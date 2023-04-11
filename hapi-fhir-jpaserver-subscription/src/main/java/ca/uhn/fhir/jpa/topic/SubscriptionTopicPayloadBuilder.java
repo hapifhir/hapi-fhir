@@ -34,6 +34,7 @@ public class SubscriptionTopicPayloadBuilder {
 			String serializedSubscriptionStatus = FhirContext.forR5Cached().newJsonParser().encodeResourceToString(subscriptionStatus);
 			subscriptionStatus = myFhirContext.newJsonParser().parseResource(org.hl7.fhir.r4b.model.SubscriptionStatus.class, serializedSubscriptionStatus);
 			// WIP STR5 VersionConvertorFactory_43_50 when it supports SubscriptionStatus
+			// track here: https://github.com/hapifhir/org.hl7.fhir.core/issues/1212
 //			subscriptionStatus = (SubscriptionStatus) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.SubscriptionStatus) subscriptionStatus);
 		} else if (fhirVersion == FhirVersionEnum.R5) {
 			bundleBuilder.setType(Bundle.BundleType.SUBSCRIPTIONNOTIFICATION.toCode());

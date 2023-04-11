@@ -109,6 +109,7 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 		} else if (theResource instanceof org.hl7.fhir.r4b.model.SubscriptionTopic) {
 			return myFhirContext.newJsonParser().parseResource(SubscriptionTopic.class, FhirContext.forR4BCached().newJsonParser().encodeResourceToString(theResource));
 			// WIP STR5 VersionConvertorFactory_43_50 when it supports SubscriptionTopic
+			// track here: https://github.com/hapifhir/org.hl7.fhir.core/issues/1212
 //			return (SubscriptionTopic) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.SubscriptionTopic) theResource);
 		} else {
 			throw new IllegalArgumentException(Msg.code(2332) + "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
