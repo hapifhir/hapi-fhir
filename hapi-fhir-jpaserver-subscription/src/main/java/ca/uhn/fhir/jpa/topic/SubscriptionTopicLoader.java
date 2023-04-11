@@ -111,7 +111,7 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 			// WIP STR5 VersionConvertorFactory_43_50 when it supports SubscriptionTopic
 //			return (SubscriptionTopic) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.SubscriptionTopic) theResource);
 		} else {
-			throw new IllegalArgumentException(Msg.code(2331) + "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
+			throw new IllegalArgumentException(Msg.code(2332) + "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
 		}
 	}
 }
