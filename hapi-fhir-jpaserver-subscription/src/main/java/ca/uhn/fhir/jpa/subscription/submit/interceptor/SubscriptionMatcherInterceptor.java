@@ -114,8 +114,6 @@ public class SubscriptionMatcherInterceptor {
 
 		schedulePostCommitOrPerformMessageDelivery(msg, resourceModifiedPK);
 
-		ourLog.info("persisted resource modified count after postCommit message delivery: {} ", myResourceModifiedMessagePersistenceSvc.findAllPKs().size() );
-
 	}
 
 	private void schedulePostCommitOrPerformMessageDelivery(ResourceModifiedMessage theMsg, IResourceModifiedPK thePersistedResourceModifiedPK) {
