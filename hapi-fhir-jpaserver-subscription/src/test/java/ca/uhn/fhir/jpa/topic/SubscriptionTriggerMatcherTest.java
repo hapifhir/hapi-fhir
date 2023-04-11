@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ class SubscriptionTriggerMatcherTest {
 	public void before() {
 		mySubscriptionTopicSupport = new SubscriptionTopicSupport(ourFhirContext, myDaoRegistry, mySearchParamMatcher);
 		myEncounter = new Encounter();
-		myEncounter.setId("Encounter/123");
+		myEncounter.setIdElement(new IdType("Encounter", "123", "2"));
 	}
 
 	@Test
