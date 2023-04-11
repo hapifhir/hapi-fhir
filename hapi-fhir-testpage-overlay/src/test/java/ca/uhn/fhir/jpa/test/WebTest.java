@@ -28,9 +28,12 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -195,6 +198,40 @@ public class WebTest {
 		assertThat(summaryPage.asNormalizedText(), containsString("\"diagnostics\": \"VALIDATION FAILURE\""));
 	}
 
+	@Test
+	public void testInvokeCustomOperation_Diff() throws IOException {
+		registerAndUpdatePatient();
+
+		HtmlPage searchResultPage = searchForPatients();
+		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
+		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
+		HtmlTableCell controlsCell = controlRows.get(0).getCell(0);
+
+		HtmlPage diffPage = controlsCell
+			.getElementsByTagName("button")
+			.stream()
+			.filter(t -> t.asNormalizedText().equals("$diff"))
+			.findFirst()
+			.orElseThrow()
+			.click();
+
+		assertThat(diffPage.asNormalizedText(), containsString("\"resourceType\": \"Parameters\""));
+	}
+
+	private void registerAndUpdatePatient() {
+		Patient p = new Patient();
+		Patient p2 = new Patient();
+		HumanName humanName = new HumanName();
+		humanName.addGiven("Yui");
+		humanName.setFamily("Hirasawa");
+		p2.getName().add(humanName);
+		p.setId("Patient/A");
+		p.getMeta().setLastUpdatedElement(new InstantType("2022-01-01T12:12:12.000Z"));
+		p.setActive(true);
+		IIdType iid = ourPatientProvider.store(p);
+		ourFhirServer.getFhirClient().update().resource(p2).withId(iid).execute();
+	}
+
 	private HtmlPage searchForPatients() throws IOException {
 		// Load home page
 		HtmlPage page = myWebClient.getPage("http://localhost/");
@@ -236,6 +273,12 @@ public class WebTest {
 			oo.addIssue()
 				.setDiagnostics("VALIDATION FAILURE");
 			throw new PreconditionFailedException("failure", oo);
+		}
+
+		@Operation(name = "diff", typeName = "Patient", idempotent = true)
+		public Parameters diff(@IdParam IIdType theId) {
+			Parameters parameters = new Parameters();
+			return parameters;
 		}
 
 	}

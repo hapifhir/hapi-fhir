@@ -31,6 +31,7 @@ public class WebTestFhirTesterConfig {
 			.withBaseUrl("http://localhost:8000")
 			.withName("Localhost Server")
 			.withSearchResultRowOperation("$summary", id -> "Patient".equals(id.getResourceType()))
+			.withSearchResultRowOperation("$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
 			.withSearchResultRowOperation("$validate", id -> true)
 			.enableDebugTemplates();
 		return retVal;
