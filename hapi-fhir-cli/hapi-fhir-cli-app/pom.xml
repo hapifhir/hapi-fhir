@@ -26,19 +26,6 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cli-jpaserver</artifactId>
-			<version>${project.version}</version>
-			<type>war</type>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cli-jpaserver</artifactId>
-			<version>${project.version}</version>
-			<type>jar</type>
-			<classifier>classes</classifier>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
 			<version>${project.version}</version>
 			<classifier>classes</classifier>
@@ -56,32 +43,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>hapi-fhir-cli-jpaserver</artifactId>
-									<type>war</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>target/classes</outputDirectory>
-									<destFileName>hapi-fhir-cli-jpaserver.war</destFileName>
-								</artifactItem>
-							</artifactItems>
-							<!-- other configurations here -->
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>

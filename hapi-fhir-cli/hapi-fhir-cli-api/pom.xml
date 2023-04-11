@@ -29,13 +29,6 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cli-jpaserver</artifactId>
-			<version>${project.version}</version>
-			<type>jar</type>
-			<classifier>classes</classifier>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-sql-migrate</artifactId>
 			<version>${project.version}</version>
 		</dependency>
