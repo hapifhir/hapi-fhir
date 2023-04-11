@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
-@Component
 public class CareGapsOperationProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
 

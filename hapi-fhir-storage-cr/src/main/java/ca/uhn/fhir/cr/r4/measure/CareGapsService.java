@@ -70,7 +70,6 @@ import static java.util.Map.ofEntries;
 import static org.hl7.fhir.r4.model.Factory.newId;
 import static org.opencds.cqf.cql.evaluator.fhir.util.Resources.newResource;
 
-@Component
 public class CareGapsService implements IDaoRegistryUser {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsService.class);
@@ -148,21 +147,24 @@ public class CareGapsService implements IDaoRegistryUser {
 		List<CompletableFuture<Parameters.ParametersParameterComponent>> futures = new ArrayList<>();
 		Parameters result = initializeResult();
 		if (myCrProperties.getMeasureProperties().getThreadedCareGapsEnabled()) {
-			(patients)
+			patients
 				.forEach(
-					patient -> futures.add(CompletableFuture.supplyAsync(() -> patientReports(myRequestDetails,
-						thePeriodStart.getValueAsString(), thePeriodEnd.getValueAsString(), patient, theStatuses, measures,
-						theOrganization), myCqlExecutor)));
+					patient -> {
+						Parameters.ParametersParameterComponent patientReports = patientReports(myRequestDetails,
+							thePeriodStart.getValueAsString(), thePeriodEnd.getValueAsString(), patient, theStatuses, measures,
+							theOrganization);
+						futures.add(CompletableFuture.supplyAsync(() -> patientReports, myCqlExecutor));
+					});
 
 			futures.forEach(x -> result.addParameter(x.join()));
 		} else {
-			(patients).forEach(
+			patients.forEach(
 				patient -> {
-					Parameters.ParametersParameterComponent patientParameter = patientReports(myRequestDetails,
+					Parameters.ParametersParameterComponent patientReports = patientReports(myRequestDetails,
 						thePeriodStart.getValueAsString(), thePeriodEnd.getValueAsString(), patient, theStatuses, measures,
 						theOrganization);
-					if (patientParameter != null) {
-						result.addParameter(patientParameter);
+					if (patientReports != null) {
+						result.addParameter(patientReports);
 					}
 				});
 		}
@@ -179,9 +181,9 @@ public class CareGapsService implements IDaoRegistryUser {
 		checkArgument(!Strings.isNullOrEmpty(myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsCompositionSectionAuthor()),
 			"The measure_report.care_gaps_composition_section_author setting is required for the $care-gaps operation.");
 
-		Resource configuredReporter = putConfiguredResource(Organization.class,
+		Resource configuredReporter = addConfiguredResource(Organization.class,
 			myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsReporter(), "care_gaps_reporter");
-		Resource configuredAuthor = putConfiguredResource(Organization.class,
+		Resource configuredAuthor = addConfiguredResource(Organization.class,
 			myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsCompositionSectionAuthor(),
 								"care_gaps_composition_section_author");
 
@@ -194,7 +196,7 @@ public class CareGapsService implements IDaoRegistryUser {
 	}
 	List<Patient> getPatientListFromSubject(String theSubject) {
 		if (theSubject.startsWith("Patient/")) {
-			return Collections.singletonList(ensurePatient(theSubject));
+			return Collections.singletonList(validatePatientExists(theSubject));
 		} else if (theSubject.startsWith("Group/")) {
 			return getPatientListFromGroup(theSubject);
 		}
@@ -214,7 +216,7 @@ public class CareGapsService implements IDaoRegistryUser {
 		group.getMember().forEach(member -> {
 			Reference reference = member.getEntity();
 			if (reference.getReferenceElement().getResourceType().equals("Patient")) {
-				Patient patient = ensurePatient(reference.getReference());
+				Patient patient = validatePatientExists(reference.getReference());
 				patientList.add(patient);
 			} else if (reference.getReferenceElement().getResourceType().equals("Group")) {
 				patientList.addAll(getPatientListFromGroup(reference.getReference()));
@@ -226,7 +228,7 @@ public class CareGapsService implements IDaoRegistryUser {
 		return patientList;
 	}
 
-	Patient ensurePatient(String thePatientRef) {
+	Patient validatePatientExists(String thePatientRef) {
 		Patient patient = read(newId(thePatientRef));
 		if (patient == null) {
 			throw new IllegalArgumentException(Msg.code(2277) + "Could not find Patient: " + thePatientRef);
@@ -276,7 +278,7 @@ public class CareGapsService implements IDaoRegistryUser {
 		}
 	}
 
-	private <T extends Resource> T putConfiguredResource(Class<T> theResourceClass, String theId, String theKey) {
+	private <T extends Resource> T addConfiguredResource(Class<T> theResourceClass, String theId, String theKey) {
 		//T resource = repo.search(theResourceClass, Searches.byId(theId)).firstOrNull();
 		Iterable<IBaseResource> resourceResult = search(theResourceClass, Searches.byId(theId), myRequestDetails);
 		T resource = null;
