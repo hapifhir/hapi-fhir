@@ -71,6 +71,7 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 			IBaseResource matchedResource = theMsg.getNewPayload(myFhirContext);
 
 			for (ActiveSubscription activeSubscription : topicSubscriptions) {
+				// WIP STR5 apply subscription filter
 				IBaseResource payload = mySubscriptionTopicPayloadBuilder.buildPayload(matchedResource, theMsg, activeSubscription, topic);
 				mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, activeSubscription, result);
 			}
