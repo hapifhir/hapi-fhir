@@ -72,9 +72,10 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	}
 
 	@Test
-	public void testSubscriptionTopicCreate() throws Exception {
+	public void testCreate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED, SubscriptionTopic.InteractionTrigger.CREATE);
+		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
 		waitForRegisteredSubscriptionTopicCount(1);
 
 		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
@@ -101,6 +102,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	public void testUpdate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED, SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
+		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
 		waitForRegisteredSubscriptionTopicCount(1);
 
 		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
