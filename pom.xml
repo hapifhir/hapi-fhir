@@ -7,7 +7,8 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.5.7-SNAPSHOT</version>
+	<version>6.5.12-SNAPSHOT</version>
+
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -858,6 +859,10 @@
 		<developer>
 			<id>JorisHeadease</id>
 		</developer>
+		<developer>
+			<id>delopst</id>
+			<name>Primož Delopst</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -957,9 +962,7 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<cqframework.version>2.4.0</cqframework.version>
-		<cql-engine.version>2.3.0</cql-engine.version>
-		<cql-evaluator.version>2.3.0</cql-evaluator.version>
+		<clinical-reasoning.version>3.0.0.PRE-1</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1058,6 +1061,11 @@
 				<groupId>com.github.ben-manes.caffeine</groupId>
 				<artifactId>caffeine</artifactId>
 				<version>${caffeine_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+				<artifactId>owasp-java-html-sanitizer</artifactId>
+				<version>20211018.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.graphql-java</groupId>
@@ -1459,6 +1467,16 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-osgi</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-nio</artifactId>
 				<version>${httpcore_version}</version>
 			</dependency>
 			<dependency>
@@ -2979,36 +2997,6 @@
 						<executions>
 							<execution><id>validate</id><phase>none</phase></execution>
 						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-
-		<!--
-		This profile is basically here to work around an IJ bug where the
-		<testSource> tag is ignored in IJ's compiler. See:
-		https://youtrack.jetbrains.com/issue/IDEA-85478
-		-->
-		<profile>
-			<id>ide</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-				<property>
-					<name>idea.maven.embedder.version</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<configuration>
-							<source>17</source>
-							<target>17</target>
-							<release>17</release>
-							<testSource>17</testSource>
-							<testTarget>17</testTarget>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>

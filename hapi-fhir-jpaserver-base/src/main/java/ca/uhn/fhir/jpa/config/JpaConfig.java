@@ -96,6 +96,7 @@ import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
+import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
@@ -138,7 +139,9 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
+import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.search.reindex.InstanceReindexServiceImpl;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
@@ -375,6 +378,18 @@ public class JpaConfig {
 	@Bean
 	public IResourceReindexingSvc resourceReindexingSvc() {
 		return new ResourceReindexingSvcImpl();
+	}
+
+	@Bean
+	@Lazy
+	public IInstanceReindexService instanceReindexService() {
+		return new InstanceReindexServiceImpl();
+	}
+
+	@Bean
+	@Lazy
+	public InstanceReindexProvider instanceReindexProvider(IInstanceReindexService theInstanceReindexService) {
+		return new InstanceReindexProvider(theInstanceReindexService);
 	}
 
 	@Bean

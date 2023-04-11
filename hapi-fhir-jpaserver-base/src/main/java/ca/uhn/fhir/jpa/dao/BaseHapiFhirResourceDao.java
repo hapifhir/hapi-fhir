@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -1025,7 +1026,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		mySearchParamRegistry.requestRefresh();
 	}
 
-	private boolean shouldSkipReindex(RequestDetails theRequestDetails) {
+	protected final boolean shouldSkipReindex(RequestDetails theRequestDetails) {
 		if (theRequestDetails == null) {
 			return false;
 		}
@@ -1241,7 +1242,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		//If the resolved fhir model is null, we don't need to run pre-access over or pre-show over it.
 		if (retVal != null) {
-			invokeStoragePreaccessResources(theId, theRequest, retVal);
+			invokeStoragePreAccessResources(theId, theRequest, retVal);
 			retVal = invokeStoragePreShowResources(theRequest, retVal);
 		}
 
@@ -1250,29 +1251,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private T invokeStoragePreShowResources(RequestDetails theRequest, T retVal) {
-		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
-		SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
-		HookParams params = new HookParams()
-			.add(IPreResourceShowDetails.class, showDetails)
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-		//noinspection unchecked
-		retVal = (T) showDetails.getResource(0);//TODO GGG/JA : getting resource 0 is interesting. We apparently allow null values in the list. Should we?
+		retVal = invokeStoragePreShowResources(myInterceptorBroadcaster, theRequest, retVal);
 		return retVal;
 	}
 
-	private void invokeStoragePreaccessResources(IIdType theId, RequestDetails theRequest, T theResource) {
-		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
-		SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(theResource);
-		HookParams params = new HookParams()
-			.add(IPreResourceAccessDetails.class, accessDetails)
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-		if (accessDetails.isDontReturnResourceAtIndex(0)) {
-			throw new ResourceNotFoundException(Msg.code(1995) + "Resource " + theId + " is not known");
-		}
+	private void invokeStoragePreAccessResources(IIdType theId, RequestDetails theRequest, T theResource) {
+		invokeStoragePreAccessResources(myInterceptorBroadcaster, theRequest, theId, theResource);
 	}
 
 	@Override
@@ -1908,14 +1892,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			result = validator.validateWithResult(theResource, options);
 		}
 
-		if (result.isSuccessful()) {
-			MethodOutcome retVal = new MethodOutcome();
-			retVal.setOperationOutcome(result.toOperationOutcome());
-			return retVal;
-		} else {
-			throw new PreconditionFailedException(Msg.code(993) + "Validation failed", result.toOperationOutcome());
-		}
-
+		MethodOutcome retVal = new MethodOutcome();
+		retVal.setOperationOutcome(result.toOperationOutcome());
+		// Note an earlier version of this code returned PreconditionFailedException when the validation
+		// failed, but we since realized the spec requires we return 200 regardless of the validation result.
+		return retVal;
 	}
 
 	/**
@@ -1965,6 +1946,37 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public void setIdHelperSvcForUnitTest(IIdHelperService theIdHelperService) {
 		myIdHelperService = theIdHelperService;
 	}
+
+	public static <T extends IBaseResource> T invokeStoragePreShowResources(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, T retVal) {
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, theInterceptorBroadcaster, theRequest)) {
+			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
+			HookParams params = new HookParams()
+				.add(IPreResourceShowDetails.class, showDetails)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			CompositeInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			//noinspection unchecked
+			retVal = (T) showDetails.getResource(0);//TODO GGG/JA : getting resource 0 is interesting. We apparently allow null values in the list. Should we?
+			return retVal;
+		} else {
+			return retVal;
+		}
+	}
+
+	public static void invokeStoragePreAccessResources(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, IIdType theId, IBaseResource theResource) {
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, theInterceptorBroadcaster, theRequest)) {
+			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(theResource);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			CompositeInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			if (accessDetails.isDontReturnResourceAtIndex(0)) {
+				throw new ResourceNotFoundException(Msg.code(1995) + "Resource " + theId + " is not known");
+			}
+		}
+	}
+
 
 	private static class IdChecker implements IValidatorModule {
 

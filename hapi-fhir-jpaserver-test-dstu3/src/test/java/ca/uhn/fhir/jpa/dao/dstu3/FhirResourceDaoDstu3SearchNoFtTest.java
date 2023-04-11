@@ -115,7 +115,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.*;
+import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;

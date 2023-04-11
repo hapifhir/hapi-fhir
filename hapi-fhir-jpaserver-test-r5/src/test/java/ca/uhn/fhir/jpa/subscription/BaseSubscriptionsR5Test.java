@@ -46,7 +46,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-@Disabled
+@Disabled("abstract")
 public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR5Test.class);
 	protected static int ourListenerPort;

@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
+import ca.uhn.fhir.rest.server.util.NarrativeUtil;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -522,7 +523,7 @@ public class BaseController {
 			theModelMap.put("resultBodyIsLong", resultBodyText.length() > 1000);
 			theModelMap.put("requestHeaders", requestHeaders);
 			theModelMap.put("responseHeaders", responseHeaders);
-			theModelMap.put("narrative", narrativeString);
+			theModelMap.put("narrative", NarrativeUtil.sanitize(narrativeString));
 			theModelMap.put("latencyMs", theLatency);
 
 			theModelMap.put("config", myConfig);
