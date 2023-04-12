@@ -453,7 +453,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		purgeHibernateSearch(myEntityManager);
 
 		myStorageSettings.setSchedulingDisabled(true);
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
 	@BeforeEach

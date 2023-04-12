@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.VersionEnum;
@@ -134,44 +135,174 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resSearchUrlTable.addIndex("20230227.2", "IDX_RESSEARCHURL_RES").unique(false).withColumns("RES_ID");
 		resSearchUrlTable.addIndex("20230227.3", "IDX_RESSEARCHURL_TIME").unique(false).withColumns("CREATED_TIME");
 
+		{
+			// string search index
+			Builder.BuilderWithTableName stringTable = version.onTable("HFJ_SPIDX_STRING");
+
+			// add res_id to indentity to speed up sorts.
+			stringTable
+				.addIndex("20230303.1", "IDX_SP_STRING_HASH_IDENT_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "RES_ID", "PARTITION_ID");
+			stringTable.dropIndexOnline("20230303.2", "IDX_SP_STRING_HASH_IDENT");
+
+			// add hash_norm to res_id to speed up joins on a second string.
+			stringTable
+				.addIndex("20230303.3", "IDX_SP_STRING_RESID_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_ID", "HASH_NORM_PREFIX", "PARTITION_ID");
+
+			// drop and recreate FK_SPIDXSTR_RESOURCE since it will be useing the old IDX_SP_STRING_RESID
+			stringTable.dropForeignKey("20230303.4", "FK_SPIDXSTR_RESOURCE", "HFJ_RESOURCE");
+			stringTable.dropIndexOnline("20230303.5", "IDX_SP_STRING_RESID");
+			stringTable.addForeignKey("20230303.6", "FK_SPIDXSTR_RESOURCE")
+				.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+
+		}
+
 		final String revColumnName = "REV";
 		final String enversRevisionTable = "HFJ_REVINFO";
 		final String enversMpiLinkAuditTable = "MPI_LINK_AUD";
+		final String revTstmpColumnName = "REVTSTMP";
 
-		version.addIdGenerator("20230306.1", "SEQ_HFJ_REVINFO");
+		{
+			version.addIdGenerator("20230306.1", "SEQ_HFJ_REVINFO");
 
-		final Builder.BuilderAddTableByColumns enversRevInfo = version.addTableByColumns("20230306.2", enversRevisionTable, revColumnName);
+			final Builder.BuilderAddTableByColumns enversRevInfo = version.addTableByColumns("20230306.2", enversRevisionTable, revColumnName);
 
-		enversRevInfo.addColumn(revColumnName).nonNullable().type(ColumnTypeEnum.LONG);
-		enversRevInfo.addColumn("REVTSTMP").nullable().type(ColumnTypeEnum.LONG);
+			enversRevInfo.addColumn(revColumnName).nonNullable().type(ColumnTypeEnum.LONG);
+			enversRevInfo.addColumn(revTstmpColumnName).nullable().type(ColumnTypeEnum.LONG);
 
-		final Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20230306.6", enversMpiLinkAuditTable, "PID", revColumnName);
+			final Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20230306.6", enversMpiLinkAuditTable, "PID", revColumnName);
 
-		empiLink.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("REV").nonNullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("REVTYPE").nullable().type(ColumnTypeEnum.TINYINT);
-		empiLink.addColumn("PERSON_PID").nullable().type(ColumnTypeEnum.LONG);
-		// TODO:  LD: if we want to fully audit partition_id we need to make BasePartitionable  @Auditable, which means adding a bunch of different _AUD migrations here, even if those tables will never be used
-//		empiLink.addColumn("PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
-		empiLink.addColumn("GOLDEN_RESOURCE_PID").nullable().type(ColumnTypeEnum.LONG);
-		// TODO:  LD: figure out a way to set this to 100:  perhaps a migration of MdmLink proper (not _AUD) to alter table to 100?
-		empiLink.addColumn( "TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, 40);
-		empiLink.addColumn( "RULE_COUNT").nullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("TARGET_PID").nullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("MATCH_RESULT").nullable().type(ColumnTypeEnum.INT);
-		empiLink.addColumn("LINK_SOURCE").nullable().type(ColumnTypeEnum.INT);
-		empiLink.addColumn("CREATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
-		empiLink.addColumn("UPDATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
-		empiLink.addColumn("VERSION").nullable().type(ColumnTypeEnum.STRING, 16);
-		empiLink.addColumn("EID_MATCH") .nullable().type(ColumnTypeEnum.BOOLEAN);
-		empiLink.addColumn("NEW_PERSON") .nullable().type(ColumnTypeEnum.BOOLEAN);
-		empiLink.addColumn("VECTOR").nullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("SCORE").nullable().type(ColumnTypeEnum.FLOAT);
+			empiLink.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("REV").nonNullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("REVTYPE").nullable().type(ColumnTypeEnum.TINYINT);
+			empiLink.addColumn("PERSON_PID").nullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("GOLDEN_RESOURCE_PID").nullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, 40);
+			empiLink.addColumn("RULE_COUNT").nullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("TARGET_PID").nullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("MATCH_RESULT").nullable().type(ColumnTypeEnum.INT);
+			empiLink.addColumn("LINK_SOURCE").nullable().type(ColumnTypeEnum.INT);
+			empiLink.addColumn("CREATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			empiLink.addColumn("UPDATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			empiLink.addColumn("VERSION").nullable().type(ColumnTypeEnum.STRING, 16);
+			empiLink.addColumn("EID_MATCH").nullable().type(ColumnTypeEnum.BOOLEAN);
+			empiLink.addColumn("NEW_PERSON").nullable().type(ColumnTypeEnum.BOOLEAN);
+			empiLink.addColumn("VECTOR").nullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("SCORE").nullable().type(ColumnTypeEnum.FLOAT);
 
-		// N.B.  It's impossible to rename a foreign key in a Hibernate Envers audit table, and the schema migration unit test will fail if we try to drop and recreate it
-		empiLink.addForeignKey("20230306.7", "FKAOW7NXNCLOEC419ARS0FPP58M")
-			.toColumn(revColumnName)
-			.references(enversRevisionTable, revColumnName);
+			// N.B.  It's impossible to rename a foreign key in a Hibernate Envers audit table, and the schema migration unit test will fail if we try to drop and recreate it
+			empiLink.addForeignKey("20230306.7", "FKAOW7NXNCLOEC419ARS0FPP58M")
+				.toColumn(revColumnName)
+				.references(enversRevisionTable, revColumnName);
+		}
+
+		{
+			// The pre-release already contains the long version of this column
+			// We do this becausea doing a modifyColumn on Postgres (and possibly other RDBMS's) will fail with a nasty error:
+			// column "revtstmp" cannot be cast automatically to type timestamp without time zone Hint: You might need to specify "USING revtstmp::timestamp without time zone".
+			version
+				.onTable(enversRevisionTable)
+				.dropColumn("20230316.1", revTstmpColumnName);
+
+			version
+				.onTable(enversRevisionTable)
+				.addColumn("20230316.2", revTstmpColumnName)
+				.nullable()
+				.type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+			// New columns from AuditableBasePartitionable
+			version
+				.onTable(enversMpiLinkAuditTable)
+				.addColumn("20230316.3", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+			version
+				.onTable(enversMpiLinkAuditTable)
+			   .addColumn("20230316.4", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		}
+
+        version
+           .onTable(ResourceTable.HFJ_RESOURCE)
+           .addColumn("20230323.1", "SEARCH_URL_PRESENT")
+           .nullable()
+           .type(ColumnTypeEnum.BOOLEAN);
+
+
+		{
+			Builder.BuilderWithTableName uriTable = version.onTable("HFJ_SPIDX_URI");
+			uriTable
+				.addIndex("20230324.1", "IDX_SP_URI_HASH_URI_V2")
+				.unique(true)
+				.online(true)
+				.withColumns("HASH_URI","RES_ID","PARTITION_ID");
+			uriTable
+				.addIndex("20230324.2", "IDX_SP_URI_HASH_IDENTITY_V2")
+				.unique(true)
+				.online(true)
+				.withColumns("HASH_IDENTITY","SP_URI","RES_ID","PARTITION_ID");
+			uriTable.dropIndex("20230324.3", "IDX_SP_URI_RESTYPE_NAME");
+			uriTable.dropIndex("20230324.4", "IDX_SP_URI_UPDATED");
+			uriTable.dropIndex("20230324.5", "IDX_SP_URI");
+			uriTable.dropIndex("20230324.6", "IDX_SP_URI_HASH_URI");
+			uriTable.dropIndex("20230324.7", "IDX_SP_URI_HASH_IDENTITY");
+		}
+
+		version.onTable("HFJ_SPIDX_COORDS")
+			.dropIndex("20230325.1", "IDX_SP_COORDS_HASH");
+		version.onTable("HFJ_SPIDX_COORDS")
+			.addIndex("20230325.2", "IDX_SP_COORDS_HASH_V2")
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_LATITUDE", "SP_LONGITUDE", "RES_ID", "PARTITION_ID");
+
+
+		// Postgres tuning.
+		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, List.of(
+			// we can't use convering index until the autovacuum runs for those rows, which kills index performance
+			"ALTER TABLE hfj_resource SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_forced_id SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_res_link SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_coords SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_date SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_number SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_quantity SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_quantity_nrml SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_string SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_token SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_uri SET (autovacuum_vacuum_scale_factor = 0.01)",
+
+			// PG by default tracks the most common 100 values.  But our hashes cover 100s of SPs and need greater depth.
+			// Set stats depth to the max for hash_value columns, and 1000 for hash_identity (one per SP).
+			"alter table hfj_res_link alter column src_path set statistics 10000",
+			"alter table hfj_res_link alter column target_resource_id set statistics 10000",
+			"alter table hfj_res_link alter column src_resource_id set statistics 10000",
+			"alter table hfj_spidx_coords alter column hash_identity set statistics 1000",
+			"alter table hfj_spidx_date alter column hash_identity set statistics 1000",
+			"alter table hfj_spidx_number alter column hash_identity set statistics 1000",
+			"alter table hfj_spidx_quantity alter column hash_identity set statistics 1000",
+			"alter table hfj_spidx_quantity alter column hash_identity_and_units set statistics 10000",
+			"alter table hfj_spidx_quantity alter column hash_identity_sys_units set statistics 10000",
+			"alter table hfj_spidx_quantity_nrml alter column hash_identity set statistics 1000",
+			"alter table hfj_spidx_quantity_nrml alter column hash_identity_and_units set statistics 10000",
+			"alter table hfj_spidx_quantity_nrml alter column hash_identity_sys_units set statistics 10000",
+			"alter table hfj_spidx_string alter column hash_identity set statistics 1000",
+			"alter table hfj_spidx_string alter column hash_exact set statistics 10000",
+			"alter table hfj_spidx_string alter column hash_norm_prefix set statistics 10000",
+			"alter table hfj_spidx_token alter column hash_identity set statistics 1000",
+			"alter table hfj_spidx_token alter column hash_sys set statistics 10000",
+			"alter table hfj_spidx_token alter column hash_sys_and_value set statistics 10000",
+			"alter table hfj_spidx_token alter column hash_value set statistics 10000",
+			"alter table hfj_spidx_uri alter column hash_identity set statistics 1000",
+			"alter table hfj_spidx_uri alter column hash_uri set statistics 10000"
+			)));
 	}
 
 	protected void init640() {

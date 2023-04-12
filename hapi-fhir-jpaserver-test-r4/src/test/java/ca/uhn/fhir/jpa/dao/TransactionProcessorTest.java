@@ -27,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
-import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,17 +37,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -58,6 +53,8 @@ public class TransactionProcessorTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessorTest.class);
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
+	@MockBean
+	private DaoRegistry myDaoRegistry;
 	@MockBean
 	private EntityManagerFactory myEntityManagerFactory;
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
@@ -114,6 +111,7 @@ public class TransactionProcessorTest {
 			assertEquals(Msg.code(544) + "Resource MedicationKnowledge is not supported on this server. Supported resource types: []", e.getMessage());
 		}
 	}
+
 
 	@Configuration
 	@Import(ThreadPoolFactoryConfig.class)

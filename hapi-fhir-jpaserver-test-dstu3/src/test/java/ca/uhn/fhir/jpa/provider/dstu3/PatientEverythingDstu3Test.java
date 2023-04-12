@@ -10,6 +10,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -142,16 +143,17 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingHandlesCircularReferences() throws Exception {
-		Patient linkedPatient1 = new Patient();
-		linkedPatient1.addLink().setOther(new Reference(myPatientId));
-		String linkedPatient1Id = myClient.create().resource(linkedPatient1).execute().getId().toUnqualifiedVersionless().getValue();
+		CarePlan cp1 = new CarePlan();
+		cp1.setSubject(new Reference(myPatientId));
+		String cp1Id = myClient.create().resource(cp1).execute().getId().toUnqualifiedVersionless().getValue();
 
-		Patient linkedPatient2 = new Patient();
-		linkedPatient2.addLink().setOther(new Reference(linkedPatient1Id));
-		String linkedPatient2Id = myClient.create().resource(linkedPatient2).execute().getId().toUnqualifiedVersionless().getValue();
+		CarePlan cp2 = new CarePlan();
+		cp2.addBasedOn(new Reference(cp1Id));
+		String cp2Id = myClient.create().resource(cp2).execute().getId().toUnqualifiedVersionless().getValue();
 
-		myPatient.addLink().setOther(new Reference(linkedPatient2Id));
-		myClient.update().resource(myPatient).execute();
+		cp1.addBasedOn(new Reference(cp2Id));
+		cp1.setId(cp1Id);
+		myClient.update().resource(cp1).execute();
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
@@ -165,8 +167,8 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("Found IDs: {}", actual);
 
 		assertThat(actual, hasItem(myPatientId));
-		assertThat(actual, hasItem(linkedPatient1Id));
-		assertThat(actual, hasItem(linkedPatient2Id));
+		assertThat(actual, hasItem(cp1Id));
+		assertThat(actual, hasItem(cp2Id));
 		assertThat(actual, hasItem(encId1));
 		assertThat(actual, hasItem(encId2));
 		assertThat(actual, hasItem(myOrgId));

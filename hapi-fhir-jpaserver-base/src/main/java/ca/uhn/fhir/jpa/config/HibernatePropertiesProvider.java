@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +38,9 @@ public class HibernatePropertiesProvider {
 	private Dialect myDialect;
 	private String myHibernateSearchBackend;
 
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
 	@VisibleForTesting
 	public void setDialectForUnitTest(Dialect theDialect) {
 		myDialect = theDialect;
@@ -50,6 +54,7 @@ public class HibernatePropertiesProvider {
 			Validate.notNull(dialect, "Unable to create instance of class: %s", dialectClass);
 			myDialect = dialect;
 		}
+
 		return dialect;
 	}
 

@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
@@ -60,6 +61,13 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -121,6 +129,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -210,6 +220,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
+	@Autowired
+	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
 	@Autowired
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
 	@Autowired(required = false)
@@ -351,14 +363,14 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected void logAllResourceLinks() {
 		runInTransaction(() -> {
-			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(ResourceLink::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 
 	protected int logAllResources() {
 		return runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
-			ourLog.info("Resources:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Resources:\n * {}", resources.stream().map(ResourceTable::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
@@ -366,7 +378,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected int logAllConceptDesignations() {
 		return runInTransaction(() -> {
 			List<TermConceptDesignation> resources = myTermConceptDesignationDao.findAll();
-			ourLog.info("Concept Designations:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Concept Designations:\n * {}", resources.stream().map(TermConceptDesignation::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
@@ -374,7 +386,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected int logAllConceptProperties() {
 		return runInTransaction(() -> {
 			List<TermConceptProperty> resources = myTermConceptPropertyDao.findAll();
-			ourLog.info("Concept Designations:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Concept Designations:\n * {}", resources.stream().map(TermConceptProperty::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
@@ -382,7 +394,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected int logAllConcepts() {
 		return runInTransaction(() -> {
 			List<TermConcept> resources = myTermConceptDao.findAll();
-			ourLog.info("Concepts:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Concepts:\n * {}", resources.stream().map(TermConcept::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
@@ -390,7 +402,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected int logAllValueSetConcepts() {
 		return runInTransaction(() -> {
 			List<TermValueSetConcept> resources = myTermValueSetConceptDao.findAll();
-			ourLog.info("Concepts:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Concepts:\n * {}", resources.stream().map(TermValueSetConcept::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
@@ -398,7 +410,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected int logAllValueSets() {
 		return runInTransaction(() -> {
 			List<TermValueSet> valueSets = myTermValueSetDao.findAll();
-			ourLog.info("ValueSets:\n * {}", valueSets.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("ValueSets:\n * {}", valueSets.stream().map(TermValueSet::toString).collect(Collectors.joining("\n * ")));
 			return valueSets.size();
 		});
 	}
@@ -406,38 +418,44 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected int logAllForcedIds() {
 		return runInTransaction(() -> {
 			List<ForcedId> forcedIds = myForcedIdDao.findAll();
-			ourLog.info("Resources:\n * {}", forcedIds.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Resources:\n * {}", forcedIds.stream().map(ForcedId::toString).collect(Collectors.joining("\n * ")));
 			return forcedIds.size();
 		});
 	}
 
 	protected void logAllDateIndexes() {
 		runInTransaction(() -> {
-			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(ResourceIndexedSearchParamDate::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 
 	protected void logAllNonUniqueIndexes() {
 		runInTransaction(() -> {
-			ourLog.info("Non unique indexes:\n * {}", myResourceIndexedComboTokensNonUniqueDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Non unique indexes:\n * {}", myResourceIndexedComboTokensNonUniqueDao.findAll().stream().map(ResourceIndexedComboTokenNonUnique::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 
 	protected void logAllTokenIndexes() {
 		runInTransaction(() -> {
-			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllCoordsIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Coords indexes:\n * {}", myResourceIndexedSearchParamCoordsDao.findAll().stream().map(ResourceIndexedSearchParamCoords::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 
 	protected void logAllNumberIndexes() {
 		runInTransaction(() -> {
-			ourLog.info("Number indexes:\n * {}", myResourceIndexedSearchParamNumberDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Number indexes:\n * {}", myResourceIndexedSearchParamNumberDao.findAll().stream().map(ResourceIndexedSearchParamNumber::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 
 	protected void logAllUriIndexes() {
 		runInTransaction(() -> {
-			ourLog.info("URI indexes:\n * {}", myResourceIndexedSearchParamUriDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("URI indexes:\n * {}", myResourceIndexedSearchParamUriDao.findAll().stream().map(ResourceIndexedSearchParamUri::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 
@@ -820,18 +838,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@SuppressWarnings("BusyWait")
-	public static void waitForSize(int theTarget, int theTimeout, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {
-		StopWatch sw = new StopWatch();
-		while (theCallable.call().intValue() != theTarget && sw.getMillis() < theTimeout) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException theE) {
-				throw new Error(theE);
-			}
-		}
-		if (sw.getMillis() >= theTimeout) {
-			fail("Size " + theCallable.call() + " is != target " + theTarget + " - " + theFailureMessage.call());
-		}
-		Thread.sleep(500);
+	public static void waitForSize(int theTarget, int theTimeoutMillis, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {
+		await()
+			.alias("Waiting for size " + theTarget + ". Current size is " + theCallable.call().intValue() + ": " + theFailureMessage.call())
+			.atMost(Duration.of(theTimeoutMillis, ChronoUnit.MILLIS))
+			.until(() -> theCallable.call().intValue() == theTarget);
 	}
 }

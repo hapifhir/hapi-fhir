@@ -21,20 +21,18 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.Session;
 import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.GeneratorType;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
@@ -63,7 +61,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -297,6 +294,15 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	// Make sure the generator doesn't bump the history version.
 	@OptimisticLock(excluded = true)
 	private String myFhirId;
+
+	/**
+	 * Is there a corresponding row in {@link ResourceSearchUrlEntity} for
+	 * this row.
+	 * TODO: Added in 6.6.0 - Should make this a primitive boolean at some point
+	 */
+	@OptimisticLock(excluded = true)
+	@Column(name = "SEARCH_URL_PRESENT", nullable = true)
+	private Boolean mySearchUrlPresent = false;
 
 	/**
 	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
@@ -592,7 +598,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	public void setParamsComboTokensNonUniquePresent(boolean theParamsComboTokensNonUniquePresent) {
-		myParamsComboStringUniquePresent = theParamsComboTokensNonUniquePresent;
+		myParamsComboTokensNonUniquePresent = theParamsComboTokensNonUniquePresent;
 	}
 
 	public boolean isParamsCoordsPopulated() {
@@ -692,6 +698,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setNarrativeText(String theNarrativeText) {
 		myNarrativeText = theNarrativeText;
+	}
+
+	public boolean isSearchUrlPresent() {
+		return Boolean.TRUE.equals(mySearchUrlPresent);
+	}
+
+	public void setSearchUrlPresent(boolean theSearchUrlPresent) {
+		mySearchUrlPresent = theSearchUrlPresent;
 	}
 
 	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
@@ -801,7 +815,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
-		if (getTransientForcedId() != null) {
+		if (myFhirId != null) {
+			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
 			retVal.setValue(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else if (getForcedId() == null) {
