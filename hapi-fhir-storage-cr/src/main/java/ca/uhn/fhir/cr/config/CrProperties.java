@@ -26,80 +26,87 @@ import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 
 public class CrProperties {
 
-	private boolean enabled = true;
-	private MeasureProperties measureProperties;
-	private CqlProperties cqlProperties = new CqlProperties();
+	private boolean myCqlEnabled = true;
+	private MeasureProperties myMeasureProperties;
+	private CqlProperties myCqlProperties = new CqlProperties();
 
 	public CrProperties () {
-		this.measureProperties = new MeasureProperties();
+		this.myMeasureProperties = new MeasureProperties();
 	};
 
 
-	public boolean isEnabled() {
-		return enabled;
+	public boolean isCqlEnabled() {
+		return myCqlEnabled;
 	}
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
+	public void setCqlEnabled(boolean theCqlEnabled) {
+		this.myCqlEnabled = theCqlEnabled;
 	}
 
-	public MeasureProperties getMeasure() {
-		return measureProperties;
+	public MeasureProperties getMeasureProperties() {
+		return myMeasureProperties;
 	}
 
-	public void setMeasure(MeasureProperties measureProperties) {
-		this.measureProperties = measureProperties;
+	public void setMeasureProperties(MeasureProperties theMeasureProperties) {
+		this.myMeasureProperties = theMeasureProperties;
 	}
 
-	public CqlProperties getCql() {
-		return cqlProperties;
+	public CqlProperties getCqlProperties() {
+		return myCqlProperties;
 	}
 
-	public void setCql(CqlProperties cqlProperties) {
-		this.cqlProperties = cqlProperties;
+	public void setCqlProperties(CqlProperties theCqlProperties) {
+		this.myCqlProperties = theCqlProperties;
 	}
 
 	public static class MeasureProperties {
 
-		private boolean threadedCareGapsEnabled = true;
-		private MeasureReportConfiguration measureReportConfiguration;
-		private MeasureEvaluationOptions measureEvaluationOptions;
+		private boolean myThreadedCareGapsEnabled = true;
+		private MeasureReportConfiguration myMeasureReportConfiguration;
+		private MeasureEvaluationOptions myMeasureEvaluationOptions;
+
+		public static final int DEFAULT_THREADS_FOR_MEASURE_EVAL = 4;
+		public static final int DEFAULT_THREADS_BATCH_SIZE = 250;
+		public static final boolean DEFAULT_THREADS_ENABLED_FOR_MEASURE_EVAL = true;
 
 		public MeasureProperties() {
-			measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
-			measureEvaluationOptions.setNumThreads(4);
-			measureEvaluationOptions.setThreadedBatchSize(250);
-			measureEvaluationOptions.setThreadedEnabled(true);
+			myMeasureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
+			myMeasureEvaluationOptions.setNumThreads(DEFAULT_THREADS_FOR_MEASURE_EVAL);
+			myMeasureEvaluationOptions.setThreadedBatchSize(DEFAULT_THREADS_BATCH_SIZE);
+			myMeasureEvaluationOptions.setThreadedEnabled(DEFAULT_THREADS_ENABLED_FOR_MEASURE_EVAL);
 		};
 
-		//eval options
-		public MeasureEvaluationOptions getMeasureEvaluation() {
-			return this.measureEvaluationOptions;
-		}
-
-		public void setMeasureEvaluation(MeasureEvaluationOptions measureEvaluation) {
-			this.measureEvaluationOptions = measureEvaluation;
-		}
 
 		//care gaps
 		public boolean getThreadedCareGapsEnabled() {
-			return threadedCareGapsEnabled;
+			return myThreadedCareGapsEnabled;
 		}
 
-		public void setThreadedCareGapsEnabled(boolean enabled) {
-			this.threadedCareGapsEnabled = enabled;
+		public void setThreadedCareGapsEnabled(boolean theThreadedCareGapsEnabled) {
+			myThreadedCareGapsEnabled = theThreadedCareGapsEnabled;
+		}
+		public boolean isThreadedCareGapsEnabled() {
+			return myThreadedCareGapsEnabled;
 		}
 
 		//report configuration
-		public MeasureReportConfiguration getMeasureReport() {
-			return this.measureReportConfiguration;
+		public MeasureReportConfiguration getMeasureReportConfiguration() {
+			return myMeasureReportConfiguration;
 		}
 
-		public void setMeasureReport(MeasureReportConfiguration measureReport) {
-			this.measureReportConfiguration = measureReport;
+		public void setMeasureReportConfiguration(MeasureReportConfiguration theMeasureReport) {
+			myMeasureReportConfiguration = theMeasureReport;
 		}
 
 
+		//measure evaluations
+		public void setMeasureEvaluationOptions(MeasureEvaluationOptions theMeasureEvaluation) {
+			myMeasureEvaluationOptions = theMeasureEvaluation;
+		}
+
+		public MeasureEvaluationOptions getMeasureEvaluationOptions() {
+			return myMeasureEvaluationOptions;
+		}
 
 		public static class MeasureReportConfiguration {
 			/**
@@ -112,7 +119,7 @@ public class CrProperties {
 			 * <a href="http://build.fhir.org/ig/HL7/davinci-deqm/index.html">Da Vinci DEQM
 			 * FHIR Implementation Guide</a>.
 			 **/
-			private String careGapsReporter;
+			private String myCareGapsReporter;
 			/**
 			 * Implements the author element of the <a href=
 			 * "http://www.hl7.org/fhir/composition.html">Composition</a> FHIR
@@ -123,22 +130,22 @@ public class CrProperties {
 			 * <a href="http://build.fhir.org/ig/HL7/davinci-deqm/index.html">Da Vinci DEQM
 			 * FHIR Implementation Guide</a>.
 			 **/
-			private String careGapsCompositionSectionAuthor;
+			private String myCareGapsCompositionSectionAuthor;
 
-			public String getReporter() {
-				return careGapsReporter;
+			public String getCareGapsReporter() {
+				return myCareGapsReporter;
 			}
 
-			public void setCareGapsReporter(String careGapsReporter) {
-				this.careGapsReporter = null;// ResourceBuilder.ensureOrganizationReference(careGapsReporter);
+			public void setCareGapsReporter(String theCareGapsReporter) {
+				myCareGapsReporter = theCareGapsReporter;
 			}
 
-			public String getCompositionAuthor() {
-				return careGapsCompositionSectionAuthor;
+			public String getCareGapsCompositionSectionAuthor() {
+				return myCareGapsCompositionSectionAuthor;
 			}
 
-			public void setCareGapsCompositionSectionAuthor(String careGapsCompositionSectionAuthor) {
-				this.careGapsCompositionSectionAuthor = careGapsCompositionSectionAuthor;
+			public void setCareGapsCompositionSectionAuthor(String theCareGapsCompositionSectionAuthor) {
+				myCareGapsCompositionSectionAuthor = theCareGapsCompositionSectionAuthor;
 			}
 		}
 
@@ -147,41 +154,41 @@ public class CrProperties {
 
 	public static class CqlProperties {
 
-		private boolean useEmbeddedLibraries = true;
+		private boolean myCqlUseOfEmbeddedLibraries = true;
 
-		private CqlEngineOptions runtimeOptions = CqlEngineOptions.defaultOptions();
-		private CqlTranslatorOptions compilerOptions = CqlTranslatorOptions.defaultOptions();
+		private CqlEngineOptions myCqlRuntimeOptions = CqlEngineOptions.defaultOptions();
+		private CqlTranslatorOptions myCqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
 
 
-		public boolean useEmbeddedLibraries() {
-			return this.useEmbeddedLibraries;
+		public boolean isCqlUseOfEmbeddedLibraries() {
+			return myCqlUseOfEmbeddedLibraries;
 		}
 
-		public void setUseEmbeddedLibraries(boolean useEmbeddedLibraries) {
-			this.useEmbeddedLibraries = useEmbeddedLibraries;
+		public void setCqlUseOfEmbeddedLibraries(boolean theCqlUseOfEmbeddedLibraries) {
+			myCqlUseOfEmbeddedLibraries = theCqlUseOfEmbeddedLibraries;
 		}
 
-		public CqlEngineOptions getRuntime() {
-			return this.runtimeOptions;
+		public CqlEngineOptions getCqlRuntimeOptions() {
+			return myCqlRuntimeOptions;
 		}
 
-		public void setRuntime(CqlEngineOptions runtime) {
-			this.runtimeOptions = runtime;
+		public void setCqlRuntimeOptions(CqlEngineOptions theRuntime) {
+			myCqlRuntimeOptions = theRuntime;
 		}
 
-		public CqlTranslatorOptions getCompiler() {
-			return this.compilerOptions;
+		public CqlTranslatorOptions getCqlTranslatorOptions() {
+			return myCqlTranslatorOptions;
 		}
 
-		public void setCompiler(CqlTranslatorOptions compiler) {
-			this.compilerOptions = compiler;
+		public void setCqlTranslatorOptions(CqlTranslatorOptions theCqlTranslatorOptions) {
+			myCqlTranslatorOptions = theCqlTranslatorOptions;
 		}
 
-		public CqlOptions getOptions() {
+		public CqlOptions getCqlOptions() {
 			CqlOptions cqlOptions = new CqlOptions();
-			cqlOptions.setUseEmbeddedLibraries(this.useEmbeddedLibraries());
-			cqlOptions.setCqlEngineOptions(this.getRuntime());
-			cqlOptions.setCqlTranslatorOptions(this.getCompiler());
+			cqlOptions.setUseEmbeddedLibraries(isCqlUseOfEmbeddedLibraries());
+			cqlOptions.setCqlEngineOptions(getCqlRuntimeOptions());
+			cqlOptions.setCqlTranslatorOptions(getCqlTranslatorOptions());
 			return cqlOptions;
 		}
 	}

@@ -5,15 +5,21 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4b.model.CanonicalType;
+import org.hl7.fhir.r4b.model.Enumerations;
+import org.hl7.fhir.r4b.model.Subscription;
+import org.hl7.fhir.r4b.model.SubscriptionTopic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +29,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -33,6 +43,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 public class SubscriptionValidatingInterceptorTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionValidatingInterceptorTest.class);
+	public static final String TEST_SUBSCRIPTION_TOPIC_URL = "http://test.topic";
 
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
@@ -44,6 +55,8 @@ public class SubscriptionValidatingInterceptorTest {
 	private JpaStorageSettings myStorageSettings;
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@Mock
+	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 
 	@BeforeEach
 	public void before() {
@@ -66,7 +79,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testEmptyStatus() {
 		try {
 			Subscription badSub = new Subscription();
-			badSub.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -78,7 +91,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testBadCriteria() {
 		try {
 			Subscription badSub = new Subscription();
-			badSub.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 			badSub.setCriteria("Patient");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
@@ -91,7 +104,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testBadChannel() {
 		try {
 			Subscription badSub = new Subscription();
-			badSub.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 			badSub.setCriteria("Patient?");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
@@ -104,7 +117,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testEmptyEndpoint() {
 		try {
 			Subscription badSub = new Subscription();
-			badSub.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 			badSub.setCriteria("Patient?");
 			Subscription.SubscriptionChannelComponent channel = badSub.getChannel();
 			channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
@@ -118,7 +131,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@Test
 	public void testMalformedEndpoint() {
 		Subscription badSub = new Subscription();
-		badSub.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+		badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 		badSub.setCriteria("Patient?");
 		Subscription.SubscriptionChannelComponent channel = badSub.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
@@ -170,11 +183,40 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 	}
 
+	@Test
+	public void testInvalidTopic() throws URISyntaxException {
+		when(myDaoRegistry.getResourceDao("SubscriptionTopic")).thenReturn(mySubscriptionTopicDao);
+
+		SimpleBundleProvider emptyBundleProvider = new SimpleBundleProvider(Collections.emptyList());
+		when(mySubscriptionTopicDao.search(any(), any())).thenReturn(emptyBundleProvider);
+
+		org.hl7.fhir.r4b.model.Subscription badSub = new org.hl7.fhir.r4b.model.Subscription();
+		badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
+		badSub.getMeta().getProfile().add(new CanonicalType(new URI("http://other.profile")));
+		badSub.getMeta().getProfile().add(new CanonicalType(new URI(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL)));
+		badSub.setCriteria("http://topic.url");
+		Subscription.SubscriptionChannelComponent channel = badSub.getChannel();
+		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
+		channel.setEndpoint("channel:my-queue-name");
+		try {
+			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), is(Msg.code(2322) + "No SubscriptionTopic exists with url: http://topic.url"));
+		}
+
+		// Happy path
+		SubscriptionTopic topic = new SubscriptionTopic();
+		SimpleBundleProvider simpleBundleProvider = new SimpleBundleProvider(List.of(topic));
+		when(mySubscriptionTopicDao.search(any(), any())).thenReturn(simpleBundleProvider);
+		mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+	}
+
 	@Configuration
 	public static class SpringConfig {
 		@Bean
 		FhirContext fhirContext() {
-			return FhirContext.forR4();
+			return FhirContext.forR4B();
 		}
 
 		@Bean
@@ -191,7 +233,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@Nonnull
 	private static Subscription createSubscription() {
 		final Subscription subscription = new Subscription();
-		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setStatus(Enumerations.SubscriptionStatus.REQUESTED);
 		subscription.setCriteria("Patient?");
 		final Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);

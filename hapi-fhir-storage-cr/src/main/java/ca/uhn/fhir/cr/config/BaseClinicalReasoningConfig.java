@@ -110,26 +110,22 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 
 	@Bean
 	public CrProperties.CqlProperties cqlProperties(CrProperties theCrProperties) {
-		return theCrProperties.getCql();
+		return theCrProperties.getCqlProperties();
 	}
 
 	@Bean
 	public CrProperties.MeasureProperties measureProperties(CrProperties theCrProperties) {
-		return theCrProperties.getMeasure();
+		return theCrProperties.getMeasureProperties();
 	}
 
 	@Bean
 	public MeasureEvaluationOptions measureEvaluationOptions(CrProperties theCrProperties) {
-		theCrProperties.getMeasure();
-		MeasureEvaluationOptions measureEvaluation = theCrProperties.getMeasure().getMeasureEvaluation();
-		return measureEvaluation;
+		return theCrProperties.getMeasureProperties().getMeasureEvaluationOptions();
 	}
-
-
 
 	@Bean
 	public CqlOptions cqlOptions(CrProperties theCrProperties) {
-		return theCrProperties.getCql().getOptions();
+		return theCrProperties.getCqlProperties().getCqlOptions();
 	}
 
 	@Bean
@@ -139,7 +135,7 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 
 	@Bean
 	public CqlTranslatorOptions cqlTranslatorOptions(FhirContext theFhirContext, CrProperties.CqlProperties theCqlProperties) {
-		CqlTranslatorOptions options = theCqlProperties.getOptions().getCqlTranslatorOptions();
+		CqlTranslatorOptions options = theCqlProperties.getCqlOptions().getCqlTranslatorOptions();
 
 		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)
 			&& (options.getCompatibilityLevel().equals("1.5") || options.getCompatibilityLevel().equals("1.4"))) {
@@ -238,7 +234,7 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 		ModelManager theModelManager, CqlTranslatorOptions theCqlTranslatorOptions, CrProperties.CqlProperties theCqlProperties) {
 		return lcp -> {
 
-			if (theCqlProperties.getOptions().useEmbeddedLibraries()) {
+			if (theCqlProperties.getCqlOptions().useEmbeddedLibraries()) {
 				lcp.add(new FhirLibrarySourceProvider());
 			}
 
