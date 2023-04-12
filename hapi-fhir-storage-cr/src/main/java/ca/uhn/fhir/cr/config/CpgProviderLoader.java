@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CpgProviderLoader {
-	private static final Logger myLogger = LoggerFactory.getLogger(CrProviderLoader.class);
+	private static final Logger myLogger = LoggerFactory.getLogger(CpgProviderLoader.class);
 	private final FhirContext myFhirContext;
 	private final ResourceProviderFactory myResourceProviderFactory;
 	private final CpgProviderFactory myCpgProviderFactory;

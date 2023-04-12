@@ -194,20 +194,22 @@ public class QuestionnaireOperationsProvider {
 	 *                          autopopulated HAPI.
 	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
 	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_QUESTIONNAIRE_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle questionnairePackage(@IdParam IdType theId,
+	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
+	public Bundle packageQuestionnaire(@IdParam IdType theId,
 												  @OperationParam(name = "canonical") String theCanonical,
+												  @OperationParam(name = "usePut") boolean theIsPut,
 												  RequestDetails theRequestDetails) {
 		return (Bundle) myR4QuestionnaireProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(theId, new CanonicalType(theCanonical), null);
+			.packageQuestionnaire(theId, new CanonicalType(theCanonical), null, theIsPut);
 	}
 
-	@Operation(name = ProviderConstants.CR_OPERATION_QUESTIONNAIRE_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle questionnairePackage(@OperationParam(name = "canonical") String theCanonical,
+	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
+	public Bundle packageQuestionnaire(@OperationParam(name = "canonical") String theCanonical,
+												  @OperationParam(name = "usePut") boolean theIsPut,
 												  RequestDetails theRequestDetails) {
 		return (Bundle) myR4QuestionnaireProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(null, new CanonicalType(theCanonical), null);
+			.packageQuestionnaire(null, new CanonicalType(theCanonical), null, theIsPut);
 	}
 }

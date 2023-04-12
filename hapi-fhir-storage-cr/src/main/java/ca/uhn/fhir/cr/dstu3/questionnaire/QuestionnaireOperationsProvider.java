@@ -148,13 +148,13 @@ public class QuestionnaireOperationsProvider {
 	 *                          autopopulated HAPI.
 	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
 	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_QUESTIONNAIRE_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle questionnairePackage(@IdParam IdType theId,
+	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
+	public Bundle packageQuestionnaire(@IdParam IdType theId,
 												  @OperationParam(name = "canonical") String theCanonical,
 												  RequestDetails theRequestDetails) {
 
 		return (Bundle) this.myDstu3QuestionnaireServiceFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(theId, new StringType(theCanonical), null);
+			.packageQuestionnaire(theId, new StringType(theCanonical), null, false);
 	}
 }

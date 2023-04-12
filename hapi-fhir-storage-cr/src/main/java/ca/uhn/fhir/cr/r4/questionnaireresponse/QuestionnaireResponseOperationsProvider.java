@@ -57,7 +57,7 @@ public class QuestionnaireResponseOperationsProvider {
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return myR4QuestionnaireResponseProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.extract(theId, theQuestionnaireResponse);
+			.extract(theId, theQuestionnaireResponse, null, null, null);
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
@@ -65,6 +65,6 @@ public class QuestionnaireResponseOperationsProvider {
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return myR4QuestionnaireResponseProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.extract(null, theQuestionnaireResponse);
+			.extract(null, theQuestionnaireResponse, null, null, null);
 	}
 }

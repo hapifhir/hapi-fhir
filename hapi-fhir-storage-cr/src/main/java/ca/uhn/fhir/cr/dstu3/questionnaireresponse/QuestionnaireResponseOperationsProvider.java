@@ -57,6 +57,6 @@ public class QuestionnaireResponseOperationsProvider {
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return this.myDstu3QuestionnaireResponseServiceFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.extract(theId, theQuestionnaireResponse);
+			.extract(theId, theQuestionnaireResponse, null, null, null);
 	}
 }

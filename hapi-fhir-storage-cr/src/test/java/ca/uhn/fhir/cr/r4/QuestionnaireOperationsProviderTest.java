@@ -51,8 +51,8 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 	void testQuestionnairePackage() {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
 		var requestDetails = setupRequestDetails();
-		var result = this.questionnaireOperationsProvider.questionnairePackage(null,
-			"http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+		var result = this.questionnaireOperationsProvider.packageQuestionnaire(null,
+			"http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest", true,
 			requestDetails);
 
 		assertNotNull(result);

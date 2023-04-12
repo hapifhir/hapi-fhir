@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -277,5 +278,25 @@ public class PlanDefinitionOperationsProvider {
 				theDataEndpoint,
 				theContentEndpoint,
 				theTerminologyEndpoint);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
+	public IBaseBundle packagePlanDefinition(@IdParam IdType theId,
+										@OperationParam(name = "canonical") String theCanonical,
+										@OperationParam(name = "usePut") boolean theIsPut,
+										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return myR4PlanDefinitionProcessorFactory
+			.create(myRepositoryFactory.create(theRequestDetails))
+			.packagePlanDefinition(theId, new CanonicalType(theCanonical), null, theIsPut);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
+	public IBaseBundle packagePlanDefinition(@OperationParam(name = "id") String theId,
+														  @OperationParam(name = "canonical") String theCanonical,
+														  @OperationParam(name = "usePut") boolean theIsPut,
+														  RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return myR4PlanDefinitionProcessorFactory
+			.create(myRepositoryFactory.create(theRequestDetails))
+			.packagePlanDefinition(new IdType("PlanDefinition", theId), new CanonicalType(theCanonical), null, theIsPut);
 	}
 }
