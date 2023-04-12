@@ -1031,6 +1031,43 @@ public enum Pointcut implements IPointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource"
 	),
 
+	/**
+	 * <b>Subscription Topic Hook:</b>
+	 * Invoked whenever a persisted resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) is about to be checked for whether any subscription topics
+	 * were triggered as a result of the operation.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - Hooks may modify this parameter. This will affect the checking process.</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
+	 * returns <code>false</code>, processing will be aborted.
+	 * </p>
+	 */
+	SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+
+
+	/**
+	 * <b>Subscription Topic Hook:</b>
+	 * Invoked whenever a persisted resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) has been checked for whether any subscription topics
+	 * were triggered as a result of the operation.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+
 
 	/**
 	 * <b>Storage Hook:</b>

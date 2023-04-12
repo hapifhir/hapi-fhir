@@ -128,7 +128,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
         </dependency>
-    </dependencies>
+	</dependencies>
 	<build>
 		<pluginManagement>
 			<plugins>

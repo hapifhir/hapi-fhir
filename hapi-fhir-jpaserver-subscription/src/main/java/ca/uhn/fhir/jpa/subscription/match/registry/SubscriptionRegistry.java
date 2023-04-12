@@ -74,6 +74,10 @@ public class SubscriptionRegistry {
 		return myActiveSubscriptionCache.getAll();
 	}
 
+	public synchronized List<ActiveSubscription> getTopicSubscriptionsByUrl(String theUrl) {
+		return myActiveSubscriptionCache.getTopicSubscriptionsForUrl(theUrl);
+	}
+
 	private Optional<CanonicalSubscription> hasSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
