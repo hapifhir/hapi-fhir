@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
@@ -59,7 +60,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class ExpandResourcesStep<P extends IResourcePersistentId<?>> implements IJobStepWorker<BulkExportJobParameters, ResourceIdList, ExpandedResourcesList> {
+public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParameters, ResourceIdList, ExpandedResourcesList> {
 	private static final Logger ourLog = getLogger(ExpandResourcesStep.class);
 
 	@Autowired
@@ -69,7 +70,7 @@ public class ExpandResourcesStep<P extends IResourcePersistentId<?>> implements 
 	private FhirContext myFhirContext;
 
 	@Autowired
-	private IBulkExportProcessor<P> myBulkExportProcessor;
+	private IBulkExportProcessor<?> myBulkExportProcessor;
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
@@ -78,12 +79,12 @@ public class ExpandResourcesStep<P extends IResourcePersistentId<?>> implements 
 	private StorageSettings myStorageSettings;
 
 	@Autowired
-	private IIdHelperService<P> myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
-	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	@Nonnull
 	@Override
@@ -92,11 +93,11 @@ public class ExpandResourcesStep<P extends IResourcePersistentId<?>> implements 
 		ResourceIdList idList = theStepExecutionDetails.getData();
 		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
-		ourLog.info("Step 2 for bulk export - Expand resources. {}/{}", theStepExecutionDetails.getInstance().getInstanceId(), theStepExecutionDetails.getChunkId());
+		ourLog.info("Step 2 for bulk export - Expand resources");
 		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getIds().size());
 
 		// search the resources
-		List<IBaseResource> allResources = fetchAllResources(idList);
+		List<IBaseResource> allResources = fetchAllResources(idList, jobParameters.getPartitionId());
 
 
 		// if necessary, expand resources
@@ -106,7 +107,12 @@ public class ExpandResourcesStep<P extends IResourcePersistentId<?>> implements 
 
 		// Normalize terminology
 		if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
-			getResponseTerminologyTranslationSvc().processResourcesForTerminologyTranslation(allResources);
+			ResponseTerminologyTranslationSvc terminologyTranslationSvc = myResponseTerminologyTranslationSvc;
+			if (terminologyTranslationSvc == null) {
+				terminologyTranslationSvc = myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
+				myResponseTerminologyTranslationSvc = terminologyTranslationSvc;
+			}
+			terminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
 		}
 
 		// encode them - Key is resource type, Value is a collection of serialized resources of that type
@@ -131,16 +137,7 @@ public class ExpandResourcesStep<P extends IResourcePersistentId<?>> implements 
 		return RunOutcome.SUCCESS;
 	}
 
-	@Nonnull
-	private ResponseTerminologyTranslationSvc getResponseTerminologyTranslationSvc() {
-		// this is ugly.  Extracted from earlier.
-		if (myResponseTerminologyTranslationSvc == null) {
-			myResponseTerminologyTranslationSvc = myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
-		}
-		return myResponseTerminologyTranslationSvc;
-	}
-
-	private List<IBaseResource> fetchAllResources(ResourceIdList theIds) {
+	private List<IBaseResource> fetchAllResources(ResourceIdList theIds, RequestPartitionId theRequestPartitionId) {
 		ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
 		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
 
@@ -156,7 +153,7 @@ public class ExpandResourcesStep<P extends IResourcePersistentId<?>> implements 
 				// single SQ statement at once
 				int batchSize = Math.min(500, allIds.size());
 
-				Set<P> nextBatchOfPids =
+				Set<IResourcePersistentId> nextBatchOfPids =
 					allIds
 						.subList(0, batchSize)
 						.stream()
@@ -164,12 +161,12 @@ public class ExpandResourcesStep<P extends IResourcePersistentId<?>> implements 
 						.collect(Collectors.toSet());
 				allIds = allIds.subList(batchSize, allIds.size());
 
-				PersistentIdToForcedIdMap<P> nextBatchOfResourceIds = myTransactionService
+				PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
 					.withRequest(null)
 					.execute(() -> myIdHelperService.translatePidsToForcedIds(nextBatchOfPids));
 
 				TokenOrListParam idListParam = new TokenOrListParam();
-				for (P nextPid : nextBatchOfPids) {
+				for (IResourcePersistentId nextPid : nextBatchOfPids) {
 					Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
 					idListParam.add(resourceId.orElse(nextPid.getId().toString()));
 				}
@@ -177,7 +174,7 @@ public class ExpandResourcesStep<P extends IResourcePersistentId<?>> implements 
 				SearchParameterMap spMap = SearchParameterMap
 					.newSynchronous()
 					.add(PARAM_ID, idListParam);
-				IBundleProvider outcome = dao.search(spMap, new SystemRequestDetails());
+				IBundleProvider outcome = dao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
 				resources.addAll(outcome.getAllResources());
 			}
 

@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
+import com.healthmarketscience.sqlbuilder.ComboExpression;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InCondition;
@@ -108,6 +109,7 @@ public class SearchQueryBuilder {
 	private boolean dialectIsMsSql;
 	private boolean dialectIsMySql;
 	private boolean myNeedResourceTableRoot;
+	private int myNextNearnessColumnId = 0;
 
 	/**
 	 * Constructor
@@ -722,6 +724,30 @@ public class SearchQueryBuilder {
 		return myHaveAtLeastOnePredicate;
 	}
 
+	public void addSortCoordsNear(CoordsPredicateBuilder theCoordsBuilder, double theLatitudeValue, double theLongitudeValue, boolean theAscending) {
+		FunctionCall absLatitude = new FunctionCall("ABS");
+		String latitudePlaceholder = generatePlaceholder(theLatitudeValue);
+		ComboExpression absLatitudeMiddle = new ComboExpression(ComboExpression.Op.SUBTRACT, theCoordsBuilder.getColumnLatitude(), latitudePlaceholder);
+		absLatitude = absLatitude.addCustomParams(absLatitudeMiddle);
+
+		FunctionCall absLongitude = new FunctionCall("ABS");
+		String longitudePlaceholder = generatePlaceholder(theLongitudeValue);
+		ComboExpression absLongitudeMiddle = new ComboExpression(ComboExpression.Op.SUBTRACT, theCoordsBuilder.getColumnLongitude(), longitudePlaceholder);
+		absLongitude = absLongitude.addCustomParams(absLongitudeMiddle);
+
+		ComboExpression sum = new ComboExpression(ComboExpression.Op.ADD, absLatitude, absLongitude);
+		String ordering;
+		if (theAscending) {
+			ordering = "";
+		} else {
+			ordering = " DESC";
+		}
+
+		String columnName = "MHD" + (myNextNearnessColumnId++);
+		mySelect.addAliasedColumn(sum, columnName);
+		mySelect.addCustomOrderings(columnName + ordering);
+	}
+
 	public void addSortString(DbColumn theColumnValueNormalized, boolean theAscending) {
 		addSortString(theColumnValueNormalized, theAscending, false);
 	}
@@ -787,26 +813,26 @@ public class SearchQueryBuilder {
 		return sortColumnName;
 	}
 
-	public void addSortNumeric(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder, boolean theUseAggregate) {
+	public void addSortNumeric(DbColumn theTheColumnValueNormalized, boolean theAscending, OrderObject.NullOrder theNullOrder, boolean theUseAggregate) {
 		if ((dialectIsMySql || dialectIsMsSql)) {
 			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
 			// Null values are always treated as less than non-null values.
 			// As such special handling is required here.
 			String direction;
 			String sortColumnName = theTheColumnValueNormalized.getTable().getAlias() + "." + theTheColumnValueNormalized.getName();
-			if ((theTheAscending && theNullOrder == OrderObject.NullOrder.LAST)
-				|| (!theTheAscending && theNullOrder == OrderObject.NullOrder.FIRST)) {
+			if ((theAscending && theNullOrder == OrderObject.NullOrder.LAST)
+				|| (!theAscending && theNullOrder == OrderObject.NullOrder.FIRST)) {
 				// Negating the numeric column value and reversing the sort order will ensure that the rows appear
 				// in the correct order with nulls appearing first or last as needed.
-				direction = theTheAscending ? " DESC" : " ASC";
+				direction = theAscending ? " DESC" : " ASC";
 				sortColumnName = "-" + sortColumnName;
 			} else {
-				direction = theTheAscending ? " ASC" : " DESC";
+				direction = theAscending ? " ASC" : " DESC";
 			}
-			sortColumnName = formatColumnNameForAggregate(theTheAscending, theUseAggregate, sortColumnName);
+			sortColumnName = formatColumnNameForAggregate(theAscending, theUseAggregate, sortColumnName);
 			mySelect.addCustomOrderings(sortColumnName + direction);
 		} else {
-			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder, theUseAggregate);
+			addSort(theTheColumnValueNormalized, theAscending, theNullOrder, theUseAggregate);
 		}
 	}
 

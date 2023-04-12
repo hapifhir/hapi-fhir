@@ -336,7 +336,6 @@ public class JobInstance implements IModelJson, IJobInstance {
 		return this;
 	}
 
-
 	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
 		setJobDefinitionId(theJobDefinition.getJobDefinitionId());
 		setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());

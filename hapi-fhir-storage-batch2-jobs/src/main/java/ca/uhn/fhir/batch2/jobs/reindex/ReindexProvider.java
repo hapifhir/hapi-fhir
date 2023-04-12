@@ -56,7 +56,7 @@ public class ReindexProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
-	public IBaseParameters Reindex(
+	public IBaseParameters reindex(
 		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_URL, typeName = "string", min = 0, max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theUrlsToReindex,
 		RequestDetails theRequestDetails
 	) {

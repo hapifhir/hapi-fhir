@@ -21,13 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CrProviderDstu3Test extends BaseCrDstu3Test {
+public class 	CrProviderDstu3Test extends BaseCrDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CrProviderDstu3Test.class);
 	protected final RequestDetails myRequestDetails = RequestDetailsHelper.newServletRequestDetails();
 
@@ -78,12 +76,10 @@ public class CrProviderDstu3Test extends BaseCrDstu3Test {
 		loadResource(Library.class, "ca/uhn/fhir/cr/dstu3/hedis-ig/library/library-asf-logic.json", myRequestDetails);
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
 		loadResource(Measure.class,"ca/uhn/fhir/cr/dstu3/hedis-ig/measure-asf.json", myRequestDetails);
-		var result = loadBundle("ca/uhn/fhir/cr/dstu3/hedis-ig/test-patient-6529-data.json");
+		Bundle result = loadBundle("ca/uhn/fhir/cr/dstu3/hedis-ig/test-patient-6529-data.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-		assertThat(entries, hasSize(22));
-//		assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
-//		assertEquals(entries.get(21).getResponse().getStatus(), "201 Created");
+		assertEquals(entries.size(), 22);
 
 		IdType measureId = new IdType("Measure", "measure-asf");
 		String patient = "Patient/Patient-6529";
@@ -105,8 +101,8 @@ public class CrProviderDstu3Test extends BaseCrDstu3Test {
 			null,
 			myRequestDetails);
 		// Assert it worked
-		assertThat(report.getGroup(), hasSize(2));
-		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
+		assertEquals(report.getGroup().size(), 2);
+		assertEquals(report.getGroup().get(0).getPopulation().size(), 3);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 
 		// Now timed runs
@@ -148,8 +144,8 @@ public class CrProviderDstu3Test extends BaseCrDstu3Test {
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, "population",
 			null, null, null, null, null, null, myRequestDetails);
 		// Assert it worked
-		assertThat(report.getGroup(), hasSize(2));
-		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
+		assertEquals(report.getGroup().size(), 2);
+		assertEquals(report.getGroup().get(0).getPopulation().size(), 3);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 
 		// Now timed runs
