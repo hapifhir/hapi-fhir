@@ -22,12 +22,14 @@ package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
 import javax.annotation.Nullable;
 
 import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
@@ -75,8 +77,23 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 		return null;
     }
 
+	/**
+	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns null.
+	 *
+	 * @return the message key value or default
+	 */
 	@Nullable
 	public String getMessageKeyOrDefault() {
-		return getMessageKey();
+		return defaultString(getMessageKey(), getMessageKeyDefaultValue());
+	}
+
+	/**
+	 * Provides a fallback value when the value returned by {@link #getMessageKey()} is null.
+	 *
+	 * @return null by default
+	 */
+	@Nullable
+	protected String getMessageKeyDefaultValue(){
+		return null;
 	}
 }
