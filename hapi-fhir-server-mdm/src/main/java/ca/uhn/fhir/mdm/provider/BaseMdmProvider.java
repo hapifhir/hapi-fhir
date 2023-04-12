@@ -41,8 +41,11 @@ import org.springframework.data.domain.Page;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -74,7 +77,7 @@ public abstract class BaseMdmProvider {
 
 	private void validateBothCannotBeNullOrEmpty(String theFirstName, List<IPrimitiveType<String>> theFirstList, String theSecondName, List<IPrimitiveType<String>> theSecondList) {
 		if ((theFirstList == null || theFirstList.isEmpty()) && (theSecondList == null || theSecondList.isEmpty())) {
-			throw new InvalidRequestException(Msg.code(2292) + "both ["+theFirstName+"] and ["+theSecondName+"] cannot be null or empty");
+			throw new InvalidRequestException(Msg.code(2292) + "Please include either ["+theFirstName+"]s, ["+theSecondName+"]s, or both in your search inputs.");
 		}
 	}
 
@@ -123,10 +126,17 @@ public abstract class BaseMdmProvider {
 	}
 
 	@Nonnull
-	protected List<String> convertToStringsIfNotNull(List<IPrimitiveType<String>> thePrimitiveTypeStrings) {
-		return thePrimitiveTypeStrings == null
-			? Collections.emptyList()
-			: thePrimitiveTypeStrings.stream().map(this::extractStringOrNull).collect(Collectors.toUnmodifiableList());
+	protected List<String> convertToStringsIncludingCommaDelimitedIfNotNull(List<IPrimitiveType<String>> thePrimitiveTypeStrings) {
+		if (thePrimitiveTypeStrings == null) {
+			return Collections.emptyList();
+		}
+
+		return thePrimitiveTypeStrings.stream()
+			.map(this::extractStringOrNull)
+			.filter(Objects::nonNull)
+			.map(input -> Arrays.asList(input.split(",")))
+			.flatMap(Collection::stream)
+			.collect(Collectors.toUnmodifiableList());
 	}
 
 	protected String extractStringOrNull(IPrimitiveType<String> theString) {

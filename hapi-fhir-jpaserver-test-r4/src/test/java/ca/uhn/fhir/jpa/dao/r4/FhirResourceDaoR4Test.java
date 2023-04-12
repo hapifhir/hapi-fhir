@@ -4281,7 +4281,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			search.setStatus(SearchStatusEnum.FAILED);
 			search.setFailureCode(500);
 			search.setFailureMessage("FOO");
-			mySearchCacheSvc.save(search);
+			mySearchCacheSvc.save(search, RequestPartitionId.defaultPartition());
 		});
 
 		IBundleProvider results = myEncounterDao.search(map);

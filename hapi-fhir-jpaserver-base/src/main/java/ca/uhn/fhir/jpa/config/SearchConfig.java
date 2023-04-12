@@ -120,8 +120,7 @@ public class SearchConfig {
 			mySearchBuilderFactory,
 			mySynchronousSearchSvc,
 			myPersistedJpaBundleProviderFactory,
-			myRequestPartitionHelperService,
-			mySearchParamRegistry,
+                mySearchParamRegistry,
 			mySearchStrategyFactory,
 			exceptionService(),
 			myBeanFactory
