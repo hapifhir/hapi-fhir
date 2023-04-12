@@ -172,7 +172,7 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 
 	@Nullable
 	public String getMessageKey() {
-		return null;
+		return myMessageKey;
 	}
 
 	public void setMessageKey(String theMessageKey) {
