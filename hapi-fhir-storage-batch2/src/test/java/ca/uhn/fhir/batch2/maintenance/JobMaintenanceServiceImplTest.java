@@ -54,8 +54,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -115,7 +113,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		mySvc.runMaintenancePass();
 
-		verify(myJobPersistence, never()).updateInstance(any());
+		verify(myJobPersistence, times(1)).updateInstance(any(), any());
 	}
 
 	@Test

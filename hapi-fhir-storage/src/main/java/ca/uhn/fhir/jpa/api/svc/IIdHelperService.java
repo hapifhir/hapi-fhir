@@ -42,7 +42,7 @@ import java.util.Set;
  * This interface is used to translate between {@link IResourcePersistentId}
  * and actual resource IDs.
  */
-public interface IIdHelperService<T extends IResourcePersistentId<?>> {
+public interface IIdHelperService<T extends IResourcePersistentId> {
 
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
