@@ -294,6 +294,28 @@ public class ResourceLink extends BaseResourceIndex {
 		return myTargetResource;
 	}
 
+	/**
+	 * Creates a clone of this resourcelink which doesn't contain the internal PID
+	 * of the target resource.
+	 */
+	public ResourceLink cloneWithoutTargetPid() {
+		ResourceLink retVal = new ResourceLink();
+		retVal.mySourceResource = mySourceResource;
+		retVal.mySourceResourcePid = mySourceResource.getId();
+		retVal.mySourceResourceType = mySourceResource.getResourceType();
+		retVal.mySourcePath = mySourcePath;
+		retVal.myUpdated = myUpdated;
+		retVal.myTargetResourceType = myTargetResourceType;
+		if (myTargetResourceId != null) {
+			retVal.myTargetResourceId = myTargetResourceId;
+		} else if (myTargetResource != null) {
+			retVal.myTargetResourceId = myTargetResource.getIdDt().getIdPart();
+		}
+		retVal.myTargetResourceUrl = myTargetResourceUrl;
+		retVal.myTargetResourceVersion = myTargetResourceVersion;
+		return retVal;
+	}
+
 	public static ResourceLink forAbsoluteReference(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
 		ResourceLink retVal = new ResourceLink();
 		retVal.setSourcePath(theSourcePath);

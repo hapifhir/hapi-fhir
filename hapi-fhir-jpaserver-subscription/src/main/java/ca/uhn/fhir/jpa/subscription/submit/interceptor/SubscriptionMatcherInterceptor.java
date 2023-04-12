@@ -178,6 +178,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	@VisibleForTesting
 	public LinkedBlockingChannel getProcessingChannelForUnitTest() {
+		startIfNeeded();
 		return (LinkedBlockingChannel) myMatchingChannel;
 	}
 }

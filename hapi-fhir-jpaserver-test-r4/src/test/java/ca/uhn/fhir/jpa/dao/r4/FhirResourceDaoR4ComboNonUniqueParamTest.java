@@ -28,8 +28,10 @@ import java.util.Comparator;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -164,6 +166,59 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual, containsInAnyOrder(id3.toUnqualifiedVersionless().getValue()));
+
+	}
+
+	@Test
+	public void testCreateAndUpdateResource() {
+		createNamesAndGenderSp();
+
+		// Create a resource patching the unique SP
+		myCaptureQueriesListener.clear();
+		IIdType id1 = createPatient1();
+		assertNotNull(id1);
+
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(12, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		runInTransaction(()->{
+			List<String> indexes = myResourceIndexedComboTokensNonUniqueDao
+				.findAll()
+				.stream()
+				.map(ResourceIndexedComboTokenNonUnique::getIndexString)
+				.toList();
+			assertThat(indexes.toString(), indexes, contains("Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1"));
+		});
+
+		/*
+		 * Now update the resource
+		 */
+
+		Patient patient = myPatientDao.read(id1, mySrd);
+		patient.getNameFirstRep().setFamily("Family2");
+
+		myCaptureQueriesListener.clear();
+		myPatientDao.update(patient, mySrd);
+
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(5, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		runInTransaction(()->{
+			List<String> indexes = myResourceIndexedComboTokensNonUniqueDao
+				.findAll()
+				.stream()
+				.map(ResourceIndexedComboTokenNonUnique::getIndexString)
+				.toList();
+			assertThat(indexes.toString(), indexes, contains("Patient?family=FAMILY2%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1"));
+		});
 
 	}
 

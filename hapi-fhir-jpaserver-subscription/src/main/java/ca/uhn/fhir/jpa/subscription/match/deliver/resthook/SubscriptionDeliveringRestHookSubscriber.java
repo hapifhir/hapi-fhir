@@ -26,13 +26,12 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
@@ -70,9 +69,6 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private MatchUrlService myMatchUrlService;
-
 	/**
 	 * Constructor
 	 */
@@ -90,7 +86,9 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IClientExecutable<?, ?> operation;
 
-		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
+		if (theSubscription.isTopicSubscription()) {
+			operation = createDeliveryRequestTopic((IBaseBundle) theMsg.getPayload(myFhirContext), theClient, thePayloadResource);
+		} else if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
 			operation = createDeliveryRequestTransaction(theSubscription, theClient, thePayloadResource);
 		} else if (thePayloadType != null) {
 			operation = createDeliveryRequestNormal(theMsg, theClient, thePayloadResource);
@@ -141,6 +139,10 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	private IClientExecutable<?, ?> createDeliveryRequestTransaction(CanonicalSubscription theSubscription, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IBaseBundle bundle = createDeliveryBundleForPayloadSearchCriteria(theSubscription, thePayloadResource);
 		return theClient.transaction().withBundle(bundle);
+	}
+
+	private IClientExecutable<?, ?> createDeliveryRequestTopic(IBaseBundle theBundle, IGenericClient theClient, IBaseResource thePayloadResource) {
+		return theClient.transaction().withBundle(theBundle);
 	}
 
 	public IBaseResource getResource(IIdType payloadId, RequestPartitionId thePartitionId, boolean theDeletedOK) throws ResourceGoneException {
