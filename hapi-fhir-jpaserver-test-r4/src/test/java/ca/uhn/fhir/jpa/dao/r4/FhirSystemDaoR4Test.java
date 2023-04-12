@@ -75,6 +75,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -131,6 +132,7 @@ import static org.mockito.Mockito.when;
 public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoR4Test.class);
+	private static final String FAKE_IDENTIFIER_SYSTEM = "http://some-system.com";
 
 	@AfterEach
 	public void after() {
@@ -4391,6 +4393,115 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		});
 	}
 
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_0() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		// Test Passes when identifier.value = ID2
+		final String identifierValue = "ID2";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(ResourceType.Organization.name() + "?identifier=" + FAKE_IDENTIFIER_SYSTEM + "|" + identifierValue)
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient");
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		assertEquals(1, observationSearch.getAllResourceIds().size());
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_1() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		final String identifierValue = "http://some-url-value";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(ResourceType.Organization.name() + "?identifier=" + FAKE_IDENTIFIER_SYSTEM + "|" + identifierValue)
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient");
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		assertEquals(1, observationSearch.getAllResourceIds().size());
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_2() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		final String identifierValue = "http://some-url-value/Observation/ID2";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(ResourceType.Organization.name() + "?identifier=" + FAKE_IDENTIFIER_SYSTEM + "|" + identifierValue)
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient");
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		assertEquals(1, observationSearch.getAllResourceIds().size());
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_3() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		// Test fails with Organization and Organization
+		final String identifierValue = "http://some-url-value/Organization/ID2";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(ResourceType.Organization.name() + "?identifier=" + FAKE_IDENTIFIER_SYSTEM + "|" + identifierValue)
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient");
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		assertEquals(1, observationSearch.getAllResourceIds().size());
+	}
 
 	/**
 	 * Per a message on the mailing list

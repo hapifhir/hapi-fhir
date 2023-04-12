@@ -473,6 +473,8 @@ public class SearchParamExtractorService {
 	private void extractResourceLinks(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theExistingParams, ResourceIndexedSearchParams theNewParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
 		String sourceResourceName = myContext.getResourceType(theResource);
 
+		ourLog.info("4426: theIndexedReferences: {}", theIndexedReferences);
+
 		for (PathAndRef nextPathAndRef : theIndexedReferences) {
 			if (nextPathAndRef.getRef() != null) {
 				if (nextPathAndRef.getRef().getReferenceElement().isLocal()) {
@@ -518,6 +520,9 @@ public class SearchParamExtractorService {
 			return;
 		}
 
+		ourLog.info("4426: treatBaseUrlsAsLocal: [{}], isAllowExternalReferences: [{}]", myStorageSettings.getTreatBaseUrlsAsLocal(), myStorageSettings.isAllowExternalReferences());
+
+		// TODO: this is null on 2023.02
 		String baseUrl = nextId.getBaseUrl();
 		String typeString = nextId.getResourceType();
 		if (isBlank(typeString)) {
@@ -543,6 +548,7 @@ public class SearchParamExtractorService {
 		}
 
 		if (theRuntimeSearchParam.hasTargets()) {
+			ourLog.info("4426: baseUrl: [{}], typeString: [{}], theRuntimeSearchParam.hasTargets: [{}]", baseUrl, typeString, theRuntimeSearchParam.getTargets());
 			if (!theRuntimeSearchParam.getTargets().contains(typeString)) {
 				return;
 			}

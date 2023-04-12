@@ -274,11 +274,21 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		identifierDefinition.getMutator().addValue(theTargetResource, identifierIBase);
 	}
 
+	// TODO:  figure out where to call this method from
 	private CanonicalIdentifier extractIdentifierReference(IBaseReference theSourceReference) {
 		Optional<IBase> identifier = myContext.newFhirPath().evaluateFirst(theSourceReference, "identifier", IBase.class);
 		if (!identifier.isPresent()) {
 			return null;
 		} else {
+			/*
+						 "subject": {
+                    "reference": "Patient?identifier=http://example.com/system|http://example.com/fhir/Patient/123",
+                    "identifier": {
+                        "system": "http://example.com/system",
+                        "value": "http://example.com/fhir/Patient/123"
+                    }
+                }
+			 */
 			CanonicalIdentifier canonicalIdentifier = new CanonicalIdentifier();
 			Optional<IPrimitiveType> system = myContext.newFhirPath().evaluateFirst(identifier.get(), "system", IPrimitiveType.class);
 			Optional<IPrimitiveType> value = myContext.newFhirPath().evaluateFirst(identifier.get(), "value", IPrimitiveType.class);

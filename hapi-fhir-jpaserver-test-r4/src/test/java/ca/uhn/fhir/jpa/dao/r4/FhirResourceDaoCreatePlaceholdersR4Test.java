@@ -372,7 +372,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
 		obsToCreate.getSubject().setReference("Patient?identifier=http://bar|321");
+		// system|value
 		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("321");
+		ourLog.info("\n4426: Observation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obsToCreate));
 		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
 
 		// Read the Observation
@@ -397,6 +399,45 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertThat(identifier.getValue(), is(equalTo("321")));
 
 
+	}
+
+	@Test
+	public void testCreatePlaceholderWithMatchingInlineAndSubjectReferenceIdentifiersCreatesOnlyOne_withConditionalUrl() {
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		/*
+		 * Create an Observation that references a Patient
+		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
+		 */
+		Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		obsToCreate.getSubject().setReference("Patient?identifier=http://bar|http://something.something/b");
+		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("http://something.something/b");
+		ourLog.info("\n4426: Observation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obsToCreate));
+		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
+
+		// Read the Observation
+		Observation createdObs = myObservationDao.read(obsId);
+
+		//Read the Placeholder Patient
+		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
+		ourLog.debug("\nObservation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+
+		//Ensure the Obs has the right placeholder ID.
+		IIdType placeholderPatId = placeholderPat.getIdElement();
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
+
+		/*
+		 * Should have a single identifier populated.
+		 */
+		ourLog.debug("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		assertEquals(1, placeholderPat.getIdentifier().size());
+		List<Identifier> identifiers = placeholderPat.getIdentifier();
+		Identifier identifier = identifiers.get(0);
+		assertThat(identifier.getSystem(), is(equalTo("http://bar")));
+		assertThat(identifier.getValue(), is(equalTo("http://something.something/b")));
 	}
 
 	//	Case 4:
