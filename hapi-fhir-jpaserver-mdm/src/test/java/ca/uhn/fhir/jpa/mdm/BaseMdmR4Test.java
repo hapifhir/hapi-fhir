@@ -573,6 +573,10 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		assertFields(MdmLink::getScore, theExpectedValues);
 	}
 
+	protected void assertLinksMatchVector(Long... theExpectedValues) {
+		assertFields(MdmLink::getVector, theExpectedValues);
+	}
+
 	public SearchParameterMap buildGoldenResourceSearchParameterMap() {
 		SearchParameterMap spMap = new SearchParameterMap();
 		spMap.setLoadSynchronous(true);
