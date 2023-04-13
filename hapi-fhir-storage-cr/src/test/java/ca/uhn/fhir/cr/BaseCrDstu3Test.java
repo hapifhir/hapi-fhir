@@ -5,9 +5,6 @@ import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import io.specto.hoverfly.junit.dsl.HoverflyDsl;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
 import io.specto.hoverfly.junit.rule.HoverflyRule;
@@ -19,7 +16,6 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.junit.ClassRule;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
@@ -32,7 +28,7 @@ import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 @ContextConfiguration(classes = {TestCrConfig.class, CrDstu3Config.class})
 public abstract class BaseCrDstu3Test extends BaseJpaDstu3Test implements IResourceLoader {
 	protected static final FhirContext ourFhirContext = FhirContext.forDstu3Cached();
-	protected static final IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
+	private static final IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
 	private static final String TEST_ADDRESS = "test-address.com";
 	@ClassRule
 	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
