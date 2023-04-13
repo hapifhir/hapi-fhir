@@ -697,9 +697,6 @@ public class SearchParamExtractorService {
 
 			// 3.3 create indexes for the current contained resource
 			ISearchParamExtractor.SearchParamSet<PathAndRef> indexedReferences = mySearchParamExtractor.extractResourceLinks(containedResource, true);
-			final String json = myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
-			ourLog.info("BUNDLE: json: \n{}", json);
-			ourLog.info("4426: BUNDLE: containedResource: {}, indexedReferences: {}", theResource, indexedReferences.stream().map(PathAndRef::getRef).map(IBaseReference::getReferenceElement).collect(Collectors.toList()));
 			extractResourceLinks(theRequestPartitionId, currParams, theEntity, containedResource, theTransactionDetails, theFailOnInvalidReference, theRequest, indexedReferences);
 
 			// 3.4 recurse to process any other contained resources referenced by this one
