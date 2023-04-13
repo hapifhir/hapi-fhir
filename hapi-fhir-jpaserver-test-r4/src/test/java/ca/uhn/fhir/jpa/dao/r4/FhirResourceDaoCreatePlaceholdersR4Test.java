@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -438,6 +439,30 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Identifier identifier = identifiers.get(0);
 		assertThat(identifier.getSystem(), is(equalTo("http://bar")));
 		assertThat(identifier.getValue(), is(equalTo("http://something.something/b")));
+	}
+
+	// TODO:  this is the standalone equivalent of the failing bundle test
+	private static final String FAKE_IDENTIFIER_SYSTEM = "http://some-system.com";
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_3() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		// Test fails with Organization and Organization
+		final String identifierValue = "http://some-url-value/Organization/ID2";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(ResourceType.Organization.name() + "?identifier=" + FAKE_IDENTIFIER_SYSTEM + "|" + identifierValue)
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+
+		ourLog.info("\n4426: Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		myPatientDao.create(patient, mySrd).getId();
+
+		// TODO:  proper assertions not just lack of errors
 	}
 
 	//	Case 4:

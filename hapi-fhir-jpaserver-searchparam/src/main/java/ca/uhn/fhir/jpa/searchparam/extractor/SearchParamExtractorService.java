@@ -124,6 +124,13 @@ public class SearchParamExtractorService {
 
 		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
 		ISearchParamExtractor.SearchParamSet<PathAndRef> indexedReferences = mySearchParamExtractor.extractResourceLinks(theResource, indexOnContainedResources);
+		final String json = myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
+		// TODO:  STANDALONE:      "reference": "Organization/1",
+		// TODO:  BUNDLE:          "reference": "Organization?identifier=http://some-system.com|http://some-url-value/Organization/ID2",
+		// TODO: delete
+		ourLog.info("4426: STANDALONE: json: \n{}", json);
+		// TODO: delete
+		ourLog.info("4426: STANDALONE: theResource: {}, indexedReferences: {}", theResource, indexedReferences.stream().map(PathAndRef::getRef).map(IBaseReference::getReferenceElement).collect(Collectors.toList()));
 		SearchParamExtractorService.handleWarnings(theRequestDetails, myInterceptorBroadcaster, indexedReferences);
 
 		if (indexOnContainedResources) {
@@ -473,6 +480,7 @@ public class SearchParamExtractorService {
 	private void extractResourceLinks(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theExistingParams, ResourceIndexedSearchParams theNewParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
 		String sourceResourceName = myContext.getResourceType(theResource);
 
+		// TODO: cleanup
 		ourLog.info("4426: theIndexedReferences: {}", theIndexedReferences);
 
 		for (PathAndRef nextPathAndRef : theIndexedReferences) {
@@ -520,11 +528,67 @@ public class SearchParamExtractorService {
 			return;
 		}
 
-		ourLog.info("4426: treatBaseUrlsAsLocal: [{}], isAllowExternalReferences: [{}]", myStorageSettings.getTreatBaseUrlsAsLocal(), myStorageSettings.isAllowExternalReferences());
+		// TODO: delete
+//		ourLog.info("4426: treatBaseUrlsAsLocal: [{}], isAllowExternalReferences: [{}]", myStorageSettings.getTreatBaseUrlsAsLocal(), myStorageSettings.isAllowExternalReferences());
 
 		// TODO: this is null on 2023.02
 		String baseUrl = nextId.getBaseUrl();
 		String typeString = nextId.getResourceType();
+
+		// TODO: delete
+		/*
+		{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "managingOrganization": {
+        "reference": "Organization?identifier=http://some-system.com|http://some-url-value/Organization/ID2",
+        "identifier": {
+          "system": "http://some-system.com",
+          "value": "http://some-url-value/Organization/ID2"
+        }
+      }
+    },
+    "request": {
+      "method": "POST",
+      "url": "Patient"
+    }
+  } ]
+}
+
+
+{
+    "resourceType": "Organization",
+    "id": "1473",
+    "meta": {
+        "versionId": "1",
+        "lastUpdated": "2023-04-12T16:17:51.191-04:00",
+        "source": "#5RT2j7GdNqrsq6m0"
+    },
+    "extension": [
+        {
+            "url": "http://hapifhir.io/fhir/StructureDefinition/resource-placeholder",
+            "valueBoolean": true
+        }
+    ],
+    "identifier": [
+        {
+            "system": "http://some-system.com",
+            "value": "http://some-url-value/Organization/ID2"
+        }
+    ]
+}
+		 */
+
+		ourLog.info("4426: baseUrl: [{}] and typeString [{}] pre-fix", baseUrl, typeString);
+
+		// TODO:  this is a hack that fixes the test and creates the right resources
+		if (baseUrl != null && baseUrl.contains("|") && typeString != null) {
+			baseUrl = null;
+		}
+
 		if (isBlank(typeString)) {
 			String msg = "Invalid resource reference found at path[" + path + "] - Does not contain resource type - " + nextId.getValue();
 			if (theFailOnInvalidReference) {
@@ -548,6 +612,7 @@ public class SearchParamExtractorService {
 		}
 
 		if (theRuntimeSearchParam.hasTargets()) {
+			// TODO: delete
 			ourLog.info("4426: baseUrl: [{}], typeString: [{}], theRuntimeSearchParam.hasTargets: [{}]", baseUrl, typeString, theRuntimeSearchParam.getTargets());
 			if (!theRuntimeSearchParam.getTargets().contains(typeString)) {
 				return;
@@ -703,6 +768,9 @@ public class SearchParamExtractorService {
 
 			// 3.3 create indexes for the current contained resource
 			ISearchParamExtractor.SearchParamSet<PathAndRef> indexedReferences = mySearchParamExtractor.extractResourceLinks(containedResource, true);
+			final String json = myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
+			ourLog.info("BUNDLE: json: \n{}", json);
+			ourLog.info("4426: BUNDLE: containedResource: {}, indexedReferences: {}", theResource, indexedReferences.stream().map(PathAndRef::getRef).map(IBaseReference::getReferenceElement).collect(Collectors.toList()));
 			extractResourceLinks(theRequestPartitionId, currParams, theEntity, containedResource, theTransactionDetails, theFailOnInvalidReference, theRequest, indexedReferences);
 
 			// 3.4 recurse to process any other contained resources referenced by this one
