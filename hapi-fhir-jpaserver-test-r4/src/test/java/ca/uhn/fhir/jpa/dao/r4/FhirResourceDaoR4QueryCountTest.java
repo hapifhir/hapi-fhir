@@ -50,6 +50,9 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Parameters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -2794,6 +2797,45 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		});
 	}
 
+
+	@Test
+	public void testTransactionWithConditionalCreateAndConditionalPatchOnSameUrl() {
+		// Setup
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		org.hl7.fhir.r5.model.Patient patient = new org.hl7.fhir.r5.model.Patient();
+		patient.setActive(false);
+		patient.addIdentifier().setSystem("http://system").setValue("value");
+		bb.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://system|value");
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(true));
+		bb.addTransactionFhirPatchEntry(patch).conditional("Patient?identifier=http://system|value");
+
+		Bundle input = bb.getBundleTyped();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+
+		// Verify
+		assertEquals(17, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(6607, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		assertEquals(input.getEntry().size(), output.getEntry().size());
+
+		runInTransaction(() -> {
+			assertEquals(437, myResourceTableDao.count());
+			assertEquals(437, myResourceHistoryTableDao.count());
+		});
+
+	}
 
 	/**
 	 * See the class javadoc before changing the counts in this test!
