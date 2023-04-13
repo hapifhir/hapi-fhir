@@ -85,15 +85,16 @@ public class JobInstanceProcessor {
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
 
-	// wipmb should we delete this?  Or reduce it to an instance event?
-	// wipmb Frig - bring it back - we need the completion hander called
 	private void handleCancellation(JobInstance theInstance) {
 		if (theInstance.isPendingCancellationRequest()) {
 			String errorMessage = buildCancelledMessage(theInstance);
 			ourLog.info("Job {} moving to CANCELLED", theInstance.getInstanceId());
 			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance -> {
-				instance.setErrorMessage(errorMessage);
-				return myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.CANCELLED);
+				boolean changed = myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.CANCELLED);
+				if (changed) {
+					instance.setErrorMessage(errorMessage);
+				}
+				return changed;
 			});
 		}
 	}

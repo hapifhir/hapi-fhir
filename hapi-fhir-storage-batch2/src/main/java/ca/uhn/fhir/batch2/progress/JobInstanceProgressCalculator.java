@@ -76,11 +76,11 @@ public class JobInstanceProgressCalculator {
 	@Nonnull
 	public InstanceProgress calculateInstanceProgress(String instanceId) {
 		InstanceProgress instanceProgress = new InstanceProgress();
-		// wipmb mb here
 		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
 
 		while (workChunkIterator.hasNext()) {
 			WorkChunk next = workChunkIterator.next();
+			// wipmb can we merge these two things?
 			myProgressAccumulator.addChunk(next);
 			instanceProgress.addChunk(next);
 		}

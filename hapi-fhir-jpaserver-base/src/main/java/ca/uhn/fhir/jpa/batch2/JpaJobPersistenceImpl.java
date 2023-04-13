@@ -121,7 +121,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTe
 			return Optional.empty();
 		} else {
 			Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-			return chunk.map(t -> toChunk(t, true));
+			return chunk.map(this::toChunk);
 		}
 	}
 
@@ -235,8 +235,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTe
 		return myJobInstanceRepository.findAll(pageRequest).stream().map(this::toInstance).collect(Collectors.toList());
 	}
 
-	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity, boolean theIncludeData) {
-		return JobInstanceUtil.fromEntityToWorkChunk(theEntity, theIncludeData);
+	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity) {
+		return JobInstanceUtil.fromEntityToWorkChunk(theEntity);
 	}
 
 	private JobInstance toInstance(Batch2JobInstanceEntity theEntity) {
@@ -334,30 +334,20 @@ public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTe
 	}
 
 	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
-		if (theIncludeData) {
-			// I think this is dead: MB
-			myTransactionService
-				.withSystemRequest()
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> {
-				List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+		myTransactionService
+			.withSystemRequest()
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(() -> {
+				List<Batch2WorkChunkEntity> chunks;
+				if (theIncludeData) {
+					chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+				} else {
+					chunks = myWorkChunkRepository.fetchChunksNoData(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+				}
 				for (Batch2WorkChunkEntity chunk : chunks) {
-					theConsumer.accept(toChunk(chunk, theIncludeData));
+					theConsumer.accept(toChunk(chunk));
 				}
 			});
-		} else {
-			// wipmb mb here
-			// a minimally-different path for a prod-fix.
-			myTransactionService
-				.withSystemRequest()
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> {
-				List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunksNoData(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
-				for (Batch2WorkChunkEntity chunk : chunks) {
-					theConsumer.accept(toChunk(chunk, theIncludeData));
-				}
-			});
-		}
 	}
 
 	@Override
@@ -379,14 +369,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTe
 	 */
 	@Override
 	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
-		// wipmb mb here
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
 	public Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId) {
-		return myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId).map(entity -> toChunk(entity, true));
+		return myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId).map(this::toChunk);
 	}
 
 	/**
@@ -398,7 +387,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTe
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean updateInstance(JobInstance theInstance) {
-		// Separate updating the status so we have atomic information about whether the status is changing
+		// Separate updating the status, so we have atomic information about whether the status is changing
 		int recordsChangedByStatusUpdate = myJobInstanceRepository.updateInstanceStatus(theInstance.getInstanceId(), theInstance.getStatus());
 
 		Optional<Batch2JobInstanceEntity> instanceOpt = myJobInstanceRepository.findById(theInstance.getInstanceId());
@@ -493,14 +482,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTe
 		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
 		String operationString = "Cancel job instance " + theInstanceId;
 
+		String messagePrefix = "Job instance <" + theInstanceId + ">";
 		if (recordsChanged > 0) {
-			return JobOperationResultJson.newSuccess(operationString, "Job instance <" + theInstanceId + "> successfully cancelled.");
+			return JobOperationResultJson.newSuccess(operationString, messagePrefix + " successfully cancelled.");
 		} else {
 			Optional<JobInstance> instance = fetchInstance(theInstanceId);
 			if (instance.isPresent()) {
-				return JobOperationResultJson.newFailure(operationString, "Job instance <" + theInstanceId + "> was already cancelled.  Nothing to do.");
+				return JobOperationResultJson.newFailure(operationString, messagePrefix + " was already cancelled.  Nothing to do.");
 			} else {
-				return JobOperationResultJson.newFailure(operationString, "Job instance <" + theInstanceId + "> not found.");
+				return JobOperationResultJson.newFailure(operationString, messagePrefix + " not found.");
 			}
 		}
 	}

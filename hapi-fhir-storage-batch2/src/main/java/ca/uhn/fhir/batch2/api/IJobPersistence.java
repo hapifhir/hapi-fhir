@@ -137,6 +137,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theModifier a hook to modify the instance
 	 * @return true if the instance was modified
 	 */
+	// wipmb consider changing all callers to actual objects we can unit test.
 	boolean updateInstance(String theInstanceId, Predicate<JobInstance> theModifier);
 
 	/**

@@ -95,12 +95,12 @@ class JobInstanceUtil {
 
 	/**
 	 * Converts a Batch2WorkChunkEntity into a WorkChunk object
+	 *
 	 * @param theEntity - the entity to convert
-	 * @param theIncludeData - whether or not to include the Data attached to the chunk
 	 * @return - the WorkChunk object
 	 */
 	@Nonnull
-	public static WorkChunk fromEntityToWorkChunk(@Nonnull Batch2WorkChunkEntity theEntity, boolean theIncludeData) {
+	public static WorkChunk fromEntityToWorkChunk(@Nonnull Batch2WorkChunkEntity theEntity) {
 		WorkChunk retVal = new WorkChunk();
 		retVal.setId(theEntity.getId());
 		retVal.setSequence(theEntity.getSequence());
@@ -116,10 +116,8 @@ class JobInstanceUtil {
 		retVal.setErrorMessage(theEntity.getErrorMessage());
 		retVal.setErrorCount(theEntity.getErrorCount());
 		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
-		if (theIncludeData &&
-			theEntity.getSerializedData() != null) {
-			retVal.setData(theEntity.getSerializedData());
-		}
+		// note: may be null out if queried NoData
+		retVal.setData(theEntity.getSerializedData());
 		return retVal;
 	}
 }

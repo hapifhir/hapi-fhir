@@ -84,7 +84,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	private LinkedBlockingChannel myWorkChannel;
 	private final List<StackTraceElement[]> myStackTraceElements = new ArrayList<>();
 	private TransactionTemplate myTxTemplate;
-	private MyChannelInterceptor myChannelInterceptor = new MyChannelInterceptor();
+	private final MyChannelInterceptor myChannelInterceptor = new MyChannelInterceptor();
 
 	@BeforeEach
 	public void before() {
@@ -163,7 +163,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 				chunk2, SECOND, QUEUED
 				""",
 			"""
-   		 chunk2
+				chunk2
 				"""
 		);
 
@@ -400,11 +400,10 @@ chunk3, LAST, QUEUED
 		workChunk.setCreateTime(new Date());
 		workChunk.setInstanceId(TEST_INSTANCE_ID);
 		workChunk.setTargetStepId(theStepId);
-		switch (theStatus) {
-			case COMPLETED:
-				workChunk.setEndTime(new Date());
-				break;
+		if (!theStatus.isIncomplete()) {
+			workChunk.setEndTime(new Date());
 		}
+
 		return workChunk;
 	}
 
@@ -428,19 +427,17 @@ chunk3, LAST, QUEUED
 		return definition;
 	}
 
-	private void storeNewInstance(JobDefinition<? extends IModelJson> definition) {
+	private void storeNewInstance(JobDefinition<? extends IModelJson> theJobDefinition) {
 		Batch2JobInstanceEntity entity = new Batch2JobInstanceEntity();
 		entity.setId(TEST_INSTANCE_ID);
 		entity.setStatus(StatusEnum.IN_PROGRESS);
-		entity.setDefinitionId(JOB_DEF_ID);
-		entity.setDefinitionVersion(TEST_JOB_VERSION);
+		entity.setDefinitionId(theJobDefinition.getJobDefinitionId());
+		entity.setDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
 		entity.setParams(JsonUtil.serializeOrInvalidRequest(new TestJobParameters()));
 		entity.setCurrentGatedStepId(FIRST);
 		entity.setCreateTime(new Date());
 
-		myTxTemplate.executeWithoutResult(t -> {
-			myJobInstanceRepository.save(entity);
-		});
+		myTxTemplate.executeWithoutResult(t -> myJobInstanceRepository.save(entity));
 	}
 
 	private void assertInstanceCount(int size) {
@@ -499,8 +496,8 @@ chunk3, LAST, QUEUED
 	}
 
 	private class WorkChunkExpectation {
-		private final List<Batch2WorkChunkEntity> myInputChunks = new ArrayList();
-		private final List<String> myExpectedChunkIdNotifications = new ArrayList();
+		private final List<Batch2WorkChunkEntity> myInputChunks = new ArrayList<>();
+		private final List<String> myExpectedChunkIdNotifications = new ArrayList<>();
 		public WorkChunkExpectation(String theInput, String theOutputChunkIds) {
 			String[] inputLines = theInput.split("\n");
 			for (String next : inputLines) {
@@ -517,9 +514,7 @@ chunk3, LAST, QUEUED
 		}
 
 		public void storeChunks() {
-			myTxTemplate.executeWithoutResult(t -> {
-				myWorkChunkRepository.saveAll(myInputChunks);
-			});
+			myTxTemplate.executeWithoutResult(t -> myWorkChunkRepository.saveAll(myInputChunks));
 		}
 
 		public void assertNotifications() {
@@ -527,11 +522,11 @@ chunk3, LAST, QUEUED
 		}
 	}
 
-	private class MyChannelInterceptor implements ChannelInterceptor, IPointcutLatch {
+	private static class MyChannelInterceptor implements ChannelInterceptor, IPointcutLatch {
 		PointcutLatch myPointcutLatch = new PointcutLatch("BATCH CHUNK MESSAGE RECEIVED");
 		List<String> myReceivedChunkIds = new ArrayList<>();
 		@Override
-		public Message<?> preSend(Message<?> message, MessageChannel channel) {
+		public Message<?> preSend(@Nonnull Message<?> message, @Nonnull MessageChannel channel) {
 			ourLog.info("Sending message: {}", message);
 			JobWorkNotification notification = ((JobWorkNotificationJsonMessage) message).getPayload();
 			myReceivedChunkIds.add(notification.getChunkId());

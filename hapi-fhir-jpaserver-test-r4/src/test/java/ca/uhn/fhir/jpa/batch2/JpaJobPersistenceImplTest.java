@@ -383,7 +383,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@Test
 	void testStoreAndFetchChunksForInstance_NoData() {
-		//wipmb here
 	    // given
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
@@ -701,7 +700,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	private WorkChunk freshFetchWorkChunk(String chunkId) {
 		return runInTransaction(() ->
 			myWorkChunkRepository.findById(chunkId)
-				.map(e-> JobInstanceUtil.fromEntityToWorkChunk(e, true))
+				.map(e-> JobInstanceUtil.fromEntityToWorkChunk(e))
 				.orElseThrow(IllegalArgumentException::new));
 	}
 
