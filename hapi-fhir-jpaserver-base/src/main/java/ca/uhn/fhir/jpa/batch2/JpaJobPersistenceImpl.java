@@ -104,6 +104,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTe
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setStatus(WorkChunkStatusEnum.QUEUED);
+		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
+		ourLog.trace("Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
 		myWorkChunkRepository.save(entity);
 		return entity.getId();
 	}

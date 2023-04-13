@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
+import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -153,8 +154,8 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 			}));
 
 			// Don't let the list of futures grow so big we run out of memory
-			if (futures.size() > 200) {
-				while (futures.size() > 100) {
+			if (futures.size() > 1000) {
+				while (futures.size() > 500) {
 					// This should always return true, but it'll throw an exception if we failed
 					assertTrue(futures.remove(0).get());
 				}
@@ -229,7 +230,9 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	}
 
 	private String startJob(BulkDataExportOptions theOptions) {
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
+		BulkExportParameters startRequest = BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions);
+		startRequest.setUseExistingJobsFirst(false);
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(startRequest);
 		assertNotNull(startResponse);
 		return startResponse.getInstanceId();
 	}

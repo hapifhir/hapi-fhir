@@ -112,7 +112,7 @@ public class JobInstanceProcessor {
 				// If we're still QUEUED, there are no stats to calculate
 				break;
 			case FINALIZE:
-				// If we're in FINALIZE, the reduction step is working so we should stay out of the way until it
+				// If we're in FINALIZE, the reduction step is working, so we should stay out of the way until it
 				// marks the job as COMPLETED
 				return;
 			case IN_PROGRESS:
@@ -206,10 +206,22 @@ public class JobInstanceProcessor {
 		// Sequence: 1 - So we run the query to minimize the work overlapping.
 		List<String> chunksToSubmit = myJobPersistence.fetchAllChunkIdsForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
 		// Sequence: 2 - update the job step so the workers will process them.
-		myJobPersistence.updateInstance(instanceId, instance->{
+		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
+			if (instance.getCurrentGatedStepId().equals(nextStepId)) {
+				// someone else beat us here.  No changes
+				return false;
+			}
 			instance.setCurrentGatedStepId(nextStepId);
 			return true;
 		});
+		if (!changed) {
+			// we collided with another maintenance job.
+			return;
+		}
+
+		// DESIGN GAP: if we die here, these chunks will never be queued.
+		// Need a WAITING stage before QUEUED for chunks, so we can catch them.
+
 		// Sequence: 3 - send the notifications
 		for (String nextChunkId : chunksToSubmit) {
 			JobWorkNotification workNotification = new JobWorkNotification(theInstance, nextStepId, nextChunkId);
