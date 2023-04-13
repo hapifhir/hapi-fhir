@@ -145,6 +145,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 	@VisibleForTesting
 	public IChannelProducer getProcessingChannelForUnitTest() {
+		startIfNeeded();
 		return (IChannelProducer) myMatchingChannel;
 	}
 
