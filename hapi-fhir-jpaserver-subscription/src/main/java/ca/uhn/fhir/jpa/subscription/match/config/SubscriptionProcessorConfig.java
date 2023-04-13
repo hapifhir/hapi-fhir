@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegiste
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -47,7 +48,7 @@ import org.springframework.context.annotation.Scope;
  * This Spring config should be imported by a system that pulls messages off of the
  * matching queue for processing, and handles delivery
  */
-@Import(SubscriptionModelConfig.class)
+@Import({SubscriptionModelConfig.class, SubscriptionTopicConfig.class})
 public class SubscriptionProcessorConfig {
 
 	@Bean
