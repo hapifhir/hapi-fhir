@@ -50,6 +50,9 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -2765,8 +2768,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * as well as a large number of updates (PUT). This means that a lot of URLs and resources
 	 * need to be resolved (ie SQL SELECT) in order to proceed with the transaction. Prior
 	 * to the optimization that introduced this test, we had 140 SELECTs, now it's 17.
-	 */
-	/**
+	 *
 	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test
@@ -2794,6 +2796,48 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		});
 	}
 
+
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@Test
+	public void testTransactionWithConditionalCreateAndConditionalPatchOnSameUrl() {
+		// Setup
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient patient = new Patient();
+		patient.setActive(false);
+		patient.addIdentifier().setSystem("http://system").setValue("value");
+		bb.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://system|value");
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(true));
+		bb.addTransactionFhirPatchEntry(patch).conditional("Patient?identifier=http://system|value");
+
+		Bundle input = bb.getBundleTyped();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+
+		// Verify
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(6, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		assertEquals(input.getEntry().size(), output.getEntry().size());
+
+		runInTransaction(() -> {
+			assertEquals(1, myResourceTableDao.count());
+			assertEquals(1, myResourceHistoryTableDao.count());
+		});
+
+	}
 
 	/**
 	 * See the class javadoc before changing the counts in this test!
