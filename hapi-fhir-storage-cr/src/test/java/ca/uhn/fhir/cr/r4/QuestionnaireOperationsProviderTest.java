@@ -2,6 +2,7 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -52,7 +53,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
 		var requestDetails = setupRequestDetails();
 		var result = this.questionnaireOperationsProvider.packageQuestionnaire(null,
-			"http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest", true,
+			"http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest", new BooleanType(true),
 			requestDetails);
 
 		assertNotNull(result);

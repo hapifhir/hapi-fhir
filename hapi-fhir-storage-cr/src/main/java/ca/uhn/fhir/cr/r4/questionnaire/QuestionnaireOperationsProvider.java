@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -197,19 +198,19 @@ public class QuestionnaireOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
 	public Bundle packageQuestionnaire(@IdParam IdType theId,
 												  @OperationParam(name = "canonical") String theCanonical,
-												  @OperationParam(name = "usePut") boolean theIsPut,
+												  @OperationParam(name = "usePut") BooleanType theIsPut,
 												  RequestDetails theRequestDetails) {
 		return (Bundle) myR4QuestionnaireProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(theId, new CanonicalType(theCanonical), null, theIsPut);
+			.packageQuestionnaire(theId, new CanonicalType(theCanonical), null, theIsPut.booleanValue());
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
 	public Bundle packageQuestionnaire(@OperationParam(name = "canonical") String theCanonical,
-												  @OperationParam(name = "usePut") boolean theIsPut,
+												  @OperationParam(name = "usePut") BooleanType theIsPut,
 												  RequestDetails theRequestDetails) {
 		return (Bundle) myR4QuestionnaireProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(null, new CanonicalType(theCanonical), null, theIsPut);
+			.packageQuestionnaire(null, new CanonicalType(theCanonical), null, theIsPut.booleanValue());
 	}
 }
