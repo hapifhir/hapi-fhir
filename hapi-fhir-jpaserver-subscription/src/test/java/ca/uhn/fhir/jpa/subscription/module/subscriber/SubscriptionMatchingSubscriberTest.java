@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
@@ -27,9 +28,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -406,7 +407,6 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@Nested
 	public class TestDeleteMessages {
-		private final SubscriptionMatchingSubscriber subscriber = new SubscriptionMatchingSubscriber();
 		@Mock
 		ResourceModifiedMessage message;
 		@Mock
@@ -423,11 +423,14 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		CanonicalSubscription myNonDeleteCanonicalSubscription;
 		@Mock
 		SubscriptionCriteriaParser.SubscriptionCriteria mySubscriptionCriteria;
+		@Mock
+		SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
+		@InjectMocks
+		SubscriptionMatchingSubscriber subscriber;
+
 
 		@Test
 		public void testAreNotIgnored() {
-			ReflectionTestUtils.setField(subscriber, "myInterceptorBroadcaster", myInterceptorBroadcaster);
-			ReflectionTestUtils.setField(subscriber, "mySubscriptionRegistry", mySubscriptionRegistry);
 
 			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
 			when(myInterceptorBroadcaster.callHooks(
@@ -444,9 +447,6 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		@Test
 		public void matchActiveSubscriptionsChecksSendDeleteMessagesExtensionFlag() {
-			ReflectionTestUtils.setField(subscriber, "myInterceptorBroadcaster", myInterceptorBroadcaster);
-			ReflectionTestUtils.setField(subscriber, "mySubscriptionRegistry", mySubscriptionRegistry);
-
 			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
 			when(myInterceptorBroadcaster.callHooks(
 				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
@@ -464,9 +464,6 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		@Test
 		public void testMultipleSubscriptionsDoNotEarlyReturn() {
-			ReflectionTestUtils.setField(subscriber, "myInterceptorBroadcaster", myInterceptorBroadcaster);
-			ReflectionTestUtils.setField(subscriber, "mySubscriptionRegistry", mySubscriptionRegistry);
-
 			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
 			when(myInterceptorBroadcaster.callHooks(
 				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
@@ -489,9 +486,6 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		@Test
 		public void matchActiveSubscriptionsAndDeliverSetsPartitionId() {
-			ReflectionTestUtils.setField(subscriber, "myInterceptorBroadcaster", myInterceptorBroadcaster);
-			ReflectionTestUtils.setField(subscriber, "mySubscriptionRegistry", mySubscriptionRegistry);
-
 			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
 			when(myInterceptorBroadcaster.callHooks(
 				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
