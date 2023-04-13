@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -4394,9 +4393,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		});
 	}
 
-	// TODO: better names for these tests
 	@Test
-	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_0() {
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_simpleIdentifier() {
 		// setup
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
@@ -4424,7 +4422,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_1() {
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_simpleUrlWithIdentifier() {
 		// setup
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
@@ -4451,7 +4449,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_2() {
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_urlOrganizationAndObservation() {
 		// setup
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
@@ -4478,7 +4476,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_3() {
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_OrganizationAndOrganization() {
 		// setup
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
@@ -4520,7 +4518,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		obsToCreate.setStatus(ObservationStatus.FINAL);
 		obsToCreate.getSubject().setReference("Patient?identifier=http://bar|http://something.something/b");
 		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("http://something.something/b");
-		ourLog.info("\n4426: Observation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obsToCreate));
 
 		final Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);

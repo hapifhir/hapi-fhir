@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -52,6 +53,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCreatePlaceholdersR4Test.class);
+
+	private static final String FAKE_IDENTIFIER_SYSTEM = "http://some-system.com";
 
 	@AfterEach
 	public final void afterResetDao() {
@@ -373,9 +376,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
 		obsToCreate.getSubject().setReference("Patient?identifier=http://bar|321");
-		// system|value
 		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("321");
-		ourLog.info("\n4426: Observation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obsToCreate));
 		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
 
 		// Read the Observation
@@ -412,39 +413,34 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 * Create an Observation that references a Patient
 		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
 		 */
-		Observation obsToCreate = new Observation();
+		final Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
 		obsToCreate.getSubject().setReference("Patient?identifier=http://bar|http://something.something/b");
 		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("http://something.something/b");
-		ourLog.info("\n4426: Observation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obsToCreate));
-		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
+		final IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
 
 		// Read the Observation
-		Observation createdObs = myObservationDao.read(obsId);
+		final Observation createdObs = myObservationDao.read(obsId);
 
 		//Read the Placeholder Patient
-		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
-		ourLog.debug("\nObservation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		final Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
 
 		//Ensure the Obs has the right placeholder ID.
-		IIdType placeholderPatId = placeholderPat.getIdElement();
+		final IIdType placeholderPatId = placeholderPat.getIdElement();
 		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
 
 		/*
 		 * Should have a single identifier populated.
 		 */
-		ourLog.debug("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
 		assertEquals(1, placeholderPat.getIdentifier().size());
-		List<Identifier> identifiers = placeholderPat.getIdentifier();
+		final List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
 		assertThat(identifier.getSystem(), is(equalTo("http://bar")));
 		assertThat(identifier.getValue(), is(equalTo("http://something.something/b")));
 	}
 
-	// TODO:  this is the standalone equivalent of the failing bundle test
-	private static final String FAKE_IDENTIFIER_SYSTEM = "http://some-system.com";
 	@Test
-	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_3() {
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_conditionalCreateOrganizationAndOrganization() {
 		// setup
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
@@ -458,11 +454,13 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
 		patient.setManagingOrganization(reference);
 
-		ourLog.info("\n4426: Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		final IIdType patientId = myPatientDao.create(patient, mySrd).getId();
 
-		myPatientDao.create(patient, mySrd).getId();
+		final Patient createdPatient = myPatientDao.read(patientId, new SystemRequestDetails());
 
-		// TODO:  proper assertions not just lack of errors
+		//Read the Placeholder Observation
+		final IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		assertEquals(1, observationSearch.getAllResourceIds().size());
 	}
 
 	//	Case 4:
