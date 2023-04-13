@@ -65,11 +65,11 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4Test {
 			requestDetails);
 
 		assertNotNull(result);
-		assertEquals("Acme Clinic",
+		assertEquals("Sleep Study",
 			((Questionnaire) result.getContained().get(1))
-				.getItem().get(1)
 				.getItem().get(0)
-				.getInitial().get(0).getValueStringType().getValueAsString());
+				.getItem().get(0)
+				.getText());
 
 		var resultR5 = (Bundle) this.planDefinitionOperationsProvider.applyR5(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
@@ -78,10 +78,10 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4Test {
 			requestDetails);
 
 		assertNotNull(resultR5);
-		assertEquals("Acme Clinic",
-			((Questionnaire) resultR5.getEntry().get(2)
-				.getResource()).getItem().get(1)
+		assertEquals("Sleep Study",
+			((Questionnaire) resultR5.getEntry().get(1)
+				.getResource()).getItem().get(0)
 				.getItem().get(0)
-				.getInitial().get(0).getValueStringType().getValueAsString());
+				.getText());
 	}
 }
