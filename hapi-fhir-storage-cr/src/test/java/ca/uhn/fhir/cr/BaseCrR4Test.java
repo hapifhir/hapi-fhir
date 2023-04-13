@@ -63,10 +63,6 @@ public abstract class BaseCrR4Test extends BaseResourceProviderR4Test implements
 		return loadBundle(Bundle.class, theLocation);
 	}
 
-	public IParser getFhirParser() {
-		return ourParser;
-	}
-
 	public StubServiceBuilder mockNotFound(String theResource) {
 		OperationOutcome outcome = new OperationOutcome();
 		outcome.getText().setStatusAsString("generated");
@@ -129,7 +125,7 @@ public abstract class BaseCrR4Test extends BaseResourceProviderR4Test implements
 	protected RequestDetails setupRequestDetails() {
 		var requestDetails = new ServletRequestDetails();
 		requestDetails.setServletRequest(new MockHttpServletRequest());
-		requestDetails.setServer(new RestfulServer(getFhirContext()));
+		requestDetails.setServer(ourRestServer);
 		requestDetails.setFhirServerBase(TEST_ADDRESS);
 		return requestDetails;
 	}

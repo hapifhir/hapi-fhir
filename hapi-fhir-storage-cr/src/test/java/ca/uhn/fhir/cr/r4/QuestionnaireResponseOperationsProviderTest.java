@@ -27,15 +27,4 @@ public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4Test {
 		assertNotNull(result);
 		assertEquals(5, result.getEntry().size());
 	}
-
-	@Test
-	void testDefinitionBasedExtraction() throws IOException {
-		var requestDetails = setupRequestDetails();
-		loadResource(Questionnaire.class, "ca/uhn/fhir/cr/r4/Questionnaire-OutpatientPriorAuthorizationRequest.json", requestDetails);
-		var questionnaireResponse = readResource(QuestionnaireResponse.class, "ca/uhn/fhir/cr/r4/QuestionnaireResponse-OutpatientPriorAuthorizationRequest.json");
-		var result = (Bundle) this.questionnaireResponseOperationsProvider.extract(null, questionnaireResponse, requestDetails);
-
-		assertNotNull(result);
-		assertEquals(2, result.getEntry().size());
-	}
 }

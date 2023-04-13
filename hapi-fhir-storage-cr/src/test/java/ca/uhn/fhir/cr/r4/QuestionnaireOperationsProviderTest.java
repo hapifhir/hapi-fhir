@@ -22,9 +22,10 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-PatientData.json");
 		var requestDetails = setupRequestDetails();
-		var theSubject = "OPA-Patient1";
-		var result = this.questionnaireOperationsProvider.populate(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"),
-			null, null, theSubject, new Parameters().addParameter("ClaimId", "OPA-Claim1"),
+		var theSubject = "positive";
+		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
+		var result = this.questionnaireOperationsProvider.populate(new IdType("Questionnaire", "ASLPA1"),
+			null, null, theSubject, parameters,
 			null, null, null, null,
 			requestDetails);
 
@@ -38,9 +39,10 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-PatientData.json");
 		var requestDetails = setupRequestDetails();
-		var theSubject = "OPA-Patient1";
-		var result = this.questionnaireOperationsProvider.prepopulate(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"),
-			null, null, theSubject, new Parameters().addParameter("ClaimId", "OPA-Claim1"),
+		var theSubject = "positive";
+		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
+		var result = this.questionnaireOperationsProvider.prepopulate(new IdType("Questionnaire", "ASLPA1"),
+			null, null, theSubject, parameters,
 			null, null, null, null,
 			requestDetails);
 
@@ -53,11 +55,11 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
 		var requestDetails = setupRequestDetails();
 		var result = this.questionnaireOperationsProvider.packageQuestionnaire(null,
-			"http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest", new BooleanType(true),
+			"http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1", new BooleanType(true),
 			requestDetails);
 
 		assertNotNull(result);
-		assertEquals(3, result.getEntry().size());
+		assertEquals(11, result.getEntry().size());
 		assertTrue(result.getEntry().get(0).getResource().fhirType().equals(Enumerations.FHIRAllTypes.QUESTIONNAIRE.toCode()));
 	}
 }

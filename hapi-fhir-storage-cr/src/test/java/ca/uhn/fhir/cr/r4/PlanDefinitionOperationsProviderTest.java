@@ -55,9 +55,9 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4Test {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-PatientData.json");
 
 		var requestDetails = setupRequestDetails();
-		var planDefinitionID = new IdType(Enumerations.FHIRAllTypes.PLANDEFINITION.toCode(), "generate-questionnaire");
-		var patientID = "OPA-Patient1";
-		var parameters = new Parameters().addParameter("ClaimId", "OPA-Claim1");
+		var planDefinitionID = new IdType(Enumerations.FHIRAllTypes.PLANDEFINITION.toCode(), "ASLPA1");
+		var patientID = "positive";
+		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
 		var result = (CarePlan) this.planDefinitionOperationsProvider.apply(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
 			null, null, null, parameters, null,
