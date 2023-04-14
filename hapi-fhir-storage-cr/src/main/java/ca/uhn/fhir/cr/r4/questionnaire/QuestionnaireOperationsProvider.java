@@ -198,19 +198,19 @@ public class QuestionnaireOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
 	public Bundle packageQuestionnaire(@IdParam IdType theId,
 												  @OperationParam(name = "canonical") String theCanonical,
-												  @OperationParam(name = "usePut") BooleanType theIsPut,
+												  @OperationParam(name = "usePut") String theIsPut,
 												  RequestDetails theRequestDetails) {
 		return (Bundle) myR4QuestionnaireProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(theId, new CanonicalType(theCanonical), null, theIsPut.booleanValue());
+			.packageQuestionnaire(theId, new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
 	public Bundle packageQuestionnaire(@OperationParam(name = "canonical") String theCanonical,
-												  @OperationParam(name = "usePut") BooleanType theIsPut,
+												  @OperationParam(name = "usePut") String theIsPut,
 												  RequestDetails theRequestDetails) {
 		return (Bundle) myR4QuestionnaireProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(null, new CanonicalType(theCanonical), null, theIsPut.booleanValue());
+			.packageQuestionnaire(null, new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
 	}
 }

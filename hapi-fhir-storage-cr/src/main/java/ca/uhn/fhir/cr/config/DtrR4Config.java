@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Provides $populate, $prepopulate, and $questionnaire-package for use with DTR.
+ * Provides $populate, $prepopulate, and $package for use with DTR.
  */
 @Configuration
 public class DtrR4Config extends BaseDtrConfig {

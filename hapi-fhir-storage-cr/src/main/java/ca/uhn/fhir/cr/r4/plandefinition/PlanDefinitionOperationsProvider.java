@@ -283,20 +283,20 @@ public class PlanDefinitionOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
 	public IBaseBundle packagePlanDefinition(@IdParam IdType theId,
 										@OperationParam(name = "canonical") String theCanonical,
-										@OperationParam(name = "usePut") BooleanType theIsPut,
+										@OperationParam(name = "usePut") String theIsPut,
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return myR4PlanDefinitionProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.packagePlanDefinition(theId, new CanonicalType(theCanonical), null, theIsPut.booleanValue());
+			.packagePlanDefinition(theId, new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
 	public IBaseBundle packagePlanDefinition(@OperationParam(name = "id") String theId,
 														  @OperationParam(name = "canonical") String theCanonical,
-														  @OperationParam(name = "usePut") BooleanType theIsPut,
+														  @OperationParam(name = "usePut") String theIsPut,
 														  RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return myR4PlanDefinitionProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.packagePlanDefinition(new IdType("PlanDefinition", theId), new CanonicalType(theCanonical), null, theIsPut.booleanValue());
+			.packagePlanDefinition(new IdType("PlanDefinition", theId), new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
 	}
 }

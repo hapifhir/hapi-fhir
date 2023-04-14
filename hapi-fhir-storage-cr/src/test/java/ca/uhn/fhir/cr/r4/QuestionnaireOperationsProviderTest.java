@@ -55,7 +55,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
 		var requestDetails = setupRequestDetails();
 		var result = this.questionnaireOperationsProvider.packageQuestionnaire(null,
-			"http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1", new BooleanType(true),
+			"http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1", "true",
 			requestDetails);
 
 		assertNotNull(result);
