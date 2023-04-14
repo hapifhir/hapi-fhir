@@ -431,8 +431,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		//Ensure the Obs has the right placeholder ID.
 		final IIdType placeholderPatId = placeholderPat.getIdElement();
 		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
+		assertTrue(placeholderPatId.isIdPartValidLong());
+		assertTrue(placeholderPatId.isVersionIdPartValidLong());
 
-		/*
+
+			/*
 		 * Should have a single identifier populated.
 		 */
 		assertEquals(1, placeholderPat.getIdentifier().size());
