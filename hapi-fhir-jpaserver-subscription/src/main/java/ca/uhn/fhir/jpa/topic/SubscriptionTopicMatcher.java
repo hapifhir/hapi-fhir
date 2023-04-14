@@ -26,12 +26,11 @@ public class SubscriptionTopicMatcher {
 				SubscriptionTriggerMatcher matcher = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, theMsg, next);
 				InMemoryMatchResult result = matcher.match();
 				if (result.matched()) {
+					// as soon as one trigger matches, we're done
 					return result;
 				}
-				// WIP STR5 should we check the other triggers?
 			}
 		}
-		// WIP STR5 add support for event triggers
 		return InMemoryMatchResult.noMatch();
 	}
 }

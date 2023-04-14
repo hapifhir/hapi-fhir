@@ -29,6 +29,8 @@ public class SubscriptionTopicPayloadBuilder {
 
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 
+		// WIP STR5 add support for notificationShape include, revinclude
+
 		if (fhirVersion == FhirVersionEnum.R4B) {
 			bundleBuilder.setType(Bundle.BundleType.HISTORY.toCode());
 			String serializedSubscriptionStatus = FhirContext.forR5Cached().newJsonParser().encodeResourceToString(subscriptionStatus);
@@ -41,7 +43,8 @@ public class SubscriptionTopicPayloadBuilder {
 		} else {
 			throw new IllegalStateException(Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + fhirVersion);
 		}
-		// WIP STR5 is this the right type of entry?
+		// WIP STR5 is this the right type of entry? see http://hl7.org/fhir/subscriptionstatus-examples.html
+		// WIP STR5 Also see http://hl7.org/fhir/R4B/notification-full-resource.json.html need to conform to these
 		bundleBuilder.addCollectionEntry(subscriptionStatus);
 		switch (theMsg.getOperationType()) {
 			case CREATE:
@@ -62,6 +65,7 @@ public class SubscriptionTopicPayloadBuilder {
 		subscriptionStatus.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
 		subscriptionStatus.setType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION);
 		// WIP STR5 count events since subscription start and set eventsSinceSubscriptionStart
+		// store counts by subscription id
 		subscriptionStatus.setEventsSinceSubscriptionStart(theEventsSinceSubscriptionStart);
 		subscriptionStatus.addNotificationEvent().setEventNumber(theEventsSinceSubscriptionStart).setFocus(new Reference(theMatchedResource.getIdElement()));
 		subscriptionStatus.setSubscription(new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));

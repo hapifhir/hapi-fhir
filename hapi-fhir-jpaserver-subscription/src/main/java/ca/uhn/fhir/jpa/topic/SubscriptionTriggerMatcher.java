@@ -52,6 +52,8 @@ public class SubscriptionTriggerMatcher {
 		String previousCriteria = theQueryCriteria.getPrevious();
 		String currentCriteria = theQueryCriteria.getCurrent();
 
+		// WIP STR5 implement fhirPathCriteria per https://build.fhir.org/subscriptiontopic.html#fhirpath-criteria
+
 		if (previousCriteria != null) {
 			if (myOperation == ResourceModifiedMessage.OperationTypeEnum.UPDATE ||
 				myOperation == ResourceModifiedMessage.OperationTypeEnum.DELETE) {
@@ -69,7 +71,7 @@ public class SubscriptionTriggerMatcher {
 		if (currentCriteria != null) {
 			currentMatches = matchResource(myResource, currentCriteria);
 		}
-		// WIP STR5 is this the correct interpretation of requireBoth?
+		// WIP STR5 implement resultForCreate and resultForDelete
 		if (theQueryCriteria.getRequireBoth()) {
 			return InMemoryMatchResult.and(previousMatches, currentMatches);
 		} else {
