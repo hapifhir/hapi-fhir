@@ -1185,7 +1185,7 @@ public abstract class BaseTransactionProcessor {
 			// flush writes to db
 			theTransactionStopWatch.startTask("Flush writes to database");
 
-			// throws on flush
+			// flush the changes
 			flushSession(theIdToPersistedOutcome);
 
 			theTransactionStopWatch.endCurrentTask();
