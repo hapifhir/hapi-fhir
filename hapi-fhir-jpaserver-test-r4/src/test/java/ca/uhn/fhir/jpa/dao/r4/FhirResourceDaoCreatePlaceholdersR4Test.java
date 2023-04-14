@@ -54,7 +54,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCreatePlaceholdersR4Test.class);
 
-	private static final String FAKE_IDENTIFIER_SYSTEM = "http://some-system.com";
+	private static final String TEST_IDENTIFIER_SYSTEM = "http://some-system.com";
 
 	@AfterEach
 	public final void afterResetDao() {
@@ -409,21 +409,24 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
+		final String system = "http://bar";
+		final String value = "http://something.something/b";
+
 		/*
 		 * Create an Observation that references a Patient
 		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
 		 */
 		final Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
-		obsToCreate.getSubject().setReference("Patient?identifier=http://bar|http://something.something/b");
-		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("http://something.something/b");
+		obsToCreate.getSubject().setReference(String.format("%s?identifier=%s|%s", ResourceType.Patient.name(), system, value));
+		obsToCreate.getSubject().getIdentifier().setSystem(system).setValue(value);
 		final IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
 
 		// Read the Observation
-		final Observation createdObs = myObservationDao.read(obsId);
+		final Observation createdObs = myObservationDao.read(obsId, new SystemRequestDetails());
 
 		//Read the Placeholder Patient
-		final Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
+		final Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()), new SystemRequestDetails());
 
 		//Ensure the Obs has the right placeholder ID.
 		final IIdType placeholderPatId = placeholderPat.getIdElement();
@@ -435,8 +438,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(1, placeholderPat.getIdentifier().size());
 		final List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem(), is(equalTo("http://bar")));
-		assertThat(identifier.getValue(), is(equalTo("http://something.something/b")));
+		assertThat(identifier.getSystem(), is(equalTo(system)));
+		assertThat(identifier.getValue(), is(equalTo(value)));
 	}
 
 	@Test
@@ -446,24 +449,23 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
-		// Test fails with Organization and Organization
 		final String identifierValue = "http://some-url-value/Organization/ID2";
+
+		// Test fails with Organization and Organization
 		final Patient patient = new Patient();
 		final Reference reference = new Reference()
-			.setReference(ResourceType.Organization.name() + "?identifier=" + FAKE_IDENTIFIER_SYSTEM + "|" + identifierValue)
-			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
 		patient.setManagingOrganization(reference);
 
-		final IIdType patientId = myPatientDao.create(patient, mySrd).getId();
-
-		final Patient createdPatient = myPatientDao.read(patientId, new SystemRequestDetails());
+		myPatientDao.create(patient, mySrd);
 
 		//Read the Placeholder Observation
-		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
 		assertEquals(1, allResources.size());
-		assertEquals("Organization", allResources.get(0).getIdElement().getResourceType());
-		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith("Organization"));
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
 		assertEquals(1, organizationSearch.getAllResourceIds().size());
 	}
 
@@ -480,6 +482,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
+		final String system = "http://bar";
+		final String value = "321";
+
 		/*
 		 * Create an Observation that references a Patient
 		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
@@ -487,7 +492,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
 		obsToCreate.getSubject().setReference("Patient?identifier=http://foo|123");
-		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("321");
+		obsToCreate.getSubject().getIdentifier().setSystem(system).setValue(value);
 		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
 
 		// Read the Observation
@@ -513,8 +518,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertThat(identifiers.get(1).getValue(), is(equalTo("123")));
 
 		//subject identifier
-		assertThat(identifiers.get(0).getSystem(), is(equalTo("http://bar")));
-		assertThat(identifiers.get(0).getValue(), is(equalTo("321")));
+		assertThat(identifiers.get(0).getSystem(), is(equalTo(system)));
+		assertThat(identifiers.get(0).getValue(), is(equalTo(value)));
 
 
 		// Conditionally update a Patient with the same identifier

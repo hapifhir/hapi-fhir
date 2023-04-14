@@ -133,7 +133,7 @@ import static org.mockito.Mockito.when;
 public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoR4Test.class);
-	private static final String FAKE_IDENTIFIER_SYSTEM = "http://some-system.com";
+	private static final String TEST_IDENTIFIER_SYSTEM = "http://some-system.com";
 
 	@AfterEach
 	public void after() {
@@ -4405,24 +4405,24 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final String identifierValue = "ID2";
 		final Patient patient = new Patient();
 		final Reference reference = new Reference()
-			.setReference(ResourceType.Organization.name() + "?identifier=" + FAKE_IDENTIFIER_SYSTEM + "|" + identifierValue)
-			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
 		patient.setManagingOrganization(reference);
 		final Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		bundle.addEntry().setResource(patient)
 			.getRequest()
 			.setMethod(HTTPVerb.POST)
-			.setUrl("Patient");
+			.setUrl(ResourceType.Patient.name());
 		// execute
 		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
 		// validate
 		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
-		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
 		assertEquals(1, allResources.size());
-		assertEquals("Organization", allResources.get(0).getIdElement().getResourceType());
-		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith("Organization"));
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
 	}
 
 	@Test
@@ -4435,24 +4435,24 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final String identifierValue = "http://some-url-value";
 		final Patient patient = new Patient();
 		final Reference reference = new Reference()
-			.setReference(ResourceType.Organization.name() + "?identifier=" + FAKE_IDENTIFIER_SYSTEM + "|" + identifierValue)
-			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
 		patient.setManagingOrganization(reference);
 		final Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		bundle.addEntry().setResource(patient)
 			.getRequest()
 			.setMethod(HTTPVerb.POST)
-			.setUrl("Patient");
+			.setUrl(ResourceType.Patient.name());
 		// execute
 		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
 		// validate
 		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
-		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
 		assertEquals(1, allResources.size());
-		assertEquals("Organization", allResources.get(0).getIdElement().getResourceType());
-		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith("Organization"));
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
 	}
 
 	@Test
@@ -4465,24 +4465,24 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final String identifierValue = "http://some-url-value/Observation/ID2";
 		final Patient patient = new Patient();
 		final Reference reference = new Reference()
-			.setReference(ResourceType.Organization.name() + "?identifier=" + FAKE_IDENTIFIER_SYSTEM + "|" + identifierValue)
-			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
 		patient.setManagingOrganization(reference);
 		final Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		bundle.addEntry().setResource(patient)
 			.getRequest()
 			.setMethod(HTTPVerb.POST)
-			.setUrl("Patient");
+			.setUrl(ResourceType.Patient.name());
 		// execute
 		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
 		// validate
 		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
-		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
 		assertEquals(1, allResources.size());
-		assertEquals("Organization", allResources.get(0).getIdElement().getResourceType());
-		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith("Organization"));
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
 	}
 
 	@Test
@@ -4496,24 +4496,24 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final String identifierValue = "http://some-url-value/Organization/ID2";
 		final Patient patient = new Patient();
 		final Reference reference = new Reference()
-			.setReference(ResourceType.Organization.name() + "?identifier=" + FAKE_IDENTIFIER_SYSTEM + "|" + identifierValue)
-			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(FAKE_IDENTIFIER_SYSTEM));
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
 		patient.setManagingOrganization(reference);
 		final Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		bundle.addEntry().setResource(patient)
 			.getRequest()
 			.setMethod(HTTPVerb.POST)
-			.setUrl("Patient");
+			.setUrl(ResourceType.Patient.name());
 		// execute
 		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
 		// validate
 		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
-		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
 		assertEquals(1, allResources.size());
-		assertEquals("Organization", allResources.get(0).getIdElement().getResourceType());
-		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith("Organization"));
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
 	}
 
 	@Test
@@ -4529,7 +4529,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		 */
 		final Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
-		obsToCreate.getSubject().setReference("Patient?identifier=http://bar|http://something.something/b");
+		String identifierValue = "http://something.something/b";
+		obsToCreate.getSubject()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Patient.name(), TEST_IDENTIFIER_SYSTEM, identifierValue));
 		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("http://something.something/b");
 
 		final Bundle bundle = new Bundle();
@@ -4537,9 +4539,16 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		bundle.addEntry().setResource(obsToCreate)
 			.getRequest()
 			.setMethod(HTTPVerb.POST)
-			.setUrl("Observation");
+			.setUrl(ResourceType.Observation.name());
 		// execute
 		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider patientSearch = myPatientDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = patientSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Patient.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Patient.name()));
 	}
 
 	/**
