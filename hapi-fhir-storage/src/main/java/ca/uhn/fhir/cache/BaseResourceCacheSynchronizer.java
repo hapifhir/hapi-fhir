@@ -64,9 +64,9 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		mySearchParameterMap = getSearchParameterMap();
 		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 
+		myEnabled = true;
 		IResourceChangeListenerCache resourceCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(myResourceName, mySearchParameterMap, this, REFRESH_INTERVAL);
 		resourceCache.forceRefresh();
-		myEnabled = true;
 	}
 
 	@PreDestroy
