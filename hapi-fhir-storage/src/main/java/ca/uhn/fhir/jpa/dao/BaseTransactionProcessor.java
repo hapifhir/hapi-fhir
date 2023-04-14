@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.transactions.TransactionBundleSynchronizationParameters;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -54,12 +55,12 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -109,7 +110,21 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -133,7 +148,9 @@ public abstract class BaseTransactionProcessor {
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private FhirContext myContext;
+
 	@Autowired
+	@SuppressWarnings("rawtypes")
 	private ITransactionProcessorVersionAdapter myVersionAdapter;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -153,8 +170,16 @@ public abstract class BaseTransactionProcessor {
 
 	private TaskExecutor myExecutor;
 
+	private TransactionSynchronizer myTransactionSynchronizer;
+
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
+
+	@PostConstruct
+	public void start() {
+		// TODO - consider creating a new shared transactionconfig that creates this
+		myTransactionSynchronizer = new TransactionSynchronizer(myContext, myVersionAdapter);
+	}
 
 	@VisibleForTesting
 	public void setStorageSettings(StorageSettings theStorageSettings) {
@@ -225,10 +250,12 @@ public abstract class BaseTransactionProcessor {
 		return resp;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void populateEntryWithOperationOutcome(BaseServerResponseException caughtEx, IBase nextEntry) {
 		myVersionAdapter.populateEntryWithOperationOutcome(caughtEx, nextEntry);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void handleTransactionCreateOrUpdateOutcome(IdSubstitutionMap idSubstitutions, Map<IIdType, DaoMethodOutcome> idToPersistedOutcome,
 																		 IIdType nextResourceId, DaoMethodOutcome outcome,
 																		 IBase newEntry, String theResourceType,
@@ -502,6 +529,7 @@ public abstract class BaseTransactionProcessor {
 		return response;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void doTransactionReadOperations(final RequestDetails theRequestDetails, IBaseBundle theResponse,
 														  List<IBase> theGetEntries, IdentityHashMap<IBase, Integer> theOriginalRequestOrder,
 														  StopWatch theTransactionStopWatch, boolean theNestedMode) {
@@ -579,6 +607,7 @@ public abstract class BaseTransactionProcessor {
 	 * heavy load with lots of concurrent transactions using all available
 	 * database connections.
 	 */
+	@SuppressWarnings("unchecked")
 	private void prepareThenExecuteTransactionWriteOperations(RequestDetails theRequestDetails, String theActionName,
 																				 TransactionDetails theTransactionDetails, StopWatch theTransactionStopWatch,
 																				 IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder,
@@ -601,16 +630,23 @@ public abstract class BaseTransactionProcessor {
 				theResponse, theOriginalRequestOrder,
 				theEntries, theTransactionStopWatch);
 
+			// this is misleading - writes are already persisted
 			theTransactionStopWatch.startTask("Commit writes to database");
 			return retVal;
 		};
 		EntriesToProcessMap entriesToProcess;
 
 		try {
-			entriesToProcess = myHapiTransactionService
-				.withRequest(theRequestDetails)
-				.withTransactionDetails(theTransactionDetails)
-				.execute(txCallback);
+			TransactionBundleSynchronizationParameters params = new TransactionBundleSynchronizationParameters(
+				theResponse,
+				theEntries
+			);
+			entriesToProcess = myTransactionSynchronizer.syncTransactionIfNecessary(params, () -> {
+				return myHapiTransactionService
+					.withRequest(theRequestDetails)
+					.withTransactionDetails(theTransactionDetails)
+					.execute(txCallback);
+			});
 		} finally {
 			if (haveWriteOperationsHooks(theRequestDetails)) {
 				callWriteOperationsHook(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST, theRequestDetails, theTransactionDetails, writeOperationsDetails);
@@ -639,6 +675,7 @@ public abstract class BaseTransactionProcessor {
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, thePointcut, params);
 	}
 
+	@SuppressWarnings("unchecked")
 	private TransactionWriteOperationsDetails buildWriteOperationsDetails(List<IBase> theEntries) {
 		TransactionWriteOperationsDetails writeOperationsDetails;
 		List<String> updateRequestUrls = new ArrayList<>();
@@ -699,6 +736,7 @@ public abstract class BaseTransactionProcessor {
 	/**
 	 * Searches for duplicate conditional creates and consolidates them.
 	 */
+	@SuppressWarnings("unchecked")
 	private void consolidateDuplicateConditionals(RequestDetails theRequestDetails, String theActionName, List<IBase> theEntries) {
 		final Set<String> keysWithNoFullUrl = new HashSet<>();
 		final HashMap<String, String> keyToUuid = new HashMap<>();
@@ -786,6 +824,7 @@ public abstract class BaseTransactionProcessor {
 	 */
 	private void replaceReferencesInEntriesWithConsolidatedUUID(List<IBase> theEntries, String theEntryFullUrl, String existingUuid) {
 		for (IBase nextEntry : theEntries) {
+			@SuppressWarnings("unchecked")
 			IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
 			if (nextResource != null) {
 				for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
@@ -819,6 +858,7 @@ public abstract class BaseTransactionProcessor {
 		if (theBaseResource != null) {
 			nextResourceId = theBaseResource.getIdElement();
 
+			@SuppressWarnings("unchecked")
 			String fullUrl = myVersionAdapter.getFullUrl(theNextReqEntry);
 			if (isNotBlank(fullUrl)) {
 				IIdType fullUrlIdType = newIdType(fullUrl);
@@ -865,6 +905,7 @@ public abstract class BaseTransactionProcessor {
 	/**
 	 * After pre-hooks have been called
 	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected EntriesToProcessMap doTransactionWriteOperations(final RequestDetails theRequest, String theActionName,
 																				  TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
 																				  IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
@@ -903,6 +944,7 @@ public abstract class BaseTransactionProcessor {
 
 				IBase nextReqEntry = theEntries.get(i);
 				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
+
 				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds);
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
@@ -931,15 +973,18 @@ public abstract class BaseTransactionProcessor {
 							extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						}
 						validateResourcePresent(res, order, verb);
-						@SuppressWarnings("rawtypes")
+
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 						res.setId((String) null);
+
 						DaoMethodOutcome outcome;
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
+						// this will throw if duplicates found in the transaction
 						outcome = resourceDao.create(res, matchUrl, false, theTransactionDetails, theRequest);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						res.setId(outcome.getId());
+
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
@@ -1140,6 +1185,7 @@ public abstract class BaseTransactionProcessor {
 			// flush writes to db
 			theTransactionStopWatch.startTask("Flush writes to database");
 
+			// throws on flush
 			flushSession(theIdToPersistedOutcome);
 
 			theTransactionStopWatch.endCurrentTask();
@@ -1253,7 +1299,6 @@ public abstract class BaseTransactionProcessor {
 						if (!match.matched()) {
 							throw new PreconditionFailedException(Msg.code(539) + "Invalid conditional URL \"" + matchUrl + "\". The given resource is not matched by this URL.");
 						}
-						;
 					}
 				}
 			});
@@ -1636,7 +1681,7 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Extracts the transaction url from the entry and verifies it's:
-	 * * not null or bloack
+	 * * not null or blank
 	 * * is a relative url matching the resourceType it is about
 	 * <p>
 	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)

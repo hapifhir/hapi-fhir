@@ -121,7 +121,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 					myResultSet = new ScrollableResultsIterator<>(scrollableResults);
 					myQueryInitialized = true;
-
 				}
 
 				if (myResultSet == null || !myResultSet.hasNext()) {

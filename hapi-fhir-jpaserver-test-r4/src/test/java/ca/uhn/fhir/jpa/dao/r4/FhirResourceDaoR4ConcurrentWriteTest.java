@@ -14,7 +14,10 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -37,11 +40,13 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,6 +58,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -60,8 +66,10 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings({"deprecation", "Duplicates"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ConcurrentWriteTest.class);
+
+	private static final int THREAD_COUNT = 10;
+
 	private ExecutorService myExecutor;
 	private UserRequestRetryVersionConflictsInterceptor myRetryInterceptor;
 	private TransactionConcurrencySemaphoreInterceptor myConcurrencySemaphoreInterceptor;
@@ -71,13 +79,12 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myExecutor = Executors.newFixedThreadPool(10);
+		myExecutor = Executors.newFixedThreadPool(THREAD_COUNT);
 		myRetryInterceptor = new UserRequestRetryVersionConflictsInterceptor();
 		myConcurrencySemaphoreInterceptor = new TransactionConcurrencySemaphoreInterceptor(myMemoryCacheService);
 
 		RestfulServer server = new RestfulServer(myFhirContext);
 		when(mySrd.getServer()).thenReturn(server);
-
 	}
 
 	@AfterEach
@@ -85,6 +92,58 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		myExecutor.shutdown();
 		myInterceptorRegistry.unregisterInterceptor(myRetryInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(myConcurrencySemaphoreInterceptor);
+	}
+
+	@Test
+	public void testTransaction_multiThreaded()
+		throws InterruptedException, ExecutionException {
+		// setup
+		int calls = 2;
+		Bundle bundle1 = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/test-bundle.json");
+		Bundle bundle2 = ClasspathUtil.loadResource(myFhirContext,
+			Bundle.class, "/r4/test-bundle2.json");
+		Bundle[] bundles = {
+			bundle1,
+			bundle2
+		};
+		AtomicInteger counter = new AtomicInteger();
+		PointcutLatch latch = new PointcutLatch("transactionLatch");
+		Collection<Callable<Bundle>> callables = new ArrayList<>();
+
+		latch.setDefaultTimeoutSeconds(5);
+		latch.setExpectedCount(calls);
+		for (int i = 0; i < calls; i++) {
+			int mc = i % 2;
+			Bundle bundle = bundles[mc];
+			Callable<Bundle> task = () -> {
+				String name = "task_" + mc;
+				StopWatch watch = new StopWatch();
+				ourLog.info("Starting thread " + name);
+				watch.startTask(name);
+				Bundle b = mySystemDao.transaction(new SystemRequestDetails(),
+					bundle);
+				int c = counter.incrementAndGet();
+				latch.call(1);
+				watch.endCurrentTask();
+				long timeMS = watch.getMillis();
+				ourLog.info("Ending thread " + name + " after " + timeMS + "ms");
+				return b;
+			};
+			callables.add(task);
+		}
+
+		// test
+		List<Future<Bundle>> futures = myExecutor.invokeAll(callables);
+
+		// validate
+		assertEquals(futures.size(), calls);
+		for (Future<Bundle> future : futures) {
+			// make sure no exceptions
+			Bundle b = future.get();
+			assertNotNull(b);
+		}
+		latch.awaitExpected();
+		assertEquals(counter.get(), calls);
 	}
 
 	@Test

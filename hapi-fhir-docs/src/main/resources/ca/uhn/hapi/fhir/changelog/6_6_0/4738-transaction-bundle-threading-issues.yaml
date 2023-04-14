@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 4738
+title: "Processing multiple transaction bundles with similar entries
+      on different threads would lead to Constraint Violations if
+      the entries contained similar unique values.
+      This has been fixed at the expense of slowing down the processing
+      of similar bundles.
+      Non-similar bundles should be unaffected.
+      "
