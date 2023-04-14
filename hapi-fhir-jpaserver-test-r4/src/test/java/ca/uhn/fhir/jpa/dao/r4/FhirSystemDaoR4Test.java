@@ -40,6 +40,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
@@ -4417,8 +4418,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
 		// validate
 		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
-		final IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
-		assertEquals(1, observationSearch.getAllResourceIds().size());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals("Organization", allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith("Organization"));
 	}
 
 	@Test
@@ -4444,8 +4448,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
 		// validate
 		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
-		final IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
-		assertEquals(1, observationSearch.getAllResourceIds().size());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals("Organization", allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith("Organization"));
 	}
 
 	@Test
@@ -4471,8 +4478,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
 		// validate
 		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
-		final IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
-		assertEquals(1, observationSearch.getAllResourceIds().size());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals("Organization", allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith("Organization"));
 	}
 
 	@Test
@@ -4499,8 +4509,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
 		// validate
 		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
-		final IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
-		assertEquals(1, observationSearch.getAllResourceIds().size());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(FAKE_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals("Organization", allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith("Organization"));
 	}
 
 	@Test

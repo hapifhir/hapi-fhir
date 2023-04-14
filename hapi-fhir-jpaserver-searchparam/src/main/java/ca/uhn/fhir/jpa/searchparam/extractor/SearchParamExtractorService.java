@@ -518,7 +518,8 @@ public class SearchParamExtractorService {
 			return;
 		}
 
-		String baseUrl = (! nextReference.hasIdentifier()) ? nextId.getBaseUrl() : null;
+		final boolean hasNoIdentifier = ! nextReference.hasIdentifier();
+		final String baseUrl = hasNoIdentifier ? nextId.getBaseUrl() : null;
 		String typeString = nextId.getResourceType();
 		if (isBlank(typeString)) {
 			String msg = "Invalid resource reference found at path[" + path + "] - Does not contain resource type - " + nextId.getValue();
