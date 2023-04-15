@@ -171,61 +171,61 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Test
 	public void testUpdatesHaveCorrectMetadataUsingTransactions() throws Exception {
 		String code = OBS_CODE;
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
 
-		createSubscription();
+		Subscription subscription = createSubscription();
 		waitForActivatedSubscriptionCount(1);
 
 		/*
 		 * Send version 1
 		 */
 
-		Observation observation = new Observation();
-		observation.getIdentifierFirstRep().setSystem("foo").setValue("1");
-		observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
-		observation.setStatus(Enumerations.ObservationStatus.FINAL);
+		Observation sentObservation = new Observation();
+		sentObservation.getIdentifierFirstRep().setSystem("foo").setValue("1");
+		sentObservation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
+		sentObservation.setStatus(Enumerations.ObservationStatus.FINAL);
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
-		Bundle responseBundle = mySystemDao.transaction(null, bundle);
+		bundle.addEntry().setResource(sentObservation).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		// Send the transaction
+		Bundle responseBundle = sendTransaction(bundle, true);
+		assertEquals(1, getSystemProviderCount());
+
+		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
 
 		Observation obs = myObservationDao.read(new IdType(responseBundle.getEntry().get(0).getResponse().getLocation()));
 
-		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		int idx = 0;
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(idx));
-		Assertions.assertEquals("1", BaseSubscriptionsR5Test.ourUpdatedObservations.get(idx).getIdElement().getVersionIdPart());
-		Assertions.assertEquals("1", BaseSubscriptionsR5Test.ourUpdatedObservations.get(idx).getMeta().getVersionId());
-		Assertions.assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), BaseSubscriptionsR5Test.ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
-		Assertions.assertEquals("1", BaseSubscriptionsR5Test.ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
+		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+		Assertions.assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
+		Assertions.assertEquals("1", receivedObs.getMeta().getVersionId());
+		Assertions.assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
+		Assertions.assertEquals("1", receivedObs.getIdentifierFirstRep().getValue());
 
 		/*
 		 * Send version 2
 		 */
 
-		observation = new Observation();
-		observation.setId(obs.getId());
-		observation.getIdentifierFirstRep().setSystem("foo").setValue("2");
-		observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
-		observation.setStatus(Enumerations.ObservationStatus.FINAL);
+		sentObservation = new Observation();
+		sentObservation.setId(obs.getId());
+		sentObservation.getIdentifierFirstRep().setSystem("foo").setValue("2");
+		sentObservation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
+		sentObservation.setStatus(Enumerations.ObservationStatus.FINAL);
 		bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(obs.getIdElement().toUnqualifiedVersionless().getValue());
-		mySystemDao.transaction(null, bundle);
+		bundle.addEntry().setResource(sentObservation).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(obs.getIdElement().toUnqualifiedVersionless().getValue());
+		// Send the transaction
+		sendTransaction(bundle, true);
+		assertEquals(2, getSystemProviderCount());
+
+		receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
 		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
 
-		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		idx++;
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(2, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(idx));
-		Assertions.assertEquals("2", BaseSubscriptionsR5Test.ourUpdatedObservations.get(idx).getIdElement().getVersionIdPart());
-		Assertions.assertEquals("2", BaseSubscriptionsR5Test.ourUpdatedObservations.get(idx).getMeta().getVersionId());
-		Assertions.assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), BaseSubscriptionsR5Test.ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
-		Assertions.assertEquals("2", BaseSubscriptionsR5Test.ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
+		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+		Assertions.assertEquals("2", receivedObs.getIdElement().getVersionIdPart());
+		Assertions.assertEquals("2", receivedObs.getMeta().getVersionId());
+		Assertions.assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
+		Assertions.assertEquals("2", receivedObs.getIdentifierFirstRep().getValue());
 	}
 
 	@Test

@@ -239,16 +239,17 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return id;
 	}
 
-	protected void sendTransaction(Bundle theBundle, boolean theExpectDelivery) throws InterruptedException {
+	protected Bundle sendTransaction(Bundle theBundle, boolean theExpectDelivery) throws InterruptedException {
 		if (theExpectDelivery) {
 			mySubscriptionDeliveredLatch.setExpectedCount(1);
 		}
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
-		mySystemDao.transaction(mySrd, theBundle);
+		Bundle retval = mySystemDao.transaction(mySrd, theBundle);
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 		if (theExpectDelivery) {
 			mySubscriptionDeliveredLatch.awaitExpected();
 		}
+		return retval;
 	}
 
 
