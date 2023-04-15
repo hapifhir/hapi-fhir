@@ -328,9 +328,6 @@ public class SubscriptionCanonicalizer {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
 		}
 		setPartitionIdOnReturnValue(theSubscription, retVal);
-		retVal.setChannelType(getChannelType(subscription));
-		retVal.setCriteriaString(getCriteria(theSubscription));
-		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 		retVal.setHeaders(subscription.getChannel().getHeader());
 		retVal.setChannelExtensions(extractExtension(subscription));
 		retVal.setIdElement(subscription.getIdElement());
@@ -343,6 +340,18 @@ public class SubscriptionCanonicalizer {
 			if (SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL.equals(next.getValueAsString())) {
 				retVal.setTopicSubscription(true);
 			}
+		}
+
+		if (retVal.isTopicSubscription()) {
+			retVal.getTopicSubscription().setTopic(getCriteria(theSubscription));
+			retVal.getTopicSubscription().setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
+			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
+			retVal.setChannelType(getChannelType(subscription));
+			// WIP STR5 set other topic subscription fields
+		} else {
+			retVal.setCriteriaString(getCriteria(theSubscription));
+			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
+			retVal.setChannelType(getChannelType(subscription));
 		}
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
@@ -397,7 +406,6 @@ public class SubscriptionCanonicalizer {
 		retVal.setHeaders(subscription.getHeader());
 		retVal.setChannelExtensions(extractExtension(subscription));
 		retVal.setIdElement(subscription.getIdElement());
-
 		retVal.setPayloadString(subscription.getContentType());
 		retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 		retVal.setTags(extractTags(subscription));
@@ -439,7 +447,6 @@ public class SubscriptionCanonicalizer {
 		// All R5 subscriptions are topic subscriptions
 		retVal.setTopicSubscription(true);
 
-		// WIP STR5 rewrite canonicalizeR4B above to use this appraoch
 		Enumerations.SubscriptionStatusCodes status = subscription.getStatus();
 		if (status != null) {
 			// WIP STR5 do all the codes map?
