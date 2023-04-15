@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -102,8 +101,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 	}
 
 	private Subscription createTopicSubscription(String theTopicUrl) {
-		Subscription subscription = newSubscription(theTopicUrl, Constants.CT_FHIR_JSON_NEW);
-		subscription.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL);
+		Subscription subscription = newTopicSubscription(theTopicUrl, Constants.CT_FHIR_JSON_NEW);
 		return postSubscription(subscription);
 	}
 

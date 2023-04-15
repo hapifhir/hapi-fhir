@@ -146,9 +146,9 @@ public class SubscriptionValidatingInterceptor {
 		if (!finished) {
 
 			if (subscription.isTopicSubscription()) {
-				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getCriteriaString());
+				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getTopic());
 				if (!oTopic.isPresent()) {
-					throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with url: " + subscription.getCriteriaString());
+					throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: " + subscription.getTopic());
 				}
 			} else {
 				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");

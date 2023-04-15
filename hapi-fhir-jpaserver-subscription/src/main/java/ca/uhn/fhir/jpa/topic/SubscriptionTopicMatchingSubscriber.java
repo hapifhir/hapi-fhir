@@ -83,7 +83,7 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	}
 
 	private void deliverToTopicSubscriptions(ResourceModifiedMessage theMsg, SubscriptionTopic topic, InMemoryMatchResult result) {
-		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByUrl(topic.getUrl());
+		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(topic.getUrl());
 		if (!topicSubscriptions.isEmpty()) {
 			IBaseResource matchedResource = theMsg.getNewPayload(myFhirContext);
 

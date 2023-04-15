@@ -31,7 +31,6 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Subscription;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -50,6 +49,7 @@ import java.util.List;
 @Disabled("abstract")
 public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR5Test.class);
+	private static final String TEST_TOPIC = "http://test.topic";
 	protected static int ourListenerPort;
 	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	protected static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
@@ -119,8 +119,9 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	}
 
 
-	protected Subscription createSubscription(String theCriteria, String thePayload) {
-		Subscription subscription = newSubscription(theCriteria, thePayload);
+	protected Subscription createSubscription(String thePayload) {
+		// WIP STR5 will likely require matching TopicSubscription
+		Subscription subscription = newTopicSubscription(TEST_TOPIC, thePayload);
 
 		return postSubscription(subscription);
 	}
@@ -134,14 +135,10 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return subscription;
 	}
 
-	protected Subscription newSubscription(String theCriteria, String thePayload) {
-		SubscriptionTopic topic = new SubscriptionTopic();
-		topic.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(theCriteria);
-		topic.setId("1");
+	protected Subscription newTopicSubscription(String theTopicUrl, String thePayload) {
 
 		Subscription subscription = new Subscription();
-		subscription.getContained().add(topic);
-		subscription.setTopic("#1");
+		subscription.setTopic(theTopicUrl);
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 
