@@ -210,6 +210,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		ourCountHolder = myCountHolder;
 	}
 
+	// WIP STR5 consolidate with lambda
 	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		if (theExpectDelivery) {
@@ -237,6 +238,19 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		}
 		return id;
 	}
+
+	protected void sendTransaction(Bundle theBundle, boolean theExpectDelivery) throws InterruptedException {
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.setExpectedCount(1);
+		}
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		mySystemDao.transaction(mySrd, theBundle);
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.awaitExpected();
+		}
+	}
+
 
 
 	public static class ObservationListener implements IResourceProvider {

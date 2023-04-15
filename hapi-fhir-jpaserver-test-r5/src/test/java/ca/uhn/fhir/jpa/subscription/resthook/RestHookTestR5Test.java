@@ -54,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR5Test.class);
+	public static final String OBS_CODE = "1000000050";
 
 
 	@Autowired
@@ -68,16 +69,15 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
-		String code = "1000000050";
 
-		createObservationSubscriptionTopic(code);
-		createObservationSubscriptionTopic(code + "111");
+		createObservationSubscriptionTopic(OBS_CODE);
+		createObservationSubscriptionTopic(OBS_CODE + "111");
 		waitForRegisteredSubscriptionTopicCount(2);
 
 		Subscription subscription = createSubscription(Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(1);
 
-		Observation sentObservation = sendObservation(code, "SNOMED-CT", true);
+		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT", true);
 
 		// Should see 1 subscription notification
 		assertEquals(1, getSystemProviderCount());
@@ -89,9 +89,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testUpdatesHaveCorrectMetadata() throws Exception {
-		String code = "1000000050";
 
-		createObservationSubscriptionTopic(code);
+		createObservationSubscriptionTopic(OBS_CODE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
 		Subscription subscription = createSubscription();
@@ -101,7 +100,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		 * Send version 1
 		 */
 
-		Observation sentObservation = sendObservation(code, "SNOMED-CT");
+		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT");
 		sentObservation = myObservationDao.read(sentObservation.getIdElement().toUnqualifiedVersionless());
 
 		// Should see 1 subscription notification
@@ -139,9 +138,10 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testPlaceholderReferencesInTransactionAreResolvedCorrectly() throws Exception {
-		String code = "1000000050";
-		String criteria1 = "Observation?";
-		createSubscription();
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
+
+		Subscription subscription = createSubscription();
 		waitForActivatedSubscriptionCount(1);
 
 		// Create a transaction that should match
@@ -153,25 +153,24 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		patient.getIdentifierFirstRep().setSystem("foo").setValue("AAA");
 		bundle.addEntry().setResource(patient).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
 
-		Observation observation = new Observation();
-		observation.getIdentifierFirstRep().setSystem("foo").setValue("1");
-		observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
-		observation.setStatus(Enumerations.ObservationStatus.FINAL);
-		observation.getSubject().setReference(patient.getId());
-		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		Observation sentObservation = new Observation();
+		sentObservation.getIdentifierFirstRep().setSystem("foo").setValue("1");
+		sentObservation.getCode().addCoding().setCode(OBS_CODE).setSystem("SNOMED-CT");
+		sentObservation.setStatus(Enumerations.ObservationStatus.FINAL);
+		sentObservation.getSubject().setReference(patient.getId());
+		bundle.addEntry().setResource(sentObservation).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
 
 		// Send the transaction
-		mySystemDao.transaction(null, bundle);
+		sendTransaction(bundle, true);
 
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
+		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
 
-		MatcherAssert.assertThat(BaseSubscriptionsR5Test.ourUpdatedObservations.get(0).getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+		MatcherAssert.assertThat(receivedObs.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
 	}
 
 	@Test
 	public void testUpdatesHaveCorrectMetadataUsingTransactions() throws Exception {
-		String code = "1000000050";
-		String criteria1 = "Observation?";
+		String code = OBS_CODE;
 
 		createSubscription();
 		waitForActivatedSubscriptionCount(1);
@@ -231,7 +230,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRepeatedDeliveries() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?";
 
 		createSubscription();
@@ -262,7 +261,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
@@ -293,7 +292,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionApplicationJsonDisableVersionIdInDelivery() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		waitForActivatedSubscriptionCount(0);
@@ -339,7 +338,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionDoesntGetLatestVersionByDefault() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		waitForActivatedSubscriptionCount(0);
@@ -380,7 +379,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionGetsLatestVersionWithFlag() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		waitForActivatedSubscriptionCount(0);
@@ -427,7 +426,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
@@ -507,7 +506,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	public void testRestHookSubscriptionApplicationJsonDatabase() throws Exception {
 		// Same test as above, but now run it using database matching
 		myStorageSettings.setEnableInMemorySubscriptionMatching(false);
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
@@ -590,7 +589,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionApplicationXml() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
@@ -665,7 +664,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testSubscriptionTriggerViaSubscription() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		createSubscription(Constants.CT_FHIR_XML_NEW);
@@ -714,7 +713,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testUpdateSubscriptionToMatchLater() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteriaBad = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
 		ourLog.info("** About to create non-matching subscription");
@@ -760,7 +759,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionApplicationXmlJson() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
@@ -791,7 +790,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testSubscriptionWithHeaders() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		// Add some headers, and we'll also turn back to requested status for fun
@@ -817,7 +816,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testDisableSubscription() throws Exception {
-		String code = "1000000050";
+		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		Subscription subscription = createSubscription(Constants.CT_FHIR_JSON_NEW);
