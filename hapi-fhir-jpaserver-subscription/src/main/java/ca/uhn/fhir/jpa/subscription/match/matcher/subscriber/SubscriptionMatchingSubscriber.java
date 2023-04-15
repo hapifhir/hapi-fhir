@@ -111,7 +111,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getPayloadId(myFhirContext);
 
-		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
+		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAllNonTopicSubscriptions();
 
 		ourLog.trace("Testing {} subscriptions for applicability", subscriptions.size());
 		boolean anySubscriptionsMatchedResource = false;

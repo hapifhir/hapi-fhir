@@ -213,4 +213,8 @@ public class SubscriptionRegistry {
 	public int size() {
 		return myActiveSubscriptionCache.size();
 	}
+
+	public synchronized List<ActiveSubscription> getAllNonTopicSubscriptions() {
+		return myActiveSubscriptionCache.getAllNonTopicSubscriptions();
+	}
 }

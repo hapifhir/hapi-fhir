@@ -1,14 +1,21 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -16,6 +23,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.Lists;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
@@ -25,12 +33,12 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.CodeableConcept;
-import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Subscription;
+import org.hl7.fhir.r5.model.SubscriptionStatus;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -45,11 +53,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Disabled("abstract")
 public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR5Test.class);
-	private static final String TEST_TOPIC = "http://test.topic";
+	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "http://example.com/topic/test";
+
+
 	protected static int ourListenerPort;
 	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	protected static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
@@ -67,33 +81,27 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
 	private SingleQueryCountHolder myCountHolder;
+	@Autowired
+	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+	@Autowired
+	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
+	@Autowired
+	private IInterceptorService myInterceptorService;
+	private static final SubscriptionTopicR5Test.TestSystemProvider ourTestSystemProvider = new SubscriptionTopicR5Test.TestSystemProvider();
+	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
+	private final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
+	private final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 
-	@AfterEach
-	public void afterUnregisterRestHookListener() {
-		for (IIdType next : mySubscriptionIds) {
-			IIdType nextId = next.toUnqualifiedVersionless();
-			ourLog.info("Deleting: {}", nextId);
-			myClient.delete().resourceById(nextId).execute();
-		}
-		mySubscriptionIds.clear();
 
-		myStorageSettings.setAllowMultipleDelete(true);
-		ourLog.info("Deleting all subscriptions");
-		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
-		ourLog.info("Done deleting all subscriptions");
-		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
-
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-	}
-
+	@Override
 	@BeforeEach
-	public void beforeRegisterRestHookListener() {
+	protected void before() throws Exception {
+		super.before();
+		mySubscriptionTopicDao = myDaoRegistry.getResourceDao(SubscriptionTopic.class);
 		mySubscriptionTestUtil.registerRestHookInterceptor();
-	}
+		ourListenerRestServer.unregisterProvider(mySystemProvider);
+		ourListenerRestServer.registerProvider(ourTestSystemProvider);
 
-	@BeforeEach
-	public void beforeReset() throws Exception {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
@@ -116,19 +124,61 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		if (processingChannel != null) {
 			processingChannel.addInterceptor(myCountingInterceptor);
 		}
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionTopicsCheckedLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, mySubscriptionDeliveredLatch);
+
+	}
+
+	@AfterEach
+	public void afterUnregisterRestHookListener() {
+		myInterceptorService.unregisterAllAnonymousInterceptors();
+		for (IIdType next : mySubscriptionIds) {
+			IIdType nextId = next.toUnqualifiedVersionless();
+			ourLog.info("Deleting: {}", nextId);
+			myClient.delete().resourceById(nextId).execute();
+		}
+		mySubscriptionIds.clear();
+
+		myStorageSettings.setAllowMultipleDelete(true);
+		ourLog.info("Deleting all subscriptions");
+		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		ourLog.info("Done deleting all subscriptions");
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		ourListenerRestServer.unregisterProvider(ourTestSystemProvider);
+		ourListenerRestServer.registerProvider(mySystemProvider);
+		mySubscriptionTopicsCheckedLatch.clear();
+		mySubscriptionDeliveredLatch.clear();
+	}
+
+	protected int getSystemProviderCount() {
+		return ourTestSystemProvider.getCount();
+	}
+
+	protected Bundle getLastSystemProviderBundle() {
+		return ourTestSystemProvider.lastBundle;
+	}
+
+	protected String getLastSystemProviderContentType() {
+		return ourTestSystemProvider.lastContentType;
 	}
 
 
-	protected Subscription createSubscription(String thePayload) {
+
+	protected Subscription createSubscription(String theTopic, String thePayload) throws InterruptedException {
 		// WIP STR5 will likely require matching TopicSubscription
-		Subscription subscription = newTopicSubscription(TEST_TOPIC, thePayload);
+		Subscription subscription = newTopicSubscription(theTopic, thePayload);
 
 		return postSubscription(subscription);
 	}
 
 	@Nonnull
-	protected Subscription postSubscription(Subscription subscription) {
+	protected Subscription postSubscription(Subscription subscription) throws InterruptedException {
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
 		subscription.setId(methodOutcome.getId().toVersionless());
 		mySubscriptionIds.add(methodOutcome.getId());
 
@@ -160,22 +210,32 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		ourCountHolder = myCountHolder;
 	}
 
+	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.setExpectedCount(1);
+		}
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		IIdType id = dao.create(theResource, mySrd).getId();
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.awaitExpected();
+		}
+		return id;
+	}
 
-	protected Observation sendObservation(String code, String system) {
-		Observation observation = new Observation();
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation.setCode(codeableConcept);
-		observation.getIdentifierFirstRep().setSystem("foo").setValue("1");
-		Coding coding = codeableConcept.addCoding();
-		coding.setCode(code);
-		coding.setSystem(system);
-
-		observation.setStatus(Enumerations.ObservationStatus.FINAL);
-
-		IIdType id = myObservationDao.create(observation).getId();
-		observation.setId(id);
-
-		return observation;
+	protected IIdType updateResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.setExpectedCount(1);
+		}
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		IIdType id = dao.update(theResource, mySrd).getId();
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.awaitExpected();
+		}
+		return id;
 	}
 
 
@@ -227,6 +287,41 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return ourCountHolder.getQueryCountMap().get("");
 	}
 
+
+	protected void waitForRegisteredSubscriptionTopicCount(int theTarget) throws Exception {
+		await().until(() -> subscriptionTopicRegistryHasSize(theTarget));
+	}
+
+	private boolean subscriptionTopicRegistryHasSize(int theTarget) {
+		int size = mySubscriptionTopicRegistry.size();
+		if (size == theTarget) {
+			return true;
+		}
+		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		return mySubscriptionTopicRegistry.size() == theTarget;
+	}
+
+	protected void createSubscriptionTopic(SubscriptionTopic theSubscriptionTopic) throws InterruptedException {
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		mySubscriptionTopicDao.create(theSubscriptionTopic, mySrd);
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
+	}
+
+	protected static void validateSubscriptionStatus(Subscription subscription, IBaseResource sentResource, SubscriptionStatus ss) {
+		assertEquals(Enumerations.SubscriptionStatusCodes.ACTIVE, ss.getStatus());
+		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
+		assertEquals("1", ss.getEventsSinceSubscriptionStartElement().getValueAsString());
+
+		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
+		assertEquals(1, notificationEvents.size());
+		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
+		assertEquals(1, notificationEvent.getEventNumber());
+		assertEquals(sentResource.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
+
+		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());
+		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, ss.getTopic());
+	}
+
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		ourListenerRestServer = new RestfulServer(FhirContext.forR5Cached());
@@ -254,4 +349,23 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		JettyUtil.closeServer(ourListenerServer);
 	}
 
+
+	static class TestSystemProvider {
+		AtomicInteger count = new AtomicInteger(0);
+		Bundle lastBundle;
+		String lastContentType;
+
+		@Transaction
+		public Bundle transaction(@TransactionParam Bundle theBundle, HttpServletRequest theRequest) {
+			ourLog.info("Received Transaction with {} entries", theBundle.getEntry().size());
+			count.incrementAndGet();
+			lastContentType = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", "");
+			lastBundle = theBundle;
+			return theBundle;
+		}
+
+		int getCount() {
+			return count.get();
+		}
+	}
 }

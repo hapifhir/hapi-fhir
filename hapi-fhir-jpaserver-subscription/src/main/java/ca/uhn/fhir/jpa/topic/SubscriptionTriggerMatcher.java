@@ -47,10 +47,10 @@ public class SubscriptionTriggerMatcher {
 	}
 
 	private InMemoryMatchResult match(SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent theQueryCriteria) {
-		InMemoryMatchResult previousMatches = InMemoryMatchResult.successfulMatch();
-		InMemoryMatchResult currentMatches = InMemoryMatchResult.successfulMatch();
 		String previousCriteria = theQueryCriteria.getPrevious();
 		String currentCriteria = theQueryCriteria.getCurrent();
+		InMemoryMatchResult previousMatches = InMemoryMatchResult.fromBoolean(previousCriteria != null);
+		InMemoryMatchResult currentMatches = InMemoryMatchResult.fromBoolean(currentCriteria != null);
 
 		// WIP STR5 implement fhirPathCriteria per https://build.fhir.org/subscriptiontopic.html#fhirpath-criteria
 
