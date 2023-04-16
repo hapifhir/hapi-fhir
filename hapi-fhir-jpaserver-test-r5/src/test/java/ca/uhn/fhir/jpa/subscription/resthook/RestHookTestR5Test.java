@@ -69,7 +69,6 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
-
 		createObservationSubscriptionTopic(OBS_CODE);
 		createObservationSubscriptionTopic(OBS_CODE + "111");
 		waitForRegisteredSubscriptionTopicCount(2);
@@ -231,11 +230,15 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Test
 	public void testRepeatedDeliveries() throws Exception {
 		String code = OBS_CODE;
-		String criteria1 = "Observation?";
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
 
 		createSubscription();
 		waitForActivatedSubscriptionCount(1);
 
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(100);
+		mySubscriptionDeliveredLatch.setExpectedCount(100);
+		// WIP STR5 I don't know the answer to this, but should we be bunching these up into a single delivery?
 		for (int i = 0; i < 100; i++) {
 			Observation observation = new Observation();
 			observation.getIdentifierFirstRep().setSystem("foo").setValue("ID" + i);
@@ -243,16 +246,20 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 			observation.setStatus(Enumerations.ObservationStatus.FINAL);
 			myObservationDao.create(observation);
 		}
-
-		waitForSize(100, BaseSubscriptionsR5Test.ourUpdatedObservations);
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
+		mySubscriptionDeliveredLatch.awaitExpected();
 	}
 
 	@Test
 	public void testActiveSubscriptionShouldntReActivate() throws Exception {
-		String criteria = "Observation?code=111111111&_format=xml";
-		createSubscription(Constants.CT_FHIR_JSON_NEW);
+		// FIXME extract method
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
 
+		// FIXME extract method
+		createSubscription(Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
+
 		for (int i = 0; i < 5; i++) {
 			int changes = this.mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 			assertEquals(0, changes);
@@ -261,33 +268,29 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
-		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+		createObservationSubscriptionTopic(OBS_CODE);
+		createObservationSubscriptionTopic(OBS_CODE + "111");
+		waitForRegisteredSubscriptionTopicCount(2);
 
-		createSubscription(Constants.CT_FHIR_JSON_NEW);
-		createSubscription(Constants.CT_FHIR_JSON_NEW);
-		waitForActivatedSubscriptionCount(2);
+		Subscription subscription = createSubscription(Constants.CT_FHIR_JSON_NEW);
+		waitForActivatedSubscriptionCount(1);
 
-		Observation obs = sendObservation(code, "SNOMED-CT");
+		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT");
+
+		assertEquals(1, getSystemProviderCount());
+
+		Observation obs = assertBundleAndGetObservation(subscription, sentObservation);
 
 		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(0));
+		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 
 		// Send an update with no changes
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
-		myClient.update().resource(obs).execute();
+		myObservationDao.update(obs, mySrd);
 
-		// Should be no further deliveries
 		Thread.sleep(1000);
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-
+		// Should be no further deliveries
+		assertEquals(1, getSystemProviderCount());
 	}
 
 	@Test
