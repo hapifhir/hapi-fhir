@@ -346,6 +346,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), resourceIds.size());
 			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
 
+			// FIXME: don't read these one-by-one from the DB
 			for (IResourcePersistentId next : resourceIds) {
 				IBaseResource nextResource = resourceDao.readByPid(next);
 				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
