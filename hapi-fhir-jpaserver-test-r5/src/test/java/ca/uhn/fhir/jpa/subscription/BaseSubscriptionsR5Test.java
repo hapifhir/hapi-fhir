@@ -190,7 +190,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		Subscription subscription = new Subscription();
 		subscription.setTopic(theTopicUrl);
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
+		subscription.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
 
 		subscription.getChannelType()
 			.setSystem(CanonicalSubscriptionChannelType.RESTHOOK.getSystem())

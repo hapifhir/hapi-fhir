@@ -410,32 +410,6 @@ public class SubscriptionCanonicalizer {
 		retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 		retVal.setTags(extractTags(subscription));
 
-		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
-			String from;
-			String subjectTemplate;
-			try {
-				from = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM);
-				subjectTemplate = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
-			} catch (FHIRException theE) {
-				throw new ConfigurationException(Msg.code(2323) + "Failed to extract subscription extension(s): " + theE.getMessage(), theE);
-			}
-			retVal.getEmailDetails().setFrom(from);
-			retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
-		}
-
-		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
-			String stripVersionIds;
-			String deliverLatestVersion;
-			try {
-				stripVersionIds = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
-				deliverLatestVersion = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
-			} catch (FHIRException theE) {
-				throw new ConfigurationException(Msg.code(2324) + "Failed to extract subscription extension(s): " + theE.getMessage(), theE);
-			}
-			retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
-			retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
-		}
-
 		List<org.hl7.fhir.r5.model.Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
 		if (topicExts.size() > 0) {
 			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
@@ -464,8 +438,37 @@ public class SubscriptionCanonicalizer {
 		retVal.getTopicSubscription().setHeartbeatPeriod(subscription.getHeartbeatPeriod());
 		retVal.getTopicSubscription().setMaxCount(subscription.getMaxCount());
 
+		setR5FlagsBasedOnChannelType(subscription, retVal);
 
 		return retVal;
+	}
+
+	private void setR5FlagsBasedOnChannelType(org.hl7.fhir.r5.model.Subscription subscription, CanonicalSubscription retVal) {
+		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
+			String from;
+			String subjectTemplate;
+			try {
+				from = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM);
+				subjectTemplate = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
+			} catch (FHIRException theE) {
+				throw new ConfigurationException(Msg.code(2323) + "Failed to extract subscription extension(s): " + theE.getMessage(), theE);
+			}
+			retVal.getEmailDetails().setFrom(from);
+			retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
+		}
+
+		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
+			String stripVersionIds;
+			String deliverLatestVersion;
+			try {
+				stripVersionIds = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
+				deliverLatestVersion = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
+			} catch (FHIRException theE) {
+				throw new ConfigurationException(Msg.code(2324) + "Failed to extract subscription extension(s): " + theE.getMessage(), theE);
+			}
+			retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
+			retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
+		}
 	}
 
 	private CanonicalTopicSubscriptionFilter convertFilter(org.hl7.fhir.r5.model.Subscription.SubscriptionFilterByComponent theFilter) {

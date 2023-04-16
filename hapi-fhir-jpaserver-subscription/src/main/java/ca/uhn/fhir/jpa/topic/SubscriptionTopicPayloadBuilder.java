@@ -6,6 +6,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -20,7 +21,7 @@ public class SubscriptionTopicPayloadBuilder {
 		myFhirContext = theFhirContext;
 	}
 
-	public IBaseResource buildPayload(IBaseResource theMatchedResource, ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription, SubscriptionTopic theTopic) {
+	public IBaseBundle buildPayload(IBaseResource theMatchedResource, ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription, SubscriptionTopic theTopic) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
 		// WIP STR5 set eventsSinceSubscriptionStart from the database

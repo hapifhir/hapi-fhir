@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import org.springframework.messaging.MessagingException;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicMatchingSubscriber.class);
@@ -89,8 +91,10 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 
 			for (ActiveSubscription activeSubscription : topicSubscriptions) {
 				// WIP STR5 apply subscription filters
-				IBaseResource payload = mySubscriptionTopicPayloadBuilder.buildPayload(matchedResource, theMsg, activeSubscription, topic);
-				mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, activeSubscription, result);
+				IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(matchedResource, theMsg, activeSubscription, topic);
+				// WIP STR5 do we need to add a total?  If so can do that with R5BundleFactory
+				bundlePayload.setId(UUID.randomUUID().toString());
+				mySubscriptionMatchDeliverer.deliverPayload(bundlePayload, theMsg, activeSubscription, result);
 			}
 		}
 	}

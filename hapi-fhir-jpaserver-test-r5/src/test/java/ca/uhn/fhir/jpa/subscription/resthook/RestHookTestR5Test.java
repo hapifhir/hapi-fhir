@@ -296,45 +296,45 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Test
 	public void testRestHookSubscriptionApplicationJsonDisableVersionIdInDelivery() throws Exception {
 		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
 
 		waitForActivatedSubscriptionCount(0);
-		Subscription subscription1 = createSubscription(Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription = createSubscription(Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
-
 		ourLog.info("** About to send observation");
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
+		Observation sentObservation1 = sendObservation(code, "SNOMED-CT");
 
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(0));
+		assertEquals(1, getSystemProviderCount());
 
-		IdType idElement = BaseSubscriptionsR5Test.ourUpdatedObservations.get(0).getIdElement();
-		assertEquals(observation1.getIdElement().getIdPart(), idElement.getIdPart());
+		Observation obs = assertBundleAndGetObservation(subscription, sentObservation1);
+
+		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+
+		IdType idElement = obs.getIdElement();
+		assertEquals(sentObservation1.getIdElement().getIdPart(), idElement.getIdPart());
 		// VersionId is present
-		assertEquals(observation1.getIdElement().getVersionIdPart(), idElement.getVersionIdPart());
+		assertEquals(sentObservation1.getIdElement().getVersionIdPart(), idElement.getVersionIdPart());
 
-		subscription1
+		subscription
 			.addExtension(HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
 		ourLog.info("** About to update subscription");
 
-		int modCount = myCountingInterceptor.getSentCount("Subscription");
 		ourLog.info("** About to send another...");
-		myClient.update().resource(subscription1).execute();
-		waitForSize(modCount + 2, () -> myCountingInterceptor.getSentCount("Subscription"), () -> myCountingInterceptor.toString());
+		updateResource(subscription, false);
 
 		ourLog.info("** About to send observation");
-		Observation observation2 = sendObservation(code, "SNOMED-CT");
+		Observation sentObservation2 = sendObservation(code, "SNOMED-CT");
 
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(2, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(1));
+		assertEquals(2, getSystemProviderCount());
 
-		idElement = BaseSubscriptionsR5Test.ourUpdatedObservations.get(1).getIdElement();
-		assertEquals(observation2.getIdElement().getIdPart(), idElement.getIdPart());
+		Observation obs2 = assertBundleAndGetObservation(subscription, sentObservation2);
+
+		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+
+		idElement =obs2.getIdElement();
+		assertEquals(sentObservation2.getIdElement().getIdPart(), idElement.getIdPart());
 		// Now VersionId is stripped
 		assertEquals(null, idElement.getVersionIdPart());
 	}
