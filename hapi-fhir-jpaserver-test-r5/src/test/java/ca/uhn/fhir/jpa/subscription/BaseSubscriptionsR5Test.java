@@ -249,10 +249,11 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	}
 
 	protected Bundle sendTransaction(Bundle theBundle, boolean theExpectDelivery) throws InterruptedException {
+		int expectedChecks = theBundle.getEntry().size();
 		if (theExpectDelivery) {
 			mySubscriptionDeliveredLatch.setExpectedCount(1);
 		}
-		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(expectedChecks);
 		Bundle retval = mySystemDao.transaction(mySrd, theBundle);
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 		if (theExpectDelivery) {
