@@ -118,20 +118,29 @@ public class InMemoryResourceMatcher {
 	}
 
 	/**
-	 * This method is called in two different scenarios.  With a null theResource, it determines whether database matching might be required.
-	 * Otherwise, it tries to perform the match in-memory, returning UNSUPPORTED if it's not possible.
-	 * <p>
-	 * Note that there will be cases where it returns UNSUPPORTED with a null resource, but when a non-null resource it returns supported and no match.
-	 * This is because an earlier parameter may be matchable in-memory in which case processing stops and we never get to the parameter
-	 * that would have required a database call.
-	 *
-	 * @param theIndexedSearchParams If the search params have already been calculated for the given resource,
-	 *                               they can be passed in. Passing in {@literal null} is also fine, in which
-	 *                               case they will be calculated for the resource. It can be preferable to
-	 *                               pass in {@literal null} unless you already actually had to calculate the
-	 *                               indexes for another reason, since we can be efficient here and only calculate
-	 *                               the params that are actually relevant for the given search expression.
+	 * @deprecated Use {@link #match(String, IBaseResource, ResourceIndexedSearchParams, RequestDetails)}
 	 */
+	@Deprecated
+	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, @Nullable ResourceIndexedSearchParams theIndexedSearchParams) {
+		return match(theCriteria, theResource, theIndexedSearchParams, null);
+	}
+
+
+	/**
+		 * This method is called in two different scenarios.  With a null theResource, it determines whether database matching might be required.
+		 * Otherwise, it tries to perform the match in-memory, returning UNSUPPORTED if it's not possible.
+		 * <p>
+		 * Note that there will be cases where it returns UNSUPPORTED with a null resource, but when a non-null resource it returns supported and no match.
+		 * This is because an earlier parameter may be matchable in-memory in which case processing stops and we never get to the parameter
+		 * that would have required a database call.
+		 *
+		 * @param theIndexedSearchParams If the search params have already been calculated for the given resource,
+		 *                               they can be passed in. Passing in {@literal null} is also fine, in which
+		 *                               case they will be calculated for the resource. It can be preferable to
+		 *                               pass in {@literal null} unless you already actually had to calculate the
+		 *                               indexes for another reason, since we can be efficient here and only calculate
+		 *                               the params that are actually relevant for the given search expression.
+		 */
 	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, @Nullable ResourceIndexedSearchParams theIndexedSearchParams, RequestDetails theRequestDetails) {
 		RuntimeResourceDefinition resourceDefinition;
 		if (theResource == null) {
@@ -289,7 +298,7 @@ public class InMemoryResourceMatcher {
 		} else {
 			return theResource.getMeta().getProfile().stream()
 				.map(IPrimitiveType::getValueAsString)
-				.anyMatch(profileValue -> profileValue.equals(paramProfileValue));
+				.anyMatch(profileValue -> profileValue != null && profileValue.equals(paramProfileValue));
 		}
 	}
 
