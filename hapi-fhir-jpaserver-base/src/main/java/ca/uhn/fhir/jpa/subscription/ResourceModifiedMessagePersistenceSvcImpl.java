@@ -145,7 +145,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		try {
 			return myObjectMapper.readValue(thePayloadLessMessage, ResourceModifiedMessage.class);
 		} catch (JsonProcessingException e) {
-			throw new ConfigurationException("Failed to json deserialize payloadless  message", e);
+			throw new ConfigurationException(Msg.code(2334) + "Failed to json deserialize payloadless  message", e);
 		}
 	}
 
@@ -163,7 +163,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		try {
 			return myObjectMapper.writeValueAsString(tempMessage);
 		} catch (JsonProcessingException e) {
-			throw new ConfigurationException("Failed to json serialize payloadless  ResourceModifiedMessage", e);
+			throw new ConfigurationException(Msg.code(2335) + "Failed to json serialize payloadless  ResourceModifiedMessage", e);
 		}
 	}
 
