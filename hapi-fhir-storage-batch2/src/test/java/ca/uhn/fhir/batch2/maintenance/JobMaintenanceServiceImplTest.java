@@ -195,6 +195,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	public void testInProgress_GatedExecution_FirstStepComplete() {
 		// Setup
 		List<WorkChunk> chunks = Arrays.asList(
+			JobCoordinatorImplTest.createWorkChunkStep1().setStatus(WorkChunkStatusEnum.COMPLETED).setId(CHUNK_ID + "abc"),
 			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID),
 			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID_2)
 		);
@@ -205,12 +206,13 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			.thenReturn(chunks.iterator());
 
 		when(myJobPersistence.fetchAllChunkIdsForStepWithStatus(eq(INSTANCE_ID), eq(STEP_2), eq(WorkChunkStatusEnum.QUEUED)))
-			.thenReturn(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()));
+			.thenReturn(chunks.stream().filter(c->c.getTargetStepId().equals(STEP_2)).map(WorkChunk::getId).collect(Collectors.toList()));
 
 		JobInstance instance1 = createInstance();
 		instance1.setCurrentGatedStepId(STEP_1);
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
+		stubUpdateInstanceCallback(instance1);
 
 		// Execute
 		mySvc.runMaintenancePass();
