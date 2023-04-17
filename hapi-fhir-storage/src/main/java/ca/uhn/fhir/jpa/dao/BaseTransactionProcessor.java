@@ -1569,7 +1569,7 @@ public abstract class BaseTransactionProcessor {
 						continue;
 					}
 
-					if (myInMemoryResourceMatcher.match(matchUrl, resource, indexedParams).matched()) {
+					if (myInMemoryResourceMatcher.match(matchUrl, resource, indexedParams, theRequest).matched()) {
 						counter++;
 						if (counter > 1) {
 							throw new InvalidRequestException(Msg.code(542) + "Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");

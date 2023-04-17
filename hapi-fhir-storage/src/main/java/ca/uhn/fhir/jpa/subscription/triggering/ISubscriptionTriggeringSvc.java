@@ -25,11 +25,12 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public interface ISubscriptionTriggeringSvc {
 
-	IBaseParameters triggerSubscription(List<IPrimitiveType<String>> theResourceIds, List<IPrimitiveType<String>> theSearchUrls, @IdParam IIdType theSubscriptionId);
+	IBaseParameters triggerSubscription(@Nullable List<IPrimitiveType<String>> theResourceIds, @Nullable List<IPrimitiveType<String>> theSearchUrls, @Nullable IIdType theSubscriptionId);
 
 	void runDeliveryPass();
 }

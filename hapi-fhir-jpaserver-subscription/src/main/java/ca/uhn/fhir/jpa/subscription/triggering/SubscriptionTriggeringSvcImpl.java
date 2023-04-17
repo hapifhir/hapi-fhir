@@ -29,6 +29,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -38,7 +41,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -65,6 +67,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -108,9 +111,11 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 	@Autowired
 	private ISearchSvc mySearchService;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
 
 	@Override
-	public IBaseParameters triggerSubscription(List<IPrimitiveType<String>> theResourceIds, List<IPrimitiveType<String>> theSearchUrls, @IdParam IIdType theSubscriptionId) {
+	public IBaseParameters triggerSubscription(@Nullable List<IPrimitiveType<String>> theResourceIds, @Nullable List<IPrimitiveType<String>> theSearchUrls, @Nullable IIdType theSubscriptionId) {
 
 		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
 			throw new PreconditionFailedException(Msg.code(22) + "Subscription processing not active on this server");
@@ -227,7 +232,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		// This is the job initial step where we set ourselves up to do the actual re-submitting of resources
 		// to the broker.  Note that querying of resource can be done synchronously or asynchronously
-		if ( isInitialStep(theJobDetails) && isNotEmpty(theJobDetails.getRemainingSearchUrls()) && totalSubmitted < myMaxSubmitPerPass){
+		if (isInitialStep(theJobDetails) && isNotEmpty(theJobDetails.getRemainingSearchUrls()) && totalSubmitted < myMaxSubmitPerPass) {
 
 			String nextSearchUrl = theJobDetails.getRemainingSearchUrls().remove(0);
 			RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myFhirContext, nextSearchUrl);
@@ -264,7 +269,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 			String searchUrl = theJobDetails.getCurrentSearchUrl();
 
-			ourLog.info("Triggered job [{}] - Starting synchronous processing at offset {} and index {}", theJobDetails.getJobId(), theJobDetails.getCurrentOffset(), fromIndex );
+			ourLog.info("Triggered job [{}] - Starting synchronous processing at offset {} and index {}", theJobDetails.getJobId(), theJobDetails.getCurrentOffset(), fromIndex);
 
 			int submittableCount = myMaxSubmitPerPass - totalSubmitted;
 			int toIndex = fromIndex + submittableCount;
@@ -329,18 +334,35 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theJobDetails.getCurrentSearchResourceType());
 
 			int maxQuerySize = myMaxSubmitPerPass - totalSubmitted;
-			int toIndex = fromIndex + maxQuerySize;
+			int toIndex;
 			if (theJobDetails.getCurrentSearchCount() != null) {
-				toIndex = Math.min(toIndex, theJobDetails.getCurrentSearchCount());
+				toIndex = Math.min(fromIndex + maxQuerySize, theJobDetails.getCurrentSearchCount());
+			} else {
+				toIndex = fromIndex + maxQuerySize;
 			}
+
 			ourLog.info("Triggering job[{}] search {} requesting resources {} - {}", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex);
-			List<IResourcePersistentId> resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null);
+
+
+			List<IResourcePersistentId<?>> resourceIds;
+			RequestPartitionId requestPartitionId = RequestPartitionId.allPartitions();
+			resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
 
 			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), resourceIds.size());
 			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
 
-			for (IResourcePersistentId next : resourceIds) {
-				IBaseResource nextResource = resourceDao.readByPid(next);
+			String resourceType = myFhirContext.getResourceType(theJobDetails.getCurrentSearchResourceType());
+			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
+			ISearchBuilder searchBuilder = mySearchBuilderFactory.newSearchBuilder(resourceDao, resourceType, resourceDef.getImplementingClass());
+			List<IBaseResource> listToPopulate = new ArrayList<>();
+
+			myTransactionService
+				.withSystemRequest()
+				.execute(() -> {
+					searchBuilder.loadResourcesByPid(resourceIds, Collections.emptyList(), listToPopulate, false, new SystemRequestDetails());
+				});
+
+			for (IBaseResource nextResource : listToPopulate) {
 				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
 				futures.add(Pair.of(nextResource.getIdElement().getIdPart(), future));
 				totalSubmitted++;
@@ -369,7 +391,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		return isBlank(theJobDetails.myCurrentSearchUuid) && isBlank(theJobDetails.myCurrentSearchUrl);
 	}
 
-	private boolean jobHasCompleted(SubscriptionTriggeringJobDetails theJobDetails){
+	private boolean jobHasCompleted(SubscriptionTriggeringJobDetails theJobDetails) {
 		return isInitialStep(theJobDetails);
 	}
 
@@ -592,11 +614,11 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			myCurrentSearchLastUploadedIndex = theCurrentSearchLastUploadedIndex;
 		}
 
-		public void clearCurrentSearchUrl(){
+		public void clearCurrentSearchUrl() {
 			myCurrentSearchUrl = null;
 		}
 
-		public int getCurrentOffset(){
+		public int getCurrentOffset() {
 			return myCurrentOffset;
 		}
 
