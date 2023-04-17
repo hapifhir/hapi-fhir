@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR5Test;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -342,10 +343,10 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Test
 	public void testRestHookSubscriptionDoesntGetLatestVersionByDefault() throws Exception {
 		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
 
-		waitForActivatedSubscriptionCount(0);
-		createSubscription(Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription = createSubscription(Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
@@ -353,26 +354,33 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
-		Observation observation = sendObservation(code, "SNOMED-CT");
-		assertEquals("1", observation.getIdElement().getVersionIdPart());
-		assertNull(observation.getNoteFirstRep().getText());
+		Observation sentObservation = sendObservation(code, "SNOMED-CT", false);
+		assertEquals("1", sentObservation.getIdElement().getVersionIdPart());
+		assertNull(sentObservation.getNoteFirstRep().getText());
 
-		observation.getNoteFirstRep().setText("changed");
-		MethodOutcome methodOutcome = myClient.update().resource(observation).execute();
+		sentObservation.getNoteFirstRep().setText("changed");
+
+		DaoMethodOutcome methodOutcome = updateResource(sentObservation, false);
 		assertEquals("2", methodOutcome.getId().getVersionIdPart());
-		assertEquals("changed", observation.getNoteFirstRep().getText());
+		assertEquals("changed", sentObservation.getNoteFirstRep().getText());
 
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
+		mySubscriptionDeliveredLatch.setExpectedCount(2);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		mySubscriptionDeliveredLatch.awaitExpected();
 
+		assertEquals(2, getSystemProviderCount());
 
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(2, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-		Observation observation1 = BaseSubscriptionsR5Test.ourUpdatedObservations.stream().filter(t -> t.getIdElement().getVersionIdPart().equals("1")).findFirst().orElseThrow(() -> new IllegalStateException());
-		Observation observation2 = BaseSubscriptionsR5Test.ourUpdatedObservations.stream().filter(t -> t.getIdElement().getVersionIdPart().equals("2")).findFirst().orElseThrow(() -> new IllegalStateException());
+		Observation observation1 = getReceivedObservations().stream()
+			.filter(t -> "1".equals(t.getIdElement().getVersionIdPart()))
+			.findFirst()
+			.orElseThrow();
+		Observation observation2 = getReceivedObservations().stream()
+			.filter(t -> "2".equals(t.getIdElement().getVersionIdPart()))
+			.findFirst()
+			.orElseThrow();
 
 		assertEquals("1", observation1.getIdElement().getVersionIdPart());
 		assertNull(observation1.getNoteFirstRep().getText());
@@ -383,16 +391,13 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Test
 	public void testRestHookSubscriptionGetsLatestVersionWithFlag() throws Exception {
 		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
 
-		waitForActivatedSubscriptionCount(0);
-
-		String topic = "http://testRestHookSubscriptionGetsLatestVersionWithFlag";
-		Subscription subscription = newTopicSubscription(topic, Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL, Constants.CT_FHIR_JSON_NEW);
 		subscription
 			.addExtension(HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
-		myClient.create().resource(subscription).execute();
-
+		postSubscription(subscription);
 		waitForActivatedSubscriptionCount(1);
 
 		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
@@ -400,32 +405,27 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
-		Observation observation = sendObservation(code, "SNOMED-CT");
-		assertEquals("1", observation.getIdElement().getVersionIdPart());
-		assertNull(observation.getNoteFirstRep().getText());
+		Observation sentObservation = sendObservation(code, "SNOMED-CT", false);
+		assertEquals("1", sentObservation.getIdElement().getVersionIdPart());
+		assertNull(sentObservation.getNoteFirstRep().getText());
 
-		observation.getNoteFirstRep().setText("changed");
-		MethodOutcome methodOutcome = myClient.update().resource(observation).execute();
+		sentObservation.getNoteFirstRep().setText("changed");
+		DaoMethodOutcome methodOutcome = updateResource(sentObservation, false);
 		assertEquals("2", methodOutcome.getId().getVersionIdPart());
-		assertEquals("changed", observation.getNoteFirstRep().getText());
+		assertEquals("changed", sentObservation.getNoteFirstRep().getText());
 
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
+		mySubscriptionDeliveredLatch.setExpectedCount(2);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		mySubscriptionDeliveredLatch.awaitExpected();
 
-
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(2, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-		Observation observation1 = BaseSubscriptionsR5Test.ourUpdatedObservations.get(0);
-		Observation observation2 = BaseSubscriptionsR5Test.ourUpdatedObservations.get(1);
-
-		assertEquals("2", observation1.getIdElement().getVersionIdPart());
-		assertEquals("changed", observation1.getNoteFirstRep().getText());
-		assertEquals("2", observation2.getIdElement().getVersionIdPart());
-		assertEquals("changed", observation2.getNoteFirstRep().getText());
+		assertTrue(getReceivedObservations().stream().allMatch(t -> "2".equals(t.getIdElement().getVersionIdPart())));
+		assertTrue(getReceivedObservations().stream().anyMatch(t -> "changed".equals(t.getNoteFirstRep().getText())));
 	}
+
+	// FIXME KHS tests pass up to here
 
 	@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {

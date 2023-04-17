@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -53,7 +54,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -158,14 +161,20 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	}
 
 	protected Bundle getLastSystemProviderBundle() {
-		return ourTestSystemProvider.lastBundle;
+		return ourTestSystemProvider.getLastBundle();
 	}
 
 	protected String getLastSystemProviderContentType() {
-		return ourTestSystemProvider.lastContentType;
+		return ourTestSystemProvider.getLastContentType();
 	}
 
-
+	protected Set<Observation> getReceivedObservations() {
+		return ourTestSystemProvider.receivedBundles.stream()
+			.flatMap(t -> t.getEntry().stream())
+			.filter(t -> t.getResource() instanceof Observation)
+			.map(t -> (Observation) t.getResource())
+			.collect(Collectors.toSet());
+	}
 
 	protected Subscription createSubscription(String theTopic, String thePayload) throws InterruptedException {
 		// WIP STR5 will likely require matching TopicSubscription
@@ -225,18 +234,18 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return id;
 	}
 
-	protected IIdType updateResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
+	protected DaoMethodOutcome updateResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		if (theExpectDelivery) {
 			mySubscriptionDeliveredLatch.setExpectedCount(1);
 		}
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
-		IIdType id = dao.update(theResource, mySrd).getId();
+		DaoMethodOutcome retval = dao.update(theResource, mySrd);
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 		if (theExpectDelivery) {
 			mySubscriptionDeliveredLatch.awaitExpected();
 		}
-		return id;
+		return retval;
 	}
 
 	protected Bundle sendTransaction(Bundle theBundle, boolean theExpectDelivery) throws InterruptedException {
@@ -367,20 +376,32 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 	static class TestSystemProvider {
 		AtomicInteger count = new AtomicInteger(0);
-		Bundle lastBundle;
-		String lastContentType;
+		final List<Bundle> receivedBundles = new ArrayList<>();
+		final List<String> receivedContentTypes = new ArrayList<>();
 
 		@Transaction
 		public Bundle transaction(@TransactionParam Bundle theBundle, HttpServletRequest theRequest) {
 			ourLog.info("Received Transaction with {} entries", theBundle.getEntry().size());
 			count.incrementAndGet();
-			lastContentType = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", "");
-			lastBundle = theBundle;
+			receivedContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			receivedBundles.add(theBundle);
 			return theBundle;
 		}
 
 		int getCount() {
 			return count.get();
+		}
+
+		public String getLastContentType() {
+			return receivedContentTypes.get(receivedContentTypes.size() - 1);
+		}
+
+		public Bundle getLastBundle() {
+			return receivedBundles.get(receivedBundles.size() - 1);
+		}
+
+		public Bundle getReceivedBundle(int theIndex) {
+			return receivedBundles.get(theIndex);
 		}
 	}
 }

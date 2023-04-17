@@ -14,6 +14,8 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 
+import java.util.UUID;
+
 public class SubscriptionTopicPayloadBuilder {
 	private final FhirContext myFhirContext;
 
@@ -63,6 +65,7 @@ public class SubscriptionTopicPayloadBuilder {
 
 	private SubscriptionStatus buildSubscriptionStatus(IBaseResource theMatchedResource, ActiveSubscription theActiveSubscription, SubscriptionTopic theTopic, int theEventsSinceSubscriptionStart) {
 		SubscriptionStatus subscriptionStatus = new SubscriptionStatus();
+		subscriptionStatus.setId(UUID.randomUUID().toString());
 		subscriptionStatus.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
 		subscriptionStatus.setType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION);
 		// WIP STR5 count events since subscription start and set eventsSinceSubscriptionStart
