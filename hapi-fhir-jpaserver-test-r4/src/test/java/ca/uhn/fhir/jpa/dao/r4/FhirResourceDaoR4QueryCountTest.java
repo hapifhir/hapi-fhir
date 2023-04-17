@@ -5,13 +5,13 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
+import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -23,7 +23,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -52,6 +52,7 @@ import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -75,9 +76,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -94,14 +93,6 @@ import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
-	@Autowired
-	private ISearchParamPresentDao mySearchParamPresentDao;
-	@Autowired
-	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
-	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
-
 	@RegisterExtension
 	@Order(0)
 	public static final RestfulServerExtension ourServer = new RestfulServerExtension(FhirContext.forR4Cached())
@@ -109,7 +100,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@RegisterExtension
 	@Order(1)
 	public static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourServer, Patient.class);
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
+	@Autowired
+	private ISearchParamPresentDao mySearchParamPresentDao;
+	@Autowired
+	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
+	@Autowired
+	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 
 	@AfterEach
 	public void afterResetDao() {
@@ -128,7 +125,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
 		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
-        
+
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 	}
 
@@ -193,7 +190,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
-	public void testUpdateGroup_withAddedReferences_willSucceed(){
+	public void testUpdateGroup_withAddedReferences_willSucceed() {
 		int initialPatientsCount = 30;
 		int newPatientsCount = 5;
 		int allPatientsCount = initialPatientsCount + newPatientsCount;
@@ -216,7 +213,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
-	public void testUpdateGroup_NoChangesToReferences(){
+	public void testUpdateGroup_NoChangesToReferences() {
 		List<IIdType> patientList = createPatients(30);
 
 		myCaptureQueriesListener.clear();
@@ -2683,7 +2680,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		}
 
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, input);
+		Bundle output = mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(45, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
@@ -2695,8 +2692,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(input.getEntry().size(), output.getEntry().size());
 
 		runInTransaction(() -> {
-			assertEquals(1, myResourceTableDao.count());
-			assertEquals(1, myResourceHistoryTableDao.count());
+			assertEquals(10, myResourceTableDao.count());
+			assertEquals(10, myResourceHistoryTableDao.count());
 		});
 
 	}
@@ -2721,7 +2718,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input);
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 	}
 
@@ -2734,7 +2731,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	public void testTriggerSubscription() throws Exception {
 		// Setup
 
-		myStorageSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
+		myModelConfig.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
 		mySubscriptionMatcherInterceptor.startIfNeeded();
 
 		for (int i = 0; i < 10; i++) {
@@ -2999,7 +2996,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
-	public void testDeleteResource_WithMassIngestionMode_enabled(){
+	public void testDeleteResource_WithMassIngestionMode_enabled() {
 		myDaoConfig.setMassIngestionMode(true);
 
 		// given
@@ -3027,7 +3024,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
-	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount){
+	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount) {
 
 		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();

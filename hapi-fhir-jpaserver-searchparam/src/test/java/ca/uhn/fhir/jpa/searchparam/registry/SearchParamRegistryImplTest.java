@@ -12,8 +12,8 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -323,8 +323,8 @@ public class SearchParamRegistryImplTest {
 		}
 
 		@Bean
-		StorageSettings storageSettings() {
-			StorageSettings storageSettings = new StorageSettings();
+		ModelConfig modelConfig() {
+			ModelConfig storageSettings = new ModelConfig();
 			storageSettings.setDefaultSearchParamsCanBeOverridden(true);
 			return storageSettings;
 		}

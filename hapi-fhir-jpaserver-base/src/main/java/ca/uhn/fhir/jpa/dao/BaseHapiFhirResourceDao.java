@@ -726,6 +726,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	@Override
 	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
 		myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
 		Date updateTime = new Date();

@@ -113,6 +113,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private ISearchSvc mySearchService;
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
+	@Autowired
+	private HapiTransactionService myTransactionService;
 
 	@Override
 	public IBaseParameters triggerSubscription(@Nullable List<IPrimitiveType<String>> theResourceIds, @Nullable List<IPrimitiveType<String>> theSearchUrls, @Nullable IIdType theSubscriptionId) {
@@ -345,8 +347,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 
 			List<IResourcePersistentId<?>> resourceIds;
-			RequestPartitionId requestPartitionId = RequestPartitionId.allPartitions();
-			resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
+			resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null);
 
 			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), resourceIds.size());
 			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
@@ -357,7 +358,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			List<IBaseResource> listToPopulate = new ArrayList<>();
 
 			myTransactionService
-				.withSystemRequest()
+				.withRequest(null)
 				.execute(() -> {
 					searchBuilder.loadResourcesByPid(resourceIds, Collections.emptyList(), listToPopulate, false, new SystemRequestDetails());
 				});

@@ -28,8 +28,8 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -163,12 +163,7 @@ public class InMemoryResourceMatcher {
 		if (theIndexedSearchParams != null) {
 			relevantSearchParams = theIndexedSearchParams;
 		} else if (theResource != null) {
-			// Don't index search params we don't actully need for the given criteria
-			ISearchParamExtractor.ISearchParamFilter filter = theSearchParams -> theSearchParams
-				.stream()
-				.filter(t -> searchParameterMap.containsKey(t.getName()))
-				.collect(Collectors.toList());
-			relevantSearchParams = myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, theRequestDetails, filter);
+			relevantSearchParams = myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, theRequestDetails);
 		}
 
 		return match(searchParameterMap, theResource, resourceDefinition, relevantSearchParams);

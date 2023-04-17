@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -40,17 +39,12 @@ public class IndexedSearchParamExtractor {
 
 	@Nonnull
 	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest) {
-		return extractIndexedSearchParams(theResource, theRequest, ISearchParamExtractor.ALL_PARAMS);
-	}
-
-	@Nonnull
-	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest, ISearchParamExtractor.ISearchParamFilter filter) {
 		ResourceTable entity = new ResourceTable();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		String resourceType = myContext.getResourceType(theResource);
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
-		mySearchParamExtractorService.extractFromResource(null, theRequest, resourceIndexedSearchParams, new ResourceIndexedSearchParams(), entity, theResource, transactionDetails, false, filter);
+		mySearchParamExtractorService.extractFromResource(null, theRequest, resourceIndexedSearchParams, new ResourceIndexedSearchParams(), entity, theResource, transactionDetails, false);
 		return resourceIndexedSearchParams;
 	}
 }
