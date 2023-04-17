@@ -620,20 +620,20 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionTopicInvalidCriteria() throws Exception {
-		SubscriptionTopic subscriptionTopic = buildSubscriptionTopic("will-be-replaced");
-		setSubscriptionTopicCriteria(subscriptionTopic, "Observation?codeeeee=SNOMED-CT");
-
 		try {
-			createSubscriptionTopic(subscriptionTopic);
-			fail();
+			createSubscriptionTopicWithCriteria("Observation?codeeeee=SNOMED-CT");
 		} catch (UnprocessableEntityException e) {
 			// FIXME code
 			assertEquals("HTTP 422 Unprocessable Entity: " +  "Invalid SubscriptionTopic criteria 'Observation?codeeeee=SNOMED-CT' in SubscriptionTopic.resourceTrigger.queryCriteria.current: HAPI-0488: Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
 	}
 
-	// FIXME KHS tests pass to here
-
+	@Nonnull
+	private SubscriptionTopic createSubscriptionTopicWithCriteria(String theCriteria) throws InterruptedException {
+		SubscriptionTopic subscriptionTopic = buildSubscriptionTopic("will-be-replaced");
+		setSubscriptionTopicCriteria(subscriptionTopic, theCriteria);
+		return createSubscriptionTopic(subscriptionTopic);
+	}
 
 	@Test
 	public void testSubscriptionWithHeaders() throws Exception {
@@ -687,42 +687,40 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		assertEquals(1, getSystemProviderCount());
 	}
 
-	// FIXME pass up to here
-
 	@Test
 	public void testInvalidProvenanceParam() {
 		assertThrows(UnprocessableEntityException.class, () -> {
 			String criteriabad = "Provenance?foo=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
-			String topic = "http://testInvalidProvenanceParam";
-			Subscription subscription = newTopicSubscription(topic, Constants.CT_FHIR_JSON_NEW);
-			myClient.create().resource(subscription).execute();
+			createSubscriptionTopicWithCriteria(criteriabad);
 		});
 	}
 
 	@Test
 	public void testInvalidProcedureRequestParam() {
 		assertThrows(UnprocessableEntityException.class, () -> {
-			String topic = "http://testInvalidProcedureRequestParam";
-			Subscription subscription = newTopicSubscription(topic, Constants.CT_FHIR_JSON_NEW);
-			myClient.create().resource(subscription).execute();
+			String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
+			createSubscriptionTopicWithCriteria(criteriabad);
 		});
 	}
 
 	@Test
 	public void testInvalidBodySiteParam() {
 		assertThrows(UnprocessableEntityException.class, () -> {
-			String topic = "http://testInvalidBodySiteParam";
-			Subscription subscription = newTopicSubscription(topic, Constants.CT_FHIR_JSON_NEW);
-			myClient.create().resource(subscription).execute();
+			String criteriabad = "BodySite?accessType=Catheter";
+			createSubscriptionTopicWithCriteria(criteriabad);
 		});
 	}
 
+	// FIXME pass up to here
+
 	@Test
-	public void testGoodSubscriptionPersists() {
+	public void testGoodSubscriptionPersists() throws Exception {
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
+
 		assertEquals(0, subscriptionCount());
-		String topic = "http://testGoodSubscriptionPersists";
-		Subscription subscription = newTopicSubscription(topic, Constants.CT_FHIR_JSON_NEW);
-		myClient.create().resource(subscription).execute();
+		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
+		waitForActivatedSubscriptionCount(1);
 		assertEquals(1, subscriptionCount());
 	}
 
@@ -732,27 +730,25 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	}
 
 	@Test
-	public void testSubscriptionWithNoStatusIsRejected() {
-		String topic = "http://testSubscriptionWithNoStatusIsRejected";
-		Subscription subscription = newTopicSubscription(topic, "application/json");
-		subscription.setStatus(null);
+	public void testSubscriptionTopicWithNoStatusIsRejected() throws InterruptedException {
+		SubscriptionTopic subscriptionTopic = buildSubscriptionTopic(OBS_CODE);
+		subscriptionTopic.setStatus(null);
 
 		try {
-			myClient.create().resource(subscription).execute();
+			createSubscriptionTopic(subscriptionTopic);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			assertThat(e.getMessage(), containsString("Can not process submitted SubscriptionTopic - SubscriptionTopic.status must be populated on this server"));
 		}
 	}
 
 
 	@Test
-	public void testBadSubscriptionDoesntPersist() {
+	public void testBadSubscriptionTopicDoesntPersist() throws InterruptedException {
 		assertEquals(0, subscriptionCount());
-		String topic = "http://testBadSubscriptionDoesntPersist";
-		Subscription subscription = newTopicSubscription(topic, Constants.CT_FHIR_JSON_NEW);
+		String criteriaBad = "BodySite?accessType=Catheter";
 		try {
-			myClient.create().resource(subscription).execute();
+			createSubscriptionTopicWithCriteria(criteriaBad);
 		} catch (UnprocessableEntityException e) {
 			ourLog.info("Expected exception", e);
 		}

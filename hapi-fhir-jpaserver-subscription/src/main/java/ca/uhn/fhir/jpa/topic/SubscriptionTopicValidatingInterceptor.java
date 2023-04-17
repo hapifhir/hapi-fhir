@@ -55,7 +55,7 @@ public class SubscriptionTopicValidatingInterceptor {
 		boolean finished = false;
 		if (subscriptionTopic.getStatus() == null) {
 			// FIXME code
-			throw new UnprocessableEntityException("Can not process submitted Subscription - Subscription.status must be populated on this server");
+			throw new UnprocessableEntityException("Can not process submitted SubscriptionTopic - SubscriptionTopic.status must be populated on this server");
 		}
 
 		switch (subscriptionTopic.getStatus()) {

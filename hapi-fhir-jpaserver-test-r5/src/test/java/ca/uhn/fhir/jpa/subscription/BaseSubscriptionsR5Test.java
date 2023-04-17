@@ -325,10 +325,11 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return mySubscriptionTopicRegistry.size() == theTarget;
 	}
 
-	protected void createSubscriptionTopic(SubscriptionTopic theSubscriptionTopic) throws InterruptedException {
+	protected SubscriptionTopic createSubscriptionTopic(SubscriptionTopic theSubscriptionTopic) throws InterruptedException {
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
-		myClient.create().resource(theSubscriptionTopic).execute();
+		SubscriptionTopic retval = (SubscriptionTopic) myClient.create().resource(theSubscriptionTopic).execute().getResource();
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
+		return retval;
 	}
 
 	protected static void validateSubscriptionStatus(Subscription subscription, IBaseResource sentResource, SubscriptionStatus ss) {
