@@ -24,6 +24,8 @@ import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +54,7 @@ public interface IWorkChunkPersistence {
 	 * @param theBatchWorkChunk the batch work chunk to be stored
 	 * @return a globally unique identifier for this chunk.
 	 */
+	@Transactional(propagation = Propagation.REQUIRED)
 	String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk);
 
 	/**
@@ -62,6 +65,7 @@ public interface IWorkChunkPersistence {
 	 * @param theChunkId The ID from {@link #onWorkChunkCreate}
 	 * @return The WorkChunk or empty if no chunk exists, or not in a runnable state (QUEUED or ERRORRED)
 	 */
+	@Transactional(propagation = Propagation.REQUIRED)
 	Optional<WorkChunk> onWorkChunkDequeue(String theChunkId);
 
 	/**
@@ -80,6 +84,7 @@ public interface IWorkChunkPersistence {
 	 *
 	 * @param theChunkId The chunk ID
 	 */
+	@Transactional(propagation = Propagation.REQUIRED)
 	void onWorkChunkFailed(String theChunkId, String theErrorMessage);
 
 
@@ -89,6 +94,7 @@ public interface IWorkChunkPersistence {
 	 *
 	 * @param theEvent with record and error count
 	 */
+	@Transactional(propagation = Propagation.REQUIRED)
 	void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent);
 
 	/**
@@ -99,6 +105,7 @@ public interface IWorkChunkPersistence {
 	 * @param theStatus     - the status to mark
 	 * @param theErrorMsg   - error message (if status warrants it)
 	 */
+	@Transactional(propagation = Propagation.MANDATORY)
 	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMsg);
 
 

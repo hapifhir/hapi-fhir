@@ -53,7 +53,7 @@ public class JobInstanceProcessor {
 	private final String myInstanceId;
 	private final JobDefinitionRegistry myJobDefinitionegistry;
 
-	JobInstanceProcessor(IJobPersistence theJobPersistence,
+	public JobInstanceProcessor(IJobPersistence theJobPersistence,
 								BatchJobSender theBatchJobSender,
 								String theInstanceId,
 								JobChunkProgressAccumulator theProgressAccumulator,
@@ -78,18 +78,22 @@ public class JobInstanceProcessor {
 			return;
 		}
 
-		handleCancellation(theInstance);
+		boolean cancelUpdate = handleCancellation(theInstance);
+		if (cancelUpdate) {
+			// reload after update
+			theInstance = myJobPersistence.fetchInstance(myInstanceId).orElseThrow();
+		}
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance);
 		
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
 
-	private void handleCancellation(JobInstance theInstance) {
+	private boolean handleCancellation(JobInstance theInstance) {
 		if (theInstance.isPendingCancellationRequest()) {
 			String errorMessage = buildCancelledMessage(theInstance);
 			ourLog.info("Job {} moving to CANCELLED", theInstance.getInstanceId());
-			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance -> {
+			return myJobPersistence.updateInstance(theInstance.getInstanceId(), instance -> {
 				boolean changed = myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.CANCELLED);
 				if (changed) {
 					instance.setErrorMessage(errorMessage);
@@ -97,6 +101,7 @@ public class JobInstanceProcessor {
 				return changed;
 			});
 		}
+		return false;
 	}
 
 	private String buildCancelledMessage(JobInstance theInstance) {

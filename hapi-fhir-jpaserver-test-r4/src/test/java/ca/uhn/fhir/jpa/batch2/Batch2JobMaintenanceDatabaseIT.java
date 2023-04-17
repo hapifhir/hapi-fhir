@@ -223,9 +223,6 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		assertCurrentGatedStep(FIRST);
 	}
 	
-
-	// wipmb new tests
-
 	@Test
 	public void runMaintenancePass_allStepsComplete_jobCompletes() {
 		assertCurrentGatedStep(FIRST);

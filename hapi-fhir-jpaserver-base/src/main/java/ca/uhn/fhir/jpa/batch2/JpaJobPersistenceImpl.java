@@ -91,7 +91,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
 	public String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());
@@ -295,7 +294,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional
 	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMessage) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
@@ -373,7 +371,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.MANDATORY)
 	public Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId) {
 		return myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId).map(this::toChunk);
 	}
@@ -433,9 +430,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public boolean markInstanceAsStatusWhenStatusIn(String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates) {
-		int recordsChanged =	myTransactionService
-			.withSystemRequest()
-			.execute(()->myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum));
+		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum);
 		ourLog.debug("Update job {} to status {} if in status {}: {}", theInstance, theStatusEnum, thePriorStates, recordsChanged>0);
 		return recordsChanged > 0;
 	}
@@ -460,22 +455,5 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		}
 	}
 
-
-	@Override
-	public void processCancelRequests() {
-		myTransactionService
-			.withSystemRequest()
-			.execute(()->{
-				Query query = myEntityManager.createQuery(
-					"UPDATE Batch2JobInstanceEntity b " +
-						"set myStatus = ca.uhn.fhir.batch2.model.StatusEnum.CANCELLED, " +
-						"myErrorMessage = 'Job instance cancelled' || " +
-						"COALESCE(' while running step ' || myCurrentGatedStepId, '')" +
-						"where myCancelled = true " +
-						"AND myStatus IN (:states)");
-				query.setParameter("states", StatusEnum.CANCELLED.getPriorStates());
-				query.executeUpdate();
-			});
-	}
 
 }

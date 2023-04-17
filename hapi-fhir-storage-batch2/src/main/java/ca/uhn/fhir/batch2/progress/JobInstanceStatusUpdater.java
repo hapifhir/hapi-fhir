@@ -39,9 +39,9 @@ public class JobInstanceStatusUpdater {
 
 	/**
 	 * Update the status on the instance, and call any completion handlers when entering a completion state.
-	 * @param theJobInstance
-	 * @param theNewStatus
-	 * @return
+	 * @param theJobInstance the instance to mutate
+	 * @param theNewStatus target status
+	 * @return was the state change allowed?
 	 */
 	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
 		StatusEnum origStatus = theJobInstance.getStatus();

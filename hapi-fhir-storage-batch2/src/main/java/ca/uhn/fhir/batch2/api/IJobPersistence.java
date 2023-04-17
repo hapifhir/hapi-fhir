@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -46,6 +48,9 @@ import java.util.stream.Stream;
 /**
  *
  * Some of this is tested in {@link ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest}
+ * This is a transactional interface, but we have pushed the declaration of calls that have
+ * {@code @Transactional(propagation = Propagation.REQUIRES_NEW)} down to the implementations since we have a synchronized
+ * wrapper that was double-createing the NEW transaction.
  */
 public interface IJobPersistence extends IWorkChunkPersistence {
 	Logger ourLog = LoggerFactory.getLogger(IJobPersistence.class);
@@ -56,6 +61,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 *
 	 * @param theInstance The details
 	 */
+	@Transactional(propagation = Propagation.REQUIRED)
 	String storeNewInstance(JobInstance theInstance);
 
 	/**
@@ -106,6 +112,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	/**
 	 * Fetches all chunks for a given instance, without loading the data
 	 *
+	 * wipmb this seems to only be used by tests.  Can we use the iterator instead?
 	 * @param theInstanceId The instance ID
 	 * @param thePageSize   The page size
 	 * @param thePageIndex  The page index
@@ -126,6 +133,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * Fetch all chunks with data for a given instance for a given step id
 	 * @return - a stream for fetching work chunks
 	 */
+	@Transactional(propagation = Propagation.MANDATORY)
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
 	/**
@@ -164,6 +172,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum);
 
+	@Transactional(propagation = Propagation.MANDATORY)
 	boolean markInstanceAsStatusWhenStatusIn(String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates);
 
 	/**
@@ -175,7 +184,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	void updateInstanceUpdateTime(String theInstanceId);
 
-	void processCancelRequests();
 
 
 	/*

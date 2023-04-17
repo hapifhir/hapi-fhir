@@ -22,6 +22,9 @@ package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
+import ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -541,7 +544,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			assertNotNull(createResult);
 
 			// when
-			mySvc.onChunkDequeued(createResult.jobInstanceId);
+			newTxTemplate().execute(status -> mySvc.onChunkDequeued(createResult.jobInstanceId));
 
 		    // then
 			JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
@@ -563,8 +566,13 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			normalInstance.setStatus(theState);
 			String instanceId2 = mySvc.storeNewInstance(normalInstance);
 
+			JobDefinitionRegistry jobDefinitionRegistry = new JobDefinitionRegistry();
+			jobDefinitionRegistry.addJobDefinitionIfNotRegistered(withJobDefinition());
+
+
 			// when
-			runInTransaction(()-> mySvc.processCancelRequests());
+			runInTransaction(()-> new JobInstanceProcessor(mySvc, null, instanceId1, new JobChunkProgressAccumulator(), null, jobDefinitionRegistry)
+				.process());
 
 
 			// then
@@ -587,7 +595,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		String instanceId = mySvc.storeNewInstance(createInstance());
 
 		// when
-		mySvc.updateInstance(instanceId, (instance)->{
+		mySvc.updateInstance(instanceId, instance ->{
 			instance.setErrorCount(42);
 			return true;
 		});
@@ -606,7 +614,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		String instanceId = mySvc.storeNewInstance(instance1);
 
 		// when
-		mySvc.updateInstance(instanceId, (instance)->{
+		mySvc.updateInstance(instanceId, instance ->{
 			instance.setFastTracking(false);
 			return false;
 		});
