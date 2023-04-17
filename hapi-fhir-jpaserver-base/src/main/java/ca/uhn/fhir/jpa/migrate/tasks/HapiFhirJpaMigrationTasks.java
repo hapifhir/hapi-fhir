@@ -125,12 +125,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
 
 
-		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1", "HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
+		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1","HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
 
-		resSearchUrlTable.addColumn("RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
-		resSearchUrlTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		resSearchUrlTable.addColumn( "RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
+		resSearchUrlTable.addColumn( "RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
 
-		resSearchUrlTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		resSearchUrlTable.addColumn( "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 
 		resSearchUrlTable.addIndex("20230227.2", "IDX_RESSEARCHURL_RES").unique(false).withColumns("RES_ID");
 		resSearchUrlTable.addIndex("20230227.3", "IDX_RESSEARCHURL_TIME").unique(false).withColumns("CREATED_TIME");
@@ -233,7 +233,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 			version
 				.onTable(enversMpiLinkAuditTable)
-				.addColumn("20230316.4", "PARTITION_DATE")
+			   .addColumn("20230316.4", "PARTITION_DATE")
 				.nullable()
 				.type(ColumnTypeEnum.DATE_ONLY);
 		}
@@ -313,7 +313,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			"alter table hfj_spidx_uri alter column hash_uri set statistics 10000"
 			)));
 	}
-
 
 	protected void init640() {
 		Builder version = forVersion(VersionEnum.V6_3_0);
@@ -2277,4 +2276,3 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 
 }
-

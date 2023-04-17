@@ -37,6 +37,6 @@ public interface IResourceModifiedConsumer {
 	 * This is an internal API - Use with caution!
 	 *
 	 */
-	void processResourceModified(ResourceModifiedMessage theMsg);
+	void submitResourceModified(ResourceModifiedMessage theMsg);
 
 }

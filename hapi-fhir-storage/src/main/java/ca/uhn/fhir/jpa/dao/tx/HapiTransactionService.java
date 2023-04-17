@@ -316,9 +316,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 				txTemplate.setReadOnly(true);
 			}
 
-			T retVal = txTemplate.execute(theCallback);
-
-			return retVal;
+			return txTemplate.execute(theCallback);
 		} catch (MyException e) {
 			if (e.getCause() instanceof RuntimeException) {
 				throw (RuntimeException) e.getCause();

@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class JpaSubscriptionMessagePersistenceConfig {
+public class JpaResourceModifiedMessagePersistenceConfig {
 
 	@Bean
 	public IResourceModifiedMessagePersistenceSvc subscriptionMessagePersistence(FhirContext theFhirContext, IResourceModifiedDao theIResourceModifiedDao, DaoRegistry theDaoRegistry){

@@ -433,7 +433,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		return myExecutorService.submit(() -> {
 			for (int i = 0; ; i++) {
 				try {
-					myResourceModifiedConsumer.processResourceModified(msg);
+					myResourceModifiedConsumer.submitResourceModified(msg);
 					break;
 				} catch (Exception e) {
 					if (i >= 3) {

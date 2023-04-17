@@ -48,12 +48,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
 /**
- * This service provides two distinct context in which it submits messages to the subscription pipeline.
+ * This service provides two distinct contexts in which it submits messages to the subscription pipeline.
  *
  * It implements {@link IResourceModifiedConsumer} for synchronous submissions where retry upon failures is not required.
  *
  * It implements {@link IResourceModifiedConsumerWithRetries} for synchronous submissions performed as part of processing
- * an operation on a resource (see {@link SubscriptionMatcherInterceptor}).  Submissions in this context require retries
+ * an operation on a resource (see {@link SubscriptionMatcherInterceptor}).  Submissions in such context require retries
  * upon submission failure.
  *
  *
@@ -95,7 +95,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	 *
 	 */
 	@Override
-	public void processResourceModified(ResourceModifiedMessage theMsg) {
+	public void submitResourceModified(ResourceModifiedMessage theMsg) {
 		startIfNeeded();
 
 		ourLog.trace("Sending resource modified message to processing channel");
@@ -111,7 +111,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	 * Implementation of {@link IResourceModifiedConsumerWithRetries}
 	 */
 	@Override
-	public boolean processResourceModifiedPostCommit(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK) {
+	public boolean submitResourceModified(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK) {
 
 		// we have a message and it's already persisted.  to respect the operations on resources order, we can only submit <code>theResourceModifiedMessage</code>
 		// to the pipeline if there is no other messages needing submission before this one.
@@ -142,7 +142,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 				if(wasDeleted) {
 					// the PK did exist and we were able to deleted it, ie, we are the only one processing the message
-					processResourceModified(theResourceModifiedMessage);
+					submitResourceModified(theResourceModifiedMessage);
 				} else {
 					// we were not able to delete the pk.  this implies that someone else did read/delete the PK and processed the message
 					// successfully before we did.  still, we return true as the message was processed.

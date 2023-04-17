@@ -83,7 +83,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.processResourceModifiedPostCommit(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
+		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.TRUE));
@@ -99,7 +99,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(false);
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.processResourceModifiedPostCommit(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
+		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.TRUE));
@@ -118,7 +118,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myChannelProducer.send(any())).thenThrow(new MessageDeliveryException("sendingError"));
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.processResourceModifiedPostCommit(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
+		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.FALSE));

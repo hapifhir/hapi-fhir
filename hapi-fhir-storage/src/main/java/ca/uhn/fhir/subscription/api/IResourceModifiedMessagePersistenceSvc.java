@@ -31,8 +31,7 @@ import java.util.List;
  *
  * Client of this interface should persist ResourceModifiedMessage as part of the processing of an operation on
  * a resource.  Upon a successful submission to the subscription pipeline, the persisted message should be deleted
- * or left un-altered for further re-submission at a later time (see {@link IResourceModifiedConsumerWithRetries}
- * and {@link IAsyncResourceModifiedConsumer}).
+ * or left un-altered for further re-submission at a later time (see {@link IResourceModifiedConsumerWithRetries}.
  */
 public interface IResourceModifiedMessagePersistenceSvc {
 

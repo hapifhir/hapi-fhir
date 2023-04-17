@@ -32,7 +32,7 @@ public interface IResourceModifiedConsumerWithRetries {
 
 	/**
 	 * The implementer of this method should submit a ResourceModifiedMessage to a broker (see {@link IResourceModifiedConsumer})
-	 * and if submission succeed, delete the persisted message referred to by the IResourceModifiedPK.
+	 * and if submission succeeds, delete the persisted message referred to by the IResourceModifiedPK.
 	 *
 	 * Clients of this interface are responsible for persisting the {@link ResourceModifiedMessage} through a
 	 * {@link IResourceModifiedMessagePersistenceSvc} before invoking this service.
@@ -42,6 +42,6 @@ public interface IResourceModifiedConsumerWithRetries {
 	 * @param theResourceModifiedPK The primary key pointing to the <code>theResourceModifiedMessage</code> in its persisted form.
 	 * @return Whether the message was successfully submitted to the broker
 	 */
-	boolean processResourceModifiedPostCommit(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK);
+	boolean submitResourceModified(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK);
 
 }

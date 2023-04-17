@@ -214,7 +214,7 @@ import java.util.Date;
 	SearchConfig.class,
 	PackageLoaderConfig.class,
 	EnversAuditConfig.class,
-	JpaSubscriptionMessagePersistenceConfig.class
+	JpaResourceModifiedMessagePersistenceConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";

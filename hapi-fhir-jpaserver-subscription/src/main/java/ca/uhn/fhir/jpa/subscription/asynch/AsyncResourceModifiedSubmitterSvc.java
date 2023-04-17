@@ -55,7 +55,7 @@ public class AsyncResourceModifiedSubmitterSvc {
 
 			ResourceModifiedMessage modifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(resourceModifiedPk);
 
-			boolean wasProcessed = myResourceModifiedConsumer.processResourceModifiedPostCommit(modifiedMessage, resourceModifiedPk);
+			boolean wasProcessed = myResourceModifiedConsumer.submitResourceModified(modifiedMessage, resourceModifiedPk);
 
 			if(!wasProcessed){
 				break;

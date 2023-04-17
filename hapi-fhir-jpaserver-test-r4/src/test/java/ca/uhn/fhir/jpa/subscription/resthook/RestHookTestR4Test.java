@@ -96,8 +96,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals("IN_MEMORY", subscription.getMeta().getTag().get(0).getCode());
 	}
 
-
-	// pepe
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
 		String payload = "application/fhir+json";

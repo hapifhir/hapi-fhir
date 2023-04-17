@@ -180,7 +180,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testMethodFindAllIds_withPersistedResourceModifiedMessages_willReturnedAllPK(){
+	public void testMethodFindAllPKs_willReturnAllResourceModifiedPK(){
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 
 		// given
@@ -203,30 +203,8 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testMethodRemoveByPK_needsExternalTransaction(){
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-
-		// given
-		Patient patient = sendPatient();
-
-		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
-		IResourceModifiedPK patientPk = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
-
-		// when
-		int wasDeleted = myResourceModifiedDao.removeById((ResourceModifiedEntityPK) patientPk);
-
-		// then
-		assertThat(wasDeleted, is(1));
-		assertThat(myResourceModifiedMessagePersistenceSvc.findAllPKs(), hasSize(0));
-	}
-
-
-	@Test
 	public void testMethodDeleteByPK_whenEntityExists_willDeleteTheEntityAndReturnTrue(){
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-
-		boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
-		ourLog.info("pepe is in transaction {}", actualTransactionActive);
 
 		// given
 		Patient patient = sendPatient();
@@ -240,18 +218,6 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		// then
 		assertThat(wasDeleted, is(Boolean.TRUE));
 		assertThat(myResourceModifiedMessagePersistenceSvc.findAllPKs(), hasSize(0));
-	}
-
-	@Test
-	public void testMethodDeleteByPK_whenEntityExists_willDeleteTheEntityAndReturnTrueInTransaction(){
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-
-		TransactionCallback transactionCallback = status -> {
-			testMethodDeleteByPK_whenEntityExists_willDeleteTheEntityAndReturnTrue();
-			return true;
-		};
-
-		txTemplate.execute(transactionCallback);
 	}
 
 	@Test

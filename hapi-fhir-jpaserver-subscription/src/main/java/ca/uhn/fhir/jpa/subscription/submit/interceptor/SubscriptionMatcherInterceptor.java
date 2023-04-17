@@ -121,11 +121,11 @@ public class SubscriptionMatcherInterceptor {
 
 		IResourceModifiedPK resourceModifiedPK = myResourceModifiedMessagePersistenceSvc.persist(msg);
 
-		schedulePostCommitOrPerformMessageDelivery(msg, resourceModifiedPK);
+		schedulePostCommitDeliverOrDeliverMessage(msg, resourceModifiedPK);
 
 	}
 
-	private void schedulePostCommitOrPerformMessageDelivery(ResourceModifiedMessage theMsg, IResourceModifiedPK thePersistedResourceModifiedPK) {
+	private void schedulePostCommitDeliverOrDeliverMessage(ResourceModifiedMessage theMsg, IResourceModifiedPK thePersistedResourceModifiedPK) {
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 
@@ -137,12 +137,12 @@ public class SubscriptionMatcherInterceptor {
 
 				@Override
 				public void afterCommit() {
-					myResourceModifiedSubmitterSvc.processResourceModifiedPostCommit(theMsg, thePersistedResourceModifiedPK);
+					myResourceModifiedSubmitterSvc.submitResourceModified(theMsg, thePersistedResourceModifiedPK);
 				}
 			});
 
 		} else{
-			myResourceModifiedSubmitterSvc.processResourceModifiedPostCommit(theMsg, thePersistedResourceModifiedPK);
+			myResourceModifiedSubmitterSvc.submitResourceModified(theMsg, thePersistedResourceModifiedPK);
 		}
 
 	}
