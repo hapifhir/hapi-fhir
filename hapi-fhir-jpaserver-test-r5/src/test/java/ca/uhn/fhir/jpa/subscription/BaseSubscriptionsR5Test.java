@@ -320,7 +320,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 	protected void createSubscriptionTopic(SubscriptionTopic theSubscriptionTopic) throws InterruptedException {
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
-		mySubscriptionTopicDao.create(theSubscriptionTopic, mySrd);
+		myClient.create().resource(theSubscriptionTopic).execute();
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 	}
 

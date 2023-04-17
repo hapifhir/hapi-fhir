@@ -500,8 +500,6 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		return createTopicSubscription(theTopicUrlSuffix, Constants.CT_FHIR_JSON_NEW);
 	}
 
-	// FIXME KHS tests pass up to here
-
 	@Test
 	public void testSubscriptionTriggerViaSubscription() throws Exception {
 		String code = OBS_CODE;
@@ -571,7 +569,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		ourLog.info("** About to update subscription topic");
 		SubscriptionTopic subscriptionTopicTemp = myClient.read(SubscriptionTopic.class, subscriptionTopic.getId());
 		assertNotNull(subscriptionTopicTemp);
-		subscriptionTopicTemp.getResourceTriggerFirstRep().getQueryCriteria().setCurrent("Observation?code=SNOMED-CT|" + OBS_CODE);
+		setSubscriptionTopicCriteria(subscriptionTopicTemp, "Observation?code=SNOMED-CT|" + OBS_CODE);
 		updateResource(subscriptionTopicTemp, false);
 
 		ourLog.info("** About to send Observation 2");
@@ -588,38 +586,54 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		assertEquals(1, getSystemProviderCount());
 	}
 
-	// FIXME KHS tests pass to here
+	private static void setSubscriptionTopicCriteria(SubscriptionTopic subscriptionTopicTemp, String theCriteria) {
+		subscriptionTopicTemp.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(theCriteria);
+	}
 
 	@Test
 	public void testRestHookSubscriptionApplicationXmlJson() throws Exception {
 		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+		createObservationSubscriptionTopic(OBS_CODE);
+		createObservationSubscriptionTopic(OBS_CODE2);
+		waitForRegisteredSubscriptionTopicCount(2);
 
 		Subscription subscription1 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
-		Subscription subscription2 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
+		Subscription subscription2 = createTopicSubscription(OBS_CODE2, Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		Assertions.assertEquals(Constants.CT_FHIR_XML_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(0));
+		assertEquals(1, getSystemProviderCount());
+		assertEquals(Constants.CT_FHIR_XML_NEW, getLastSystemProviderContentType());
 	}
 
 	@Test
-	public void testRestHookSubscriptionInvalidCriteria() throws Exception {
-		String criteria1 = "Observation?codeeeee=SNOMED-CT";
-
+	public void testRestHookTopicSubscriptionInvalidTopic() throws Exception {
 		try {
-			createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
+			createTopicSubscription(OBS_CODE);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(2322) + "No SubscriptionTopic exists with topic: " + SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE, e.getMessage());
 		}
 	}
+
+	@Test
+	public void testRestHookSubscriptionTopicInvalidCriteria() throws Exception {
+		SubscriptionTopic subscriptionTopic = buildSubscriptionTopic("will-be-replaced");
+		setSubscriptionTopicCriteria(subscriptionTopic, "Observation?codeeeee=SNOMED-CT");
+
+		try {
+			createSubscriptionTopic(subscriptionTopic);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// FIXME code
+			assertEquals("HTTP 422 Unprocessable Entity: " +  "Invalid SubscriptionTopic criteria 'Observation?codeeeee=SNOMED-CT' in SubscriptionTopic.resourceTrigger.queryCriteria.current: HAPI-0488: Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+		}
+	}
+
+	// FIXME KHS tests pass to here
+
 
 	@Test
 	public void testSubscriptionWithHeaders() throws Exception {
@@ -809,8 +823,16 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	}
 
 	private SubscriptionTopic createObservationSubscriptionTopic(String theCode) throws InterruptedException {
+		SubscriptionTopic retval = buildSubscriptionTopic(theCode);
+		createSubscriptionTopic(retval);
+
+		return retval;
+	}
+
+	@Nonnull
+	private static SubscriptionTopic buildSubscriptionTopic(String theCode) {
 		SubscriptionTopic retval = new SubscriptionTopic();
-		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL+theCode);
+		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL+ theCode);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = retval.addResourceTrigger();
 		trigger.setResource("Observation");
@@ -819,8 +841,6 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = trigger.getQueryCriteria();
 		queryCriteria.setCurrent("Observation?code=SNOMED-CT|" + theCode);
 		queryCriteria.setRequireBoth(false);
-		createSubscriptionTopic(retval);
-
 		return retval;
 	}
 
