@@ -588,6 +588,8 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		assertEquals(1, getSystemProviderCount());
 	}
 
+	// FIXME KHS tests pass to here
+
 	@Test
 	public void testRestHookSubscriptionApplicationXmlJson() throws Exception {
 		String code = OBS_CODE;
