@@ -176,13 +176,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 			.collect(Collectors.toSet());
 	}
 
-	protected Subscription createSubscription(String theTopic, String thePayload) throws InterruptedException {
-		// WIP STR5 will likely require matching TopicSubscription
-		Subscription subscription = newTopicSubscription(theTopic, thePayload);
-
-		return postSubscription(subscription);
-	}
-
 	@Nonnull
 	protected Subscription postSubscription(Subscription subscription) throws InterruptedException {
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
@@ -343,7 +336,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		assertEquals(sentResource.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
 
 		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());
-		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, ss.getTopic());
+		assertEquals(subscription.getTopic(), ss.getTopic());
 	}
 
 	@BeforeAll

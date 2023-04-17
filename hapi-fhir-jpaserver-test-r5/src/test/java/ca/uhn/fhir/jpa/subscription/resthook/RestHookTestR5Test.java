@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Test the rest-hook subscriptions
  */
-public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
+public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR5Test.class);
 	public static final String OBS_CODE = "1000000050";
 
@@ -74,7 +74,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE + "111");
 		waitForRegisteredSubscriptionTopicCount(2);
 
-		Subscription subscription = createSubscription(Constants.CT_FHIR_XML_NEW);
+		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT", true);
@@ -93,7 +93,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
-		Subscription subscription = createSubscription();
+		Subscription subscription = createTopicSubscription(OBS_CODE);
 		waitForActivatedSubscriptionCount(1);
 
 		/*
@@ -141,7 +141,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
-		Subscription subscription = createSubscription();
+		Subscription subscription = createTopicSubscription(OBS_CODE);
 		waitForActivatedSubscriptionCount(1);
 
 		// Create a transaction that should match
@@ -174,7 +174,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
-		Subscription subscription = createSubscription();
+		Subscription subscription = createTopicSubscription(OBS_CODE);
 		waitForActivatedSubscriptionCount(1);
 
 		/*
@@ -234,7 +234,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
-		createSubscription();
+		createTopicSubscription(OBS_CODE);
 		waitForActivatedSubscriptionCount(1);
 
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(100);
@@ -258,7 +258,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForRegisteredSubscriptionTopicCount(1);
 
 		// FIXME extract method
-		createSubscription(Constants.CT_FHIR_JSON_NEW);
+		createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		for (int i = 0; i < 5; i++) {
@@ -273,7 +273,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE + "111");
 		waitForRegisteredSubscriptionTopicCount(2);
 
-		Subscription subscription = createSubscription(Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT");
@@ -301,7 +301,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForRegisteredSubscriptionTopicCount(1);
 
 		waitForActivatedSubscriptionCount(0);
-		Subscription subscription = createSubscription(Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		ourLog.info("** About to send observation");
@@ -346,7 +346,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
-		Subscription subscription = createSubscription(Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
@@ -425,53 +425,43 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertTrue(getReceivedObservations().stream().anyMatch(t -> "changed".equals(t.getNoteFirstRep().getText())));
 	}
 
-	// FIXME KHS tests pass up to here
-
 	@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
 		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+		createObservationSubscriptionTopic(OBS_CODE);
+		createObservationSubscriptionTopic(OBS_CODE + "111");
+		waitForRegisteredSubscriptionTopicCount(2);
 
-		Subscription subscription1 = createSubscription(Constants.CT_FHIR_JSON_NEW);
-		Subscription subscription2 = createSubscription(Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription1 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription2 = createTopicSubscription(OBS_CODE+"111", Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(2);
 
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
+		Observation sentObservation1 = sendObservation(code, "SNOMED-CT", true);
 
-		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(0));
+		assertEquals(1, getSystemProviderCount());
 
-		Assertions.assertEquals("1", BaseSubscriptionsR5Test.ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
+		Observation receivedObs = assertBundleAndGetObservation(subscription1, sentObservation1);
+
+		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+
+		Assertions.assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 
-		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getContained().get(0);
-		topic.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(criteria1);
-
-		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-		waitForQueueToDrain();
+		subscriptionTemp.setTopic(subscription1.getTopic());
+		updateResource(subscriptionTemp, false);
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
-		waitForQueueToDrain();
 
-		// Should see two subscription notifications
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(3, BaseSubscriptionsR5Test.ourUpdatedObservations);
+		assertEquals(3, getSystemProviderCount());
 
 		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
-		waitForQueueToDrain();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
-		waitForQueueToDrain();
 
 		// Should see only one subscription notification
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(4, BaseSubscriptionsR5Test.ourUpdatedObservations);
+		assertEquals(4, getSystemProviderCount());
 
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -479,12 +469,10 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		updateResource(observation3, false);
 
 		// Should see no subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(4, BaseSubscriptionsR5Test.ourUpdatedObservations);
+		assertEquals(4, getSystemProviderCount());
 
 		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
@@ -493,15 +481,13 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		updateResource(observation3a, true);
 
 		// Should see only one subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(5, BaseSubscriptionsR5Test.ourUpdatedObservations);
+		assertEquals(5, getSystemProviderCount());
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
+		assertFalse(sentObservation1.getId().isEmpty());
 		assertFalse(observation2.getId().isEmpty());
 	}
 
@@ -513,8 +499,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription();
-		Subscription subscription2 = createSubscription(Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription1 = createTopicSubscription(OBS_CODE);
+		Subscription subscription2 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
@@ -586,9 +572,11 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	}
 
 	@Nonnull
-	private Subscription createSubscription() throws InterruptedException {
-		return createSubscription(Constants.CT_FHIR_JSON_NEW);
+	private Subscription createTopicSubscription(String theTopicUrlSuffix) throws InterruptedException {
+		return createTopicSubscription(theTopicUrlSuffix, Constants.CT_FHIR_JSON_NEW);
 	}
+
+	// FIXME KHS tests pass up to here
 
 	@Test
 	public void testRestHookSubscriptionApplicationXml() throws Exception {
@@ -596,8 +584,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription(Constants.CT_FHIR_XML_NEW);
-		Subscription subscription2 = createSubscription(Constants.CT_FHIR_XML_NEW);
+		Subscription subscription1 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
+		Subscription subscription2 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(2);
 
 		ourLog.info("** About to send observation");
@@ -670,7 +658,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		createSubscription(Constants.CT_FHIR_XML_NEW);
+		createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		ourLog.info("** About to send observation");
@@ -721,7 +709,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		ourLog.info("** About to create non-matching subscription");
 
-		Subscription subscription2 = createSubscription(Constants.CT_FHIR_XML_NEW);
+		Subscription subscription2 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
 
 		ourLog.info("** About to send observation that wont match");
 
@@ -766,8 +754,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription(Constants.CT_FHIR_XML_NEW);
-		Subscription subscription2 = createSubscription(Constants.CT_FHIR_XML_NEW);
+		Subscription subscription1 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
+		Subscription subscription2 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
@@ -784,7 +772,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String criteria1 = "Observation?codeeeee=SNOMED-CT";
 
 		try {
-			createSubscription(Constants.CT_FHIR_JSON_NEW);
+			createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
@@ -797,7 +785,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		// Add some headers, and we'll also turn back to requested status for fun
-		Subscription subscription = createSubscription(Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		subscription.addHeader("X-Foo: FOO");
@@ -822,7 +810,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String code = OBS_CODE;
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		Subscription subscription = createSubscription(Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		sendObservation(code, "SNOMED-CT");
@@ -929,7 +917,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(sp);
 		mySearchParamRegistry.forceRefresh();
-		createSubscription("application/json");
+		createTopicSubscription(OBS_CODE, "application/json");
 		waitForActivatedSubscriptionCount(1);
 
 		{
@@ -980,7 +968,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	private SubscriptionTopic createObservationSubscriptionTopic(String theCode) throws InterruptedException {
 		SubscriptionTopic retval = new SubscriptionTopic();
-		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL);
+		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL+theCode);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = retval.addResourceTrigger();
 		trigger.setResource("Observation");
@@ -995,9 +983,9 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	}
 
 
-	private Subscription createSubscription(String thePayload) throws InterruptedException {
+	private Subscription createTopicSubscription(String theTopicUrlSuffix, String thePayload) throws InterruptedException {
 		// WIP STR5 will likely require matching TopicSubscription
-		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL, thePayload);
+		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + theTopicUrlSuffix, thePayload);
 
 		return postSubscription(subscription);
 	}

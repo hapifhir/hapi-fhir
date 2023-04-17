@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.r5.model.Subscription;
 
 import java.util.ArrayList;
@@ -94,5 +96,21 @@ public class CanonicalTopicSubscription {
 
 	public void setContent(Subscription.SubscriptionPayloadContent theContent) {
 		myContent = theContent;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		CanonicalTopicSubscription that = (CanonicalTopicSubscription) theO;
+
+		return new EqualsBuilder().append(myTopic, that.myTopic).isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(myTopic).toHashCode();
 	}
 }

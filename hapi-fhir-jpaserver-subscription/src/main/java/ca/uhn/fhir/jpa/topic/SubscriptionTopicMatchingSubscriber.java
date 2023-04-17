@@ -78,7 +78,7 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 			SubscriptionTopicMatcher matcher = new SubscriptionTopicMatcher(mySubscriptionTopicSupport, topic);
 			InMemoryMatchResult result = matcher.match(theMsg);
 			if (result.matched()) {
-				ourLog.info("Matched topic {} to message {}", topic.getIdElement().toUnqualifiedVersionless(), theMsg);
+				ourLog.info("Matched topic {} to message {}", topic.getUrl(), theMsg);
 				deliverToTopicSubscriptions(theMsg, topic, result);
 			}
 		}

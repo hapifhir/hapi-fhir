@@ -290,6 +290,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		b.append(myChannelExtensions, that.myChannelExtensions);
 		b.append(mySendDeleteMessages, that.mySendDeleteMessages);
 		b.append(myPayloadSearchCriteria, that.myPayloadSearchCriteria);
+		b.append(myTopicSubscription, that.myTopicSubscription);
 		return b.isEquals();
 	}
 
