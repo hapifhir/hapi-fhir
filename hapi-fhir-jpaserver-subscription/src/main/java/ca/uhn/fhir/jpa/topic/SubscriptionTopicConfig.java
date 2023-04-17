@@ -38,4 +38,9 @@ public class SubscriptionTopicConfig {
 	public SubscriptionTopicLoader subscriptionTopicLoader() {
 		return new SubscriptionTopicLoader();
 	}
+
+	@Bean
+	public SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber() {
+		return new SubscriptionTopicRegisteringSubscriber();
+	}
 }

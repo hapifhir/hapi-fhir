@@ -231,5 +231,20 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return myPayloadId;
 	}
 
+	public boolean hasPayloadType(FhirContext theFhirContext, String theResourceName) {
+		String payloadIdType = null;
+		IIdType payloadId = getPayloadId(theFhirContext);
+		if (payloadId != null) {
+			payloadIdType = payloadId.getResourceType();
+		}
+		if (isBlank(payloadIdType)) {
+			IBaseResource payload = getNewPayload(theFhirContext);
+			if (payload != null) {
+				payloadIdType = theFhirContext.getResourceType(payload);
+			}
+		}
+
+		return theResourceName.equals(payloadIdType);
+	}
 }
 

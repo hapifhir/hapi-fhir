@@ -56,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR5Test.class);
 	public static final String OBS_CODE = "1000000050";
+	public static final String OBS_CODE2 = OBS_CODE + "111";
 
 
 	@Autowired
@@ -71,7 +72,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
 		createObservationSubscriptionTopic(OBS_CODE);
-		createObservationSubscriptionTopic(OBS_CODE + "111");
+		createObservationSubscriptionTopic(OBS_CODE2);
 		waitForRegisteredSubscriptionTopicCount(2);
 
 		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
@@ -270,7 +271,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	@Test
 	public void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
 		createObservationSubscriptionTopic(OBS_CODE);
-		createObservationSubscriptionTopic(OBS_CODE + "111");
+		createObservationSubscriptionTopic(OBS_CODE2);
 		waitForRegisteredSubscriptionTopicCount(2);
 
 		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
@@ -429,26 +430,22 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
 		String code = OBS_CODE;
 		createObservationSubscriptionTopic(OBS_CODE);
-		createObservationSubscriptionTopic(OBS_CODE + "111");
+		createObservationSubscriptionTopic(OBS_CODE2);
 		waitForRegisteredSubscriptionTopicCount(2);
 
 		Subscription subscription1 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
-		Subscription subscription2 = createTopicSubscription(OBS_CODE+"111", Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription2 = createTopicSubscription(OBS_CODE2, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(2);
 
 		Observation sentObservation1 = sendObservation(code, "SNOMED-CT", true);
-
 		assertEquals(1, getSystemProviderCount());
-
 		Observation receivedObs = assertBundleAndGetObservation(subscription1, sentObservation1);
-
 		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 
 		Assertions.assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
-
 		subscriptionTemp.setTopic(subscription1.getTopic());
 		updateResource(subscriptionTemp, false);
 
@@ -495,80 +492,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	public void testRestHookSubscriptionApplicationJsonDatabase() throws Exception {
 		// Same test as above, but now run it using database matching
 		myStorageSettings.setEnableInMemorySubscriptionMatching(false);
-		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
-
-		Subscription subscription1 = createTopicSubscription(OBS_CODE);
-		Subscription subscription2 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
-		waitForActivatedSubscriptionCount(2);
-
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
-
-		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(0));
-
-		Assertions.assertEquals("1", BaseSubscriptionsR5Test.ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
-
-		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertNotNull(subscriptionTemp);
-
-		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getContained().get(0);
-		topic.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(criteria1);
-
-		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-		waitForQueueToDrain();
-
-		Observation observation2 = sendObservation(code, "SNOMED-CT");
-		waitForQueueToDrain();
-
-		// Should see two subscription notifications
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(3, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
-		waitForQueueToDrain();
-
-		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
-		waitForQueueToDrain();
-
-		// Should see only one subscription notification
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(4, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation3.setCode(codeableConcept);
-		Coding coding = codeableConcept.addCoding();
-		coding.setCode(code + "111");
-		coding.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
-
-		// Should see no subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(4, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
-
-		CodeableConcept codeableConcept1 = new CodeableConcept();
-		observation3a.setCode(codeableConcept1);
-		Coding coding1 = codeableConcept1.addCoding();
-		coding1.setCode(code);
-		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
-
-		// Should see only one subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(5, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		testRestHookSubscriptionApplicationJson();
 	}
 
 	@Nonnull
@@ -579,109 +503,35 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	// FIXME KHS tests pass up to here
 
 	@Test
-	public void testRestHookSubscriptionApplicationXml() throws Exception {
-		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
-
-		Subscription subscription1 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
-		Subscription subscription2 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
-		waitForActivatedSubscriptionCount(2);
-
-		ourLog.info("** About to send observation");
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
-
-		// Should see 1 subscription notification
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourContentTypes);
-		Assertions.assertEquals(Constants.CT_FHIR_XML_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(0));
-
-		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertNotNull(subscriptionTemp);
-		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getContained().get(0);
-		topic.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(criteria1);
-
-		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-		waitForQueueToDrain();
-
-		Observation observation2 = sendObservation(code, "SNOMED-CT");
-		waitForQueueToDrain();
-
-		// Should see two subscription notifications
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(3, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
-
-		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
-
-		// Should see only one subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(4, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation3.setCode(codeableConcept);
-		Coding coding = codeableConcept.addCoding();
-		coding.setCode(code + "111");
-		coding.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
-
-		// Should see no subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(4, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
-
-		CodeableConcept codeableConcept1 = new CodeableConcept();
-		observation3a.setCode(codeableConcept1);
-		Coding coding1 = codeableConcept1.addCoding();
-		coding1.setCode(code);
-		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
-
-		// Should see only one subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(5, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
-	}
-
-	@Test
 	public void testSubscriptionTriggerViaSubscription() throws Exception {
 		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
 
-		createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
+		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		ourLog.info("** About to send observation");
 
-		Observation observation = new Observation();
-		observation.addIdentifier().setSystem("foo").setValue("bar1");
-		observation.setId(IdType.newRandomUuid().getValue());
+		Observation sentObservation = new Observation();
+		sentObservation.addIdentifier().setSystem("foo").setValue("bar1");
+		sentObservation.setId(IdType.newRandomUuid().getValue());
 		CodeableConcept codeableConcept = new CodeableConcept()
 			.addCoding(new Coding().setCode(code).setSystem("SNOMED-CT"));
-		observation.setCode(codeableConcept);
-		observation.setStatus(Enumerations.ObservationStatus.FINAL);
+		sentObservation.setCode(codeableConcept);
+		sentObservation.setStatus(Enumerations.ObservationStatus.FINAL);
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("foo").setValue("bar2");
 		patient.setId(IdType.newRandomUuid().getValue());
 		patient.setActive(true);
-		observation.getSubject().setReference(patient.getId());
+		sentObservation.getSubject().setReference(patient.getId());
 
 		Bundle requestBundle = new Bundle();
 		requestBundle.setType(Bundle.BundleType.TRANSACTION);
 		requestBundle.addEntry()
-			.setResource(observation)
-			.setFullUrl(observation.getId())
+			.setResource(sentObservation)
+			.setFullUrl(sentObservation.getId())
 			.getRequest()
 			.setUrl("Observation?identifier=foo|bar1")
 			.setMethod(Bundle.HTTPVerb.PUT);
@@ -691,61 +541,51 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 			.getRequest()
 			.setUrl("Patient?identifier=foo|bar2")
 			.setMethod(Bundle.HTTPVerb.PUT);
-		myClient.transaction().withBundle(requestBundle).execute();
+
+		sendTransaction(requestBundle, true);
 
 		// Should see 1 subscription notification
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		Assertions.assertEquals(Constants.CT_FHIR_XML_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(0));
+		assertEquals(1, getSystemProviderCount());
+		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
+		assertEquals(Constants.CT_FHIR_XML_NEW, getLastSystemProviderContentType());
 
-		Observation obs = BaseSubscriptionsR5Test.ourUpdatedObservations.get(0);
-		ourLog.debug("Observation content: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.debug("Observation content: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(receivedObs));
 	}
 
 	@Test
 	public void testUpdateSubscriptionToMatchLater() throws Exception {
-		String code = OBS_CODE;
-		String criteriaBad = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+		SubscriptionTopic subscriptionTopic = createObservationSubscriptionTopic(OBS_CODE2);
+		waitForRegisteredSubscriptionTopicCount(1);
 
 		ourLog.info("** About to create non-matching subscription");
 
-		Subscription subscription2 = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_XML_NEW);
+		Subscription subscription = createTopicSubscription(OBS_CODE2, Constants.CT_FHIR_XML_NEW);
+		waitForActivatedSubscriptionCount(1);
 
 		ourLog.info("** About to send observation that wont match");
 
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
-
-		// Criteria didn't match, shouldn't see any updates
-		waitForQueueToDrain();
-		Thread.sleep(1000);
+		Observation observation1 = sendObservation(OBS_CODE, "SNOMED-CT", false);
+		assertEquals(0, getSystemProviderCount());
 		Assertions.assertEquals(0, BaseSubscriptionsR5Test.ourUpdatedObservations.size());
 
-		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
-		assertNotNull(subscriptionTemp);
-		String criteriaGood = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-
-		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getContained().get(0);
-		topic.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(criteriaGood);
-
-		ourLog.info("** About to update subscription");
-		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-		waitForQueueToDrain();
+		ourLog.info("** About to update subscription topic");
+		SubscriptionTopic subscriptionTopicTemp = myClient.read(SubscriptionTopic.class, subscriptionTopic.getId());
+		assertNotNull(subscriptionTopicTemp);
+		subscriptionTopicTemp.getResourceTriggerFirstRep().getQueryCriteria().setCurrent("Observation?code=SNOMED-CT|" + OBS_CODE);
+		updateResource(subscriptionTopicTemp, false);
 
 		ourLog.info("** About to send Observation 2");
-		Observation observation2 = sendObservation(code, "SNOMED-CT");
-		waitForQueueToDrain();
+		Observation observation2 = sendObservation(OBS_CODE, "SNOMED-CT", true);
 
 		// Should see a subscription notification this time
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
+		assertEquals(1, getSystemProviderCount());
 
-		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription.getId())).execute();
 
-		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
+		Observation observationTemp3 = sendObservation(OBS_CODE, "SNOMED-CT", false);
 
 		// No more matches
-		Thread.sleep(1000);
-		Assertions.assertEquals(1, BaseSubscriptionsR5Test.ourUpdatedObservations.size());
+		assertEquals(1, getSystemProviderCount());
 	}
 
 	@Test
