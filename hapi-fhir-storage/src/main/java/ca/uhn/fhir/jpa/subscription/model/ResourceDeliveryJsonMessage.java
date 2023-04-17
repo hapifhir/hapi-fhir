@@ -75,15 +75,6 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 	}
 
 	@Override
-	@Nullable
-	public String getMessageKeyOrDefault() {
-		if (myPayload == null) {
-			return null;
-		}
-		return myPayload.getMessageKeyOrDefault();
-	}
-
-	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
 			.append("myPayload", myPayload)

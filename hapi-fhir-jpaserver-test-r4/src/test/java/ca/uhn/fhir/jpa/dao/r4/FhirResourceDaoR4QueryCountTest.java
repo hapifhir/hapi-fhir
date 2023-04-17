@@ -14,7 +14,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -115,7 +115,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	private ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
 
 	@RegisterExtension
 	@Order(0)
@@ -2896,7 +2896,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Setup
 
 		myStorageSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
-		mySubscriptionMatcherInterceptor.startIfNeeded();
+		myResourceModifiedSubmitterSvc.startIfNeeded();
 
 		for (int i = 0; i < 10; i++) {
 			createPatient(withActiveTrue());
