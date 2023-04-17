@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.IJobPersistenceTestExt;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -69,7 +68,7 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTestExt {
+public class JpaJobPersistenceImpl implements IJobPersistence {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final String CREATE_TIME = "myCreateTime";
 
@@ -113,7 +112,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTe
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<WorkChunk> onWorkChunkDequeue(String theChunkId) {
-		// wipmb IN_PROGRESS probably shouldn't be allowed.  But how does re-run happen if k8s kills a processor mid run?
+		// wipmb design question - IN_PROGRESS probably shouldn't be allowed.  But how does re-run happen if k8s kills a processor mid run?
 		List<WorkChunkStatusEnum> priorStates = List.of(WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.ERRORED, WorkChunkStatusEnum.IN_PROGRESS);
 		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, priorStates);
 		if (rowsModified == 0) {
@@ -378,42 +377,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTe
 		return myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId).map(this::toChunk);
 	}
 
-	/**
-	 * Update the stored instance
-	 *
-	 * @param theInstance The instance - Must contain an ID
-	 * @return true if the status changed
-	 */
-	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean updateInstance(JobInstance theInstance) {
-		// Separate updating the status, so we have atomic information about whether the status is changing
-		int recordsChangedByStatusUpdate = myJobInstanceRepository.updateInstanceStatus(theInstance.getInstanceId(), theInstance.getStatus());
-
-		Optional<Batch2JobInstanceEntity> instanceOpt = myJobInstanceRepository.findById(theInstance.getInstanceId());
-		Batch2JobInstanceEntity instanceEntity = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));
-
-		instanceEntity.setStartTime(theInstance.getStartTime());
-		instanceEntity.setEndTime(theInstance.getEndTime());
-		instanceEntity.setStatus(theInstance.getStatus());
-		instanceEntity.setCancelled(theInstance.isCancelled());
-		instanceEntity.setFastTracking(theInstance.isFastTracking());
-		instanceEntity.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
-		instanceEntity.setCombinedRecordsProcessedPerSecond(theInstance.getCombinedRecordsProcessedPerSecond());
-		instanceEntity.setTotalElapsedMillis(theInstance.getTotalElapsedMillis());
-		instanceEntity.setWorkChunksPurged(theInstance.isWorkChunksPurged());
-		instanceEntity.setProgress(theInstance.getProgress());
-		instanceEntity.setErrorMessage(theInstance.getErrorMessage());
-		instanceEntity.setErrorCount(theInstance.getErrorCount());
-		instanceEntity.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
-		instanceEntity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
-		instanceEntity.setReport(theInstance.getReport());
-
-		myJobInstanceRepository.save(instanceEntity);
-
-		return recordsChangedByStatusUpdate > 0;
-	}
-
 	@Override
 	@Transactional
 	public boolean updateInstance(String theInstanceId, Predicate<JobInstance> theModifier) {
@@ -482,6 +445,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTe
 		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
 		String operationString = "Cancel job instance " + theInstanceId;
 
+		// wipmb this is much too detailed to be down here - this should be up at the api layer.  Replace with simple enum.
 		String messagePrefix = "Job instance <" + theInstanceId + ">";
 		if (recordsChanged > 0) {
 			return JobOperationResultJson.newSuccess(operationString, messagePrefix + " successfully cancelled.");

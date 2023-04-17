@@ -31,6 +31,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
 import java.util.Date;
@@ -61,6 +62,9 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 
 		InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(instanceId);
 		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
+			Validate.validState(
+				StatusEnum.FINALIZE.equals(instance.getStatus()),
+				"Job %s must be in FINALIZE state.  In %s", instanceId, instance.getStatus());
 
 			if (instance.getReport() != null) {
 				// last in wins - so we won't throw
@@ -97,7 +101,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 		});
 
 		if (!changed) {
-			ourLog.error("No instance found with Id {}", instanceId);
+			ourLog.error("No instance found with Id {} in FINALIZE state", instanceId);
 
 			throw new JobExecutionFailedException(Msg.code(2097) + ("No instance found with Id " + instanceId));
 		}

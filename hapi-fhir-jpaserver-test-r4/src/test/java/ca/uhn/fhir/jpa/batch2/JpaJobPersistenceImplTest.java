@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
-import ca.uhn.fhir.batch2.api.IJobPersistenceTestExt;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -30,8 +30,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nonnull;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -64,7 +66,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public static final String CHUNK_DATA = "{\"key\":\"value\"}";
 
 	@Autowired
-	private IJobPersistenceTestExt mySvc;
+	private IJobPersistence mySvc;
 	@Autowired
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 	@Autowired
@@ -250,14 +252,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
 
-		runInTransaction(() -> {
-			Batch2JobInstanceEntity instanceEntity = myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalStateException::new);
-			assertEquals(StatusEnum.QUEUED, instanceEntity.getStatus());
-			instanceEntity.setCancelled(true);
-			myJobInstanceRepository.save(instanceEntity);
-		});
-
 		JobOperationResultJson result = mySvc.cancelInstance(instanceId);
+
 		assertTrue(result.getSuccess());
 		assertEquals("Job instance <" + instanceId + "> successfully cancelled.", result.getMessage());
 
@@ -634,41 +630,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testUpdateInstance() {
-		String instanceId = mySvc.storeNewInstance(createInstance());
-
-		JobInstance instance = mySvc.fetchInstance(instanceId).orElseThrow(IllegalArgumentException::new);
-		assertEquals(instanceId, instance.getInstanceId());
-		assertFalse(instance.isWorkChunksPurged());
-
-		instance.setStartTime(new Date());
-		sleepUntilTimeChanges();
-		instance.setEndTime(new Date());
-		instance.setCombinedRecordsProcessed(100);
-		instance.setCombinedRecordsProcessedPerSecond(22.0);
-		instance.setWorkChunksPurged(true);
-		instance.setProgress(0.5d);
-		instance.setErrorCount(3);
-		instance.setEstimatedTimeRemaining("32d");
-
-		mySvc.updateInstance(instance);
-
-		runInTransaction(() -> {
-			Batch2JobInstanceEntity entity = myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalArgumentException::new);
-			assertEquals(instance.getStartTime().getTime(), entity.getStartTime().getTime());
-			assertEquals(instance.getEndTime().getTime(), entity.getEndTime().getTime());
-		});
-
-		JobInstance finalInstance = mySvc.fetchInstance(instanceId).orElseThrow(IllegalArgumentException::new);
-		assertEquals(instanceId, finalInstance.getInstanceId());
-		assertEquals(0.5d, finalInstance.getProgress());
-		assertTrue(finalInstance.isWorkChunksPurged());
-		assertEquals(3, finalInstance.getErrorCount());
-		assertEquals(instance.getReport(), finalInstance.getReport());
-		assertEquals(instance.getEstimatedTimeRemaining(), finalInstance.getEstimatedTimeRemaining());
-	}
-
-	@Test
 	public void markWorkChunksWithStatusAndWipeData_marksMultipleChunksWithStatus_asExpected() {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
@@ -728,15 +689,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		final String id = mySvc.storeNewInstance(jobInstance);
 
-		jobInstance.setInstanceId(id);
-		final LocalDateTime localDateTime = LocalDateTime.now()
-			.minusMinutes(minutes);
-		ourLog.info("localDateTime: {}", localDateTime);
-		jobInstance.setEndTime(Date.from(localDateTime
-			.atZone(ZoneId.systemDefault())
-			.toInstant()));
+		mySvc.updateInstance(id, instance->{
+			instance.setEndTime(Date.from(Instant.now().minus(minutes, ChronoUnit.MINUTES)));
+			return true;
+		});
 
-		mySvc.updateInstance(jobInstance);
 
 		return id;
 	}
