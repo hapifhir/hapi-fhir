@@ -105,10 +105,13 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		ourListenerRestServer.unregisterProvider(mySystemProvider);
 		ourListenerRestServer.registerProvider(ourTestSystemProvider);
 
+		// FIXME remove these
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
 		ourHeaders.clear();
+
+		ourTestSystemProvider.clear();
 
 		// Delete all Subscriptions
 		if (myClient != null) {
@@ -158,6 +161,10 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 	protected int getSystemProviderCount() {
 		return ourTestSystemProvider.getCount();
+	}
+
+	protected List<String> getLastSystemProviderHeaders() {
+		return ourTestSystemProvider.getLastHeaders();
 	}
 
 	protected Bundle getLastSystemProviderBundle() {
@@ -371,6 +378,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		AtomicInteger count = new AtomicInteger(0);
 		final List<Bundle> receivedBundles = new ArrayList<>();
 		final List<String> receivedContentTypes = new ArrayList<>();
+		final List<String> myHeaders = new ArrayList<>();
 
 		@Transaction
 		public Bundle transaction(@TransactionParam Bundle theBundle, HttpServletRequest theRequest) {
@@ -378,7 +386,20 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 			count.incrementAndGet();
 			receivedContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			receivedBundles.add(theBundle);
+			extractHeaders(theRequest);
 			return theBundle;
+		}
+
+		private void extractHeaders(HttpServletRequest theRequest) {
+			Enumeration<String> headerNamesEnum = theRequest.getHeaderNames();
+			while (headerNamesEnum.hasMoreElements()) {
+				String nextName = headerNamesEnum.nextElement();
+				Enumeration<String> valueEnum = theRequest.getHeaders(nextName);
+				while (valueEnum.hasMoreElements()) {
+					String nextValue = valueEnum.nextElement();
+					myHeaders.add(nextName + ": " + nextValue);
+				}
+			}
 		}
 
 		int getCount() {
@@ -395,6 +416,17 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 		public Bundle getReceivedBundle(int theIndex) {
 			return receivedBundles.get(theIndex);
+		}
+
+		public List<String> getLastHeaders() {
+			return Collections.unmodifiableList(myHeaders);
+		}
+
+		public void clear() {
+			count.set(0);
+			receivedBundles.clear();
+			receivedContentTypes.clear();
+			myHeaders.clear();
 		}
 	}
 }

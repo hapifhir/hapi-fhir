@@ -638,7 +638,8 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	@Test
 	public void testSubscriptionWithHeaders() throws Exception {
 		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
 
 		// Add some headers, and we'll also turn back to requested status for fun
 		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
@@ -647,49 +648,46 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		subscription.addHeader("X-Foo: FOO");
 		subscription.addHeader("X-Bar: BAR");
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
-		myClient.update().resource(subscription).execute();
-		waitForQueueToDrain();
+		updateResource(subscription, false);
 
-		sendObservation(code, "SNOMED-CT");
+		Observation sentObservation = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(0));
-		assertThat(BaseSubscriptionsR5Test.ourHeaders, hasItem("X-Foo: FOO"));
-		assertThat(BaseSubscriptionsR5Test.ourHeaders, hasItem("X-Bar: BAR"));
+		assertEquals(1, getSystemProviderCount());
+		Observation receivedObservation = assertBundleAndGetObservation(subscription, sentObservation);
+		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+
+		assertThat(getLastSystemProviderHeaders(), hasItem("X-Foo: FOO"));
+		assertThat(getLastSystemProviderHeaders(), hasItem("X-Bar: BAR"));
 	}
 
 	@Test
 	public void testDisableSubscription() throws Exception {
 		String code = OBS_CODE;
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		createObservationSubscriptionTopic(OBS_CODE);
+		waitForRegisteredSubscriptionTopicCount(1);
 
 		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
-		sendObservation(code, "SNOMED-CT");
+		Observation sentObservation = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
+		assertEquals(1, getSystemProviderCount());
+		Observation receivedObservation = assertBundleAndGetObservation(subscription, sentObservation);
 
 		// Disable
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.OFF);
-		myClient.update().resource(subscription).execute();
-		waitForQueueToDrain();
+		updateResource(subscription, false);
 
-		// Send another object
-		sendObservation(code, "SNOMED-CT");
+		// Send another observation
+		sendObservation(OBS_CODE, "SNOMED-CT", false);
 
-		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		waitForSize(0, BaseSubscriptionsR5Test.ourCreatedObservations);
-		waitForSize(1, BaseSubscriptionsR5Test.ourUpdatedObservations);
-
+		// Should see no new delivery
+		assertEquals(1, getSystemProviderCount());
 	}
+
+	// FIXME pass up to here
 
 	@Test
 	public void testInvalidProvenanceParam() {
