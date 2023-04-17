@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -1153,6 +1154,8 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Autowired
 	private IFhirResourceDao<SearchParameter> mySearchParameterDao;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Test
 	public void testMatchCustomSearchParameter() {
@@ -1166,6 +1169,7 @@ public class InMemorySubscriptionMatcherR4Test {
 		sp.setExpression("PractitionerRole.active");
 		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		mySearchParameterDao.update(sp, new SystemRequestDetails());
+		mySearchParamRegistry.forceRefresh();
 
 		PractitionerRole pr = new PractitionerRole();
 		pr.setActive(true);
