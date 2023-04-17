@@ -59,7 +59,6 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	public static final String OBS_CODE2 = OBS_CODE + "111";
 	private static final String CUSTOM_URL = "http://custom.topic.url";
 
-
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 
@@ -102,7 +101,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		 * Send version 1
 		 */
 
-		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT");
+		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT", true);
 		sentObservation = myObservationDao.read(sentObservation.getIdElement().toUnqualifiedVersionless());
 
 		// Should see 1 subscription notification
@@ -278,7 +277,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
-		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT");
+		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT", true);
 
 		assertReceivedTransactionCount(1);
 
@@ -289,7 +288,10 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 
 		// Send an update with no changes
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
-		updateResource(obs, false);
+		myObservationDao.update(obs, mySrd);
+
+		// TODO KHS replace this sleep with a latch on http request processed
+		Thread.sleep(1000);
 
 		// Should be no further deliveries
 		assertReceivedTransactionCount(1);
@@ -306,7 +308,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		waitForActivatedSubscriptionCount(1);
 
 		ourLog.info("** About to send observation");
-		Observation sentObservation1 = sendObservation(code, "SNOMED-CT");
+		Observation sentObservation1 = sendObservation(code, "SNOMED-CT", true);
 
 		assertReceivedTransactionCount(1);
 
@@ -327,7 +329,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		updateResource(subscription, false);
 
 		ourLog.info("** About to send observation");
-		Observation sentObservation2 = sendObservation(code, "SNOMED-CT");
+		Observation sentObservation2 = sendObservation(code, "SNOMED-CT", true);
 
 		assertReceivedTransactionCount(2);
 
@@ -395,7 +397,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
-		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL, Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		subscription
 			.addExtension(HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
 		postSubscription(subscription);
@@ -449,13 +451,13 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		subscriptionTemp.setTopic(subscription1.getTopic());
 		updateResource(subscriptionTemp, false);
 
-		Observation observation2 = sendObservation(code, "SNOMED-CT");
+		Observation observation2 = sendObservation(code, "SNOMED-CT", true);
 
 		assertReceivedTransactionCount(3);
 
 		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 
-		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
+		Observation observationTemp3 = sendObservation(code, "SNOMED-CT", true);
 
 		// Should see only one subscription notification
 		assertReceivedTransactionCount(4);
@@ -610,7 +612,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		Subscription subscription2 = createTopicSubscription(OBS_CODE2, Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(2);
 
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
+		Observation observation1 = sendObservation(code, "SNOMED-CT", true);
 
 		// Should see 1 subscription notification
 		assertReceivedTransactionCount(1);
@@ -659,7 +661,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 		updateResource(subscription, false);
 
-		Observation sentObservation = sendObservation(code, "SNOMED-CT");
+		Observation sentObservation = sendObservation(code, "SNOMED-CT", true);
 
 		// Should see 1 subscription notification
 		assertReceivedTransactionCount(1);
@@ -679,7 +681,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		Subscription subscription = createTopicSubscription(OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
-		Observation sentObservation = sendObservation(code, "SNOMED-CT");
+		Observation sentObservation = sendObservation(code, "SNOMED-CT", true);
 
 		// Should see 1 subscription notification
 		assertReceivedTransactionCount(1);
@@ -821,11 +823,9 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 	}
 
 	private SubscriptionTopic createObservationSubscriptionTopic(String theCode) throws InterruptedException {
-		SubscriptionTopic retval = buildSubscriptionTopic(theCode);
-		createSubscriptionTopic(retval);
-
-		return retval;
-	}
+		SubscriptionTopic subscriptionTopic = buildSubscriptionTopic(theCode);
+		return createSubscriptionTopic(subscriptionTopic);
+}
 
 	@Nonnull
 	private static SubscriptionTopic buildSubscriptionTopic(String theCode) {
@@ -848,11 +848,6 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + theTopicUrlSuffix, thePayload);
 
 		return postSubscription(subscription);
-	}
-
-	// FIXME KHS remove this method
-	private Observation sendObservation(String theCode, String theSystem) throws InterruptedException {
-		return sendObservation(theCode, theSystem, true);
 	}
 
 	private Observation sendObservation(String theCode, String theSystem, boolean theExpectDelivery) throws InterruptedException {
