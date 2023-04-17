@@ -28,6 +28,9 @@
  * done convert work chunk methods to events - requires bump
  * done define job instance tx boundary
  * wipmb review tx layer - the variety of @Transaction annotations is scary.
+ *
+ * Design
+ * - How do we handle tx around chunk queueing?  At-most-once or at-least-once?
  */
 package ca.uhn.fhir.batch2;
 

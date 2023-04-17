@@ -23,7 +23,6 @@ import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.IPointcutLatch;
@@ -70,8 +69,6 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	@Autowired
 	IJobMaintenanceService myJobMaintenanceService;
 	@Autowired
-	Batch2JobHelper myBatch2JobHelper;
-	@Autowired
 	private IChannelFactory myChannelFactory;
 
 	@Autowired
@@ -109,6 +106,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
+		ourLog.debug("Maintenance traces: {}", myStackTraceElements);
 		myWorkChannel.clearInterceptorsForUnitTest();
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
 		jobMaintenanceService.setMaintenanceJobStartedCallback(() -> {
@@ -313,8 +311,9 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		assertInstanceStatus(StatusEnum.COMPLETED);
 	}
 
+	// wipmb Ken and Nathan created these.  Do we want to make them real?
 	@Test
-	@Disabled("future plans") // wipmb
+	@Disabled("future plans")
 	public void runMaintenancePass_MultipleStepsInProgress_CancelsInstance() {
 		assertCurrentGatedStep(FIRST);
 
@@ -335,7 +334,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled("future plans") // wipmb
+	@Disabled("future plans")
 	public void runMaintenancePass_MultipleOtherStepsInProgress_CancelsInstance() {
 		assertCurrentGatedStep(FIRST);
 
@@ -356,7 +355,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled("future plans") // wipmb
+	@Disabled("future plans")
 	public void runMaintenancePass_MultipleStepsQueued_CancelsInstance() {
 		assertCurrentGatedStep(FIRST);
 

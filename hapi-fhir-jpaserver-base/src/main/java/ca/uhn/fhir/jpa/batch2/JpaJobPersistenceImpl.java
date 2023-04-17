@@ -65,6 +65,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -257,7 +258,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				"where myId = :chunkId and myErrorCount > :maxCount");
 		query.setParameter("chunkId", chunkId);
 		query.setParameter("failed", WorkChunkStatusEnum.FAILED);
-		query.setParameter("maxCount", theParameters.getMaxRetries());
+		query.setParameter("maxCount", MAX_CHUNK_ERROR_COUNT);
 		int failChangeCount = query.executeUpdate();
 
 		if (failChangeCount > 0) {
