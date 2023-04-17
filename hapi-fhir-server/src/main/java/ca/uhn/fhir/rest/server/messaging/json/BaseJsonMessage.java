@@ -28,6 +28,7 @@ import org.springframework.messaging.MessageHeaders;
 import javax.annotation.Nullable;
 
 import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
@@ -60,18 +61,38 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 		return myHeaders;
 	}
 
-
 	public void setHeaders(HapiMessageHeaders theHeaders) {
 		myHeaders = theHeaders;
 	}
 
+	@Deprecated
 	@Nullable
-    public String getMessageKeyOrNull() {
+	public String getMessageKeyOrNull() {
+		return getMessageKey();
+	}
+
+	@Nullable
+   public String getMessageKey() {
 		return null;
     }
 
+	/**
+	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns null.
+	 *
+	 * @return the message key value or default
+	 */
 	@Nullable
 	public String getMessageKeyOrDefault() {
-		return getMessageKeyOrNull();
+		return defaultString(getMessageKey(), getMessageKeyDefaultValue());
+	}
+
+	/**
+	 * Provides a fallback value when the value returned by {@link #getMessageKey()} is null.
+	 *
+	 * @return null by default
+	 */
+	@Nullable
+	protected String getMessageKeyDefaultValue(){
+		return null;
 	}
 }

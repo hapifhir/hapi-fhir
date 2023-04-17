@@ -29,7 +29,7 @@ class BaseJsonMessageTest {
 		IBaseResource patient = buildPatient();
 		ResourceOperationMessage payload = new ResourceOperationMessage(ourFhirContext, patient, ResourceOperationMessage.OperationTypeEnum.CREATE);
 		message.setPayload(payload);
-		assertNull(message.getMessageKeyOrNull());
+		assertNull(message.getMessageKey());
 		assertEquals(RESOURCE_ID, message.getMessageKeyOrDefault());
 	}
 
@@ -40,7 +40,7 @@ class BaseJsonMessageTest {
 		ResourceOperationMessage payload = new ResourceOperationMessage(ourFhirContext, patient, ResourceOperationMessage.OperationTypeEnum.CREATE);
 		payload.setMessageKey(MESSAGE_KEY);
 		message.setPayload(payload);
-		assertEquals(MESSAGE_KEY, message.getMessageKeyOrNull());
+		assertEquals(MESSAGE_KEY, message.getMessageKey());
 		assertEquals(MESSAGE_KEY, message.getMessageKeyOrDefault());
 	}
 
@@ -51,7 +51,7 @@ class BaseJsonMessageTest {
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setPayload(ourFhirContext, patient, EncodingEnum.JSON);
 		message.setPayload(payload);
-		assertNull(message.getMessageKeyOrNull());
+		assertNull(message.getMessageKey());
 		assertEquals(RESOURCE_ID, message.getMessageKeyOrDefault());
 	}
 
@@ -63,7 +63,7 @@ class BaseJsonMessageTest {
 		payload.setPayload(ourFhirContext, patient, EncodingEnum.JSON);
 		payload.setMessageKey(MESSAGE_KEY);
 		message.setPayload(payload);
-		assertEquals(MESSAGE_KEY, message.getMessageKeyOrNull());
+		assertEquals(MESSAGE_KEY, message.getMessageKey());
 		assertEquals(MESSAGE_KEY, message.getMessageKeyOrDefault());
 	}
 
@@ -73,7 +73,7 @@ class BaseJsonMessageTest {
 		IBaseResource patient = buildPatient();
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(ourFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		message.setPayload(payload);
-		assertNull(message.getMessageKeyOrNull());
+		assertNull(message.getMessageKey());
 		assertEquals(RESOURCE_ID, message.getMessageKeyOrDefault());
 	}
 
@@ -84,7 +84,7 @@ class BaseJsonMessageTest {
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(ourFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		payload.setMessageKey(MESSAGE_KEY);
 		message.setPayload(payload);
-		assertEquals(MESSAGE_KEY, message.getMessageKeyOrNull());
+		assertEquals(MESSAGE_KEY, message.getMessageKey());
 		assertEquals(MESSAGE_KEY, message.getMessageKeyOrDefault());
 	}
 
@@ -100,13 +100,13 @@ class BaseJsonMessageTest {
 	}
 
 	@Test
-	void test_getMessageKeyOrNull_whenSetMessageKeyIsNotInvoked_willReturnNull(){
+	void test_getMessageKey_whenSetMessageKeyIsNotInvoked_willReturnNull(){
 		// given
 		IBaseResource patient = buildPatient();
 		// when
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(ourFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		// then
-		assertNull(payload.getMessageKeyOrNull());
+		assertNull(payload.getMessageKey());
 	}
 
 	@Nonnull
