@@ -36,6 +36,10 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 	public static final String Patient_B_JSON_PATH = TEST_RSC_PATH + "patient-B.json/";
 	public static final String Patient_C_JSON_PATH = TEST_RSC_PATH + "patient-C.json/";
 
+	public static final String Patient_SR1_JSON_PATH = TEST_RSC_PATH + "patient-SR1.json/";
+	public static final String Patient_SR2_JSON_PATH = TEST_RSC_PATH + "patient-SR2.json/";
+	public static final String Patient_SR3_JSON_PATH = TEST_RSC_PATH + "patient-SR3.json/";
+
 	@Autowired
 	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
 
@@ -72,7 +76,26 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		assertEquals(expectedExceptionMessage, thrown.getMessage());
 	}
 
+	@Test
+	void testUpdateLinkToNoMatchWhenAnotherLinkToDifferentGoldenExistsShouldNotFail() throws Exception {
+		// create Patient A -> MATCH GR A
+		Patient patientA = createPatientFromJsonInputFile(Patient_A_JSON_PATH);
+		// create Patient B -> MATCH GR B
+		Patient patientB = createPatientFromJsonInputFile(Patient_B_JSON_PATH);
 
+		Patient goldenA = getGoldenFor(patientA);
+		Patient goldenB = getGoldenFor(patientB);
+
+		// create Patient C -> no MATCH link. Only POSSIBLE_MATCH GR A and POSSIBLE_MATCH GR B and
+		Patient patientC = createPatientFromJsonInputFileWithPossibleMatches( List.of(goldenA, goldenB) );
+
+		MdmTransactionContext mdmTransactionContext = getPatientUpdateLinkContext();
+		// update POSSIBLE_MATCH Patient C -> GR A to MATCH (should work OK)
+		myMdmLinkUpdaterSvc.updateLink(goldenA, patientC, MdmMatchResultEnum.MATCH, mdmTransactionContext);
+
+		// update POSSIBLE_MATCH Patient C -> GR B to NO_MATCH (should work OK)
+		myMdmLinkUpdaterSvc.updateLink(goldenB, patientC, MdmMatchResultEnum.NO_MATCH, mdmTransactionContext);
+	}
 
 	private Patient createPatientFromJsonInputFileWithPossibleMatches(List<Patient> theGoldens) throws Exception {
 		Patient patient = createPatientFromJsonInputFile(Patient_C_JSON_PATH, false);
