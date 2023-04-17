@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -221,14 +222,10 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return true;
 	}
 
-
 	@Nullable
 	@Override
-	public String getMessageKeyOrNull() {
-		if (super.getMessageKeyOrNull() != null) {
-			return super.getMessageKeyOrNull();
-		}
-		return myPayloadId;
+	public String getMessageKeyOrDefault() {
+		return StringUtils.defaultString(super.getMessageKey(), myPayloadId);
 	}
 
 	public boolean hasPayloadType(FhirContext theFhirContext, String theResourceName) {
