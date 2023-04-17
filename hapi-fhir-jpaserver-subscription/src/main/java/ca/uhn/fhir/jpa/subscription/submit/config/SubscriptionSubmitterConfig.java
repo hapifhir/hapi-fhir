@@ -28,10 +28,9 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterc
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
-import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc2;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
-import ca.uhn.fhir.subscription.api.IAsyncResourceModifiedConsumer;
+import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,16 +53,6 @@ public class SubscriptionSubmitterConfig {
 																			  StorageSettings theStorageSettings){
 
 		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theTxManager);
-
-	}
-
-	@Bean
-	public ResourceModifiedSubmitterSvc2 resourceModifiedSvc2(PlatformTransactionManager theTxManager,
-																				 IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
-																				 SubscriptionChannelFactory theSubscriptionChannelFactory,
-																				 StorageSettings theStorageSettings){
-
-		return new ResourceModifiedSubmitterSvc2(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theTxManager);
 
 	}
 
@@ -94,8 +83,8 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public AsyncResourceModifiedSubmitterSvc asyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theSubscriptionMessagePersistenceSvc, IAsyncResourceModifiedConsumer theAsyncResourceModifiedConsumer){
-		return new AsyncResourceModifiedSubmitterSvc(theSubscriptionMessagePersistenceSvc, theAsyncResourceModifiedConsumer);
+	public AsyncResourceModifiedSubmitterSvc asyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theIResourceModifiedMessagePersistenceSvc, IResourceModifiedConsumerWithRetries theResourceModifiedConsumer){
+		return new AsyncResourceModifiedSubmitterSvc(theIResourceModifiedMessagePersistenceSvc, theResourceModifiedConsumer);
 	}
 
 }

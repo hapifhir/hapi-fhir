@@ -28,6 +28,10 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * This service is responsible for scheduling a job that will process messages
+ * where submission to the subscription pipeline previously failed.
+ */
 public class AsyncResourceModifiedProcessingSchedulerSvc implements IHasScheduledJobs {
 
 	public static final long ONE_MINUTE = 60 * DateUtils.MILLIS_PER_SECOND;

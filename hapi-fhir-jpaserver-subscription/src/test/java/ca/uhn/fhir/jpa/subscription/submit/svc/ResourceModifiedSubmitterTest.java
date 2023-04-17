@@ -17,6 +17,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
@@ -26,7 +27,6 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,9 +47,17 @@ public class ResourceModifiedSubmitterTest {
 	@Captor
 	ArgumentCaptor<ChannelProducerSettings> myArgumentCaptor;
 
+	@Mock
+	IChannelProducer myChannelProducer;
+	
+	TransactionStatus myCapturingTransactionStatus;
+
 	@BeforeEach
 	public void beforeEach(){
+		myCapturingTransactionStatus = new SimpleTransactionStatus();
 		lenient().when(myStorageSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
+		lenient().when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(myChannelProducer);
+		lenient().when(myTxManager.getTransaction(any())).thenReturn(myCapturingTransactionStatus);
 	}
 
 	@ParameterizedTest
@@ -71,66 +79,50 @@ public class ResourceModifiedSubmitterTest {
 	@Test
 	public void testMethodProcessResourceModified_withExistingPersistedResourceModifiedMessage_willSucceed(){
 		// given
-		TransactionStatus capturingTransactionStatus = new SimpleTransactionStatus();
-		IChannelProducer producerChannel = mock(IChannelProducer.class);
-		when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(producerChannel);
-		when(myTxManager.getTransaction(any())).thenReturn(capturingTransactionStatus);
-
 		// a successful deletion implies that the message did exist.
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
-		when(myResourceModifiedMessagePersistenceSvc.findByPK(any())).thenReturn(new ResourceModifiedMessage());
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.processResourceModified(new ResourceModifiedEntityPK());
+		boolean wasProcessed = myUnitUnderTest.processResourceModifiedPostCommit(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.TRUE));
-		assertThat(capturingTransactionStatus.isRollbackOnly(), is(Boolean.FALSE));
-		verify(producerChannel, times(1)).send(any());
+		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.FALSE));
+		verify(myChannelProducer, times(1)).send(any());
 
 	}
 
 	@Test
-	public void testMethodProcessResourceModified_whenMessageHasWasAlreadyProcess_willSucceed(){
+	public void testMethodProcessResourceModified_whenMessageWasAlreadyProcess_willSucceed(){
 		// given
-		TransactionStatus capturingTransactionStatus = new SimpleTransactionStatus();
-		IChannelProducer producerChannel = mock(IChannelProducer.class);
-		myUnitUnderTest.setMatchingChannel(producerChannel);
-		when(myTxManager.getTransaction(any())).thenReturn(capturingTransactionStatus);
-
 		// deletion fails, someone else was faster and processed the message
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(false);
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.processResourceModified(new ResourceModifiedEntityPK());
+		boolean wasProcessed = myUnitUnderTest.processResourceModifiedPostCommit(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.TRUE));
-		assertThat(capturingTransactionStatus.isRollbackOnly(), is(Boolean.FALSE));
+		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.FALSE));
 		// we do not send a message which was already sent
-		verify(producerChannel, times(0)).send(any());
+		verify(myChannelProducer, times(0)).send(any());
 
 	}
 
 	@Test
-	public void testMethodProcessResourceModified_whithErrorOnSending_willRollback(){
+	public void testMethodProcessResourceModified_whitErrorOnSending_willRollbackDeletion(){
 		// given
-		TransactionStatus capturingTransactionStatus = new SimpleTransactionStatus();
-		IChannelProducer producerChannel = mock(IChannelProducer.class);
-		when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(producerChannel);
-		when(myTxManager.getTransaction(any())).thenReturn(capturingTransactionStatus);
-		when(myResourceModifiedMessagePersistenceSvc.findByPK(any())).thenReturn(new ResourceModifiedMessage());
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
 
 		// simulate failure writing to the channel
-		when(producerChannel.send(any())).thenThrow(new RuntimeException());
+		when(myChannelProducer.send(any())).thenThrow(new MessageDeliveryException("sendingError"));
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.processResourceModified(new ResourceModifiedEntityPK());
+		boolean wasProcessed = myUnitUnderTest.processResourceModifiedPostCommit(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.FALSE));
-		assertThat(capturingTransactionStatus.isRollbackOnly(), is(Boolean.TRUE));
+		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.TRUE));
 
 	}
 
@@ -138,7 +130,5 @@ public class ResourceModifiedSubmitterTest {
 		verify(mySubscriptionChannelFactory).newMatchingSendingChannel(anyString(), myArgumentCaptor.capture());
 		return myArgumentCaptor.getValue();
 	}
-
-
 
 }

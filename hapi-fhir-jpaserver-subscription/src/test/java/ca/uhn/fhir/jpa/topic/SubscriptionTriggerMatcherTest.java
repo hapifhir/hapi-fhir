@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -119,7 +120,7 @@ class SubscriptionTriggerMatcherTest {
 		IFhirResourceDao mockEncounterDao = mock(IFhirResourceDao.class);
 		when(myDaoRegistry.getResourceDao("Encounter")).thenReturn(mockEncounterDao);
 		Encounter encounterPreviousVersion = new Encounter();
-		when(mockEncounterDao.read(any(), any())).thenReturn(encounterPreviousVersion);
+		when(mockEncounterDao.read(any(), any(RequestPartitionId.class))).thenReturn(encounterPreviousVersion);
 		when(mySearchParamMatcher.match(any(), any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 
 		// run

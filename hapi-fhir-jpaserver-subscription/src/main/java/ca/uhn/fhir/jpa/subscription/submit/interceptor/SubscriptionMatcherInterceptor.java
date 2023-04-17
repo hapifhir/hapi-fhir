@@ -33,7 +33,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import ca.uhn.fhir.subscription.api.IPostCommitResourceModifiedConsumer;
+import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -45,6 +45,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ *
+ * This interceptor is responsible for submitting operations on resources to the subscription pipeline.
+ *
+ */
 @Interceptor
 public class SubscriptionMatcherInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
@@ -58,7 +63,7 @@ public class SubscriptionMatcherInterceptor {
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
-	private IPostCommitResourceModifiedConsumer myResourceModifiedSubmitterSvc;
+	private IResourceModifiedConsumerWithRetries myResourceModifiedSubmitterSvc;
 
 	@Autowired
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
@@ -73,31 +78,35 @@ public class SubscriptionMatcherInterceptor {
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 	public void resourceCreated(IBaseResource theResource, RequestDetails theRequest) {
 
-		processResourceModifiedWithAsyncRetries(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE, theRequest);
+		processResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE, theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
 	public void resourceDeleted(IBaseResource theResource, RequestDetails theRequest) {
 
-		processResourceModifiedWithAsyncRetries(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
+		processResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
-		boolean dontTriggerSubsWhenVersionsAreTheSame = !myStorageSettings.isTriggerSubscriptionsForNonVersioningChanges();
+		boolean dontTriggerSubscriptionWhenVersionsAreTheSame = !myStorageSettings.isTriggerSubscriptionsForNonVersioningChanges();
 		boolean resourceVersionsAreTheSame = isSameResourceVersion(theOldResource, theNewResource);
 
-		if (dontTriggerSubsWhenVersionsAreTheSame && resourceVersionsAreTheSame) {
+		if (dontTriggerSubscriptionWhenVersionsAreTheSame && resourceVersionsAreTheSame) {
 			return;
 		}
 
-		processResourceModifiedWithAsyncRetries(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
+		processResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
 	}
 
 	/**
 	 * This is an internal API - Use with caution!
+	 *
+	 * This method will create a {@link ResourceModifiedMessage}, persist it and arrange for its delivery to the
+	 * subscription pipeline after the resource was committed.  The message is persisted to provide asynchronous submission
+	 * in the event where submission would fail.
 	 */
-	protected void processResourceModifiedWithAsyncRetries(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	protected void processResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 
 		ResourceModifiedMessage msg = createResourceModifiedMessage(theNewResource, theOperationType, theRequest);
 

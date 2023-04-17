@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
+import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -48,6 +49,11 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK.with;
 
+/**
+ * This implementer provides the capability to persist subscription messages before their submission
+ * to the subscription processing pipeline with the purpose of offering a retry mechanism
+ * upon submission failure (see @link {@link AsyncResourceModifiedSubmitterSvc}).
+ */
 public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModifiedMessagePersistenceSvc {
 
 	private FhirContext myFhirContext;
@@ -90,6 +96,11 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		}
 
 		return inflateResourceModifiedMessageFromEntity(optionalEntity.get());
+	}
+
+	@Override
+	public long getMessagePersistedCount() {
+		return myResourceModifiedDao.count();
 	}
 
 	@Override

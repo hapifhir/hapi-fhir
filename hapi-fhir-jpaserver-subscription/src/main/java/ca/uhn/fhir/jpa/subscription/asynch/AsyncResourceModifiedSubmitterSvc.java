@@ -21,7 +21,8 @@ package ca.uhn.fhir.jpa.subscription.asynch;
  */
 
 import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
-import ca.uhn.fhir.subscription.api.IAsyncResourceModifiedConsumer;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,23 +30,32 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 
+/**
+ * The purpose of this service is to submit messages to the processing pipeline for which previous attempts at
+ * submission has failed.  See also {@link AsyncResourceModifiedProcessingSchedulerSvc} and {@link IResourceModifiedMessagePersistenceSvc}.
+ *
+ */
 public class AsyncResourceModifiedSubmitterSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(AsyncResourceModifiedSubmitterSvc.class);
-	private IResourceModifiedMessagePersistenceSvc mySubscriptionMessagePersistenceSvc;
-	private IAsyncResourceModifiedConsumer myAsyncResourceModifiedConsumer;
 
-	public AsyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theSubscriptionMessagePersistenceSvc, IAsyncResourceModifiedConsumer theAsyncResourceModifiedConsumer) {
-		mySubscriptionMessagePersistenceSvc = theSubscriptionMessagePersistenceSvc;
-		myAsyncResourceModifiedConsumer = theAsyncResourceModifiedConsumer;
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+	private IResourceModifiedConsumerWithRetries myResourceModifiedConsumer;
+
+
+	public AsyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc, IResourceModifiedConsumerWithRetries theResourceModifiedConsumer) {
+		myResourceModifiedMessagePersistenceSvc = theResourceModifiedMessagePersistenceSvc;
+		myResourceModifiedConsumer = theResourceModifiedConsumer;
 	}
 
 	public void runDeliveryPass() {
-		List<IResourceModifiedPK> allPKs = mySubscriptionMessagePersistenceSvc.findAllPKs();
+		List<IResourceModifiedPK> allPKs = myResourceModifiedMessagePersistenceSvc.findAllPKs();
 		ourLog.info("Attempting to submit {} resources to consumer channel.", allPKs.size());
 
-		for (IResourceModifiedPK anId : allPKs){
+		for (IResourceModifiedPK resourceModifiedPk : allPKs){
 
-			boolean wasProcessed = myAsyncResourceModifiedConsumer.processResourceModified(anId);
+			ResourceModifiedMessage modifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(resourceModifiedPk);
+
+			boolean wasProcessed = myResourceModifiedConsumer.processResourceModifiedPostCommit(modifiedMessage, resourceModifiedPk);
 
 			if(!wasProcessed){
 				break;
@@ -53,6 +63,5 @@ public class AsyncResourceModifiedSubmitterSvc {
 		}
 
 	}
-
 
 }

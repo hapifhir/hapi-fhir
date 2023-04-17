@@ -26,6 +26,14 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
 import java.util.List;
 
+/**
+ * An implementer of this interface will provide {@link ResourceModifiedMessage} persistence services.
+ *
+ * Client of this interface should persist ResourceModifiedMessage as part of the processing of an operation on
+ * a resource.  Upon a successful submission to the subscription pipeline, the persisted message should be deleted
+ * or left un-altered for further re-submission at a later time (see {@link IResourceModifiedConsumerWithRetries}
+ * and {@link IAsyncResourceModifiedConsumer}).
+ */
 public interface IResourceModifiedMessagePersistenceSvc {
 
 	List<IResourceModifiedPK> findAllPKs();
@@ -35,5 +43,7 @@ public interface IResourceModifiedMessagePersistenceSvc {
 	IResourceModifiedPK persist(ResourceModifiedMessage theMsg);
 
 	ResourceModifiedMessage findByPK(IResourceModifiedPK theResourceModifiedPK);
+
+	long getMessagePersistedCount();
 
 }

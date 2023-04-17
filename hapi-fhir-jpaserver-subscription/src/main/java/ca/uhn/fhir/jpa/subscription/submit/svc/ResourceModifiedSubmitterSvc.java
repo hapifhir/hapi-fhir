@@ -24,14 +24,13 @@ import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.subscription.api.IAsyncResourceModifiedConsumer;
-import ca.uhn.fhir.subscription.api.IPostCommitResourceModifiedConsumer;
+import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -48,7 +47,19 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
-public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, IPostCommitResourceModifiedConsumer, IAsyncResourceModifiedConsumer {
+/**
+ * This service provides two distinct context in which it submits messages to the subscription pipeline.
+ *
+ * It implements {@link IResourceModifiedConsumer} for synchronous submissions where retry upon failures is not required.
+ *
+ * It implements {@link IResourceModifiedConsumerWithRetries} for synchronous submissions performed as part of processing
+ * an operation on a resource (see {@link SubscriptionMatcherInterceptor}).  Submissions in this context require retries
+ * upon submission failure.
+ *
+ *
+ */
+
+public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, IResourceModifiedConsumerWithRetries {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
 	private volatile MessageChannel myMatchingChannel;
@@ -77,9 +88,11 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	/**
-	 * Submit a message to the broker without retries if submission fails.
+	 * @inheritDoc
+	 * Submit a message to the broker without retries.
 	 *
-	 * @param theMsg the ResourceModifiedMessage to be processed.
+	 * Implementation of the {@link IResourceModifiedConsumer}
+	 *
 	 */
 	@Override
 	public void processResourceModified(ResourceModifiedMessage theMsg) {
@@ -90,14 +103,25 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMsg));
 	}
 
-	@Override
-	public boolean processResourceModified(IResourceModifiedPK theResourceModifiedPK){
-		ResourceModifiedMessage resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(theResourceModifiedPK);
-		return processResourceModifiedInTransaction(resourceModifiedMessage, theResourceModifiedPK);
-	}
-
+	/**
+	 * @inheritDoc
+	 *
+	 * Synchronous processing with retry.
+	 *
+	 * Implementation of {@link IResourceModifiedConsumerWithRetries}
+	 */
 	@Override
 	public boolean processResourceModifiedPostCommit(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK) {
+
+		// we have a message and it's already persisted.  to respect the operations on resources order, we can only submit <code>theResourceModifiedMessage</code>
+		// to the pipeline if there is no other messages needing submission before this one.
+		//
+		// in the event where we do have other messages needing submission, the message will get submitted asynchronously
+		// through the {@link AsyncResourceModifiedSubmitterSvc}.
+		if( hasOtherMessagesNeedingSubmission() ) {
+			return false;
+		}
+
 		return processResourceModifiedInTransaction(theResourceModifiedMessage, theResourceModifiedPK);
 	}
 
@@ -120,14 +144,14 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 					// the PK did exist and we were able to deleted it, ie, we are the only one processing the message
 					processResourceModified(theResourceModifiedMessage);
 				} else {
-					// we were not able to delete the pk.  this implies that someone else did read/delete the PK /process the message
+					// we were not able to delete the pk.  this implies that someone else did read/delete the PK and processed the message
 					// successfully before we did.  still, we return true as the message was processed.
 				}
 
 			} catch(ResourceNotFoundException exception) {
 				ourLog.warn("Resource with primary key {}/{} could not be found", theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion(), exception);
 			} catch (MessageDeliveryException exception) {
-				// we encountered an issue (again) when trying to send the message so mark the transaction for rollback
+				// we encountered an issue when trying to send the message so mark the transaction for rollback
 				ourLog.warn("Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.", theResourceModifiedMessage.getPayloadId(), theResourceModifiedMessage.getSubscriptionId());
 				processed = false;
 				theStatus.setRollbackOnly();
@@ -135,6 +159,10 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 			return processed;
 		};
+	}
+
+	private boolean hasOtherMessagesNeedingSubmission(){
+		return myResourceModifiedMessagePersistenceSvc.getMessagePersistedCount() > 1;
 	}
 
 	private ChannelProducerSettings getChannelProducerSettings() {
@@ -147,10 +175,6 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	public IChannelProducer getProcessingChannelForUnitTest() {
 		startIfNeeded();
 		return (IChannelProducer) myMatchingChannel;
-	}
-
-	public void setMatchingChannel(MessageChannel theMatchingChannel){
-		myMatchingChannel = theMatchingChannel;
 	}
 
 }
