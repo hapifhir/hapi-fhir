@@ -26,7 +26,7 @@ import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
- * The default error handler, which logs issues but does not abort parsing, with only one exception:
+ * The default error handler, which logs issues but does not abort parsing, with only two exceptions:
  * <p>
  * The {@link #invalidValue(ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation, String, String)}
  * method will throw a {@link DataFormatException} by default since ignoring this type of error
@@ -36,6 +36,12 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * 
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
  * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
+ *
+ * <p>
+ * The {@link #extensionContainsValueAndNestedExtensions(ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation)}
+ * method will throw a {@link DataFormatException} by default since ignoring this type of error will allow malformed
+ * resouces to be created and result in errors when attempts to read, update or delete the resource in the future.
+ * </p>
  */
 public class LenientErrorHandler extends ParseErrorHandler implements IParserErrorHandler {
 
@@ -158,9 +164,9 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	}
 
 	@Override
-	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
+	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation){
 		if (myLogErrors) {
-			ourLog.warn("{}Extension contains both a value and nested extensions", describeLocation(theLocation));
+			STRICT_ERROR_HANDLER.extensionContainsValueAndNestedExtensions(theLocation);
 		}
 	}
 
