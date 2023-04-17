@@ -2,20 +2,25 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
@@ -380,6 +385,56 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		});
 
 	}
+
+
+	/**
+	 * A FHIR transaction bundle containing a conditional create as well as a patch that point to the same resource
+	 */
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testConditionalCreateAndConditionalPatchOnSameResource(boolean thePreviouslyExisting) {
+
+		if (thePreviouslyExisting) {
+			Patient patient = new Patient();
+			patient.setActive(false);
+			patient.addIdentifier().setSystem("http://system").setValue("value");
+			myPatientDao.create(patient, mySrd);
+		}
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient patient = new Patient();
+		patient.setActive(false);
+		patient.addIdentifier().setSystem("http://system").setValue("value");
+		bb.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://system|value");
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(true));
+		bb.addTransactionFhirPatchEntry(patch).conditional("Patient?identifier=http://system|value");
+
+		Bundle input = bb.getBundleTyped();
+		ourLog.info("Bundle: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		// Test
+		Bundle output = mySystemDao.transaction(mySrd, input);
+
+		// Verify
+		IdType createId = new IdType(output.getEntry().get(0).getResponse().getLocation());
+		IdType patchId = new IdType(output.getEntry().get(1).getResponse().getLocation());
+		assertEquals("1", createId.getVersionIdPart());
+		assertEquals("2", patchId.getVersionIdPart());
+		assertEquals(createId.getIdPart(), patchId.getIdPart());
+
+		Patient createdPatient = myPatientDao.read(patchId, mySrd);
+		assertEquals("http://system", createdPatient.getIdentifierFirstRep().getSystem());
+		assertTrue(createdPatient.getActive());
+
+		assertEquals(2, output.getEntry().size());
+	}
+
+
 
 }
 
