@@ -40,6 +40,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
@@ -75,6 +76,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -131,6 +133,7 @@ import static org.mockito.Mockito.when;
 public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoR4Test.class);
+	private static final String TEST_IDENTIFIER_SYSTEM = "http://some-system.com";
 
 	@AfterEach
 	public void after() {
@@ -4391,6 +4394,162 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		});
 	}
 
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_simpleIdentifier() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		// Test Passes when identifier.value = ID2
+		final String identifierValue = "ID2";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl(ResourceType.Patient.name());
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_simpleUrlWithIdentifier() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		final String identifierValue = "http://some-url-value";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl(ResourceType.Patient.name());
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_urlOrganizationAndObservation() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		final String identifierValue = "http://some-url-value/Observation/ID2";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl(ResourceType.Patient.name());
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_OrganizationAndOrganization() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		// Test fails with Organization and Organization
+		final String identifierValue = "http://some-url-value/Organization/ID2";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl(ResourceType.Patient.name());
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
+	}
+
+	@Test
+	public void testCreatePlaceholderWithMatchingInlineAndSubjectReferenceIdentifiersCreatesOnlyOne_withConditionalUrl() {
+		// setup
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		/*
+		 * Create an Observation that references a Patient
+		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
+		 */
+		final Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		String identifierValue = "http://something.something/b";
+		obsToCreate.getSubject()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Patient.name(), TEST_IDENTIFIER_SYSTEM, identifierValue));
+		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("http://something.something/b");
+
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(obsToCreate)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl(ResourceType.Observation.name());
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider patientSearch = myPatientDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = patientSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Patient.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Patient.name()));
+	}
 
 	/**
 	 * Per a message on the mailing list
