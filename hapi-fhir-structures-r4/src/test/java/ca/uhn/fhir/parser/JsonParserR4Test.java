@@ -519,7 +519,12 @@ public class JsonParserR4Test extends BaseTest {
 		// Lenient error handler - should parse successfully with no error
 		LenientErrorHandler errorHandler = new LenientErrorHandler(true).disableAllErrors();
 		IParser parser = ourCtx.newJsonParser().setParserErrorHandler(errorHandler);
-		parser.encodeResourceToString(p);
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("http://root"));
+		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output, containsString("http://child"));
+		assertThat(output, containsString("CHILD_VALUE"));
 		assertEquals(false, errorHandler.isErrorOnInvalidExtension());
 		assertEquals(false, errorHandler.isErrorOnInvalidValue());
 	}
