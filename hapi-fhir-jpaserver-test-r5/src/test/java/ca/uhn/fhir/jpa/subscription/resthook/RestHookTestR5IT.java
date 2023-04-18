@@ -54,8 +54,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Test the rest-hook subscriptions
  */
-public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR5Test.class);
+public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR5IT.class);
 	public static final String OBS_CODE = "1000000050";
 	public static final String OBS_CODE2 = OBS_CODE + "111";
 	private static final String CUSTOM_URL = "http://custom.topic.url";
