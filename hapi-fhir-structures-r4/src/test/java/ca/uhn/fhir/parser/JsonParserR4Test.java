@@ -506,6 +506,25 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	@Test
+	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions_withDisableAllErrorsShouldSucceed() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setUrl("http://root");
+		root.setValue(new StringType("ROOT_VALUE"));
+		Extension child = root.addExtension();
+		child.setUrl("http://child");
+		child.setValue(new StringType("CHILD_VALUE"));
+
+		// Lenient error handler - should parse successfully with no error
+		LenientErrorHandler errorHandler = new LenientErrorHandler(true).disableAllErrors();
+		IParser parser = ourCtx.newJsonParser().setParserErrorHandler(errorHandler);
+		parser.encodeResourceToString(p);
+		assertEquals(false, errorHandler.isErrorOnInvalidExtension());
+		assertEquals(false, errorHandler.isErrorOnInvalidValue());
+	}
+
+	@Test
 	public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalFirst() {
 
 		Observation obs = new Observation();
