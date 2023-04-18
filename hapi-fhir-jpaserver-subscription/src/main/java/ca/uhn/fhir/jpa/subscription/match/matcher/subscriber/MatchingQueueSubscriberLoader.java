@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -45,7 +44,7 @@ public class MatchingQueueSubscriberLoader {
 	FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
-	@Autowired
+	@Autowired(required = false)
 	private SubscriptionTopicMatchingSubscriber mySubscriptionTopicMatchingSubscriber;
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
@@ -67,7 +66,7 @@ public class MatchingQueueSubscriberLoader {
 			myMatchingChannel.subscribe(mySubscriptionActivatingSubscriber);
 			myMatchingChannel.subscribe(mySubscriptionRegisteringSubscriber);
 			ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myMatchingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
-			if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4B)) {
+			if (mySubscriptionTopicMatchingSubscriber != null) {
 				ourLog.info("Starting SubscriptionTopic Matching Subscriber");
 				myMatchingChannel.subscribe(mySubscriptionTopicMatchingSubscriber);
 			}
