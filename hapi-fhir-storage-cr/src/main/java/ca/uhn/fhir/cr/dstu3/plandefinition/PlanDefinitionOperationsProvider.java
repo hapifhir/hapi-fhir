@@ -22,6 +22,7 @@ package ca.uhn.fhir.cr.dstu3.plandefinition;
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.config.CrDstu3Config;
+import ca.uhn.fhir.cr.dstu3.IPlanDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -46,7 +47,7 @@ public class PlanDefinitionOperationsProvider {
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
 	@Autowired
-	CrDstu3Config.IDstu3PlanDefinitionProcessorFactory myDstu3PlanDefinitionServiceFactory;
+	IPlanDefinitionProcessorFactory myDstu3PlanDefinitionServiceFactory;
 
 	/**
 	 * Implements the <a href=

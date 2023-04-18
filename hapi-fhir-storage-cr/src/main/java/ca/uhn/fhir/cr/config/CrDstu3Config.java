@@ -21,16 +21,7 @@ package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
-import ca.uhn.fhir.cr.dstu3.activitydefinition.ActivityDefinitionOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.questionnaireresponse.QuestionnaireResponseOperationsProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.plandefinition.dstu3.PlanDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
-import org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
-import org.opencds.cqf.fhir.api.Repository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,8 +31,6 @@ import java.util.function.Function;
 
 @Configuration
 public class CrDstu3Config extends BaseClinicalReasoningConfig {
-
-	// Measure
 
 	@Bean
 	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(ApplicationContext theApplicationContext) {
@@ -63,71 +52,4 @@ public class CrDstu3Config extends BaseClinicalReasoningConfig {
 		return new MeasureOperationsProvider();
 	}
 
-	// ActivityDefinition
-
-	@FunctionalInterface
-	public interface IDstu3ActivityDefinitionProcessorFactory {
-		ActivityDefinitionProcessor create(Repository theRepository);
-	}
-
-	@Bean
-	IDstu3ActivityDefinitionProcessorFactory dstu3ActivityDefinitionProcessorFactory() {
-		return r -> new ActivityDefinitionProcessor(r);
-	}
-
-	@Bean
-	public ActivityDefinitionOperationsProvider dstu3ActivityDefinitionOperationsProvider() {
-		return new ActivityDefinitionOperationsProvider();
-	}
-
-	// PlanDefinition
-
-	@FunctionalInterface
-	public interface IDstu3PlanDefinitionProcessorFactory {
-		PlanDefinitionProcessor create(Repository theRepository);
-	}
-
-	@Bean
-	IDstu3PlanDefinitionProcessorFactory dstu3PlanDefinitionProcessorFactory() {
-		return r -> new PlanDefinitionProcessor(r);
-	}
-
-	@Bean
-	public PlanDefinitionOperationsProvider dstu3PlanDefinitionOperationsProvider() {
-		return new PlanDefinitionOperationsProvider();
-	}
-
-	// Questionnaire
-
-	@FunctionalInterface
-	public interface IDstu3QuestionnaireProcessorFactory {
-		QuestionnaireProcessor create(Repository theRepository);
-	}
-
-	@Bean
-	IDstu3QuestionnaireProcessorFactory dstu3QuestionnaireProcessorFactory() {
-		return r -> new QuestionnaireProcessor(r);
-	}
-
-	@Bean
-	public QuestionnaireOperationsProvider dstu3QuestionnaireOperationsProvider() {
-		return new QuestionnaireOperationsProvider();
-	}
-
-	// QuestionnaireResponse
-
-	@FunctionalInterface
-	public interface IDstu3QuestionnaireResponseProcessorFactory {
-		QuestionnaireResponseProcessor create(Repository theRepository);
-	}
-
-	@Bean
-	IDstu3QuestionnaireResponseProcessorFactory dstu3QuestionnaireResponseProcessorFactory() {
-		return r -> new QuestionnaireResponseProcessor(r);
-	}
-
-	@Bean
-	public QuestionnaireResponseOperationsProvider dstu3QuestionnaireResponseOperationsProvider() {
-		return new QuestionnaireResponseOperationsProvider();
-	}
 }

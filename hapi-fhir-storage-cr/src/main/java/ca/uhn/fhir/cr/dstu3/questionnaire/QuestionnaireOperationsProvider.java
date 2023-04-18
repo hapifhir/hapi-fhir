@@ -22,6 +22,7 @@ package ca.uhn.fhir.cr.dstu3.questionnaire;
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.config.CrDstu3Config;
+import ca.uhn.fhir.cr.dstu3.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -42,7 +43,7 @@ public class QuestionnaireOperationsProvider {
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
 	@Autowired
-	CrDstu3Config.IDstu3QuestionnaireProcessorFactory myDstu3QuestionnaireServiceFactory;
+	IQuestionnaireProcessorFactory myDstu3QuestionnaireServiceFactory;
 
 	/**
 	 * Implements a modified version of the <a href=

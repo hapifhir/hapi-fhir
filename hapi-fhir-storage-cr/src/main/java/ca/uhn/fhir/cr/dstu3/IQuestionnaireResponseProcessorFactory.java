@@ -17,7 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.r4;
+package ca.uhn.fhir.cr.dstu3;
 
-public interface IProcessorFactory {
+import org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
+import org.opencds.cqf.fhir.api.Repository;
+
+@FunctionalInterface
+public interface IQuestionnaireResponseProcessorFactory {
+	QuestionnaireResponseProcessor create(Repository theRepository);
 }
