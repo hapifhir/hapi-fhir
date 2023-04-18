@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.5.12-SNAPSHOT</version>
+	<version>6.5.13-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -3008,6 +3008,35 @@
 						<executions>
 							<execution><id>validate</id><phase>none</phase></execution>
 						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!--
+		This profile is basically here to work around an IJ bug where the
+		<testSource> tag is ignored in IJ's compiler. See:
+		https://youtrack.jetbrains.com/issue/IDEA-85478
+		IntelliJ 2023.1 now supports this, so we removed the activation.
+		But if you want to run an older IntelliJ, activate the old-intellij profile in the Maven tab.
+		-->
+		<profile>
+			<id>old-intellij</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<source>17</source>
+							<target>17</target>
+							<release>17</release>
+							<testSource>17</testSource>
+							<testTarget>17</testTarget>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>

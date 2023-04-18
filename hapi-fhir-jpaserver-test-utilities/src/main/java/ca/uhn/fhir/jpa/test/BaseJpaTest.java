@@ -129,6 +129,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -836,18 +838,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@SuppressWarnings("BusyWait")
-	public static void waitForSize(int theTarget, int theTimeout, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {
-		StopWatch sw = new StopWatch();
-		while (theCallable.call().intValue() != theTarget && sw.getMillis() < theTimeout) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException theE) {
-				throw new Error(theE);
-			}
-		}
-		if (sw.getMillis() >= theTimeout) {
-			fail("Size " + theCallable.call() + " is != target " + theTarget + " - " + theFailureMessage.call());
-		}
-		Thread.sleep(500);
+	public static void waitForSize(int theTarget, int theTimeoutMillis, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {
+		await()
+			.alias("Waiting for size " + theTarget + ". Current size is " + theCallable.call().intValue() + ": " + theFailureMessage.call())
+			.atMost(Duration.of(theTimeoutMillis, ChronoUnit.MILLIS))
+			.until(() -> theCallable.call().intValue() == theTarget);
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -13,8 +14,11 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -25,6 +29,8 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
+import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -49,12 +55,18 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -100,6 +112,19 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
 	@Autowired
 	private ISearchParamPresentDao mySearchParamPresentDao;
+	@Autowired
+	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
+	@Autowired
+	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+
+	@RegisterExtension
+	@Order(0)
+	public static final RestfulServerExtension ourServer = new RestfulServerExtension(FhirContext.forR4Cached())
+		.keepAliveBetweenTests();
+	@RegisterExtension
+	@Order(1)
+	public static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourServer, Patient.class);
+
 
 	@AfterEach
 	public void afterResetDao() {
@@ -117,6 +142,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 	}
@@ -2765,8 +2791,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * as well as a large number of updates (PUT). This means that a lot of URLs and resources
 	 * need to be resolved (ie SQL SELECT) in order to proceed with the transaction. Prior
 	 * to the optimization that introduced this test, we had 140 SELECTs, now it's 17.
-	 */
-	/**
+	 *
 	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test
@@ -2799,6 +2824,48 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test
+	public void testTransactionWithConditionalCreateAndConditionalPatchOnSameUrl() {
+		// Setup
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient patient = new Patient();
+		patient.setActive(false);
+		patient.addIdentifier().setSystem("http://system").setValue("value");
+		bb.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://system|value");
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(true));
+		bb.addTransactionFhirPatchEntry(patch).conditional("Patient?identifier=http://system|value");
+
+		Bundle input = bb.getBundleTyped();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+
+		// Verify
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(6, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		assertEquals(input.getEntry().size(), output.getEntry().size());
+
+		runInTransaction(() -> {
+			assertEquals(1, myResourceTableDao.count());
+			assertEquals(1, myResourceHistoryTableDao.count());
+		});
+
+	}
+
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@Test
 	public void testTransactionWithClientAssignedId() {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 
@@ -2816,6 +2883,46 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+
+	}
+
+
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testTriggerSubscription() throws Exception {
+		// Setup
+
+		myStorageSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
+		mySubscriptionMatcherInterceptor.startIfNeeded();
+
+		for (int i = 0; i < 10; i++) {
+			createPatient(withActiveTrue());
+		}
+
+		Subscription subscription = new Subscription();
+		subscription.getChannel().setEndpoint(ourServer.getBaseUrl());
+		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
+		subscription.getChannel().setPayload(Constants.CT_FHIR_JSON_NEW);
+		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setCriteria("Patient?active=true");
+		IIdType subscriptionId = mySubscriptionDao.create(subscription, mySrd).getId().toUnqualifiedVersionless();
+		waitForActivatedSubscriptionCount(1);
+
+		mySubscriptionTriggeringSvc.triggerSubscription(null, List.of(new StringType("Patient?active=true")), subscriptionId);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		ourPatientProvider.waitForUpdateCount(10);
+
+		// Validate
+		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(11, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 	}
 

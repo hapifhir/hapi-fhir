@@ -32,11 +32,11 @@ import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 public abstract class BaseCrR4Test extends BaseResourceProviderR4Test implements IResourceLoader {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	private static final IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
-	private static final String TEST_ADDRESS = "test-address.com";
+	protected static final String TEST_ADDRESS = "http://test:9001/fhir";
 	@ClassRule
 	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
 		service(TEST_ADDRESS)
-			.get("/fhir/metadata")
+			.get("/metadata")
 			.willReturn(success(getCapabilityStatement().toString(), "application/json"))
 	));
 

@@ -485,6 +485,8 @@ public class BaseController {
 						} else if (theResultType == ResultType.BUNDLE) {
 							resultDescription.append("JSON bundle");
 							riBundle = context.newJsonParser().parseResource(resultBody);
+						} else if (theResultType == ResultType.PARAMETERS) {
+							resultDescription.append("JSON parameters");
 						}
 						break;
 					case XML:
@@ -494,6 +496,8 @@ public class BaseController {
 						} else if (theResultType == ResultType.BUNDLE) {
 							resultDescription.append("XML bundle");
 							riBundle = context.newXmlParser().parseResource(resultBody);
+						} else if (theResultType == ResultType.PARAMETERS) {
+							resultDescription.append("XML parameters");
 						}
 						break;
 				}
@@ -549,7 +553,7 @@ public class BaseController {
 	}
 
 	protected enum ResultType {
-		BUNDLE, NONE, RESOURCE, TAGLIST
+		BUNDLE, NONE, RESOURCE, TAGLIST, PARAMETERS
 	}
 
 	public static class CaptureInterceptor implements IClientInterceptor {

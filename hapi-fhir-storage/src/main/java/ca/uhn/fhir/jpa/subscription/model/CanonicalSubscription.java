@@ -77,6 +77,8 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private boolean myCrossPartitionEnabled;
 	@JsonProperty("sendDeleteMessages")
 	private boolean mySendDeleteMessages;
+	private boolean myIsTopicSubscription;
+
 	/**
 	 * Constructor
 	 */
@@ -349,6 +351,14 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 //			.append("myRestHookDetails", myRestHookDetails)
 //			.append("myChannelExtensions", myChannelExtensions)
 			.toString();
+	}
+
+	public void setTopicSubscription(boolean theTopicSubscription) {
+		myIsTopicSubscription = theTopicSubscription;
+	}
+
+	public boolean isTopicSubscription() {
+		return myIsTopicSubscription;
 	}
 
 	public static class EmailDetails implements IModelJson {
