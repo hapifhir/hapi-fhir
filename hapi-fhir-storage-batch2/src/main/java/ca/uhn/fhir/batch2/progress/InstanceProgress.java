@@ -126,6 +126,8 @@ public class InstanceProgress {
 		}
 	}
 
+	// todo mb this name is weird.  Split the status calc + the basic stats calcs.
+	// extract an update object we can test separately.  This mixes calculation with updating the instance.
 	private void updateStatus(JobInstance theInstance) {
 		ourLog.trace("Updating status for instance with errors: {}", myErroredChunkCount);
 		if (myCompleteChunkCount > 0 || myErroredChunkCount > 0 || myFailedChunkCount > 0) {

@@ -42,7 +42,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -112,7 +111,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	/**
 	 * Fetches all chunks for a given instance, without loading the data
 	 *
-	 * wipmb this seems to only be used by tests.  Can we use the iterator instead?
+	 * TODO MB this seems to only be used by tests.  Can we use the iterator instead?
 	 * @param theInstanceId The instance ID
 	 * @param thePageSize   The page size
 	 * @param thePageIndex  The page index
@@ -137,16 +136,31 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
 	/**
+	 * Callback to update a JobInstance within a locked transaction.
+	 * Return true from the callback if the record write should continue, or false if
+	 * the change should be discarded.
+	 */
+	@FunctionalInterface
+	interface JobInstanceUpdateCallback  {
+		/**
+		 * Modify theInstance within a write-lock transaction.
+		 * @param theInstance a copy of the instance to modify.
+		 * @return true if the change to theInstance should be written back to the db.
+		 */
+		boolean doUpdate(JobInstance theInstance);
+	}
+
+	/**
 	 * Goofy hack for now to create a tx boundary.
 	 * If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
 	 * 	instead to ensure state-change callbacks are invoked properly.
 	 *
 	 * @param theInstanceId the id of the instance to modify
-	 * @param theModifier a hook to modify the instance
+	 * @param theModifier a hook to modify the instance - return true to finish the record write
 	 * @return true if the instance was modified
 	 */
-	// wipmb consider changing all callers to actual objects we can unit test.
-	boolean updateInstance(String theInstanceId, Predicate<JobInstance> theModifier);
+	// todo mb consider changing callers to actual objects we can unit test.
+	boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier);
 
 	/**
 	 * Deletes the instance and all associated work chunks

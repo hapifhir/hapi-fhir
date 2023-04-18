@@ -142,6 +142,7 @@ public class JobInstanceProcessor {
 			InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(theInstance.getInstanceId());
 
 			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance->{
+				// todo mb split the calculation from the update here.
 				progress.updateInstance(instance);
 				instance.setWorkChunksPurged(true);
 				return true;

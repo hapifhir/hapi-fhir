@@ -61,7 +61,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -377,7 +376,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional
-	public boolean updateInstance(String theInstanceId, Predicate<JobInstance> theModifier) {
+	public boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier) {
 		Batch2JobInstanceEntity instanceEntity = myEntityManager.find(Batch2JobInstanceEntity.class, theInstanceId, LockModeType.PESSIMISTIC_WRITE);
 		if (null == instanceEntity) {
 			ourLog.error("No instance found with Id {}", theInstanceId);
@@ -387,7 +386,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		JobInstance jobInstance = JobInstanceUtil.fromEntityToInstance(instanceEntity);
 
 		// run the modification callback
-		boolean wasModified = theModifier.test(jobInstance);
+		boolean wasModified = theModifier.doUpdate(jobInstance);
 
 		if (wasModified) {
 			// copy fields back for flush.

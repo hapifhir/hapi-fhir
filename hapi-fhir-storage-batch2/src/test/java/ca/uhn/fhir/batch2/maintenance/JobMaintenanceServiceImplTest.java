@@ -40,7 +40,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunkStep1;
@@ -151,8 +150,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 	private void stubUpdateInstanceCallback(JobInstance theJobInstance) {
 		when(myJobPersistence.updateInstance(eq(INSTANCE_ID), any())).thenAnswer(call->{
-			Predicate<JobInstance> callback = call.getArgument(1);
-			return callback.test(theJobInstance);
+			IJobPersistence.JobInstanceUpdateCallback callback = call.getArgument(1);
+			return callback.doUpdate(theJobInstance);
 		});
 	}
 

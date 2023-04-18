@@ -55,11 +55,10 @@ public class JobInstanceProgressCalculator {
 			if (instanceProgress.changed() || currentInstance.getStatus() == StatusEnum.IN_PROGRESS) {
 				if (currentInstance.getCombinedRecordsProcessed() > 0) {
 					ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed(), currentInstance.getCombinedRecordsProcessedPerSecond(), currentInstance.getEstimatedTimeRemaining());
-					ourLog.debug(instanceProgress.toString());
 				} else {
 					ourLog.info("Job {} of type {} has status {} - {} records processed", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed());
-					ourLog.debug(instanceProgress.toString());
 				}
+				ourLog.debug(instanceProgress.toString());
 			}
 
 

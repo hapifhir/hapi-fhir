@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
-import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -129,8 +128,8 @@ public class ReductionStepDataSinkTest {
 
 	private void stubUpdateInstanceCallback(JobInstance theJobInstance) {
 		when(myJobPersistence.updateInstance(eq(INSTANCE_ID), any())).thenAnswer(call->{
-			Predicate<JobInstance> callback = call.getArgument(1);
-			return callback.test(theJobInstance);
+			IJobPersistence.JobInstanceUpdateCallback callback = call.getArgument(1);
+			return callback.doUpdate(theJobInstance);
 		});
 	}
 
