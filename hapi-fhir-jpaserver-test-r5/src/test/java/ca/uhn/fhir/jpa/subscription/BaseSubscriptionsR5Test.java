@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
@@ -188,6 +189,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
+
 		subscription.setId(methodOutcome.getId().toVersionless());
 		mySubscriptionIds.add(methodOutcome.getId());
 
@@ -241,7 +243,11 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		}
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		DaoMethodOutcome retval = dao.update(theResource, mySrd);
+
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
+		ResourceModifiedMessage lastMessage = mySubscriptionTopicsCheckedLatch.getLatchInvocationParameterOfType(ResourceModifiedMessage.class);
+		assertEquals(theResource.getIdElement().toVersionless().toString(), lastMessage.getPayloadId());
+
 		if (theExpectDelivery) {
 			mySubscriptionDeliveredLatch.awaitExpected();
 		}

@@ -455,7 +455,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 
 		assertReceivedTransactionCount(3);
 
-		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		deleteSubscription(subscription2);
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT", true);
 
@@ -488,6 +488,12 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
 		assertFalse(sentObservation1.getId().isEmpty());
 		assertFalse(observation2.getId().isEmpty());
+	}
+
+	private void deleteSubscription(Subscription subscription2) throws InterruptedException {
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
 	}
 
 	private void assertReceivedTransactionCount(int theExpected) {
@@ -589,7 +595,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 		// Should see a subscription notification this time
 		assertReceivedTransactionCount(1);
 
-		myClient.delete().resourceById(new IdType("Subscription/" + subscription.getId())).execute();
+		deleteSubscription(subscription);
 
 		Observation observationTemp3 = sendObservation(OBS_CODE, "SNOMED-CT", false);
 
@@ -658,7 +664,7 @@ public class RestHookTestR5Test  extends BaseSubscriptionsR5Test {
 
 		subscription.addHeader("X-Foo: FOO");
 		subscription.addHeader("X-Bar: BAR");
-		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
+//		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 		updateResource(subscription, false);
 
 		Observation sentObservation = sendObservation(code, "SNOMED-CT", true);
