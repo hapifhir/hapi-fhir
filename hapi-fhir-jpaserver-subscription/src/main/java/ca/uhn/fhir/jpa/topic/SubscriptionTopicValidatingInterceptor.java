@@ -43,7 +43,7 @@ public class SubscriptionTopicValidatingInterceptor {
 														 RequestPartitionId theRequestPartitionId,
 														 Pointcut thePointcut) {
 		if (Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED != thePointcut && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED != thePointcut) {
-			throw new UnprocessableEntityException(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + thePointcut);
+			throw new UnprocessableEntityException(Msg.code(2340) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + thePointcut);
 		}
 
 		if (!"SubscriptionTopic".equals(myFhirContext.getResourceType(theSubscription))) {

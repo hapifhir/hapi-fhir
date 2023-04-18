@@ -11,7 +11,7 @@ public final class SubscriptionTopicCanonicalizer {
 	private SubscriptionTopicCanonicalizer() {
 	}
 
-	// FIXME KHS use elsewhere
+	// WIP STR5 use elsewhere
 	public static SubscriptionTopic canonicalize(FhirContext theFhirContext, IBaseResource theSubscriptionTopic) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R4B:
