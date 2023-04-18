@@ -80,6 +80,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID;
@@ -216,10 +217,10 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		ourLog.info("Starting pass of subscription triggering job {}", theJobDetails.getJobId());
 
 		// Submit individual resources
-		int totalSubmitted = 0;
+		AtomicInteger totalSubmitted = new AtomicInteger(0);
 		List<Pair<String, Future<Void>>> futures = new ArrayList<>();
-		while (theJobDetails.getRemainingResourceIds().size() > 0 && totalSubmitted < myMaxSubmitPerPass) {
-			totalSubmitted++;
+		while (theJobDetails.getRemainingResourceIds().size() > 0 && totalSubmitted.get() < myMaxSubmitPerPass) {
+			totalSubmitted.incrementAndGet();
 			String nextResourceId = theJobDetails.getRemainingResourceIds().remove(0);
 			Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResourceId);
 			futures.add(Pair.of(nextResourceId, future));
@@ -234,7 +235,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		// This is the job initial step where we set ourselves up to do the actual re-submitting of resources
 		// to the broker.  Note that querying of resource can be done synchronously or asynchronously
-		if (isInitialStep(theJobDetails) && isNotEmpty(theJobDetails.getRemainingSearchUrls()) && totalSubmitted < myMaxSubmitPerPass) {
+		if (isInitialStep(theJobDetails) && isNotEmpty(theJobDetails.getRemainingSearchUrls()) && totalSubmitted.get() < myMaxSubmitPerPass) {
 
 			String nextSearchUrl = theJobDetails.getRemainingSearchUrls().remove(0);
 			RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myFhirContext, nextSearchUrl);
@@ -264,7 +265,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		}
 
 		// processing step for synchronous processing mode
-		if (isNotBlank(theJobDetails.getCurrentSearchUrl()) && totalSubmitted < myMaxSubmitPerPass) {
+		if (isNotBlank(theJobDetails.getCurrentSearchUrl()) && totalSubmitted.get() < myMaxSubmitPerPass) {
 			List<IBaseResource> allCurrentResources;
 
 			int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
@@ -273,7 +274,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 			ourLog.info("Triggered job [{}] - Starting synchronous processing at offset {} and index {}", theJobDetails.getJobId(), theJobDetails.getCurrentOffset(), fromIndex);
 
-			int submittableCount = myMaxSubmitPerPass - totalSubmitted;
+			int submittableCount = myMaxSubmitPerPass - totalSubmitted.get();
 			int toIndex = fromIndex + submittableCount;
 
 			if (nonNull(search) && !search.isEmpty()) {
@@ -301,21 +302,21 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			}
 
 			ourLog.info("Triggered job[{}] delivering {} resources", theJobDetails.getJobId(), allCurrentResources.size());
-			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
+			AtomicInteger highestIndexSubmitted = new AtomicInteger(theJobDetails.getCurrentSearchLastUploadedIndex());
 
 
 			for (IBaseResource nextResource : allCurrentResources) {
 				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
 				futures.add(Pair.of(nextResource.getIdElement().getIdPart(), future));
-				totalSubmitted++;
-				highestIndexSubmitted++;
+				totalSubmitted.incrementAndGet();
+				highestIndexSubmitted.incrementAndGet();
 			}
 
 			if (validateFuturesAndReturnTrueIfWeShouldAbort(futures)) {
 				return;
 			}
 
-			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted);
+			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted.get());
 
 			ourLog.info("Triggered job[{}] lastUploadedIndex is {}", theJobDetails.getJobId(), theJobDetails.getCurrentSearchLastUploadedIndex());
 
@@ -330,12 +331,12 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		}
 
 		// processing step for asynchronous processing mode
-		if (isNotBlank(theJobDetails.getCurrentSearchUuid()) && totalSubmitted < myMaxSubmitPerPass) {
+		if (isNotBlank(theJobDetails.getCurrentSearchUuid()) && totalSubmitted.get() < myMaxSubmitPerPass) {
 			int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
 
 			IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theJobDetails.getCurrentSearchResourceType());
 
-			int maxQuerySize = myMaxSubmitPerPass - totalSubmitted;
+			int maxQuerySize = myMaxSubmitPerPass - totalSubmitted.get();
 			int toIndex;
 			if (theJobDetails.getCurrentSearchCount() != null) {
 				toIndex = Math.min(fromIndex + maxQuerySize, theJobDetails.getCurrentSearchCount());
@@ -350,7 +351,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null);
 
 			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), resourceIds.size());
-			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
+			AtomicInteger highestIndexSubmitted = new AtomicInteger(theJobDetails.getCurrentSearchLastUploadedIndex());
 
 			String resourceType = myFhirContext.getResourceType(theJobDetails.getCurrentSearchResourceType());
 			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
@@ -366,15 +367,15 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			for (IBaseResource nextResource : listToPopulate) {
 				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
 				futures.add(Pair.of(nextResource.getIdElement().getIdPart(), future));
-				totalSubmitted++;
-				highestIndexSubmitted++;
+				totalSubmitted.incrementAndGet();
+				highestIndexSubmitted.incrementAndGet();
 			}
 
 			if (validateFuturesAndReturnTrueIfWeShouldAbort(futures)) {
 				return;
 			}
 
-			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted);
+			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted.get());
 
 			if (resourceIds.size() == 0 || (theJobDetails.getCurrentSearchCount() != null && toIndex >= theJobDetails.getCurrentSearchCount())) {
 				ourLog.info("Triggering job[{}] search {} has completed ", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUuid());
@@ -385,7 +386,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			}
 		}
 
-		ourLog.info("Subscription trigger job[{}] triggered {} resources in {}ms ({} res / second)", theJobDetails.getJobId(), totalSubmitted, sw.getMillis(), sw.getThroughput(totalSubmitted, TimeUnit.SECONDS));
+		ourLog.info("Subscription trigger job[{}] triggered {} resources in {}ms ({} res / second)", theJobDetails.getJobId(), totalSubmitted, sw.getMillis(), sw.getThroughput(totalSubmitted.get(), TimeUnit.SECONDS));
 	}
 
 	private boolean isInitialStep(SubscriptionTriggeringJobDetails theJobDetails) {
