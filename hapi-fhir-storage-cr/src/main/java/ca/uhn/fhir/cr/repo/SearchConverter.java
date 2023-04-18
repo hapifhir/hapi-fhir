@@ -1,10 +1,5 @@
 package ca.uhn.fhir.cr.repo;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -25,13 +20,19 @@ import java.util.Map;
  * #L%
  */
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 
-import javax.annotation.Nonnull;
 
 /**
  * The IGenericClient API represents searches with OrLists, while the FhirRepository API uses nested
