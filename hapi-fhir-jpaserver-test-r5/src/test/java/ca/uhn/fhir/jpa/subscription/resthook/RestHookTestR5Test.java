@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR5Test;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -23,6 +24,7 @@ import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +52,15 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR5Test.class);
 
 	@Autowired
+	ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
+
+	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+
+	@BeforeEach
+	public void beforeEach(){
+		myResourceModifiedSubmitterSvc.ignoreOperationOnResourcesOrderForTesting();
+	}
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {

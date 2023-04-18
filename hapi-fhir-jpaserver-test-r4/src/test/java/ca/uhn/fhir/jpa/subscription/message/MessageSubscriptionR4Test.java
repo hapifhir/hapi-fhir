@@ -32,7 +32,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -207,13 +210,14 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 
 		// given
+		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
 		Patient patient = sendPatient();
 
 		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		IResourceModifiedPK patientPk = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
 
 		// when
-		boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteByPK(patientPk);
+		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(patientPk));
 
 		// then
 		assertThat(wasDeleted, is(Boolean.TRUE));
@@ -221,14 +225,16 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
+
 	public void testMethodDeleteByPK_whenEntityDoesNotExist_willReturnFalse(){
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 
 		// given
+		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
 		IResourceModifiedPK nonExistentResourceWithPk = ResourceModifiedEntityPK.with("one", "one");
 
 		// when
-		boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteByPK(nonExistentResourceWithPk);
+		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(nonExistentResourceWithPk));
 
 		// then
 		assertThat(wasDeleted, is(Boolean.FALSE));
@@ -238,17 +244,24 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void testPersistedResourceModifiedMessage_whenFetchFromDb_willEqualOriginalMessage() throws JsonProcessingException {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 		// given
+		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
 		Observation obs = sendObservation("zoop", "SNOMED-CT", "theExplicitSource", "theRequestId");
 
 		ResourceModifiedMessage originalResourceModifiedMessage = createResourceModifiedMessage(obs);
-		IResourceModifiedPK resourceModifiedPk = myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
 
-		// when
-		ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(resourceModifiedPk);
+		transactionTemplate.execute(tx -> {
 
-		// then
-		assertEquals(toJson(originalResourceModifiedMessage), toJson(restoredResourceModifiedMessage));
-		assertEquals(originalResourceModifiedMessage, restoredResourceModifiedMessage);
+				IResourceModifiedPK resourceModifiedPk = myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
+
+				// when
+				ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(resourceModifiedPk);
+
+				// then
+				assertEquals(toJson(originalResourceModifiedMessage), toJson(restoredResourceModifiedMessage));
+				assertEquals(originalResourceModifiedMessage, restoredResourceModifiedMessage);
+
+				return null;
+		});
 
 	}
 

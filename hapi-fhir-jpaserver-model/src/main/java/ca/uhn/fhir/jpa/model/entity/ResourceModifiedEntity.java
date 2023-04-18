@@ -44,7 +44,7 @@ public class ResourceModifiedEntity implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
 
-	@Column(name = "RESOURCE_TYPE", nullable = false)
+	@Column(name = "RESOURCE_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
 	public ResourceModifiedEntityPK getResourceModifiedEntityPK() {

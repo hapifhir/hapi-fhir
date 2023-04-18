@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class AsyncResourceModifiedProcessingSchedulerSvc implements IHasScheduledJobs {
 
-	public static final long ONE_MINUTE = 60 * DateUtils.MILLIS_PER_SECOND;
+	public static final long SECONDS = 5 * DateUtils.MILLIS_PER_SECOND;
 
 	@Override
 	public void scheduleJobs(ISchedulerService theSchedulerService) {
@@ -42,7 +42,7 @@ public class AsyncResourceModifiedProcessingSchedulerSvc implements IHasSchedule
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(AsyncResourceModifiedProcessingSchedulerSvc.Job.class);
 
-		theSchedulerService.scheduleClusteredJob(ONE_MINUTE, jobDetail);
+		theSchedulerService.scheduleClusteredJob(SECONDS, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

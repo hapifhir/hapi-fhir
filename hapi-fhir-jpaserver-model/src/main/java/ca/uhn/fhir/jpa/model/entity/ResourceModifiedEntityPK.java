@@ -27,10 +27,11 @@ import java.util.Objects;
 
 @Embeddable
 public class ResourceModifiedEntityPK implements IResourceModifiedPK, Serializable {
-	@Column(name = "RES_ID", nullable = false)
+
+	@Column(name = "RES_ID", length = 256, nullable = false)
 	private String myResourcePid;
 
-	@Column(name = "RES_VER", nullable = false)
+	@Column(name = "RES_VER", length = 8, nullable = false)
 	private String myResourceVersion;
 
 	public String getResourcePid() {

@@ -69,6 +69,8 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 	private PlatformTransactionManager myTxManager;
 
+	private boolean myIgnoreOperationOnResourcesOrderForTesting = false;
+
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
 		if (!myStorageSettings.hasSupportedSubscriptionTypes()) {
@@ -113,12 +115,12 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	@Override
 	public boolean submitResourceModified(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK) {
 
-		// we have a message and it's already persisted.  to respect the operations on resources order, we can only submit <code>theResourceModifiedMessage</code>
+		// we have a message and it's already persisted.  to respect the order of operations performed on resources, we can only submit <code>theResourceModifiedMessage</code>
 		// to the pipeline if there is no other messages needing submission before this one.
 		//
 		// in the event where we do have other messages needing submission, the message will get submitted asynchronously
 		// through the {@link AsyncResourceModifiedSubmitterSvc}.
-		if( hasOtherMessagesNeedingSubmission() ) {
+		if( hasOtherMessagesNeedingSubmission() && !myIgnoreOperationOnResourcesOrderForTesting) {
 			return false;
 		}
 
@@ -175,6 +177,11 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	public IChannelProducer getProcessingChannelForUnitTest() {
 		startIfNeeded();
 		return (IChannelProducer) myMatchingChannel;
+	}
+
+	@VisibleForTesting
+	public void ignoreOperationOnResourcesOrderForTesting(){
+		myIgnoreOperationOnResourcesOrderForTesting = true;
 	}
 
 }
