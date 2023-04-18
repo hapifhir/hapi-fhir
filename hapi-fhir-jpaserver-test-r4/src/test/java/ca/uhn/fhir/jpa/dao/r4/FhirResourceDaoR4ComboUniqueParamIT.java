@@ -77,6 +77,12 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myResourceIndexedCompositeStringUniqueDao.deleteAll();
 	}
 
+	@Test
+	public void testFailingTest() {
+		fail();
+	}
+
+
 	private void createUniqueBirthdateAndGenderSps() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender");
