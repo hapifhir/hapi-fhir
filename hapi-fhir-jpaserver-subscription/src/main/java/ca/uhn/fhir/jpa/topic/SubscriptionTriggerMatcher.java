@@ -68,10 +68,16 @@ public class SubscriptionTriggerMatcher {
 	private InMemoryMatchResult match(SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent theQueryCriteria) {
 		String previousCriteria = theQueryCriteria.getPrevious();
 		String currentCriteria = theQueryCriteria.getCurrent();
-		InMemoryMatchResult previousMatches = InMemoryMatchResult.fromBoolean(previousCriteria != null);
-		InMemoryMatchResult currentMatches = InMemoryMatchResult.fromBoolean(currentCriteria != null);
+		InMemoryMatchResult previousMatches = InMemoryMatchResult.fromBoolean(previousCriteria == null);
+		InMemoryMatchResult currentMatches = InMemoryMatchResult.fromBoolean(currentCriteria == null);
 
 		// WIP STR5 implement fhirPathCriteria per https://build.fhir.org/subscriptiontopic.html#fhirpath-criteria
+		if (currentCriteria != null) {
+			currentMatches = matchResource(myResource, currentCriteria);
+		}
+		if (myOperation == ResourceModifiedMessage.OperationTypeEnum.CREATE) {
+			return currentMatches;
+		}
 
 		if (previousCriteria != null) {
 			if (myOperation == ResourceModifiedMessage.OperationTypeEnum.UPDATE ||
@@ -86,9 +92,6 @@ public class SubscriptionTriggerMatcher {
 					ourLog.warn("Resource {} has a version of 1, which should not be the case for a create or delete operation", myResource.getIdElement().toUnqualifiedVersionless());
 				}
 			}
-		}
-		if (currentCriteria != null) {
-			currentMatches = matchResource(myResource, currentCriteria);
 		}
 		// WIP STR5 implement resultForCreate and resultForDelete
 		if (theQueryCriteria.getRequireBoth()) {
