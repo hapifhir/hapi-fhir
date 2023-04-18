@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
@@ -63,7 +62,7 @@ public class SubscriptionTopicConfig {
 	SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber() {
 		return new SubscriptionTopicRegisteringSubscriber();
 	}
-	
+
 	@Bean
 	SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
 		return new SubscriptionTopicValidatingInterceptor(theFhirContext, theSubscriptionQueryValidator);

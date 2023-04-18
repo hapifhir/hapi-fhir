@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -59,6 +60,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+	@Autowired(required = false)
+	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
@@ -68,7 +71,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
-
+	@Test
+	public void testSubscriptionTopicRegistryBean() {
+		// This bean should not exist in R4
+		assertNull(mySubscriptionTopicRegistry);
+	}
 
 	/**
 	 * Make sure that if we delete a subscription, then reinstate it with a criteria
