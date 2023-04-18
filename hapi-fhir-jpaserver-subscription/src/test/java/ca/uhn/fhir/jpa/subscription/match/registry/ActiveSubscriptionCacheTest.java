@@ -136,7 +136,7 @@ public class ActiveSubscriptionCacheTest {
 	private ActiveSubscription buildTopicSubscription(String theId, String theTopicUrl) {
 		ActiveSubscription activeSub2 = buildActiveSubscription(theId);
 		activeSub2.getSubscription().setTopicSubscription(true);
-		activeSub2.getSubscription().setCriteriaString(theTopicUrl);
+		activeSub2.getSubscription().getTopicSubscription().setTopic(theTopicUrl);
 		return activeSub2;
 	}
 
