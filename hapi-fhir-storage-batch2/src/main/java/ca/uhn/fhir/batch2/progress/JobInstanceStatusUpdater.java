@@ -48,7 +48,7 @@ public class JobInstanceStatusUpdater {
 		if (origStatus == theNewStatus) {
 			return false;
 		}
-		if (!StatusEnum.isLegalStateTransition(origStatus, theNewStatus)) { // wipmb hack because mock tests alias the object
+		if (!StatusEnum.isLegalStateTransition(origStatus, theNewStatus)) {
 			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theNewStatus);
 			return false;
 		}

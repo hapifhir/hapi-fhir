@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 public class JobDefinitionRegistry {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	// wipmb is this safe?  Can ue use ConcurrentHashMap instead?
+	// TODO MB is this safe?  Can ue use ConcurrentHashMap instead?
 	private volatile Map<String, NavigableMap<Integer, JobDefinition<?>>> myJobs = new HashMap<>();
 
 	/**

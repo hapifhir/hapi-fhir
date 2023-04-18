@@ -129,10 +129,11 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
-	 * Fetch all chunks with data for a given instance for a given step id
+	 * Fetch all chunks with data for a given instance for a given step id - read-only.
+	 *
 	 * @return - a stream for fetching work chunks
 	 */
-	@Transactional(propagation = Propagation.MANDATORY)
+	@Transactional(propagation = Propagation.MANDATORY, readOnly = true)
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
 	/**

@@ -190,6 +190,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 		ourLog.info("Received work notification for {}", workNotification);
 
 		// wipmb when should we throw an exception vs skip the chunk?  I.e. should re-queue the chunk to retry?
+		// failing to load a job definition probably means this is an old process during upgrade. - retry those.
 		executeInTxRollbackWhenEmpty(() -> (
 			// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
 			Optional.of(new MessageProcess(workNotification))

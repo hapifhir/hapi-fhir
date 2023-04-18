@@ -20,10 +20,17 @@
 /**
  * Our distributed batch processing library.
  *
- * wipmb review tx layer - the variety of @Transaction annotations is scary.
+ * A running job corresponds to a {@link ca.uhn.fhir.batch2.model.JobInstance}.
+ * Jobs are modeled as a sequence of steps, operating on {@link ca.uhn.fhir.batch2.model.WorkChunk}s
+ * containing json data.  The first step is special -- it is empty, and the data is assumed to be the job parameters.
+ * A {@link ca.uhn.fhir.batch2.model.JobDefinition} defines the sequence of {@link ca.uhn.fhir.batch2.model.JobDefinitionStep}s.
+ * Each step defines the input chunk type, the output chunk type, and a procedure that receives the input and emits 0 or more outputs.
+ * We have a special kind of final step called a reducer, which corresponds to the stream Collector concept.
  *
- * Design
- * - How do we handle tx around chunk queueing?  At-most-once or at-least-once?
+ * Design gaps:
+ * <ul>
+ *    <li> If a work </li>
+ * </ul>
  */
 package ca.uhn.fhir.batch2;
 

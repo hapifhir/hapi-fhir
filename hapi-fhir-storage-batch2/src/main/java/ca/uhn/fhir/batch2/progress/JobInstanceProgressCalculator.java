@@ -79,8 +79,9 @@ public class JobInstanceProgressCalculator {
 
 		while (workChunkIterator.hasNext()) {
 			WorkChunk next = workChunkIterator.next();
-			// wipmb can we merge these two things?
+			// global stats
 			myProgressAccumulator.addChunk(next);
+			// instance stats
 			instanceProgress.addChunk(next);
 		}
 		return instanceProgress;

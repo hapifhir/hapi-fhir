@@ -111,7 +111,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<WorkChunk> onWorkChunkDequeue(String theChunkId) {
-		// wipmb design question - IN_PROGRESS probably shouldn't be allowed.  But how does re-run happen if k8s kills a processor mid run?
+		// NOTE: Ideally, IN_PROGRESS wouldn't be allowed here.  On chunk failure, we probably shouldn't be allowed.  But how does re-run happen if k8s kills a processor mid run?
 		List<WorkChunkStatusEnum> priorStates = List.of(WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.ERRORED, WorkChunkStatusEnum.IN_PROGRESS);
 		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, priorStates);
 		if (rowsModified == 0) {
@@ -440,7 +440,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
 		String operationString = "Cancel job instance " + theInstanceId;
 
-		// wipmb this is much too detailed to be down here - this should be up at the api layer.  Replace with simple enum.
+		// TODO MB this is much too detailed to be down here - this should be up at the api layer.  Replace with simple enum.
 		String messagePrefix = "Job instance <" + theInstanceId + ">";
 		if (recordsChanged > 0) {
 			return JobOperationResultJson.newSuccess(operationString, messagePrefix + " successfully cancelled.");
