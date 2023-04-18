@@ -107,7 +107,6 @@ public class TransactionSynchronizer {
 		for (Entry entry : theBaseResources) {
 			String key = entry.getKey();
 
-			System.out.println("\n" + key);
 			if (addBundleToMapAndReturnIfAlreadyContained(key, theBundle)) {
 				contains = true;
 				// we still continue, because we need to add all entries to map

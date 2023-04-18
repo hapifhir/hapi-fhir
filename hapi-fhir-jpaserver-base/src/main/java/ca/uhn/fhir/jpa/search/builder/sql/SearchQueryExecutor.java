@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
@@ -118,6 +119,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 
 					ourLog.trace("About to execute SQL: {}", sql);
 
+					hibernateQuery.setFlushMode(FlushModeType.COMMIT);
 					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 					myResultSet = new ScrollableResultsIterator<>(scrollableResults);
 					myQueryInitialized = true;

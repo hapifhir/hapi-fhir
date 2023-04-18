@@ -116,7 +116,6 @@ public class SearchParamExtractorService {
 	 * {@literal theParams}.
 	 */
 	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theNewParams, ResourceIndexedSearchParams theExistingParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, @Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
-
 		// All search parameter types except Reference
 		ResourceIndexedSearchParams normalParams = new ResourceIndexedSearchParams();
 		extractSearchIndexParameters(theRequestDetails, normalParams, theResource, theSearchParamFilter);

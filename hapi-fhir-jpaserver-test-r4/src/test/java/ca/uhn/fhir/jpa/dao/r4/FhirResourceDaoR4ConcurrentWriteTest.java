@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -36,6 +37,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 
 import javax.annotation.Nonnull;
@@ -74,6 +76,8 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	private UserRequestRetryVersionConflictsInterceptor myRetryInterceptor;
 	private TransactionConcurrencySemaphoreInterceptor myConcurrencySemaphoreInterceptor;
 
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	@Override
 	@BeforeEach
@@ -110,6 +114,9 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		PointcutLatch latch = new PointcutLatch("transactionLatch");
 		Collection<Callable<Bundle>> callables = new ArrayList<>();
 
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		myStorageSettings.setEnforceReferenceTargetTypes(false);
+
 		latch.setDefaultTimeoutSeconds(5);
 		latch.setExpectedCount(calls);
 		for (int i = 0; i < calls; i++) {
@@ -140,8 +147,10 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(futures.size(), calls);
+		int i = 0;
 		for (Future<Bundle> future : futures) {
 			// make sure no exceptions
+			System.out.println(" here we are " + i++);
 			Bundle b = future.get();
 			assertNotNull(b);
 		}

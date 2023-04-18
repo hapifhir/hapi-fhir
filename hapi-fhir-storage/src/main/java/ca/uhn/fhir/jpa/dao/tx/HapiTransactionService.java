@@ -229,7 +229,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 //					ResourceVersionConflictException | DataIntegrityViolationException | ObjectOptimisticLockingFailureException e
 					Exception e
 				) {
-					ourLog.error("\nXXXXX Retrying on exception " + e.getClass().getName());
+					ourLog.error("\nXXXXX Retrying on exception " + e.getClass().getName() + " \n" + e.getMessage());
 					ourLog.debug("Version conflict detected", e);
 
 					if (theExecutionBuilder.myOnRollback != null) {
