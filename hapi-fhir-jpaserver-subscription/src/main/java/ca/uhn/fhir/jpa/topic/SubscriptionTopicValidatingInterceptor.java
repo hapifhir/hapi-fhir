@@ -54,8 +54,7 @@ public class SubscriptionTopicValidatingInterceptor {
 
 		boolean finished = false;
 		if (subscriptionTopic.getStatus() == null) {
-			// FIXME code
-			throw new UnprocessableEntityException("Can not process submitted SubscriptionTopic - SubscriptionTopic.status must be populated on this server");
+			throw new UnprocessableEntityException(Msg.code(2338) + "Can not process submitted SubscriptionTopic - SubscriptionTopic.status must be populated on this server");
 		}
 
 		switch (subscriptionTopic.getStatus()) {
@@ -93,8 +92,7 @@ public class SubscriptionTopicValidatingInterceptor {
 				ourLog.warn("Warning: Query Criteria '{}' in {} cannot be evaluated in-memory", theCriteria, theFieldName);
 			}
 		} catch (InvalidRequestException | DataFormatException e) {
-			// FIXME code
-			throw new UnprocessableEntityException("Invalid SubscriptionTopic criteria '" + theCriteria + "' in " + theFieldName + ": " + e.getMessage());
+			throw new UnprocessableEntityException(Msg.code(2339) + "Invalid SubscriptionTopic criteria '" + theCriteria + "' in " + theFieldName + ": " + e.getMessage());
 		}
 	}
 }

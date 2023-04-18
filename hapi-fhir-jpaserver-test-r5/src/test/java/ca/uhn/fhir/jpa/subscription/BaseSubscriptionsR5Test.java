@@ -14,19 +14,14 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterc
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
-import com.google.common.collect.Lists;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.eclipse.jetty.server.Server;
@@ -36,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
@@ -69,10 +63,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 
 	protected static int ourListenerPort;
-	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
-	protected static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
-	protected static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static Server ourListenerServer;
 	private static SingleQueryCountHolder ourCountHolder;
 	private static String ourListenerServerBase;
@@ -105,12 +95,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 		ourListenerRestServer.unregisterProvider(mySystemProvider);
 		ourListenerRestServer.registerProvider(ourTestSystemProvider);
-
-		// FIXME remove these
-		ourCreatedObservations.clear();
-		ourUpdatedObservations.clear();
-		ourContentTypes.clear();
-		ourHeaders.clear();
 
 		ourTestSystemProvider.clear();
 
@@ -211,11 +195,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return subscription;
 	}
 
-
-	protected void waitForQueueToDrain() throws InterruptedException {
-		mySubscriptionTestUtil.waitForQueueToDrain();
-	}
-
 	@PostConstruct
 	public void initializeOurCountHolder() {
 		ourCountHolder = myCountHolder;
@@ -268,47 +247,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return retval;
 	}
 
-
-
-	public static class ObservationListener implements IResourceProvider {
-
-		@Create
-		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
-			ourLog.info("Received Listener Create");
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
-			ourCreatedObservations.add(theObservation);
-			extractHeaders(theRequest);
-			return new MethodOutcome(new IdType("Observation/1"), true);
-		}
-
-		private void extractHeaders(HttpServletRequest theRequest) {
-			Enumeration<String> headerNamesEnum = theRequest.getHeaderNames();
-			while (headerNamesEnum.hasMoreElements()) {
-				String nextName = headerNamesEnum.nextElement();
-				Enumeration<String> valueEnum = theRequest.getHeaders(nextName);
-				while (valueEnum.hasMoreElements()) {
-					String nextValue = valueEnum.nextElement();
-					ourHeaders.add(nextName + ": " + nextValue);
-				}
-			}
-		}
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Observation.class;
-		}
-
-		@Update
-		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
-			ourLog.info("Received Listener Update");
-			ourUpdatedObservations.add(theObservation);
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
-			extractHeaders(theRequest);
-			return new MethodOutcome(new IdType("Observation/1"), false);
-		}
-
-	}
-
 	@AfterAll
 	public static void reportTotalSelects() {
 		ourLog.info("Total database select queries: {}", getQueryCount().getSelect());
@@ -319,7 +257,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	}
 
 
-	protected void waitForRegisteredSubscriptionTopicCount(int theTarget) throws Exception {
+	protected void waitForRegisteredSubscriptionTopicCount(int theTarget) {
 		await().until(() -> subscriptionTopicRegistryHasSize(theTarget));
 	}
 
@@ -357,10 +295,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		ourListenerRestServer = new RestfulServer(FhirContext.forR5Cached());
-
-		ObservationListener obsListener = new ObservationListener();
-		ourListenerRestServer.setResourceProviders(obsListener);
-
 		ourListenerServer = new Server(0);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
@@ -420,10 +354,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 		public Bundle getLastBundle() {
 			return receivedBundles.get(receivedBundles.size() - 1);
-		}
-
-		public Bundle getReceivedBundle(int theIndex) {
-			return receivedBundles.get(theIndex);
 		}
 
 		public List<String> getLastHeaders() {
