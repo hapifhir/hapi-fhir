@@ -66,7 +66,6 @@ public class JobInstanceProgressCalculator {
 				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
 			}
 
-
 			return true;
 		});
 		ourLog.trace("calculating progress: {} - complete in {}", theInstanceId, stopWatch);
@@ -84,6 +83,9 @@ public class JobInstanceProgressCalculator {
 			// instance stats
 			instanceProgress.addChunk(next);
 		}
+
+		instanceProgress.calculateNewStatus();
+
 		return instanceProgress;
 	}
 

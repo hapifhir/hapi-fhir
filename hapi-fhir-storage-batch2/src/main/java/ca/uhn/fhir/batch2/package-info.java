@@ -17,6 +17,7 @@
  * limitations under the License.
  * #L%
  */
+
 /**
  * Our distributed batch processing library.
  *
@@ -29,7 +30,9 @@
  *
  * Design gaps:
  * <ul>
- *    <li> If a work </li>
+ *    <li> If the maintenance job is killed while sending notifications about
+ *         a gated step advance, remaining chunks will never be notified.  A CREATED state before QUEUED would catch this.
+ *         </li>
  * </ul>
  */
 package ca.uhn.fhir.batch2;

@@ -83,22 +83,6 @@ class WorkChannelMessageHandler implements MessageHandler {
 		}
 
 		/**
-		 * Load the chunk, and mark it as dequeued.
-		 */
-		Optional<MessageProcess> updateChunkStatusAndValidate() {
-			return myJobPersistence.onWorkChunkDequeue(myChunkId)
-				.or(()->{
-					ourLog.error("Unable to find chunk with ID {} - Aborting", myChunkId);
-					return Optional.empty();
-				})
-				.map(chunk->{
-					myWorkChunk = chunk;
-					ourLog.debug("Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]", myChunkId, myWorkChunk.getTargetStepId(), myWorkChunk.getStartTime());
-					return this;
-				});
-		}
-
-		/**
 		 * Save the chunkId and validate.
 		 */
 		Optional<MessageProcess> validateChunkId() {
@@ -110,21 +94,11 @@ class WorkChannelMessageHandler implements MessageHandler {
 			return Optional.of(this);
 		}
 
-		Optional<MessageProcess> buildCursor() {
-
-			myCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myJobDefinition, myWorkNotification.getTargetStepId());
-
-			if (!myWorkChunk.getTargetStepId().equals(myCursor.getCurrentStepId())) {
-				ourLog.error("Chunk {} has target step {} but expected {}", myChunkId, myWorkChunk.getTargetStepId(), myCursor.getCurrentStepId());
-				return Optional.empty();
-			}
-			return Optional.of(this);
-		}
-
 		Optional<MessageProcess> loadJobDefinitionOrThrow() {
 			String jobDefinitionId = myWorkNotification.getJobDefinitionId();
 			int jobDefinitionVersion = myWorkNotification.getJobDefinitionVersion();
 
+			// Do not catch this exception - that will discard this chunk.
 			// Failing to load a job definition probably means this is an old process during upgrade.
 			// Retry those until this node is killed/restarted.
 			myJobDefinition =  myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
@@ -143,6 +117,22 @@ class WorkChannelMessageHandler implements MessageHandler {
 				.map(instance->{
 					myJobInstance = instance;
 					instance.setJobDefinition(myJobDefinition);
+					return this;
+				});
+		}
+
+		/**
+		 * Load the chunk, and mark it as dequeued.
+		 */
+		Optional<MessageProcess> updateChunkStatusAndValidate() {
+			return myJobPersistence.onWorkChunkDequeue(myChunkId)
+				.or(()->{
+					ourLog.error("Unable to find chunk with ID {} - Aborting.  {}", myChunkId, myWorkNotification);
+					return Optional.empty();
+				})
+				.map(chunk->{
+					myWorkChunk = chunk;
+					ourLog.debug("Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]", myChunkId, myWorkChunk.getTargetStepId(), myWorkChunk.getStartTime());
 					return this;
 				});
 		}
@@ -180,6 +170,18 @@ class WorkChannelMessageHandler implements MessageHandler {
 			return Optional.of(this);
 		}
 
+
+		Optional<MessageProcess> buildCursor() {
+
+			myCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myJobDefinition, myWorkNotification.getTargetStepId());
+
+			if (!myWorkChunk.getTargetStepId().equals(myCursor.getCurrentStepId())) {
+				ourLog.error("Chunk {} has target step {} but expected {}", myChunkId, myWorkChunk.getTargetStepId(), myCursor.getCurrentStepId());
+				return Optional.empty();
+			}
+			return Optional.of(this);
+		}
+
 		public Optional<MessageProcess> buildStepExecutor() {
 			this.myStepExector = myJobStepExecutorFactory.newJobStepExecutor(this.myJobInstance, this.myWorkChunk, this.myCursor);
 
@@ -205,7 +207,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 			Optional.of(new MessageProcess(workNotification))
 				// validate and load info
 				.flatMap(MessageProcess::validateChunkId)
-				// no job definition should be retried - we must be a stale node.
+				// no job definition should be retried - we must be a stale process encountering a new job definition.
 				.flatMap(MessageProcess::loadJobDefinitionOrThrow)
 				.flatMap(MessageProcess::loadJobInstance)
 				// update statuses now in the db: QUEUED->IN_PROGRESS
@@ -219,7 +221,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 				// all the setup is happy and committed.  Do the work.
 				process -> process.myStepExector.executeStep(),
 				// discard the chunk
-				() -> ourLog.error("Discarding chunk notification {}", workNotification)
+				() -> ourLog.debug("Discarding chunk notification {}", workNotification)
 			);
 
 	}
