@@ -121,10 +121,12 @@ class WorkChannelMessageHandler implements MessageHandler {
 			return Optional.of(this);
 		}
 
-		Optional<MessageProcess> loadJobDefinition() {
+		Optional<MessageProcess> loadJobDefinitionOrThrow() {
 			String jobDefinitionId = myWorkNotification.getJobDefinitionId();
 			int jobDefinitionVersion = myWorkNotification.getJobDefinitionVersion();
 
+			// Failing to load a job definition probably means this is an old process during upgrade.
+			// Retry those until this node is killed/restarted.
 			myJobDefinition =  myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
 			return Optional.of(this);
 		}
@@ -189,14 +191,22 @@ class WorkChannelMessageHandler implements MessageHandler {
 		JobWorkNotification workNotification = theMessage.getPayload();
 		ourLog.info("Received work notification for {}", workNotification);
 
-		// wipmb when should we throw an exception vs skip the chunk?  I.e. should re-queue the chunk to retry?
-		// failing to load a job definition probably means this is an old process during upgrade. - retry those.
+		// There are three paths through this code:
+		// 1. Normal execution.  We validate, load, update statuses, all in a tx.  Then we proces the chunk.
+		// 2. Discard chunk.  If some validation fails (e.g. no chunk with that id), we log and discard the chunk.
+		//    Probably a db rollback, with a stale queue.
+		// 3. Fail and retry.  If we throw an exception out of here, Spring will put the queue message back, and redeliver later.
+		//
+		// We use Optional chaining here to simplify all the cases where we short-circuit exit.
+		// A step that returns an empty Optional means discard the chunk.
+		//
 		executeInTxRollbackWhenEmpty(() -> (
 			// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
 			Optional.of(new MessageProcess(workNotification))
 				// validate and load info
 				.flatMap(MessageProcess::validateChunkId)
-				.flatMap(MessageProcess::loadJobDefinition)
+				// no job definition should be retried - we must be a stale node.
+				.flatMap(MessageProcess::loadJobDefinitionOrThrow)
 				.flatMap(MessageProcess::loadJobInstance)
 				// update statuses now in the db: QUEUED->IN_PROGRESS
 				.flatMap(MessageProcess::updateChunkStatusAndValidate)
@@ -205,11 +215,12 @@ class WorkChannelMessageHandler implements MessageHandler {
 				.flatMap(MessageProcess::buildCursor)
 				.flatMap(MessageProcess::buildStepExecutor)
 			))
-			.ifPresent(process ->
+			.ifPresentOrElse(
 				// all the setup is happy and committed.  Do the work.
-				process.myStepExector.executeStep()
+				process -> process.myStepExector.executeStep(),
+				// discard the chunk
+				() -> ourLog.error("Discarding chunk notification {}", workNotification)
 			);
-
 
 	}
 
