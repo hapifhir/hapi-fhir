@@ -10,9 +10,9 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class SearchParameterCanonicalizerTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterCanonicalizerTest.class);
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
@@ -42,7 +43,9 @@ public class SearchParameterCanonicalizerTest {
 		if (theConvertToR5) {
 			VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR4Cached());
 			searchParamToCanonicalize = versionCanonicalizer.searchParameterToCanonical(sp);
-			svc = new SearchParameterCanonicalizer(FhirContext.forR5Cached());
+			FhirContext fhirContextR5 = FhirContext.forR5Cached();
+			ourLog.info("R5 Subscription: {}", fhirContextR5.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParamToCanonicalize));
+				svc = new SearchParameterCanonicalizer(fhirContextR5);
 		} else {
 			svc = new SearchParameterCanonicalizer(FhirContext.forR4Cached());
 		}
