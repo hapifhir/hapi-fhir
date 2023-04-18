@@ -273,6 +273,7 @@ public class VersionCanonicalizer {
 			.collect(Collectors.toList());
 		if (baseExtensionValues.stream().allMatch(Enumerations.VersionIndependentResourceTypesAll::isValidCode)) {
 			baseExtensionValues.clear();
+		} else {
 			baseList.clear();
 		}
 		return baseExtensionValues;
