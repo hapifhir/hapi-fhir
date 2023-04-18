@@ -96,9 +96,8 @@ public class PlanDefinitionOperationsProvider {
 										@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		var repository = myRepositoryFactory.create(theRequestDetails);
 		return myR4PlanDefinitionProcessorFactory
-			.create(repository)
+			.create(myRepositoryFactory.create(theRequestDetails))
 			.apply(theId,
 				new CanonicalType(theCanonical),
 				thePlanDefinition,
@@ -138,9 +137,8 @@ public class PlanDefinitionOperationsProvider {
 										@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		var repository = myRepositoryFactory.create(theRequestDetails);
 		return myR4PlanDefinitionProcessorFactory
-			.create(repository)
+			.create(myRepositoryFactory.create(theRequestDetails))
 			.apply(null,
 				new CanonicalType(theCanonical),
 				thePlanDefinition,

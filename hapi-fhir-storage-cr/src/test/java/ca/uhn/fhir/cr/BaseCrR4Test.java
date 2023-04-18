@@ -1,13 +1,12 @@
 package ca.uhn.fhir.cr;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.config.CpgR4Config;
 import ca.uhn.fhir.cr.config.CrR4Config;
+import ca.uhn.fhir.cr.r4.TestCrR4Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import io.specto.hoverfly.junit.dsl.HoverflyDsl;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
@@ -31,7 +30,7 @@ import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
 import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 
 
-@ContextConfiguration(classes = {TestCrConfig.class, CrR4Config.class, CpgR4Config.class})
+@ContextConfiguration(classes = {TestCrR4Config.class, CrR4Config.class})
 public abstract class BaseCrR4Test extends BaseResourceProviderR4Test implements IResourceLoader {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	protected static final IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
