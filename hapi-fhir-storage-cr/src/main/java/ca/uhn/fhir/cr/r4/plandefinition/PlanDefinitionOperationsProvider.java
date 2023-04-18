@@ -197,7 +197,7 @@ public class PlanDefinitionOperationsProvider {
 	 *                               autopopulated HAPI.
 	 * @return The Bundle that is the result of applying the plan definition
 	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
+	@Operation(name = ProviderConstants.CR_OPERATION_R5_APPLY, idempotent = true, type = PlanDefinition.class)
 	public IBaseResource applyR5(@IdParam IdType theId,
 										  @OperationParam(name = "canonical") String theCanonical,
 										  @OperationParam(name = "planDefinition") PlanDefinition thePlanDefinition,
@@ -239,7 +239,7 @@ public class PlanDefinitionOperationsProvider {
 				theTerminologyEndpoint);
 	}
 
-	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
+	@Operation(name = ProviderConstants.CR_OPERATION_R5_APPLY, idempotent = true, type = PlanDefinition.class)
 	public IBaseResource applyR5(@OperationParam(name = "canonical") String theCanonical,
 										  @OperationParam(name = "planDefinition") PlanDefinition thePlanDefinition,
 										  @OperationParam(name = "subject") String theSubject,
