@@ -120,7 +120,10 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				StopWatch watch = new StopWatch();
 				ourLog.info("Starting thread " + name);
 				watch.startTask(name);
-				Bundle b = mySystemDao.transaction(new SystemRequestDetails(),
+				SystemRequestDetails details = new SystemRequestDetails();
+				details.setRetry(true);
+				details.setMaxRetries(3);
+				Bundle b = mySystemDao.transaction(details,
 					bundle);
 				int c = counter.incrementAndGet();
 				latch.call(1);

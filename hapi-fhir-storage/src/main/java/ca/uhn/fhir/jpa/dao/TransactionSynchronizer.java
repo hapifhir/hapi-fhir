@@ -82,24 +82,24 @@ public class TransactionSynchronizer {
 		TransactionBundleSynchronizationParameters theParameters,
 		Supplier<EntriesToProcessMap> theCallback
 	) {
-		IBaseBundle bundle = theParameters.getBundle();
-		List<IBase> baseEntries = theParameters.getBundleEntries();
-
-		List<Entry> entries = baseEntries.stream().map(e -> {
-			Entry entry = new Entry();
-			entry.setBase(e);
-			entry.setKey(getKeyFromEntry(e));
-			return entry;
-		}).collect(Collectors.toList());
-
-		synchronized (containsAny(entries, bundle) ? this : new Object()) {
+//		IBaseBundle bundle = theParameters.getBundle();
+//		List<IBase> baseEntries = theParameters.getBundleEntries();
+//
+//		List<Entry> entries = baseEntries.stream().map(e -> {
+//			Entry entry = new Entry();
+//			entry.setBase(e);
+//			entry.setKey(getKeyFromEntry(e));
+//			return entry;
+//		}).collect(Collectors.toList());
+//
+//		synchronized (containsAny(entries, bundle) ? this : new Object()) {
 			// process transaction
 			EntriesToProcessMap map = theCallback.get();
 
 			// remove from map
-			removeBundleFromLists(entries, bundle);
+//			removeBundleFromLists(entries, bundle);
 			return map;
-		}
+//		}
 	}
 
 	private boolean containsAny(List<Entry> theBaseResources, IBaseBundle theBundle) {
