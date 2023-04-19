@@ -235,7 +235,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 						ExceptionUtils.indexOfThrowable(e, ConstraintViolationException.class) != -1 ||
 						ExceptionUtils.indexOfThrowable(e, ObjectOptimisticLockingFailureException.class) != -1) {
 
-						ourLog.error("Version conflict detected", e);
+						ourLog.debug("Version conflict detected", e);
 
 						if (theExecutionBuilder.myOnRollback != null) {
 							theExecutionBuilder.myOnRollback.run();
@@ -298,6 +298,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 						throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
 					} else {
+						ourLog.error("Unexpected transaction exception. Will not be retried.", e);
 						throw e;
 					}
 				}
