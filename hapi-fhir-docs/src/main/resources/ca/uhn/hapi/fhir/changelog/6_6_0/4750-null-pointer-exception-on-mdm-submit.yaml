@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4750
+jira: SMILE-6152
+title: "Previously, mdm-submit operation with Prefer: response-async header will result in error logs of NullPointerException 
+and the status of the batch job will ended up with FAILED. Now, this has been fixed."
