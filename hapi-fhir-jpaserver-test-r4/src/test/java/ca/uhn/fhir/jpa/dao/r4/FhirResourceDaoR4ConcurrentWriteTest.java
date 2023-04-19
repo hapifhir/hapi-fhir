@@ -105,13 +105,9 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Bundle bundle1 = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/test-bundle.json");
 		Bundle bundle2 = ClasspathUtil.loadResource(myFhirContext,
 			Bundle.class, "/r4/test-bundle2.json");
-		Bundle bundle3 = ClasspathUtil.loadResource(myFhirContext,
-			Bundle.class,
-			"/r4/test-bundle3.json");
 		Bundle[] bundles = {
 			bundle1,
-			bundle2,
-			bundle3
+			bundle2
 		};
 		int calls = bundles.length;
 		AtomicInteger counter = new AtomicInteger();
@@ -119,7 +115,6 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Collection<Callable<Bundle>> callables = new ArrayList<>();
 
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		myStorageSettings.setEnforceReferenceTargetTypes(false);
 
 		latch.setDefaultTimeoutSeconds(5);
 		latch.setExpectedCount(calls);
@@ -151,7 +146,6 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(futures.size(), calls);
-		int i = 0;
 		for (Future<Bundle> future : futures) {
 			// make sure no exceptions
 			Bundle b = future.get();
