@@ -88,7 +88,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		}
 
 		// check if the golden resource and the source resource are in the same partition, throw error if not
-		myMdmPartitionHelper.validateResourcesInSamePartition(theFromGoldenResource, theToGoldenResource);
+		myMdmPartitionHelper.validateMdmResourcesPartitionMatches(theFromGoldenResource, theToGoldenResource);
 
 		//Merge the links from the FROM to the TO resource. Clean up dangling links.
 		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, theFromGoldenResource.getIdElement(), theMdmTransactionContext);

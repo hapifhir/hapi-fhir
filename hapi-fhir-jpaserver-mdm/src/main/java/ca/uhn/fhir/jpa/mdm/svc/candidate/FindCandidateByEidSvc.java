@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -49,6 +50,8 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	private MdmResourceDaoSvc myMdmResourceDaoSvc;
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
+	@Autowired
+	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Override
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theIncomingResource) {
@@ -57,7 +60,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theIncomingResource);
 		if (!eidFromResource.isEmpty()) {
 			for (CanonicalEID eid : eidFromResource) {
-				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theIncomingResource.getIdElement().getResourceType(), (RequestPartitionId) theIncomingResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theIncomingResource.getIdElement().getResourceType(), myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theIncomingResource));
 				if (oFoundGoldenResource.isPresent()) {
 					IAnyResource foundGoldenResource = oFoundGoldenResource.get();
 					// Exclude manually declared NO_MATCH links from candidates

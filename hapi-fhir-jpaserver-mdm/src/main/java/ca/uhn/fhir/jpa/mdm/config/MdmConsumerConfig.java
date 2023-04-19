@@ -266,7 +266,10 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmPartitionHelper mdmPartitionHelper() {return new MdmPartitionHelper();}
+	MdmPartitionHelper mdmPartitionHelper(MessageHelper theMessageHelper,
+													  IMdmSettings theMdmSettings) {
+		return new MdmPartitionHelper(theMessageHelper, theMdmSettings);
+	}
 
 	@Bean
 	public IGoldenResourceSearchSvc goldenResourceSearchSvc() {

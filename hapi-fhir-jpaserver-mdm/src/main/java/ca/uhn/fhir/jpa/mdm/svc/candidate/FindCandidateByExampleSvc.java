@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
@@ -52,6 +53,8 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 	private MdmLinkDaoSvc<P, IMdmLink<P>> myMdmLinkDaoSvc;
 	@Autowired
 	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
+	@Autowired
+	MdmPartitionHelper myMdmPartitionHelper;
 
 	/**
 	 * Attempt to find matching Golden Resources by resolving them from similar Matching target resources. Runs MDM logic
@@ -67,7 +70,7 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 
 		List<P> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
 
-		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theTarget), theTarget, (RequestPartitionId) theTarget.getUserData(Constants.RESOURCE_PARTITION_ID));
+		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theTarget), theTarget, myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theTarget));
 
 		// Convert all possible match targets to their equivalent Golden Resources by looking up in the MdmLink table,
 		// while ensuring that the matches aren't in our NO_MATCH list.
