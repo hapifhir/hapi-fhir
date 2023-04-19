@@ -50,6 +50,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -1387,6 +1388,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		TransactionDetails transactionDetails = new TransactionDetails(theEntity.getUpdatedDate());
 		ResourceTable resourceTable = updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
+		ResourceHistoryTable resourceHistoryTable = theEntity.getCurrentVersionEntity();
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, null);
 		}
@@ -1656,6 +1658,38 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
 		}
+	}
+
+	@Override
+	public void migrateLogToVarChar(IResourcePersistentId<?> theResourcePersistentId) {
+			Long id = ((JpaPid)theResourcePersistentId).getId();
+			ResourceTable entity =
+				myEntityManager.find(ResourceTable.class, id, LockModeType.OPTIMISTIC);
+			if (entity == null) {
+				ourLog.warn("Unable to find entity with PID: {}", id);
+			} else {
+				IBaseResource resource = myJpaStorageResourceParser.toResource(entity, false);
+				ResourceHistoryTable historyEntity = entity.getCurrentVersionEntity();
+				ResourceEncodingEnum encoding = getConfig().getResourceEncoding();
+				List<String> excludeElements = new ArrayList<>(8);
+				getExcludedElements(historyEntity.getResourceType(), excludeElements, resource.getMeta());
+				String encodedResourceString = encodeResource(resource, encoding, excludeElements, myFhirContext);
+
+
+				historyEntity = myEntityManager.merge(historyEntity);
+				if (getConfig().getInlineResourceTextBelowSize() > 0 && encodedResourceString.length() < getConfig().getInlineResourceTextBelowSize()) {
+					historyEntity.setResourceTextVc(encodedResourceString);
+					historyEntity.setResource(null);
+				} else {
+					historyEntity.setResourceTextVc(null);
+					byte[] resourceBinary = getResourceBinary(encoding, encodedResourceString);
+					historyEntity.setResource(resourceBinary);
+					historyEntity.setResourceTextVc(null);
+				}
+
+				historyEntity.setEncoding(encoding);
+				myResourceHistoryTableDao.save(historyEntity);
+			}
 	}
 
 	private DaoMethodOutcome doUpdate(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, TransactionDetails theTransactionDetails) {

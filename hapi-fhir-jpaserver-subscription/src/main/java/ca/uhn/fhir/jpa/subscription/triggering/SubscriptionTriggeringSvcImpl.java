@@ -525,7 +525,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		jobDetail.setJobClass(Job.class);
 		// Currently jobs ae kept in a local ArrayList so this should be a local job, and
 		// it can fire frequently without adding load
-		theSchedulerService.scheduleLocalJob(5 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+		theSchedulerService.scheduleLocalJob(2 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	public int getActiveJobCount() {

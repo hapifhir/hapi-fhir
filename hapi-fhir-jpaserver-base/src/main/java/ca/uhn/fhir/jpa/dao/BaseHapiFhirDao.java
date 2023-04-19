@@ -675,7 +675,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * @return byte array of the resource
 	 */
 	@Nonnull
-	private byte[] getResourceBinary(ResourceEncodingEnum encoding, String encodedResource) {
+	protected byte[] getResourceBinary(ResourceEncodingEnum encoding, String encodedResource) {
 		byte[] resourceBinary;
 		switch (encoding) {
 			case JSON:
@@ -700,7 +700,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * @param theMeta            the meta element of the resource
 	 * @return source extension if present in the meta element
 	 */
-	private IBaseExtension<?, ?> getExcludedElements(String theResourceType, List<String> theExcludeElements, IBaseMetaType theMeta) {
+	protected IBaseExtension<?, ?> getExcludedElements(String theResourceType, List<String> theExcludeElements, IBaseMetaType theMeta) {
 		boolean hasExtensions = false;
 		IBaseExtension<?, ?> sourceExtension = null;
 		if (theMeta instanceof IBaseHasExtensions) {
