@@ -60,6 +60,8 @@ public class ReindexProvider {
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
 	public IBaseParameters Reindex(
 		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_URL, typeName = "string", min = 0, max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theUrlsToReindex,
+		@OperationParam(name = ReindexJobParameters.REINDEX_SEARCH_PARAMETERS, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theReindexSearchParameters,
+		@OperationParam(name = ReindexJobParameters.OPTIMIZE_STORAGE, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theOptimizeStorage,
 		RequestDetails theRequestDetails
 	) {
 
@@ -70,6 +72,13 @@ public class ReindexProvider {
 				.filter(StringUtils::isNotBlank)
 				.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
 				.forEach(params::addPartitionedUrl);
+		}
+
+		if (theReindexSearchParameters != null && theReindexSearchParameters.getValue() != null) {
+			params.setReindexSearchParameters(theReindexSearchParameters.getValue());
+		}
+		if (theOptimizeStorage != null && theOptimizeStorage.getValue() != null) {
+			params.setOptimizeStorage(theOptimizeStorage.getValue());
 		}
 
 		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);

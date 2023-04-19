@@ -29,10 +29,13 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ReindexJobParameters extends PartitionedUrlListJobParameters {
 
-	@JsonProperty(value = "optimizeStorage", defaultValue = "false", required = false)
+	public static final String OPTIMIZE_STORAGE = "optimizeStorage";
+	public static final String REINDEX_SEARCH_PARAMETERS = "reindexSearchParameters";
+
+	@JsonProperty(value = OPTIMIZE_STORAGE, defaultValue = "false", required = false)
 	@Nullable
 	private Boolean myOptimizeStorage;
-	@JsonProperty(value = "reindexSearchParameters", defaultValue = "true", required = false)
+	@JsonProperty(value = REINDEX_SEARCH_PARAMETERS, defaultValue = "true", required = false)
 	@Nullable
 	private Boolean myReindexSearchParameters;
 
