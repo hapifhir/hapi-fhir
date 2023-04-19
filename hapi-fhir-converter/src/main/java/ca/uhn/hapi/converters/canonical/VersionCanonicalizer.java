@@ -209,10 +209,24 @@ public class VersionCanonicalizer {
 	 * the extension (including standard types) and the source list is cleared.
 	 */
 	public <T extends IBaseResource> SearchParameter searchParameterToCanonical(T theSearchParameter) {
-		List<String> baseExtensionValues = extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(theSearchParameter, "base");
-		List<String> targetExtensionValues = extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(theSearchParameter, "target");
 
-		SearchParameter retVal = myStrategy.searchParameterToCanonical(theSearchParameter);
+		/*
+		 * The R4 model allows custom types to be put into SearchParameter.base and
+		 * SearchParameter.target because those fields use a simple CodeType. But
+		 * in R5 it uses an Enumeration, so it's not actually possible to put custom
+		 * resource types into those fields. This means that the version converter fails
+		 * with an exception unless we remove those values from those fields before
+		 * conversion. However, we don't want to affect the state of the originally
+		 * passed in resource since that may affect other things. So, we clone
+		 * it first. This is a pain in the butt, but there doesn't seem to be any
+		 * better option.
+		 */
+		T input = myContext.newTerser().clone(theSearchParameter);
+
+		List<String> baseExtensionValues = extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(input, "base");
+		List<String> targetExtensionValues = extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(input, "target");
+
+		SearchParameter retVal = myStrategy.searchParameterToCanonical(input);
 
 		baseExtensionValues.forEach(t -> retVal.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE, new CodeType(t)));
 		targetExtensionValues.forEach(t -> retVal.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new CodeType(t)));

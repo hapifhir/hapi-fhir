@@ -157,8 +157,8 @@ public class HapiExtensions {
 	 */
 	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME = "element-name";
 
-	public static String EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE = "http://hl7.org/fhir/tools/CustomBaseResource";
-	public static String EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE = "http://hl7.org/fhir/tools/CustomTargetResource";
+	public static final String EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE = "http://hl7.org/fhir/tools/CustomBaseResource";
+	public static final String EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE = "http://hl7.org/fhir/tools/CustomTargetResource";
 
 	/**
 	 * Non instantiable

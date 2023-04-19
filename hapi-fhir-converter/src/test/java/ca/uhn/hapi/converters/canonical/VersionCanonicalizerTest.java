@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.Enumeration;
@@ -82,10 +83,13 @@ class VersionCanonicalizerTest {
 		org.hl7.fhir.r5.model.SearchParameter actual = canonicalizer.searchParameterToCanonical(input);
 
 		// Verify
-		assertThat(actual.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList()), contains("Resource"));
-		assertThat(actual.getTarget().stream().map(Enumeration::getCode).collect(Collectors.toList()), contains("Resource"));
+		assertThat(actual.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList()), empty());
+		assertThat(actual.getTarget().stream().map(Enumeration::getCode).collect(Collectors.toList()), empty());
 		assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE), contains("Base1", "Base2"));
 		assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE), contains("Target1", "Target2"));
+		// Original shouldn't be modified
+		assertThat(input.getBase().stream().map(CodeType::getCode).toList(), contains("Base1", "Base2"));
+		assertThat(input.getTarget().stream().map(CodeType::getCode).toList(), contains("Target1", "Target2"));
 
 	}
 
