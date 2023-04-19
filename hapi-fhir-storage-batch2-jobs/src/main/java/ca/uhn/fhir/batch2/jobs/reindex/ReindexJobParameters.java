@@ -21,7 +21,36 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  */
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.annotation.Nullable;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ReindexJobParameters extends PartitionedUrlListJobParameters {
+
+	@JsonProperty(value = "optimizeStorage", defaultValue = "false", required = false)
+	@Nullable
+	private Boolean myOptimizeStorage;
+	@JsonProperty(value = "reindexSearchParameters", defaultValue = "true", required = false)
+	@Nullable
+	private Boolean myReindexSearchParameters;
+
+	@Nullable
+	public boolean isOptimizeStorage() {
+		return defaultIfNull(myOptimizeStorage, Boolean.FALSE);
+	}
+
+	public void setOptimizeStorage(boolean myOptimizeStorage) {
+		this.myOptimizeStorage = myOptimizeStorage;
+	}
+
+	public boolean isReindexSearchParameters() {
+		return defaultIfNull(myReindexSearchParameters, Boolean.TRUE);
+	}
+
+	public void setReindexSearchParameters(boolean myReindexSearchParameters) {
+		this.myReindexSearchParameters = myReindexSearchParameters;
+	}
 
 }

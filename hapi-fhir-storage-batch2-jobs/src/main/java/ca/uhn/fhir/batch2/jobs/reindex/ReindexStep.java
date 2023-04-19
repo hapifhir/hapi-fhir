@@ -74,17 +74,18 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
 		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
+		ReindexJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
-		return doReindex(data, theDataSink, theStepExecutionDetails.getInstance().getInstanceId(), theStepExecutionDetails.getChunkId());
+		return doReindex(data, theDataSink, theStepExecutionDetails.getInstance().getInstanceId(), theStepExecutionDetails.getChunkId(), jobParameters);
 	}
 
 	@Nonnull
-	public RunOutcome doReindex(ResourceIdListWorkChunkJson data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
+	public RunOutcome doReindex(ResourceIdListWorkChunkJson data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId, ReindexJobParameters theJobParameters) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRetry(true);
 		requestDetails.setMaxRetries(REINDEX_MAX_RETRIES);
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
+		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId, theJobParameters));
 
 		return new RunOutcome(data.size());
 	}
@@ -96,14 +97,16 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 		private final IJobDataSink<VoidModel> myDataSink;
 		private final String myChunkId;
 		private final String myInstanceId;
+		private final ReindexJobParameters myJobParameters;
 
-		public ReindexJob(ResourceIdListWorkChunkJson theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
+		public ReindexJob(ResourceIdListWorkChunkJson theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId, ReindexJobParameters theJobParameters) {
 			myData = theData;
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
 			myDataSink = theDataSink;
 			myInstanceId = theInstanceId;
 			myChunkId = theChunkId;
+			myJobParameters = theJobParameters;
 		}
 
 		@Override
@@ -128,9 +131,10 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);
 				IResourcePersistentId<?> resourcePersistentId = persistentIds.get(i);
 				try {
-					if (false) {
+					if (myJobParameters.isReindexSearchParameters()) {
 						dao.reindex(resourcePersistentId, myRequestDetails, myTransactionDetails);
-					} else {
+					}
+					if (myJobParameters.isOptimizeStorage()) {
 						dao.migrateLogToVarChar(resourcePersistentId);
 					}
 				} catch (BaseServerResponseException | DataFormatException e) {
