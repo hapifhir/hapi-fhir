@@ -169,6 +169,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
 
 	/**
+	 * FIXME GGG This is a temporary hack to test whether the baby reindex works.
+	 */
+	void migrateLogToVarChar(IResourcePersistentId<?> theResourcePersistentId);
+
+	/**
 	 * Opens a new transaction and performs a patch operation
 	 */
 	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails);

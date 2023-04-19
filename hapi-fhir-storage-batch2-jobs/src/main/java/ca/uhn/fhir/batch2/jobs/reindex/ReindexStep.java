@@ -32,9 +32,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -46,6 +46,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -62,6 +65,9 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IIdHelperService<IResourcePersistentId> myIdHelperService;
+
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
 
 	@Nonnull
 	@Override
@@ -122,7 +128,11 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);
 				IResourcePersistentId<?> resourcePersistentId = persistentIds.get(i);
 				try {
-					dao.reindex(resourcePersistentId, myRequestDetails, myTransactionDetails);
+					if (false) {
+						dao.reindex(resourcePersistentId, myRequestDetails, myTransactionDetails);
+					} else {
+						dao.migrateLogToVarChar(resourcePersistentId)
+					}
 				} catch (BaseServerResponseException | DataFormatException e) {
 					String resourceForcedId = myIdHelperService.translatePidIdToForcedIdWithCache(resourcePersistentId).orElse(resourcePersistentId.toString());
 					String resourceId = nextResourceType + "/" + resourceForcedId;
