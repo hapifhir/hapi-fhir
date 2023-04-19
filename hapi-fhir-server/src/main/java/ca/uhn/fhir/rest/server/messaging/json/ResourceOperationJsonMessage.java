@@ -70,7 +70,13 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 
 	@Nullable
 	@Override
-	public String getMessageKeyOrNull() {
-		return myPayload.getMessageKeyOrNull();
+	public String getMessageKey() {
+		return myPayload.getMessageKey();
+	}
+
+	@Nullable
+	@Override
+	public String getMessageKeyOrDefault() {
+		return myPayload.getMessageKeyOrDefault();
 	}
 }

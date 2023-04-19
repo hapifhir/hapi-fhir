@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,8 +29,6 @@ public class SearchBuilderFactory<T extends IResourcePersistentId<?>> {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
 
 	public ISearchBuilder<T> newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		return (ISearchBuilder<T>) myApplicationContext.getBean(ISearchBuilder.SEARCH_BUILDER_BEAN_NAME, theDao, theResourceName, theResourceType);
