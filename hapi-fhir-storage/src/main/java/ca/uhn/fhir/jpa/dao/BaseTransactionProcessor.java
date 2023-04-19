@@ -45,7 +45,6 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.model.transactions.TransactionBundleSynchronizationParameters;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -55,7 +54,6 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -110,7 +108,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -170,16 +167,8 @@ public abstract class BaseTransactionProcessor {
 
 	private TaskExecutor myExecutor;
 
-	private TransactionSynchronizer myTransactionSynchronizer;
-
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
-
-	@PostConstruct
-	public void start() {
-		// TODO - consider creating a new shared transactionconfig that creates this
-		myTransactionSynchronizer = new TransactionSynchronizer(myContext, myVersionAdapter);
-	}
 
 	@VisibleForTesting
 	public void setStorageSettings(StorageSettings theStorageSettings) {
@@ -630,23 +619,16 @@ public abstract class BaseTransactionProcessor {
 				theResponse, theOriginalRequestOrder,
 				theEntries, theTransactionStopWatch);
 
-			// this is misleading - writes are already persisted
 			theTransactionStopWatch.startTask("Commit writes to database");
 			return retVal;
 		};
 		EntriesToProcessMap entriesToProcess;
 
 		try {
-			TransactionBundleSynchronizationParameters params = new TransactionBundleSynchronizationParameters(
-				theResponse,
-				theEntries
-			);
-			entriesToProcess = myTransactionSynchronizer.syncTransactionIfNecessary(params, () -> {
-				return myHapiTransactionService
-					.withRequest(theRequestDetails)
-					.withTransactionDetails(theTransactionDetails)
-					.execute(txCallback);
-			});
+			entriesToProcess = myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(theTransactionDetails)
+				.execute(txCallback);
 		} finally {
 			if (haveWriteOperationsHooks(theRequestDetails)) {
 				callWriteOperationsHook(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST, theRequestDetails, theTransactionDetails, writeOperationsDetails);
@@ -980,7 +962,7 @@ public abstract class BaseTransactionProcessor {
 						DaoMethodOutcome outcome;
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-						// this will throw if duplicates found in the transaction
+						// create individual resource
 						outcome = resourceDao.create(res, matchUrl, false, theTransactionDetails, theRequest);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						res.setId(outcome.getId());

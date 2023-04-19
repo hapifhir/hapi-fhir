@@ -43,6 +43,8 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
@@ -226,11 +228,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
 				} catch (
-//					ResourceVersionConflictException | DataIntegrityViolationException | ObjectOptimisticLockingFailureException e
-					Exception e
+					ResourceVersionConflictException
+					| DataIntegrityViolationException
+					| ObjectOptimisticLockingFailureException e
 				) {
-					ourLog.error("\nXXXXX Retrying on exception " + e.getClass().getName() + " \n" + e.getMessage());
-					ourLog.debug("Version conflict detected", e);
+					ourLog.error("Version conflict detected", e);
 
 					if (theExecutionBuilder.myOnRollback != null) {
 						theExecutionBuilder.myOnRollback.run();
@@ -253,7 +255,12 @@ public class HapiTransactionService implements IHapiTransactionService {
 						HookParams params = new HookParams()
 							.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
 							.addIfMatchesType(ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
-						ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theExecutionBuilder.myRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
+						ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
+								myInterceptorBroadcaster,
+								theExecutionBuilder.myRequestDetails,
+								Pointcut.STORAGE_VERSION_CONFLICT,
+								params
+						);
 						if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
 							maxRetries = conflictResolutionStrategy.getMaxRetries();
 						}
@@ -289,7 +296,14 @@ public class HapiTransactionService implements IHapiTransactionService {
 					throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
 				}
 			}
-		} finally {
+		} catch (InternalErrorException e) {
+			ourLog.error("-----------");
+			ourLog.error("Internal error", e);
+			ourLog.error("\n" + e.getMessage());
+
+			throw e;
+		}
+		finally {
 			if (requestPartitionId != null) {
 				ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 			}

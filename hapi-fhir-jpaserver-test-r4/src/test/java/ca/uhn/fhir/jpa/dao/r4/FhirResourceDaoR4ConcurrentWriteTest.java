@@ -102,14 +102,18 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	public void testTransaction_multiThreaded()
 		throws InterruptedException, ExecutionException {
 		// setup
-		int calls = 2;
 		Bundle bundle1 = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/test-bundle.json");
 		Bundle bundle2 = ClasspathUtil.loadResource(myFhirContext,
 			Bundle.class, "/r4/test-bundle2.json");
+		Bundle bundle3 = ClasspathUtil.loadResource(myFhirContext,
+			Bundle.class,
+			"/r4/test-bundle3.json");
 		Bundle[] bundles = {
 			bundle1,
-			bundle2
+			bundle2,
+			bundle3
 		};
+		int calls = bundles.length;
 		AtomicInteger counter = new AtomicInteger();
 		PointcutLatch latch = new PointcutLatch("transactionLatch");
 		Collection<Callable<Bundle>> callables = new ArrayList<>();
@@ -120,8 +124,8 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		latch.setDefaultTimeoutSeconds(5);
 		latch.setExpectedCount(calls);
 		for (int i = 0; i < calls; i++) {
-			int mc = i % 2;
-			Bundle bundle = bundles[mc];
+			int mc = i;
+			Bundle bundle = bundles[i];
 			Callable<Bundle> task = () -> {
 				String name = "task_" + mc;
 				StopWatch watch = new StopWatch();
@@ -150,7 +154,6 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		int i = 0;
 		for (Future<Bundle> future : futures) {
 			// make sure no exceptions
-			System.out.println(" here we are " + i++);
 			Bundle b = future.get();
 			assertNotNull(b);
 		}
