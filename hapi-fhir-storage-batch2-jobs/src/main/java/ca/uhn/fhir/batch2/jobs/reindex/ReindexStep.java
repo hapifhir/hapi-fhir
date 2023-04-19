@@ -131,7 +131,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 					if (false) {
 						dao.reindex(resourcePersistentId, myRequestDetails, myTransactionDetails);
 					} else {
-						dao.migrateLogToVarChar(resourcePersistentId)
+						dao.migrateLogToVarChar(resourcePersistentId);
 					}
 				} catch (BaseServerResponseException | DataFormatException e) {
 					String resourceForcedId = myIdHelperService.translatePidIdToForcedIdWithCache(resourcePersistentId).orElse(resourcePersistentId.toString());
