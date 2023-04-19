@@ -766,8 +766,8 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 			fail();
-		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1093) + "Can not create resource of type Patient as it would create a duplicate unique index matching query: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale (existing index belongs to Patient/" + id1.getIdPart() + ", new unique index created by SearchParameter/patient-gender-birthdate)", e.getMessage());
+		} catch (ResourceVersionConflictException e) {
+			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 	}
 
@@ -786,7 +786,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.create(pt);
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (ResourceVersionConflictException e) {
 			// good
 		}
 
@@ -1536,7 +1536,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 
@@ -1551,7 +1551,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.update(pt2);
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 

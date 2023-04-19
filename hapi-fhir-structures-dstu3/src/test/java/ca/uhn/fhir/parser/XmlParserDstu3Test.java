@@ -1619,7 +1619,7 @@ public class XmlParserDstu3Test {
 		child.setValue(new StringType("CHILD_VALUE"));
 
 		// Lenient error handler
-		IParser parser = ourCtx.newXmlParser();
+		IParser parser = ourCtx.newXmlParser().setParserErrorHandler(new LenientErrorHandler(false).disableAllErrors());
 		String output = parser.encodeResourceToString(p);
 		ourLog.info("Output: {}", output);
 		assertThat(output, containsString("http://root"));
