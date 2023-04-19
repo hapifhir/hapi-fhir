@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -91,6 +92,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private final List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
+	@Autowired(required = false)
+	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
@@ -183,6 +186,12 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		observation.setId(observationId);
 
 		return observation;
+	}
+
+	@Test
+	public void testSubscriptionTopicRegistryBean() {
+		// This bean should not exist in DSTU3
+		assertNull(mySubscriptionTopicRegistry);
 	}
 
 	@Test
