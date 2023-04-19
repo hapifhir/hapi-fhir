@@ -119,6 +119,11 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 
 					ourLog.trace("About to execute SQL: {}", sql);
 
+					// This tells hibernate to not flush when we call scroll(), but rather to wait until the transaction commits and
+					// only flush then.  We need to do this so that any exceptions that happen in the transaction happen when
+					// we try to commit the transaction, and not here.  See the test called testTransaction_multiThreaded which triggers
+					// the following exception if we don't set this flush mode:
+					// java.util.concurrent.ExecutionException: org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only
 					hibernateQuery.setFlushMode(FlushModeType.COMMIT);
 					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 					myResultSet = new ScrollableResultsIterator<>(scrollableResults);
@@ -135,7 +140,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 			} catch (Exception e) {
 				ourLog.error("Failed to create or execute SQL query", e);
 				close();
-				throw new InternalErrorException(Msg.code(1262) + e);
+				throw new InternalErrorException(Msg.code(1262) + e, e);
 			}
 		}
 	}

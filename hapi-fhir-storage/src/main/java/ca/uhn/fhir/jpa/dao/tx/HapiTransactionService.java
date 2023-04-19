@@ -39,6 +39,8 @@ import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,83 +229,80 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
-				} catch (
-					ResourceVersionConflictException
-					| DataIntegrityViolationException
-					| ObjectOptimisticLockingFailureException e
-				) {
-					ourLog.error("Version conflict detected", e);
+				} catch (Exception e) {
+					if (ExceptionUtils.indexOfThrowable(e, ResourceVersionConflictException.class) != -1 ||
+						ExceptionUtils.indexOfThrowable(e, DataIntegrityViolationException.class) != -1 ||
+						ExceptionUtils.indexOfThrowable(e, ConstraintViolationException.class) != -1 ||
+						ExceptionUtils.indexOfThrowable(e, ObjectOptimisticLockingFailureException.class) != -1) {
 
-					if (theExecutionBuilder.myOnRollback != null) {
-						theExecutionBuilder.myOnRollback.run();
-					}
+						ourLog.error("Version conflict detected", e);
 
-					int maxRetries = 0;
+						if (theExecutionBuilder.myOnRollback != null) {
+							theExecutionBuilder.myOnRollback.run();
+						}
 
-					/*
-					 * If two client threads both concurrently try to add the same tag that isn't
-					 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
-					 * which is the tag definition table. In that case, a constraint error will be
-					 * thrown by one of the client threads, so we auto-retry in order to avoid
-					 * annoying spurious failures for the client.
-					 */
-					if (DaoFailureUtil.isTagStorageFailure(e)) {
-						maxRetries = 3;
-					}
+						int maxRetries = 0;
 
-					if (maxRetries == 0) {
-						HookParams params = new HookParams()
-							.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
-						ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
+						/*
+						 * If two client threads both concurrently try to add the same tag that isn't
+						 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
+						 * which is the tag definition table. In that case, a constraint error will be
+						 * thrown by one of the client threads, so we auto-retry in order to avoid
+						 * annoying spurious failures for the client.
+						 */
+						if (DaoFailureUtil.isTagStorageFailure(e)) {
+							maxRetries = 3;
+						}
+
+						if (maxRetries == 0) {
+							HookParams params = new HookParams()
+								.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
+								.addIfMatchesType(ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
+							ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
 								myInterceptorBroadcaster,
 								theExecutionBuilder.myRequestDetails,
 								Pointcut.STORAGE_VERSION_CONFLICT,
 								params
-						);
-						if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-							maxRetries = conflictResolutionStrategy.getMaxRetries();
+							);
+							if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+								maxRetries = conflictResolutionStrategy.getMaxRetries();
+							}
 						}
-					}
 
-					if (i < maxRetries) {
-						if (theExecutionBuilder.myTransactionDetails != null) {
-							theExecutionBuilder.myTransactionDetails.getRollbackUndoActions().forEach(Runnable::run);
-							theExecutionBuilder.myTransactionDetails.clearRollbackUndoActions();
-							theExecutionBuilder.myTransactionDetails.clearResolvedItems();
-							theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-							theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+						if (i < maxRetries) {
+							if (theExecutionBuilder.myTransactionDetails != null) {
+								theExecutionBuilder.myTransactionDetails.getRollbackUndoActions().forEach(Runnable::run);
+								theExecutionBuilder.myTransactionDetails.clearRollbackUndoActions();
+								theExecutionBuilder.myTransactionDetails.clearResolvedItems();
+								theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+								theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+							}
+							double sleepAmount = (250.0d * i) * Math.random();
+							long sleepAmountLong = (long) sleepAmount;
+							TestUtil.sleepAtLeast(sleepAmountLong, false);
+
+							ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
+							continue;
 						}
-						double sleepAmount = (250.0d * i) * Math.random();
-						long sleepAmountLong = (long) sleepAmount;
-						TestUtil.sleepAtLeast(sleepAmountLong, false);
 
-						ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
-						continue;
+						IBaseOperationOutcome oo = null;
+						if (e instanceof ResourceVersionConflictException) {
+							oo = ((ResourceVersionConflictException) e).getOperationOutcome();
+						}
+
+						if (maxRetries > 0) {
+							String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
+							ourLog.info(msg, maxRetries);
+							throw new ResourceVersionConflictException(Msg.code(549) + msg);
+						}
+
+						throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
+					} else {
+						throw e;
 					}
-
-					IBaseOperationOutcome oo = null;
-					if (e instanceof ResourceVersionConflictException) {
-						oo = ((ResourceVersionConflictException) e).getOperationOutcome();
-					}
-
-					if (maxRetries > 0) {
-						String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
-						ourLog.info(msg, maxRetries);
-						throw new ResourceVersionConflictException(Msg.code(549) + msg);
-					}
-
-					throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
 				}
 			}
-		} catch (InternalErrorException e) {
-			ourLog.error("-----------");
-			ourLog.error("Internal error", e);
-			ourLog.error("\n" + e.getMessage());
-
-			throw e;
-		}
-		finally {
+		} finally {
 			if (requestPartitionId != null) {
 				ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 			}
