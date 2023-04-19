@@ -276,7 +276,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 
 			IFhirSystemDao<?,?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
-			systemDao.preFetchResources(JpaPid.fromLongList(idsToPreFetch));
+			systemDao.preFetchResources(JpaPid.fromLongList(idsToPreFetch), true);
 
 		}
 

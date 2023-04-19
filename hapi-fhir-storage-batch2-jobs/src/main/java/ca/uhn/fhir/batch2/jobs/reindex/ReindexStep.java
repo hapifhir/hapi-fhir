@@ -119,7 +119,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 
 			// Prefetch Resources from DB
 
-			mySystemDao.preFetchResources(persistentIds);
+			mySystemDao.preFetchResources(persistentIds, myJobParameters.isReindexSearchParameters());
 			ourLog.info("Prefetched {} resources in {} - Instance[{}] Chunk[{}]", persistentIds.size(), sw, myInstanceId, myChunkId);
 
 			// Reindex
@@ -135,7 +135,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 						dao.reindex(resourcePersistentId, myRequestDetails, myTransactionDetails);
 					}
 					if (myJobParameters.isOptimizeStorage()) {
-						dao.migrateLogToVarChar(resourcePersistentId);
+						dao.migrateLobToVarChar(resourcePersistentId);
 					}
 				} catch (BaseServerResponseException | DataFormatException e) {
 					String resourceForcedId = myIdHelperService.translatePidIdToForcedIdWithCache(resourcePersistentId).orElse(resourcePersistentId.toString());

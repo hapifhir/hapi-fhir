@@ -133,7 +133,7 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 			theTransactionDetails.addResolvedResourceId(next, null);
 		}
 
-		mySystemDao.preFetchResources(resolvedIds);
+		mySystemDao.preFetchResources(resolvedIds, true);
 
 		for (IBaseResource next : theResources) {
 			updateResource(theRequestDetails, theTransactionDetails, next);

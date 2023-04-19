@@ -140,6 +140,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -1661,34 +1662,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public void migrateLogToVarChar(IResourcePersistentId<?> theResourcePersistentId) {
+	public void migrateLobToVarChar(IResourcePersistentId<?> theResourcePersistentId) {
 			Long id = ((JpaPid)theResourcePersistentId).getId();
-			ResourceTable entity =
-				myEntityManager.find(ResourceTable.class, id, LockModeType.OPTIMISTIC);
+			ResourceTable entity = myResourceTableDao.findById(id).orElse(null);
 			if (entity == null) {
 				ourLog.warn("Unable to find entity with PID: {}", id);
 			} else {
-				IBaseResource resource = myJpaStorageResourceParser.toResource(entity, false);
 				ResourceHistoryTable historyEntity = entity.getCurrentVersionEntity();
-				ResourceEncodingEnum encoding = getConfig().getResourceEncoding();
-				List<String> excludeElements = new ArrayList<>(8);
-				getExcludedElements(historyEntity.getResourceType(), excludeElements, resource.getMeta());
-				String encodedResourceString = encodeResource(resource, encoding, excludeElements, myFhirContext);
-
-
-				historyEntity = myEntityManager.merge(historyEntity);
-				if (getConfig().getInlineResourceTextBelowSize() > 0 && encodedResourceString.length() < getConfig().getInlineResourceTextBelowSize()) {
-					historyEntity.setResourceTextVc(encodedResourceString);
-					historyEntity.setResource(null);
-				} else {
-					historyEntity.setResourceTextVc(null);
-					byte[] resourceBinary = getResourceBinary(encoding, encodedResourceString);
-					historyEntity.setResource(resourceBinary);
-					historyEntity.setResourceTextVc(null);
+				if (historyEntity != null) {
+					if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC || historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
+						byte[] resourceBytes = historyEntity.getResource();
+						if (resourceBytes != null) {
+							String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
+							if (getConfig().getInlineResourceTextBelowSize() > 0 && resourceText.length() < getConfig().getInlineResourceTextBelowSize()) {
+								ourLog.info("Storing text of resource {} version {} as inline VARCHAR", entity.getResourceId(), entity.getVersion());
+								myResourceHistoryTableDao.setResourceTextVcForVersion(historyEntity.getId(), resourceText);
+							}
+						}
+					}
 				}
-
-				historyEntity.setEncoding(encoding);
-				myResourceHistoryTableDao.save(historyEntity);
 			}
 	}
 

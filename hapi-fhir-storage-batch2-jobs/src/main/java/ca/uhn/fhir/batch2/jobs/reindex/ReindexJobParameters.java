@@ -44,16 +44,18 @@ public class ReindexJobParameters extends PartitionedUrlListJobParameters {
 		return defaultIfNull(myOptimizeStorage, Boolean.FALSE);
 	}
 
-	public void setOptimizeStorage(boolean myOptimizeStorage) {
+	public ReindexJobParameters setOptimizeStorage(boolean myOptimizeStorage) {
 		this.myOptimizeStorage = myOptimizeStorage;
+		return this;
 	}
 
 	public boolean isReindexSearchParameters() {
 		return defaultIfNull(myReindexSearchParameters, Boolean.TRUE);
 	}
 
-	public void setReindexSearchParameters(boolean myReindexSearchParameters) {
+	public ReindexJobParameters setReindexSearchParameters(boolean myReindexSearchParameters) {
 		this.myReindexSearchParameters = myReindexSearchParameters;
+		return this;
 	}
 
 }

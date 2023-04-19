@@ -354,6 +354,11 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
+		public ResourceHistoryTable findForIdAndVersion(long theId, long theVersion) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public ResourceHistoryTable findForIdAndVersionAndFetchProvenance(long theId, long theVersion) {
 			throw new UnsupportedOperationException();
 		}
@@ -385,6 +390,11 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public void deleteByPid(Long theId) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setResourceTextVcForVersion(Long id, String resourceText) {
 			throw new UnsupportedOperationException();
 		}
 

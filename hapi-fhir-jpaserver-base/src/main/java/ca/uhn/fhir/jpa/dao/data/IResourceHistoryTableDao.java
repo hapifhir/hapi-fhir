@@ -39,6 +39,8 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :resId ORDER BY t.myResourceVersion ASC")
 	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") Long theId);
 
+	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :id AND t.myResourceVersion = :version")
+	ResourceHistoryTable findForIdAndVersion(@Param("id") long theId, @Param("version") long theVersion);
 
 	@Query("SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :id AND t.myResourceVersion = :version")
 	ResourceHistoryTable findForIdAndVersionAndFetchProvenance(@Param("id") long theId, @Param("version") long theVersion);
@@ -73,4 +75,8 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Modifying
 	@Query("DELETE FROM ResourceHistoryTable t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
+
+	@Modifying
+	@Query("UPDATE ResourceHistoryTable as t SET t.myResource = null, t.myResourceTextVc = :text WHERE t.myId = :pid")
+	void setResourceTextVcForVersion(@Param("pid") Long id, @Param("text") String resourceText);
 }
