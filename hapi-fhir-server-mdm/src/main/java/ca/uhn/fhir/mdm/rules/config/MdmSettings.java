@@ -39,7 +39,7 @@ public class MdmSettings implements IMdmSettings {
 	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
 	private boolean myPreventEidUpdates;
-	private String myGoldenResourcePartitionId;
+	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
 
 	/**
@@ -140,13 +140,13 @@ public class MdmSettings implements IMdmSettings {
 	}
 
 	@Override
-	public String getGoldenResourcePartitionId() {
-		return myGoldenResourcePartitionId;
+	public String getGoldenResourcePartitionName() {
+		return myGoldenResourcePartitionName;
 	}
 
 	@Override
-	public void setGoldenResourcePartitionId(String theGoldenResourcePartitionId) {
-		myGoldenResourcePartitionId = theGoldenResourcePartitionId;
+	public void setGoldenResourcePartitionName(String theGoldenResourcePartitionName) {
+		myGoldenResourcePartitionName = theGoldenResourcePartitionName;
 	}
 
 	@Override

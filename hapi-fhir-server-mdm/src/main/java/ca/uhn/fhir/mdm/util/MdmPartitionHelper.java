@@ -17,14 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.mdm.util;
+package ca.uhn.fhir.mdm.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.stereotype.Service;
 
@@ -60,12 +60,28 @@ public class MdmPartitionHelper {
 		}
 	}
 
+	/**
+	 * Generates the request partition id for a mdm candidate search for a given resource.
+	 * If the system is configured to search across all partition for matches, this will return all partition
+	 * and if not, this function will return the request partition id of the source resource
+	 * @param theResource
+	 * @return The RequestPartitionId that should be used for the candidate search for the given resource
+	 */
 	public RequestPartitionId getRequestPartitionIdFromResourceForSearch(IAnyResource theResource){
 		if (myMdmSettings.getSearchAllPartitionForMatch()){
 			return RequestPartitionId.allPartitions();
 		}
 		else {
 			return (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		}
+	}
+
+	public RequestPartitionId getRequestPartitionIdForNewGoldenResources(IAnyResource theSourceResource){
+		if (StringUtils.isBlank(myMdmSettings.getGoldenResourcePartitionName())){
+			return (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		}
+		else {
+			return RequestPartitionId.fromPartitionName(myMdmSettings.getGoldenResourcePartitionName());
 		}
 	}
 }
