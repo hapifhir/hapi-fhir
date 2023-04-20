@@ -92,7 +92,6 @@ public class ActivityDefinitionOperationsProvider {
 										@OperationParam(name = "setting") String theSetting,
 										@OperationParam(name = "settingContext") String theSettingContext,
 										@OperationParam(name = "parameters") Parameters theParameters,
-										// @OperationParam(name = "data") Bundle theData,
 										@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 										@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
@@ -112,7 +111,6 @@ public class ActivityDefinitionOperationsProvider {
 				theSetting,
 				theSettingContext,
 				theParameters,
-				// theData,
 				theDataEndpoint,
 				theContentEndpoint,
 				theTerminologyEndpoint);
@@ -131,7 +129,6 @@ public class ActivityDefinitionOperationsProvider {
 										@OperationParam(name = "setting") String theSetting,
 										@OperationParam(name = "settingContext") String theSettingContext,
 										@OperationParam(name = "parameters") Parameters theParameters,
-										// @OperationParam(name = "data") Bundle theData,
 										@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 										@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
@@ -151,7 +148,6 @@ public class ActivityDefinitionOperationsProvider {
 				theSetting,
 				theSettingContext,
 				theParameters,
-				// theData,
 				theDataEndpoint,
 				theContentEndpoint,
 				theTerminologyEndpoint);
