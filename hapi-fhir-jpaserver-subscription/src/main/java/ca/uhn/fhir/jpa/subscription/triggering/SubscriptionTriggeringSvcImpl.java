@@ -486,12 +486,12 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	}
 
 	private void createExecutorService() {
-		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
 		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
 			.namingPattern("SubscriptionTriggering-%d")
 			.daemon(false)
 			.priority(Thread.NORM_PRIORITY)
 			.build();
+		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
 		RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
 			@Override
 			public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
@@ -509,8 +509,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			}
 		};
 		myExecutorService = new ThreadPoolExecutor(
-			0,
-			20,
+			30,
+			30,
 			0L,
 			TimeUnit.MILLISECONDS,
 			executorQueue,
