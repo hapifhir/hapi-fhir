@@ -60,6 +60,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -487,6 +488,7 @@ public class SearchParameterMap implements Serializable {
 						b.append(',');
 					}
 					String valueAsQueryToken = nextValueOr.getValueAsQueryToken(theCtx);
+					valueAsQueryToken = defaultString(valueAsQueryToken);
 					b.append(UrlUtil.escapeUrlParam(valueAsQueryToken));
 				}
 			}

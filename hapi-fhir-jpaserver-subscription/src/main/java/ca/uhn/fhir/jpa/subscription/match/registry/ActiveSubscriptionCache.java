@@ -23,8 +23,15 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 class ActiveSubscriptionCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscriptionCache.class);
@@ -76,5 +83,13 @@ class ActiveSubscriptionCache {
 			}
 		}
 		return retval;
+	}
+
+	public List<ActiveSubscription> getTopicSubscriptionsForUrl(String theUrl) {
+		assert !isBlank(theUrl);
+		return getAll().stream()
+			.filter(as -> as.getSubscription().isTopicSubscription())
+			.filter(as -> theUrl.equals(as.getSubscription().getCriteriaString()))
+			.collect(Collectors.toList());
 	}
 }
