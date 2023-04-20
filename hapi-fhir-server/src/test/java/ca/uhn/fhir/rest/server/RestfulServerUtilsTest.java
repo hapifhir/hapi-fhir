@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BinaryUtil;
-import jdk.incubator.vector.VectorOperators;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.junit.jupiter.api.Test;
 
