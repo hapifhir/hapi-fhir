@@ -164,6 +164,28 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+
+	@Test
+	public void testCreateAndRetrieveExternalizedBinaryViaGet() {
+		// Create a resource with a big enough binary
+		Binary binary = new Binary();
+		binary.setId("FOO");
+		binary.setContentType("application/octet-stream");
+		binary.setData(SOME_BYTES);
+		DaoMethodOutcome outcome = myBinaryDao.update(binary, mySrd);
+
+		// Make sure it was externalized
+		IIdType id = outcome.getId().toUnqualifiedVersionless();
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, not(containsString("\"data\"")));
+
+		// Now read it back and make sure it was de-externalized
+		Binary execute = myClient.read().resource(Binary.class).withId(id).execute();
+		assertArrayEquals(SOME_BYTES, execute.getContent());
+		assertNotNull(execute.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
+	}
 	@Test
 	public void testCreateAndRetrieveBinary_ClientAssignedId_ExternalizedBinary() {
 
