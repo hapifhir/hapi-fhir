@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -11,6 +10,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MessageHelper;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -35,10 +35,6 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 	public static final String Patient_A_JSON_PATH = TEST_RSC_PATH + "patient-A.json/";
 	public static final String Patient_B_JSON_PATH = TEST_RSC_PATH + "patient-B.json/";
 	public static final String Patient_C_JSON_PATH = TEST_RSC_PATH + "patient-C.json/";
-
-	public static final String Patient_SR1_JSON_PATH = TEST_RSC_PATH + "patient-SR1.json/";
-	public static final String Patient_SR2_JSON_PATH = TEST_RSC_PATH + "patient-SR2.json/";
-	public static final String Patient_SR3_JSON_PATH = TEST_RSC_PATH + "patient-SR3.json/";
 
 	@Autowired
 	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
