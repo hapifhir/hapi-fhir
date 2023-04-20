@@ -1,12 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.BinaryUtil;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -18,8 +15,9 @@ import static ca.uhn.fhir.rest.api.RequestTypeEnum.GET;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RestfulServerUtilsTest{
 
