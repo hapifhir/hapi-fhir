@@ -291,14 +291,7 @@ public class TestCrDstu3Config {
 
 	@Bean
 	public ModelResolver modelResolver(FhirContext theFhirContext) {
-		switch (theFhirContext.getVersion().getVersion()) {
-			case R4:
-				return new CachingModelResolverDecorator(new R4FhirModelResolver());
-			case DSTU3:
-				return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
-			default:
-				throw new IllegalStateException(Msg.code(2224) + "CQL support not yet implemented for this FHIR version. Please change versions or disable the CQL plugin.");
-		}
+		return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
 	}
 
 	@Bean
