@@ -57,7 +57,6 @@ public class ReindexProvider {
 		myUrlPartitioner = theUrlPartitioner;
 	}
 
-	// FIXME: add to test with the new params
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
 	public IBaseParameters reindex(
 		@Description("Optionally provides one ore more relative search parameter URLs (e.g. \"Patient?active=true\" or \"Observation?\") that will be reindexed. Note that the URL applies to the resources as they are currently indexed, so you should not use a search parameter that needs reindexing in the URL or some resources may be missed. If no URLs are provided, all resources of all types will be reindexed.")

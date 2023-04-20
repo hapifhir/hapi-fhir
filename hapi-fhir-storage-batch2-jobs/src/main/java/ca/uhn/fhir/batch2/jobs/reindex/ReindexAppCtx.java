@@ -41,7 +41,6 @@ public class ReindexAppCtx {
 
 	@Bean
 	public JobDefinition<ReindexJobParameters> reindexJobDefinition(IBatch2DaoSvc theBatch2DaoSvc) {
-		// FIXME: resolve the generics complaint here
 		return JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_REINDEX)

@@ -32,6 +32,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -119,15 +121,19 @@ public class ReindexProviderTest {
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
 		assertThat(params.getPartitionedUrls(), hasSize(1));
 		assertEquals(url, params.getPartitionedUrls().get(0).getUrl());
+		// Non-default values
+		assertTrue(params.isReindexSearchParameters());
+		assertTrue(params.getOptimisticLock());
+		assertFalse(params.isOptimizeStorage());
 	}
 
 	@Test
 	public void testReindex_NoUrl() {
 		// setup
 		Parameters input = new Parameters();
-		int batchSize = 2401;
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_EVERYTHING, new BooleanType(true));
+		input.addParameter(ReindexJobParameters.REINDEX_SEARCH_PARAMETERS, new BooleanType(false));
+		input.addParameter(ReindexJobParameters.OPTIMISTIC_LOCK, new BooleanType(false));
+		input.addParameter(ReindexJobParameters.OPTIMIZE_STORAGE, new BooleanType(true));
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
@@ -138,7 +144,7 @@ public class ReindexProviderTest {
 			.operation()
 			.onServer()
 			.named(ProviderConstants.OPERATION_REINDEX)
-			.withNoParameters(Parameters.class)
+			.withParameters(input)
 			.execute();
 
 		// Verify
@@ -150,6 +156,10 @@ public class ReindexProviderTest {
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
 		assertThat(params.getPartitionedUrls(), empty());
+		// Non-default values
+		assertFalse(params.isReindexSearchParameters());
+		assertFalse(params.getOptimisticLock());
+		assertTrue(params.isOptimizeStorage());
 
 	}
 }

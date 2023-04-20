@@ -35,6 +35,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
@@ -1292,40 +1293,45 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void reindex(IResourcePersistentId thePid, ReindexParameters theReindexParameters, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	public ReindexOutcome reindex(IResourcePersistentId thePid, ReindexParameters theReindexParameters, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		ReindexOutcome retVal = new ReindexOutcome();
+
 		JpaPid jpaPid = (JpaPid) thePid;
 
 		// Careful!  Reindex only reads ResourceTable, but we tell Hibernate to check version
 		// to ensure Hibernate will catch concurrent updates (PUT/DELETE) elsewhere.
 		// Otherwise, we may index stale data.  See #4584
 		// We use the main entity as the lock object since all the index rows hang off it.
-		// FIXME: make optimistic optional
-		ResourceTable entity =
-			myEntityManager.find(ResourceTable.class, jpaPid.getId(), LockModeType.OPTIMISTIC);
+		ResourceTable entity;
+		if (theReindexParameters.isOptimisticLock()) {
+			entity = myEntityManager.find(ResourceTable.class, jpaPid.getId(), LockModeType.OPTIMISTIC);
+		} else {
+			entity = myEntityManager.find(ResourceTable.class, jpaPid.getId());
+		}
 
 		if (entity == null) {
-			ourLog.warn("Unable to find entity with PID: {}", jpaPid.getId());
-			return;
+			retVal.addWarning("Unable to find entity with PID: " + jpaPid.getId());
+			return retVal;
 		}
 
 		if (theReindexParameters.isReindexSearchParameters()) {
-			reindexSearchParameters(entity);
+			reindexSearchParameters(entity, retVal);
 		}
 		if (theReindexParameters.isOptimizeStorage()) {
 			reindexOptimizeStorage(entity);
 		}
 
+		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")
-	private void reindexSearchParameters(ResourceTable entity) {
+	private void reindexSearchParameters(ResourceTable entity, ReindexOutcome theReindexOutcome) {
 		try {
 			T resource = (T) myJpaStorageResourceParser.toResource(entity, false);
 			reindex(resource, entity);
 		} catch (Exception e) {
-			ourLog.warn("Failed to reindex resource {}: {}", entity.getIdDt(), e.toString());
+			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e);
 			myResourceTableDao.updateIndexStatus(entity.getId(), INDEX_STATUS_INDEXING_FAILED);
-			// FIXME: return a failure here so we can count success and failure?
 		}
 	}
 

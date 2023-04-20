@@ -47,8 +47,9 @@ public class ReindexJobParameters extends PartitionedUrlListJobParameters {
 		return defaultIfNull(myOptimisticLock, ReindexParameters.OPTIMISTIC_LOCK_DEFAULT);
 	}
 
-	public void setOptimisticLock(boolean theOptimisticLock) {
+	public ReindexJobParameters setOptimisticLock(boolean theOptimisticLock) {
 		myOptimisticLock = theOptimisticLock;
+		return this;
 	}
 
 	public boolean isOptimizeStorage() {

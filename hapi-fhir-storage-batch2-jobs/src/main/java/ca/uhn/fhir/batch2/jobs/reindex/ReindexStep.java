@@ -19,22 +19,14 @@
  */
 package ca.uhn.fhir.batch2.jobs.reindex;
 
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.api.*;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
+import ca.uhn.fhir.jpa.api.dao.*;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -136,7 +128,10 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);
 				IResourcePersistentId<?> resourcePersistentId = persistentIds.get(i);
 				try {
-					dao.reindex(resourcePersistentId, parameters, myRequestDetails, myTransactionDetails);
+
+					ReindexOutcome outcome = dao.reindex(resourcePersistentId, parameters, myRequestDetails, myTransactionDetails);
+					outcome.getWarnings().forEach(myDataSink::recoveredError);
+
 				} catch (BaseServerResponseException | DataFormatException e) {
 					String resourceForcedId = myIdHelperService.translatePidIdToForcedIdWithCache(resourcePersistentId).orElse(resourcePersistentId.toString());
 					String resourceId = nextResourceType + "/" + resourceForcedId;

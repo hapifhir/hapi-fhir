@@ -234,15 +234,15 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theResource The FHIR resource object corresponding to the entity to reindex
 	 * @param theEntity   The storage entity to reindex
 	 */
-	// FIXME: what is this method for?
 	void reindex(T theResource, IBasePersistedResource theEntity);
 
 	/**
 	 * Reindex the given resource
 	 *
 	 * @param theResourcePersistentId The ID
+	 * @return
 	 */
-	void reindex(IResourcePersistentId theResourcePersistentId, ReindexParameters theReindexParameters, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+	ReindexOutcome reindex(IResourcePersistentId theResourcePersistentId, ReindexParameters theReindexParameters, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequestDetails);
 
