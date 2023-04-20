@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -93,6 +94,11 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 
 		assertEquals(1, getSPIDXDateCount(observationPid), "still only one index row before reindex");
 
+		ReindexParameters reindexParameters = new ReindexParameters();
+		reindexParameters.setReindexSearchParameters(true);
+		reindexParameters.setOptimisticLock(true);
+		reindexParameters.setOptimizeStorage(false);
+
 		// suppose reindex job step starts here and loads the resource and ResourceTable entity
 		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().namingPattern("Reindex-thread-%d").build());
 		Future<Integer> backgroundResult = backgroundReindexThread.submit(() -> {
@@ -104,7 +110,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 
 						phaser.assertInPhase(Steps.RUN_REINDEX);
 						ourLog.info("Run $reindex");
-						myObservationDao.reindex(JpaPid.fromIdAndResourceType(observationPid, "Observation"), rd, new TransactionDetails());
+						myObservationDao.reindex(JpaPid.fromIdAndResourceType(observationPid, "Observation"), reindexParameters, rd, new TransactionDetails());
 
 						ourLog.info("$reindex done release main thread to delete");
 						phaser.arriveAndAwaitSharedEndOf(Steps.RUN_REINDEX);

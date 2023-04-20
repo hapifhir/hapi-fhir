@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -57,7 +58,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -87,7 +88,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -120,7 +121,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -188,7 +189,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -233,7 +234,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
 		// Verify
 		assertEquals(4, outcome.getRecordsProcessed());

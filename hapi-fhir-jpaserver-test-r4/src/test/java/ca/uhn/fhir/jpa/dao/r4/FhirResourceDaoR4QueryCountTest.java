@@ -1,5 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -9,6 +14,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -89,8 +95,11 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -116,6 +125,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	@Autowired
+	private ReindexStep myReindexStep;
 
 	@RegisterExtension
 	@Order(0)
@@ -878,6 +889,92 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// insert to: HFJ_RESOURCE, HFJ_RES_VER, HFJ_RES_LINK
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+
+	}
+
+	@Test
+	public void testReindexJob_OptimizeStorage() {
+		// Setup
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		IIdType patientId = createPatient(withActiveTrue());
+		data.addTypedPid("Patient", patientId.getIdPartAsLong());
+		for (int i = 0; i < 9; i++) {
+			IIdType nextPatientId = createPatient(withActiveTrue());
+			data.addTypedPid("Patient", nextPatientId.getIdPartAsLong());
+		}
+
+		runInTransaction(()->{
+			assertEquals(10, myResourceHistoryTableDao.count());
+			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
+			assertNull(history.getResourceTextVc());
+			assertNotNull(history.getResource());
+		});
+
+		myStorageSettings.setInlineResourceTextBelowSize(10000);
+		ReindexJobParameters params = new ReindexJobParameters()
+			.setOptimizeStorage(true)
+			.setReindexSearchParameters(false);
+
+		// execute
+		myCaptureQueriesListener.clear();
+		RunOutcome outcome = myReindexStep.doReindex(data, mock(IJobDataSink.class), "123", "456", params);
+
+		// validate
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(10, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		assertEquals(10, outcome.getRecordsProcessed());
+		runInTransaction(()->{
+			assertEquals(10, myResourceHistoryTableDao.count());
+			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
+			assertNotNull(history.getResourceTextVc());
+			assertNull(history.getResource());
+		});
+		Patient patient = myPatientDao.read(patientId, mySrd);
+		assertTrue(patient.getActive());
+
+	}
+
+
+	@Test
+	public void testReindexJob_OptimizeStorage_NoOp() {
+		// Setup
+
+		// Inlined already, so no reindexing needed
+		myStorageSettings.setInlineResourceTextBelowSize(10000);
+
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		IIdType patientId = createPatient(withActiveTrue());
+		data.addTypedPid("Patient", patientId.getIdPartAsLong());
+		for (int i = 0; i < 9; i++) {
+			IIdType nextPatientId = createPatient(withActiveTrue());
+			data.addTypedPid("Patient", nextPatientId.getIdPartAsLong());
+		}
+
+		runInTransaction(()->{
+			assertEquals(10, myResourceHistoryTableDao.count());
+			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
+			assertNotNull(history.getResourceTextVc());
+			assertNull(history.getResource());
+		});
+
+		ReindexJobParameters params = new ReindexJobParameters()
+			.setOptimizeStorage(true)
+			.setReindexSearchParameters(false);
+
+		// execute
+		myCaptureQueriesListener.clear();
+		RunOutcome outcome = myReindexStep.doReindex(data, mock(IJobDataSink.class), "123", "456", params);
+
+		// validate
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 
 	}
 
@@ -2776,12 +2873,21 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		}
 
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, input);
+		Bundle output = mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(45, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		assertEquals(input.getEntry().size(), output.getEntry().size());
+
+		runInTransaction(() -> {
+			assertEquals(10, myResourceTableDao.count());
+			assertEquals(10, myResourceHistoryTableDao.count());
+		});
 
 	}
 

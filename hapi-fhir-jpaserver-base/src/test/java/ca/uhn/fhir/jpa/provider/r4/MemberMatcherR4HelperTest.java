@@ -65,7 +65,7 @@ public class MemberMatcherR4HelperTest {
 	@RegisterExtension
 	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) MemberMatcherR4Helper.ourLog, Level.TRACE);
 	@Spy
-	private final FhirContext myFhirContext = FhirContext.forR4();
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	@Mock
 	private IFhirResourceDao<Coverage> myCoverageDao;
 	@Mock

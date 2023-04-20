@@ -25,8 +25,10 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -55,13 +57,36 @@ public class ReindexProvider {
 		myUrlPartitioner = theUrlPartitioner;
 	}
 
+	// FIXME: add to test with the new params
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
 	public IBaseParameters reindex(
-		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_URL, typeName = "string", min = 0, max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theUrlsToReindex,
+		@Description("Optionally provides one ore more relative search parameter URLs (e.g. \"Patient?active=true\" or \"Observation?\") that will be reindexed. Note that the URL applies to the resources as they are currently indexed, so you should not use a search parameter that needs reindexing in the URL or some resources may be missed. If no URLs are provided, all resources of all types will be reindexed.")
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_URL, typeName = "string", min = 0, max = OperationParam.MAX_UNLIMITED)
+		List<IPrimitiveType<String>> theUrlsToReindex,
+		@Description("Should search parameters be reindexed (default: " + ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT + ")")
+		@OperationParam(name = ReindexJobParameters.REINDEX_SEARCH_PARAMETERS, typeName = "boolean", min = 0, max = 1)
+		IPrimitiveType<Boolean> theReindexSearchParameters,
+		@Description("Should we attempt to optimize storage for resources (default: " + ReindexParameters.OPTIMIZE_STORAGE_DEFAULT + ")")
+		@OperationParam(name = ReindexJobParameters.OPTIMIZE_STORAGE, typeName = "boolean", min = 0, max = 1)
+		IPrimitiveType<Boolean> theOptimizeStorage,
+		@Description("Should we attempt to optimistically lock resources being reindexed in order to avoid concurrency issues (default: " + ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + ")")
+		@OperationParam(name = ReindexJobParameters.OPTIMISTIC_LOCK, typeName = "boolean", min = 0, max = 1)
+		IPrimitiveType<Boolean> theOptimisticLock,
 		RequestDetails theRequestDetails
 	) {
 
 		ReindexJobParameters params = new ReindexJobParameters();
+
+		if (theReindexSearchParameters != null && theReindexSearchParameters.getValue() != null) {
+			params.setReindexSearchParameters(theReindexSearchParameters.getValue());
+		}
+		if (theOptimizeStorage != null && theOptimizeStorage.getValue() != null) {
+			params.setOptimizeStorage(theOptimizeStorage.getValue());
+		}
+		if (theOptimisticLock != null && theOptimisticLock.getValue() != null) {
+			params.setOptimisticLock(theOptimisticLock.getValue());
+		}
+
 		if (theUrlsToReindex != null) {
 			theUrlsToReindex.stream()
 				.map(IPrimitiveType::getValue)

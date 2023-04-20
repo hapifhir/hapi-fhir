@@ -379,6 +379,11 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
+		public void setResourceTextVcForVersion(Long id, String resourceText) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public void updateVersion(long theId, long theOldVersion, long theNewVersion) {
 			throw new UnsupportedOperationException();
 		}
@@ -388,23 +393,27 @@ public class GiantTransactionPerfTest {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
 		public List<ResourceHistoryTable> findAll() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public List<ResourceHistoryTable> findAll(Sort sort) {
+		public List<ResourceHistoryTable> findAll(@Nonnull Sort sort) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public Page<ResourceHistoryTable> findAll(Pageable pageable) {
+		public Page<ResourceHistoryTable> findAll(@Nonnull Pageable pageable) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public List<ResourceHistoryTable> findAllById(Iterable<Long> ids) {
+		public List<ResourceHistoryTable> findAllById(@Nonnull Iterable<Long> ids) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -414,22 +423,22 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public void deleteById(Long theLong) {
+		public void deleteById(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void delete(ResourceHistoryTable entity) {
+		public void delete(@Nonnull ResourceHistoryTable entity) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void deleteAllById(Iterable<? extends Long> ids) {
-
+		public void deleteAllById(@Nonnull Iterable<? extends Long> ids) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void deleteAll(Iterable<? extends ResourceHistoryTable> entities) {
+		public void deleteAll(@Nonnull Iterable<? extends ResourceHistoryTable> entities) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -438,24 +447,27 @@ public class GiantTransactionPerfTest {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> S save(S entity) {
+		public <S extends ResourceHistoryTable> S save(@Nonnull S entity) {
 			mySaveCount++;
 			return entity;
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> List<S> saveAll(Iterable<S> entities) {
+		public <S extends ResourceHistoryTable> List<S> saveAll(@Nonnull Iterable<S> entities) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nonnull
+		@Override
+		public Optional<ResourceHistoryTable> findById(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Optional<ResourceHistoryTable> findById(Long theLong) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean existsById(Long theLong) {
+		public boolean existsById(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -464,28 +476,30 @@ public class GiantTransactionPerfTest {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> S saveAndFlush(S entity) {
+		public <S extends ResourceHistoryTable> S saveAndFlush(@Nonnull S entity) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nonnull
+		@Override
+		public <S extends ResourceHistoryTable> List<S> saveAllAndFlush(@Nonnull Iterable<S> entities) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public <S extends ResourceHistoryTable> List<S> saveAllAndFlush(Iterable<S> entities) {
+		public void deleteInBatch(@Nonnull Iterable<ResourceHistoryTable> entities) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void deleteInBatch(Iterable<ResourceHistoryTable> entities) {
+		public void deleteAllInBatch(@Nonnull Iterable<ResourceHistoryTable> entities) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void deleteAllInBatch(Iterable<ResourceHistoryTable> entities) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void deleteAllByIdInBatch(Iterable<Long> ids) {
+		public void deleteAllByIdInBatch(@Nonnull Iterable<Long> ids) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -495,57 +509,62 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public ResourceHistoryTable getOne(Long theLong) {
+		public ResourceHistoryTable getOne(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public ResourceHistoryTable getById(Long theLong) {
+		public ResourceHistoryTable getById(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public ResourceHistoryTable getReferenceById(Long theLong) {
+		public ResourceHistoryTable getReferenceById(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> Optional<S> findOne(Example<S> example) {
+		public <S extends ResourceHistoryTable> Optional<S> findOne(@Nonnull Example<S> example) {
 			return Optional.empty();
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> List<S> findAll(Example<S> example) {
+		public <S extends ResourceHistoryTable> List<S> findAll(@Nonnull Example<S> example) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nonnull
+		@Override
+		public <S extends ResourceHistoryTable> List<S> findAll(@Nonnull Example<S> example, @Nonnull Sort sort) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nonnull
+		@Override
+		public <S extends ResourceHistoryTable> Page<S> findAll(@Nonnull Example<S> example, @Nonnull Pageable pageable) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public <S extends ResourceHistoryTable> List<S> findAll(Example<S> example, Sort sort) {
+		public <S extends ResourceHistoryTable> long count(@Nonnull Example<S> example) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public <S extends ResourceHistoryTable> Page<S> findAll(Example<S> example, Pageable pageable) {
+		public <S extends ResourceHistoryTable> boolean exists(@Nonnull Example<S> example) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> long count(Example<S> example) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <S extends ResourceHistoryTable> boolean exists(Example<S> example) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <S extends ResourceHistoryTable, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+		public <S extends ResourceHistoryTable, R> R findBy(@Nonnull Example<S> example, @Nonnull Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
 			throw new UnsupportedOperationException();
 		}
 	}
 
-	private class MockEntityManager implements EntityManager {
+	private static class MockEntityManager implements EntityManager {
 		private final List<Object> myPersistCount = new ArrayList<>();
 		private final List<Object> myMergeCount = new ArrayList<>();
 		private long ourNextId = 0L;
@@ -816,54 +835,6 @@ public class GiantTransactionPerfTest {
 		public void clearCounts() {
 			myMergeCount.clear();
 			myPersistCount.clear();
-		}
-	}
-
-	private static class MockSchedulerSvc implements ISchedulerService {
-
-		@Override
-		public void purgeAllScheduledJobsForUnitTest() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void logStatusForUnitTest() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Set<JobKey> getLocalJobKeysForUnitTest() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Set<JobKey> getClusteredJobKeysForUnitTest() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean isStopping() {
-			return false;
-		}
-
-		@Override
-		public void triggerLocalJobImmediately(ScheduledJobDefinition theJobDefinition) {
-			ISchedulerService.super.triggerLocalJobImmediately(theJobDefinition);
-		}
-
-		@Override
-		public void triggerClusteredJobImmediately(ScheduledJobDefinition theJobDefinition) {
-			ISchedulerService.super.triggerClusteredJobImmediately(theJobDefinition);
 		}
 	}
 

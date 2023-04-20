@@ -35,6 +35,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
@@ -51,6 +52,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -68,9 +70,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
+import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.ListResource;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -94,7 +96,6 @@ import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -196,6 +197,36 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Autowired
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
+
+	public static <T extends IBaseResource> T invokeStoragePreShowResources(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, T retVal) {
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, theInterceptorBroadcaster, theRequest)) {
+			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
+			HookParams params = new HookParams()
+				.add(IPreResourceShowDetails.class, showDetails)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			CompositeInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			//noinspection unchecked
+			retVal = (T) showDetails.getResource(0);//TODO GGG/JA : getting resource 0 is interesting. We apparently allow null values in the list. Should we?
+			return retVal;
+		} else {
+			return retVal;
+		}
+	}
+
+	public static void invokeStoragePreAccessResources(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, IIdType theId, IBaseResource theResource) {
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, theInterceptorBroadcaster, theRequest)) {
+			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(theResource);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			CompositeInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			if (accessDetails.isDontReturnResourceAtIndex(0)) {
+				throw new ResourceNotFoundException(Msg.code(1995) + "Resource " + theId + " is not known");
+			}
+		}
+	}
 
 	@Override
 	protected HapiTransactionService getTransactionService() {
@@ -1261,13 +1292,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void reindex(IResourcePersistentId thePid, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	public void reindex(IResourcePersistentId thePid, ReindexParameters theReindexParameters, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		JpaPid jpaPid = (JpaPid) thePid;
 
 		// Careful!  Reindex only reads ResourceTable, but we tell Hibernate to check version
 		// to ensure Hibernate will catch concurrent updates (PUT/DELETE) elsewhere.
 		// Otherwise, we may index stale data.  See #4584
 		// We use the main entity as the lock object since all the index rows hang off it.
+		// FIXME: make optimistic optional
 		ResourceTable entity =
 			myEntityManager.find(ResourceTable.class, jpaPid.getId(), LockModeType.OPTIMISTIC);
 
@@ -1276,12 +1308,40 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return;
 		}
 
+		if (theReindexParameters.isReindexSearchParameters()) {
+			reindexSearchParameters(entity);
+		}
+		if (theReindexParameters.isOptimizeStorage()) {
+			reindexOptimizeStorage(entity);
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	private void reindexSearchParameters(ResourceTable entity) {
 		try {
 			T resource = (T) myJpaStorageResourceParser.toResource(entity, false);
 			reindex(resource, entity);
-		} catch (BaseServerResponseException | DataFormatException e) {
+		} catch (Exception e) {
+			ourLog.warn("Failed to reindex resource {}: {}", entity.getIdDt(), e.toString());
 			myResourceTableDao.updateIndexStatus(entity.getId(), INDEX_STATUS_INDEXING_FAILED);
-			throw e;
+			// FIXME: return a failure here so we can count success and failure?
+		}
+	}
+
+	private void reindexOptimizeStorage(ResourceTable entity) {
+		ResourceHistoryTable historyEntity = entity.getCurrentVersionEntity();
+		if (historyEntity != null) {
+			if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC || historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
+				byte[] resourceBytes = historyEntity.getResource();
+				if (resourceBytes != null) {
+					String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
+					if (myStorageSettings.getInlineResourceTextBelowSize() > 0 && resourceText.length() < myStorageSettings.getInlineResourceTextBelowSize()) {
+						ourLog.debug("Storing text of resource {} version {} as inline VARCHAR", entity.getResourceId(), entity.getVersion());
+						myResourceHistoryTableDao.setResourceTextVcForVersion(historyEntity.getId(), resourceText);
+					}
+				}
+			}
 		}
 	}
 
@@ -1361,7 +1421,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myEntityManager.find(ResourceTable.class, jpaPid.getId());
 	}
 
-
 	@Override
 	@Nonnull
 	protected ResourceTable readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
@@ -1412,7 +1471,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			CURRENTLY_REINDEXING.put(theResource, null);
 		}
 	}
-
 
 	@Transactional
 	@Override
@@ -1512,7 +1570,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				for (List<IQueryParameterType> orValues : andOrValues) {
 					List<IQueryParameterType> orList = new ArrayList<>();
 					for (IQueryParameterType value : orValues) {
-						orList.add(new HasParam("List", ListResource.SP_ITEM, ListResource.SP_RES_ID, value.getValueAsQueryToken(null)));
+						orList.add(new HasParam("List", ListResource.SP_ITEM, BaseResource.SP_RES_ID, value.getValueAsQueryToken(null)));
 					}
 					hasParamValues.add(orList);
 				}
@@ -1937,37 +1995,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public void setIdHelperSvcForUnitTest(IIdHelperService theIdHelperService) {
 		myIdHelperService = theIdHelperService;
 	}
-
-	public static <T extends IBaseResource> T invokeStoragePreShowResources(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, T retVal) {
-		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, theInterceptorBroadcaster, theRequest)) {
-			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
-			HookParams params = new HookParams()
-				.add(IPreResourceShowDetails.class, showDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-			//noinspection unchecked
-			retVal = (T) showDetails.getResource(0);//TODO GGG/JA : getting resource 0 is interesting. We apparently allow null values in the list. Should we?
-			return retVal;
-		} else {
-			return retVal;
-		}
-	}
-
-	public static void invokeStoragePreAccessResources(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, IIdType theId, IBaseResource theResource) {
-		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, theInterceptorBroadcaster, theRequest)) {
-			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(theResource);
-			HookParams params = new HookParams()
-				.add(IPreResourceAccessDetails.class, accessDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-			if (accessDetails.isDontReturnResourceAtIndex(0)) {
-				throw new ResourceNotFoundException(Msg.code(1995) + "Resource " + theId + " is not known");
-			}
-		}
-	}
-
 
 	private static class IdChecker implements IValidatorModule {
 
