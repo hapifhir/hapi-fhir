@@ -214,7 +214,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		Binary execute = myClient.read().resource(Binary.class).withId(id).execute();
 		myClient.unregisterInterceptor(interceptor);
 
-		assertArrayEquals(SOME_BYTES, execute.getContent());
+		assertNull(execute.getContent());
+		assertNull(execute.getDataElement().getValue());
 		assertNotNull(execute.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
 
 		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(true);
