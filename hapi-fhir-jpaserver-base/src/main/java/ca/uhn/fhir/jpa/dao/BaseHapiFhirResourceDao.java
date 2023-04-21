@@ -231,6 +231,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	public void breakPlease() {
+		throw new UnsupportedOperationException("Do not merge me :) ");
+	}
+
+
+	@Override
 	public DaoMethodOutcome create(final T theResource, RequestDetails theRequestDetails) {
 		return create(theResource, null, true, new TransactionDetails(), theRequestDetails);
 	}
