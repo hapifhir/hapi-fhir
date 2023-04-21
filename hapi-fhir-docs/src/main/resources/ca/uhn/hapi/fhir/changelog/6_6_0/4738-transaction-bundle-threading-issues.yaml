@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 4738
+title: "Processing multiple transaction bundles with similar entries
+      on different threads would lead to Constraint Violations if
+      the entries contained similar unique values.
+      This is an error that can be fixed with Retry Handlers now.
+      "
