@@ -1,6 +1,6 @@
 ---
 type: add
-issue: FIXME
+issue: 4758
 backport: 6.4.5
 title: "The JPA server REST-HOOK subscription delivery client had a hardcoded connection pool
    limit of 20 outgoing connections. This has been increased to 1000, since subscriptions

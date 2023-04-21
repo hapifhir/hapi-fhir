@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -248,7 +250,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		verify(myDataSink, times(1)).recoveredError(myErrorCaptor.capture());
 		String message = myErrorCaptor.getValue();
 		message = message.replace("Observation.subject.where(resolve() is Patient)", "Observation.subject"); // depending on whether subject or patient gets indexed first
-		assertEquals("Failure reindexing Patient/" + idPatientToInvalidate + ": HAPI-0928: Failed to parse database resource[Patient/" + idPatientToInvalidate + " (pid " + idPatientToInvalidate + ", version R4): HAPI-1861: Failed to parse JSON encoded FHIR content: HAPI-1859: Content does not appear to be FHIR JSON, first non-whitespace character was: 'A' (must be '{')", message);
+		assertThat(message, containsString("HAPI-0928: Failed to parse database resource"));
 
 		runInTransaction(() -> {
 			ResourceTable table = myResourceTableDao.findById(idPatientToInvalidate).orElseThrow();

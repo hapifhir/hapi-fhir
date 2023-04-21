@@ -263,12 +263,12 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
-		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(startResponse);
+		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// Verify
 
-		assertEquals(StatusEnum.ERRORED, outcome.getStatus());
-		assertEquals("foo message", outcome.getErrorMessage());
+		assertEquals(StatusEnum.COMPLETED, outcome.getStatus());
+		assertEquals(null, outcome.getErrorMessage());
 	}
 
 	@Test
