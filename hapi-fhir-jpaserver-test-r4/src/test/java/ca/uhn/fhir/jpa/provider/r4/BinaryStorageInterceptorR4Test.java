@@ -208,7 +208,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
 
-		// Now read it back and make sure it was de-externalized
+		// Now read it back and make sure it is not successfully de-externalized
 		ContentTypeStrippingInterceptor interceptor = new ContentTypeStrippingInterceptor();
 		myClient.registerInterceptor(interceptor);
 		Binary execute = myClient.read().resource(Binary.class).withId(id).execute();
