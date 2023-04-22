@@ -232,7 +232,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public void breakPlease() {
-		throw new UnsupportedOperationException("Do not merge me :) ");
+		throw new UnsupportedOperationException(Msg.code(999999) + "Do not merge me :) ");
 	}
 
 
