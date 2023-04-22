@@ -8,14 +8,22 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsTest;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +35,8 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 
 	@Mock
 	private IJobDataSink<ResourceIdList> mySink;
+	@Captor
+	private ArgumentCaptor<ResourceIdList> myResourceIdListCaptor;
 
 	@Override
 	public void afterCleanupDao() {
@@ -40,6 +50,15 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 	public void testSystemBulkExportWithManyTags() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
+		mySearchParameterDao.create(FhirResourceDaoR4TagsTest.createSecuritySearchParameter(myFhirContext), mySrd);
+
+		for (int i = 0; i < 10; i++) {
+			OrganizationAffiliation orgAff = new OrganizationAffiliation();
+			orgAff.getMeta().addSecurity().setSystem("http://foo").setCode("01B0");
+			orgAff.setActive(true);
+			myOrganizationAffiliationDao.create(orgAff, mySrd);
+		}
+
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		params.setResourceTypes(List.of("OrganizationAffiliation"));
 		params.setSince(new DateTimeType("2023-01-01").getValue());
@@ -50,8 +69,14 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		String chunkId = "chunk-id";
 		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, chunkId);
 		myCaptureQueriesListener.clear();
+
+		// Test
 		myFetchResourceIdsStep.run(executionDetails, mySink);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		// Verify
+		verify(mySink, times(1)).accept(myResourceIdListCaptor.capture());
+		ResourceIdList idList = myResourceIdListCaptor.getAllValues().get(0);
+		assertEquals(10, idList.getIds().size());
 	}
 
 
