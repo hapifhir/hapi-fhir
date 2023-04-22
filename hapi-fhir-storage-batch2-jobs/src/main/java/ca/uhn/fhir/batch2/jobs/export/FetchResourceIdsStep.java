@@ -71,6 +71,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setGroupId(params.getGroupId());
 		providerParams.setPatientIds(params.getPatientIds());
 		providerParams.setExpandMdm(params.isExpandMdm());
+		providerParams.setChunkId(theStepExecutionDetails.getChunkId());
 
 		int submissionCount = 0;
 		try {

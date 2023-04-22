@@ -8,23 +8,17 @@ import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -73,7 +67,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 		ResourceIdList resourceList = new ResourceIdList();
 		resourceList.setResourceType("Patient");
-		resourceList.setIds(ids.stream().map(t->new BatchResourceId().setResourceType("Patient").setId(Long.toString(t))).toList());
+		resourceList.setIds(ids.stream().map(t -> new BatchResourceId().setResourceType("Patient").setId(Long.toString(t))).toList());
 
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		JobInstance jobInstance = new JobInstance();
@@ -105,7 +99,6 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 	}
-
 
 
 }

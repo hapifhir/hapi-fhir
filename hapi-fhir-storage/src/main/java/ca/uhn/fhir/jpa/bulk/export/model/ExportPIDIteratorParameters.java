@@ -72,6 +72,7 @@ public class ExportPIDIteratorParameters {
 	 * The patient id
 	 */
 	private List<String> myPatientIds;
+	private String myChunkId;
 
 	public String getResourceType() {
 		return myResourceType;
@@ -142,4 +143,11 @@ public class ExportPIDIteratorParameters {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 
+	public void setChunkId(String theChunkId) {
+		myChunkId = theChunkId;
+	}
+
+	public String getChunkId() {
+		return myChunkId;
+	}
 }
