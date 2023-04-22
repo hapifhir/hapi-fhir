@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -89,6 +90,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
 	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
+	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
 	@OptimisticLock(excluded = true)
 	private String myResourceTextVc;
 

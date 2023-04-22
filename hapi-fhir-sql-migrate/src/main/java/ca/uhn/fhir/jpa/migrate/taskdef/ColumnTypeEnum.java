@@ -31,5 +31,6 @@ public enum ColumnTypeEnum {
 	TINYINT,
 	BLOB,
 	CLOB,
-	DOUBLE;
+	DOUBLE,
+	TEXT;
 }

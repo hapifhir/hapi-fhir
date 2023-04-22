@@ -284,8 +284,9 @@ public class JpaConstants {
 	 * IPS Generation operation URL
 	 */
 	public static final String SUMMARY_OPERATION_URL = "http://hl7.org/fhir/uv/ips/OperationDefinition/summary";
+    public static final String ORG_HIBERNATE_TYPE_TEXT_TYPE = "org.hibernate.type.TextType";
 
-	/**
+    /**
 	 * Non-instantiable
 	 */
 	private JpaConstants() {
