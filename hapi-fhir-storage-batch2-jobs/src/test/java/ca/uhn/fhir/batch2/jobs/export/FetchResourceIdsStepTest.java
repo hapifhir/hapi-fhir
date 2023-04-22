@@ -73,7 +73,7 @@ public class FetchResourceIdsStepTest {
 
 	private BulkExportJobParameters createParameters(boolean thePartitioned) {
 		BulkExportJobParameters jobParameters = new BulkExportJobParameters();
-		jobParameters.setStartDate(new Date());
+		jobParameters.setSince(new Date());
 		jobParameters.setOutputFormat("json");
 		jobParameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		jobParameters.setResourceTypes(Arrays.asList("Patient", "Observation"));

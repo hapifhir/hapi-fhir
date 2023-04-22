@@ -234,7 +234,7 @@ public class BulkDataExportProviderTest {
 		assertTrue(params.getResourceTypes().contains(patientResource));
 		assertTrue(params.getResourceTypes().contains(practitionerResource));
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
-		assertNotNull(params.getStartDate());
+		assertNotNull(params.getSince());
 		assertTrue(params.getFilters().contains(filter));
 	}
 
@@ -292,7 +292,7 @@ public class BulkDataExportProviderTest {
 		BulkExportParameters params = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertThat(params.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
-		assertThat(params.getStartDate(), notNullValue());
+		assertThat(params.getSince(), notNullValue());
 		assertThat(params.getFilters(), containsInAnyOrder("Patient?identifier=foo"));
 	}
 
@@ -321,7 +321,7 @@ public class BulkDataExportProviderTest {
 		BulkExportParameters params = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertThat(params.getResourceTypes(), containsInAnyOrder("Patient", "EpisodeOfCare"));
-		assertThat(params.getStartDate(), nullValue());
+		assertThat(params.getSince(), nullValue());
 		assertThat(params.getFilters(), containsInAnyOrder("Patient?_id=P999999990", "EpisodeOfCare?patient=P999999990"));
 	}
 
@@ -606,7 +606,7 @@ public class BulkDataExportProviderTest {
 
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes(), containsInAnyOrder("Observation", "DiagnosticReport"));
-		assertThat(bp.getStartDate(), notNullValue());
+		assertThat(bp.getSince(), notNullValue());
 		assertThat(bp.getFilters(), notNullValue());
 		assertEquals(GROUP_ID, bp.getGroupId());
 		assertThat(bp.isExpandMdm(), is(equalTo(true)));
@@ -641,7 +641,7 @@ public class BulkDataExportProviderTest {
 		BulkExportParameters bp = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
-		assertThat(bp.getStartDate(), notNullValue());
+		assertThat(bp.getSince(), notNullValue());
 		assertThat(bp.getFilters(), notNullValue());
 		assertEquals(GROUP_ID, bp.getGroupId());
 		assertThat(bp.isExpandMdm(), is(equalTo(true)));
@@ -816,7 +816,7 @@ public class BulkDataExportProviderTest {
 		BulkExportParameters bp = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes(), containsInAnyOrder("Immunization", "Observation"));
-		assertThat(bp.getStartDate(), notNullValue());
+		assertThat(bp.getSince(), notNullValue());
 		assertThat(bp.getFilters(), containsInAnyOrder("Immunization?vaccine-code=foo"));
 	}
 
