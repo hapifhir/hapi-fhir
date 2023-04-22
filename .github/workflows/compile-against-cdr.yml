@@ -1,0 +1,14 @@
+name: "Compile Against CDR"
+
+on: [push]
+jobs:
+  Compile Against CDR:
+    runs-on: ubuntu-latest
+    steps:
+       - run: echo "Testing!"
+       - run: >
+         curl --request POST 
+         --url https://gitlab.com/api/v4/projects/1927185/trigger/pipeline
+         --header 'Content-Type: application/x-www-form-urlencoded'
+         --data token=$TRIGGER_TOKEN
+         --data ref=explore-hapi-branch
