@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -62,7 +63,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -114,29 +114,37 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@Autowired
 	private EntityManager myEntityManager;
 
+	@Autowired
+	private IHapiTransactionService myHapiTransactionService;
+
 	private IFhirPath myFhirPath;
 
-	@Transactional
 	@Override
 	public Iterator<JpaPid> getResourcePidIterator(ExportPIDIteratorParameters theParams) {
-		String resourceType = theParams.getResourceType();
-		String jobId = theParams.getJobId();
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
+		return myHapiTransactionService
+			.withRequest(null)
+			.readOnly()
+			.execute(() -> {
+				String resourceType = theParams.getResourceType();
+				String jobId = theParams.getInstanceId();
+				String chunkId = theParams.getChunkId();
+				RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
 
-		LinkedHashSet<JpaPid> pids;
-		if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.PATIENT) {
-			pids = getPidsForPatientStyleExport(theParams, resourceType, jobId, def);
-		} else if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.GROUP) {
-			pids = getPidsForGroupStyleExport(theParams, resourceType, def);
-		} else {
-			pids = getPidsForSystemStyleExport(theParams, jobId, def);
-		}
+				LinkedHashSet<JpaPid> pids;
+				if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.PATIENT) {
+					pids = getPidsForPatientStyleExport(theParams, resourceType, jobId, chunkId, def);
+				} else if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.GROUP) {
+					pids = getPidsForGroupStyleExport(theParams, resourceType, def);
+				} else {
+					pids = getPidsForSystemStyleExport(theParams, jobId, chunkId, def);
+				}
 
-		ourLog.debug("Finished expanding resource pids to export, size is {}", pids.size());
-		return pids.iterator();
+				ourLog.debug("Finished expanding resource pids to export, size is {}", pids.size());
+				return pids.iterator();
+			});
 	}
 
-	private LinkedHashSet<JpaPid> getPidsForPatientStyleExport(ExportPIDIteratorParameters theParams, String resourceType, String jobId, RuntimeResourceDefinition def) {
+	private LinkedHashSet<JpaPid> getPidsForPatientStyleExport(ExportPIDIteratorParameters theParams, String resourceType, String theJobId, String theChunkId, RuntimeResourceDefinition def) {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 		// Patient
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
@@ -157,9 +165,17 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 				filterBySpecificPatient(theParams, resourceType, patientSearchParam, map);
 
-				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, jobId);
-				IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, null, theParams.getPartitionIdOrAllPartitions());
+				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, theJobId);
+
+				ourLog.info("Executing query for bulk export job[{}] chunk[{}]: {}", theJobId, theChunkId, map.toNormalizedQueryString(myContext));
+
+				IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, null, RequestPartitionId.allPartitions());
+				int pidCount = 0;
 				while (resultIterator.hasNext()) {
+					if (pidCount % 1000 == 0) {
+						ourLog.info("Bulk export job[{}] chunk[{}] has loaded {} pids", theJobId, theChunkId, pidCount);
+					}
+					pidCount++;
 					pids.add(resultIterator.next());
 				}
 			}
@@ -192,19 +208,26 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return referenceOrListParam;
 	}
 
-	private LinkedHashSet<JpaPid> getPidsForSystemStyleExport(ExportPIDIteratorParameters theParams, String theJobId, RuntimeResourceDefinition theDef) {
+	private LinkedHashSet<JpaPid> getPidsForSystemStyleExport(ExportPIDIteratorParameters theParams, String theJobId, String theChunkId, RuntimeResourceDefinition theDef) {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 		// System
 		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theDef, theParams, true);
 		ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
 		for (SearchParameterMap map : maps) {
+			ourLog.info("Executing query for bulk export job[{}] chunk[{}]: {}", theJobId, theChunkId, map.toNormalizedQueryString(myContext));
+
 			// requires a transaction
 			IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map,
 				new SearchRuntimeDetails(null, theJobId),
 				null,
 				theParams.getPartitionIdOrAllPartitions());
+			int pidCount = 0;
 			while (resultIterator.hasNext()) {
+				if (pidCount % 1000 == 0) {
+					ourLog.info("Bulk export job[{}] chunk[{}] has loaded {} pids", theJobId, theChunkId, pidCount);
+				}
+				pidCount++;
 				pids.add(resultIterator.next());
 			}
 		}
@@ -350,9 +373,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		for (SearchParameterMap map : maps) {
 			ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType("Patient");
-			ourLog.debug("Searching for members of group {} with job id {} with map {}", theParameters.getGroupId(), theParameters.getJobId(), map);
+			ourLog.debug("Searching for members of group {} with job instance {} with map {}", theParameters.getGroupId(), theParameters.getInstanceId(), map);
 			IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map,
-				new SearchRuntimeDetails(null, theParameters.getJobId()),
+				new SearchRuntimeDetails(null, theParameters.getInstanceId()),
 				null,
 				theParameters.getPartitionIdOrAllPartitions());
 
@@ -451,7 +474,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			//Execute query and all found pids to our local iterator.
 			RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 			IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(expandedSpMap,
-				new SearchRuntimeDetails(null, theParams.getJobId()),
+				new SearchRuntimeDetails(null, theParams.getInstanceId()),
 				null,
 				partitionId);
 			while (resultIterator.hasNext()) {
@@ -461,7 +484,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			// add _include to results to support ONC
 			Set<Include> includes = Collections.singleton(new Include("*", true));
 			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
-			Set<JpaPid> includeIds = searchBuilder.loadIncludes(myContext, myEntityManager, theReadPids, includes, false, expandedSpMap.getLastUpdated(), theParams.getJobId(), requestDetails, null);
+			Set<JpaPid> includeIds = searchBuilder.loadIncludes(myContext, myEntityManager, theReadPids, includes, false, expandedSpMap.getLastUpdated(), theParams.getInstanceId(), requestDetails, null);
 			// gets rid of the Patient duplicates
 			theReadPids.addAll(includeIds.stream().filter((id) -> !id.getResourceType().equals("Patient")).collect(Collectors.toSet()));
 		}

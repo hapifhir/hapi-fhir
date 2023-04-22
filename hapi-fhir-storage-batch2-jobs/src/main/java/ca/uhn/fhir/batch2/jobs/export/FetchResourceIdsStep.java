@@ -61,6 +61,8 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		ourLog.info("Fetching resource IDs for bulk export job instance[{}]", theStepExecutionDetails.getInstance().getInstanceId());
 
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
+		providerParams.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId());
+		providerParams.setChunkId(theStepExecutionDetails.getChunkId());
 		providerParams.setFilters(params.getFilters());
 		providerParams.setStartDate(params.getSince());
 		providerParams.setExportStyle(params.getExportStyle());

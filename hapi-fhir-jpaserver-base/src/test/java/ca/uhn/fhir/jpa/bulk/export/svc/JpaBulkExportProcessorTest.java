@@ -136,7 +136,7 @@ public class JpaBulkExportProcessorTest {
 
 	private ExportPIDIteratorParameters createExportParameters(BulkDataExportOptions.ExportStyle theExportStyle) {
 		ExportPIDIteratorParameters parameters = new ExportPIDIteratorParameters();
-		parameters.setJobId("jobId");
+		parameters.setInstanceId("instanceId");
 		parameters.setExportStyle(theExportStyle);
 		if (theExportStyle == BulkDataExportOptions.ExportStyle.GROUP) {
 			parameters.setGroupId("123");
