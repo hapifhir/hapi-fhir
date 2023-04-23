@@ -119,6 +119,10 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 
 					ourLog.trace("About to execute SQL: {}", sql);
 
+					/*
+					 * These settings help to ensure that we use a search cursor
+					 * as opposed to loading all search results into memory
+					 */
 					hibernateQuery.setFetchSize(1000);
 					hibernateQuery.setCacheable(false);
 					hibernateQuery.setCacheMode(CacheMode.IGNORE);
