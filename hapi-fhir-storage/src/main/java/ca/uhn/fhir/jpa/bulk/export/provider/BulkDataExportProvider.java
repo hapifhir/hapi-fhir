@@ -370,7 +370,9 @@ public class BulkDataExportProvider {
 				response.getWriter().close();
 				break;
 			default:
+				// Deliberate fall through
 				ourLog.warn("Unrecognized status encountered: {}. Treating as BUILDING/SUBMITTED", info.getStatus().name());
+				//noinspection fallthrough
 			case BUILDING:
 			case SUBMITTED:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {

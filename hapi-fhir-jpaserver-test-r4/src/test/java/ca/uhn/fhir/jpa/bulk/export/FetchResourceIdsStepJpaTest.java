@@ -45,7 +45,6 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 	}
 
-	// FIXME: move this test to a dedicated class
 	@Test
 	public void testSystemBulkExportWithManyTags() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);

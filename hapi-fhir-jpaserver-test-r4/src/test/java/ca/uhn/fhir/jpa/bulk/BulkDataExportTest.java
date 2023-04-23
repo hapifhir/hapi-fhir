@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -687,14 +689,32 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, expectedContainedIds, Collections.emptyList());
 	}
 
-	private void verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
+	@Test
+	public void testSystemBulkExport() {
+		List<String> expectedIds = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			expectedIds.add(createPatient(withActiveTrue()).getValue());
+			expectedIds.add(createObservation(withStatus("final")).getValue());
+		}
+
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Set.of("Patient", "Observation"));
+		options.setFilters(Set.of("Patient?active=true", "Patient?active=false", "Observation?status=final"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
+		assertEquals(40, finalJobInstance.getCombinedRecordsProcessed());
+	}
+
+	private JobInstance verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 
 		assertNotNull(startResponse);
 		assertFalse(startResponse.isUsesCachedResult());
 
 		// Run a scheduled pass to build the export
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
+		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
 
 		await()
 			.atMost(200, TimeUnit.SECONDS)
@@ -737,6 +757,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				}
 
 			}
+
+			return jobInstance;
 		}
 
 		for (String containedString : theContainedList) {
@@ -745,6 +767,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		for (String excludedString : theExcludedList) {
 			assertThat("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds, foundIds, not(hasItem(excludedString)));
 		}
+		return jobInstance;
 	}
 
 	private static Stream<Set<String>> bulkExportOptionsResourceTypes() {

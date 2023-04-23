@@ -172,7 +172,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, null, RequestPartitionId.allPartitions());
 				int pidCount = 0;
 				while (resultIterator.hasNext()) {
-					if (pidCount % 1000 == 0) {
+					if (pidCount % 10000 == 0) {
 						ourLog.info("Bulk export job[{}] chunk[{}] has loaded {} pids", theJobId, theChunkId, pidCount);
 					}
 					pidCount++;
@@ -224,7 +224,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				theParams.getPartitionIdOrAllPartitions());
 			int pidCount = 0;
 			while (resultIterator.hasNext()) {
-				if (pidCount % 1000 == 0) {
+				if (pidCount % 10000 == 0) {
 					ourLog.info("Bulk export job[{}] chunk[{}] has loaded {} pids", theJobId, theChunkId, pidCount);
 				}
 				pidCount++;
