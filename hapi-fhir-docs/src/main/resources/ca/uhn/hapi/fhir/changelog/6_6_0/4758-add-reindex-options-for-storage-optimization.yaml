@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4758
+backport: 6.4.5
+title: "The $reindex operation now supports two new optional parameters. _optimizeStorage_ can
+   be used to migrate data to/from inline storage mode, and `optimisticLock` can be used to
+   control whether to guard against concurrent data modification during reindexing."
