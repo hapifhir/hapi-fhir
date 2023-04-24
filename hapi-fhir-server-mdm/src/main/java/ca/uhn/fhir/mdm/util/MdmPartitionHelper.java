@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Master Data Management
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
