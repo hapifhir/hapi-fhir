@@ -16,11 +16,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       name: Checkout
-    - run: echo "${{ toJSON(github.event) }}"
-    - run: echo "${{ toJSON(github) }}"
-    - run: echo "${{ toJSON(inputs) }}"
-    - name: Print Environment Variables
-      run: env
     - name: Install poetry
       run: pipx install poetry
     - name: Setup Python
