@@ -169,7 +169,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 				ourLog.info("Executing query for bulk export job[{}] chunk[{}]: {}", theJobId, theChunkId, map.toNormalizedQueryString(myContext));
 
-				IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, null, RequestPartitionId.allPartitions());
+				IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, new SystemRequestDetails(), theParams.getPartitionIdOrAllPartitions());
 				int pidCount = 0;
 				while (resultIterator.hasNext()) {
 					if (pidCount % 10000 == 0) {

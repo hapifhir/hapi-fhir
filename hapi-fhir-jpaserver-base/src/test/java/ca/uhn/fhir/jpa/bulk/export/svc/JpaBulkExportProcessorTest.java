@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Observation;
@@ -53,6 +54,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -67,6 +69,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
 
 @ExtendWith(MockitoExtension.class)
 public class JpaBulkExportProcessorTest {
@@ -97,7 +100,7 @@ public class JpaBulkExportProcessorTest {
 		}
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 
 		}
 
@@ -250,8 +253,8 @@ public class JpaBulkExportProcessorTest {
 		try {
 			myProcessor.getResourcePidIterator(parameters);
 			fail();
-		} catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("You attempted to start a Patient Bulk Export,"));
+		} catch (InternalErrorException ex) {
+			assertThat(ex.getMessage(), containsString("You attempted to start a Patient Bulk Export,"));
 		}
 	}
 
