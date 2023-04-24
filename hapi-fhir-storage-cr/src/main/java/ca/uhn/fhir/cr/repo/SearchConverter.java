@@ -1,12 +1,5 @@
 package ca.uhn.fhir.cr.repo;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nonnull;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -26,6 +19,13 @@ import javax.annotation.Nonnull;
  * limitations under the License.
  * #L%
  */
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -48,6 +48,7 @@ public class SearchConverter {
 
 	void convertParameters(Map<String, List<IQueryParameterType>> theParameters,
 			FhirContext theFhirContext) {
+		if (theParameters == null) { return; }
 		separateParameterTypes(theParameters);
 		convertToSearchParameterMap(separatedSearchParameters);
 		convertToStringMap(separatedResultParameters, theFhirContext);
