@@ -13,6 +13,8 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -20,6 +22,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -59,6 +62,8 @@ import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -131,6 +136,9 @@ public class JpaBulkExportProcessorTest {
 	@Mock
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
+	@Spy
+	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
+
 	@InjectMocks
 	private JpaBulkExportProcessor myProcessor;
 
@@ -196,10 +204,10 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(searchBuilder);
 		// ret
 		when(searchBuilder.createQuery(
-			eq(map),
-			any(SearchRuntimeDetails.class),
 			any(),
-			eq(getPartitionIdFromParams(thePartitioned))))
+			any(),
+			any(),
+			any()))
 			.thenReturn(resultIterator);
 
 		// test
@@ -212,6 +220,12 @@ public class JpaBulkExportProcessorTest {
 		assertTrue(pidIterator.hasNext());
 		assertEquals(pid2, pidIterator.next());
 		assertFalse(pidIterator.hasNext());
+		verify(searchBuilder, times(1)).createQuery(
+			eq(map),
+			any(SearchRuntimeDetails.class),
+			nullable(RequestDetails.class),
+			eq(getPartitionIdFromParams(thePartitioned)));
+
 	}
 
 	private RequestPartitionId getPartitionIdFromParams(boolean thePartitioned) {
