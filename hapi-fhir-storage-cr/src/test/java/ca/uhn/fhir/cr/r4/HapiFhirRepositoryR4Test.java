@@ -31,14 +31,6 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 	private static final String MY_TEST_DATA =
 			"ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 
-	private RequestDetails setupRequestDetails() {
-		var requestDetails = new ServletRequestDetails();
-		requestDetails.setServletRequest(new MockHttpServletRequest());
-		requestDetails.setServer(ourRestServer);
-		requestDetails.setFhirServerBase(ourServerBase);
-		return requestDetails;
-	}
-
 	@Test
 	void crudTest() {
 		var requestDetails = setupRequestDetails();

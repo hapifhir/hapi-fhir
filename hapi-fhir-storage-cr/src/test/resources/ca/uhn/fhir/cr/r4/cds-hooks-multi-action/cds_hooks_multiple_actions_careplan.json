@@ -1,0 +1,47 @@
+{
+	"resourceType": "CarePlan",
+	"id": "CdsHooksMultipleActions-PlanDefinition-1.0.0",
+	"contained": [
+		{
+			"resourceType": "RequestGroup",
+			"id": "CdsHooksMultipleActions-PlanDefinition-1.0.0",
+			"instantiatesCanonical": [
+				"http://example.com/PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0"
+			],
+			"status": "draft",
+			"intent": "proposal",
+			"subject": {
+				"reference": "patient-CdsHooksMultipleActions"
+			},
+			"action": [
+				{
+					"title": "Summary",
+					"description": "Detail"
+				},
+				{
+					"title": "Summary 1",
+					"description": "Detail 1"
+				},
+				{
+					"title": "Child Monthly Routine Visit",
+					"description": "This action will performed every month for a patient < 5 years old. The start date with be next month after registration while the end date will be the 60th week after birth."
+				}
+			]
+		}
+	],
+	"instantiatesCanonical": [
+		"http://example.com/PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0"
+	],
+	"status": "draft",
+	"intent": "proposal",
+	"subject": {
+		"reference": "patient-CdsHooksMultipleActions"
+	},
+	"activity": [
+		{
+			"reference": {
+				"reference": "#RequestGroup/CdsHooksMultipleActions-PlanDefinition-1.0.0"
+			}
+		}
+	]
+}
