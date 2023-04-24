@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -110,7 +111,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					 * Note that we use the spring managed connection, and the expectation is that a transaction that
 					 * is managed by Spring has been started before this method is called.
 					 */
-					assert TransactionSynchronizationManager.isSynchronizationActive();
+					HapiTransactionService.requireTransaction();
 
 					Query nativeQuery = myEntityManager.createNativeQuery(sql);
 					org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
@@ -124,7 +125,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					 * These settings help to ensure that we use a search cursor
 					 * as opposed to loading all search results into memory
 					 */
-					hibernateQuery.setFetchSize(1000);
+					hibernateQuery.setFetchSize(500000);
 					hibernateQuery.setCacheable(false);
 					hibernateQuery.setCacheMode(CacheMode.IGNORE);
 					hibernateQuery.setReadOnly(true);
