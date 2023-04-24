@@ -91,7 +91,6 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
-							<forkCount>1</forkCount>
 							<excludes>
 								<exclude>**/stresstest/*</exclude>
 							</excludes>
@@ -108,7 +107,6 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
-							<forkCount>1</forkCount>
 							<runOrder>alphabetical</runOrder>
 						</configuration>
 					</plugin>

@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicR5Test.class);
@@ -55,6 +56,11 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		ourListenerRestServer.unregisterProvider(ourTestSystemProvider);
 		ourListenerRestServer.registerProvider(mySystemProvider);
 		super.after();
+	}
+
+	@Test
+	public void testSubscriptionTopicRegistryBean() {
+		assertNotNull(mySubscriptionTopicRegistry);
 	}
 
 	@Test

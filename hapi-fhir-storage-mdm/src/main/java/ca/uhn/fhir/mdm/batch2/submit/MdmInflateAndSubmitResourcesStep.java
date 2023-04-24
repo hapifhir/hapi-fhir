@@ -53,6 +53,7 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 	@Autowired
 	private IMdmChannelSubmitterSvc myMdmChannelSubmitterSvc;
+	@Autowired
 	private IIdHelperService<? extends IResourcePersistentId> myIdHelperService;
 
 	@Nonnull

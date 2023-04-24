@@ -46,6 +46,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH);
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
+		assertLinksMatchScore(1.0);
+		assertLinksMatchVector((Long) null);
 
 		IAnyResource janeGoldenResource = getGoldenResourceFromTargetResource(patient);
 		List<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janeGoldenResource);
@@ -58,6 +60,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, false);
+		assertLinksMatchScore(1.0, 2.0/3.0);
+		assertLinksMatchVector(null, 6L);
 
 		//We want to make sure the patients were linked to the same GoldenResource.
 		assertThat(patient, is(sameGoldenResourceAs(janePatient)));
@@ -94,6 +98,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH);
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
+		assertLinksMatchScore(1.0);
+		assertLinksMatchVector((Long) null);
 
 		Patient patient2 = buildPaulPatient();
 		addExternalEID(patient2, "id_5");
@@ -102,6 +108,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, true);
+		assertLinksMatchScore(1.0, 1.0);
+		assertLinksMatchVector(null, null);
 
 		assertThat(patient1, is(sameGoldenResourceAs(patient2)));
 
@@ -117,6 +125,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, true);
+		assertLinksMatchScore(1.0, 1.0);
+		assertLinksMatchVector(null, null);
 
 		assertThat(patient1, is(sameGoldenResourceAs(patient2)));
 
@@ -133,6 +143,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH);
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
+		assertLinksMatchScore(1.0);
+		assertLinksMatchVector((Long) null);
 
 		Patient patient2 = buildJanePatient();
 		addExternalEID(patient2, "eid-2");
@@ -141,6 +153,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH, POSSIBLE_DUPLICATE);
 		assertLinksCreatedNewResource(true, true, false);
 		assertLinksMatchedByEid(false, false, true);
+		assertLinksMatchScore(1.0, 1.0, null);
+		assertLinksMatchVector(null, null, null);
 
 		List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
@@ -167,6 +181,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH);
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
+		assertLinksMatchScore(1.0);
+		assertLinksMatchVector((Long) null);
 
 		Patient patient2 = buildPaulPatient();
 		addExternalEID(patient2, "eid-2");
@@ -175,6 +191,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, true);
 		assertLinksMatchedByEid(false, false);
+		assertLinksMatchScore(1.0, 1.0);
+		assertLinksMatchVector(null, null);
 
 		Patient patient3 = buildPaulPatient();
 		addExternalEID(patient3, "eid-22");
@@ -182,6 +200,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH, MATCH);
 		assertLinksCreatedNewResource(true, true, false);
 		assertLinksMatchedByEid(false, false, true);
+		assertLinksMatchScore(1.0, 1.0, 1.0);
+		assertLinksMatchVector(null, null, null);
 
 		//Now, Patient 2 and 3 are linked, and the GoldenResource has 2 eids.
 		assertThat(patient2, is(sameGoldenResourceAs(patient3)));
@@ -197,6 +217,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, POSSIBLE_MATCH, MATCH, POSSIBLE_MATCH, POSSIBLE_DUPLICATE);
 		assertLinksCreatedNewResource(true, true, false, false, false);
 		assertLinksMatchedByEid(false, true, true, true, true);
+		assertLinksMatchScore(1.0, 1.0, 1.0, 1.0, null);
+		assertLinksMatchVector(null, null, null, null, null);
 
 		assertThat(patient2, is(not(matchedToAGoldenResource())));
 		assertThat(patient2, is(possibleMatchWith(patient1)));

@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.config;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryChannelNamer;
@@ -33,12 +35,12 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.MatchingQueueSubscriberLoader;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegisteringSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -48,7 +50,7 @@ import org.springframework.context.annotation.Scope;
  * This Spring config should be imported by a system that pulls messages off of the
  * matching queue for processing, and handles delivery
  */
-@Import({SubscriptionModelConfig.class, SubscriptionTopicConfig.class})
+@Import(SubscriptionModelConfig.class)
 public class SubscriptionProcessorConfig {
 
 	@Bean
@@ -94,6 +96,11 @@ public class SubscriptionProcessorConfig {
 	@Bean
 	public SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory() {
 		return new SubscriptionDeliveryHandlerFactory();
+	}
+
+	@Bean
+	public SubscriptionMatchDeliverer subscriptionMatchDeliverer(FhirContext theFhirContext, IInterceptorBroadcaster theInterceptorBroadcaster, SubscriptionChannelRegistry theSubscriptionChannelRegistry) {
+		return new SubscriptionMatchDeliverer(theFhirContext, theInterceptorBroadcaster, theSubscriptionChannelRegistry);
 	}
 
 	@Bean
