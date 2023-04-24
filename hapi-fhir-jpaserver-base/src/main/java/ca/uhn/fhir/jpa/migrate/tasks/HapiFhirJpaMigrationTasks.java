@@ -268,7 +268,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 
 		// Postgres tuning.
-		String postgresTuningStatementsAll = ClasspathUtil.loadResource("hapi-fhir-jpaserver-base/src/main/resources/ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql");
+		String postgresTuningStatementsAll = ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql");
 		List<String> postgresTuningStatements = Arrays
 			.stream(postgresTuningStatementsAll.split("\\n"))
 			.map(org.apache.commons.lang3.StringUtils::trim)
