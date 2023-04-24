@@ -1,0 +1,5138 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Composition",
+				"id": "c17d0f3e-a703-480c-a830-fecbcbe27388",
+				"identifier": {
+					"use": "official",
+					"system": "urn:oid:2.16.840.1.113883.19",
+					"value": "2014_ClinicalSummary_2",
+					"assigner": {
+						"display": "Kareo Clinical"
+					}
+				},
+				"status": "preliminary",
+				"type": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "34133-9",
+							"display": "Summarization of Episode Note"
+						}
+					]
+				},
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/ValueSet/doc-classcodes",
+								"code": "LP173421-7",
+								"display": "Note"
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"date": "2023-03-29",
+				"author": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+						"display": "Charts Admin"
+					}
+				],
+				"title": "kareo_eLab_practice: Health Summary",
+				"attester": [
+					{
+						"mode": "legal",
+						"time": "2023-03-29T18:31:48+00:00",
+						"party": {
+							"reference": "Practitioner/eec86ff9-8e2b-453d-b1d7-051418a494e8",
+							"display": "Charts Admin"
+						}
+					},
+					{
+						"mode": "professional",
+						"time": "2023-03-29T18:31:48+00:00",
+						"party": {
+							"reference": "Practitioner/eec86ff9-8e2b-453d-b1d7-051418a494e8",
+							"display": "Charts Admin"
+						}
+					}
+				],
+				"custodian": {
+					"reference": "Organization/112f72af-3bef-4b2c-81b3-66974b4df38b",
+					"display": "kareo_eLab_practice"
+				},
+				"event": [
+					{
+						"detail": [
+							{
+								"reference": "Practitioner/eec86ff9-8e2b-453d-b1d7-051418a494e8",
+								"display": "Charts Admin"
+							}
+						]
+					}
+				],
+				"section": [
+					{
+						"title": "IMMUNIZATIONS",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "11369-6",
+									"display": "History of immunizations"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "Immunization/72f8dfbf-83d4-487d-acb6-0b62abfdd6ce",
+								"display": "Influenza (LAIV, TIV), [CVX:197]"
+							}
+						]
+					},
+					{
+						"title": "ADVERSE REACTIONS, ALERTS, ALLERGIES",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "48765-2",
+									"display": "Allergies, adverse reactions, alerts"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "AllergyIntolerance/91818b4f-afe3-4d19-8158-be57baa437f9",
+								"display": "penicillin"
+							},
+							{
+								"reference": "AllergyIntolerance/03f94b49-3218-42af-9faf-047140929571",
+								"display": "aspirin"
+							}
+						]
+					},
+					{
+						"title": "CARE TEAM",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "85847-2",
+									"display": "Patient Care team information"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "CareTeam/ecc0aba5-b070-485c-9390-5a30abbf3481",
+								"display": "Care team"
+							}
+						]
+					},
+					{
+						"title": "RESULTS",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "30954-2",
+									"display": "Relevant diagnostic tests and/or laboratory data"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "DiagnosticReport/471ee058-f91c-40f5-a9c4-32117270767f",
+								"display": "Laboratory Studies"
+							},
+							{
+								"reference": "DiagnosticReport/fae92ab1-5ab8-4d53-83d5-58a6b29c0c88",
+								"display": "Laboratory Studies"
+							},
+							{
+								"reference": "DiagnosticReport/fb945160-509a-4a93-adb6-49cefd5eaad2",
+								"display": "Laboratory Studies"
+							},
+							{
+								"reference": "DiagnosticReport/968d52c1-72de-4d72-bc36-52d643a40e5e",
+								"display": "Laboratory Studies"
+							}
+						]
+					},
+					{
+						"title": "Plan Of Care",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "18776-5",
+									"display": "Treatment plan"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "CarePlan/08d4ceb5-56e2-40ac-af29-1e3353550894"
+							}
+						]
+					},
+					{
+						"title": "SOCIAL HISTORY",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "29762-2",
+									"display": "Social history"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "Observation/270bcc8f-ef6c-448d-876b-899b8cd42d00"
+							}
+						]
+					},
+					{
+						"title": "PROBLEMS",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "11450-4",
+									"display": "Problem List"
+								}
+							]
+						},
+						"mode": "snapshot"
+					},
+					{
+						"title": "VITAL SIGNS",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "8716-3",
+									"display": "Vital Signs"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "Observation/ac8975fa-6db9-4ca9-b0e4-391f33f2dde1",
+								"display": "BMI (Body Mass Index)"
+							},
+							{
+								"reference": "Observation/808fb1f8-c8d1-4876-9cd3-29453f974b88",
+								"display": "Patient Body Weight - Measured"
+							},
+							{
+								"reference": "Observation/2277f73f-1d28-445b-a605-47c08729c59f",
+								"display": "Body Temperature"
+							},
+							{
+								"reference": "Observation/e79a3e25-d6da-44da-b221-479a798daf83",
+								"display": "Height"
+							},
+							{
+								"reference": "Observation/9b019768-62fd-497a-871a-d1a89a8f4425",
+								"display": "Respiratory Rate"
+							},
+							{
+								"reference": "Observation/2cce70af-f771-4743-9226-e4695b1fced2",
+								"display": "BP Systolic"
+							},
+							{
+								"reference": "Observation/dcae4663-682d-4c1f-a075-9fdb05c4330c",
+								"display": "BP Diastolic"
+							},
+							{
+								"reference": "Observation/bc77fc4a-6553-4454-9dae-0bbde88915f9",
+								"display": "Heart Rate"
+							},
+							{
+								"reference": "Observation/00c6acb1-6059-43cb-9ab4-3fcba48954f0",
+								"display": "BP Diastolic"
+							},
+							{
+								"reference": "Observation/fc579e80-e678-4c0c-9fdb-d0d44d43aff8",
+								"display": "Heart Rate"
+							},
+							{
+								"reference": "Observation/f0580959-de83-46fd-a1ef-ff9e50295a94",
+								"display": "Height"
+							},
+							{
+								"reference": "Observation/75920c2d-ef55-4c51-bafd-893da5c502d2",
+								"display": "BMI (Body Mass Index)"
+							},
+							{
+								"reference": "Observation/dffff1c7-7d55-4a1e-8488-7cbe2728bc61",
+								"display": "Respiratory Rate"
+							},
+							{
+								"reference": "Observation/5fa01f77-07ad-4648-a486-163d3b25db3f",
+								"display": "Patient Body Weight - Measured"
+							},
+							{
+								"reference": "Observation/905e7024-0c09-4504-9a80-5cc6af7e863d",
+								"display": "Body Temperature"
+							},
+							{
+								"reference": "Observation/17718f86-4de6-41ab-8b3d-be7198b6c1ba",
+								"display": "BP Systolic"
+							},
+							{
+								"reference": "Observation/ecdd7d45-4266-4d2a-b03b-ff1eb7977764",
+								"display": "BMI (Body Mass Index)"
+							},
+							{
+								"reference": "Observation/15b9710e-9a5a-4677-a058-f72e94bb67c5",
+								"display": "BP Systolic"
+							},
+							{
+								"reference": "Observation/f6373994-12a6-4465-86ed-49d6b509782a",
+								"display": "Body Temperature"
+							},
+							{
+								"reference": "Observation/f7548f65-f538-4716-b242-19986d076003",
+								"display": "Height"
+							},
+							{
+								"reference": "Observation/d0d4e739-e641-4cb5-8425-d693a15e86fd",
+								"display": "BP Diastolic"
+							},
+							{
+								"reference": "Observation/e60bba46-fec1-4392-9ea7-2c3e08c09425",
+								"display": "Patient Body Weight - Measured"
+							},
+							{
+								"reference": "Observation/fda63205-e2b1-4718-990f-11d56c5b3521",
+								"display": "Heart Rate"
+							},
+							{
+								"reference": "Observation/6daa25da-3269-4d5f-a9cd-fbc42ff7c3c6",
+								"display": "Respiratory Rate"
+							}
+						]
+					},
+					{
+						"title": "ENCOUNTERS",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "46240-8",
+									"display": "Encounters"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "Encounter/1f8e3ae9-388e-4761-be6e-9c9f273f5b3e",
+								"display": "Encounter_1"
+							},
+							{
+								"reference": "Encounter/1ee16fac-47df-45f5-b5fb-c4cf62e334a9",
+								"display": "Encounter_2"
+							},
+							{
+								"reference": "Encounter/f0453de0-564d-4072-abb3-df1bcc48da32",
+								"display": "Encounter_0"
+							}
+						]
+					},
+					{
+						"title": "ASSESSMENTS",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "51848-0",
+									"display": "Assessments"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "ClinicalImpression/194c07a6-1476-44f6-884f-441e0d60cdcb",
+								"display": "Assessments"
+							}
+						]
+					},
+					{
+						"title": "MEDICATIONS",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "10160-0",
+									"display": "History of medication use"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "MedicationRequest/af74f44d-505d-48a4-ac02-b403d13b0844",
+								"display": "atorvastatin 20 mg tablet"
+							}
+						]
+					},
+					{
+						"title": "PROCEDURES",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "47519-4",
+									"display": "History of Procedures"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "Procedure/9b84b604-9a0d-4a09-b592-bfba7ae12020"
+							}
+						]
+					},
+					{
+						"title": "CLINICAL NOTES",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "34109-9",
+									"display": "Note"
+								}
+							]
+						},
+						"mode": "snapshot",
+						"entry": [
+							{
+								"reference": "DocumentReference/84b5b4b3-bcbd-4042-8372-8888b7d30f06",
+								"display": "Progress Note"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Composition",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.19|2014_ClinicalSummary_2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+						"extension": [
+							{
+								"url": "text",
+								"valueString": "Native Hawaiian or Other Pacific Islander"
+							},
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2076-8",
+									"display": "Native Hawaiian or Other Pacific Islander"
+								}
+							}
+						]
+					},
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+										"valueCoding": {
+											"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+											"code": "unknown",
+											"display": "Unknown"
+										}
+									}
+								]
+							}
+						]
+					}
+				],
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "122931486574841021738296474082960373424_2"
+					}
+				],
+				"name": [
+					{
+						"use": "usual",
+						"family": "DOE2",
+						"given": [
+							"JANE2"
+						]
+					}
+				],
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "+1(321)-654-9879",
+						"use": "mobile"
+					}
+				],
+				"gender": "female",
+				"birthDate": "1999-02-02",
+				"managingOrganization": {
+					"reference": "Organization/112f72af-3bef-4b2c-81b3-66974b4df38b",
+					"display": "kareo_eLab_practice"
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "Patient",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|122931486574841021738296474082960373424_2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Organization",
+				"id": "112f72af-3bef-4b2c-81b3-66974b4df38b",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "98519764390292672615955311778782861677"
+					}
+				],
+				"active": true,
+				"name": "kareo_eLab_practice",
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "+1(123)-123-1234",
+						"use": "work"
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"3353 Michelson Dr"
+						],
+						"city": "Irvine",
+						"state": "CA",
+						"postalCode": "926127622"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Organization",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|98519764390292672615955311778782861677"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "140404067178534074184130408374688950342"
+					}
+				],
+				"name": [
+					{
+						"family": "Admin",
+						"given": [
+							"Charts"
+						]
+					}
+				],
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "+1(123)-123-1234",
+						"use": "work"
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"3353 Michelson Dr"
+						],
+						"city": "Irvine",
+						"state": "CA",
+						"postalCode": "926127622"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Practitioner",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|140404067178534074184130408374688950342"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "PractitionerRole",
+				"id": "d6e9a7d2-9a0a-4d58-8af3-dec0d28a8ea9",
+				"practitioner": {
+					"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+					"display": "Charts Admin"
+				},
+				"organization": {
+					"reference": "Organization/112f72af-3bef-4b2c-81b3-66974b4df38b",
+					"display": "kareo_eLab_practice"
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "PractitionerRole"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "eec86ff9-8e2b-453d-b1d7-051418a494e8",
+				"identifier": [
+					{
+						"use": "official",
+						"value": "http://hl7.org/fhir/sid/us-npi"
+					}
+				],
+				"name": [
+					{
+						"family": "Admin",
+						"given": [
+							"Charts"
+						]
+					}
+				],
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "+1(123)-123-1234",
+						"use": "work"
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"3353 Michelson Dr"
+						],
+						"city": "Irvine",
+						"state": "CA",
+						"postalCode": "926127622"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Practitioner",
+				"ifNoneExist": "identifier=http://hl7.org/fhir/sid/us-npi"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Immunization",
+				"id": "72f8dfbf-83d4-487d-acb6-0b62abfdd6ce",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "95933575418911479707449382398516957944"
+					}
+				],
+				"status": "completed",
+				"vaccineCode": {
+					"coding": [
+						{
+							"system": "http://www2a.cdc.gov/vaccines/iis/iisstandards/vaccines.asp?rpt=cvx",
+							"code": "197",
+							"display": "Fluzone High-Dose Quad 2022-2023 (PF) 240 mcg/0.7 mL IM syringe"
+						},
+						{
+							"system": "http://www2a.cdc.gov/vaccines/iis/iisstandards/vaccines.asp?rpt=cvx",
+							"code": "197",
+							"display": "Fluzone HighDose Quad 22-23(65yr up) PF"
+						}
+					],
+					"text": "Influenza (LAIV, TIV), [CVX:197]"
+				},
+				"patient": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"occurrenceDateTime": "2023-03-28",
+				"primarySource": true,
+				"manufacturer": {
+					"reference": "Organization/f4d7936d-64f7-490e-b1be-36cc82aeddbf",
+					"display": "Sanofi-Pasteur"
+				},
+				"route": {
+					"coding": [
+						{
+							"system": "http://www.nlm.nih.gov/research/umls/nci",
+							"code": "C28161",
+							"display": "Intramuscular Route of Administration"
+						}
+					]
+				},
+				"doseQuantity": {
+					"value": 500,
+					"unit": "Milliliters",
+					"system": "http://unitsofmeasure.org/ucum.html"
+				},
+				"performer": [
+					{
+						"function": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0443",
+									"code": "AP",
+									"display": "Administering Provider"
+								}
+							]
+						},
+						"actor": {
+							"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+							"display": "Charts Admin"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Immunization",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|95933575418911479707449382398516957944"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Organization",
+				"id": "f4d7936d-64f7-490e-b1be-36cc82aeddbf",
+				"active": true,
+				"name": "Sanofi-Pasteur"
+			},
+			"request": {
+				"method": "POST",
+				"url": "Organization",
+				"ifNoneExist": "Organization?name:exact=Sanofi-Pasteur"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "AllergyIntolerance",
+				"id": "91818b4f-afe3-4d19-8158-be57baa437f9",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "277788191146731937514236403940997396651"
+					}
+				],
+				"clinicalStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+							"code": "active",
+							"display": "Active"
+						}
+					]
+				},
+				"verificationStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+							"code": "confirmed",
+							"display": "Confirmed"
+						}
+					]
+				},
+				"type": "intolerance",
+				"category": [
+					"medication"
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+							"code": "7986",
+							"display": "penicillin"
+						}
+					],
+					"text": "penicillin"
+				},
+				"patient": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"recorder": {
+					"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+					"display": "Charts Admin"
+				},
+				"reaction": [
+					{
+						"manifestation": [
+							{
+								"coding": [
+									{
+										"system": "http://snomed.info/sct",
+										"code": "39579001",
+										"display": "anaphylaxis"
+									}
+								]
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "AllergyIntolerance",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|277788191146731937514236403940997396651"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "AllergyIntolerance",
+				"id": "03f94b49-3218-42af-9faf-047140929571",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "45328892856990878507282817854849838185"
+					}
+				],
+				"clinicalStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+							"code": "active",
+							"display": "Active"
+						}
+					]
+				},
+				"verificationStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+							"code": "confirmed",
+							"display": "Confirmed"
+						}
+					]
+				},
+				"type": "intolerance",
+				"category": [
+					"medication"
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+							"code": "1191",
+							"display": "aspirin"
+						}
+					],
+					"text": "aspirin"
+				},
+				"patient": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"recorder": {
+					"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+					"display": "Charts Admin"
+				},
+				"reaction": [
+					{
+						"manifestation": [
+							{
+								"coding": [
+									{
+										"system": "http://snomed.info/sct",
+										"code": "369546013",
+										"display": "hives"
+									}
+								]
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "AllergyIntolerance",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|45328892856990878507282817854849838185"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "CareTeam",
+				"id": "ecc0aba5-b070-485c-9390-5a30abbf3481",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "289473234410502056436817417228621662860"
+					}
+				],
+				"status": "inactive",
+				"name": "Care team",
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"participant": [
+					{
+						"member": {
+							"reference": "Practitioner/eec86ff9-8e2b-453d-b1d7-051418a494e8",
+							"display": "Charts Admin"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "CareTeam",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|289473234410502056436817417228621662860"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "DiagnosticReport",
+				"id": "471ee058-f91c-40f5-a9c4-32117270767f",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "338107633632902900302849719445707160373"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+								"code": "LAB",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "26436-6",
+							"display": "Laboratory Studies"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T00:00:00.000-04:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+						"display": "Charts Admin"
+					}
+				],
+				"result": [
+					{
+						"reference": "Observation/ddfe8c37-cc13-439d-866f-62bd83382c78",
+						"display": "result_13"
+					},
+					{
+						"reference": "Observation/82d75d8c-8d09-44c0-811c-82b89f0ddd17",
+						"display": "result_9"
+					},
+					{
+						"reference": "Observation/6dc5bed0-d5cc-4638-a14f-2b8c92e4ad1e",
+						"display": "result_8"
+					},
+					{
+						"reference": "Observation/09ab8ab9-e40b-4534-92af-e06faa3aabc7",
+						"display": "result_11"
+					},
+					{
+						"reference": "Observation/5b2e0d12-c505-4eb4-a284-e8037d88e77e",
+						"display": "result_12"
+					},
+					{
+						"reference": "Observation/3b5cac84-df01-4508-9454-9ddacf00a8f6",
+						"display": "result_10"
+					},
+					{
+						"reference": "Observation/6d23bec3-f83f-42fb-bb7d-cb769d7b07e6",
+						"display": "result_7"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "DiagnosticReport",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|338107633632902900302849719445707160373"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "ddfe8c37-cc13-439d-866f-62bd83382c78",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "104785591053368342317074285464986571043"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "72884-1",
+							"display": "CBC (INCLUDES DIFF/PLT) WITH SMEAR REVIEW Result 2"
+						}
+					],
+					"text": "result_13"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:15:53+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 17,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|104785591053368342317074285464986571043"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "82d75d8c-8d09-44c0-811c-82b89f0ddd17",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "305036582220607716925626005803926726566"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "60073-6",
+							"display": "BUPRENORPHINE AND NALOXONE LC/MS/MS Result 3"
+						}
+					],
+					"text": "result_9"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:10:53+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 77,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|305036582220607716925626005803926726566"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "6dc5bed0-d5cc-4638-a14f-2b8c92e4ad1e",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "241120461663684375595188447829492346074"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "63495-0",
+							"display": "BUPRENORPHINE AND NALOXONE LC/MS/MS Result 2"
+						}
+					],
+					"text": "result_8"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:10:53+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 71,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|241120461663684375595188447829492346074"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "09ab8ab9-e40b-4534-92af-e06faa3aabc7",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "101973922248202873207815631168200227460"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "45435-1",
+							"display": "BUPRENORPHINE AND NALOXONE LC/MS/MS Result 4"
+						}
+					],
+					"text": "result_11"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:10:53+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 69,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|101973922248202873207815631168200227460"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "5b2e0d12-c505-4eb4-a284-e8037d88e77e",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "275021519294799125126676924028467584719"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "17267-2",
+							"display": "CBC (INCLUDES DIFF/PLT) WITH SMEAR REVIEW Result 1"
+						}
+					],
+					"text": "result_12"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:15:53+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 38,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|275021519294799125126676924028467584719"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "3b5cac84-df01-4508-9454-9ddacf00a8f6",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "192557328463788683537465418744240020301"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "93544-2",
+							"display": "BUPRENORPHINE AND NALOXONE LC/MS/MS Result 1"
+						}
+					],
+					"text": "result_10"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:10:53+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 95,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|192557328463788683537465418744240020301"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "6d23bec3-f83f-42fb-bb7d-cb769d7b07e6",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "154251704608054575888923120647840586876"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "63264-1",
+							"display": "CBC (INCLUDES DIFF/PLT) WITH SMEAR REVIEW Result 3"
+						}
+					],
+					"text": "result_7"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:15:53+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 71,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|154251704608054575888923120647840586876"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "DiagnosticReport",
+				"id": "fae92ab1-5ab8-4d53-83d5-58a6b29c0c88",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "335595522498437967033959359201469171322"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+								"code": "LAB",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "26436-6",
+							"display": "Laboratory Studies"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-28",
+					"end": "2022-09-28"
+				},
+				"issued": "2022-09-28T00:00:00.000-04:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+						"display": "Charts Admin"
+					}
+				],
+				"result": [
+					{
+						"reference": "Observation/a6e302b3-924a-4828-9739-6212766c377c",
+						"display": "result_5"
+					},
+					{
+						"reference": "Observation/5c73d9a9-4ce5-41bd-a2b0-79a4dac8979c",
+						"display": "result_6"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "DiagnosticReport",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|335595522498437967033959359201469171322"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "a6e302b3-924a-4828-9739-6212766c377c",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "74851979582210087445736437344575512405"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "287-5",
+							"display": "BUPRENORPHINE AND METABOLITE SCREEN SP Result 1"
+						}
+					],
+					"text": "result_5"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-28",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T19:42:37+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 72,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|74851979582210087445736437344575512405"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "5c73d9a9-4ce5-41bd-a2b0-79a4dac8979c",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "144637624218374037834221224383484461575"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "37573-0",
+							"display": "BUPRENORPHINE AND NALOXONE LC/MS/MS Result 1"
+						}
+					],
+					"text": "result_6"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-28",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T19:42:37+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 16,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|144637624218374037834221224383484461575"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "DiagnosticReport",
+				"id": "fb945160-509a-4a93-adb6-49cefd5eaad2",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "52666728728671057975818826806137826000"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+								"code": "LAB",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "26436-6",
+							"display": "Laboratory Studies"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-07-13",
+					"end": "2022-07-13"
+				},
+				"issued": "2022-07-13T00:00:00.000-04:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+						"display": "Charts Admin"
+					}
+				],
+				"result": [
+					{
+						"reference": "Observation/47358c31-b67a-45df-a78b-5fbd5a553cf8",
+						"display": "result_15"
+					},
+					{
+						"reference": "Observation/c8c7b931-962c-4a1e-84f1-b4692537a76c",
+						"display": "result_18"
+					},
+					{
+						"reference": "Observation/ea151388-1c59-419d-8be4-604ef3012b30",
+						"display": "result_14"
+					},
+					{
+						"reference": "Observation/d9113409-396d-4a30-bf66-72d43fd85f3d",
+						"display": "result_17"
+					},
+					{
+						"reference": "Observation/232f9b7c-e08b-4749-a3f2-e6581a1f20e5",
+						"display": "result_16"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "DiagnosticReport",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|52666728728671057975818826806137826000"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "47358c31-b67a-45df-a78b-5fbd5a553cf8",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "287165239481384177221540237405127661694"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "27249-8",
+							"display": "BUPRENORPHINE AND NALOXONE LC/MS/MS Result 4"
+						}
+					],
+					"text": "result_15"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-07-13",
+					"end": "2022-07-13"
+				},
+				"issued": "2022-07-13T14:17:09+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 70,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|287165239481384177221540237405127661694"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "c8c7b931-962c-4a1e-84f1-b4692537a76c",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "11507121173499593635483110528036003638"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "38825-0",
+							"display": "CBFB/MYH11 INV (16) QN. REAL-TIME PCR Result 1"
+						}
+					],
+					"text": "result_18"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-07-13",
+					"end": "2022-07-13"
+				},
+				"issued": "2022-07-13T14:23:09+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 58,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|11507121173499593635483110528036003638"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "ea151388-1c59-419d-8be4-604ef3012b30",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "166656971904315338535535494182426767218"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "40756-4",
+							"display": "BUPRENORPHINE AND NALOXONE LC/MS/MS Result 3"
+						}
+					],
+					"text": "result_14"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-07-13",
+					"end": "2022-07-13"
+				},
+				"issued": "2022-07-13T14:17:09+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 91,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|166656971904315338535535494182426767218"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "d9113409-396d-4a30-bf66-72d43fd85f3d",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "219577118098975741703294020176094908009"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "77263-1",
+							"display": "BUPRENORPHINE AND NALOXONE LC/MS/MS Result 2"
+						}
+					],
+					"text": "result_17"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-07-13",
+					"end": "2022-07-13"
+				},
+				"issued": "2022-07-13T14:17:09+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 19,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|219577118098975741703294020176094908009"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "232f9b7c-e08b-4749-a3f2-e6581a1f20e5",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "41253489414268255572375423871179268429"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "20659-2",
+							"display": "BUPRENORPHINE AND NALOXONE LC/MS/MS Result 1"
+						}
+					],
+					"text": "result_16"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-07-13",
+					"end": "2022-07-13"
+				},
+				"issued": "2022-07-13T14:17:09+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 59,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|41253489414268255572375423871179268429"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "DiagnosticReport",
+				"id": "968d52c1-72de-4d72-bc36-52d643a40e5e",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "237819490015444825428128029761987291697"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+								"code": "LAB",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "26436-6",
+							"display": "Laboratory Studies"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T00:00:00.000-04:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+						"display": "Charts Admin"
+					}
+				],
+				"result": [
+					{
+						"reference": "Observation/e37fb304-de21-46ea-b861-b666379517ce",
+						"display": "result_4"
+					},
+					{
+						"reference": "Observation/ffc4d9b2-7d3e-40f1-b8d1-6bc599f1684b",
+						"display": "result_3"
+					},
+					{
+						"reference": "Observation/50410eb8-ca77-4960-a2e2-d733a4a8ae7a",
+						"display": "result_1"
+					},
+					{
+						"reference": "Observation/1b90fdb5-f67a-4d82-95f3-89cfcc198d15",
+						"display": "result_0"
+					},
+					{
+						"reference": "Observation/b058ba67-5c7d-4691-8891-799e5f929de7",
+						"display": "result_2"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "DiagnosticReport",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|237819490015444825428128029761987291697"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "e37fb304-de21-46ea-b861-b666379517ce",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "318180485189243857886403666951274998685"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "36078-1",
+							"display": "BUPRENORPHINE AND METABOLITE SCREEN SP Result 1"
+						}
+					],
+					"text": "result_4"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:16:45+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 27,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|318180485189243857886403666951274998685"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "ffc4d9b2-7d3e-40f1-b8d1-6bc599f1684b",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "332176341949901235432423281570007896355"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "81025-4",
+							"display": "BUPRENORPHINE AND METABOLITE SCREEN SP Result 2"
+						}
+					],
+					"text": "result_3"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:16:45+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 24,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|332176341949901235432423281570007896355"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "50410eb8-ca77-4960-a2e2-d733a4a8ae7a",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "110329337778561336475796464854552962887"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "31118-8",
+							"display": "BUPRENORPHINE AND METABOLITE SCREEN SP Result 3"
+						}
+					],
+					"text": "result_1"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:16:45+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 19,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|110329337778561336475796464854552962887"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "1b90fdb5-f67a-4d82-95f3-89cfcc198d15",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "246028501732276717491026723180170135109"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "63613-0",
+							"display": "BUPRENORPHINE AND METABOLITE SCREEN SP Result 4"
+						}
+					],
+					"text": "result_0"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:16:45+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 98,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|246028501732276717491026723180170135109"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "b058ba67-5c7d-4691-8891-799e5f929de7",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "47460827406143490354424003488209408331"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "99001-0",
+							"display": "BUPRENORPHINE AND NALOXONE LC/MS/MS Result 1"
+						}
+					],
+					"text": "result_2"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-09-27",
+					"end": "2022-09-27"
+				},
+				"issued": "2022-09-27T17:16:45+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 41,
+					"unit": "mg/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "mg/dL"
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 1,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						},
+						"high": {
+							"value": 100,
+							"unit": "mg/dL",
+							"system": "http://unitsofmeasure.org/ucum.html"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|47460827406143490354424003488209408331"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "CarePlan",
+				"id": "08d4ceb5-56e2-40ac-af29-1e3353550894",
+				"text": {
+					"status": "additional",
+					"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">                        <table border=\"1\" width=\"100%\">                            <thead>                                <tr>                                    <th>Problem</th>                                    <th>Care Plan</th>                                </tr>                            </thead>                            <tbody>                                <tr>                                    <td></td>                                    <td></td>                                </tr>                            </tbody>                        </table>                    </div>"
+				},
+				"status": "active",
+				"intent": "plan",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/us/core/CodeSystem/careplan-category",
+								"code": "assess-plan"
+							}
+						]
+					}
+				],
+				"title": "Plan Of Care",
+				"description": "<div>                        <table border=\"1\" width=\"100%\">                            <thead>                                <tr>                                    <th>Problem</th>                                    <th>Care Plan</th>                                </tr>                            </thead>                            <tbody>                                <tr>                                    <td></td>                                    <td></td>                                </tr>                            </tbody>                        </table>                    </div>",
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "CarePlan"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "270bcc8f-ef6c-448d-876b-899b8cd42d00",
+				"status": "final",
+				"code": {
+					"coding": [
+						{
+							"system": "urn:oid:2.16.840.1.113883.5.4",
+							"code": "ASSERTION"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"valueCodeableConcept": {
+					"coding": [
+						{
+							"system": "http://snomed.info/sct",
+							"code": "266927001",
+							"display": "Unknown if ever smoked"
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "ac8975fa-6db9-4ca9-b0e4-391f33f2dde1",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "74854465989133552601650587978511598680"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "39156-5",
+							"display": "BMI (Body Mass Index)"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:24:40+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 25.085835,
+					"unit": "kg/m2",
+					"system": "http://unitsofmeasure.org",
+					"code": "kg/m2"
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|74854465989133552601650587978511598680"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "808fb1f8-c8d1-4876-9cd3-29453f974b88",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "127485895822103776617558977517652949815"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "29463-7",
+							"display": "Patient Body Weight - Measured"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:24:40+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 68.37,
+					"unit": "kg",
+					"system": "http://unitsofmeasure.org",
+					"code": "kg"
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|127485895822103776617558977517652949815"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "2277f73f-1d28-445b-a605-47c08729c59f",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8310-5",
+							"display": "Body Temperature"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:24:40+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "e79a3e25-d6da-44da-b221-479a798daf83",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "219896733944830814041230730071683543708"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8302-2",
+							"display": "Height"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:24:40+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 165.1,
+					"unit": "cm",
+					"system": "http://unitsofmeasure.org",
+					"code": "cm"
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|219896733944830814041230730071683543708"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "9b019768-62fd-497a-871a-d1a89a8f4425",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "9279-1",
+							"display": "Respiratory Rate"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:24:40+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "2cce70af-f771-4743-9226-e4695b1fced2",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8480-6",
+							"display": "BP Systolic"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:24:40+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "dcae4663-682d-4c1f-a075-9fdb05c4330c",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8462-4",
+							"display": "BP Diastolic"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:24:40+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "bc77fc4a-6553-4454-9dae-0bbde88915f9",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8867-4",
+							"display": "Heart Rate"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:24:40+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "00c6acb1-6059-43cb-9ab4-3fcba48954f0",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "17839043761419513247689672526993578395"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8462-4",
+							"display": "BP Diastolic"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:02:00+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 80,
+					"unit": "mm[Hg]",
+					"system": "http://unitsofmeasure.org",
+					"code": "mm[Hg]"
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|17839043761419513247689672526993578395"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "fc579e80-e678-4c0c-9fdb-d0d44d43aff8",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8867-4",
+							"display": "Heart Rate"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:02:00+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "f0580959-de83-46fd-a1ef-ff9e50295a94",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8302-2",
+							"display": "Height"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:02:00+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "75920c2d-ef55-4c51-bafd-893da5c502d2",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "39156-5",
+							"display": "BMI (Body Mass Index)"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:02:00+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "dffff1c7-7d55-4a1e-8488-7cbe2728bc61",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "9279-1",
+							"display": "Respiratory Rate"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:02:00+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "5fa01f77-07ad-4648-a486-163d3b25db3f",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "182904345720271899332531616484296375058"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "29463-7",
+							"display": "Patient Body Weight - Measured"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:02:00+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 68.17,
+					"unit": "kg",
+					"system": "http://unitsofmeasure.org",
+					"code": "kg"
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|182904345720271899332531616484296375058"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "905e7024-0c09-4504-9a80-5cc6af7e863d",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8310-5",
+							"display": "Body Temperature"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:02:00+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "17718f86-4de6-41ab-8b3d-be7198b6c1ba",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "225063356427146325875635102644367052724"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8480-6",
+							"display": "BP Systolic"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:02:00+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 160,
+					"unit": "mm[Hg]",
+					"system": "http://unitsofmeasure.org",
+					"code": "mm[Hg]"
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|225063356427146325875635102644367052724"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "ecdd7d45-4266-4d2a-b03b-ff1eb7977764",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "179040174127344187303876946117935917350"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "39156-5",
+							"display": "BMI (Body Mass Index)"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:26:33+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 23.600737,
+					"unit": "kg/m2",
+					"system": "http://unitsofmeasure.org",
+					"code": "kg/m2"
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|179040174127344187303876946117935917350"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "15b9710e-9a5a-4677-a058-f72e94bb67c5",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8480-6",
+							"display": "BP Systolic"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:26:33+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "f6373994-12a6-4465-86ed-49d6b509782a",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8310-5",
+							"display": "Body Temperature"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:26:33+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "f7548f65-f538-4716-b242-19986d076003",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "267751561033653991424769137812492104212"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8302-2",
+							"display": "Height"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:26:33+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 170.18,
+					"unit": "cm",
+					"system": "http://unitsofmeasure.org",
+					"code": "cm"
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|267751561033653991424769137812492104212"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "d0d4e739-e641-4cb5-8425-d693a15e86fd",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8462-4",
+							"display": "BP Diastolic"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:26:33+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "e60bba46-fec1-4392-9ea7-2c3e08c09425",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "79073441567949229859502576517960210110"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "29463-7",
+							"display": "Patient Body Weight - Measured"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:26:33+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"valueQuantity": {
+					"value": 68.34,
+					"unit": "kg",
+					"system": "http://unitsofmeasure.org",
+					"code": "kg"
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|79073441567949229859502576517960210110"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "fda63205-e2b1-4718-990f-11d56c5b3521",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8867-4",
+							"display": "Heart Rate"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:26:33+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "6daa25da-3269-4d5f-a9cd-fbc42ff7c3c6",
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "9279-1",
+							"display": "Respiratory Rate"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"effectivePeriod": {
+					"start": "2022-10-17"
+				},
+				"issued": "2022-10-17T23:26:33+00:00",
+				"performer": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7"
+					}
+				],
+				"dataAbsentReason": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+							"code": "error",
+							"display": "Error"
+						}
+					]
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "N"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Observation"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Encounter",
+				"id": "1f8e3ae9-388e-4761-be6e-9c9f273f5b3e",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "320110526456683056936182883576195667553"
+					}
+				],
+				"status": "finished",
+				"class": {
+					"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+					"code": "AMB",
+					"display": "ambulatory"
+				},
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "urn:oid:2.16.840.1.113883.5.4",
+								"code": "AMB",
+								"display": "Ambulatory"
+							}
+						],
+						"text": "Encounter_1"
+					}
+				],
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"participant": [
+					{
+						"type": [
+							{
+								"coding": [
+									{
+										"system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+										"code": "PART",
+										"display": "Participation"
+									}
+								]
+							}
+						],
+						"period": {
+							"start": "2022-10-17",
+							"end": "2022-12-15"
+						},
+						"individual": {
+							"reference": "Practitioner/1a90d62b-ec2e-47d5-9d35-1ac2eba8eac9",
+							"display": "Elab Admin"
+						}
+					}
+				],
+				"period": {
+					"start": "2022-10-17",
+					"end": "2022-12-15"
+				},
+				"location": [
+					{
+						"location": {
+							"reference": "Location/b7a193bc-ba47-40e6-aaaf-5fa9846ba216",
+							"display": "kareo_eLab_practice"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Encounter",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|320110526456683056936182883576195667553"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "1a90d62b-ec2e-47d5-9d35-1ac2eba8eac9",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "1234567893"
+					}
+				],
+				"name": [
+					{
+						"family": "Admin",
+						"given": [
+							"Elab"
+						]
+					}
+				],
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "+1(123)-123-1234",
+						"use": "work"
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"3353 Michelson Dr"
+						],
+						"city": "Irvine",
+						"state": "CA",
+						"postalCode": "926127622"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Practitioner",
+				"ifNoneExist": "identifier=http://hl7.org/fhir/sid/us-npi|1234567893"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Location",
+				"id": "b7a193bc-ba47-40e6-aaaf-5fa9846ba216",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "98519764390292672615955311778782861677"
+					}
+				],
+				"name": "kareo_eLab_practice",
+				"telecom": [
+					{
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+								"valueCoding": {
+									"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+									"code": "unknown",
+									"display": "Unknown"
+								}
+							}
+						]
+					}
+				],
+				"address": {
+					"line": [
+						"3353 Michelson Dr"
+					],
+					"city": "Irvine",
+					"state": "CA",
+					"postalCode": "926127622"
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "Location",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|98519764390292672615955311778782861677"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Encounter",
+				"id": "1ee16fac-47df-45f5-b5fb-c4cf62e334a9",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "39597296538209845244825365647102481406"
+					}
+				],
+				"status": "finished",
+				"class": {
+					"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+					"code": "AMB",
+					"display": "ambulatory"
+				},
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "urn:oid:2.16.840.1.113883.5.4",
+								"code": "AMB",
+								"display": "Ambulatory"
+							}
+						],
+						"text": "Encounter_2"
+					}
+				],
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"participant": [
+					{
+						"type": [
+							{
+								"coding": [
+									{
+										"system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+										"code": "PART",
+										"display": "Participation"
+									}
+								]
+							}
+						],
+						"period": {
+							"start": "2020-06-17",
+							"end": "2022-11-15"
+						},
+						"individual": {
+							"reference": "Practitioner/eec86ff9-8e2b-453d-b1d7-051418a494e8",
+							"display": "Charts Admin"
+						}
+					}
+				],
+				"period": {
+					"start": "2020-06-17",
+					"end": "2022-11-15"
+				},
+				"location": [
+					{
+						"location": {
+							"reference": "Location/b7a193bc-ba47-40e6-aaaf-5fa9846ba216",
+							"display": "kareo_eLab_practice"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Encounter",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|39597296538209845244825365647102481406"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Encounter",
+				"id": "f0453de0-564d-4072-abb3-df1bcc48da32",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "305495690599719614815279385114384347568"
+					}
+				],
+				"status": "finished",
+				"class": {
+					"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+					"code": "AMB",
+					"display": "ambulatory"
+				},
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "urn:oid:2.16.840.1.113883.5.4",
+								"code": "AMB",
+								"display": "Ambulatory"
+							}
+						],
+						"text": "Encounter_0"
+					}
+				],
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"participant": [
+					{
+						"type": [
+							{
+								"coding": [
+									{
+										"system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+										"code": "PART",
+										"display": "Participation"
+									}
+								]
+							}
+						],
+						"period": {
+							"start": "2022-10-28",
+							"end": "2022-12-15"
+						},
+						"individual": {
+							"reference": "Practitioner/1a90d62b-ec2e-47d5-9d35-1ac2eba8eac9",
+							"display": "Elab Admin"
+						}
+					}
+				],
+				"period": {
+					"start": "2022-10-28",
+					"end": "2022-12-15"
+				},
+				"location": [
+					{
+						"location": {
+							"reference": "Location/b7a193bc-ba47-40e6-aaaf-5fa9846ba216",
+							"display": "kareo_eLab_practice"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Encounter",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|305495690599719614815279385114384347568"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ClinicalImpression",
+				"id": "194c07a6-1476-44f6-884f-441e0d60cdcb",
+				"status": "completed",
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "51848-0",
+							"display": "Assessments"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "ClinicalImpression"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "MedicationRequest",
+				"id": "af74f44d-505d-48a4-ac02-b403d13b0844",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "241046894200699238238164884474319238781"
+					}
+				],
+				"status": "active",
+				"intent": "order",
+				"reportedBoolean": false,
+				"medicationReference": {
+					"reference": "Medication/c5a46825-c08d-42e4-beaa-1881bc43895e",
+					"display": "atorvastatin 20 mg tablet"
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"encounter": {
+					"reference": "Encounter/f0453de0-564d-4072-abb3-df1bcc48da32",
+					"display": "Encounter_0"
+				},
+				"authoredOn": "2020-06-18T17:53:57-04:00",
+				"requester": {
+					"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+					"display": "Charts Admin"
+				},
+				"dosageInstruction": [
+					{
+						"text": "dfgsdfg",
+						"patientInstruction": "dfgsdfg"
+					}
+				],
+				"dispenseRequest": {
+					"validityPeriod": {
+						"start": "2020-06-18"
+					},
+					"quantity": {
+						"value": 10,
+						"unit": "1"
+					}
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "MedicationRequest",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|241046894200699238238164884474319238781"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Medication",
+				"id": "c5a46825-c08d-42e4-beaa-1881bc43895e",
+				"code": {
+					"coding": [
+						{
+							"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+							"code": "617310",
+							"display": "atorvastatin 20 mg tablet"
+						},
+						{
+							"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+							"code": "617310",
+							"display": "atorvastatin 20 mg tablet"
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "Medication",
+				"ifNoneExist": "code=http://www.nlm.nih.gov/research/umls/rxnorm|617310&http://www.nlm.nih.gov/research/umls/rxnorm|617310"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Procedure",
+				"id": "9b84b604-9a0d-4a09-b592-bfba7ae12020",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.3208.101.10",
+						"value": "20130607114600-ProcedureActivity"
+					}
+				],
+				"status": "completed",
+				"code": {
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+							"valueCoding": {
+								"system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+								"code": "error",
+								"display": "Error"
+							}
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "Procedure",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.3208.101.10|20130607114600-ProcedureActivity"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "DocumentReference",
+				"id": "84b5b4b3-bcbd-4042-8372-8888b7d30f06",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "urn:oid:2.16.840.1.113883.3.7220",
+						"value": "119226107999314380000857661656667576515"
+					}
+				],
+				"status": "current",
+				"docStatus": "final",
+				"type": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "11506-3",
+							"display": "Progress Note"
+						}
+					]
+				},
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/us/core/CodeSystem/us-core-documentreference-category",
+								"code": "clinical-note"
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+					"display": "JANE2 DOE2"
+				},
+				"date": "2023-04-12T11:18:43.000-04:00",
+				"author": [
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+						"display": "Charts Admin"
+					}
+				],
+				"custodian": {
+					"reference": "Organization/112f72af-3bef-4b2c-81b3-66974b4df38b",
+					"display": "kareo_eLab_practice"
+				},
+				"content": [
+					{
+						"attachment": {
+							"contentType": "text/plain",
+							"data": "Q0M6IAoKU3ViamVjdGl2ZTogCgpNZWRpY2F0aW9uczogCgpBbGxlcmdpZXM6IAoKTWVudGFsL0Z1bmN0aW9uYWw6IAoKVml0YWxzOg==",
+							"url": "DocumentReference/84b5b4b3-bcbd-4042-8372-8888b7d30f06",
+							"creation": "2022-10-17T19:11:52-04:00"
+						},
+						"format": {
+							"system": "http://ihe.net/fhir/ValueSet/IHE.FormatCode.codesystem",
+							"code": "urn:ihe:iti:xds:2017:mimeTypeSufficient"
+						}
+					}
+				],
+				"context": {
+					"encounter": [
+						{
+							"reference": "Encounter/1f8e3ae9-388e-4761-be6e-9c9f273f5b3e",
+							"display": "Progress Note"
+						}
+					],
+					"period": {
+						"start": "2022-12-15"
+					}
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "DocumentReference",
+				"ifNoneExist": "identifier=urn:oid:2.16.840.1.113883.3.7220|119226107999314380000857661656667576515"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "DocumentReference",
+				"id": "e0ef31aa-85a7-472e-85bb-56bfdca0c9f3",
+				"status": "current",
+				"type": {
+					"coding": [
+						{
+							"system": "2.16.840.1.113883.6.1",
+							"code": "34133-9",
+							"display": "Summarization of Episode Note"
+						}
+					]
+				},
+				"date": "2023-04-12T11:18:43.010-04:00",
+				"content": [
+					{
+						"attachment": {
+							"contentType": "text/plain",
+							"data": "test",
+							"hash": "MtNjXnJ2usuJFqrPRrSDQoF3qrE="
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "DocumentReference"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Provenance",
+				"id": "5c72eeb3-8e98-4196-bb98-34ab6584e3ed",
+				"target": [
+					{
+						"reference": "Composition/c17d0f3e-a703-480c-a830-fecbcbe27388",
+						"display": "Summarization of Episode Note"
+					},
+					{
+						"reference": "Patient/2603bb78-377d-4e4a-ad05-fd8db0c2d11d",
+						"display": "JANE2 DOE2"
+					},
+					{
+						"reference": "Organization/112f72af-3bef-4b2c-81b3-66974b4df38b",
+						"display": "kareo_eLab_practice"
+					},
+					{
+						"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+						"display": "Charts Admin"
+					},
+					{
+						"reference": "PractitionerRole/d6e9a7d2-9a0a-4d58-8af3-dec0d28a8ea9"
+					},
+					{
+						"reference": "Practitioner/eec86ff9-8e2b-453d-b1d7-051418a494e8",
+						"display": "Charts Admin"
+					},
+					{
+						"reference": "Immunization/72f8dfbf-83d4-487d-acb6-0b62abfdd6ce",
+						"display": "Influenza (LAIV, TIV), [CVX:197]"
+					},
+					{
+						"reference": "Organization/f4d7936d-64f7-490e-b1be-36cc82aeddbf",
+						"display": "Sanofi-Pasteur"
+					},
+					{
+						"reference": "AllergyIntolerance/91818b4f-afe3-4d19-8158-be57baa437f9",
+						"display": "penicillin"
+					},
+					{
+						"reference": "AllergyIntolerance/03f94b49-3218-42af-9faf-047140929571",
+						"display": "aspirin"
+					},
+					{
+						"reference": "CareTeam/ecc0aba5-b070-485c-9390-5a30abbf3481",
+						"display": "Care team"
+					},
+					{
+						"reference": "DiagnosticReport/471ee058-f91c-40f5-a9c4-32117270767f",
+						"display": "Laboratory Studies"
+					},
+					{
+						"reference": "Observation/ddfe8c37-cc13-439d-866f-62bd83382c78",
+						"display": "result_13"
+					},
+					{
+						"reference": "Observation/82d75d8c-8d09-44c0-811c-82b89f0ddd17",
+						"display": "result_9"
+					},
+					{
+						"reference": "Observation/6dc5bed0-d5cc-4638-a14f-2b8c92e4ad1e",
+						"display": "result_8"
+					},
+					{
+						"reference": "Observation/09ab8ab9-e40b-4534-92af-e06faa3aabc7",
+						"display": "result_11"
+					},
+					{
+						"reference": "Observation/5b2e0d12-c505-4eb4-a284-e8037d88e77e",
+						"display": "result_12"
+					},
+					{
+						"reference": "Observation/3b5cac84-df01-4508-9454-9ddacf00a8f6",
+						"display": "result_10"
+					},
+					{
+						"reference": "Observation/6d23bec3-f83f-42fb-bb7d-cb769d7b07e6",
+						"display": "result_7"
+					},
+					{
+						"reference": "DiagnosticReport/fae92ab1-5ab8-4d53-83d5-58a6b29c0c88",
+						"display": "Laboratory Studies"
+					},
+					{
+						"reference": "Observation/a6e302b3-924a-4828-9739-6212766c377c",
+						"display": "result_5"
+					},
+					{
+						"reference": "Observation/5c73d9a9-4ce5-41bd-a2b0-79a4dac8979c",
+						"display": "result_6"
+					},
+					{
+						"reference": "DiagnosticReport/fb945160-509a-4a93-adb6-49cefd5eaad2",
+						"display": "Laboratory Studies"
+					},
+					{
+						"reference": "Observation/47358c31-b67a-45df-a78b-5fbd5a553cf8",
+						"display": "result_15"
+					},
+					{
+						"reference": "Observation/c8c7b931-962c-4a1e-84f1-b4692537a76c",
+						"display": "result_18"
+					},
+					{
+						"reference": "Observation/ea151388-1c59-419d-8be4-604ef3012b30",
+						"display": "result_14"
+					},
+					{
+						"reference": "Observation/d9113409-396d-4a30-bf66-72d43fd85f3d",
+						"display": "result_17"
+					},
+					{
+						"reference": "Observation/232f9b7c-e08b-4749-a3f2-e6581a1f20e5",
+						"display": "result_16"
+					},
+					{
+						"reference": "DiagnosticReport/968d52c1-72de-4d72-bc36-52d643a40e5e",
+						"display": "Laboratory Studies"
+					},
+					{
+						"reference": "Observation/e37fb304-de21-46ea-b861-b666379517ce",
+						"display": "result_4"
+					},
+					{
+						"reference": "Observation/ffc4d9b2-7d3e-40f1-b8d1-6bc599f1684b",
+						"display": "result_3"
+					},
+					{
+						"reference": "Observation/50410eb8-ca77-4960-a2e2-d733a4a8ae7a",
+						"display": "result_1"
+					},
+					{
+						"reference": "Observation/1b90fdb5-f67a-4d82-95f3-89cfcc198d15",
+						"display": "result_0"
+					},
+					{
+						"reference": "Observation/b058ba67-5c7d-4691-8891-799e5f929de7",
+						"display": "result_2"
+					},
+					{
+						"reference": "CarePlan/08d4ceb5-56e2-40ac-af29-1e3353550894"
+					},
+					{
+						"reference": "Observation/270bcc8f-ef6c-448d-876b-899b8cd42d00"
+					},
+					{
+						"reference": "Observation/ac8975fa-6db9-4ca9-b0e4-391f33f2dde1",
+						"display": "BMI (Body Mass Index)"
+					},
+					{
+						"reference": "Observation/808fb1f8-c8d1-4876-9cd3-29453f974b88",
+						"display": "Patient Body Weight - Measured"
+					},
+					{
+						"reference": "Observation/2277f73f-1d28-445b-a605-47c08729c59f",
+						"display": "Body Temperature"
+					},
+					{
+						"reference": "Observation/e79a3e25-d6da-44da-b221-479a798daf83",
+						"display": "Height"
+					},
+					{
+						"reference": "Observation/9b019768-62fd-497a-871a-d1a89a8f4425",
+						"display": "Respiratory Rate"
+					},
+					{
+						"reference": "Observation/2cce70af-f771-4743-9226-e4695b1fced2",
+						"display": "BP Systolic"
+					},
+					{
+						"reference": "Observation/dcae4663-682d-4c1f-a075-9fdb05c4330c",
+						"display": "BP Diastolic"
+					},
+					{
+						"reference": "Observation/bc77fc4a-6553-4454-9dae-0bbde88915f9",
+						"display": "Heart Rate"
+					},
+					{
+						"reference": "Observation/00c6acb1-6059-43cb-9ab4-3fcba48954f0",
+						"display": "BP Diastolic"
+					},
+					{
+						"reference": "Observation/fc579e80-e678-4c0c-9fdb-d0d44d43aff8",
+						"display": "Heart Rate"
+					},
+					{
+						"reference": "Observation/f0580959-de83-46fd-a1ef-ff9e50295a94",
+						"display": "Height"
+					},
+					{
+						"reference": "Observation/75920c2d-ef55-4c51-bafd-893da5c502d2",
+						"display": "BMI (Body Mass Index)"
+					},
+					{
+						"reference": "Observation/dffff1c7-7d55-4a1e-8488-7cbe2728bc61",
+						"display": "Respiratory Rate"
+					},
+					{
+						"reference": "Observation/5fa01f77-07ad-4648-a486-163d3b25db3f",
+						"display": "Patient Body Weight - Measured"
+					},
+					{
+						"reference": "Observation/905e7024-0c09-4504-9a80-5cc6af7e863d",
+						"display": "Body Temperature"
+					},
+					{
+						"reference": "Observation/17718f86-4de6-41ab-8b3d-be7198b6c1ba",
+						"display": "BP Systolic"
+					},
+					{
+						"reference": "Observation/ecdd7d45-4266-4d2a-b03b-ff1eb7977764",
+						"display": "BMI (Body Mass Index)"
+					},
+					{
+						"reference": "Observation/15b9710e-9a5a-4677-a058-f72e94bb67c5",
+						"display": "BP Systolic"
+					},
+					{
+						"reference": "Observation/f6373994-12a6-4465-86ed-49d6b509782a",
+						"display": "Body Temperature"
+					},
+					{
+						"reference": "Observation/f7548f65-f538-4716-b242-19986d076003",
+						"display": "Height"
+					},
+					{
+						"reference": "Observation/d0d4e739-e641-4cb5-8425-d693a15e86fd",
+						"display": "BP Diastolic"
+					},
+					{
+						"reference": "Observation/e60bba46-fec1-4392-9ea7-2c3e08c09425",
+						"display": "Patient Body Weight - Measured"
+					},
+					{
+						"reference": "Observation/fda63205-e2b1-4718-990f-11d56c5b3521",
+						"display": "Heart Rate"
+					},
+					{
+						"reference": "Observation/6daa25da-3269-4d5f-a9cd-fbc42ff7c3c6",
+						"display": "Respiratory Rate"
+					},
+					{
+						"reference": "Encounter/1f8e3ae9-388e-4761-be6e-9c9f273f5b3e",
+						"display": "Encounter_1"
+					},
+					{
+						"reference": "Practitioner/1a90d62b-ec2e-47d5-9d35-1ac2eba8eac9",
+						"display": "Elab Admin"
+					},
+					{
+						"reference": "Location/b7a193bc-ba47-40e6-aaaf-5fa9846ba216",
+						"display": "kareo_eLab_practice"
+					},
+					{
+						"reference": "Encounter/1ee16fac-47df-45f5-b5fb-c4cf62e334a9",
+						"display": "Encounter_2"
+					},
+					{
+						"reference": "Encounter/f0453de0-564d-4072-abb3-df1bcc48da32",
+						"display": "Encounter_0"
+					},
+					{
+						"reference": "ClinicalImpression/194c07a6-1476-44f6-884f-441e0d60cdcb",
+						"display": "Assessments"
+					},
+					{
+						"reference": "MedicationRequest/af74f44d-505d-48a4-ac02-b403d13b0844",
+						"display": "atorvastatin 20 mg tablet"
+					},
+					{
+						"reference": "Medication/c5a46825-c08d-42e4-beaa-1881bc43895e",
+						"display": "atorvastatin 20 mg tablet"
+					},
+					{
+						"reference": "Procedure/9b84b604-9a0d-4a09-b592-bfba7ae12020"
+					},
+					{
+						"reference": "DocumentReference/84b5b4b3-bcbd-4042-8372-8888b7d30f06",
+						"display": "Progress Note"
+					},
+					{
+						"reference": "DocumentReference/e0ef31aa-85a7-472e-85bb-56bfdca0c9f3",
+						"display": "Summarization of Episode Note"
+					}
+				],
+				"recorded": "2023-04-12T11:18:43.010-04:00",
+				"agent": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+									"code": "author",
+									"display": "Author"
+								}
+							]
+						},
+						"who": {
+							"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+							"display": "Charts Admin"
+						},
+						"onBehalfOf": {
+							"reference": "Organization/112f72af-3bef-4b2c-81b3-66974b4df38b",
+							"display": "kareo_eLab_practice"
+						}
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/core/CodeSystem/us-core-provenance-participant-type",
+									"code": "transmitter",
+									"display": "Transmitter"
+								}
+							]
+						},
+						"who": {
+							"reference": "Practitioner/a8106e8c-ef85-47f0-9d80-1ea04c56a0e7",
+							"display": "Charts Admin"
+						},
+						"onBehalfOf": {
+							"reference": "Organization/112f72af-3bef-4b2c-81b3-66974b4df38b",
+							"display": "kareo_eLab_practice"
+						}
+					}
+				],
+				"entity": [
+					{
+						"role": "source",
+						"what": {
+							"reference": "DocumentReference/e0ef31aa-85a7-472e-85bb-56bfdca0c9f3",
+							"display": "Summarization of Episode Note"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Provenance"
+			}
+		}
+	]
+}
