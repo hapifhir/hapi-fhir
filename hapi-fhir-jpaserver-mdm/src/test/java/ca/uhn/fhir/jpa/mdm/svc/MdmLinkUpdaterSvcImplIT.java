@@ -82,10 +82,10 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		Patient goldenA = getGoldenFor(patientA);
 		Patient goldenB = getGoldenFor(patientB);
 
-		// create Patient C -> no MATCH link. Only POSSIBLE_MATCH GR A and POSSIBLE_MATCH GR B and
+		// create Patient C -> no MATCH link. Only POSSIBLE_MATCH GR A and POSSIBLE_MATCH GR B
 		Patient patientC = createPatientFromJsonInputFileWithPossibleMatches( List.of(goldenA, goldenB) );
-
 		MdmTransactionContext mdmTransactionContext = getPatientUpdateLinkContext();
+
 		// update POSSIBLE_MATCH Patient C -> GR A to MATCH (should work OK)
 		myMdmLinkUpdaterSvc.updateLink(goldenA, patientC, MdmMatchResultEnum.MATCH, mdmTransactionContext);
 
