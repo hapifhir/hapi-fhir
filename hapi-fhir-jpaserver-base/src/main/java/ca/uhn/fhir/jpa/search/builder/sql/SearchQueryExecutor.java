@@ -120,7 +120,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 
 					ourLog.trace("About to execute SQL: {}", sql);
 
-					hibernateQuery.setFetchSize(1000);
+					hibernateQuery.setFetchSize(100000);
 					hibernateQuery.setCacheable(false);
 					hibernateQuery.setCacheMode(CacheMode.IGNORE);
 					hibernateQuery.setReadOnly(true);
