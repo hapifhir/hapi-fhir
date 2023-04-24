@@ -121,7 +121,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			dao.deletePidList(ProviderConstants.OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);
 			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, conflicts);
 
-//			dao.expunge(persistentIds, myRequestDetails);
+			dao.expunge(persistentIds, myRequestDetails);
 
 			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
 
