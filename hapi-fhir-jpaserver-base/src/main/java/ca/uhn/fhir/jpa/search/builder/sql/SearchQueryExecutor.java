@@ -118,9 +118,11 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 						hibernateQuery.setParameter(i, args[i - 1]);
 					}
 
-					ourLog.trace("About to execute SQL: {}", sql);
+					// FIXME: reduce to trace
+					ourLog.info("About to execute SQL: {}", sql);
 
-					hibernateQuery.setFetchSize(100000);
+					// FIXME: update in ja_20230422_postgres_optimization
+					hibernateQuery.setFetchSize(500000);
 					hibernateQuery.setCacheable(false);
 					hibernateQuery.setCacheMode(CacheMode.IGNORE);
 					hibernateQuery.setReadOnly(true);

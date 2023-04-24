@@ -225,6 +225,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				pidCount++;
 				pids.add(resultIterator.next());
 			}
+
+			ourLog.info("Query for bulk export job[{}] chunk[{}] completed with {} pids", theJobId, theChunkId, pids.size());
 		}
 		return pids;
 	}
