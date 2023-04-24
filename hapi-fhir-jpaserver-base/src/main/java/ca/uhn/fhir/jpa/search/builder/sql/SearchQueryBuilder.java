@@ -141,6 +141,9 @@ public class SearchQueryBuilder {
 		mySchema = mySpec.addDefaultSchema();
 		mySelect = new SelectQuery();
 
+		// FIXME: make configurable
+		mySelect.setIsDistinct(true);
+
 		myBindVariableSubstitutionBase = theBindVariableSubstitutionBase;
 		myBindVariableValues = theBindVariableValues;
 	}
