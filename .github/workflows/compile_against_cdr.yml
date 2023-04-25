@@ -1,0 +1,36 @@
+name: Compile against CDR
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+    inputs:
+      cdr_branch:
+        description: 'CDR Branch to Compile Against'
+        default: 'master'
+        required: true
+        type: string
+
+jobs:
+  compile-against-cdr:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Setup Python
+      uses: actions/setup-python@v4.6.0
+      with:
+        python-version: '3.10'
+    - run: poetry install
+      name: Install Dependencies
+      working-directory: ./.github/workflows/cdr_check
+    - run: poetry run python trigger_and_poll_gitlab.py
+      name: Execute Poller
+      working-directory: ./.github/workflows/cdr_check
+      env:
+        TRIGGER_TOKEN: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
+        READ_API_TOKEN: ${{ secrets.GITLAB_READ_API_TOKEN }}
+        HAPI_BRANCH: ${{ github.head_ref || github.ref_name }}
+        # When run via the manual run, this will be set. When run in a PR, it will be blank.
+        CDR_BRANCH: ${{ inputs.cdr_branch }}

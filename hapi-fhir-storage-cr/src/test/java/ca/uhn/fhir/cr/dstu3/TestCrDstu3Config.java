@@ -1,27 +1,8 @@
-/*-
- * #%L
- * HAPI FHIR - Clinical Reasoning
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-package ca.uhn.fhir.cr.config;
+package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.cr.TestCrConfig;
 import ca.uhn.fhir.cr.common.CodeCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.CqlExceptionHandlingInterceptor;
 import ca.uhn.fhir.cr.common.CqlForkJoinWorkerThreadFactory;
@@ -36,11 +17,17 @@ import ca.uhn.fhir.cr.common.ILibraryLoaderFactory;
 import ca.uhn.fhir.cr.common.ILibraryManagerFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
+import ca.uhn.fhir.cr.config.CrProperties;
+import ca.uhn.fhir.cr.config.CrProviderFactory;
+import ca.uhn.fhir.cr.config.CrProviderLoader;
+import ca.uhn.fhir.cr.config.PreExpandedValidationSupportLoader;
+import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
+import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -51,7 +38,6 @@ import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
@@ -70,9 +56,7 @@ import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -86,13 +70,30 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Function;
 
-@Import(AdapterConfiguration.class)
 @Configuration
-public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
+@Import(TestCrConfig.class)
+public class TestCrDstu3Config {
+	@Bean
+	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(ApplicationContext theApplicationContext) {
+		return r -> {
+			var ms = theApplicationContext.getBean(MeasureService.class);
+			ms.setRequestDetails(r);
+			return ms;
+		};
+	}
 
-	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
+	@Bean
+	@Scope("prototype")
+	public MeasureService dstu3measureService() {
+		return new MeasureService();
+	}
 
+	@Bean
+	public MeasureOperationsProvider dstu3measureOperationsProvider() {
+		return new MeasureOperationsProvider();
+	}
 
 	@Bean
 	CrProviderFactory cqlProviderFactory() {
@@ -106,7 +107,14 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 
 	@Bean
 	public CrProperties crProperties() {
-		return new CrProperties();
+		var cqlProperties = new CrProperties.CqlProperties();
+		var translatorOptions = cqlProperties.getCqlTranslatorOptions();
+		translatorOptions.setCompatibilityLevel("1.3");
+		cqlProperties.setCqlTranslatorOptions(translatorOptions);
+		var properties = new CrProperties();
+		properties.setCqlProperties(cqlProperties);
+
+		return properties;
 	}
 
 	@Bean
@@ -138,22 +146,25 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 	public CqlTranslatorOptions cqlTranslatorOptions(FhirContext theFhirContext, CrProperties.CqlProperties theCqlProperties) {
 		CqlTranslatorOptions options = theCqlProperties.getCqlOptions().getCqlTranslatorOptions();
 
-		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)
-			&& (options.getCompatibilityLevel().equals("1.5") || options.getCompatibilityLevel().equals("1.4"))) {
-			ourLogger.warn("{} {} {}",
-				"This server is configured to use CQL version > 1.4 and FHIR version <= DSTU3.",
-				"Most available CQL content for DSTU3 and below is for CQL versions 1.3.",
-				"If your CQL content causes translation errors, try setting the CQL compatibility level to 1.3");
-		}
-
 		return options;
 	}
 
 	@Bean
-	@Scope("prototype")
 	public ModelManager modelManager(
 		Map<ModelIdentifier, Model> theGlobalModelCache) {
 		return new CacheAwareModelManager(theGlobalModelCache);
+	}
+
+	@Bean
+	public ILibraryManagerFactory libraryManagerFactory(
+		ModelManager theModelManager) {
+		return (providers) -> {
+			LibraryManager libraryManager = new LibraryManager(theModelManager);
+			for (LibrarySourceProvider provider : providers) {
+				libraryManager.getLibrarySourceLoader().registerProvider(provider);
+			}
+			return libraryManager;
+		};
 	}
 
 	@Bean
@@ -219,7 +230,6 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 	}
 
 	@Bean
-	@Scope("prototype")
 	ILibraryLoaderFactory libraryLoaderFactory(
 		Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> theGlobalLibraryCache,
 		ModelManager theModelManager, CqlTranslatorOptions theCqlTranslatorOptions, CrProperties.CqlProperties theCqlProperties) {
@@ -281,14 +291,7 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 
 	@Bean
 	public ModelResolver modelResolver(FhirContext theFhirContext) {
-		switch (theFhirContext.getVersion().getVersion()) {
-			case R4:
-				return new CachingModelResolverDecorator(new R4FhirModelResolver());
-			case DSTU3:
-				return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
-			default:
-				throw new IllegalStateException(Msg.code(2224) + "CQL support not yet implemented for this FHIR version. Please change versions or disable the CQL plugin.");
-		}
+		return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
 	}
 
 	@Bean
