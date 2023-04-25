@@ -39,7 +39,7 @@ public class ReindexGenerateRangeChunksStep extends GenerateRangeChunksStep<Rein
     public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<PartitionedUrlChunkRangeJson> theDataSink) throws JobExecutionFailedException {
 
         ReindexJobParameters parameters = theStepExecutionDetails.getParameters();
-        ourLog.info("Beginning reindex job - OptimizeStorage[{}] - ReindexSearchParameters[{}]", parameters.isOptimizeStorage(), parameters.isReindexSearchParameters());
+        ourLog.info("Beginning reindex job - OptimizeStorage[{}] - ReindexSearchParameters[{}]", parameters.getOptimizeStorage(), parameters.getReindexSearchParameters());
 
         return super.run(theStepExecutionDetails, theDataSink);
     }

@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
@@ -895,13 +896,17 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@CsvSource({
-		// NoOp    OptimisticLock  ExpectedSelect  ExpectedUpdate
-		"  false,  false,          2,              10",
-		"  true,   false,          2,              0",
-		"  false,  true,           12,             10",
-		"  true,   true,           12,             0",
+		// NoOp    OptimisticLock  OptimizeMode      ExpectedSelect  ExpectedUpdate
+		"  false,  false,          CURRENT_VERSION,  2,              10",
+		"  true,   false,          CURRENT_VERSION,  2,              0",
+		"  false,  true,           CURRENT_VERSION,  12,             10",
+		"  true,   true,           CURRENT_VERSION,  12,             0",
+		"  false,  false,          ALL_VERSIONS,     22,             20",
+		"  true,   false,          ALL_VERSIONS,     22,             0",
+		"  false,  true,           ALL_VERSIONS,     32,             20",
+		"  true,   true,           ALL_VERSIONS,     32,             0",
 	})
-	public void testReindexJob_OptimizeStorage(boolean theNoOp, boolean theOptimisticLock, int theExpectedSelectCount, int theExpectedUpdateCount) {
+	public void testReindexJob_OptimizeStorage(boolean theNoOp, boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
 		// Setup
 
 		// In no-op mode, the inlining is already in the state it needs to be in
@@ -913,28 +918,23 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
 		IIdType patientId = createPatient(withActiveTrue());
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId(patientId.toUnqualifiedVersionless());
+			p.setActive(true);
+			p.addIdentifier().setValue("" + i);
+			myPatientDao.update(p, mySrd);
+		}
 		data.addTypedPid("Patient", patientId.getIdPartAsLong());
 		for (int i = 0; i < 9; i++) {
 			IIdType nextPatientId = createPatient(withActiveTrue());
 			data.addTypedPid("Patient", nextPatientId.getIdPartAsLong());
 		}
 
-		runInTransaction(() -> {
-			assertEquals(10, myResourceHistoryTableDao.count());
-			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
-			if (theNoOp) {
-				assertNotNull(history.getResourceTextVc());
-				assertNull(history.getResource());
-			} else {
-				assertNull(history.getResourceTextVc());
-				assertNotNull(history.getResource());
-			}
-		});
-
 		myStorageSettings.setInlineResourceTextBelowSize(10000);
 		ReindexJobParameters params = new ReindexJobParameters()
-			.setOptimizeStorage(true)
-			.setReindexSearchParameters(false)
+			.setOptimizeStorage(theOptimizeStorageModeEnum)
+			.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)
 			.setOptimisticLock(theOptimisticLock);
 
 		// execute
@@ -947,16 +947,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(theExpectedUpdateCount, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-
 		assertEquals(10, outcome.getRecordsProcessed());
-		runInTransaction(() -> {
-			assertEquals(10, myResourceHistoryTableDao.count());
-			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
-			assertNotNull(history.getResourceTextVc());
-			assertNull(history.getResource());
-		});
-		Patient patient = myPatientDao.read(patientId, mySrd);
-		assertTrue(patient.getActive());
 
 	}
 

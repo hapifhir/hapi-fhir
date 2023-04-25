@@ -345,7 +345,7 @@ public class GiantTransactionPerfTest {
 		}
 	}
 
-	private class MockResourceHistoryTableDao implements IResourceHistoryTableDao {
+	private static class MockResourceHistoryTableDao implements IResourceHistoryTableDao {
 		private int mySaveCount;
 
 		@Override
@@ -360,6 +360,11 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public Slice<Long> findForResourceId(Pageable thePage, Long theId, Long theDontWantVersion) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntities(Pageable thePage, Long theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 

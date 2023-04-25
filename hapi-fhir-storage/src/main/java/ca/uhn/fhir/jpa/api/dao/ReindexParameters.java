@@ -20,11 +20,13 @@
 package ca.uhn.fhir.jpa.api.dao;
 
 public class ReindexParameters {
-	public static final boolean REINDEX_SEARCH_PARAMETERS_DEFAULT = true;
+	public static final ReindexSearchParametersEnum REINDEX_SEARCH_PARAMETERS_DEFAULT = ReindexSearchParametersEnum.ALL;
+	public static final String REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING = "ALL";
 	public static final boolean OPTIMISTIC_LOCK_DEFAULT = true;
-	public static final boolean OPTIMIZE_STORAGE_DEFAULT = false;
-	private boolean myReindexSearchParameters = REINDEX_SEARCH_PARAMETERS_DEFAULT;
-	private boolean myOptimizeStorage = OPTIMIZE_STORAGE_DEFAULT;
+	public static final OptimizeStorageModeEnum OPTIMIZE_STORAGE_DEFAULT = OptimizeStorageModeEnum.NONE;
+	public static final String OPTIMIZE_STORAGE_DEFAULT_STRING = "NONE";
+	private ReindexSearchParametersEnum myReindexSearchParameters = REINDEX_SEARCH_PARAMETERS_DEFAULT;
+	private OptimizeStorageModeEnum myOptimizeStorage = OPTIMIZE_STORAGE_DEFAULT;
 	private boolean myOptimisticLock = OPTIMISTIC_LOCK_DEFAULT;
 
 	public boolean isOptimisticLock() {
@@ -36,22 +38,34 @@ public class ReindexParameters {
 		return this;
 	}
 
-	public boolean isReindexSearchParameters() {
+	public ReindexSearchParametersEnum getReindexSearchParameters() {
 		return myReindexSearchParameters;
 	}
 
-	public ReindexParameters setReindexSearchParameters(boolean theReindexSearchParameters) {
+	public ReindexParameters setReindexSearchParameters(ReindexSearchParametersEnum theReindexSearchParameters) {
 		myReindexSearchParameters = theReindexSearchParameters;
 		return this;
 	}
 
-	public boolean isOptimizeStorage() {
+	public OptimizeStorageModeEnum getOptimizeStorage() {
 		return myOptimizeStorage;
 	}
 
-	public ReindexParameters setOptimizeStorage(boolean theOptimizeStorage) {
+	public ReindexParameters setOptimizeStorage(OptimizeStorageModeEnum theOptimizeStorage) {
 		myOptimizeStorage = theOptimizeStorage;
 		return this;
+	}
+
+
+	public enum ReindexSearchParametersEnum {
+		ALL,
+		NONE
+	}
+
+	public enum OptimizeStorageModeEnum {
+		NONE,
+		CURRENT_VERSION,
+		ALL_VERSIONS
 	}
 
 }

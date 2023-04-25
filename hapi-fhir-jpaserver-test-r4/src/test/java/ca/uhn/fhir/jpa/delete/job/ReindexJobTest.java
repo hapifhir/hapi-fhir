@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -65,18 +66,26 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testOptimizeStorage() {
+	public void testOptimizeStorage_CurrentVersion() {
 		// Setup
 		IIdType patientId = createPatient(withActiveTrue());
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId(patientId.toUnqualifiedVersionless());
+			p.setActive(true);
+			p.addIdentifier().setValue("" + i);
+			myPatientDao.update(p, mySrd);
+		}
 		for (int i = 0; i < 9; i++) {
 			createPatient(withActiveTrue());
 		}
 
 		runInTransaction(()->{
-			assertEquals(10, myResourceHistoryTableDao.count());
-			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
-			assertNull(history.getResourceTextVc());
-			assertNotNull(history.getResource());
+			assertEquals(20, myResourceHistoryTableDao.count());
+			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
+				assertNull(history.getResourceTextVc());
+				assertNotNull(history.getResource());
+			}
 		});
 
 		myStorageSettings.setInlineResourceTextBelowSize(10000);
@@ -86,24 +95,78 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(
 			new ReindexJobParameters()
-				.setOptimizeStorage(true)
-				.setReindexSearchParameters(false)
+				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION)
+				.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)
 		);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
 		runInTransaction(()->{
-			assertEquals(10, myResourceHistoryTableDao.count());
+			assertEquals(20, myResourceHistoryTableDao.count());
 			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
-			assertNotNull(history.getResourceTextVc());
-			assertNull(history.getResource());
+			if (history.getResourceId().equals(patientId.getIdPartAsLong()) && history.getVersion() < 11) {
+				assertNull(history.getResourceTextVc());
+				assertNotNull(history.getResource());
+			} else {
+				assertNotNull(history.getResourceTextVc());
+				assertNull(history.getResource());
+			}
 		});
 		Patient patient = myPatientDao.read(patientId, mySrd);
 		assertTrue(patient.getActive());
 
 	}
 
+
+	@Test
+	public void testOptimizeStorage_AllVersions() {
+		// Setup
+		IIdType patientId = createPatient(withActiveTrue());
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId(patientId.toUnqualifiedVersionless());
+			p.setActive(true);
+			p.addIdentifier().setValue("" + i);
+			myPatientDao.update(p, mySrd);
+		}
+		for (int i = 0; i < 9; i++) {
+			createPatient(withActiveTrue());
+		}
+
+		runInTransaction(()->{
+			assertEquals(20, myResourceHistoryTableDao.count());
+			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
+				assertNull(history.getResourceTextVc());
+				assertNotNull(history.getResource());
+			}
+		});
+
+		myStorageSettings.setInlineResourceTextBelowSize(10000);
+
+		// execute
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(
+			new ReindexJobParameters()
+				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS)
+				.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)
+		);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitJobCompletion(startResponse);
+
+		// validate
+		runInTransaction(()->{
+			assertEquals(20, myResourceHistoryTableDao.count());
+			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
+				assertNotNull(history.getResourceTextVc());
+				assertNull(history.getResource());
+			}
+		});
+		Patient patient = myPatientDao.read(patientId, mySrd);
+		assertTrue(patient.getActive());
+
+	}
 
 	@Test
 	public void testOptimizeStorage_DeletedRecords() {
@@ -122,8 +185,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(
 			new ReindexJobParameters()
-				.setOptimizeStorage(true)
-				.setReindexSearchParameters(false)
+				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION)
+				.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)
 		);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);

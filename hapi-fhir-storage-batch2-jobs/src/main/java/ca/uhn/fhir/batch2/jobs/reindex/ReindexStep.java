@@ -110,13 +110,13 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 
 			// Prefetch Resources from DB
 
-			boolean reindexSearchParameters = myJobParameters.isReindexSearchParameters();
+			boolean reindexSearchParameters = myJobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
 			mySystemDao.preFetchResources(persistentIds, reindexSearchParameters);
 			ourLog.info("Prefetched {} resources in {} - Instance[{}] Chunk[{}]", persistentIds.size(), sw, myInstanceId, myChunkId);
 
 			ReindexParameters parameters = new ReindexParameters()
-				.setReindexSearchParameters(myJobParameters.isReindexSearchParameters())
-				.setOptimizeStorage(myJobParameters.isOptimizeStorage())
+				.setReindexSearchParameters(myJobParameters.getReindexSearchParameters())
+				.setOptimizeStorage(myJobParameters.getOptimizeStorage())
 				.setOptimisticLock(myJobParameters.getOptimisticLock());
 
 			// Reindex

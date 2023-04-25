@@ -54,6 +54,7 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -167,13 +168,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, theJobId);
 
-				ourLog.info("Executing query for bulk export job[{}] chunk[{}]: {}", theJobId, theChunkId, map.toNormalizedQueryString(myContext));
+				Logs.getBatchTroubleshootingLog().debug("Executing query for bulk export job[{}] chunk[{}]: {}", theJobId, theChunkId, map.toNormalizedQueryString(myContext));
 
 				IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, new SystemRequestDetails(), theParams.getPartitionIdOrAllPartitions());
 				int pidCount = 0;
 				while (resultIterator.hasNext()) {
 					if (pidCount % 10000 == 0) {
-						ourLog.info("Bulk export job[{}] chunk[{}] has loaded {} pids", theJobId, theChunkId, pidCount);
+						Logs.getBatchTroubleshootingLog().debug("Bulk export job[{}] chunk[{}] has loaded {} pids", theJobId, theChunkId, pidCount);
 					}
 					pidCount++;
 					pids.add(resultIterator.next());
@@ -215,7 +216,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
 		for (SearchParameterMap map : maps) {
-			ourLog.info("Executing query for bulk export job[{}] chunk[{}]: {}", theJobId, theChunkId, map.toNormalizedQueryString(myContext));
+			Logs.getBatchTroubleshootingLog().debug("Executing query for bulk export job[{}] chunk[{}]: {}", theJobId, theChunkId, map.toNormalizedQueryString(myContext));
 
 			// requires a transaction
 			IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map,
@@ -225,7 +226,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			int pidCount = 0;
 			while (resultIterator.hasNext()) {
 				if (pidCount % 10000 == 0) {
-					ourLog.info("Bulk export job[{}] chunk[{}] has loaded {} pids", theJobId, theChunkId, pidCount);
+					Logs.getBatchTroubleshootingLog().debug("Bulk export job[{}] chunk[{}] has loaded {} pids", theJobId, theChunkId, pidCount);
 				}
 				pidCount++;
 				pids.add(resultIterator.next());
@@ -253,9 +254,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 		Set<JpaPid> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
 		assert expandedMemberResourceIds != null && !expandedMemberResourceIds.isEmpty();
-		if (ourLog.isDebugEnabled()) {
-			ourLog.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
-		}
+		Logs.getBatchTroubleshootingLog().debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
 
 		//Next, let's search for the target resources, with their correct patient references, chunked.
 		//The results will be jammed into myReadPids

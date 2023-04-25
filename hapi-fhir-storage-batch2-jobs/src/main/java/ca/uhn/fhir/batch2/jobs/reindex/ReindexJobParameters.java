@@ -33,12 +33,12 @@ public class ReindexJobParameters extends PartitionedUrlListJobParameters {
 	public static final String REINDEX_SEARCH_PARAMETERS = "reindexSearchParameters";
 	public static final String OPTIMISTIC_LOCK = "optimisticLock";
 
-	@JsonProperty(value = OPTIMIZE_STORAGE, defaultValue = ReindexParameters.OPTIMIZE_STORAGE_DEFAULT + "", required = false)
+	@JsonProperty(value = OPTIMIZE_STORAGE, defaultValue = ReindexParameters.OPTIMIZE_STORAGE_DEFAULT_STRING, required = false)
 	@Nullable
-	private Boolean myOptimizeStorage;
-	@JsonProperty(value = REINDEX_SEARCH_PARAMETERS, defaultValue = ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT + "", required = false)
+	private ReindexParameters.OptimizeStorageModeEnum myOptimizeStorage;
+	@JsonProperty(value = REINDEX_SEARCH_PARAMETERS, defaultValue = ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING, required = false)
 	@Nullable
-	private Boolean myReindexSearchParameters;
+	private ReindexParameters.ReindexSearchParametersEnum myReindexSearchParameters;
 	@JsonProperty(value = OPTIMISTIC_LOCK, defaultValue = ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + "", required = false)
 	@Nullable
 	private Boolean myOptimisticLock;
@@ -52,21 +52,24 @@ public class ReindexJobParameters extends PartitionedUrlListJobParameters {
 		return this;
 	}
 
-	public boolean isOptimizeStorage() {
+	public ReindexParameters.OptimizeStorageModeEnum getOptimizeStorage() {
 		return defaultIfNull(myOptimizeStorage, ReindexParameters.OPTIMIZE_STORAGE_DEFAULT);
 	}
 
-	public ReindexJobParameters setOptimizeStorage(boolean myOptimizeStorage) {
+	public ReindexJobParameters setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum myOptimizeStorage) {
 		this.myOptimizeStorage = myOptimizeStorage;
 		return this;
 	}
 
-	public boolean isReindexSearchParameters() {
+	public ReindexParameters.ReindexSearchParametersEnum getReindexSearchParameters() {
 		return defaultIfNull(myReindexSearchParameters, ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT);
 	}
 
-	public ReindexJobParameters setReindexSearchParameters(boolean myReindexSearchParameters) {
-		this.myReindexSearchParameters = myReindexSearchParameters;
+	public ReindexJobParameters setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
+		this.myReindexSearchParameters = theReindexSearchParameters;
 		return this;
 	}
+
+
+
 }

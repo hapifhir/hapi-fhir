@@ -15,6 +15,7 @@ import ca.uhn.test.concurrency.LockstepEnumPhaser;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
@@ -92,12 +93,13 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 			return result;
 		});
 
+
 		assertEquals(1, getSPIDXDateCount(observationPid), "still only one index row before reindex");
 
 		ReindexParameters reindexParameters = new ReindexParameters();
-		reindexParameters.setReindexSearchParameters(true);
+		reindexParameters.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.ALL);
 		reindexParameters.setOptimisticLock(true);
-		reindexParameters.setOptimizeStorage(false);
+		reindexParameters.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.NONE);
 
 		// suppose reindex job step starts here and loads the resource and ResourceTable entity
 		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().namingPattern("Reindex-thread-%d").build());
