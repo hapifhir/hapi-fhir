@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BinaryUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -133,18 +134,21 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 	private void addMetadataExtensionsToBinary(@NotNull StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> theStepExecutionDetails, ExpandedResourcesList expandedResources, IBaseBinary binary) {
 		if (binary.getMeta() instanceof IBaseHasExtensions) {
 			IBaseHasExtensions meta = (IBaseHasExtensions) binary.getMeta();
-			//export identifier
+
+			//export identifier, potentially null.
 			String exportIdentifier = theStepExecutionDetails.getParameters().getExportIdentifier();
-			IBaseExtension<?, ?> exportIdentifierExtension = meta.addExtension();
-			exportIdentifierExtension.setUrl(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER);
-			exportIdentifierExtension.setValue(myFhirContext.getPrimitiveString(exportIdentifier));
+			if (!StringUtils.isBlank(exportIdentifier)) {
+				IBaseExtension<?, ?> exportIdentifierExtension = meta.addExtension();
+				exportIdentifierExtension.setUrl(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER);
+				exportIdentifierExtension.setValue(myFhirContext.getPrimitiveString(exportIdentifier));
+			}
 
 			//job id
 			IBaseExtension<?, ?> jobExtension = meta.addExtension();
 			jobExtension.setUrl(JpaConstants.BULK_META_EXTENSION_JOB_ID);
 			jobExtension.setValue(myFhirContext.getPrimitiveString(theStepExecutionDetails.getInstance().getInstanceId()));
 
-			//Resource type
+			//resource type
 			IBaseExtension<?, ?> typeExtension = meta.addExtension();
 			typeExtension.setUrl(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE);
 			typeExtension.setValue(myFhirContext.getPrimitiveString(expandedResources.getResourceType()));
