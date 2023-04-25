@@ -199,6 +199,10 @@ public class JpaConstants {
 	/**
 	 * Parameter for the $export operation
 	 */
+	public static final String PARAM_EXPORT_TYPE_POST_FETCH_FILTER_URL = "_typePostFetchFilterUrl";
+	/**
+	 * Parameter for the $export operation
+	 */
 	public static final String PARAM_EXPORT_PATIENT = "patient";
 
 	/**
