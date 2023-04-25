@@ -31,6 +31,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.persistence.EntityManager;
@@ -118,8 +119,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 						hibernateQuery.setParameter(i, args[i - 1]);
 					}
 
-					// FIXME: reduce to trace
-					ourLog.info("About to execute SQL: {}", sql);
+					ourLog.trace("About to execute SQL: {}", sql);
 
 					// FIXME: update in ja_20230422_postgres_optimization
 					hibernateQuery.setFetchSize(500000);
