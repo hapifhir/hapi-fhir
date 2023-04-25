@@ -1,14 +1,19 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.interceptor.api.Pointcut;
+
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.DocumentReference;
@@ -68,6 +73,39 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		binaryStorageSvc.clear();
 
 		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
+	}
+
+	class BinaryFilePrefixingInterceptor(){
+
+		@Hook(Pointcut.STORAGE_PRESTORAGE_EXTERNALIZED_BINARY_DETERMINE_PREFIX)
+		public String provideFilenameForBinary(RequestDetails theRequestDetails, IBaseBinary theBinary) {
+			ourLog.info("Received binary for prefixing!" + theBinary.getIdElement());
+			return "prefix-";
+		}
+	}
+	@Test
+	public void testCreatingExternalizedBinaryTriggersPointcut() {
+
+
+		myInterceptorRegistry.registerInterceptor()
+		// Create a resource with a big enough binary
+		Binary binary = new Binary();
+		binary.setContentType("application/octet-stream");
+		binary.setData(SOME_BYTES);
+		DaoMethodOutcome outcome = myBinaryDao.create(binary, mySrd);
+
+		// Make sure it was externalized
+		IIdType id = outcome.getId().toUnqualifiedVersionless();
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, not(containsString("\"data\"")));
+
+		// Now read it back and make sure it was de-externalized
+		Binary output = myBinaryDao.read(id, mySrd);
+		assertEquals("application/octet-stream", output.getContentType());
+		assertArrayEquals(SOME_BYTES, output.getData());
+
 	}
 
 	@Test
