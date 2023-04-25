@@ -50,6 +50,6 @@ public class JobStepExecutorFactory {
 	}
 
 	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutor<PT,IT,OT> newJobStepExecutor(@Nonnull JobInstance theInstance, WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
-		return new JobStepExecutor<>(myJobPersistence, myBatchJobSender, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc, myJobMaintenanceService, myJobDefinitionRegistry);
+		return new JobStepExecutor<>(myJobPersistence, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc, myJobMaintenanceService, myJobDefinitionRegistry);
 	}
 }

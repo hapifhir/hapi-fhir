@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -109,7 +108,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	 * Projection constructor for no-date path.
 	 */
 	public Batch2WorkChunkEntity(String theId, int theSequence, String theJobDefinitionId, int theJobDefinitionVersion,
-										  String theInstanceId, String theTargetStepId, StatusEnum theStatus,
+										  String theInstanceId, String theTargetStepId, WorkChunkStatusEnum theStatus,
 										  Date theCreateTime, Date theStartTime, Date theUpdateTime, Date theEndTime,
 										  String theErrorMessage, int theErrorCount, Integer theRecordsProcessed) {
 		myId = theId;

@@ -72,14 +72,16 @@ public abstract class BaseBatch2Config {
 	public IJobCoordinator batch2JobCoordinator(JobDefinitionRegistry theJobDefinitionRegistry,
 															  BatchJobSender theBatchJobSender,
 															  WorkChunkProcessor theExecutor,
-															  IJobMaintenanceService theJobMaintenanceService) {
+															  IJobMaintenanceService theJobMaintenanceService,
+															  IHapiTransactionService theTransactionService) {
 		return new JobCoordinatorImpl(
 			theBatchJobSender,
 			batch2ProcessingChannelReceiver(myChannelFactory),
 			myPersistence,
 			theJobDefinitionRegistry,
 			theExecutor,
-			theJobMaintenanceService);
+			theJobMaintenanceService,
+			theTransactionService);
 	}
 
 	@Bean

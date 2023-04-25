@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,23 +17,24 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.batch2.progress.InstanceProgress;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
 import java.util.Date;
-import java.util.Optional;
 
 public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 	extends BaseDataSink<PT, IT, OT> {
@@ -56,21 +55,39 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 	@Override
 	public void accept(WorkChunkData<OT> theData) {
 		String instanceId = getInstanceId();
-		Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
-		if (instanceOp.isPresent()) {
-			JobInstance instance = instanceOp.get();
+		OT data = theData.getData();
+		String dataString = JsonUtil.serialize(data, false);
+		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
+		JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(myJobPersistence, progressAccumulator, myJobDefinitionRegistry);
+
+		InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(instanceId);
+		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
+			Validate.validState(
+				StatusEnum.FINALIZE.equals(instance.getStatus()),
+				"Job %s must be in FINALIZE state.  In %s", instanceId, instance.getStatus());
 
 			if (instance.getReport() != null) {
 				// last in wins - so we won't throw
 				ourLog.error("Report has already been set. Now it is being overwritten. Last in will win!");
 			}
 
-			JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
-			JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(myJobPersistence, progressAccumulator, myJobDefinitionRegistry);
-			myJobInstanceProgressCalculator.calculateInstanceProgressAndPopulateInstance(instance);
+			/*
+			 * For jobs without a reduction step at the end, the maintenance service marks the job instance
+			 * as COMPLETE when all chunks are complete, and calculates the final counts and progress.
+			 * However, for jobs with a reduction step at the end the maintenance service stops working
+			 * on the job while the job is in FINALIZE state, and this sink is ultimately responsible
+			 * for marking the instance as COMPLETE at the end of the reduction.
+			 *
+			 * So, make sure we update the stats and counts before marking as complete here.
+			 *
+			 * I could envision a better setup where the stuff that the maintenance service touches
+			 * is moved into separate DB tables or transactions away from the stuff that the
+			 * reducer touches. If the two could never collide we wouldn't need this duplication
+			 * here. Until then though, this is safer.
+			 */
 
-			OT data = theData.getData();
-			String dataString = JsonUtil.serialize(data, false);
+			progress.updateInstance(instance);
+
 			instance.setReport(dataString);
 			instance.setStatus(StatusEnum.COMPLETED);
 			instance.setEndTime(new Date());
@@ -80,15 +97,13 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 				.addArgument(() -> JsonUtil.serialize(instance))
 				.log("New instance state: {}");
 
-			myJobPersistence.updateInstance(instance);
+			return true;
+		});
 
-			ourLog.info("Finalized job instance {} with report length {} chars", instance.getInstanceId(), dataString.length());
+		if (!changed) {
+			ourLog.error("No instance found with Id {} in FINALIZE state", instanceId);
 
-		} else {
-			String msg = "No instance found with Id " + instanceId;
-			ourLog.error(msg);
-
-			throw new JobExecutionFailedException(Msg.code(2097) + msg);
+			throw new JobExecutionFailedException(Msg.code(2097) + ("No instance found with Id " + instanceId));
 		}
 	}
 

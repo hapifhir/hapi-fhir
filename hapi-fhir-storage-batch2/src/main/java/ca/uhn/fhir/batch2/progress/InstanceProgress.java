@@ -34,21 +34,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class InstanceProgress {
+public class InstanceProgress {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private int myRecordsProcessed = 0;
+
+	// these 4 cover all chunks
 	private int myIncompleteChunkCount = 0;
-	private int myQueuedCount = 0;
 	private int myCompleteChunkCount = 0;
 	private int myErroredChunkCount = 0;
 	private int myFailedChunkCount = 0;
+
 	private int myErrorCountForAllStatuses = 0;
-	private Long myEarliestStartTime = null;
-	private Long myLatestEndTime = null;
+	private Date myEarliestStartTime = null;
+	private Date myLatestEndTime = null;
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
-	private Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
+	private final Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
@@ -87,18 +89,14 @@ class InstanceProgress {
 	}
 
 	private void updateLatestEndTime(WorkChunk theChunk) {
-		if (theChunk.getEndTime() != null) {
-			if (myLatestEndTime == null || myLatestEndTime < theChunk.getEndTime().getTime()) {
-				myLatestEndTime = theChunk.getEndTime().getTime();
-			}
+		if (theChunk.getEndTime() != null && (myLatestEndTime == null || myLatestEndTime.before(theChunk.getEndTime()))) {
+			myLatestEndTime = theChunk.getEndTime();
 		}
 	}
 
 	private void updateEarliestTime(WorkChunk theChunk) {
-		if (theChunk.getStartTime() != null) {
-			if (myEarliestStartTime == null || myEarliestStartTime > theChunk.getStartTime().getTime()) {
-				myEarliestStartTime = theChunk.getStartTime().getTime();
-			}
+		if (theChunk.getStartTime() != null && (myEarliestStartTime == null || myEarliestStartTime.after(theChunk.getStartTime()))) {
+			myEarliestStartTime = theChunk.getStartTime();
 		}
 	}
 
@@ -108,67 +106,68 @@ class InstanceProgress {
 		}
 	}
 
+	/**
+	 * Update the job instance with status information.
+	 * We shouldn't read any values from theInstance here -- just write.
+	 *
+	 * @param theInstance the instance to update with progress statistics
+	 */
 	public void updateInstance(JobInstance theInstance) {
 		if (myEarliestStartTime != null) {
-			theInstance.setStartTime(new Date(myEarliestStartTime));
+			theInstance.setStartTime(myEarliestStartTime);
+		}
+		if (myLatestEndTime != null && hasNewStatus() && myNewStatus.isEnded()) {
+			theInstance.setEndTime(myLatestEndTime);
 		}
 		theInstance.setErrorCount(myErrorCountForAllStatuses);
 		theInstance.setCombinedRecordsProcessed(myRecordsProcessed);
 
-		updateStatus(theInstance);
+		if (getChunkCount() > 0) {
+			double percentComplete = (double) (myCompleteChunkCount) / (double) getChunkCount();
+			theInstance.setProgress(percentComplete);
+		}
 
-		setEndTime(theInstance);
+		if (myEarliestStartTime != null && myLatestEndTime != null) {
+			long elapsedTime = myLatestEndTime.getTime() - myEarliestStartTime.getTime();
+			if (elapsedTime > 0) {
+				double throughput = StopWatch.getThroughput(myRecordsProcessed, elapsedTime, TimeUnit.SECONDS);
+				theInstance.setCombinedRecordsProcessedPerSecond(throughput);
+
+				String estimatedTimeRemaining = StopWatch.formatEstimatedTimeRemaining(myCompleteChunkCount, getChunkCount(), elapsedTime);
+				theInstance.setEstimatedTimeRemaining(estimatedTimeRemaining);
+			}
+		}
 
 		theInstance.setErrorMessage(myErrormessage);
-	}
 
-	private void setEndTime(JobInstance theInstance) {
-		if (myLatestEndTime != null) {
-			if (myFailedChunkCount > 0) {
-				theInstance.setEndTime(new Date(myLatestEndTime));
-			} else if (myCompleteChunkCount > 0 && myIncompleteChunkCount == 0 && myErroredChunkCount == 0) {
-				theInstance.setEndTime(new Date(myLatestEndTime));
-			}
+		if (hasNewStatus()) {
+			ourLog.trace("Status will change for {}: {}", theInstance.getInstanceId(), myNewStatus);
 		}
-	}
 
-	private void updateStatus(JobInstance theInstance) {
 		ourLog.trace("Updating status for instance with errors: {}", myErroredChunkCount);
-		if (myCompleteChunkCount >= 1 || myErroredChunkCount >= 1) {
+		ourLog.trace("Statistics for job {}: complete/in-progress/errored/failed chunk count {}/{}/{}/{}",
+			theInstance.getInstanceId(), myCompleteChunkCount, myIncompleteChunkCount, myErroredChunkCount, myFailedChunkCount);
+	}
 
-			double percentComplete = (double) (myCompleteChunkCount) / (double) (myIncompleteChunkCount + myCompleteChunkCount + myFailedChunkCount + myErroredChunkCount);
-			theInstance.setProgress(percentComplete);
+	private int getChunkCount() {
+		return myIncompleteChunkCount + myCompleteChunkCount + myFailedChunkCount + myErroredChunkCount;
+	}
 
-			if (jobSuccessfullyCompleted()) {
-				myNewStatus = StatusEnum.COMPLETED;
-			} else if (myErroredChunkCount > 0) {
-				myNewStatus = StatusEnum.ERRORED;
-			}
-
-			ourLog.trace("Status is now {} with errored chunk count {}", myNewStatus, myErroredChunkCount);
-			if (myEarliestStartTime != null && myLatestEndTime != null) {
-				long elapsedTime = myLatestEndTime - myEarliestStartTime;
-				if (elapsedTime > 0) {
-					double throughput = StopWatch.getThroughput(myRecordsProcessed, elapsedTime, TimeUnit.SECONDS);
-					theInstance.setCombinedRecordsProcessedPerSecond(throughput);
-
-					String estimatedTimeRemaining = StopWatch.formatEstimatedTimeRemaining(myCompleteChunkCount, (myCompleteChunkCount + myIncompleteChunkCount), elapsedTime);
-					theInstance.setEstimatedTimeRemaining(estimatedTimeRemaining);
-				}
-			}
+	/**
+	 * Transitions from IN_PROGRESS/ERRORED based on chunk statuses.
+	 */
+	public void calculateNewStatus() {
+		if (myFailedChunkCount > 0) {
+			myNewStatus = StatusEnum.FAILED;
+		} else if (myErroredChunkCount > 0) {
+			myNewStatus = StatusEnum.ERRORED;
+		} else if (myIncompleteChunkCount == 0 && myCompleteChunkCount > 0) {
+			myNewStatus = StatusEnum.COMPLETED;
 		}
-	}
-
-	private boolean jobSuccessfullyCompleted() {
-		return myIncompleteChunkCount == 0 && myErroredChunkCount == 0 && myFailedChunkCount == 0;
-	}
-
-	public boolean failed() {
-		return myFailedChunkCount > 0;
 	}
 
 	public boolean changed() {
-		return (myIncompleteChunkCount + myCompleteChunkCount + myErroredChunkCount) >= 2 || myErrorCountForAllStatuses > 0;
+		return (myIncompleteChunkCount + myCompleteChunkCount + myErroredChunkCount + myErrorCountForAllStatuses) > 0;
 	}
 
 	@Override

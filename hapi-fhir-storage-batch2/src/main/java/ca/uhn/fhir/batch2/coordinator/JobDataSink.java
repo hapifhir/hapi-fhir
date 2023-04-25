@@ -69,7 +69,6 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		String instanceId = getInstanceId();
 		String targetStepId = myTargetStep.getStepId();
 
-		// wipmb what is sequence for?  It isn't global, so what?
 		int sequence = myChunkCounter.getAndIncrement();
 		OT dataValue = theData.getData();
 		String dataValueString = JsonUtil.serialize(dataValue, false);

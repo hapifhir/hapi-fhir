@@ -6,17 +6,20 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
-import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.PlatformTransactionManager;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -25,9 +28,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,8 +40,8 @@ class JpaJobPersistenceImplTest {
 	IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Mock
 	IBatch2WorkChunkRepository myWorkChunkRepository;
-	@Mock
-	PlatformTransactionManager myTxManager;
+	@Spy
+	IHapiTransactionService myTxManager = new NonTransactionalHapiTransactionService();
 	@InjectMocks
 	JpaJobPersistenceImpl mySvc;
 
@@ -111,7 +112,7 @@ class JpaJobPersistenceImplTest {
 
 		// verify
 		verify(myWorkChunkRepository)
-			.deleteAllForInstance(eq(jobId));
+			.deleteAllForInstance(jobId);
 	}
 
 	@Test
@@ -124,63 +125,9 @@ class JpaJobPersistenceImplTest {
 
 		// verify
 		verify(myWorkChunkRepository)
-			.deleteAllForInstance(eq(jobid));
+			.deleteAllForInstance(jobid);
 		verify(myJobInstanceRepository)
-			.deleteById(eq(jobid));
-	}
-
-	@Test
-	public void updateInstance_withInstance_checksInstanceExistsAndCallsSave() {
-		// setup
-		JobInstance toSave = createJobInstanceWithDemoData();
-		Batch2JobInstanceEntity entity = new Batch2JobInstanceEntity();
-		entity.setId(toSave.getInstanceId());
-
-		// when
-		when(myJobInstanceRepository.findById(eq(toSave.getInstanceId())))
-			.thenReturn(Optional.of(entity));
-
-		// test
-		mySvc.updateInstance(toSave);
-
-		// verify
-		ArgumentCaptor<Batch2JobInstanceEntity> entityCaptor = ArgumentCaptor.forClass(Batch2JobInstanceEntity.class);
-		verify(myJobInstanceRepository)
-			.save(entityCaptor.capture());
-		Batch2JobInstanceEntity saved = entityCaptor.getValue();
-		assertEquals(toSave.getInstanceId(), saved.getId());
-		assertEquals(toSave.getStatus(), saved.getStatus());
-		assertEquals(toSave.getStartTime(), entity.getStartTime());
-		assertEquals(toSave.getEndTime(), entity.getEndTime());
-		assertEquals(toSave.isCancelled(), entity.isCancelled());
-		assertEquals(toSave.getCombinedRecordsProcessed(), entity.getCombinedRecordsProcessed());
-		assertEquals(toSave.getCombinedRecordsProcessedPerSecond(), entity.getCombinedRecordsProcessedPerSecond());
-		assertEquals(toSave.getTotalElapsedMillis(), entity.getTotalElapsedMillis());
-		assertEquals(toSave.isWorkChunksPurged(), entity.getWorkChunksPurged());
-		assertEquals(toSave.getProgress(), entity.getProgress());
-		assertEquals(toSave.getErrorMessage(), entity.getErrorMessage());
-		assertEquals(toSave.getErrorCount(), entity.getErrorCount());
-		assertEquals(toSave.getEstimatedTimeRemaining(), entity.getEstimatedTimeRemaining());
-		assertEquals(toSave.getCurrentGatedStepId(), entity.getCurrentGatedStepId());
-		assertEquals(toSave.getReport(), entity.getReport());
-	}
-
-	@Test
-	public void updateInstance_invalidId_throwsIllegalArgumentException() {
-		// setup
-		JobInstance instance = createJobInstanceWithDemoData();
-
-		// when
-		when(myJobInstanceRepository.findById(anyString()))
-			.thenReturn(Optional.empty());
-
-		// test
-		try {
-			mySvc.updateInstance(instance);
-			fail();
-		} catch (IllegalArgumentException ex) {
-			assertTrue(ex.getMessage().contains("Unknown instance ID: " + instance.getInstanceId()));
-		}
+			.deleteById(jobid);
 	}
 
 	@Test
@@ -229,7 +176,7 @@ class JpaJobPersistenceImplTest {
 		JobInstance instance = createJobInstanceFromEntity(entity);
 
 		// when
-		when(myJobInstanceRepository.findById(eq(instance.getInstanceId())))
+		when(myJobInstanceRepository.findById(instance.getInstanceId()))
 			.thenReturn(Optional.of(entity));
 
 		// test
@@ -240,10 +187,6 @@ class JpaJobPersistenceImplTest {
 		assertEquals(instance.getInstanceId(), retInstance.get().getInstanceId());
 	}
 
-	private JobInstance createJobInstanceWithDemoData() {
-		return createJobInstanceFromEntity(createBatch2JobInstanceEntity());
-	}
-
 	private JobInstance createJobInstanceFromEntity(Batch2JobInstanceEntity theEntity) {
 		return JobInstanceUtil.fromEntityToInstance(theEntity);
 	}
@@ -251,8 +194,8 @@ class JpaJobPersistenceImplTest {
 	private Batch2JobInstanceEntity createBatch2JobInstanceEntity() {
 		Batch2JobInstanceEntity entity = new Batch2JobInstanceEntity();
 		entity.setId("id");
-		entity.setStartTime(new Date(2000, 1, 2));
-		entity.setEndTime(new Date(2000, 2, 3));
+		entity.setStartTime(Date.from(LocalDate.of(2000, 1, 2).atStartOfDay().toInstant(ZoneOffset.UTC)));
+		entity.setEndTime(Date.from(LocalDate.of(2000, 2, 3).atStartOfDay().toInstant(ZoneOffset.UTC)));
 		entity.setStatus(StatusEnum.COMPLETED);
 		entity.setCancelled(true);
 		entity.setFastTracking(true);

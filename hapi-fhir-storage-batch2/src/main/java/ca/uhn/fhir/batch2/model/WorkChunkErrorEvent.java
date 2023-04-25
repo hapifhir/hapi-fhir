@@ -24,8 +24,6 @@ package ca.uhn.fhir.batch2.model;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
-
 /**
  * Payload for the work-chunk error event including the error message, and the allowed retry count.
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
@@ -33,7 +31,6 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_
 public class WorkChunkErrorEvent extends BaseWorkChunkEvent {
 
 	private String myErrorMsg;
-	private int maxRetries = MAX_CHUNK_ERROR_COUNT;
 
 	public WorkChunkErrorEvent(String theChunkId) {
 		super(theChunkId);
@@ -53,15 +50,6 @@ public class WorkChunkErrorEvent extends BaseWorkChunkEvent {
 		return this;
 	}
 
-	public int getMaxRetries() {
-		return maxRetries;
-	}
-
-	// wipmb - will we ever want this?
-	public void setMaxRetries(int theMaxRetries) {
-		maxRetries = theMaxRetries;
-	}
-
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
@@ -74,7 +62,6 @@ public class WorkChunkErrorEvent extends BaseWorkChunkEvent {
 			.appendSuper(super.equals(theO))
 			.append(myChunkId, that.myChunkId)
 			.append(myErrorMsg, that.myErrorMsg)
-			.append(maxRetries, that.maxRetries)
 			.isEquals();
 	}
 
@@ -84,7 +71,6 @@ public class WorkChunkErrorEvent extends BaseWorkChunkEvent {
 			.appendSuper(super.hashCode())
 			.append(myChunkId)
 			.append(myErrorMsg)
-			.append(maxRetries)
 			.toHashCode();
 	}
 }
