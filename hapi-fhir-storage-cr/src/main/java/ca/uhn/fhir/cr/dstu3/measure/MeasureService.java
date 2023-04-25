@@ -196,7 +196,7 @@ public class MeasureService implements IDaoRegistryUser {
 		var measureProcessor = new org.opencds.cqf.cql.evaluator.measure.dstu3.Dstu3MeasureProcessor(
 			null, this.myDataProviderFactory, null, null, null, terminologyProvider, libraryContentProvider, dataProvider,
 			fhirDal, myMeasureEvaluationOptions, myCqlOptions,
-			this.myGlobalLibraryCache);
+			null);
 
 		MeasureReport report = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
 			theSubject, null, theLastReceivedOn, null, null, null, theAdditionalData);

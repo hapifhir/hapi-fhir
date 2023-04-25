@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
+@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection", "java:S1192"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
