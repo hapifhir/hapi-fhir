@@ -99,7 +99,7 @@ public class Batch2JobHelper {
 				.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
 			String currentStatus = myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
-			fail("Job still " + theBatchJobId + " has status " + currentStatus + " - All statuses:\n" + statuses);
+			fail("Job " + theBatchJobId + " still has status " + currentStatus + " - All statuses:\n" + statuses);
 		}
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
