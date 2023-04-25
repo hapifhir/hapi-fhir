@@ -88,7 +88,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
 		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
-		Patient patient = createPatientOnPartition(buildFrankPatient(), true, false, requestPartitionId1);
+		Patient patient = createPatientOnPartition(buildFrankPatient(), false, false, requestPartitionId1);
 		StringType patientId = new StringType(patient.getIdElement().getValue());
 
 		Patient sourcePatient = createPatientOnPartition(buildJanePatient(), true, false, requestPartitionId2);

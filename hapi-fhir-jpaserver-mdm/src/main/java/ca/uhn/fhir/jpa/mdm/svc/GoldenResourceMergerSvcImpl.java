@@ -87,6 +87,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 			myMdmResourceDaoSvc.upsertGoldenResource(theToGoldenResource, resourceType);
 		}
 
+		myMdmPartitionHelper.validateMdmResourcesPartitionMatches(theFromGoldenResource, theToGoldenResource);
+
 		//Merge the links from the FROM to the TO resource. Clean up dangling links.
 		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, theFromGoldenResource.getIdElement(), theMdmTransactionContext);
 

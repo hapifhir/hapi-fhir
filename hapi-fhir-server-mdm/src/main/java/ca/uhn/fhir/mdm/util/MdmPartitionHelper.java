@@ -39,7 +39,7 @@ public class MdmPartitionHelper {
 	}
 
 	/**
-	 * Checks the partition of the two resources are in complicance with the settings
+	 * Checks the partition of the two resources are in compliance with the settings
 	 * If the mdm settings states mdm resources that only matches against resources in the same partition, validate
 	 * the resources have the same partition
 	 * This is used to check in merging golden resources as well as when creating a link between source and golden resource
@@ -47,10 +47,7 @@ public class MdmPartitionHelper {
 	 * @param theToResource
 	 */
 	public void validateMdmResourcesPartitionMatches(IAnyResource theFromResource, IAnyResource theToResource){
-		if (myMdmSettings.getSearchAllPartitionForMatch()){
-			return;
-		}
-		else {
+		if (!myMdmSettings.getSearchAllPartitionForMatch()){
 			RequestPartitionId fromGoldenResourcePartitionId = (RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 			RequestPartitionId toGoldenPartitionId = (RequestPartitionId) theToResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 			if (fromGoldenResourcePartitionId != null && toGoldenPartitionId != null && fromGoldenResourcePartitionId.hasPartitionIds() && toGoldenPartitionId.hasPartitionIds() &&
