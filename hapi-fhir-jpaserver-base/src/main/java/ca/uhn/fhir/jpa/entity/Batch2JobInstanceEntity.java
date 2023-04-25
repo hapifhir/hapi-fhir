@@ -196,6 +196,10 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myEndTime = theEndTime;
 	}
 
+	public void setUpdateTime(Date theTime) {
+		myUpdateTime = theTime;
+	}
+
 	public Date getUpdateTime() {
 		return myUpdateTime;
 	}

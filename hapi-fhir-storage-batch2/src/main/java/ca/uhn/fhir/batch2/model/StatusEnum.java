@@ -22,11 +22,13 @@ package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.Logs;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 public enum StatusEnum {
@@ -55,7 +57,7 @@ public enum StatusEnum {
 	 * Task execution resulted in an error but the error may be transient (or transient status is unknown).
 	 * Retrying may result in success.
 	 */
-	ERRORED(true, true, false),
+	ERRORED(true, false, true),
 
 	/**
 	 * Task has failed and is known to be unrecoverable. There is no reason to believe that retrying will
@@ -69,6 +71,32 @@ public enum StatusEnum {
 	CANCELLED(true, true, false);
 
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+
+	/** Map from state to Set of legal inbound states */
+	static final Map<StatusEnum, Set<StatusEnum>> ourFromStates;
+	/** Map from state to Set of legal outbound states */
+	static final Map<StatusEnum, Set<StatusEnum>> ourToStates;
+
+	static {
+		EnumMap<StatusEnum, Set<StatusEnum>> fromStates = new EnumMap<>(StatusEnum.class);
+		EnumMap<StatusEnum, Set<StatusEnum>> toStates = new EnumMap<>(StatusEnum.class);
+
+		for (StatusEnum nextEnum: StatusEnum.values()) {
+			fromStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
+			toStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
+		}
+		for (StatusEnum nextPriorEnum: StatusEnum.values()) {
+			for (StatusEnum nextNextEnum: StatusEnum.values()) {
+				if (isLegalStateTransition(nextPriorEnum, nextNextEnum)) {
+					fromStates.get(nextNextEnum).add(nextPriorEnum);
+					toStates.get(nextPriorEnum).add(nextNextEnum);
+				}
+			}
+		}
+
+		ourFromStates = Maps.immutableEnumMap(fromStates);
+		ourToStates = Maps.immutableEnumMap(toStates);
+	}
 
 	private final boolean myIncomplete;
 	private final boolean myEnded;
@@ -130,7 +158,6 @@ public enum StatusEnum {
 		return retVal;
 	}
 
-	@Nonnull
 	private static void initializeStaticEndedStatuses() {
 		EnumSet<StatusEnum> endedSet = EnumSet.noneOf(StatusEnum.class);
 		EnumSet<StatusEnum> notEndedSet = EnumSet.noneOf(StatusEnum.class);
@@ -146,10 +173,7 @@ public enum StatusEnum {
 	}
 
 	public static boolean isLegalStateTransition(StatusEnum theOrigStatus, StatusEnum theNewStatus) {
-		if (theOrigStatus == theNewStatus) {
-			return true;
-		}
-		Boolean canTransition;
+		boolean canTransition;
 		switch (theOrigStatus) {
 			case QUEUED:
 				// initial state can transition to anything
@@ -159,30 +183,29 @@ public enum StatusEnum {
 				canTransition = theNewStatus != QUEUED;
 				break;
 			case ERRORED:
-				canTransition = theNewStatus == FAILED || theNewStatus == COMPLETED || theNewStatus == CANCELLED;
+				canTransition = theNewStatus == FAILED || theNewStatus == COMPLETED || theNewStatus == CANCELLED || theNewStatus == ERRORED;
 				break;
-			case COMPLETED:
 			case CANCELLED:
-			case FAILED:
 				// terminal state cannot transition
 				canTransition =  false;
+				break;
+			case COMPLETED:
+				canTransition =  false;
+				break;
+			case FAILED:
+				canTransition = theNewStatus == FAILED;
 				break;
 			case FINALIZE:
 				canTransition = theNewStatus != QUEUED && theNewStatus != IN_PROGRESS;
 				break;
 			default:
-				canTransition = null;
-				break;
+				throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
 		}
 
-		if (canTransition == null){
-			throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
-		} else {
-			if (!canTransition) {
-				ourLog.trace("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
-			}
-			return canTransition;
+		if (!canTransition) {
+			ourLog.trace("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
 		}
+		return canTransition;
 	}
 
 	public boolean isIncomplete() {
@@ -195,5 +218,19 @@ public enum StatusEnum {
 
 	public boolean isCancellable() {
 		return myIsCancellable;
+	}
+
+	/**
+	 * States that may transition to this state.
+	 */
+	public Set<StatusEnum> getPriorStates() {
+		return ourFromStates.get(this);
+	}
+
+	/**
+	 * States this state may transotion to.
+	 */
+	public Set<StatusEnum> getNextStates() {
+		return ourToStates.get(this);
 	}
 }

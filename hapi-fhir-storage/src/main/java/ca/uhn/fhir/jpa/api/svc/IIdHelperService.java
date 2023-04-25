@@ -133,7 +133,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 
 	Optional<String> translatePidIdToForcedIdWithCache(T theResourcePersistentId);
 
-	PersistentIdToForcedIdMap translatePidsToForcedIds(Set<T> theResourceIds);
+	PersistentIdToForcedIdMap<T> translatePidsToForcedIds(Set<T> theResourceIds);
 
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods

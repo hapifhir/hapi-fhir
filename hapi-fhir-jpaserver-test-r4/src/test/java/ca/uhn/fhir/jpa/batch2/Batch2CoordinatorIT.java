@@ -56,6 +56,7 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -89,10 +90,14 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		return RunOutcome.SUCCESS;
 	}
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
+
 		myCompletionHandler = details -> {};
 		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myDaoConfig.setJobFastTrackingEnabled(true);
 	}
 
 	@AfterEach
@@ -431,6 +436,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceStartRequest request = buildRequest(jobDefId);
 
 		// execute
+		ourLog.info("Starting job");
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 		String instanceId = startResponse.getJobId();
@@ -440,7 +446,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitJobInProgress(instanceId);
 
 		// execute
+		ourLog.info("Cancel job {}", instanceId);
 		myJobCoordinator.cancelInstance(instanceId);
+		ourLog.info("Cancel job {} done", instanceId);
 
 		// validate
 		myBatch2JobHelper.awaitJobCancelled(instanceId);
@@ -487,7 +495,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getJobId(),
-			12, // we want to wait a long time (2 min here) cause backoff is incremental
+			30, // we want to wait a long time (2 min here) cause backoff is incremental
 			StatusEnum.FAILED
 		);
 

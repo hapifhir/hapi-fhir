@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.maintenance;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.maintenance;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
@@ -29,6 +28,8 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.batch2.progress.InstanceProgress;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -52,7 +53,7 @@ public class JobInstanceProcessor {
 	private final String myInstanceId;
 	private final JobDefinitionRegistry myJobDefinitionegistry;
 
-	JobInstanceProcessor(IJobPersistence theJobPersistence,
+	public JobInstanceProcessor(IJobPersistence theJobPersistence,
 								BatchJobSender theBatchJobSender,
 								String theInstanceId,
 								JobChunkProgressAccumulator theProgressAccumulator,
@@ -65,7 +66,7 @@ public class JobInstanceProcessor {
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		myJobDefinitionegistry = theJobDefinitionRegistry;
 		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry);
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence, theJobDefinitionRegistry);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 	}
 
 	public void process() {
@@ -76,19 +77,31 @@ public class JobInstanceProcessor {
 		if (theInstance == null) {
 			return;
 		}
-		
-		handleCancellation(theInstance);
+
+		boolean cancelUpdate = handleCancellation(theInstance);
+		if (cancelUpdate) {
+			// reload after update
+			theInstance = myJobPersistence.fetchInstance(myInstanceId).orElseThrow();
+		}
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance);
-		
+
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
 
-	private void handleCancellation(JobInstance theInstance) {
+	private boolean handleCancellation(JobInstance theInstance) {
 		if (theInstance.isPendingCancellationRequest()) {
-			theInstance.setErrorMessage(buildCancelledMessage(theInstance));
-			myJobInstanceStatusUpdater.setCancelled(theInstance);
+			String errorMessage = buildCancelledMessage(theInstance);
+			ourLog.info("Job {} moving to CANCELLED", theInstance.getInstanceId());
+			return myJobPersistence.updateInstance(theInstance.getInstanceId(), instance -> {
+				boolean changed = myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.CANCELLED);
+				if (changed) {
+					instance.setErrorMessage(errorMessage);
+				}
+				return changed;
+			});
 		}
+		return false;
 	}
 
 	private String buildCancelledMessage(JobInstance theInstance) {
@@ -105,12 +118,12 @@ public class JobInstanceProcessor {
 				// If we're still QUEUED, there are no stats to calculate
 				break;
 			case FINALIZE:
-				// If we're in FINALIZE, the reduction step is working so we should stay out of the way until it
+				// If we're in FINALIZE, the reduction step is working, so we should stay out of the way until it
 				// marks the job as COMPLETED
 				return;
 			case IN_PROGRESS:
 			case ERRORED:
-				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress(theInstance);
+				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress(theInstance.getInstanceId());
 				break;
 			case COMPLETED:
 			case FAILED:
@@ -124,11 +137,15 @@ public class JobInstanceProcessor {
 		}
 
 		if (theInstance.isFinished() && !theInstance.isWorkChunksPurged()) {
-			myJobInstanceProgressCalculator.calculateInstanceProgressAndPopulateInstance(theInstance);
-
-			theInstance.setWorkChunksPurged(true);
 			myJobPersistence.deleteChunksAndMarkInstanceAsChunksPurged(theInstance.getInstanceId());
-			myJobPersistence.updateInstance(theInstance);
+
+			InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(theInstance.getInstanceId());
+
+			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance->{
+				progress.updateInstance(instance);
+				instance.setWorkChunksPurged(true);
+				return true;
+			});
 		}
 	}
 
@@ -186,19 +203,37 @@ public class JobInstanceProcessor {
 
 	private void processChunksForNextSteps(JobInstance theInstance, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
-		List<String> queuedChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, StatusEnum.QUEUED);
+		List<String> queuedChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
 		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
 		if (totalChunksForNextStep != queuedChunksForNextStep.size()) {
 			ourLog.debug("Total ProgressAccumulator QUEUED chunk count does not match QUEUED chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]", instanceId, nextStepId, totalChunksForNextStep, queuedChunksForNextStep.size());
 		}
-		List<String> chunksToSubmit = myJobPersistence.fetchallchunkidsforstepWithStatus(instanceId, nextStepId, StatusEnum.QUEUED);
+		// Note on sequence: we don't have XA transactions, and are talking to two stores (JPA + Queue)
+		// Sequence: 1 - So we run the query to minimize the work overlapping.
+		List<String> chunksToSubmit = myJobPersistence.fetchAllChunkIdsForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
+		// Sequence: 2 - update the job step so the workers will process them.
+		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
+			if (instance.getCurrentGatedStepId().equals(nextStepId)) {
+				// someone else beat us here.  No changes
+				return false;
+			}
+			instance.setCurrentGatedStepId(nextStepId);
+			return true;
+		});
+		if (!changed) {
+			// we collided with another maintenance job.
+			return;
+		}
+
+		// DESIGN GAP: if we die here, these chunks will never be queued.
+		// Need a WAITING stage before QUEUED for chunks, so we can catch them.
+
+		// Sequence: 3 - send the notifications
 		for (String nextChunkId : chunksToSubmit) {
 			JobWorkNotification workNotification = new JobWorkNotification(theInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
 		}
 		ourLog.debug("Submitted a batch of chunks for processing. [chunkCount={}, instanceId={}, stepId={}]", chunksToSubmit.size(), instanceId, nextStepId);
-		theInstance.setCurrentGatedStepId(nextStepId);
-		myJobPersistence.updateInstance(theInstance);
 	}
 
 }

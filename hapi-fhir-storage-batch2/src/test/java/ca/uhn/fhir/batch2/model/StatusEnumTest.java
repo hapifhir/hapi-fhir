@@ -3,19 +3,22 @@ package ca.uhn.fhir.batch2.model;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StatusEnumTest {
 	@Test
 	public void testEndedStatuses() {
-		assertThat(StatusEnum.getEndedStatuses(), containsInAnyOrder(StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.CANCELLED, StatusEnum.ERRORED));
+		assertThat(StatusEnum.getEndedStatuses(), containsInAnyOrder(StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.CANCELLED));
 	}
 	@Test
 	public void testNotEndedStatuses() {
-		assertThat(StatusEnum.getNotEndedStatuses(), containsInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.FINALIZE));
+		assertThat(StatusEnum.getNotEndedStatuses(), containsInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.ERRORED, StatusEnum.FINALIZE));
 	}
 
 	@ParameterizedTest
@@ -36,7 +39,7 @@ class StatusEnumTest {
 
 		"COMPLETED, QUEUED, false",
 		"COMPLETED, IN_PROGRESS, false",
-		"COMPLETED, COMPLETED, true",
+		"COMPLETED, COMPLETED, false",
 		"COMPLETED, CANCELLED, false",
 		"COMPLETED, ERRORED, false",
 		"COMPLETED, FAILED, false",
@@ -44,7 +47,7 @@ class StatusEnumTest {
 		"CANCELLED, QUEUED, false",
 		"CANCELLED, IN_PROGRESS, false",
 		"CANCELLED, COMPLETED, false",
-		"CANCELLED, CANCELLED, true",
+		"CANCELLED, CANCELLED, false",
 		"CANCELLED, ERRORED, false",
 		"CANCELLED, FAILED, false",
 
@@ -69,6 +72,19 @@ class StatusEnumTest {
 	})
 	public void testStateTransition(StatusEnum origStatus, StatusEnum newStatus, boolean expected) {
 		assertEquals(expected, StatusEnum.isLegalStateTransition(origStatus, newStatus));
+		if (expected) {
+			assertThat(StatusEnum.ourFromStates.get(newStatus), hasItem(origStatus));
+			assertThat(StatusEnum.ourToStates.get(origStatus), hasItem(newStatus));
+		} else {
+			assertThat(StatusEnum.ourFromStates.get(newStatus), not(hasItem(origStatus)));
+			assertThat(StatusEnum.ourToStates.get(origStatus), not(hasItem(newStatus)));
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(StatusEnum.class)
+	public void testCancellableStates(StatusEnum theState) {
+		assertEquals(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState), theState.isCancellable());
 	}
 
 	@Test

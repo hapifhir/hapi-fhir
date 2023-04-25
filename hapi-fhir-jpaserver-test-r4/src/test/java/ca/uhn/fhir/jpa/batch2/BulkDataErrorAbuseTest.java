@@ -1,10 +1,12 @@
-package ca.uhn.fhir.jpa.bulk;
+package ca.uhn.fhir.jpa.batch2;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
@@ -17,6 +19,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -60,9 +63,15 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
 
+	@BeforeEach
+	void beforeEach() {
+		afterPurgeDatabase();
+	}
+
 	@AfterEach
 	void afterEach() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		ourLog.info("BulkDataErrorAbuseTest.afterEach()");
 	}
 
 	@Test
@@ -71,7 +80,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * This test is disabled because it never actually exists. Run it if you want to ensure
+	 * This test is disabled because it never actually exits. Run it if you want to ensure
 	 * that changes to the Bulk Export Batch2 task haven't affected our ability to successfully
 	 * run endless parallel jobs. If you run it for a few minutes and it never stops on its own,
 	 * you are good.
@@ -80,7 +89,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	 * run with the build and runs 100 jobs.
 	 */
 	@Test
-	@Disabled
+	@Disabled("for manual debugging")
 	public void testNonStopAbuseBatch2BulkExportStressTest() throws InterruptedException, ExecutionException {
 		duAbuseTest(Integer.MAX_VALUE);
 	}
@@ -121,7 +130,8 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
-		ExecutorService executorService = new ThreadPoolExecutor(10, 10,
+		int workerCount = TestR4Config.ourMaxThreads - 1; // apply a little connection hunger, but not starvation.
+		ExecutorService executorService = new ThreadPoolExecutor(workerCount, workerCount,
 			0L, TimeUnit.MILLISECONDS,
 			workQueue);
 
@@ -147,8 +157,8 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 			}));
 
 			// Don't let the list of futures grow so big we run out of memory
-			if (futures.size() > 200) {
-				while (futures.size() > 100) {
+			if (futures.size() > 1000) {
+				while (futures.size() > 500) {
 					// This should always return true, but it'll throw an exception if we failed
 					assertTrue(futures.remove(0).get());
 				}
@@ -157,6 +167,12 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 		ourLog.info("Done creating tasks, waiting for task completion");
 
+		// wait for completion to avoid stranding background tasks.
+		executorService.shutdown();
+		assertTrue(executorService.awaitTermination(60, TimeUnit.SECONDS), "Finished before timeout");
+
+		// verify that all requests succeeded
+		ourLog.info("All tasks complete.  Verify results.");
 		for (var next : futures) {
 			// This should always return true, but it'll throw an exception if we failed
 			assertTrue(next.get());
@@ -217,7 +233,9 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	}
 
 	private String startJob(BulkDataExportOptions theOptions) {
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
+		BulkExportParameters startRequest = BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions);
+		startRequest.setUseExistingJobsFirst(false);
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(startRequest);
 		assertNotNull(startResponse);
 		return startResponse.getJobId();
 	}

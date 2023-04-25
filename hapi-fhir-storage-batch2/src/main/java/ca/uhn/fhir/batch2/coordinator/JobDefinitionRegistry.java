@@ -26,8 +26,8 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import com.google.common.collect.ImmutableSortedMap;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 public class JobDefinitionRegistry {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
+	// TODO MB is this safe?  Can ue use ConcurrentHashMap instead?
 	private volatile Map<String, NavigableMap<Integer, JobDefinition<?>>> myJobs = new HashMap<>();
 
 	/**
@@ -165,13 +166,9 @@ public class JobDefinitionRegistry {
 		return myJobs.isEmpty();
 	}
 
-	public Optional<JobDefinition<?>> getJobDefinition(JobInstance theJobInstance) {
-		return getJobDefinition(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
-	}
-
 	@SuppressWarnings("unchecked")
-	public <PT extends IModelJson> JobDefinition<PT> getJobDefinitionOrThrowException(JobInstance theJobInstance) {
-		return (JobDefinition<PT>) getJobDefinitionOrThrowException(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
+	public <T extends IModelJson> JobDefinition<T> getJobDefinitionOrThrowException(JobInstance theJobInstance) {
+		return (JobDefinition<T>) getJobDefinitionOrThrowException(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
 	}
 
 	public Collection<Integer> getJobDefinitionVersions(String theDefinitionId) {
