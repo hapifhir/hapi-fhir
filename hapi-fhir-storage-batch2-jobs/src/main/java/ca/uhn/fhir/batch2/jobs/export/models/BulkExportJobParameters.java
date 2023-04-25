@@ -159,7 +159,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		params.setResourceTypes(theParameters.getResourceTypes());
 		params.setExportStyle(theParameters.getExportStyle());
 		params.setFilters(theParameters.getFilters());
-        params.setPostFetchFilters(theParameters.getPostFetchFilters());
+		params.setPostFetchFilterUrls(theParameters.getPostFetchFilterUrls());
 		params.setGroupId(theParameters.getGroupId());
 		params.setOutputFormat(theParameters.getOutputFormat());
 		params.setStartDate(theParameters.getStartDate());
