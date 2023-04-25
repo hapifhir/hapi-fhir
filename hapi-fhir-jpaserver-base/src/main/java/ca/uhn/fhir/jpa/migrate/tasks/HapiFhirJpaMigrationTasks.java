@@ -284,6 +284,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			.failureAllowed()
 			.withType(ColumnTypeEnum.TEXT);
+
+		{
+			// add hash_norm to res_id to speed up joins on a second string.
+			Builder.BuilderWithTableName linkTable = version.onTable("HFJ_RES_LINK");
+			linkTable
+				.addIndex("20230424.1", "IDX_RL_TGT_v2")
+				.unique(false)
+				.online(true)
+				.withColumns("TARGET_RESOURCE_ID", "SRC_PATH", "SRC_RESOURCE_ID", "TARGET_RESOURCE_TYPE","PARTITION_ID");
+
+			// drop and recreate FK_SPIDXSTR_RESOURCE since it will be useing the old IDX_SP_STRING_RESID
+			linkTable.dropForeignKey("20230424.2", "FK_RESLINK_TARGET", "HFJ_RESOURCE");
+			linkTable.dropIndexOnline("20230424.3", "IDX_RL_TPATHRES");
+			linkTable.dropIndexOnline("20230424.4", "IDX_RL_DEST");
+			linkTable.addForeignKey("20230424.5", "FK_RESLINK_TARGET")
+				.toColumn("TARGET_RESOURCE_ID").references("HFJ_RESOURCE", "RES_ID");
+		}
 	}
 
 	protected void init640() {
