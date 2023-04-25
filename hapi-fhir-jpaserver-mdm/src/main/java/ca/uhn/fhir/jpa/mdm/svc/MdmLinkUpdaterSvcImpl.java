@@ -83,9 +83,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		IResourcePersistentId sourceResourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
 		// check if the golden resource and the source resource are in the same partition if cross partition mdm is not allowed, throw error if not
-		if (!myMdmSettings.getSearchAllPartitionForMatch()) {
-			myMdmPartitionHelper.validateMdmResourcesPartitionMatches(theGoldenResource, theSourceResource);
-		}
+		myMdmPartitionHelper.validateMdmResourcesPartitionMatches(theGoldenResource, theSourceResource);
 
 		Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, sourceResourceId);
 		if (optionalMdmLink.isEmpty()) {
