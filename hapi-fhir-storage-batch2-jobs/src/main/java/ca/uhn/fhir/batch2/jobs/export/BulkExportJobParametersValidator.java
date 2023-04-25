@@ -66,8 +66,8 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 			errorMsgs.add("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
 		}
 		// validate the exportId
-		if (!StringUtils.isBlank(theParameters.getExportId())) {
-			if (containsIllegalCharacters(theParameters.getExportId())) {
+		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
+			if (containsIllegalCharacters(theParameters.getExportIdentifier())) {
 				errorMsgs.add("Export ID must be alphanumeric and can only contain the following special characters: *  ' ( ) _ - . / ");
 			}
 		}

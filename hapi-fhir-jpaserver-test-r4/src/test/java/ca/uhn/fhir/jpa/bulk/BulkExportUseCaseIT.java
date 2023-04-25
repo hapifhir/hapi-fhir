@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -113,7 +114,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			myClient.update().resource(p).execute();
 
 			//And Given we start a bulk export job with a specific export id
-			String pollingLocation = submitBulkExportForTypes("im-an-export-identifier", "Patient");
+			String pollingLocation = submitBulkExportForTypesWithExportId("im-an-export-identifier", "Patient");
 			String jobId = getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -134,9 +135,17 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 				Binary binaryResource = myClient.read().resource(Binary.class).withUrl(binary_url).execute();
 
 				List<Extension> extension = binaryResource.getMeta().getExtension();
-				assertThat(extension, hasSize(2));
-			}
+				assertThat(extension, hasSize(3));
 
+				assertThat(extension.get(0).getUrl(), is(equalTo(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER)));
+				assertThat(extension.get(0).getValue().toString(), is(equalTo("im-an-export-identifier")));
+
+				assertThat(extension.get(1).getUrl(), is(equalTo(JpaConstants.BULK_META_EXTENSION_JOB_ID)));
+				assertThat(extension.get(1).getValue().toString(), is(equalTo(jobId)));
+
+				assertThat(extension.get(2).getUrl(), is(equalTo(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE)));
+				assertThat(extension.get(2).getValue().toString(), is(equalTo("Patient")));
+			}
 		}
 
 		@Test

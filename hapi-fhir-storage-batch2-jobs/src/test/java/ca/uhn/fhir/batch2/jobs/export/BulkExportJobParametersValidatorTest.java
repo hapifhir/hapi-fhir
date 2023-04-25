@@ -59,7 +59,7 @@ public class BulkExportJobParametersValidatorTest {
 	@Test
 	public void validate_exportId_illegal_characters() {
 		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportId("exportId&&&");
+		parameters.setExportIdentifier("exportId&&&");
 		// when
 		when(myDaoRegistry.isResourceTypeSupported(anyString()))
 			.thenReturn(true);
@@ -74,7 +74,7 @@ public class BulkExportJobParametersValidatorTest {
 	@Test
 	public void validate_exportId_legal_characters() {
 		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportId("HELLO!/WORLD/");
+		parameters.setExportIdentifier("HELLO!/WORLD/");
 		// when
 		when(myDaoRegistry.isResourceTypeSupported(anyString()))
 			.thenReturn(true);

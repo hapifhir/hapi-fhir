@@ -74,7 +74,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("expandMdm")
 	private boolean myExpandMdm;
 
-	public String getExportId() {
+	public String getExportIdentifier() {
 		return myExportId;
 	}
 
@@ -82,7 +82,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		return myResourceTypes;
 	}
 
-	public void setExportId(String theExportId) {
+	public void setExportIdentifier(String theExportId) {
 		myExportId = theExportId;
 	}
 
@@ -157,6 +157,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		params.setResourceTypes(theParameters.getResourceTypes());
+		params.setExportIdentifier(theParameters.getExportIdentifier());
 		params.setExportStyle(theParameters.getExportStyle());
 		params.setFilters(theParameters.getFilters());
 		params.setGroupId(theParameters.getGroupId());
