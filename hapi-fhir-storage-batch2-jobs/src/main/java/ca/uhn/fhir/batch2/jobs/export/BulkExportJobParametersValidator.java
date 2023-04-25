@@ -32,6 +32,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BulkExportJobParametersValidator implements IJobParametersValidator<BulkExportJobParameters> {
 
@@ -62,6 +64,12 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		if (!Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theParameters.getOutputFormat())) {
 			errorMsgs.add("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
 		}
+		// validate the exportId
+		if (theParameters.getExportId() != null || !theParameters.getExportId().isEmpty()) {
+			if (containsIllegalCharacters(theParameters.getExportId())) {
+				errorMsgs.add("Export ID must be alphanumeric and can only contain the following special characters: *  ' ( ) _ - . / ");
+			}
+		}
 
 		// validate for group
 		BulkDataExportOptions.ExportStyle style = theParameters.getExportStyle();
@@ -83,5 +91,11 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		}
 
 		return errorMsgs;
+	}
+
+	public boolean containsIllegalCharacters(String theStringToExamine) {
+		Pattern pattern = Pattern.compile("[~#@+&%{}<>\\[\\]|\"^]");
+		Matcher matcher = pattern.matcher(theStringToExamine);
+		return matcher.find();
 	}
 }

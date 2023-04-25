@@ -46,6 +46,9 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("since")
 	private Date myStartDate;
 
+	@JsonProperty("exportId")
+	private String myExportId;
+
 	@JsonProperty("filters")
 	private List<String> myFilters;
 
@@ -71,8 +74,16 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("expandMdm")
 	private boolean myExpandMdm;
 
+	public String getExportId() {
+		return myExportId;
+	}
+
 	public List<String> getResourceTypes() {
 		return myResourceTypes;
+	}
+
+	public void setExportId(String theExportId) {
+		myExportId = theExportId;
 	}
 
 	public void setResourceTypes(List<String> theResourceTypes) {

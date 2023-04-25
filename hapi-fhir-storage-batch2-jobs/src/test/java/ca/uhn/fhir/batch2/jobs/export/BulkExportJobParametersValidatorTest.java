@@ -55,6 +55,35 @@ public class BulkExportJobParametersValidatorTest {
 		assertTrue(result.isEmpty());
 	}
 
+
+	@Test
+	public void validate_exportId_illegal_characters() {
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setExportId("exportId&&&");
+		// when
+		when(myDaoRegistry.isResourceTypeSupported(anyString()))
+			.thenReturn(true);
+		List<String> errors = myValidator.validate(parameters);
+
+		// verify
+		assertNotNull(errors);
+		assertEquals(1, errors.size());
+		assertEquals(errors.get(0), "Export ID must be alphanumeric and can only contain the following special characters: *  ' ( ) _ - . / ");
+	}
+
+	@Test
+	public void validate_exportId_legal_characters() {
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setExportId("HELLO!/WORLD/");
+		// when
+		when(myDaoRegistry.isResourceTypeSupported(anyString()))
+			.thenReturn(true);
+		List<String> errors = myValidator.validate(parameters);
+
+		// verify
+		assertNotNull(errors);
+		assertEquals(0, errors.size());
+	}
 	@Test
 	public void validate_validParametersForPatient_returnsEmptyList() {
 		// setup
