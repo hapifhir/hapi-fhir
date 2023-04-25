@@ -29,6 +29,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -161,6 +162,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	public static final String BASE_RESOURCE_NAME = "resource";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
