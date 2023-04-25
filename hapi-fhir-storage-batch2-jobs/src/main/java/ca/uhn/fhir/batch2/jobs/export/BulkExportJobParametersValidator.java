@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -65,7 +66,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 			errorMsgs.add("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
 		}
 		// validate the exportId
-		if (theParameters.getExportId() != null || !theParameters.getExportId().isEmpty()) {
+		if (!StringUtils.isBlank(theParameters.getExportId())) {
 			if (containsIllegalCharacters(theParameters.getExportId())) {
 				errorMsgs.add("Export ID must be alphanumeric and can only contain the following special characters: *  ' ( ) _ - . / ");
 			}

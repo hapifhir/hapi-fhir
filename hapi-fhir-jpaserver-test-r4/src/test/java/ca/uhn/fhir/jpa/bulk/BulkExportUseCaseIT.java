@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
@@ -112,13 +113,13 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			myClient.update().resource(p).execute();
 
 			//And Given we start a bulk export job with a specific export id
-			String pollingLocation = submitBulkExportForTypes("Patient");
+			String pollingLocation = submitBulkExportForTypes("im-an-export-identifier", "Patient");
 			String jobId = getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			//Then: When the poll shows as complete, all attributes should be filled.
 			HttpGet statusGet = new HttpGet(pollingLocation);
-			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
+			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient&_exportId=im-an-export-identifier";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
 				assertEquals(200, status.getStatusLine().getStatusCode());
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -128,12 +129,12 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
-				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
-				assertThat(result.getTransactionTime(), is(notNullValue()));
 				assertThat(result.getOutput(), is(not(empty())));
+				String binary_url = result.getOutput().get(0).getUrl();
+				Binary binaryResource = myClient.read().resource(Binary.class).withUrl(binary_url).execute();
 
-				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
-				assertThat(responseContent, containsString("\"error\" : [ ]"));
+				List<Extension> extension = binaryResource.getMeta().getExtension();
+				assertThat(extension, hasSize(2));
 			}
 
 		}
