@@ -118,8 +118,11 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmContext.getResourceType());
 		if (theMatchResult == MdmMatchResultEnum.NO_MATCH) {
-			// Need to find a new Golden Resource to link this target to
-			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(theSourceResource, theMdmContext);
+			// We need to return no match for when a Golden Resource has already been found elsewhere
+			if (myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH).isEmpty()) {
+				// Need to find a new Golden Resource to link this target to
+				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(theSourceResource, theMdmContext);
+			}
 		}
 		return theGoldenResource;
 	}

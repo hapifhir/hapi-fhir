@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 
-@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
+@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection", "java:S1192"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
@@ -303,6 +303,24 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			"alter table hfj_spidx_uri alter column hash_identity set statistics 1000",
 			"alter table hfj_spidx_uri alter column hash_uri set statistics 10000"
 			)));
+
+		{
+			// add hash_norm to res_id to speed up joins on a second string.
+			Builder.BuilderWithTableName linkTable = version.onTable("HFJ_RES_LINK");
+			linkTable
+				.addIndex("20230424.1", "IDX_RL_TGT_v2")
+				.unique(false)
+				.online(true)
+				.withColumns("TARGET_RESOURCE_ID", "SRC_PATH", "SRC_RESOURCE_ID", "TARGET_RESOURCE_TYPE","PARTITION_ID");
+
+			// drop and recreate FK_SPIDXSTR_RESOURCE since it will be useing the old IDX_SP_STRING_RESID
+			linkTable.dropForeignKey("20230424.2", "FK_RESLINK_TARGET", "HFJ_RESOURCE");
+			linkTable.dropIndexOnline("20230424.3", "IDX_RL_TPATHRES");
+			linkTable.dropIndexOnline("20230424.4", "IDX_RL_DEST");
+			linkTable.addForeignKey("20230424.5", "FK_RESLINK_TARGET")
+				.toColumn("TARGET_RESOURCE_ID").references("HFJ_RESOURCE", "RES_ID");
+		}
+
 	}
 
 	protected void init640() {

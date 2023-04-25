@@ -77,6 +77,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -88,7 +89,7 @@ import java.util.concurrent.ForkJoinPool;
 
 @Import(AdapterConfiguration.class)
 @Configuration
-public abstract class BaseClinicalReasoningConfig {
+public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 
 	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
 
@@ -149,21 +150,10 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
+	@Scope("prototype")
 	public ModelManager modelManager(
 		Map<ModelIdentifier, Model> theGlobalModelCache) {
 		return new CacheAwareModelManager(theGlobalModelCache);
-	}
-
-	@Bean
-	public ILibraryManagerFactory libraryManagerFactory(
-		ModelManager theModelManager) {
-		return (providers) -> {
-			LibraryManager libraryManager = new LibraryManager(theModelManager);
-			for (LibrarySourceProvider provider : providers) {
-				libraryManager.getLibrarySourceLoader().registerProvider(provider);
-			}
-			return libraryManager;
-		};
 	}
 
 	@Bean
@@ -229,6 +219,7 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
+	@Scope("prototype")
 	ILibraryLoaderFactory libraryLoaderFactory(
 		Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> theGlobalLibraryCache,
 		ModelManager theModelManager, CqlTranslatorOptions theCqlTranslatorOptions, CrProperties.CqlProperties theCqlProperties) {
