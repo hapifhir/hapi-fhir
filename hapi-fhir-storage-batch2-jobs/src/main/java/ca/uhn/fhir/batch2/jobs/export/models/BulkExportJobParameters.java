@@ -49,6 +49,9 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("filters")
 	private List<String> myFilters;
 
+	@JsonProperty("postFetchFilterUrls")
+	private List<String> myPostFetchFilterUrls;
+
 	@JsonProperty("outputFormat")
 	private String myOutputFormat;
 
@@ -93,6 +96,14 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 
 	public void setFilters(List<String> theFilters) {
 		myFilters = theFilters;
+	}
+
+	public List<String> getPostFetchFilterUrls() {
+		return myPostFetchFilterUrls;
+	}
+
+	public void setPostFetchFilterUrls(List<String> thePostFetchFilterUrls) {
+		myPostFetchFilterUrls = thePostFetchFilterUrls;
 	}
 
 	public String getOutputFormat() {
@@ -148,6 +159,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		params.setResourceTypes(theParameters.getResourceTypes());
 		params.setExportStyle(theParameters.getExportStyle());
 		params.setFilters(theParameters.getFilters());
+        params.setPostFetchFilters(theParameters.getPostFetchFilters());
 		params.setGroupId(theParameters.getGroupId());
 		params.setOutputFormat(theParameters.getOutputFormat());
 		params.setStartDate(theParameters.getStartDate());

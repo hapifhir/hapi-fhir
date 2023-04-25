@@ -65,6 +65,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -182,6 +183,7 @@ public class BulkDataExportProviderTest {
 		String patientResource = "Patient";
 		String practitionerResource = "Practitioner";
 		String filter = "Patient?identifier=foo";
+		String postFetchFilter = "Patient?_tag=foo";
 		when(myJobRunner.startNewJob(any()))
 			.thenReturn(createJobStartResponse());
 
@@ -192,6 +194,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType(patientResource + ", " + practitionerResource));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType(filter));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_POST_FETCH_FILTER_URL, new StringType(postFetchFilter));
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
@@ -215,6 +218,7 @@ public class BulkDataExportProviderTest {
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertNotNull(params.getStartDate());
 		assertTrue(params.getFilters().contains(filter));
+		assertThat(params.getPostFetchFilterUrls(), contains("Patient?_tag=foo"));
 	}
 
 	@Test
