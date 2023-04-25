@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.LineIterator;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
@@ -41,6 +43,7 @@ import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearc
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -746,6 +749,113 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			assertThat("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds, foundIds, not(hasItem(excludedString)));
 		}
 	}
+
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_NoParams() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("foo");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: foo"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_NoParamsAfterQuestionMark() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Patient?");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: Patient?"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_InvalidResourceType() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Foo?active=true");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, unknown resource type: Foo"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_UnsupportedParam() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Observation?subject.identifier=blah");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Chained parameters are not supported"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_UnknownParam() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Observation?foo=blah");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString("Invalid post-fetch filter URL."));
+			assertThat(e.getMessage(), containsString("Resource type Observation does not have a parameter with name: foo"));
+
+		}
+	}
+
+	@Nonnull
+	private static BulkDataExportOptions createOptionsWithPostFetchFilterUrl(String postFetchUrl) {
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Set.of("Patient"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		options.setPostFetchFilterUrls(Set.of(postFetchUrl));
+		return options;
+	}
+
 
 	private static Stream<Set<String>> bulkExportOptionsResourceTypes() {
 		return Stream.of(Set.of("Patient", "Group"), Set.of("Patient", "Group", "Device"));
