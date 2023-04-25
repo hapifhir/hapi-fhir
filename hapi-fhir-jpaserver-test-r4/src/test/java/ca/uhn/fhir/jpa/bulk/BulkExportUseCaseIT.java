@@ -30,6 +30,7 @@ import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -102,6 +103,41 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 	@Nested
 	public class SpecConformanceIT {
 
+
+		@Test
+		public void testBulkExportJobsAreMetaTaggedWithJobIdAndExportId() throws IOException {
+			//Given a patient exists
+			Patient p = new Patient();
+			p.setId("Pat-1");
+			myClient.update().resource(p).execute();
+
+			//And Given we start a bulk export job with a specific export id
+			String pollingLocation = submitBulkExportForTypes("Patient");
+			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
+
+			//Then: When the poll shows as complete, all attributes should be filled.
+			HttpGet statusGet = new HttpGet(pollingLocation);
+			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
+			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
+				assertEquals(200, status.getStatusLine().getStatusCode());
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				assertTrue(isNotBlank(responseContent), responseContent);
+
+				ourLog.info(responseContent);
+
+				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
+				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
+				assertThat(result.getTransactionTime(), is(notNullValue()));
+				assertThat(result.getOutput(), is(not(empty())));
+
+				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+				assertThat(responseContent, containsString("\"error\" : [ ]"));
+			}
+
+		}
+
 		@Test
 		public void testBatchJobsAreOnlyReusedIfInProgress() throws IOException {
 			//Given a patient exists
@@ -110,7 +146,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			myClient.update().resource(p).execute();
 
 			//And Given we start a bulk export job
-			String pollingLocation = submitBulkExportForTypes("Patient");
+			String pollingLocation = submitBulkExportForTypesWithExportId("my-export-id-","Patient");
 			String jobId = getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -285,8 +321,16 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 	}
 
 	private String submitBulkExportForTypes(String... theTypes) throws IOException {
+		return submitBulkExportForTypesWithExportId(null, theTypes);
+	}
+	private String submitBulkExportForTypesWithExportId(String theExportId, String... theTypes) throws IOException {
 		String typeString = String.join(",", theTypes);
-		HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export?_type=" + typeString);
+		String uri = myClient.getServerBase() + "/$export?_type=" + typeString;
+		if (!StringUtils.isBlank(theExportId)) {
+			uri += "&_exportId=" + theExportId;
+		}
+
+		HttpGet httpGet = new HttpGet(uri);
 		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		String pollingLocation;
 		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
