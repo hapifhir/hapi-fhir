@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -51,6 +52,9 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 
 	@JsonProperty("filters")
 	private List<String> myFilters;
+
+	@JsonProperty("postFetchFilterUrls")
+	private List<String> myPostFetchFilterUrls;
 
 	@JsonProperty("outputFormat")
 	private String myOutputFormat;
@@ -104,6 +108,17 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 
 	public void setFilters(List<String> theFilters) {
 		myFilters = theFilters;
+	}
+
+	public List<String> getPostFetchFilterUrls() {
+		if (myPostFetchFilterUrls == null) {
+			myPostFetchFilterUrls = new ArrayList<>();
+		}
+		return myPostFetchFilterUrls;
+	}
+
+	public void setPostFetchFilterUrls(List<String> thePostFetchFilterUrls) {
+		myPostFetchFilterUrls = thePostFetchFilterUrls;
 	}
 
 	public String getOutputFormat() {
@@ -160,6 +175,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		params.setExportIdentifier(theParameters.getExportIdentifier());
 		params.setExportStyle(theParameters.getExportStyle());
 		params.setFilters(theParameters.getFilters());
+		params.setPostFetchFilterUrls(theParameters.getPostFetchFilterUrls());
 		params.setGroupId(theParameters.getGroupId());
 		params.setOutputFormat(theParameters.getOutputFormat());
 		params.setStartDate(theParameters.getStartDate());

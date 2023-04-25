@@ -13,6 +13,8 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -24,6 +26,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Group;
@@ -130,6 +133,9 @@ public class JpaBulkExportProcessorTest {
 	@Mock
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
+	@Spy
+	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
+
 	@InjectMocks
 	private JpaBulkExportProcessor myProcessor;
 
@@ -225,7 +231,7 @@ public class JpaBulkExportProcessorTest {
 		try {
 			myProcessor.getResourcePidIterator(parameters);
 			fail();
-		} catch (IllegalStateException ex) {
+		} catch (InternalErrorException ex) {
 			assertTrue(ex.getMessage().contains("You attempted to start a Patient Bulk Export,"));
 		}
 	}

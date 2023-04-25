@@ -49,8 +49,6 @@ import java.util.Set;
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
-	public static final int MAX_IDS_TO_BATCH = 900;
-
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
 
