@@ -107,8 +107,14 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		List<IBaseResource> allResources = fetchAllResources(idList, parameters.getPartitionId());
 
 		// Apply post-fetch filtering
-		if (!parameters.getPostFetchFilterUrls().isEmpty()) {
-			applyPostFetchFiltering(allResources, parameters.getPostFetchFilterUrls(), instanceId, chunkId);
+		String resourceType = idList.getResourceType();
+		List<String> postFetchFilterUrls = parameters
+			.getPostFetchFilterUrls()
+			.stream()
+			.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
+			.collect(Collectors.toList());
+		if (!postFetchFilterUrls.isEmpty()) {
+			applyPostFetchFiltering(allResources, postFetchFilterUrls, instanceId, chunkId);
 		}
 
 		// if necessary, expand resources

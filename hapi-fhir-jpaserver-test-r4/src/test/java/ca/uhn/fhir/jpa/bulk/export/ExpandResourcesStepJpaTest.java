@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -154,5 +155,46 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 	}
 
+
+	@Test
+	public void testPostFetchFiltering_NoFiltersForGivenResourceType() {
+		List<Long> allIds = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
+			// Create a patient that will match the post-fetch filtering
+			Patient matchingPatient = new Patient();
+			matchingPatient.setActive(true);
+			Long matchingId = myPatientDao.create(matchingPatient, mySrd).getId().getIdPartAsLong();
+			allIds.add(matchingId);
+		}
+
+		// Setup
+
+		ResourceIdList resourceList = new ResourceIdList();
+		resourceList.setResourceType("Patient");
+		resourceList.setIds(allIds.stream().map(t -> new BatchResourceId().setResourceType("Patient").setId(Long.toString(t))).toList());
+
+		BulkExportJobParameters params = new BulkExportJobParameters();
+		params.setPostFetchFilterUrls(List.of("Observation?status=final"));
+		JobInstance jobInstance = new JobInstance();
+		String chunkId = "ABC";
+
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+
+		// Test
+
+		myCaptureQueriesListener.clear();
+		myExpandResourcesStep.run(details, mySink);
+
+		// Verify
+		verify(mySink, times(1)).accept(myWorkChunkCaptor.capture());
+		List<Long> resourceIds = myWorkChunkCaptor
+			.getValue()
+			.getStringifiedResources()
+			.stream()
+			.map(t -> myFhirContext.newJsonParser().parseResource(t).getIdElement().getIdPartAsLong())
+			.toList();
+		assertThat(resourceIds.toString(), resourceIds, containsInAnyOrder(allIds.toArray(new Long[0])));
+
+	}
 
 }
