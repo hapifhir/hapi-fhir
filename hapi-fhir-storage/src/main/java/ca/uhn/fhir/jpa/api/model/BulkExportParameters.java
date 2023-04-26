@@ -48,6 +48,8 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	 */
 	private List<String> myFilters;
 
+	private List<String> myPostFetchFilterUrls;
+
 	/**
 	 * URLs to be applied by the inMemoryMatcher after the SQL select
 	 */

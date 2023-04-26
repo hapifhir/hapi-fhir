@@ -202,7 +202,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(2322) + "No SubscriptionTopic exists with url: http://topic.url"));
+			assertThat(e.getMessage(), is(Msg.code(2322) + "No SubscriptionTopic exists with topic: http://topic.url"));
 		}
 
 		// Happy path
@@ -227,6 +227,11 @@ public class SubscriptionValidatingInterceptorTest {
 		@Bean
 		SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
 			return new SubscriptionCanonicalizer(theFhirContext);
+		}
+
+		@Bean
+		SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+			return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
 		}
 	}
 
