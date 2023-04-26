@@ -121,7 +121,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		when(myContextServices.getAgentUserWho(any())).thenReturn(new Reference().setIdentifier(new Identifier().setSystem("http://users").setValue("abc")));
 		when(myContextServices.massageResourceIdForStorage(any(), any(), any())).thenCallRealMethod();
 
-		mySvc = new BalpAuditCaptureInterceptor(ourCtx, myAuditEventSink, myContextServices);
+		mySvc = new BalpAuditCaptureInterceptor(myAuditEventSink, myContextServices);
 		ourServer.registerInterceptor(mySvc);
 	}
 

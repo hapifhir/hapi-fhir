@@ -37,7 +37,8 @@ public interface IBalpAuditContextServices {
 	/**
 	 * Turns an entity resource ID from an {@link IIdType} to a String.
 	 * The default implementation injects the server's base URL into
-	 * the ID.
+	 * the ID in order to create fully qualified URLs for resource
+	 * references within BALP events.
 	 */
 	@Nonnull
 	default String massageResourceIdForStorage(@Nonnull RequestDetails theRequestDetails, @Nonnull IBaseResource theResource, @Nonnull IIdType theResourceId) {

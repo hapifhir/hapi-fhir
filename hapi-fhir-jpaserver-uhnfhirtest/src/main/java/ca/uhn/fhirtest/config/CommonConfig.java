@@ -118,8 +118,8 @@ public class CommonConfig {
 	}
 
 	@Bean
-	public BalpAuditCaptureInterceptor balpAuditCaptureInterceptor(FhirContext theFhirContext, IBalpAuditEventSink theAuditSink, IBalpAuditContextServices theAuditContextServices) {
-		return new BalpAuditCaptureInterceptor(theFhirContext, theAuditSink, theAuditContextServices);
+	public BalpAuditCaptureInterceptor balpAuditCaptureInterceptor(IBalpAuditEventSink theAuditSink, IBalpAuditContextServices theAuditContextServices) {
+		return new BalpAuditCaptureInterceptor(theAuditSink, theAuditContextServices);
 	}
 
 	@Bean

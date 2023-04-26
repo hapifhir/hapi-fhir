@@ -26,6 +26,11 @@ import java.util.TreeSet;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
+ * The IHE Basic Audit Logging Pattern (BALP) interceptor can be used to autopmatically generate
+ * AuditEvent resources that are conformant to the BALP profile in response to events in a
+ * FHIR server. See <a href="https://hapifhir.io/hapi-fhir/security/balp_interceptor.html">BALP Interceptor</a>
+ * in the HAPI FHIR documentation for more information.
+ *
  * @since 6.6.0
  */
 public class BalpAuditCaptureInterceptor {
@@ -50,9 +55,17 @@ public class BalpAuditCaptureInterceptor {
 
 	/**
 	 * Constructor
+	 *
+	 * @param theAuditEventSink This service is the target for generated AuditEvent resources. The {@link BalpAuditCaptureInterceptor}
+	 *                          does not actually store AuditEvents, it simply generates them when appropriate and passes them to
+	 *                          the sink service. The sink service might store them locally, transmit them to a remote
+	 *                          repository, or even simply log them to a syslog.
+	 * @param theContextServices This service supplies details to the BALP about the context of a given request. For example,
+	 *                           in order to generate a conformant AuditEvent resource, this interceptor needs to determine the
+	 *                           identity of the user and the client from the {@link ca.uhn.fhir.rest.api.server.RequestDetails}
+	 *                           object.
 	 */
-	public BalpAuditCaptureInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull IBalpAuditEventSink theAuditEventSink, @Nonnull IBalpAuditContextServices theContextServices) {
-		Validate.notNull(theFhirContext);
+	public BalpAuditCaptureInterceptor(@Nonnull IBalpAuditEventSink theAuditEventSink, @Nonnull IBalpAuditContextServices theContextServices) {
 		Validate.notNull(theAuditEventSink);
 		Validate.notNull(theContextServices);
 		myAuditEventSink = theAuditEventSink;
@@ -63,9 +76,12 @@ public class BalpAuditCaptureInterceptor {
 		myAdditionalPatientCompartmentParamNames = theAdditionalPatientCompartmentParamNames;
 	}
 
+	/**
+	 * Interceptor hook method. Do not call directly.
+	 */
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
-	public void hookStoragePreShowResources(IPreResourceShowDetails theDetails, ServletRequestDetails theRequestDetails) {
+	void hookStoragePreShowResources(IPreResourceShowDetails theDetails, ServletRequestDetails theRequestDetails) {
 		switch (theRequestDetails.getRestOperationType()) {
 			case SEARCH_TYPE:
 			case SEARCH_SYSTEM:
