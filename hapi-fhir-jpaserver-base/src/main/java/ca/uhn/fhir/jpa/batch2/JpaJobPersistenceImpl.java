@@ -320,16 +320,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return statusesForStep.isEmpty() || statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
 	}
 
-	/**
-	 * Note: Not @Transactional because {@link #fetchChunks(String, boolean, int, int, Consumer)} starts a transaction
-	 */
-	@Override
-	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
-		ArrayList<WorkChunk> chunks = new ArrayList<>();
-		fetchChunks(theInstanceId, false, thePageSize, thePageIndex, chunks::add);
-		return chunks;
-	}
-
 	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
 		myTransactionService
 			.withSystemRequest()

@@ -26,7 +26,6 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
-import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,26 +113,14 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
 
+
 	/**
-	 * Fetches all chunks for a given instance, without loading the data
-	 *
-	 * TODO MB this seems to only be used by tests.  Can we use the iterator instead?
-	 * @param theInstanceId The instance ID
-	 * @param thePageSize   The page size
-	 * @param thePageIndex  The page index
+	 * Fetch all chunks for a given instance.
+	 * @param theInstanceId - instance id
+	 * @param theWithData - whether to include the data - not needed for stats collection
+	 * @return - an iterator for fetching work chunks
 	 */
-	// wipmb delete - replace with stream or iterator
-	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
-
-
-
-		/**
-		 * Fetch all chunks for a given instance.
-		 * @param theInstanceId - instance id
-		 * @param theWithData - whether or not to include the data
-		 * @return - an iterator for fetching work chunks
-		 */
-// wipmb replace with stream
+	// wipmb replace with stream?
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**

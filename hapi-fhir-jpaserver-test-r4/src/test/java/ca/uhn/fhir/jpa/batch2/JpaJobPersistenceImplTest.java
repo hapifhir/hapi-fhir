@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
@@ -45,7 +46,6 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -309,41 +309,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testFetchChunks() {
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-
-		List<String> ids = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
-			ids.add(id);
-		}
-
-		List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 0);
-		assertNull(chunks.get(0).getData());
-		assertNull(chunks.get(1).getData());
-		assertNull(chunks.get(2).getData());
-		assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-			contains(ids.get(0), ids.get(1), ids.get(2)));
-
-		chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 1);
-		assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-			contains(ids.get(3), ids.get(4), ids.get(5)));
-
-		chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 2);
-		assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-			contains(ids.get(6), ids.get(7), ids.get(8)));
-
-		chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 3);
-		assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-			contains(ids.get(9)));
-
-		chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 4);
-		assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-			empty());
-	}
-
-	@Test
 	public void testUpdateTime() {
 		// Setup
 		JobInstance instance = createInstance();
@@ -581,7 +546,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 		});
 
-		List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
+		List<WorkChunk> chunks = ImmutableList.copyOf(mySvc.fetchAllWorkChunksIterator(instanceId, true));
 		assertEquals(1, chunks.size());
 		assertEquals(2, chunks.get(0).getErrorCount());
 	}
