@@ -17,11 +17,14 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.MatchGrade;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,6 +45,16 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_GOLDEN_RESOURCE), null);
+	}
+
+	@Override
+	@AfterEach
+	public void after() throws IOException {
+		super.after();
+
+		myPartitionSettings.setPartitioningEnabled(false);
+		myMdmSettings.setSearchAllPartitionForMatch(false);
+		myMdmSettings.setGoldenResourcePartitionName("");
 	}
 
 
