@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -87,7 +88,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		IClientExecutable<?, ?> operation;
 
 		if (theSubscription.isTopicSubscription()) {
-			operation = createDeliveryRequestTopic((IBaseBundle) theMsg.getPayload(myFhirContext), theClient, thePayloadResource);
+			operation = createDeliveryRequestTopic((IBaseBundle) thePayloadResource, theClient);
 		} else if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
 			operation = createDeliveryRequestTransaction(theSubscription, theClient, thePayloadResource);
 		} else if (thePayloadType != null) {
@@ -141,43 +142,76 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		return theClient.transaction().withBundle(bundle);
 	}
 
-	private IClientExecutable<?, ?> createDeliveryRequestTopic(IBaseBundle theBundle, IGenericClient theClient, IBaseResource thePayloadResource) {
+	private IClientExecutable<?, ?> createDeliveryRequestTopic(IBaseBundle theBundle, IGenericClient theClient) {
 		return theClient.transaction().withBundle(theBundle);
 	}
 
-	public IBaseResource getResource(IIdType payloadId, RequestPartitionId thePartitionId, boolean theDeletedOK) throws ResourceGoneException {
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(payloadId.getResourceType());
+	public IBaseResource getResource(IIdType thePayloadId, RequestPartitionId thePartitionId, boolean theDeletedOK) throws ResourceGoneException {
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(thePayloadId.getResourceType());
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(thePartitionId);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceDef.getImplementingClass());
-		return dao.read(payloadId.toVersionless(), systemRequestDetails, theDeletedOK);
+		return dao.read(thePayloadId.toVersionless(), systemRequestDetails, theDeletedOK);
 	}
 
-
+	/**
+	 * Perform operations on the payload based on various subscription extension settings such as deliver latest version,
+	 * delete and/or strip version id.
+	 * @param theMsg
+	 * @param theSubscription
+	 * @return
+	 */
 	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
 		IBaseResource payloadResource = theMsg.getPayload(myFhirContext);
 
-		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
-			IIdType payloadId = theMsg.getPayloadId(myFhirContext);
+		if (payloadResource instanceof IBaseBundle) {
+			return getAndMassageBundle(theMsg, (IBaseBundle) payloadResource, theSubscription);
+		} else {
+			return getAndMassageResource(theMsg, payloadResource, theSubscription);
+		}
+	}
 
+	private IBaseResource getAndMassageBundle(ResourceDeliveryMessage theMsg, IBaseBundle theBundle, CanonicalSubscription theSubscription) {
+		BundleUtil.processEntries(myFhirContext, theBundle, entry -> {
+			IBaseResource entryResource = entry.getResource();
+			if (entryResource != null) {
+				// SubscriptionStatus is a "virtual" resource type that is not stored in the repository
+				if (!"SubscriptionStatus".equals(myFhirContext.getResourceType(entryResource))) {
+					IBaseResource updatedResource = getAndMassageResource(theMsg, entryResource, theSubscription);
+					entry.setFullUrl(updatedResource.getIdElement().getValue());
+					entry.setResource(updatedResource);
+				}
+			}
+		});
+		return theBundle;
+	}
+
+	private IBaseResource getAndMassageResource(ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource, CanonicalSubscription theSubscription) {
+		if (thePayloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
+
+			IIdType payloadId = theMsg.getPayloadId(myFhirContext).toVersionless();
+			if (theSubscription.isTopicSubscription()) {
+				payloadId = thePayloadResource.getIdElement().toVersionless();
+			}
 			try {
 				if (payloadId != null) {
 					boolean deletedOK = theMsg.getOperationType() == BaseResourceModifiedMessage.OperationTypeEnum.DELETE;
-					payloadResource = getResource(payloadId.toVersionless(), theMsg.getRequestPartitionId(), deletedOK);
+					thePayloadResource = getResource(payloadId, theMsg.getRequestPartitionId(), deletedOK);
 				} else {
 					return null;
 				}
 			} catch (ResourceGoneException e) {
-				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(myFhirContext));
+				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId, theSubscription.getIdElement(myFhirContext));
 				return null;
 			}
 		}
 
-		IIdType resourceId = payloadResource.getIdElement();
+		IIdType resourceId = thePayloadResource.getIdElement();
 		if (theSubscription.getRestHookDetails().isStripVersionId()) {
 			resourceId = resourceId.toVersionless();
-			payloadResource.setId(resourceId);
+			thePayloadResource.setId(resourceId);
+			thePayloadResource.getMeta().setVersionId(null);
 		}
-		return payloadResource;
+		return thePayloadResource;
 	}
 
 	@Override

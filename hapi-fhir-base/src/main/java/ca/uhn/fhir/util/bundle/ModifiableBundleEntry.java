@@ -54,4 +54,8 @@ public class ModifiableBundleEntry {
 	public void setFullUrl(String theFullUrl) {
 		myBundleEntryMutator.setFullUrl(theFullUrl);
 	}
+
+	public void setResource(IBaseResource theUpdatedResource) {
+		myBundleEntryMutator.setResource(theUpdatedResource);
+	}
 }

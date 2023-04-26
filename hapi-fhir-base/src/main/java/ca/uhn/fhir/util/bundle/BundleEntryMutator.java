@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class BundleEntryMutator {
@@ -56,5 +57,10 @@ public class BundleEntryMutator {
 
 		BaseRuntimeChildDefinition fullUrlChild = myEntryDefinition.getChildByName("fullUrl");
 		fullUrlChild.getMutator().setValue(myEntry, value);
+	}
+
+	public void setResource(IBaseResource theUpdatedResource) {
+		BaseRuntimeChildDefinition resourceChild = myEntryDefinition.getChildByName("resource");
+		resourceChild.getMutator().setValue(myEntry, theUpdatedResource);
 	}
 }

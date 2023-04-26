@@ -17,14 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
+package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -32,6 +30,8 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,21 +47,19 @@ import javax.annotation.Nonnull;
  * <p>
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
-public class SubscriptionRegisteringSubscriber implements MessageHandler {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
+public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicRegisteringSubscriber.class);
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+	private SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionRegisteringSubscriber() {
+	public SubscriptionTopicRegisteringSubscriber() {
 		super();
 	}
 
@@ -74,7 +72,7 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 
 		ResourceModifiedMessage payload = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 
-		if (!payload.hasPayloadType(this.myFhirContext, "Subscription")) {
+		if (!payload.hasPayloadType(myFhirContext, "SubscriptionTopic")) {
 			return;
 		}
 
@@ -96,7 +94,7 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 		IBaseResource payloadResource;
 		IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
 		try {
-			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
 			RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
 			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails);
 			if (payloadResource == null) {
@@ -104,17 +102,16 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 				payloadResource = payload.getPayload(myFhirContext);
 			}
 		} catch (ResourceGoneException e) {
-			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
+			mySubscriptionTopicRegistry.unregister(payloadId.getIdPart());
 			return;
 		}
 
-		String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(payloadResource);
-		if ("active".equals(statusString)) {
-			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payloadResource);
+		SubscriptionTopic subscriptionTopic = SubscriptionTopicCanonicalizer.canonicalize(myFhirContext, payloadResource);
+		if (subscriptionTopic.getStatus() == Enumerations.PublicationStatus.ACTIVE) {
+			mySubscriptionTopicRegistry.register(subscriptionTopic);
 		} else {
-			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
+			mySubscriptionTopicRegistry.unregister(payloadId.getIdPart());
 		}
-
 	}
 
 	/**
@@ -132,5 +129,6 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 	}
+
 
 }
