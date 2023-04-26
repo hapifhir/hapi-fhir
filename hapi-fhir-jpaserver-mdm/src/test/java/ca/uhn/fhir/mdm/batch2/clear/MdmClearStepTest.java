@@ -97,6 +97,7 @@ class MdmClearStepTest extends BaseMdmR4Test {
 		mdmClearGoldenResource();
 		try {
 			assertPatientExists(myGoldenId);
+			fail("Resource cannot be found");
 		} catch (ResourceNotFoundException e) {
 			assertEquals("HAPI-2001: Resource " + myGoldenId + " is not known", e.getMessage());
 		}
