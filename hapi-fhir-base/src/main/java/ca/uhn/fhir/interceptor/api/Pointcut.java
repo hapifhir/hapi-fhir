@@ -2623,7 +2623,7 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Immediately before a binary blob is stored to its eventual data sink, this hook is called.
 	 * This hook allows implementers to provide a prefix to the binary blob's ID.
-	 * This is helpful in cases where you want to identify this blob for later retrieval outside of HAPI-FHIR.
+	 * This is helpful in cases where you want to identify this blob for later retrieval outside of HAPI-FHIR. Note that allowable characters will depend on the specific storage sink being used.
 	 * <ul>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
