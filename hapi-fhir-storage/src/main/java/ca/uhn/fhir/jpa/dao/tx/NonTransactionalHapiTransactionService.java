@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.tx;
 
+import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
 import javax.annotation.Nullable;
@@ -33,6 +34,6 @@ public class NonTransactionalHapiTransactionService extends HapiTransactionServi
 	@Nullable
 	@Override
 	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
-		return theCallback.doInTransaction(null);
+		return theCallback.doInTransaction(new SimpleTransactionStatus());
 	}
 }
