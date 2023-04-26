@@ -43,7 +43,6 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -131,7 +130,7 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 	 * 2. the job_id of the job instance.
 	 * 3. the resource type of the resources contained in the binary
 	 */
-	private void addMetadataExtensionsToBinary(@NotNull StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> theStepExecutionDetails, ExpandedResourcesList expandedResources, IBaseBinary binary) {
+	private void addMetadataExtensionsToBinary(@Nonnull  StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> theStepExecutionDetails, ExpandedResourcesList expandedResources, IBaseBinary binary) {
 		if (binary.getMeta() instanceof IBaseHasExtensions) {
 			IBaseHasExtensions meta = (IBaseHasExtensions) binary.getMeta();
 
