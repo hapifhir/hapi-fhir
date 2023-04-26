@@ -375,7 +375,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional
 	public boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier) {
 		Batch2JobInstanceEntity instanceEntity = myEntityManager.find(Batch2JobInstanceEntity.class, theInstanceId, LockModeType.PESSIMISTIC_WRITE);
 		if (null == instanceEntity) {
@@ -410,14 +409,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		ourLog.info("Deleting all chunks for instance ID: {}", theInstanceId);
 		myJobInstanceRepository.updateWorkChunksPurgedTrue(theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
-	}
-
-	// wipmb delete
-	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean markInstanceAsCompleted(String theInstanceId) {
-		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
-		return recordsChanged > 0;
 	}
 
 	@Override

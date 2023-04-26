@@ -72,30 +72,34 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	Optional<JobInstance> fetchInstance(String theInstanceId);
 
-	default List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
-		throw new UnsupportedOperationException(Msg.code(2271) + "Unsupported operation in this implementation");
-	}
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable);
 
 	/**
 	 * Fetches any existing jobs matching provided request parameters
 	 */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize);
 
 	/**
 	 * Fetch all instances
 	 */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
 
 	/**
 	 * Fetch instances ordered by myCreateTime DESC
 	 */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex);
 
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex);
 
 	/**
 	 * Fetch all job instances for a given job definition id
 	 */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 
 	/**
@@ -103,11 +107,11 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theRequest - the job fetch request
 	 * @return - a page of job instances
 	 */
-	default Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
-		return Page.empty();
-	}
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
 
 
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
 
 	/**
@@ -118,6 +122,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param thePageSize   The page size
 	 * @param thePageIndex  The page index
 	 */
+	// wipmb delete - replace with stream or iterator
 	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
 
 
@@ -128,6 +133,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 		 * @param theWithData - whether or not to include the data
 		 * @return - an iterator for fetching work chunks
 		 */
+// wipmb replace with stream
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
@@ -165,6 +171,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @return true if the instance was modified
 	 */
 	// todo mb consider changing callers to actual objects we can unit test.
+	@Transactional
 	boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier);
 
 	/**
@@ -172,6 +179,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 *
 	 * @param theInstanceId The instance ID
 	 */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	void deleteInstanceAndChunks(String theInstanceId);
 
 	/**
@@ -179,16 +187,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 *
 	 * @param theInstanceId The instance ID
 	 */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId);
-
-	/**
-	 * Marks an instance as being complete
-	 *
-	 * @param theInstanceId The instance ID
-	 * @return true if the instance status changed
-	 */
-	// wipmb delete
-	boolean markInstanceAsCompleted(String theInstanceId);
 
 
 	@Transactional(propagation = Propagation.MANDATORY)
@@ -199,8 +199,10 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 *
 	 * @param theInstanceId The instance ID
 	 */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	JobOperationResultJson cancelInstance(String theInstanceId);
 
+	@Transactional(propagation = Propagation.MANDATORY)
 	void updateInstanceUpdateTime(String theInstanceId);
 
 
@@ -231,6 +233,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	}
 
 	@Nonnull
+	@Transactional(propagation = Propagation.MANDATORY)
 	default CreateResult onCreateWithFirstChunk(JobDefinition<?> theJobDefinition, String theParameters) {
 		JobInstance instance = JobInstance.fromJobDefinition(theJobDefinition);
 		instance.setParameters(theParameters);
@@ -251,6 +254,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * Ignore other prior states.
 	 * @return did the transition happen
 	 */
+	@Transactional(propagation = Propagation.MANDATORY)
 	default boolean onChunkDequeued(String theJobInstanceId) {
 		return markInstanceAsStatusWhenStatusIn(theJobInstanceId, StatusEnum.IN_PROGRESS, Collections.singleton(StatusEnum.QUEUED));
 	}

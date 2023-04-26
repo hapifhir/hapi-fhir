@@ -159,7 +159,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.getCurrentStep();
 
-		// wipmb this runs three tx. Can we shorten that to one?
+		// wipmb this runs four tx. Can we shorten that to one?
 		JobInstance instance = executeInTransactionWithSynchronization(() ->
 			myJobPersistence.fetchInstance(theInstanceId).orElseThrow(() -> new InternalErrorException("Unknown instance: " + theInstanceId)));
 

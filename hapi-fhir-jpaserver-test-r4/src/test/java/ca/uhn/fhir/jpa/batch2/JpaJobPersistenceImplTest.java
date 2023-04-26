@@ -617,19 +617,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testMarkInstanceAsCompleted() {
-		String instanceId = mySvc.storeNewInstance(createInstance());
-
-		assertTrue(mySvc.markInstanceAsCompleted(instanceId));
-		assertFalse(mySvc.markInstanceAsCompleted(instanceId));
-
-		runInTransaction(() -> {
-			Batch2JobInstanceEntity entity = myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalArgumentException::new);
-			assertEquals(StatusEnum.COMPLETED, entity.getStatus());
-		});
-	}
-
-	@Test
 	public void markWorkChunksWithStatusAndWipeData_marksMultipleChunksWithStatus_asExpected() {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);

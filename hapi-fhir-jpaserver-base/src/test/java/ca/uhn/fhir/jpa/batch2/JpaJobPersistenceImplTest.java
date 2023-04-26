@@ -89,21 +89,6 @@ class JpaJobPersistenceImplTest {
 	}
 
 	@Test
-	public void markInstanceAsCompleted_withInstanceId_updatesToCompleted() {
-		// setup
-		String jobId = "jobid";
-
-		// test
-		mySvc.markInstanceAsCompleted(jobId);
-
-		// verify
-		ArgumentCaptor<StatusEnum> statusCaptor = ArgumentCaptor.forClass(StatusEnum.class);
-		verify(myJobInstanceRepository)
-			.updateInstanceStatus(eq(jobId), statusCaptor.capture());
-		assertEquals(StatusEnum.COMPLETED, statusCaptor.getValue());
-	}
-
-	@Test
 	public void deleteChunks_withInstanceId_callsChunkRepoDelete() {
 		// setup
 		String jobId = "jobid";
