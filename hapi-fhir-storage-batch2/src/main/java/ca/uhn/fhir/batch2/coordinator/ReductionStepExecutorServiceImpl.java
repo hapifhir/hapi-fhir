@@ -168,7 +168,9 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			case IN_PROGRESS:
 			case ERRORED:
 				// this will take a write lock on the JobInstance, preventing duplicates.
-				if (executeInTransactionWithSynchronization(() ->myJobPersistence.markInstanceAsStatusWhenStatusIn(instance.getInstanceId(), FINALIZE, EnumSet.of(IN_PROGRESS, ERRORED)))) {
+				boolean changed = executeInTransactionWithSynchronization(() ->
+					myJobPersistence.markInstanceAsStatusWhenStatusIn(instance.getInstanceId(), FINALIZE, EnumSet.of(IN_PROGRESS, ERRORED)));
+				if (changed) {
 					ourLog.info("Job instance {} has been set to FINALIZE state - Beginning reducer step", instance.getInstanceId());
 					shouldProceed = true;
 				}
