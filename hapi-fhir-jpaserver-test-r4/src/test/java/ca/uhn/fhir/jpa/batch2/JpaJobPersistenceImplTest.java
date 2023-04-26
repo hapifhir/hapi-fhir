@@ -1,5 +1,4 @@
 package ca.uhn.fhir.jpa.batch2;
-
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;

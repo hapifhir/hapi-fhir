@@ -28,6 +28,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage-batch2-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.exparity</groupId>
 			<artifactId>hamcrest-date</artifactId>
 			<version>2.0.7</version>
@@ -39,7 +45,7 @@
 			</exclusions>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>
