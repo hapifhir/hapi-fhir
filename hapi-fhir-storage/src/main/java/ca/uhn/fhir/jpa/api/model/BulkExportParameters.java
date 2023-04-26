@@ -48,6 +48,8 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	 */
 	private List<String> myFilters;
 
+	private List<String> myPostFetchFilterUrls;
+
 	/**
 	 * Export style - Patient, Group or Everything
 	 */
@@ -123,6 +125,17 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 
 	public void setFilters(List<String> theFilters) {
 		myFilters = theFilters;
+	}
+
+	public List<String> getPostFetchFilterUrls() {
+		if (myPostFetchFilterUrls == null) {
+			myPostFetchFilterUrls = new ArrayList<>();
+		}
+		return myPostFetchFilterUrls;
+	}
+
+	public void setPostFetchFilterUrls(List<String> thePostFetchFilterUrls) {
+		myPostFetchFilterUrls = thePostFetchFilterUrls;
 	}
 
 	public BulkDataExportOptions.ExportStyle getExportStyle() {
