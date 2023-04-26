@@ -22,10 +22,10 @@ package ca.uhn.fhir.batch2.progress;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -40,58 +40,53 @@ public class JobInstanceProgressCalculator {
 	public JobInstanceProgressCalculator(IJobPersistence theJobPersistence, JobChunkProgressAccumulator theProgressAccumulator, JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myProgressAccumulator = theProgressAccumulator;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence, theJobDefinitionRegistry);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 	}
 
-	public void calculateAndStoreInstanceProgress(JobInstance theInstance) {
-		String instanceId = theInstance.getInstanceId();
+	public void calculateAndStoreInstanceProgress(String theInstanceId) {
+		StopWatch stopWatch = new StopWatch();
+		ourLog.trace("calculating progress: {}", theInstanceId);
 
-		InstanceProgress instanceProgress = calculateInstanceProgress(instanceId);
+		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
-		if (instanceProgress.failed()) {
-			myJobInstanceStatusUpdater.setFailed(theInstance);
-		}
-
-		JobInstance currentInstance = myJobPersistence.fetchInstance(instanceId).orElse(null);
-		if (currentInstance != null) {
+		myJobPersistence.updateInstance(theInstanceId, currentInstance->{
 			instanceProgress.updateInstance(currentInstance);
 
 			if (instanceProgress.changed() || currentInstance.getStatus() == StatusEnum.IN_PROGRESS) {
 				if (currentInstance.getCombinedRecordsProcessed() > 0) {
 					ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed(), currentInstance.getCombinedRecordsProcessedPerSecond(), currentInstance.getEstimatedTimeRemaining());
-					ourLog.debug(instanceProgress.toString());
 				} else {
 					ourLog.info("Job {} of type {} has status {} - {} records processed", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed());
-					ourLog.debug(instanceProgress.toString());
 				}
+				ourLog.debug(instanceProgress.toString());
 			}
 
-			if (instanceProgress.changed()) {
-				if (instanceProgress.hasNewStatus()) {
-					myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
-				} else {
-					myJobPersistence.updateInstance(currentInstance);
-				}
+
+			if (instanceProgress.hasNewStatus()) {
+				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
 			}
 
-		}
+			return true;
+		});
+		ourLog.trace("calculating progress: {} - complete in {}", theInstanceId, stopWatch);
 	}
 
 	@Nonnull
-	private InstanceProgress calculateInstanceProgress(String instanceId) {
+	public InstanceProgress calculateInstanceProgress(String instanceId) {
 		InstanceProgress instanceProgress = new InstanceProgress();
 		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
 
 		while (workChunkIterator.hasNext()) {
 			WorkChunk next = workChunkIterator.next();
+			// global stats
 			myProgressAccumulator.addChunk(next);
+			// instance stats
 			instanceProgress.addChunk(next);
 		}
+
+		instanceProgress.calculateNewStatus();
+
 		return instanceProgress;
 	}
 
-	public void calculateInstanceProgressAndPopulateInstance(JobInstance theInstance) {
-		InstanceProgress progress = calculateInstanceProgress(theInstance.getInstanceId());
-		progress.updateInstance(theInstance);
-	}
 }
