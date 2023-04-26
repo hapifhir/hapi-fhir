@@ -71,8 +71,9 @@ public class JaxRsResponseTest {
 		boolean theAddContentLocationHeader = false;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals(null, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(null, result.getEntity());
+		assertEquals("{\n" +
+			"  \"resourceType\": \"Binary\"\n" +
+			"}", result.getEntity().toString());
 	}
 
 	@Test

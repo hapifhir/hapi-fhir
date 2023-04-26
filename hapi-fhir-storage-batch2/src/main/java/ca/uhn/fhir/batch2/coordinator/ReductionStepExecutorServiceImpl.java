@@ -120,7 +120,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	public void triggerReductionStep(String theInstanceId, JobWorkCursor<?, ?, ?> theJobWorkCursor) {
 		myInstanceIdToJobWorkCursor.putIfAbsent(theInstanceId, theJobWorkCursor);
 		if (myCurrentlyExecuting.availablePermits() > 0) {
-			myReducerExecutor.submit(() -> reducerPass());
+			myReducerExecutor.submit(this::reducerPass);
 		}
 	}
 
@@ -161,6 +161,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		switch (instance.getStatus()) {
 			case IN_PROGRESS:
 			case ERRORED:
+				// this will take a write lock on the JobInstance, preventing duplicates.
 				if (myJobPersistence.markInstanceAsStatus(instance.getInstanceId(), StatusEnum.FINALIZE)) {
 					ourLog.info("Job instance {} has been set to FINALIZE state - Beginning reducer step", instance.getInstanceId());
 					shouldProceed = true;
@@ -180,7 +181,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					+ " This could be a long running reduction job resulting in the processed msg not being acknowledge,"
 					+ " or the result of a failed process or server restarting.",
 				instance.getInstanceId(),
-				instance.getStatus().name()
+				instance.getStatus()
 			);
 			return new ReductionStepChunkProcessingResponse(false);
 		}
@@ -196,9 +197,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		try {
 			executeInTransactionWithSynchronization(() -> {
 				try (Stream<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
-					chunkIterator.forEach((chunk) -> {
-						processChunk(chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor);
-					});
+					chunkIterator.forEach(chunk ->
+						processChunk(chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor));
 				}
 				return null;
 			});

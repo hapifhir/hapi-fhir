@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4757
+title: "Previously, if a binary resource was read via GET, and the binary content had been externalized and not reinflated, a NullPointerException would be thrown. This has been fixed."
