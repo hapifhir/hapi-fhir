@@ -123,7 +123,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 
 		IJobPersistence.CreateResult instanceAndFirstChunk =
-			myTransactionService.withSystemRequest().execute(() ->
+			myTransactionService.withRequest(null).execute(() ->
 				myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
 
 		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceAndFirstChunk.jobInstanceId, instanceAndFirstChunk.workChunkId);

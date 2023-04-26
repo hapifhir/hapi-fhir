@@ -231,7 +231,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 	 * Run theCallback in TX, rolling back if the supplied Optional is empty.
 	 */
 	<T> Optional<T> executeInTxRollbackWhenEmpty(Supplier<Optional<T>> theCallback) {
-		return myHapiTransactionService.withSystemRequest()
+		return myHapiTransactionService.withRequest(null)
 			.execute(theTransactionStatus -> {
 
 				// run the processing

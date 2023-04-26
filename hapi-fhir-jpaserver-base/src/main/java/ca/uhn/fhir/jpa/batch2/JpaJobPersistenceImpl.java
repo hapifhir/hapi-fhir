@@ -186,7 +186,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Nonnull
 	public Optional<JobInstance> fetchInstance(String theInstanceId) {
 		return myTransactionService
-			.withSystemRequest()
+			.withRequest(null)
 			.execute(() -> myJobInstanceRepository.findById(theInstanceId).map(this::toInstance));
 	}
 
@@ -332,7 +332,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
 		myTransactionService
-			.withSystemRequest()
+			.withRequest(null)
 			.withPropagation(Propagation.REQUIRES_NEW)
 			.execute(() -> {
 				List<Batch2WorkChunkEntity> chunks;
@@ -350,7 +350,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public List<String> fetchAllChunkIdsForStepWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum) {
 		return myTransactionService
-			.withSystemRequest()
+			.withRequest(null)
 			.withPropagation(Propagation.REQUIRES_NEW)
 			.execute(() -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(theInstanceId, theStepId, theStatusEnum));
 	}
@@ -422,7 +422,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
 		int recordsChanged =	myTransactionService
-			.withSystemRequest()
+			.withRequest(null)
 			.execute(()->myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum));
 		return recordsChanged > 0;
 	}
