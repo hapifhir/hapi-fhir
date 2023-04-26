@@ -45,7 +45,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -613,7 +612,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	private WorkChunk freshFetchWorkChunk(String chunkId) {
 		return runInTransaction(() ->
 			myWorkChunkRepository.findById(chunkId)
-				.map(e-> JobInstanceUtil.fromEntityToWorkChunk(e))
+				.map(JobInstanceUtil::fromEntityToWorkChunk)
 				.orElseThrow(IllegalArgumentException::new));
 	}
 

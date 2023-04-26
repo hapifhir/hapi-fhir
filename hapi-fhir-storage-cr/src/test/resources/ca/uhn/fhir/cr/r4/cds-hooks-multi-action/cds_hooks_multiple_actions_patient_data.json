@@ -1,0 +1,28 @@
+{
+	"resourceType": "Bundle",
+	"id": "CdsHooksMultipleActions-PD-bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "patient-CdsHooksMultipleActions",
+				"gender": "female",
+				"birthDate": "1982-01-07",
+				"name": [
+					{
+						"family": "Smith",
+						"given": [
+							"John",
+							"A."
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/patient-CdsHooksMultipleActions"
+			}
+		}
+	]
+}

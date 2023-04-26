@@ -1,0 +1,140 @@
+{
+	"resourceType": "Bundle",
+	"id": "CdsHooksMultipleActions-Plans-1.0.0",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "CdsHooksMultipleActions",
+				"url": "http://example.com/Library/CdsHooksMultipleActions",
+				"version": "1.0.0",
+				"name": "CdsHooksMultipleActions",
+				"title": "CdsHooksMultipleActions",
+				"status": "draft",
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/library-type",
+							"code": "logic-library"
+						}
+					]
+				},
+				"jurisdiction": [
+					{
+						"coding": [
+							{
+								"system": "urn:iso:std:iso:3166",
+								"code": "US",
+								"display": "United States of America"
+							}
+						],
+						"text": "United States of America"
+					}
+				],
+				"relatedArtifact": [
+					{
+						"type": "depends-on",
+						"display": "FHIR model information",
+						"resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+					}
+				],
+				"content": [
+					{
+						"contentType": "text/cql",
+						"data": "bGlicmFyeSBDZHNIb29rc011bHRpcGxlQWN0aW9ucyB2ZXJzaW9uICcxLjAuMCcKCnVzaW5nIEZISVIgdmVyc2lvbiAnNC4wLjEnCgpjb250ZXh0IFBhdGllbnQKCmRlZmluZSAiSXMgQWN0aW9uIEFwcGxpY2FibGU/IjogdHJ1ZQoKZGVmaW5lICJHZXQgU3VtbWFyeSI6ICdTdW1tYXJ5JwoKZGVmaW5lICJHZXQgRGV0YWlsIjogJ0RldGFpbCcKCmRlZmluZSAiR2V0IFN1bW1hcnkgMSI6ICdTdW1tYXJ5IDEnCgpkZWZpbmUgIkdldCBEZXRhaWwgMSI6ICdEZXRhaWwgMSc="
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/CdsHooksMultipleActions"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "PlanDefinition",
+				"id": "CdsHooksMultipleActions-PlanDefinition-1.0.0",
+				"url": "http://example.com/PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0",
+				"name": "Cds Hooks Multiple Actions PlanDefinition",
+				"title": "Cds Hooks Multiple Actions PlanDefinition",
+				"status": "active",
+				"experimental": false,
+				"description": "This is a plan to test multiple actions",
+				"library": [
+					"http://example.com/Library/CdsHooksMultipleActions"
+				],
+				"action": [
+					{
+						"title": "Child Monthly Routine Visit",
+						"description": "This action will performed every month for a patient < 5 years old. The start date with be next month after registration while the end date will be the 60th week after birth.",
+						"priority": "routine",
+						"type": {
+							"coding": [
+								{
+									"code": "clinical-protocol",
+									"display": "Clinical Protocol"
+								}
+							]
+						},
+						"trigger": [
+							{
+								"type": "named-event",
+								"name": "patient-view"
+							}
+						],
+						"condition": [
+							{
+								"kind": "applicability",
+								"expression": {
+									"language": "text/cql.identifier",
+									"expression": "Is Action Applicable?"
+								}
+							}
+						],
+						"dynamicValue": [
+							{
+								"path": "action.title",
+								"expression": {
+									"language": "text/cql.identifier",
+									"expression": "Get Summary"
+								}
+							},
+							{
+								"path": "action.description",
+								"expression": {
+									"language": "text/cql.identifier",
+									"expression": "Get Detail"
+								}
+							}
+						],
+						"action": [
+							{
+								"dynamicValue": [
+									{
+										"path": "action.action.title",
+										"expression": {
+											"language": "text/cql.identifier",
+											"expression": "Get Summary 1"
+										}
+									},
+									{
+										"path": "action.action.description",
+										"expression": {
+											"language": "text/cql.identifier",
+											"expression": "Get Detail 1"
+										}
+									}
+								]
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0"
+			}
+		}
+	]
+}
