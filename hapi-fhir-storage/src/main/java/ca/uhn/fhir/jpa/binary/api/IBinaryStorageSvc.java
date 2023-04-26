@@ -41,7 +41,9 @@ public interface IBinaryStorageSvc {
 	 * @param theNewBlobId the blob ID to validate
 	 * @return true if the blob ID is valid, false otherwise.
 	 */
-   boolean isValidBlobId(String theNewBlobId);
+   default boolean isValidBlobId(String theNewBlobId) {
+		return true;//default method here as we don't want to break existing implementations
+	}
 
    /**
 	 * Sets the maximum number of bytes that can be stored in a single binary
