@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -73,6 +72,8 @@ public class SubscriptionValidatingInterceptor {
 	private FhirContext myFhirContext;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@Autowired
+	private SubscriptionQueryValidator mySubscriptionQueryValidator;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void resourcePreCreate(IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
@@ -146,9 +147,9 @@ public class SubscriptionValidatingInterceptor {
 		if (!finished) {
 
 			if (subscription.isTopicSubscription()) {
-				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getCriteriaString());
+				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getTopic());
 				if (!oTopic.isPresent()) {
-					throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with url: " + subscription.getCriteriaString());
+					throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: " + subscription.getTopic());
 				}
 			} else {
 				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
@@ -217,39 +218,7 @@ public class SubscriptionValidatingInterceptor {
 	}
 
 	public void validateQuery(String theQuery, String theFieldName) {
-		if (isBlank(theQuery)) {
-			throw new UnprocessableEntityException(Msg.code(11) + theFieldName + " must be populated");
-		}
-
-		SubscriptionCriteriaParser.SubscriptionCriteria parsedCriteria = SubscriptionCriteriaParser.parse(theQuery);
-		if (parsedCriteria == null) {
-			throw new UnprocessableEntityException(Msg.code(12) + theFieldName + " can not be parsed");
-		}
-
-		if (parsedCriteria.getType() == SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION) {
-			return;
-		}
-
-		for (String next : parsedCriteria.getApplicableResourceTypes()) {
-			if (!myDaoRegistry.isResourceTypeSupported(next)) {
-				throw new UnprocessableEntityException(Msg.code(13) + theFieldName + " contains invalid/unsupported resource type: " + next);
-			}
-		}
-
-		if (parsedCriteria.getType() != SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
-			return;
-		}
-
-		int sep = theQuery.indexOf('?');
-		if (sep <= 1) {
-			throw new UnprocessableEntityException(Msg.code(14) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
-		}
-
-		String resType = theQuery.substring(0, sep);
-		if (resType.contains("/")) {
-			throw new UnprocessableEntityException(Msg.code(15) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
-		}
-
+		mySubscriptionQueryValidator.validateCriteria(theQuery, theFieldName);
 	}
 
 	private Optional<IBaseResource> findSubscriptionTopicByUrl(String theCriteria) {
@@ -332,6 +301,7 @@ public class SubscriptionValidatingInterceptor {
 	@SuppressWarnings("WeakerAccess")
 	public void setSubscriptionStrategyEvaluatorForUnitTest(SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
+		mySubscriptionQueryValidator = new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator);
 	}
 
 }

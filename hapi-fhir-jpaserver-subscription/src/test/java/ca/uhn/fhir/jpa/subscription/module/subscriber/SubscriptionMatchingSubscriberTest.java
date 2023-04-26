@@ -450,7 +450,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			when(myInterceptorBroadcaster.callHooks(
 				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
 			when(message.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
-			when(mySubscriptionRegistry.getAll()).thenReturn(Collections.singletonList(myActiveSubscription));
+			when(mySubscriptionRegistry.getAllNonTopicSubscriptions()).thenReturn(Collections.singletonList(myActiveSubscription));
 			when(myActiveSubscription.getSubscription()).thenReturn(myCanonicalSubscription);
 			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
 			when(myActiveSubscription.getId()).thenReturn("Patient/123");
@@ -468,7 +468,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
 			when(message.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
 			when(myNonDeleteCanonicalSubscription.getSendDeleteMessages()).thenReturn(false);
-			when(mySubscriptionRegistry.getAll()).thenReturn(List.of(myNonDeleteSubscription, myActiveSubscription));
+			when(mySubscriptionRegistry.getAllNonTopicSubscriptions()).thenReturn(List.of(myNonDeleteSubscription, myActiveSubscription));
 			when(myActiveSubscription.getSubscription()).thenReturn(myCanonicalSubscription);
 			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
 			when(myActiveSubscription.getId()).thenReturn("Patient/123");
@@ -489,7 +489,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			when(myInterceptorBroadcaster.callHooks(
 				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
 			when(message.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
-			when(mySubscriptionRegistry.getAll()).thenReturn(Collections.singletonList(myActiveSubscription));
+			when(mySubscriptionRegistry.getAllNonTopicSubscriptions()).thenReturn(Collections.singletonList(myActiveSubscription));
 			when(myActiveSubscription.getSubscription()).thenReturn(myCanonicalSubscription);
 			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
 			when(myActiveSubscription.getId()).thenReturn("Patient/123");
