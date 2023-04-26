@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.config;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
@@ -59,8 +58,8 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender, IHapiTransactionService theTransactionService) {
-		return new WorkChunkProcessor(myPersistence, theBatchJobSender, theTransactionService);
+	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender) {
+		return new WorkChunkProcessor(myPersistence, theBatchJobSender);
 	}
 
 	@Bean
