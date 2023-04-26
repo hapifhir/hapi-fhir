@@ -225,6 +225,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 						if (isNotBlank(prefix)) {
 							newBlobId = prefix + newBlobId;
 						}
+						myBinaryStorageSvc.isValidBlobId(newBlobId);
 						List<DeferredBinaryTarget> deferredBinaryTargets = getOrCreateDeferredBinaryStorageMap(theTransactionDetails);
 						DeferredBinaryTarget newDeferredBinaryTarget = new DeferredBinaryTarget(newBlobId, nextTarget, data);
 						deferredBinaryTargets.add(newDeferredBinaryTarget);
@@ -237,15 +238,15 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	}
 
 	/**
-	 * This invokes the {@link Pointcut#STORAGE_BINARY_BLOB_ASSIGN_PREFIX} hook and returns the prefix to use for the blob ID, or null if there are no implementers.
+	 * This invokes the {@link Pointcut#STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX} hook and returns the prefix to use for the blob ID, or null if there are no implementers.
 	 * @return A string, which will be used to prefix the blob ID. May be null.
 	 */
 	private String invokeAssignBlobPrefix(RequestDetails theRequest, IBaseResource theResource) {
-		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_BINARY_BLOB_ASSIGN_PREFIX, myInterceptorBroadcaster, theRequest)) {
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequest)) {
 			HookParams params = new HookParams()
 				.add(RequestDetails.class, theRequest)
 				.add(IBaseResource.class, theResource);
-			return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_BINARY_BLOB_ASSIGN_PREFIX, params);
+			return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, params);
 		} else {
 			return null;
 		}

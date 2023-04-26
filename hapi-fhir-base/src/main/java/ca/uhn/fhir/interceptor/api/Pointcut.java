@@ -2639,7 +2639,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>String</code>, which represents the full prefix to be applied to the blob.
 	 * </p>
 	 */
-	STORAGE_BINARY_BLOB_ASSIGN_PREFIX(String.class,
+	STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX(String.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"org.hl7.fhir.instance.model.api.IBaseResource"
 	),

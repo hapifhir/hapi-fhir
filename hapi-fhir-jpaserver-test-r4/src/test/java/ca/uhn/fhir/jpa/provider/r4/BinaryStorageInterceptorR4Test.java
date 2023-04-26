@@ -80,7 +80,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	class BinaryFilePrefixingInterceptor{
 
-		@Hook(Pointcut.STORAGE_BINARY_BLOB_ASSIGN_PREFIX)
+		@Hook(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX)
 		public String provideFilenameForBinary(RequestDetails theRequestDetails, IBaseResource theResource) {
 			ourLog.info("Received binary for prefixing!" + theResource.getIdElement());
 			String extensionValus = ((IBaseHasExtensions) theResource.getMeta()).getExtension().stream().map(ext -> ext.getValue().toString()).collect(Collectors.joining("-"));

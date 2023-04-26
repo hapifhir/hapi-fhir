@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
@@ -43,6 +44,9 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 	public static final String UNSUPPORTED_BINARY_TYPE = BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Nullable
 	@Override
@@ -67,8 +71,9 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		}
 		// validate the exportId
 		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
-			if (containsIllegalCharacters(theParameters.getExportIdentifier())) {
-				errorMsgs.add("Export ID must be alphanumeric and can only contain the following special characters: *  ' ( ) _ - . / ");
+
+			if (!myBinaryStorageSvc.isValidBlobId(theParameters.getExportIdentifier())) {
+				errorMsgs.add("Export ID does not conform to the current blob storage implementation's limitations.");
 			}
 		}
 
@@ -94,9 +99,4 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		return errorMsgs;
 	}
 
-	public boolean containsIllegalCharacters(String theStringToExamine) {
-		Pattern pattern = Pattern.compile("[~#@+&%{}<>\\[\\]|\"^]");
-		Matcher matcher = pattern.matcher(theStringToExamine);
-		return matcher.find();
-	}
 }
