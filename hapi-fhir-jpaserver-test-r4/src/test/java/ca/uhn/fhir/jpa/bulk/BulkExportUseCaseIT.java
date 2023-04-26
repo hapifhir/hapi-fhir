@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -40,6 +42,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
@@ -102,6 +105,49 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 	@Nested
 	public class SpecConformanceIT {
 
+
+		@Test
+		public void testBulkExportJobsAreMetaTaggedWithJobIdAndExportId() throws IOException {
+			//Given a patient exists
+			Patient p = new Patient();
+			p.setId("Pat-1");
+			myClient.update().resource(p).execute();
+
+			//And Given we start a bulk export job with a specific export id
+			String pollingLocation = submitBulkExportForTypesWithExportId("im-an-export-identifier", "Patient");
+			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
+
+			//Then: When the poll shows as complete, all attributes should be filled.
+			HttpGet statusGet = new HttpGet(pollingLocation);
+			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient&_exportId=im-an-export-identifier";
+			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
+				assertEquals(200, status.getStatusLine().getStatusCode());
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				assertTrue(isNotBlank(responseContent), responseContent);
+
+				ourLog.info(responseContent);
+
+				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
+				assertThat(result.getOutput(), is(not(empty())));
+				String binary_url = result.getOutput().get(0).getUrl();
+				Binary binaryResource = myClient.read().resource(Binary.class).withUrl(binary_url).execute();
+
+				List<Extension> extension = binaryResource.getMeta().getExtension();
+				assertThat(extension, hasSize(3));
+
+				assertThat(extension.get(0).getUrl(), is(equalTo(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER)));
+				assertThat(extension.get(0).getValue().toString(), is(equalTo("im-an-export-identifier")));
+
+				assertThat(extension.get(1).getUrl(), is(equalTo(JpaConstants.BULK_META_EXTENSION_JOB_ID)));
+				assertThat(extension.get(1).getValue().toString(), is(equalTo(jobId)));
+
+				assertThat(extension.get(2).getUrl(), is(equalTo(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE)));
+				assertThat(extension.get(2).getValue().toString(), is(equalTo("Patient")));
+			}
+		}
+
 		@Test
 		public void testBatchJobsAreOnlyReusedIfInProgress() throws IOException {
 			//Given a patient exists
@@ -110,7 +156,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			myClient.update().resource(p).execute();
 
 			//And Given we start a bulk export job
-			String pollingLocation = submitBulkExportForTypes("Patient");
+			String pollingLocation = submitBulkExportForTypesWithExportId("my-export-id-","Patient");
 			String jobId = getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -285,8 +331,16 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 	}
 
 	private String submitBulkExportForTypes(String... theTypes) throws IOException {
+		return submitBulkExportForTypesWithExportId(null, theTypes);
+	}
+	private String submitBulkExportForTypesWithExportId(String theExportId, String... theTypes) throws IOException {
 		String typeString = String.join(",", theTypes);
-		HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export?_type=" + typeString);
+		String uri = myClient.getServerBase() + "/$export?_type=" + typeString;
+		if (!StringUtils.isBlank(theExportId)) {
+			uri += "&_exportId=" + theExportId;
+		}
+
+		HttpGet httpGet = new HttpGet(uri);
 		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		String pollingLocation;
 		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {

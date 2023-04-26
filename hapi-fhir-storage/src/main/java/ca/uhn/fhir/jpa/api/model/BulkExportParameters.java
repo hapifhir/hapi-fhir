@@ -82,6 +82,9 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	 * The request which originated the request.
 	 */
 	private String myOriginalRequestUrl;
+	private String myExportIdentifier;
+
+
 
 	public boolean isExpandMdm() {
 		return myExpandMdm;
@@ -97,6 +100,13 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 
 	public List<String> getResourceTypes() {
 		return myResourceTypes;
+	}
+
+	public void setExportIdentifier(String theExportIdentifier) {
+		myExportIdentifier = theExportIdentifier;
+	}
+	public String getExportIdentifier() {
+		return myExportIdentifier;
 	}
 
 	public void setResourceTypes(List<String> theResourceTypes) {

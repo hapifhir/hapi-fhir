@@ -51,6 +51,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
@@ -76,6 +78,16 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		mkdir(myBasePath);
 	}
 
+	/**
+	 * This implementation prevents: \ / | .
+	 */
+	@Override
+	public boolean isValidBlobId(String theNewBlobId) {
+		Pattern pattern = Pattern.compile("[\\/\\\\\\|\\.]");
+		Matcher matcher = pattern.matcher(theNewBlobId);
+		return !matcher.find();
+
+	}
 	@Override
 	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
 		String id = super.provideIdForNewBlob(theBlobIdOrNull);
