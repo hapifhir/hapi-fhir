@@ -51,6 +51,8 @@ import java.util.Collection;
 		@UniqueConstraint(name = "IDX_TAGDEF_TYPESYSCODE", columnNames = {"TAG_TYPE", "TAG_SYSTEM", "TAG_CODE"})
 	}
 )
+// TODO: get right code
+// TODO: do we need a version bump?
 public class TagDefinition implements Serializable {
 
 	private static final long serialVersionUID = 1L;
