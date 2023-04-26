@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -37,11 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  *
@@ -49,9 +46,8 @@ import java.util.stream.Stream;
  * This is a transactional interface, but we have pushed the declaration of calls that have
  * {@code @Transactional(propagation = Propagation.REQUIRES_NEW)} down to the implementations since we have a synchronized
  * wrapper that was double-creating the NEW transaction.
- *
- * wipmb regularize the tx boundary.  Probably make them all MANDATORY
  */
+// wipmb regularize the tx boundary.  Probably make them all MANDATORY
 public interface IJobPersistence extends IWorkChunkPersistence {
 	Logger ourLog = LoggerFactory.getLogger(IJobPersistence.class);
 
@@ -115,23 +111,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 
 	/**
-	 * Fetch all chunks for a given instance.
-	 * @param theInstanceId - instance id
-	 * @param theWithData - whether to include the data - not needed for stats collection
-	 * @return - an iterator for fetching work chunks
-	 */
-	// wipmb replace with stream?
-	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
-
-	/**
-	 * Fetch all chunks with data for a given instance for a given step id - read-only.
-	 *
-	 * @return - a stream for fetching work chunks
-	 */
-	@Transactional(propagation = Propagation.MANDATORY, readOnly = true)
-	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
-
-	/**
 	 * Callback to update a JobInstance within a locked transaction.
 	 * Return true from the callback if the record write should continue, or false if
 	 * the change should be discarded.
@@ -157,7 +136,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theModifier a hook to modify the instance - return true to finish the record write
 	 * @return true if the instance was modified
 	 */
-	// todo mb consider changing callers to actual objects we can unit test.
+	// wipmb consider changing callers to actual objects we can unit test.
 	@Transactional
 	boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier);
 

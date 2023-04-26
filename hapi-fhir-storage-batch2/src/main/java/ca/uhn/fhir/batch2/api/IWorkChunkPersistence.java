@@ -115,23 +115,12 @@ public interface IWorkChunkPersistence {
 	@Transactional(propagation = Propagation.MANDATORY)
 	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMsg);
 
-
-	/**
-	 * Fetches all chunks for a given instance, without loading the data
-	 *
-	 * @param theInstanceId The instance ID
-	 * @param thePageSize   The page size
-	 * @param thePageIndex  The page index
-	 */
-	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
-
-
 	/**
 	 * Fetch all chunks for a given instance.
-	 *
 	 * @param theInstanceId - instance id
-	 * @param theWithData   - whether or not to include the data
+	 * @param theWithData - whether to include the data - not needed for stats collection
 	 * @return - an iterator for fetching work chunks
+	 * wipmb should we replace with a stream?
 	 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
@@ -141,6 +130,7 @@ public interface IWorkChunkPersistence {
 	 *
 	 * @return - a stream for fetching work chunks
 	 */
+	@Transactional(propagation = Propagation.MANDATORY, readOnly = true)
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
 	/**
