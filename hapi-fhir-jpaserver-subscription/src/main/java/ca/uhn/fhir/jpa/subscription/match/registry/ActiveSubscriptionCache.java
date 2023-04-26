@@ -85,6 +85,11 @@ class ActiveSubscriptionCache {
 		return retval;
 	}
 
+	/**
+	 * R4B and R5 only
+	 * @param theTopic
+	 * @return a list of all subscriptions that are subscribed to the given topic
+	 */
 	public List<ActiveSubscription> getTopicSubscriptionsForTopic(String theTopic) {
 		assert !isBlank(theTopic);
 		return getAll().stream()

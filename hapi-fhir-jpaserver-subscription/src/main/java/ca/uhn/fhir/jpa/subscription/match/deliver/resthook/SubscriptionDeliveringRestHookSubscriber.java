@@ -153,7 +153,13 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		return dao.read(thePayloadId.toVersionless(), systemRequestDetails, theDeletedOK);
 	}
 
-
+	/**
+	 * Perform operations on the payload based on various subscription extension settings such as deliver latest version,
+	 * delete and/or strip version id.
+	 * @param theMsg
+	 * @param theSubscription
+	 * @return
+	 */
 	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
 		IBaseResource payloadResource = theMsg.getPayload(myFhirContext);
 
