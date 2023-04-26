@@ -685,10 +685,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ExpungeOptions options = new ExpungeOptions();
 		options.setExpungeDeletedResources(true);
 		for (P pid : theResourceIds) {
-			JpaPid jpaPid = (JpaPid) pid;
-			ResourceTable entity = myEntityManager.find(ResourceTable.class, jpaPid.getId());
+			if (pid instanceof JpaPid) {
+				ResourceTable entity = myEntityManager.find(ResourceTable.class, pid.getId());
 
-			forceExpungeInExistingTransaction(entity.getIdDt().toVersionless(), options, theRequest);
+				forceExpungeInExistingTransaction(entity.getIdDt().toVersionless(), options, theRequest);
+			} else {
+				ourLog.warn("Unable to process expunge on resource {}", pid);
+				return;
+			}
+
 		}
 	}
 
