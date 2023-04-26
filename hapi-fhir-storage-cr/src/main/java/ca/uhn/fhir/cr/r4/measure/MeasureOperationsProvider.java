@@ -36,7 +36,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 
-@Component
 public class MeasureOperationsProvider {
 	@Autowired
 	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;

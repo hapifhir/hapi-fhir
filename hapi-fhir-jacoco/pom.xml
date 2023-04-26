@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.5.11-SNAPSHOT</version>
+		<version>6.5.13-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -195,6 +195,11 @@
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-storage</artifactId>
+					<version>${project.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-fhir-storage-cr</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 			</dependencies>

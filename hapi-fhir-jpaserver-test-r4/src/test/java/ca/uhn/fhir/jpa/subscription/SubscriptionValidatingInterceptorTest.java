@@ -7,9 +7,9 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -33,7 +33,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -299,6 +299,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testSubscriptionUpdate() {
+		// setup
 		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
 		when(myStorageSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		lenient()
@@ -318,9 +319,11 @@ public class SubscriptionValidatingInterceptorTest {
 		lenient()
 			.when(requestDetails.getRestOperationType()).thenReturn(RestOperationTypeEnum.UPDATE);
 
+		// execute
 		mySvc.resourceUpdated(subscription, subscription, requestDetails, null);
 
-		verify(mySubscriptionStrategyEvaluator).determineStrategy(anyString());
+		// verify
+		verify(mySubscriptionStrategyEvaluator).determineStrategy(any(CanonicalSubscription.class));
 		verify(mySubscriptionCanonicalizer, times(2)).setMatchingStrategyTag(eq(subscription), nullable(SubscriptionMatchingStrategy.class));
 	}
 }

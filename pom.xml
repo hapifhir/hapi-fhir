@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.5.11-SNAPSHOT</version>
+	<version>6.5.13-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -859,6 +859,10 @@
 		<developer>
 			<id>JorisHeadease</id>
 		</developer>
+		<developer>
+			<id>delopst</id>
+			<name>Primož Delopst</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -958,9 +962,7 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<cqframework.version>2.7.0-SNAPSHOT</cqframework.version>
-		<cql-engine.version>3.0.0-SNAPSHOT</cql-engine.version>
-		<cql-evaluator.version>3.0.0-SNAPSHOT</cql-evaluator.version>
+		<clinical-reasoning.version>3.0.0-SNAPSHOT</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1465,6 +1467,16 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-osgi</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-nio</artifactId>
 				<version>${httpcore_version}</version>
 			</dependency>
 			<dependency>
@@ -2274,7 +2286,6 @@
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-						<forkCount>1.0C</forkCount>
 						<trimStackTrace>true</trimStackTrace>
 					</configuration>
 				</plugin>
@@ -2900,9 +2911,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<forkCount>1</forkCount>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
@@ -2914,9 +2922,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<forkCount>2</forkCount>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
@@ -2994,14 +2999,13 @@
 		This profile is basically here to work around an IJ bug where the
 		<testSource> tag is ignored in IJ's compiler. See:
 		https://youtrack.jetbrains.com/issue/IDEA-85478
+		IntelliJ 2023.1 now supports this, so we removed the activation.
+		But if you want to run an older IntelliJ, activate the old-intellij profile in the Maven tab.
 		-->
 		<profile>
-			<id>ide</id>
+			<id>old-intellij</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
-				<property>
-					<name>idea.maven.embedder.version</name>
-				</property>
 			</activation>
 			<build>
 				<plugins>

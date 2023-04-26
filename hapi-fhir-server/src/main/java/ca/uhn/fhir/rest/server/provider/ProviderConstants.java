@@ -106,6 +106,15 @@ public class ProviderConstants {
 	 * CQL Operations
 	 */
 	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
+	/**
+	 * Clinical Reasoning Operations
+	 */
+	public static final String CR_OPERATION_APPLY = "$apply";
+	public static final String CR_OPERATION_R5_APPLY = "$r5.apply";
+	public static final String CR_OPERATION_PREPOPULATE = "$prepopulate";
+	public static final String CR_OPERATION_POPULATE = "$populate";
+	public static final String CR_OPERATION_EXTRACT = "$extract";
+	public static final String CR_OPERATION_PACKAGE = "$package";
 
 	/**
 	 * Operation name for the $meta operation
@@ -162,6 +171,11 @@ public class ProviderConstants {
 	 * Operation name for the $reindex operation
 	 */
 	public static final String OPERATION_REINDEX = "$reindex";
+
+	/**
+	 * Operation name for the $reindex operation
+	 */
+	public static final String OPERATION_REINDEX_DRYRUN = "$reindex-dryrun";
 
 	/**
 	 * Operation name for the $invalidate-expansion operation

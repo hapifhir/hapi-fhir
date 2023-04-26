@@ -6,7 +6,11 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -20,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -36,9 +42,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	public static final byte[] FEW_BYTES = {4, 3, 2, 1};
-	public static final byte[] SOME_BYTES = {1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1};
+	public static final byte[] SOME_BYTES = {1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 8, 9, 0, 10, 9};
 	public static final byte[] SOME_BYTES_2 = {6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 5, 5, 5, 6};
 	private static final Logger ourLog = LoggerFactory.getLogger(BinaryStorageInterceptorR4Test.class);
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+	@Autowired
+	private StorageSettings myOldStorageSettings;;
 
 	@Autowired
 	private MemoryBinaryStorageSvcImpl myStorageSvc;
@@ -164,6 +175,49 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+
+	class ContentTypeStrippingInterceptor implements IClientInterceptor {
+
+		@Override
+		public void interceptRequest(IHttpRequest theRequest) {
+			theRequest.removeHeaders("Content-Type");
+			theRequest.removeHeaders("Accept");
+		}
+
+		@Override
+		public void interceptResponse(IHttpResponse theResponse) throws IOException {
+
+		}
+	}
+	@Test
+	public void testCreateAndRetrieveExternalizedBinaryViaGetWithNoHeaders() {
+
+		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(false);
+		// Create a resource with a big enough binary
+		Binary binary = new Binary();
+		binary.setId("FOO");
+		binary.setContentType("application/octet-stream");
+		binary.setData(SOME_BYTES);
+
+		DaoMethodOutcome outcome = myBinaryDao.update(binary, mySrd);
+
+		// Make sure it was externalized
+		IIdType id = outcome.getId().toUnqualifiedVersionless();
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, not(containsString("\"data\"")));
+
+		// Now read it back and make sure it is not successfully de-externalized
+		ContentTypeStrippingInterceptor interceptor = new ContentTypeStrippingInterceptor();
+		myClient.registerInterceptor(interceptor);
+		Binary execute = myClient.read().resource(Binary.class).withId(id).execute();
+		myClient.unregisterInterceptor(interceptor);
+
+		assertNull(execute.getContent());
+		assertNull(execute.getDataElement().getValue());
+		assertNotNull(execute.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
+	}
 	@Test
 	public void testCreateAndRetrieveBinary_ClientAssignedId_ExternalizedBinary() {
 

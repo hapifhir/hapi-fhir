@@ -45,7 +45,7 @@ public class WorkChunk implements IModelJson {
 	private String myId;
 
 	@JsonProperty("sequence")
-	// wipmb this seems unused.
+	// TODO MB danger - these repeat with a job or even a single step.  They start at 0 for every parent chunk.  Review after merge.
 	private int mySequence;
 
 	@JsonProperty("status")
