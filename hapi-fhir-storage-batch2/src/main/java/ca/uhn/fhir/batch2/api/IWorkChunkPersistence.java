@@ -34,7 +34,13 @@ import java.util.stream.Stream;
 
 /**
  * Work Chunk api, implementing the WorkChunk state machine.
- * Test specification is in {@link ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest}
+ * Test specification is in {@link ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest}.
+ * Note on transaction boundaries:  these are messy - some methods expect an existing transaction and are
+ * marked with {@code @Transactional(propagation = Propagation.MANDATORY)}, some will create a tx as needed
+ * and are marked {@code @Transactional(propagation = Propagation.REQUIRED)}, and some run in a NEW transaction
+ * and are not marked on the interface, but on the implementors instead.  We had a bug where interface
+ * methods marked {@code @Transactional(propagation = Propagation.REQUIRES_NEW)} were starting two (2!)
+ * transactions because of our synchronized wrapper.
  *
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
@@ -76,6 +82,7 @@ public interface IWorkChunkPersistence {
 	 * @param theParameters - the error message and max retry count.
 	 * @return - the new status - ERRORED or ERRORED, depending on retry count
 	 */
+	// on impl - @Transactional(propagation = Propagation.REQUIRES_NEW)
 	WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters);
 
 	/**

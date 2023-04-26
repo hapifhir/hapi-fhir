@@ -49,7 +49,9 @@ import java.util.stream.Stream;
  * Some of this is tested in {@link ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest}
  * This is a transactional interface, but we have pushed the declaration of calls that have
  * {@code @Transactional(propagation = Propagation.REQUIRES_NEW)} down to the implementations since we have a synchronized
- * wrapper that was double-createing the NEW transaction.
+ * wrapper that was double-creating the NEW transaction.
+ *
+ * wipmb regularize the tx boundary.  Probably make them all MANDATORY
  */
 public interface IJobPersistence extends IWorkChunkPersistence {
 	Logger ourLog = LoggerFactory.getLogger(IJobPersistence.class);
@@ -152,9 +154,11 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	}
 
 	/**
-	 * Goofy hack for now to create a tx boundary.
+	 * Brute-force hack for now to create a tx boundary - takes a write-lock on the instance
+	 * while the theModifier runs.
+	 * Keep the callback short to keep the lock-time short.
 	 * If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
-	 * 	instead to ensure state-change callbacks are invoked properly.
+	 * 	inside theModifier to ensure state-change callbacks are invoked properly.
 	 *
 	 * @param theInstanceId the id of the instance to modify
 	 * @param theModifier a hook to modify the instance - return true to finish the record write
@@ -183,9 +187,9 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theInstanceId The instance ID
 	 * @return true if the instance status changed
 	 */
+	// wipmb delete
 	boolean markInstanceAsCompleted(String theInstanceId);
 
-	boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum);
 
 	@Transactional(propagation = Propagation.MANDATORY)
 	boolean markInstanceAsStatusWhenStatusIn(String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates);
@@ -207,8 +211,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 *
 	 * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
 	 */
-	///////
-	// job events
 
 	class CreateResult {
 		public final String jobInstanceId;

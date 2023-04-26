@@ -52,6 +52,7 @@ import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -62,6 +63,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+
+import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
+import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;
+import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
 
 public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorService, IHasScheduledJobs {
 	public static final String SCHEDULED_JOB_ID = ReductionStepExecutorScheduledJob.class.getName();
@@ -154,6 +159,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.getCurrentStep();
 
+		// wipmb this runs three tx. Can we shorten that to one?
 		JobInstance instance = executeInTransactionWithSynchronization(() ->
 			myJobPersistence.fetchInstance(theInstanceId).orElseThrow(() -> new InternalErrorException("Unknown instance: " + theInstanceId)));
 
@@ -162,7 +168,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			case IN_PROGRESS:
 			case ERRORED:
 				// this will take a write lock on the JobInstance, preventing duplicates.
-				if (myJobPersistence.markInstanceAsStatus(instance.getInstanceId(), StatusEnum.FINALIZE)) {
+				if (executeInTransactionWithSynchronization(() ->myJobPersistence.markInstanceAsStatusWhenStatusIn(instance.getInstanceId(), FINALIZE, EnumSet.of(IN_PROGRESS, ERRORED)))) {
 					ourLog.info("Job instance {} has been set to FINALIZE state - Beginning reducer step", instance.getInstanceId());
 					shouldProceed = true;
 				}
@@ -189,7 +195,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		PT parameters = instance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker = (IReductionStepWorker<PT, IT, OT>) step.getJobStepWorker();
 
-		instance.setStatus(StatusEnum.FINALIZE);
+		instance.setStatus(FINALIZE);
 
 		boolean defaultSuccessValue = true;
 		ReductionStepChunkProcessingResponse response = new ReductionStepChunkProcessingResponse(defaultSuccessValue);

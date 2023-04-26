@@ -46,8 +46,9 @@ import java.util.stream.Collectors;
 public class JobDefinitionRegistry {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	// TODO MB is this safe?  Can ue use ConcurrentHashMap instead?
-	private volatile Map<String, NavigableMap<Integer, JobDefinition<?>>> myJobs = new HashMap<>();
+	// wipmb Replace with a final ConcurrentHashMap and drop the complicated copy-on-write stuff below.  We only populate this on startup.
+	// we don't do this at runtime.
+	private volatile Map<String, NavigableMap<Integer, JobDefinition<?>>> myJobDefinitions = new HashMap<>();
 
 	/**
 	 * Add a job definition only if it is not registered
@@ -89,7 +90,7 @@ public class JobDefinitionRegistry {
 		}
 		versionMap.put(theDefinition.getJobDefinitionVersion(), theDefinition);
 
-		myJobs = newJobsMap;
+		myJobDefinitions = newJobsMap;
 	}
 
 	public synchronized void removeJobDefinition(@Nonnull String theDefinitionId, int theVersion) {
@@ -105,20 +106,20 @@ public class JobDefinitionRegistry {
 			}
 		}
 
-		myJobs = newJobsMap;
+		myJobDefinitions = newJobsMap;
 	}
 
 	@Nonnull
 	private Map<String, NavigableMap<Integer, JobDefinition<?>>> cloneJobsMap() {
 		Map<String, NavigableMap<Integer, JobDefinition<?>>> newJobsMap = new HashMap<>();
-		for (Map.Entry<String, NavigableMap<Integer, JobDefinition<?>>> nextEntry : myJobs.entrySet()) {
+		for (Map.Entry<String, NavigableMap<Integer, JobDefinition<?>>> nextEntry : myJobDefinitions.entrySet()) {
 			newJobsMap.put(nextEntry.getKey(), new TreeMap<>(nextEntry.getValue()));
 		}
 		return newJobsMap;
 	}
 
 	public Optional<JobDefinition<?>> getLatestJobDefinition(@Nonnull String theJobDefinitionId) {
-		NavigableMap<Integer, JobDefinition<?>> versionMap = myJobs.get(theJobDefinitionId);
+		NavigableMap<Integer, JobDefinition<?>> versionMap = myJobDefinitions.get(theJobDefinitionId);
 		if (versionMap == null || versionMap.isEmpty()) {
 			return Optional.empty();
 		}
@@ -126,7 +127,7 @@ public class JobDefinitionRegistry {
 	}
 
 	public Optional<JobDefinition<?>> getJobDefinition(@Nonnull String theJobDefinitionId, int theJobDefinitionVersion) {
-		NavigableMap<Integer, JobDefinition<?>> versionMap = myJobs.get(theJobDefinitionId);
+		NavigableMap<Integer, JobDefinition<?>> versionMap = myJobDefinitions.get(theJobDefinitionId);
 		if (versionMap == null || versionMap.isEmpty()) {
 			return Optional.empty();
 		}
@@ -155,14 +156,14 @@ public class JobDefinitionRegistry {
 	 * @return a list of Job Definition Ids in alphabetical order
 	 */
 	public List<String> getJobDefinitionIds() {
-		return myJobs.keySet()
+		return myJobDefinitions.keySet()
 			.stream()
 			.sorted()
 			.collect(Collectors.toList());
 	}
 
 	public boolean isEmpty() {
-		return myJobs.isEmpty();
+		return myJobDefinitions.isEmpty();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -171,6 +172,6 @@ public class JobDefinitionRegistry {
 	}
 
 	public Collection<Integer> getJobDefinitionVersions(String theDefinitionId) {
-		return myJobs.getOrDefault(theDefinitionId, ImmutableSortedMap.of()).keySet();
+		return myJobDefinitions.getOrDefault(theDefinitionId, ImmutableSortedMap.of()).keySet();
 	}
 }

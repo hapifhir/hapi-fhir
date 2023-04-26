@@ -38,6 +38,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -68,9 +70,11 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -621,6 +625,27 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		// then
 		JobInstance jobInstance = freshFetchJobInstance(instanceId);
 		assertEquals(initialValue, jobInstance.isFastTracking());
+	}
+
+	@Test
+	void testInstanceStatusUpdate() {
+	    // given
+		JobInstance instance1 = createInstance();
+		boolean initialValue = true;
+		instance1.setFastTracking(initialValue);
+		instance1.setStatus(StatusEnum.QUEUED);
+
+		String instanceId = mySvc.storeNewInstance(instance1);
+
+	    // when
+
+		boolean badChange = runInTransaction(()->mySvc.markInstanceAsStatusWhenStatusIn(instanceId, StatusEnum.FINALIZE, EnumSet.of(StatusEnum.IN_PROGRESS, StatusEnum.ERRORED)));
+		assertFalse(badChange, "prior state no match");
+		assertEquals(StatusEnum.QUEUED, freshFetchJobInstance(instanceId).getStatus(), "Status unchanged");
+
+		boolean goodChange = runInTransaction(()->mySvc.markInstanceAsStatusWhenStatusIn(instanceId, StatusEnum.IN_PROGRESS, EnumSet.of(StatusEnum.QUEUED)));
+		assertTrue(goodChange, "prior state mached, so change written");
+		assertEquals(StatusEnum.IN_PROGRESS, freshFetchJobInstance(instanceId).getStatus(), "Status changed");
 	}
 
 	private JobDefinition<TestJobParameters> withJobDefinition() {

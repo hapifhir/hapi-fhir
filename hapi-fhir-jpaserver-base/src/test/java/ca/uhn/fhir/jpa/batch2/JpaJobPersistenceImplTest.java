@@ -18,7 +18,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Date;
@@ -40,6 +40,7 @@ class JpaJobPersistenceImplTest {
 	IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Mock
 	IBatch2WorkChunkRepository myWorkChunkRepository;
+	@SuppressWarnings("unused") // injected into mySvc
 	@Spy
 	IHapiTransactionService myTxManager = new NonTransactionalHapiTransactionService();
 	@InjectMocks
@@ -194,8 +195,8 @@ class JpaJobPersistenceImplTest {
 	private Batch2JobInstanceEntity createBatch2JobInstanceEntity() {
 		Batch2JobInstanceEntity entity = new Batch2JobInstanceEntity();
 		entity.setId("id");
-		entity.setStartTime(Date.from(LocalDate.of(2000, 1, 2).atStartOfDay().toInstant(ZoneOffset.UTC)));
-		entity.setEndTime(Date.from(LocalDate.of(2000, 2, 3).atStartOfDay().toInstant(ZoneOffset.UTC)));
+		entity.setStartTime(Date.from(LocalDateTime.of(2000, 1, 2, 0, 0).toInstant(ZoneOffset.UTC)));
+		entity.setEndTime(Date.from(LocalDateTime.of(2000, 2, 3, 0, 0).toInstant(ZoneOffset.UTC)));
 		entity.setStatus(StatusEnum.COMPLETED);
 		entity.setCancelled(true);
 		entity.setFastTracking(true);

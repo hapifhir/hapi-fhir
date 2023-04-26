@@ -33,6 +33,7 @@ import java.util.Set;
 
 public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobInstanceEntity, String>, IHapiFhirJpaRepository {
 
+	// wipmb delete - unused
 	@Modifying
 	@Query("UPDATE Batch2JobInstanceEntity e SET e.myStatus = :status WHERE e.myId = :id and e.myStatus <> :status")
 	int updateInstanceStatus(@Param("id") String theInstanceId, @Param("status") StatusEnum theStatus);

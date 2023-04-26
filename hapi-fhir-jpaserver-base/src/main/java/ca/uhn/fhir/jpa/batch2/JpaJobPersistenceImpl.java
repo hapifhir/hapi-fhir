@@ -412,6 +412,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 	}
 
+	// wipmb delete
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean markInstanceAsCompleted(String theInstanceId) {
@@ -420,17 +421,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
-		int recordsChanged =	myTransactionService
-			.withSystemRequest()
-			.execute(()->myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum));
-		return recordsChanged > 0;
-	}
-
-	@Override
-	public boolean markInstanceAsStatusWhenStatusIn(String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates) {
-		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum);
-		ourLog.debug("Update job {} to status {} if in status {}: {}", theInstance, theStatusEnum, thePriorStates, recordsChanged>0);
+	public boolean markInstanceAsStatusWhenStatusIn(String theInstanceId, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates) {
+		int recordsChanged = myJobInstanceRepository.updateInstanceStatusIfIn(theInstanceId, theStatusEnum, thePriorStates);
+		ourLog.debug("Update job {} to status {} if in status {}: {}", theInstanceId, theStatusEnum, thePriorStates, recordsChanged>0);
 		return recordsChanged > 0;
 	}
 
