@@ -396,8 +396,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId) {
 		ourLog.info("Deleting all chunks for instance ID: {}", theInstanceId);
-		myJobInstanceRepository.updateWorkChunksPurgedTrue(theInstanceId);
-		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
+		int updateCount = myJobInstanceRepository.updateWorkChunksPurgedTrue(theInstanceId);
+		int deleteCount = myWorkChunkRepository.deleteAllForInstance(theInstanceId);
+		ourLog.debug("Purged {} chunks, and updated {} instance.", deleteCount, updateCount);
 	}
 
 	@Override
@@ -413,7 +414,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
 		String operationString = "Cancel job instance " + theInstanceId;
 
-		// TODO MB this is much too detailed to be down here - this should be up at the api layer.  Replace with simple enum.
+		// wipmb this is much too detailed to be down here - this should be up at the api layer.  Replace with simple enum.
 		String messagePrefix = "Job instance <" + theInstanceId + ">";
 		if (recordsChanged > 0) {
 			return JobOperationResultJson.newSuccess(operationString, messagePrefix + " successfully cancelled.");

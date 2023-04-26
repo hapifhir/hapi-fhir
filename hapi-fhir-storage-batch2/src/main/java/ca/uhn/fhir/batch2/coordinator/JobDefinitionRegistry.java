@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,14 +40,13 @@ import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class JobDefinitionRegistry {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	// wipmb Replace with a final ConcurrentHashMap and drop the complicated copy-on-write stuff below.  We only populate this on startup.
-	// we don't do this at runtime.
-	private volatile Map<String, NavigableMap<Integer, JobDefinition<?>>> myJobDefinitions = new HashMap<>();
+	private final Map<String, NavigableMap<Integer, JobDefinition<?>>> myJobDefinitions = new ConcurrentHashMap<>();
 
 	/**
 	 * Add a job definition only if it is not registered
@@ -79,8 +77,7 @@ public class JobDefinitionRegistry {
 			}
 		}
 
-		Map<String, NavigableMap<Integer, JobDefinition<?>>> newJobsMap = cloneJobsMap();
-		NavigableMap<Integer, JobDefinition<?>> versionMap = newJobsMap.computeIfAbsent(jobDefinitionId, t -> new TreeMap<>());
+		NavigableMap<Integer, JobDefinition<?>> versionMap = myJobDefinitions.computeIfAbsent(jobDefinitionId, t -> new TreeMap<>());
 		if (versionMap.containsKey(theDefinition.getJobDefinitionVersion())) {
 			if (versionMap.get(theDefinition.getJobDefinitionVersion()) == theDefinition) {
 				ourLog.warn("job[{}] version: {} already registered.  Not registering again.", jobDefinitionId, theDefinition.getJobDefinitionVersion());
@@ -89,33 +86,19 @@ public class JobDefinitionRegistry {
 			throw new ConfigurationException(Msg.code(2047) + "Multiple definitions for job[" + jobDefinitionId + "] version: " + theDefinition.getJobDefinitionVersion());
 		}
 		versionMap.put(theDefinition.getJobDefinitionVersion(), theDefinition);
-
-		myJobDefinitions = newJobsMap;
 	}
 
 	public synchronized void removeJobDefinition(@Nonnull String theDefinitionId, int theVersion) {
 		Validate.notBlank(theDefinitionId);
 		Validate.isTrue(theVersion >= 1);
 
-		Map<String, NavigableMap<Integer, JobDefinition<?>>> newJobsMap = cloneJobsMap();
-		NavigableMap<Integer, JobDefinition<?>> versionMap = newJobsMap.get(theDefinitionId);
+		NavigableMap<Integer, JobDefinition<?>> versionMap = myJobDefinitions.get(theDefinitionId);
 		if (versionMap != null) {
 			versionMap.remove(theVersion);
 			if (versionMap.isEmpty()) {
-				newJobsMap.remove(theDefinitionId);
+				myJobDefinitions.remove(theDefinitionId);
 			}
 		}
-
-		myJobDefinitions = newJobsMap;
-	}
-
-	@Nonnull
-	private Map<String, NavigableMap<Integer, JobDefinition<?>>> cloneJobsMap() {
-		Map<String, NavigableMap<Integer, JobDefinition<?>>> newJobsMap = new HashMap<>();
-		for (Map.Entry<String, NavigableMap<Integer, JobDefinition<?>>> nextEntry : myJobDefinitions.entrySet()) {
-			newJobsMap.put(nextEntry.getKey(), new TreeMap<>(nextEntry.getValue()));
-		}
-		return newJobsMap;
 	}
 
 	public Optional<JobDefinition<?>> getLatestJobDefinition(@Nonnull String theJobDefinitionId) {
