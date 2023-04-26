@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 // This class is primarily used for testing.
 public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private static final Logger ourLog = LoggerFactory.getLogger(PointcutLatch.class);
+
 	private static final int DEFAULT_TIMEOUT_SECONDS = 10;
 	private static final FhirObjectPrinter ourFhirObjectToStringMapper = new FhirObjectPrinter();
 

@@ -1,7 +1,11 @@
 package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.cr.BaseCrDstu3Test;
+import ca.uhn.fhir.cr.IResourceLoader;
+import ca.uhn.fhir.cr.TestCrConfig;
+import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hamcrest.Matchers;
@@ -14,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -27,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@ContextConfiguration(classes = {TestCrDstu3Config.class})
 public class CrMeasureEvaluationDstu3Test extends BaseCrDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CrMeasureEvaluationDstu3Test.class);
 

@@ -5,10 +5,11 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.Logs;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -17,21 +18,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,7 +45,7 @@ public class ReductionStepDataSinkTest {
 
 	private static class StepOutputData implements IModelJson {
 		@JsonProperty("data")
-		private final String myData;
+		final String myData;
 		public StepOutputData(String theData) {
 			myData = theData;
 		}
@@ -94,19 +92,16 @@ public class ReductionStepDataSinkTest {
 		WorkChunkData<StepOutputData> chunkData = new WorkChunkData<>(stepData);
 
 		// when
-		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID)))
-			.thenReturn(Optional.of(JobInstance.fromInstanceId(INSTANCE_ID)));
+		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
+		instance.setStatus(StatusEnum.FINALIZE);
+		stubUpdateInstanceCallback(instance);
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 
 		// test
 		myDataSink.accept(chunkData);
 
 		// verify
-		ArgumentCaptor<JobInstance> instanceCaptor = ArgumentCaptor.forClass(JobInstance.class);
-		verify(myJobPersistence)
-			.updateInstance(instanceCaptor.capture());
-
-		assertEquals(JsonUtil.serialize(stepData, false), instanceCaptor.getValue().getReport());
+		assertEquals(JsonUtil.serialize(stepData, false), instance.getReport());
 	}
 
 	@Test
@@ -119,23 +114,23 @@ public class ReductionStepDataSinkTest {
 
 		ourLogger.setLevel(Level.ERROR);
 
-		// when
-		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID)))
-			.thenReturn(Optional.of(JobInstance.fromInstanceId(INSTANCE_ID)));
+		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
+		instance.setStatus(StatusEnum.FINALIZE);
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
+		stubUpdateInstanceCallback(instance);
 
 		// test
 		myDataSink.accept(firstData);
-		myDataSink.accept(secondData);
+		assertThrows(IllegalStateException.class, ()->
+			myDataSink.accept(secondData));
 
-		// verify
-		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-		verify(myListAppender).doAppend(logCaptor.capture());
-		assertEquals(1, logCaptor.getAllValues().size());
-		ILoggingEvent log = logCaptor.getValue();
-		assertTrue(log.getFormattedMessage().contains(
-			"Report has already been set. Now it is being overwritten. Last in will win!"
-		));
+	}
+
+	private void stubUpdateInstanceCallback(JobInstance theJobInstance) {
+		when(myJobPersistence.updateInstance(eq(INSTANCE_ID), any())).thenAnswer(call->{
+			IJobPersistence.JobInstanceUpdateCallback callback = call.getArgument(1);
+			return callback.doUpdate(theJobInstance);
+		});
 	}
 
 	@Test
@@ -143,10 +138,8 @@ public class ReductionStepDataSinkTest {
 		// setup
 		String data = "data";
 		WorkChunkData<StepOutputData> chunkData = new WorkChunkData<>(new StepOutputData(data));
-
-		// when
-		when(myJobPersistence.fetchInstance(anyString()))
-			.thenReturn(Optional.empty());
+		when(myJobPersistence.updateInstance(any(), any())).thenReturn(false);
+		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 
 		// test
 		try {
@@ -155,7 +148,7 @@ public class ReductionStepDataSinkTest {
 		} catch (JobExecutionFailedException ex) {
 			assertTrue(ex.getMessage().contains("No instance found with Id " + INSTANCE_ID));
 		} catch (Exception anyOtherEx) {
-			fail(anyOtherEx.getMessage());
+			fail("Unexpected exception", anyOtherEx);
 		}
 	}
 

@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import org.springframework.messaging.MessagingException;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicMatchingSubscriber.class);
@@ -95,21 +97,23 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 			SubscriptionTopicMatcher matcher = new SubscriptionTopicMatcher(mySubscriptionTopicSupport, topic);
 			InMemoryMatchResult result = matcher.match(theMsg);
 			if (result.matched()) {
-				ourLog.info("Matched topic {} to message {}", topic.getIdElement().toUnqualifiedVersionless(), theMsg);
+				ourLog.info("Matched topic {} to message {}", topic.getUrl(), theMsg);
 				deliverToTopicSubscriptions(theMsg, topic, result);
 			}
 		}
 	}
 
 	private void deliverToTopicSubscriptions(ResourceModifiedMessage theMsg, SubscriptionTopic topic, InMemoryMatchResult result) {
-		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByUrl(topic.getUrl());
+		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(topic.getUrl());
 		if (!topicSubscriptions.isEmpty()) {
 			IBaseResource matchedResource = theMsg.getNewPayload(myFhirContext);
 
 			for (ActiveSubscription activeSubscription : topicSubscriptions) {
-				// WIP STR5 apply subscription filter
-				IBaseResource payload = mySubscriptionTopicPayloadBuilder.buildPayload(matchedResource, theMsg, activeSubscription, topic);
-				mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, activeSubscription, result);
+				// WIP STR5 apply subscription filters
+				IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(matchedResource, theMsg, activeSubscription, topic);
+				// WIP STR5 do we need to add a total?  If so can do that with R5BundleFactory
+				bundlePayload.setId(UUID.randomUUID().toString());
+				mySubscriptionMatchDeliverer.deliverPayload(bundlePayload, theMsg, activeSubscription, result);
 			}
 		}
 	}

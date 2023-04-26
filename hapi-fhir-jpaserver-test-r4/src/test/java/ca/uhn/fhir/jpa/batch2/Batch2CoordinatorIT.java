@@ -432,6 +432,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceStartRequest request = buildRequest(jobDefId);
 
 		// execute
+		ourLog.info("Starting job");
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 		String instanceId = startResponse.getInstanceId();
@@ -441,7 +442,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitJobInProgress(instanceId);
 
 		// execute
+		ourLog.info("Cancel job {}", instanceId);
 		myJobCoordinator.cancelInstance(instanceId);
+		ourLog.info("Cancel job {} done", instanceId);
 
 		// validate
 		myBatch2JobHelper.awaitJobCancelled(instanceId);
@@ -488,7 +491,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getInstanceId(),
-			12, // we want to wait a long time (2 min here) cause backoff is incremental
+			30, // we want to wait a long time (2 min here) cause backoff is incremental
 			StatusEnum.FAILED
 		);
 
