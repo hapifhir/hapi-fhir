@@ -1146,6 +1146,12 @@ public class FhirContext {
 		return retval;
 	}
 
+	public IPrimitiveType<String > getPrimitiveString(String theValue) {
+		IPrimitiveType<String> retval = (IPrimitiveType<String>) getElementDefinition("string").newInstance();
+		retval.setValue(theValue);
+		return retval;
+	}
+
 	private static boolean tryToInitParser(Runnable run) {
 		boolean retVal;
 		try {

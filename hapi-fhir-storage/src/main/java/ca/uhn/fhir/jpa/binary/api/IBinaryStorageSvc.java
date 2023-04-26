@@ -36,6 +36,14 @@ public interface IBinaryStorageSvc {
 	long getMaximumBinarySize();
 
 	/**
+	 * Given a blob ID, return true if it is valid for the underlying storage mechanism, false otherwise.
+	 *
+	 * @param theNewBlobId the blob ID to validate
+	 * @return true if the blob ID is valid, false otherwise.
+	 */
+   boolean isValidBlobId(String theNewBlobId);
+
+   /**
 	 * Sets the maximum number of bytes that can be stored in a single binary
 	 * file by this service. The default is {@link Long#MAX_VALUE}
 	 *

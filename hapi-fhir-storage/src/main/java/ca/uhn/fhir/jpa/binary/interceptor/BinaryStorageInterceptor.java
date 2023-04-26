@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
@@ -31,18 +33,26 @@ import ca.uhn.fhir.jpa.binary.api.IBinaryTarget;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.IModelVisitor2;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +81,9 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	private final FhirContext myCtx;
 	@Autowired
 	private BinaryAccessProvider myBinaryAccessProvider;
+
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private Class<T> myBinaryType;
 	private String myDeferredListKey;
 	private long myAutoInflateBinariesMaximumBytes = 10 * FileUtils.ONE_MB;
@@ -123,14 +136,14 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	public void extractLargeBinariesBeforeCreate(TransactionDetails theTransactionDetails, IBaseResource theResource, Pointcut thePointcut) throws IOException {
-		extractLargeBinaries(theTransactionDetails, theResource, thePointcut);
+	public void extractLargeBinariesBeforeCreate(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IBaseResource theResource, Pointcut thePointcut) throws IOException {
+		extractLargeBinaries(theRequestDetails, theTransactionDetails, theResource, thePointcut);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void extractLargeBinariesBeforeUpdate(TransactionDetails theTransactionDetails, IBaseResource thePreviousResource, IBaseResource theResource, Pointcut thePointcut) throws IOException {
+	public void extractLargeBinariesBeforeUpdate(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IBaseResource thePreviousResource, IBaseResource theResource, Pointcut thePointcut) throws IOException {
 		blockIllegalExternalBinaryIds(thePreviousResource, theResource);
-		extractLargeBinaries(theTransactionDetails, theResource, thePointcut);
+		extractLargeBinaries(theRequestDetails, theTransactionDetails, theResource, thePointcut);
 	}
 
 	/**
@@ -180,7 +193,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 
 	}
 
-	private void extractLargeBinaries(TransactionDetails theTransactionDetails, IBaseResource theResource, Pointcut thePointcut) throws IOException {
+	private void extractLargeBinaries(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IBaseResource theResource, Pointcut thePointcut) throws IOException {
 
 		IIdType resourceId = theResource.getIdElement();
 		if (!resourceId.hasResourceType() && resourceId.hasIdPart()) {
@@ -206,6 +219,12 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 					} else {
 						assert thePointcut == Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED : thePointcut.name();
 						newBlobId = myBinaryStorageSvc.newBlobId();
+
+						String prefix = invokeAssignBlobPrefix(theRequestDetails, theResource);
+						if (isNotBlank(prefix)) {
+							newBlobId = prefix + newBlobId;
+						}
+						myBinaryStorageSvc.isValidBlobId(newBlobId);
 						List<DeferredBinaryTarget> deferredBinaryTargets = getOrCreateDeferredBinaryStorageMap(theTransactionDetails);
 						DeferredBinaryTarget newDeferredBinaryTarget = new DeferredBinaryTarget(newBlobId, nextTarget, data);
 						deferredBinaryTargets.add(newDeferredBinaryTarget);
@@ -214,6 +233,21 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 					myBinaryAccessProvider.replaceDataWithExtension(nextTarget, newBlobId);
 				}
 			}
+		}
+	}
+
+	/**
+	 * This invokes the {@link Pointcut#STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX} hook and returns the prefix to use for the blob ID, or null if there are no implementers.
+	 * @return A string, which will be used to prefix the blob ID. May be null.
+	 */
+	private String invokeAssignBlobPrefix(RequestDetails theRequest, IBaseResource theResource) {
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequest)) {
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequest)
+				.add(IBaseResource.class, theResource);
+			return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, params);
+		} else {
+			return null;
 		}
 	}
 

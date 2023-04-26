@@ -33,10 +33,16 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BinaryUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +78,8 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 		IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
 
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
+
+		addMetadataExtensionsToBinary(theStepExecutionDetails, expandedResources, binary);
 
 		// TODO
 		// should be dependent on the
@@ -120,6 +128,39 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			expandedResources.getResourceType());
 
 		return new RunOutcome(numResourcesProcessed);
+	}
+
+	/**
+	 * Adds 3 extensions to the `binary.meta` element.
+	 *
+	 * 1. the _exportId provided at request time
+	 * 2. the job_id of the job instance.
+	 * 3. the resource type of the resources contained in the binary
+	 */
+	private void addMetadataExtensionsToBinary(@Nonnull  StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> theStepExecutionDetails, ExpandedResourcesList expandedResources, IBaseBinary binary) {
+		if (binary.getMeta() instanceof IBaseHasExtensions) {
+			IBaseHasExtensions meta = (IBaseHasExtensions) binary.getMeta();
+
+			//export identifier, potentially null.
+			String exportIdentifier = theStepExecutionDetails.getParameters().getExportIdentifier();
+			if (!StringUtils.isBlank(exportIdentifier)) {
+				IBaseExtension<?, ?> exportIdentifierExtension = meta.addExtension();
+				exportIdentifierExtension.setUrl(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER);
+				exportIdentifierExtension.setValue(myFhirContext.getPrimitiveString(exportIdentifier));
+			}
+
+			//job id
+			IBaseExtension<?, ?> jobExtension = meta.addExtension();
+			jobExtension.setUrl(JpaConstants.BULK_META_EXTENSION_JOB_ID);
+			jobExtension.setValue(myFhirContext.getPrimitiveString(theStepExecutionDetails.getInstance().getInstanceId()));
+
+			//resource type
+			IBaseExtension<?, ?> typeExtension = meta.addExtension();
+			typeExtension.setUrl(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE);
+			typeExtension.setValue(myFhirContext.getPrimitiveString(expandedResources.getResourceType()));
+		} else {
+			ourLog.warn("Could not attach metadata extensions to binary resource, as this binary metadata does not support extensions");
+		}
 	}
 
 	/**
