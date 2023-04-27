@@ -59,7 +59,11 @@ public enum StatusEnum {
 	/**
 	 * Task execution resulted in an error but the error may be transient (or transient status is unknown).
 	 * Retrying may result in success.
+	 * @deprecated this is basically a synonym for IN_PROGRESS - display should use the presence of an error message on the instance
+	 * to indicate that there has been a transient error.
 	 */
+	@Deprecated(since = "6.6")
+		// wipmb remove all inbound transitions, and allow transition back to IN_PROGRESS.
 	ERRORED(true, false, true),
 
 	/**
@@ -183,10 +187,8 @@ public enum StatusEnum {
 				canTransition = true;
 				break;
 			case IN_PROGRESS:
-				canTransition = theNewStatus != QUEUED;
-				break;
 			case ERRORED:
-				canTransition = theNewStatus == FAILED || theNewStatus == COMPLETED || theNewStatus == CANCELLED || theNewStatus == ERRORED;
+				canTransition = theNewStatus != QUEUED;
 				break;
 			case CANCELLED:
 				// terminal state cannot transition

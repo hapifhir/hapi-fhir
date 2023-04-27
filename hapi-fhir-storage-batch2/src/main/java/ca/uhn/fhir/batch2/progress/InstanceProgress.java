@@ -165,10 +165,6 @@ public class InstanceProgress {
 		}
 	}
 
-	public boolean changed() {
-		return (myIncompleteChunkCount + myCompleteChunkCount + myErroredChunkCount + myErrorCountForAllStatuses) > 0;
-	}
-
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this)
