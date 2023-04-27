@@ -222,6 +222,7 @@ public class JobInstanceProcessor {
 		});
 		if (!changed) {
 			// we collided with another maintenance job.
+			ourLog.warn("Skipping gate advance to {} for instance {} - already advanced.", nextStepId, instanceId);
 			return;
 		}
 

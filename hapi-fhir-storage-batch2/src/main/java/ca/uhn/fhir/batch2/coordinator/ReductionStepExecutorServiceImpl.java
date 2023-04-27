@@ -186,7 +186,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		if (!shouldProceed) {
 			ourLog.warn(
 				"JobInstance[{}] should not be finalized at this time. In memory status is {}. Reduction step will not rerun!"
-					+ " This could be a long running reduction job resulting in the processed msg not being acknowledge,"
+					+ " This could be a long running reduction job resulting in the processed msg not being acknowledged,"
 					+ " or the result of a failed process or server restarting.",
 				instance.getInstanceId(),
 				instance.getStatus()

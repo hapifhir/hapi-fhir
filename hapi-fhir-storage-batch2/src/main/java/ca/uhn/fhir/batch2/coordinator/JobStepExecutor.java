@@ -86,6 +86,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			});
 		}
 
+		// wipmb can this flag be stale?  do we need to refetch?
 		if (myInstance.isFastTracking()) {
 			handleFastTracking(stepExecutorOutput.getDataSink());
 		}

@@ -176,6 +176,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		return myJobQuerySvc.fetchAllInstances(theFetchRequest);
 	}
 
+	// wipmb this interface is incoherent - do we return a JobOperationResultJson, or throw ResourceNotFoundException?
 	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		return myJobPersistence.cancelInstance(theInstanceId);

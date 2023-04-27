@@ -238,7 +238,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 				if (setupProcessing.isEmpty()) {
 					// If any setup failed, roll back the chunk and instance status changes.
-					ourLog.debug("WorkChunk setup tx rollback");
+					ourLog.debug("WorkChunk setup failed - rollback tx");
 					theTransactionStatus.setRollbackOnly();
 				}
 				// else COMMIT the work.

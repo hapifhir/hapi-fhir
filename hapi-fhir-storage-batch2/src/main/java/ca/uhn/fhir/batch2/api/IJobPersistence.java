@@ -115,7 +115,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * Return true from the callback if the record write should continue, or false if
 	 * the change should be discarded.
 	 */
-	@FunctionalInterface
 	interface JobInstanceUpdateCallback  {
 		/**
 		 * Modify theInstance within a write-lock transaction.
@@ -198,6 +197,16 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 		}
 	}
 
+	/**
+	 * Create the job, and it's first chunk.
+	 *
+	 * We create the chunk atomically with the job so that we never have a state with
+	 * zero unfinished chunks left until the job is complete.  Makes the maintenance run simpler.
+	 *
+	 * @param theJobDefinition what kind of job
+	 * @param theParameters params for the job
+	 * @return the ids of the instance and first chunk
+	 */
 	@Nonnull
 	@Transactional(propagation = Propagation.MANDATORY)
 	default CreateResult onCreateWithFirstChunk(JobDefinition<?> theJobDefinition, String theParameters) {

@@ -206,7 +206,8 @@ public enum StatusEnum {
 		}
 
 		if (!canTransition) {
-			ourLog.trace("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
+			// we have a bug?
+			ourLog.warn("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
 		}
 		return canTransition;
 	}
