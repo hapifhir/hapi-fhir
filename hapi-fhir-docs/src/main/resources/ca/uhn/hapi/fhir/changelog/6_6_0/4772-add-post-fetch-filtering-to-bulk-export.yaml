@@ -1,7 +1,6 @@
 ---
 type: add
 issue: 4772
-backport: 6.4.5
 title: "A new optional parameter called `_typePostFetchFilterUrl` has been added to the 
    Bulk Export `$export` 
    operation parameters. This parameter allows filters to be specified that will be applied
