@@ -86,8 +86,6 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		ExpandedResourcesList expandedResourceList = myWorkChunkCaptor.getValue();
 		assertEquals(10, expandedResourceList.getStringifiedResources().size());
 		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
-		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
-		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
 		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
 
 		// Verify query counts
