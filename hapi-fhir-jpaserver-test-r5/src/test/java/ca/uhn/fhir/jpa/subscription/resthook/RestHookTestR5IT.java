@@ -769,7 +769,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		String criteria = "Observation?accessType=Catheter,PD%20Catheter";
 
 		SearchParameter sp = new SearchParameter();
-		sp.addBase("Observation");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.OBSERVATION);
 		sp.setCode("accessType");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setExpression("Observation.extension('Observation#accessType')");
