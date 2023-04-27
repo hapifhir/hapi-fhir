@@ -138,6 +138,8 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 	 * 3. the resource type of the resources contained in the binary
 	 */
 	private void addMetadataExtensionsToBinary(@Nonnull  StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> theStepExecutionDetails, ExpandedResourcesList expandedResources, IBaseBinary binary) {
+		// Note that this applies only to hl7.org structures, so these extensions will not be added
+		// to DSTU2 structures
 		if (binary.getMeta() instanceof IBaseHasExtensions) {
 			IBaseHasExtensions meta = (IBaseHasExtensions) binary.getMeta();
 
