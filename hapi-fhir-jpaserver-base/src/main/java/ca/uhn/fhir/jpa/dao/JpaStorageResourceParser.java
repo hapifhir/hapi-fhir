@@ -72,7 +72,6 @@ import java.util.Date;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaStorageResourceParser implements IJpaStorageResourceParser {
@@ -433,6 +432,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 						tag.setSystem(next.getTag().getSystem());
 						tag.setCode(next.getTag().getCode());
 						tag.setDisplay(next.getTag().getDisplay());
+						tag.setVersion(next.getTag().getVersion());
+						tag.setUserSelected(next.getTag().getUserSelected());
 						break;
 				}
 			}

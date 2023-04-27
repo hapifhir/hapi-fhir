@@ -216,16 +216,22 @@ public class MemoryCacheService {
 		private final TagTypeEnum myType;
 		private final String mySystem;
 		private final String myCode;
+		private final String myVersion;
+		private final Boolean myUserSelected;
 		private final int myHashCode;
 
-		public TagDefinitionCacheKey(TagTypeEnum theType, String theSystem, String theCode) {
+		public TagDefinitionCacheKey(TagTypeEnum theType, String theSystem, String theCode, String theVersion, Boolean theUserSelected) {
 			myType = theType;
 			mySystem = theSystem;
 			myCode = theCode;
+			myVersion = theVersion;
+			myUserSelected = theUserSelected;
 			myHashCode = new HashCodeBuilder(17, 37)
 				.append(myType)
 				.append(mySystem)
 				.append(myCode)
+				.append(myVersion)
+				.append(myUserSelected)
 				.toHashCode();
 		}
 

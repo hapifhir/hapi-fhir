@@ -19,14 +19,12 @@
  */
 package ca.uhn.fhir.model.api;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.net.URI;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+
+import java.net.URI;
 
 /**
  * A single tag
