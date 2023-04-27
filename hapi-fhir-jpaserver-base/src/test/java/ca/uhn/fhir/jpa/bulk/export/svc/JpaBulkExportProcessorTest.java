@@ -244,7 +244,7 @@ public class JpaBulkExportProcessorTest {
 		try {
 			myProcessor.getResourcePidIterator(parameters);
 			fail();
-		} catch (InternalErrorException ex) {
+		} catch (IllegalStateException ex) {
 			assertTrue(ex.getMessage().contains("You attempted to start a Patient Bulk Export,"));
 		}
 	}
