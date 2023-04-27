@@ -2619,6 +2619,33 @@ public enum Pointcut implements IPointcut {
 	),
 
 	/**
+	 * <b> Binary Blob Prefix Assigning Hook:</b>
+	 * <p>
+	 * Immediately before a binary blob is stored to its eventual data sink, this hook is called.
+	 * This hook allows implementers to provide a prefix to the binary blob's ID.
+	 * This is helpful in cases where you want to identify this blob for later retrieval outside of HAPI-FHIR. Note that allowable characters will depend on the specific storage sink being used.
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated.
+	 * </li>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseBinary - The binary resource that is about to be stored.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>String</code>, which represents the full prefix to be applied to the blob.
+	 * </p>
+	 */
+	STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX(String.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"org.hl7.fhir.instance.model.api.IBaseResource"
+	),
+
+
+	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */

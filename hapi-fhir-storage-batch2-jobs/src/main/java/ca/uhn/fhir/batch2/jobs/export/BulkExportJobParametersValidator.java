@@ -23,15 +23,20 @@ package ca.uhn.fhir.batch2.jobs.export;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import org.apache.commons.lang3.StringUtils;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BulkExportJobParametersValidator implements IJobParametersValidator<BulkExportJobParameters> {
 
@@ -40,6 +45,9 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 	public static final String UNSUPPORTED_BINARY_TYPE = BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Nullable
 	@Override
@@ -61,6 +69,13 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		// validate the output format
 		if (!Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theParameters.getOutputFormat())) {
 			errorMsgs.add("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
+		}
+		// validate the exportId
+		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
+
+			if (!myBinaryStorageSvc.isValidBlobId(theParameters.getExportIdentifier())) {
+				errorMsgs.add("Export ID does not conform to the current blob storage implementation's limitations.");
+			}
 		}
 
 		// validate for group
@@ -84,4 +99,5 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 
 		return errorMsgs;
 	}
+
 }

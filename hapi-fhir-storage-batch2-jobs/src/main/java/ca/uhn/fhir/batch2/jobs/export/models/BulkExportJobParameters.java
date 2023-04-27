@@ -47,6 +47,9 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("since")
 	private Date myStartDate;
 
+	@JsonProperty("exportId")
+	private String myExportId;
+
 	@JsonProperty("filters")
 	private List<String> myFilters;
 
@@ -75,8 +78,33 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("expandMdm")
 	private boolean myExpandMdm;
 
+
+	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
+		BulkExportJobParameters params = new BulkExportJobParameters();
+		params.setResourceTypes(theParameters.getResourceTypes());
+		params.setExportStyle(theParameters.getExportStyle());
+		params.setExportIdentifier(theParameters.getExportIdentifier());
+		params.setFilters(theParameters.getFilters());
+		params.setPostFetchFilterUrls(theParameters.getPostFetchFilterUrls());
+		params.setGroupId(theParameters.getGroupId());
+		params.setOutputFormat(theParameters.getOutputFormat());
+		params.setStartDate(theParameters.getStartDate());
+		params.setExpandMdm(theParameters.isExpandMdm());
+		params.setPatientIds(theParameters.getPatientIds());
+		params.setOriginalRequestUrl(theParameters.getOriginalRequestUrl());
+		return params;
+	}
+
+	public String getExportIdentifier() {
+		return myExportId;
+	}
+
 	public List<String> getResourceTypes() {
 		return myResourceTypes;
+	}
+
+	public void setExportIdentifier(String theExportId) {
+		myExportId = theExportId;
 	}
 
 	public void setResourceTypes(List<String> theResourceTypes) {
@@ -156,21 +184,6 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 
 	public String getOriginalRequestUrl() {
 		return myOriginalRequestUrl;
-	}
-
-	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
-		BulkExportJobParameters params = new BulkExportJobParameters();
-		params.setResourceTypes(theParameters.getResourceTypes());
-		params.setExportStyle(theParameters.getExportStyle());
-		params.setFilters(theParameters.getFilters());
-		params.setPostFetchFilterUrls(theParameters.getPostFetchFilterUrls());
-		params.setGroupId(theParameters.getGroupId());
-		params.setOutputFormat(theParameters.getOutputFormat());
-		params.setStartDate(theParameters.getStartDate());
-		params.setExpandMdm(theParameters.isExpandMdm());
-		params.setPatientIds(theParameters.getPatientIds());
-		params.setOriginalRequestUrl(theParameters.getOriginalRequestUrl());
-		return params;
 	}
 
 }
