@@ -387,6 +387,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String typeName) {
+		//FIXME This needs to search for all possible matches.
+		return List.of(fetchTypeDefinition(typeName));
+	}
+
+	@Override
 	public UcumService getUcumService() {
 		throw new UnsupportedOperationException(Msg.code(676));
 	}

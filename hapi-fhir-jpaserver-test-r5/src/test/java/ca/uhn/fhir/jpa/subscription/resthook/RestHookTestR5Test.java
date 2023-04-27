@@ -816,8 +816,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Subscription subscription = createSubscription(criteria1, payload);
 		waitForActivatedSubscriptionCount(1);
 
-		subscription.addHeader("X-Foo: FOO");
-		subscription.addHeader("X-Bar: BAR");
+		subscription.addParameter(new Subscription.SubscriptionParameterComponent().setName("X-Foo").setValue("FOO"));
+		subscription.addParameter(new Subscription.SubscriptionParameterComponent().setName("X-Bar").setValue("BAR"));
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 		myClient.update().resource(subscription).execute();
 		waitForQueueToDrain();
@@ -943,7 +943,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String criteria = "Observation?accessType=Catheter,PD%20Catheter";
 
 		SearchParameter sp = new SearchParameter();
-		sp.addBase("Observation");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.OBSERVATION);
 		sp.setCode("accessType");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setExpression("Observation.extension('Observation#accessType')");

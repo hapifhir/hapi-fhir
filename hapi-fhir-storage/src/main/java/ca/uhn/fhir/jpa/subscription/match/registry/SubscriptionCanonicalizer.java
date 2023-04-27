@@ -45,6 +45,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -320,7 +321,7 @@ public class SubscriptionCanonicalizer {
 		retVal.setChannelType(getChannelType(subscription));
 		retVal.setCriteriaString(getCriteria(theSubscription));
 		retVal.setEndpointUrl(subscription.getEndpoint());
-		retVal.setHeaders(subscription.getHeader());
+		retVal.setHeaders(getHeaderFromParameters(subscription));
 		retVal.setChannelExtensions(extractExtension(subscription));
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getContentType());
@@ -362,6 +363,10 @@ public class SubscriptionCanonicalizer {
 		}
 
 		return retVal;
+	}
+
+	private static List<? extends IPrimitiveType<String>> getHeaderFromParameters(org.hl7.fhir.r5.model.Subscription theSubscription) {
+		return theSubscription.getParameter().stream().map(theHeader -> new StringType(theHeader.getName() + ": " + theHeader.getValue())).collect(toList());
 	}
 
 	private void setPartitionIdOnReturnValue(IBaseResource theSubscription, CanonicalSubscription retVal) {

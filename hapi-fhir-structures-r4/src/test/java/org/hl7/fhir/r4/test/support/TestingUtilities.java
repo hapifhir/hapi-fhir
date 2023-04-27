@@ -163,7 +163,7 @@ public class TestingUtilities {
 	}
 
 	private static Node skipBlankText(Node node) {
-		while (node != null && (((node.getNodeType() == Node.TEXT_NODE) && Utilities.isWhitespace(node.getTextContent())) || (node.getNodeType() == Node.COMMENT_NODE)))
+		while (node != null && (((node.getNodeType() == Node.TEXT_NODE) && Utilities.isAllWhitespace(node.getTextContent())) || (node.getNodeType() == Node.COMMENT_NODE)))
 			node = node.getNextSibling();
 		return node;
 	}

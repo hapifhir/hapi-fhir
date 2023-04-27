@@ -29,6 +29,7 @@ import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.DocumentReference;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Narrative;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Patient;
@@ -359,7 +360,7 @@ public class FhirInstanceValidatorR5Test {
 		med.getContentFirstRep().getAttachment().setContentType(Constants.CT_OCTET_STREAM);
 		med.getContentFirstRep().getAttachment().setDataElement(value);
 		med.getContentFirstRep().getAttachment().setTitle("bbbb syst");
-		med.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		med.setStatus(DocumentReference.DocumentReferenceStatus.CURRENT);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
 
 		encoded = encoded.replace(value.getValueAsString(), "%%%2@()()");
@@ -381,7 +382,7 @@ public class FhirInstanceValidatorR5Test {
 		med.getContentFirstRep().getAttachment().setContentType(Constants.CT_OCTET_STREAM);
 		med.getContentFirstRep().getAttachment().setDataElement(value);
 		med.getContentFirstRep().getAttachment().setTitle("bbbb syst");
-		med.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		med.setStatus(DocumentReference.DocumentReferenceStatus.CURRENT);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
 
 		ourLog.info("Encoded: {}", encoded);
@@ -831,7 +832,8 @@ public class FhirInstanceValidatorR5Test {
 
 		// Has a value, but not a status (which is required)
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
-		input.setValue(new StringType("AAA"));
+		//TODO this is fixed in future releases of core, which allow new StringType("AAA") to work below.
+		input.setValue(new IntegerType(5678));
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertThat(output.getMessages().size(), greaterThan(0));

@@ -54,6 +54,7 @@ import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.DiagnosticReport;
 import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.IdType;
@@ -723,7 +724,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		validate(operationDefinition);
 		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), equalTo("TestQuery"));
 		String patientResourceName = "Patient";
-		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue(), is(patientResourceName));
+		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValueAsString(), is(patientResourceName));
 		assertThat(operationDefinition.getSystem(), is(false));
 		assertThat(operationDefinition.getType(), is(true));
 		assertThat(operationDefinition.getInstance(), is(false));
@@ -804,9 +805,9 @@ public class ServerCapabilityStatementProviderR5Test {
 		return retVal;
 	}
 
-	private Set<String> toStrings(List<CodeType> theType) {
+	private Set<String> toStrings(List<Enumeration<Enumerations.VersionIndependentResourceTypesAll>> theType) {
 		HashSet<String> retVal = new HashSet<String>();
-		for (CodeType next : theType) {
+		for (Enumeration<Enumerations.VersionIndependentResourceTypesAll> next : theType) {
 			retVal.add(next.getValueAsString());
 		}
 		return retVal;

@@ -282,6 +282,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
 	}
 
+	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String typeName) {
+		//FIXME This needs to search for all possible matches.
+		return List.of(fetchTypeDefinition(typeName));
+	}
 
 	@Override
 	public <T extends org.hl7.fhir.r5.model.Resource> T fetchResource(Class<T> theClass, String theUri) {
