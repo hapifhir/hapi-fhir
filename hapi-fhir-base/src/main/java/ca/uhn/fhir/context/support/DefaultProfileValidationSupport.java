@@ -19,38 +19,20 @@
  */
 package ca.uhn.fhir.context.support;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ILockable;
 import ca.uhn.fhir.util.ReflectionUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class returns the vocabulary that is shipped with the base FHIR
@@ -66,7 +48,11 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	private static final Map<FhirVersionEnum, IValidationSupport> ourImplementations = Collections.synchronizedMap(new HashMap<>());
 	private final FhirContext myCtx;
-	private final IValidationSupport myStrategy;
+	/**
+	 * This module just delegates all calls to a concrete implementation which will
+	 * be in this field. Which implementation gets used depends on the FHIR version.
+	 */
+	private final IValidationSupport myDelegate;
 	private final Runnable myFlush;
 
 	/**
@@ -83,6 +69,13 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 			if (strategy == null) {
 				if (theFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R5)) {
+					/*
+					 * I don't love that we use reflection here, but this class is in
+					 * hapi-fhir-base, and the class we're creating is in
+					 * hapi-fhir-validation. There are complicated dependency chains that
+					 * make this hard to clean up. At some point it'd be nice to figure out
+					 * a cleaner solution though.
+					 */
 					strategy = ReflectionUtil.newInstance("org.hl7.fhir.common.hapi.validation.support.DefaultProfileValidationSupportNpmStrategy", IValidationSupport.class, new Class[]{FhirContext.class}, new Object[]{theFhirContext});
 					((ILockable)strategy).lock();
 				} else {
@@ -92,9 +85,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			}
 		}
 
-		myStrategy = strategy;
-		if (myStrategy instanceof DefaultProfileValidationSupportBundleStrategy) {
-			myFlush = ()->((DefaultProfileValidationSupportBundleStrategy)myStrategy).flush();
+		myDelegate = strategy;
+		if (myDelegate instanceof DefaultProfileValidationSupportBundleStrategy) {
+			myFlush = ()->((DefaultProfileValidationSupportBundleStrategy) myDelegate).flush();
 		} else {
 			myFlush = ()->{};
 		}
@@ -102,34 +95,34 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
-		return myStrategy.fetchAllConformanceResources();
+		return myDelegate.fetchAllConformanceResources();
 	}
 
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
-		return myStrategy.fetchAllStructureDefinitions();
+		return myDelegate.fetchAllStructureDefinitions();
 	}
 
 	@Nullable
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
-		return myStrategy.fetchAllNonBaseStructureDefinitions();
+		return myDelegate.fetchAllNonBaseStructureDefinitions();
 	}
 
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		return myStrategy.fetchCodeSystem(theSystem);
+		return myDelegate.fetchCodeSystem(theSystem);
 	}
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
-		return myStrategy.fetchStructureDefinition(theUrl);
+		return myDelegate.fetchStructureDefinition(theUrl);
 	}
 
 	@Override
 	public IBaseResource fetchValueSet(String theUrl) {
-		return myStrategy.fetchValueSet(theUrl);
+		return myDelegate.fetchValueSet(theUrl);
 	}
 
 	public void flush() {

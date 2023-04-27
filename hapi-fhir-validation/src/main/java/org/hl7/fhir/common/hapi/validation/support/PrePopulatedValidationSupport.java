@@ -105,7 +105,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 		myBinaries.put(theBinaryKey, theBinary);
 	}
 
-	private void validateNotLocked() {
+	private synchronized void validateNotLocked() {
 		Validate.isTrue(myLocked == false, "Can not add to validation support, module is locked");
 	}
 
@@ -309,7 +309,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 
 
 	@Override
-	public void lock() {
+	public synchronized void lock() {
 		myLocked = true;
 	}
 }
