@@ -183,9 +183,8 @@ public class BaseHapiFhirDaoTest {
 		String raceConditionError = "Entity exists; if this is logged, you have race condition issues!";
 
 		TagDefinition tagDefinition = new TagDefinition(tagType, scheme, term, label);
-		// TODO:  fix production code first
-//		tagDefinition.setVersion(version);
-//		tagDefinition.setUserSelected(userSelected);
+		tagDefinition.setVersion(version);
+		tagDefinition.setUserSelected(userSelected);
 
 		// mock objects
 		CriteriaBuilder builder = getMockedCriteriaBuilder();

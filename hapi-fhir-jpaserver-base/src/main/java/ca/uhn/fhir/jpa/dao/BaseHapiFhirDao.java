@@ -147,6 +147,7 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
@@ -163,7 +164,9 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
@@ -279,8 +282,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag next : tagList) {
-				// TODO: get right code
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel(), null, null);
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(),
+					next.getLabel(), next.getVersion(), next.getUserSelected());
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -292,8 +295,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<BaseCodingDt> securityLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(theResource);
 		if (securityLabels != null) {
 			for (BaseCodingDt next : securityLabels) {
-				// TODO: get right code
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue(), null, null);
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(),
+					next.getCodeElement().getValue(), next.getDisplayElement().getValue(), null, null);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -305,7 +308,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<IdDt> profiles = ResourceMetadataKeyEnum.PROFILES.get(theResource);
 		if (profiles != null) {
 			for (IIdType next : profiles) {
-				// TODO: get right code
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null, null, null);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
@@ -320,8 +322,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IBaseCoding> tagList = theResource.getMeta().getTag();
 		if (tagList != null) {
 			for (IBaseCoding next : tagList) {
-				// TODO: get right code
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay(), null, null);
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(),
+					next.getDisplay(), next.getVersion(), next.getUserSelected());
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -333,7 +335,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IBaseCoding> securityLabels = theResource.getMeta().getSecurity();
 		if (securityLabels != null) {
 			for (IBaseCoding next : securityLabels) {
-				// TODO: get right code
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay(), null, null);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
@@ -346,7 +347,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IPrimitiveType<String>> profiles = theResource.getMeta().getProfile();
 		if (profiles != null) {
 			for (IPrimitiveType<String> next : profiles) {
-				// TODO: get right code
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null, null, null);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
@@ -391,17 +391,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return null;
 		}
 
-		MemoryCacheService.TagDefinitionCacheKey key = toTagDefinitionMemoryCacheKey(theTagType, theScheme, theTerm);
+		MemoryCacheService.TagDefinitionCacheKey key = toTagDefinitionMemoryCacheKey(theTagType, theScheme, theTerm, theVersion, theUserSelected);
 
 		TagDefinition retVal = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, key);
 
 		if (retVal == null) {
-			HashMap<MemoryCacheService.TagDefinitionCacheKey, TagDefinition> resolvedTagDefinitions = theTransactionDetails.getOrCreateUserData(HapiTransactionService.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS, HashMap::new);
+			HashMap<MemoryCacheService.TagDefinitionCacheKey, TagDefinition> resolvedTagDefinitions = theTransactionDetails
+				.getOrCreateUserData(HapiTransactionService.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS, HashMap::new);
+
 			retVal = resolvedTagDefinitions.get(key);
 
 			if (retVal == null) {
 				// actual DB hit(s) happen here
-				retVal = getOrCreateTag(theTagType, theScheme, theTerm, theLabel);
+				retVal = getOrCreateTag(theTagType, theScheme, theTerm, theLabel, theVersion, theUserSelected);
 
 				TransactionSynchronization sync = new AddTagDefinitionToCacheAfterCommitSynchronization(key, retVal);
 				TransactionSynchronizationManager.registerSynchronization(sync);
@@ -419,26 +421,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * <p>
 	 * Can also throw an InternalErrorException if something bad happens.
 	 */
-	private TagDefinition getOrCreateTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
-		Root<TagDefinition> from = cq.from(TagDefinition.class);
+	private TagDefinition getOrCreateTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel,
+													 String theVersion, Boolean theUserSelected) {
 
-		if (isNotBlank(theScheme)) {
-			cq.where(
-				builder.and(
-					builder.equal(from.get("myTagType"), theTagType),
-					builder.equal(from.get("mySystem"), theScheme),
-					builder.equal(from.get("myCode"), theTerm)));
-		} else {
-			cq.where(
-				builder.and(
-					builder.equal(from.get("myTagType"), theTagType),
-					builder.isNull(from.get("mySystem")),
-					builder.equal(from.get("myCode"), theTerm)));
-		}
-
-		TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
+		TypedQuery<TagDefinition> q = buildTagQuery(theTagType, theScheme, theTerm, theVersion, theUserSelected);
 
 		TransactionTemplate template = new TransactionTemplate(myTransactionManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -460,6 +446,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 							val = q.getSingleResult();
 						} catch (NoResultException e) {
 							val = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+							val.setVersion(theVersion);
+							val.setUserSelected(theUserSelected);
 							myEntityManager.persist(val);
 						}
 						return val;
@@ -515,6 +503,34 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return retVal;
+	}
+
+	private TypedQuery<TagDefinition> buildTagQuery(TagTypeEnum theTagType, String theScheme, String theTerm,
+																	String theVersion, Boolean theUserSelected) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
+		Root<TagDefinition> from = cq.from(TagDefinition.class);
+
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(
+			builder.and(
+				builder.equal(from.get("myTagType"), theTagType),
+				builder.equal(from.get("myCode"), theTerm)));
+
+		predicates.add( isBlank(theScheme)
+			? builder.isNull(from.get("mySystem"))
+			: builder.equal(from.get("mySystem"), theScheme));
+
+		predicates.add( isBlank(theVersion)
+			? builder.isNull(from.get("myVersion"))
+			: builder.equal(from.get("myVersion"), theVersion));
+
+		predicates.add( isNull(theUserSelected) || isFalse(theUserSelected)
+			? builder.isFalse(from.get("myUserSelected"))
+			: builder.isTrue(from.get("myUserSelected")));
+
+		cq.where(predicates.toArray(new Predicate[0]));
+		return myEntityManager.createQuery(cq);
 	}
 
 
@@ -768,10 +784,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-		if (def.isStandardType() == false) {
+		if ( ! def.isStandardType()) {
 			String profile = def.getResourceProfile("");
 			if (isNotBlank(profile)) {
-				// TODO: get code from 6_4
 				TagDefinition profileDef = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null, null, null);
 
 				ResourceTag tag = theEntity.addTag(profileDef);
@@ -805,7 +820,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theResource.getMeta()
 				.addTag()
 				.setCode(tag.getTag().getCode())
-				.setSystem(tag.getTag().getSystem());
+				.setSystem(tag.getTag().getSystem())
+				.setVersion(tag.getTag().getVersion())
+				.setUserSelected(tag.getTag().getUserSelected());
 		});
 
 		theEntity.setHasTags(!allTagsNew.isEmpty());
@@ -1612,8 +1629,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@Nonnull
-	public static MemoryCacheService.TagDefinitionCacheKey toTagDefinitionMemoryCacheKey(TagTypeEnum theTagType, String theScheme, String theTerm) {
-		return new MemoryCacheService.TagDefinitionCacheKey(theTagType, theScheme, theTerm);
+	public static MemoryCacheService.TagDefinitionCacheKey toTagDefinitionMemoryCacheKey(
+		TagTypeEnum theTagType, String theScheme, String theTerm, String theVersion, Boolean theUserSelected) {
+		return new MemoryCacheService.TagDefinitionCacheKey(theTagType, theScheme, theTerm, theVersion, theUserSelected);
 	}
 
 	@SuppressWarnings("unchecked")

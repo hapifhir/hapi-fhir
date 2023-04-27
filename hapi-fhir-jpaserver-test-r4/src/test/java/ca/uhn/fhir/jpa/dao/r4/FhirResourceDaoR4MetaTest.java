@@ -243,7 +243,6 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			resourceHistoryTags2.forEach(historyTag -> {
 				final TagDefinition tag = historyTag.getTag();
 				ourLog.info("tagId: {}, resourceId: {}, version: {}, userSelected: {}, system: {}, code: {}, display: {}",
-					// TODO: fix TagDefinition
 					historyTag.getTagId(), historyTag.getResourceId(), /*tag.getVersion()*/ null, /*tag.getUserSelected()*/ null, tag.getSystem(), tag.getCode(), tag.getDisplay());
 			});
 
@@ -295,17 +294,15 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 					.filter(resourceHistoryTag -> expectedSystem1.equals(resourceHistoryTag.getTag().getSystem()))
 					.filter(resourceHistoryTag -> expectedCode1.equals(resourceHistoryTag.getTag().getCode()))
 					.filter(resourceHistoryTag -> expectedDisplay1.equals(resourceHistoryTag.getTag().getDisplay()))
-					// TODO:  fix TagDefinition
-//					.filter(resourceHistoryTag -> expectedVersion1.equals(resourceHistoryTag.getTag().getVersion()))
-//					.filter(resourceHistoryTag -> expectedUserSelected1 == resourceHistoryTag.getTag().getUserSelected())
+					.filter(resourceHistoryTag -> expectedVersion1.equals(resourceHistoryTag.getTag().getVersion()))
+					.filter(resourceHistoryTag -> expectedUserSelected1 == resourceHistoryTag.getTag().getUserSelected())
 					.count()),
 				() -> assertEquals(theExpectedHistoryCounts.theTagV2Qty, theHistoryTags.stream()
 					.filter(resourceHistoryTag -> expectedSystem2.equals(resourceHistoryTag.getTag().getSystem()))
 					.filter(resourceHistoryTag -> expectedCode2.equals(resourceHistoryTag.getTag().getCode()))
 					.filter(resourceHistoryTag -> expectedDisplay2.equals(resourceHistoryTag.getTag().getDisplay()))
-					// TODO:  fix TagDefinition
-//					.filter(resourceHistoryTag -> expectedVersion2.equals(resourceHistoryTag.getTag().getVersion()))
-//					.filter(resourceHistoryTag -> expectedUserSelected2 == resourceHistoryTag.getTag().getUserSelected())
+					.filter(resourceHistoryTag -> expectedVersion2.equals(resourceHistoryTag.getTag().getVersion()))
+					.filter(resourceHistoryTag -> expectedUserSelected2 == resourceHistoryTag.getTag().getUserSelected())
 					.count())
 			);
 		}
