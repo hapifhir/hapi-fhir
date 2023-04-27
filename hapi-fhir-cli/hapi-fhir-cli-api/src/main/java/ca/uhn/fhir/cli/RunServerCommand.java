@@ -220,7 +220,7 @@ public class RunServerCommand extends BaseCommand {
 		 WebAppContext webAppContext = new WebAppContext();
 		 webAppContext.setContextPath("/");
 		 webAppContext.setDescriptor(path + "/src/main/webapp/WEB-INF/web.xml");
-		 webAppContext.setResourceBase(path + "/target/hapi-fhir-jpaserver-example");
+		 webAppContext.setResourceBase(path + "/target/hapi-fhir-cli-jpaserver");
 		 webAppContext.setParentLoaderPriority(true);
 		
 		 server.setHandler(webAppContext);

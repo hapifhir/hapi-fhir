@@ -113,6 +113,7 @@
 									<excludes>
 										<exclude>**/*.SF</exclude>
 										<exclude>**/*.RSA</exclude>
+                                                                                <exclude>**/*.jar</exclude><!--no need the jar under web-inf/lib,it will be smaller 100M than before-->
 									</excludes>
 								</filter>
 							</filters>
