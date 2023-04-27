@@ -32,6 +32,7 @@ import com.google.common.hash.HashingInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -82,9 +83,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	 */
 	@Override
 	public boolean isValidBlobId(String theNewBlobId) {
-		Pattern pattern = Pattern.compile("[\\/\\\\\\|\\.]");
-		Matcher matcher = pattern.matcher(theNewBlobId);
-		return !matcher.find();
+		return !StringUtils.containsAny(theNewBlobId, '\\', '/', '|', '.');
 
 	}
 	@Override

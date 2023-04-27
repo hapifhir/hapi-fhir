@@ -36,8 +36,6 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BinaryUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -146,18 +144,18 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			if (!StringUtils.isBlank(exportIdentifier)) {
 				IBaseExtension<?, ?> exportIdentifierExtension = meta.addExtension();
 				exportIdentifierExtension.setUrl(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER);
-				exportIdentifierExtension.setValue(myFhirContext.getPrimitiveString(exportIdentifier));
+				exportIdentifierExtension.setValue(myFhirContext.newPrimitiveString(exportIdentifier));
 			}
 
 			//job id
 			IBaseExtension<?, ?> jobExtension = meta.addExtension();
 			jobExtension.setUrl(JpaConstants.BULK_META_EXTENSION_JOB_ID);
-			jobExtension.setValue(myFhirContext.getPrimitiveString(theStepExecutionDetails.getInstance().getInstanceId()));
+			jobExtension.setValue(myFhirContext.newPrimitiveString(theStepExecutionDetails.getInstance().getInstanceId()));
 
 			//resource type
 			IBaseExtension<?, ?> typeExtension = meta.addExtension();
 			typeExtension.setUrl(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE);
-			typeExtension.setValue(myFhirContext.getPrimitiveString(expandedResources.getResourceType()));
+			typeExtension.setValue(myFhirContext.newPrimitiveString(expandedResources.getResourceType()));
 		} else {
 			ourLog.warn("Could not attach metadata extensions to binary resource, as this binary metadata does not support extensions");
 		}

@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -224,10 +225,13 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 						if (isNotBlank(prefix)) {
 							newBlobId = prefix + newBlobId;
 						}
-						myBinaryStorageSvc.isValidBlobId(newBlobId);
-						List<DeferredBinaryTarget> deferredBinaryTargets = getOrCreateDeferredBinaryStorageMap(theTransactionDetails);
-						DeferredBinaryTarget newDeferredBinaryTarget = new DeferredBinaryTarget(newBlobId, nextTarget, data);
-						deferredBinaryTargets.add(newDeferredBinaryTarget);
+						if (myBinaryStorageSvc.isValidBlobId(newBlobId)) {
+							List<DeferredBinaryTarget> deferredBinaryTargets = getOrCreateDeferredBinaryStorageMap(theTransactionDetails);
+							DeferredBinaryTarget newDeferredBinaryTarget = new DeferredBinaryTarget(newBlobId, nextTarget, data);
+							deferredBinaryTargets.add(newDeferredBinaryTarget);
+						} else {
+							throw new InternalErrorException("Invalid blob ID for backing storage service.[blobId=" + newBlobId + ",service=" + myBinaryStorageSvc.getClass().getName() +"]");
+						}
 					}
 
 					myBinaryAccessProvider.replaceDataWithExtension(nextTarget, newBlobId);
