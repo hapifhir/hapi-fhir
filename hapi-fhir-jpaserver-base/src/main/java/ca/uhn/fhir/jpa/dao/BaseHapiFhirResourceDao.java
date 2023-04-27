@@ -129,7 +129,6 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
@@ -1341,20 +1340,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private void reindexOptimizeStorage(ResourceTable entity, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageMode) {
 		ResourceHistoryTable historyEntity = entity.getCurrentVersionEntity();
 		if (historyEntity != null) {
-			reindexOptimizeStroageHistoryEntity(entity, historyEntity);
+			reindexOptimizeStorageHistoryEntity(entity, historyEntity);
 			if (theOptimizeStorageMode == ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS) {
 				int pageSize = 100;
 				for (int page = 0; ((long)page * pageSize) < entity.getVersion(); page++) {
 					Slice<ResourceHistoryTable> historyEntities = myResourceHistoryTableDao.findForResourceIdAndReturnEntities(PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
 					for (ResourceHistoryTable next : historyEntities) {
-						reindexOptimizeStroageHistoryEntity(entity, next);
+						reindexOptimizeStorageHistoryEntity(entity, next);
 					}
 				}
 			}
 		}
 	}
 
-	private void reindexOptimizeStroageHistoryEntity(ResourceTable entity, ResourceHistoryTable historyEntity) {
+	private void reindexOptimizeStorageHistoryEntity(ResourceTable entity, ResourceHistoryTable historyEntity) {
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC || historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
 			byte[] resourceBytes = historyEntity.getResource();
 			if (resourceBytes != null) {
