@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -48,6 +49,9 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 
 	@JsonProperty("filters")
 	private List<String> myFilters;
+
+	@JsonProperty("postFetchFilterUrls")
+	private List<String> myPostFetchFilterUrls;
 
 	@JsonProperty("outputFormat")
 	private String myOutputFormat;
@@ -74,6 +78,22 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
 
+	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
+		BulkExportJobParameters params = new BulkExportJobParameters();
+		params.setResourceTypes(theParameters.getResourceTypes());
+		params.setExportStyle(theParameters.getExportStyle());
+		params.setFilters(theParameters.getFilters());
+		params.setPostFetchFilterUrls(theParameters.getPostFetchFilterUrls());
+		params.setGroupId(theParameters.getGroupId());
+		params.setOutputFormat(theParameters.getOutputFormat());
+		params.setStartDate(theParameters.getStartDate());
+		params.setExpandMdm(theParameters.isExpandMdm());
+		params.setPatientIds(theParameters.getPatientIds());
+		params.setOriginalRequestUrl(theParameters.getOriginalRequestUrl());
+		params.setPartitionId(theParameters.getPartitionId());
+		return params;
+	}
+
 	public List<String> getResourceTypes() {
 		return myResourceTypes;
 	}
@@ -96,6 +116,17 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 
 	public void setFilters(List<String> theFilters) {
 		myFilters = theFilters;
+	}
+
+	public List<String> getPostFetchFilterUrls() {
+		if (myPostFetchFilterUrls == null) {
+			myPostFetchFilterUrls = new ArrayList<>();
+		}
+		return myPostFetchFilterUrls;
+	}
+
+	public void setPostFetchFilterUrls(List<String> thePostFetchFilterUrls) {
+		myPostFetchFilterUrls = thePostFetchFilterUrls;
 	}
 
 	public String getOutputFormat() {
@@ -138,35 +169,20 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		myExpandMdm = theExpandMdm;
 	}
 
-	private void setOriginalRequestUrl(String theOriginalRequestUrl) {
-		this.myOriginalRequestUrl = theOriginalRequestUrl;
-	}
-
 	public String getOriginalRequestUrl() {
 		return myOriginalRequestUrl;
 	}
 
-	public void setPartitionId(RequestPartitionId thePartitionId) {
-		this.myPartitionId = thePartitionId;
+	private void setOriginalRequestUrl(String theOriginalRequestUrl) {
+		this.myOriginalRequestUrl = theOriginalRequestUrl;
 	}
 
 	public RequestPartitionId getPartitionId() {
 		return myPartitionId;
 	}
 
-	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
-		BulkExportJobParameters params = new BulkExportJobParameters();
-		params.setResourceTypes(theParameters.getResourceTypes());
-		params.setExportStyle(theParameters.getExportStyle());
-		params.setFilters(theParameters.getFilters());
-		params.setGroupId(theParameters.getGroupId());
-		params.setOutputFormat(theParameters.getOutputFormat());
-		params.setStartDate(theParameters.getStartDate());
-		params.setExpandMdm(theParameters.isExpandMdm());
-		params.setPatientIds(theParameters.getPatientIds());
-		params.setOriginalRequestUrl(theParameters.getOriginalRequestUrl());
-		params.setPartitionId(theParameters.getPartitionId());
-		return params;
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		this.myPartitionId = thePartitionId;
 	}
 
 }
