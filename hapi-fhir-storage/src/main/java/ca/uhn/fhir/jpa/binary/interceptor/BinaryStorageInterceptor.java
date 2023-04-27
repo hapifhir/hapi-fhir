@@ -230,7 +230,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 							DeferredBinaryTarget newDeferredBinaryTarget = new DeferredBinaryTarget(newBlobId, nextTarget, data);
 							deferredBinaryTargets.add(newDeferredBinaryTarget);
 						} else {
-							throw new InternalErrorException("Invalid blob ID for backing storage service.[blobId=" + newBlobId + ",service=" + myBinaryStorageSvc.getClass().getName() +"]");
+							throw new InternalErrorException(Msg.code(2341) + "Invalid blob ID for backing storage service.[blobId=" + newBlobId + ",service=" + myBinaryStorageSvc.getClass().getName() +"]");
 						}
 					}
 
