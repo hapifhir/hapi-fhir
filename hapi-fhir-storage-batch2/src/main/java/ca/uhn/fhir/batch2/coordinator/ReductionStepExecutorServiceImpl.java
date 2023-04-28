@@ -28,7 +28,6 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -159,8 +158,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.getCurrentStep();
 
-		// fixme combine the fetch and the case statement.  Use optional for the boolean.
 		// wipmb For 6.8 - this runs four tx. That's at least 2 too many
+		// combine the fetch and the case statement.  Use optional for the boolean.
 		JobInstance instance = executeInTransactionWithSynchronization(() ->
 			myJobPersistence.fetchInstance(theInstanceId).orElseThrow(() -> new InternalErrorException("Unknown instance: " + theInstanceId)));
 
