@@ -32,6 +32,7 @@ import java.util.Set;
 // They don't seem to serve any distinct purpose so they should be collapsed into 1
 public class BulkDataExportOptions {
 
+
 	public enum ExportStyle {
 		PATIENT,
 		GROUP,
@@ -47,6 +48,8 @@ public class BulkDataExportOptions {
 	private boolean myExpandMdm;
 	private IIdType myGroupId;
 	private Set<IIdType> myPatientIds;
+
+	private String myExportIdentifier;
 
 	public void setOutputFormat(String theOutputFormat) {
 		myOutputFormat = theOutputFormat;
@@ -130,5 +133,13 @@ public class BulkDataExportOptions {
 
 	public void setPatientIds(Set<IIdType> thePatientIds) {
 		myPatientIds = thePatientIds;
+	}
+
+	public String getExportIdentifier() {
+		return myExportIdentifier;
+	}
+
+	public void setExportIdentifier(String theExportIdentifier) {
+		myExportIdentifier = theExportIdentifier;
 	}
 }

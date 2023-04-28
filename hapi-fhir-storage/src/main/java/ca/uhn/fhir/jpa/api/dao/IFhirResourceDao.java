@@ -123,6 +123,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
+	<P extends IResourcePersistentId> void expunge(Collection<P> theResourceIds, RequestDetails theRequest);
+
 	ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
 	@Nonnull

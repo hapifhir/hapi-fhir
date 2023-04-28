@@ -47,6 +47,9 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("since")
 	private Date mySince;
 
+	@JsonProperty("exportId")
+	private String myExportId;
+
 	@JsonProperty("filters")
 	private List<String> myFilters;
 
@@ -82,6 +85,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		params.setResourceTypes(theParameters.getResourceTypes());
 		params.setExportStyle(theParameters.getExportStyle());
+		params.setExportIdentifier(theParameters.getExportIdentifier());
 		params.setFilters(theParameters.getFilters());
 		params.setPostFetchFilterUrls(theParameters.getPostFetchFilterUrls());
 		params.setGroupId(theParameters.getGroupId());
@@ -94,8 +98,16 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		return params;
 	}
 
+	public String getExportIdentifier() {
+		return myExportId;
+	}
+
 	public List<String> getResourceTypes() {
 		return myResourceTypes;
+	}
+
+	public void setExportIdentifier(String theExportId) {
+		myExportId = theExportId;
 	}
 
 	public void setResourceTypes(List<String> theResourceTypes) {
