@@ -36,6 +36,11 @@ public class SubscriptionDeliveryHandlerFactory {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
+	@Autowired
+	public SubscriptionDeliveryHandlerFactory(IEmailSender theEmailSender) {
+		myEmailSender = theEmailSender;
+	}
+
 	protected SubscriptionDeliveringEmailSubscriber newSubscriptionDeliveringEmailSubscriber(IEmailSender theEmailSender) {
 		return myApplicationContext.getBean(SubscriptionDeliveringEmailSubscriber.class, theEmailSender);
 	}

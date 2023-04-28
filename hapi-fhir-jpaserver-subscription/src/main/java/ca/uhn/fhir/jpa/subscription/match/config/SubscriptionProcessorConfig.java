@@ -94,8 +94,8 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
-	public SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory() {
-		return new SubscriptionDeliveryHandlerFactory();
+	public SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory(IEmailSender theEmailSender) {
+		return new SubscriptionDeliveryHandlerFactory(theEmailSender);
 	}
 
 	@Bean
