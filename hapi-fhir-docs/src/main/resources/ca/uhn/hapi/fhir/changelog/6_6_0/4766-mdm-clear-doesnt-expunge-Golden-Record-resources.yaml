@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4766
+title: "Previously, performing $mdm-clear would soft delete Golden Record resources and keep them in the database.
+      Now, $mdm-clear will expunge the resources from the database."

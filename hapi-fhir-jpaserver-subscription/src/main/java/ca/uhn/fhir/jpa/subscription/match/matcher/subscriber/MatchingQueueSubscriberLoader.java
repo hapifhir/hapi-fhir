@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicMatchingSubscriber;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegisteringSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,8 @@ public class MatchingQueueSubscriberLoader {
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
 	private SubscriptionRegisteringSubscriber mySubscriptionRegisteringSubscriber;
+	@Autowired(required = false)
+	private SubscriptionTopicRegisteringSubscriber mySubscriptionTopicRegisteringSubscriber;
 	@Autowired
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 	@Autowired
@@ -69,6 +72,9 @@ public class MatchingQueueSubscriberLoader {
 			if (mySubscriptionTopicMatchingSubscriber != null) {
 				ourLog.info("Starting SubscriptionTopic Matching Subscriber");
 				myMatchingChannel.subscribe(mySubscriptionTopicMatchingSubscriber);
+			}
+			if (mySubscriptionTopicRegisteringSubscriber != null) {
+				myMatchingChannel.subscribe(mySubscriptionTopicRegisteringSubscriber);
 			}
 		}
 	}

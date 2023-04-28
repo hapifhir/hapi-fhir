@@ -116,7 +116,7 @@ class JobDataSinkTest {
 		assertEquals(JOB_DEF_VERSION, notification.getJobDefinitionVersion());
 		assertEquals(LAST_STEP_ID, notification.getTargetStepId());
 
-		BatchWorkChunk batchWorkChunk = myBatchWorkChunkCaptor.getValue();
+		WorkChunkCreateEvent batchWorkChunk = myBatchWorkChunkCaptor.getValue();
 		assertEquals(JOB_DEF_VERSION, batchWorkChunk.jobDefinitionVersion);
 		assertEquals(0, batchWorkChunk.sequence);
 		assertEquals(JOB_DEF_ID, batchWorkChunk.jobDefinitionId);
