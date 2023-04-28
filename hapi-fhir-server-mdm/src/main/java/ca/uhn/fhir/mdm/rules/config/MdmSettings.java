@@ -19,10 +19,8 @@
  */
 package ca.uhn.fhir.mdm.rules.config;
 
-import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +39,8 @@ public class MdmSettings implements IMdmSettings {
 	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
 	private boolean myPreventEidUpdates;
+	private String myGoldenResourcePartitionName;
+	private boolean mySearchAllPartitionForMatch = false;
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -137,5 +137,25 @@ public class MdmSettings implements IMdmSettings {
 
 	public void setCandidateSearchLimit(int theCandidateSearchLimit) {
 		myCandidateSearchLimit = theCandidateSearchLimit;
+	}
+
+	@Override
+	public String getGoldenResourcePartitionName() {
+		return myGoldenResourcePartitionName;
+	}
+
+	@Override
+	public void setGoldenResourcePartitionName(String theGoldenResourcePartitionName) {
+		myGoldenResourcePartitionName = theGoldenResourcePartitionName;
+	}
+
+	@Override
+	public boolean getSearchAllPartitionForMatch() {
+		return mySearchAllPartitionForMatch;
+	}
+
+	@Override
+	public void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch) {
+		mySearchAllPartitionForMatch = theSearchAllPartitionForMatch;
 	}
 }
