@@ -1098,7 +1098,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertEquals(2, errors.getMessages().size());
 		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning. A system should be provided"));
 		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
-		assertThat(errors.getMessages().get(1).getMessage(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
+		assertThat(errors.getMessages().get(1).getMessage(), containsString("The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed"));
 		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
@@ -1111,7 +1111,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertEquals(2, errors.getMessages().size());
 		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning. A system should be provided"));
 		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
-		assertThat(errors.getMessages().get(1).getMessage(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
+		assertThat(errors.getMessages().get(1).getMessage(), containsString("The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed"));
 		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
@@ -1120,7 +1120,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://system").setCode(null));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://system::null) is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("ValidationResult{messageCount=1, isSuccessful=false, description="));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Wrong type

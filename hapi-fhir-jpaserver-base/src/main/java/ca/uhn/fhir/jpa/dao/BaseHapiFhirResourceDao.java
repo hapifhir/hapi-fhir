@@ -824,9 +824,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			boolean hasTag = false;
 			for (BaseTag next : new ArrayList<>(theEntity.getTags())) {
-				if (ObjectUtil.equals(next.getTag().getTagType(), nextDef.getTagType()) &&
-					ObjectUtil.equals(next.getTag().getSystem(), nextDef.getSystem()) &&
-					ObjectUtil.equals(next.getTag().getCode(), nextDef.getCode())) {
+				if (Objects.equals(next.getTag().getTagType(), nextDef.getTagType()) &&
+						Objects.equals(next.getTag().getSystem(), nextDef.getSystem()) &&
+						Objects.equals(next.getTag().getCode(), nextDef.getCode()) &&
+						Objects.equals(next.getTag().getVersion(), nextDef.getVersion()) &&
+						Objects.equals(next.getTag().getUserSelected(), nextDef.getUserSelected())) {
 					hasTag = true;
 					break;
 				}
@@ -835,7 +837,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (!hasTag) {
 				theEntity.setHasTags(true);
 
-				TagDefinition def = getTagOrNull(theTransactionDetails, nextDef.getTagType(), nextDef.getSystem(), nextDef.getCode(), nextDef.getDisplay());
+				TagDefinition def = getTagOrNull(theTransactionDetails, nextDef.getTagType(), nextDef.getSystem(),
+					nextDef.getCode(), nextDef.getDisplay(), nextDef.getVersion(), nextDef.getUserSelected());
 				if (def != null) {
 					BaseTag newEntity = theEntity.addTag(def);
 					if (newEntity.getTagId() == null) {
