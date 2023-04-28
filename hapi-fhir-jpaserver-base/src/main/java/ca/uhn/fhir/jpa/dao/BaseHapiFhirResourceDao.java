@@ -682,6 +682,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
 	}
 
+	@Override
+	public <P extends IResourcePersistentId> void expunge(Collection<P> theResourceIds, RequestDetails theRequest) {
+		ExpungeOptions options = new ExpungeOptions();
+		options.setExpungeDeletedResources(true);
+		for (P pid : theResourceIds) {
+			if (pid instanceof JpaPid) {
+				ResourceTable entity = myEntityManager.find(ResourceTable.class, pid.getId());
+
+				forceExpungeInExistingTransaction(entity.getIdDt().toVersionless(), options, theRequest);
+			} else {
+				ourLog.warn("Unable to process expunge on resource {}", pid);
+				return;
+			}
+
+		}
+	}
+
+
 	@Nonnull
 	@Override
 	public <P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
