@@ -1140,8 +1140,19 @@ public class FhirContext {
 	}
 
 	// TODO KHS add the other primitive types
+	@Deprecated(since = "6.6.0", forRemoval = true)
 	public IPrimitiveType<Boolean> getPrimitiveBoolean(Boolean theValue) {
+		return newPrimitiveBoolean(theValue);
+	}
+
+	public IPrimitiveType<Boolean> newPrimitiveBoolean(Boolean theValue) {
 		IPrimitiveType<Boolean> retval = (IPrimitiveType<Boolean>) getElementDefinition("boolean").newInstance();
+		retval.setValue(theValue);
+		return retval;
+	}
+
+	public IPrimitiveType<String > newPrimitiveString(String theValue) {
+		IPrimitiveType<String> retval = (IPrimitiveType<String>) getElementDefinition("string").newInstance();
 		retval.setValue(theValue);
 		return retval;
 	}

@@ -37,6 +37,12 @@
 		<dependency>
 			<groupId>org.exparity</groupId>
 			<artifactId>hamcrest-date</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>*</artifactId>
+					<groupId>*</groupId>
+				</exclusion>
+			</exclusions>
 			<scope>test</scope>
 		</dependency>
     </dependencies>

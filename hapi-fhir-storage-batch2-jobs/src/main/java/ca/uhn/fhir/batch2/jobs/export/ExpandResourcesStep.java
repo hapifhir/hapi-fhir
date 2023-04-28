@@ -136,19 +136,17 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		ListMultimap<String, String> resources = encodeToString(allResources, parameters);
 
 		// set to datasink
-		if (!resources.isEmpty()) {
-			for (String nextResourceType : resources.keySet()) {
+		for (String nextResourceType : resources.keySet()) {
 
-				ExpandedResourcesList output = new ExpandedResourcesList();
-				output.setStringifiedResources(resources.get(nextResourceType));
-				output.setResourceType(nextResourceType);
-				theDataSink.accept(output);
+			ExpandedResourcesList output = new ExpandedResourcesList();
+			output.setStringifiedResources(resources.get(nextResourceType));
+			output.setResourceType(nextResourceType);
+			theDataSink.accept(output);
 
-				ourLog.info("Expanding of {} resources of type {} completed",
-					idList.getIds().size(),
-					idList.getResourceType());
+			ourLog.info("Expanding of {} resources of type {} completed",
+				idList.getIds().size(),
+				idList.getResourceType());
 
-			}
 		}
 
 		// and return
@@ -158,25 +156,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	private void applyPostFetchFiltering(List<IBaseResource> theResources, List<String> thePostFetchFilterUrls, String theInstanceId, String theChunkId) {
 		int numRemoved = 0;
 		for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
-			IBaseResource nextResource = iter.next();
-			String nextResourceType = myFhirContext.getResourceType(nextResource);
-			boolean matched = false;
-
-			for (String nextPostFetchFilterUrl : thePostFetchFilterUrls) {
-				// TODO: JA in next ticket - Add validation to the filter URLs when the job is submitted
-				// We should make sure that the format is [resourceType]?[at least one param] and that
-				// the param can be evaluated by the in memory matcher
-				if (nextPostFetchFilterUrl.contains("?")) {
-					String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
-					if (nextResourceType.equals(resourceType)) {
-						InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
-						if (matchResult.matched()) {
-							matched = true;
-							break;
-						}
-					}
-				}
-			}
+			boolean matched = applyPostFetchFilteringForSingleResource(thePostFetchFilterUrls, iter);
 
 			if (!matched) {
 				iter.remove();
@@ -187,6 +167,24 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		if (numRemoved > 0) {
 			ourLog.info("Bulk export instance[{}] chunk[{}] - {} resources were filtered out because of post-fetch filter URLs", theInstanceId, theChunkId, numRemoved);
 		}
+	}
+
+	private boolean applyPostFetchFilteringForSingleResource(List<String> thePostFetchFilterUrls, Iterator<IBaseResource> iter) {
+		IBaseResource nextResource = iter.next();
+		String nextResourceType = myFhirContext.getResourceType(nextResource);
+
+		for (String nextPostFetchFilterUrl : thePostFetchFilterUrls) {
+			if (nextPostFetchFilterUrl.contains("?")) {
+				String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
+				if (nextResourceType.equals(resourceType)) {
+					InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
+					if (matchResult.matched()) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	private List<IBaseResource> fetchAllResources(ResourceIdList theIds, RequestPartitionId theRequestPartitionId) {

@@ -13,6 +13,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -88,6 +89,17 @@ class MdmClearStepTest extends BaseMdmR4Test {
 			assertEquals("HAPI-0550: HAPI-0515: Unable to delete " + myGoldenId +
 				" because at least one resource has a reference to this resource. First reference found was resource " +
 				husbandId + " in path Patient.link.other", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testGoldenResourceGetsExpunged() {
+		mdmClearGoldenResource();
+		try {
+			assertPatientExists(myGoldenId);
+			fail("Resource cannot be found");
+		} catch (ResourceNotFoundException e) {
+			assertEquals("HAPI-2001: Resource " + myGoldenId + " is not known", e.getMessage());
 		}
 	}
 
