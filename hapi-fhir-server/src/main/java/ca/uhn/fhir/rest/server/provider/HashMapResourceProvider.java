@@ -308,8 +308,13 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			@Nonnull
 			@Override
 			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-				int from = min(0, theFromIndex);
-				int to = max(theToIndex, allResources.size());
+
+				// Make sure that "from" isn't less than 0, "to" isn't more than the number available,
+				// and "from" <= "to"
+				int from = max(0, theFromIndex);
+				int to = min(theToIndex, allResources.size());
+				to = max(from, to);
+
 				List<IBaseResource> retVal = (List<IBaseResource>) allResources.subList(from, to);
 				retVal = fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 				return retVal;

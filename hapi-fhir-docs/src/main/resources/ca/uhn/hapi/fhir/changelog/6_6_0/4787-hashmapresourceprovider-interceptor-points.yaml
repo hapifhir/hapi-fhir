@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: FIXME
+issue: 4787
 title: "HashMapResourceProvider invoked the `STORAGE_PRESTORAGE_xxx` and
     `STORAGE_PRECOMMIT_xxx` pointcuts after storing the resource into memory. This
     means that if any interceptors threw an exception in an attempt to abort the
