@@ -23,12 +23,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -47,7 +47,7 @@ import javax.annotation.Nonnull;
  * <p>
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
-public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
+public class SubscriptionRegisteringSubscriber implements MessageHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
 	@Autowired
 	private FhirContext myFhirContext;
@@ -74,7 +74,7 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 
 		ResourceModifiedMessage payload = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 
-		if (!isSubscription(payload)) {
+		if (!payload.hasPayloadType(this.myFhirContext, "Subscription")) {
 			return;
 		}
 

@@ -64,6 +64,8 @@ public class GoldenResourceHelper {
 	private EIDHelper myEIDHelper;
 	@Autowired
 	private IMdmSurvivorshipService myMdmSurvivorshipService;
+	@Autowired
+	private MdmPartitionHelper myMdmPartitionHelper;
 
 	private final FhirContext myFhirContext;
 
@@ -101,7 +103,7 @@ public class GoldenResourceHelper {
 		MdmResourceUtil.setGoldenResource(newGoldenResource);
 
 		// add the partition id to the new resource
-		newGoldenResource.setUserData(Constants.RESOURCE_PARTITION_ID, theIncomingResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		newGoldenResource.setUserData(Constants.RESOURCE_PARTITION_ID, myMdmPartitionHelper.getRequestPartitionIdForNewGoldenResources(theIncomingResource));
 
 		return (T) newGoldenResource;
 	}

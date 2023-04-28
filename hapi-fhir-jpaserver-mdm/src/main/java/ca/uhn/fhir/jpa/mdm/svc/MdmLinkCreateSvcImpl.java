@@ -24,7 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
@@ -74,7 +74,7 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 		IResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
 		// check if the golden resource and the source resource are in the same partition, throw error if not
-		myMdmPartitionHelper.validateResourcesInSamePartition(theGoldenResource, theSourceResource);
+		myMdmPartitionHelper.validateMdmResourcesPartitionMatches(theGoldenResource, theSourceResource);
 
 		Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
 		if (optionalMdmLink.isPresent()) {

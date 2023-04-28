@@ -129,7 +129,10 @@ public class SearchParameterDaoValidator {
 	}
 
 	private boolean isCompositeWithoutBase(SearchParameter searchParameter) {
-		return ElementUtil.isEmpty(searchParameter.getBase()) && (searchParameter.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(searchParameter.getType().name()));
+		return
+			ElementUtil.isEmpty(searchParameter.getBase()) &&
+			ElementUtil.isEmpty(searchParameter.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE)) &&
+			(searchParameter.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(searchParameter.getType().name()));
 	}
 
 	private boolean isCompositeWithoutExpression(SearchParameter searchParameter) {

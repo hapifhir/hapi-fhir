@@ -45,4 +45,8 @@ public class SubscriptionTopicRegistry {
 	public Collection<SubscriptionTopic> getAll() {
 		return myActiveSubscriptionTopicCache.getAll();
 	}
+
+	public void unregister(String theSubscriptionTopicId) {
+		myActiveSubscriptionTopicCache.remove(theSubscriptionTopicId);
+	}
 }
