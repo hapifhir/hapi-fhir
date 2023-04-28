@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir-cli</artifactId>
-		<version>6.5.13-SNAPSHOT</version>
+		<version>6.5.17-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -23,19 +23,6 @@
 			<artifactId>hapi-fhir-cli-api</artifactId>
 			<version>${project.version}</version>
 			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cli-jpaserver</artifactId>
-			<version>${project.version}</version>
-			<type>war</type>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cli-jpaserver</artifactId>
-			<version>${project.version}</version>
-			<type>jar</type>
-			<classifier>classes</classifier>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -56,32 +43,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>hapi-fhir-cli-jpaserver</artifactId>
-									<type>war</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>target/classes</outputDirectory>
-									<destFileName>hapi-fhir-cli-jpaserver.war</destFileName>
-								</artifactItem>
-							</artifactItems>
-							<!-- other configurations here -->
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>

@@ -31,14 +31,14 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 	@Test
 	public void testRestHookSubscriptionTopicApplicationFhirJson() throws Exception {
 		// WIP SR4B test update, delete, etc
-		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.COMPLETED, SubscriptionTopic.InteractionTrigger.CREATE);
+		createEncounterSubscriptionTopic(Enumerations.EncounterStatus.PLANNED, Enumerations.EncounterStatus.COMPLETED, SubscriptionTopic.InteractionTrigger.CREATE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
 		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, getSystemProviderCount());
-		Encounter sentEncounter = sendEncounterWithStatus(Encounter.EncounterStatus.COMPLETED, false);
+		Encounter sentEncounter = sendEncounterWithStatus(Enumerations.EncounterStatus.COMPLETED, false);
 
 		await().until(() -> getSystemProviderCount() > 0);
 
@@ -50,7 +50,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		validateSubscriptionStatus(subscription, sentEncounter, ss);
 
 		Encounter encounter = (Encounter) resources.get(1);
-		assertEquals(Encounter.EncounterStatus.COMPLETED, encounter.getStatus());
+		assertEquals(Enumerations.EncounterStatus.COMPLETED, encounter.getStatus());
 		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
 	}
 
@@ -61,7 +61,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		return postSubscription(subscription);
 	}
 
-	private SubscriptionTopic createEncounterSubscriptionTopic(Encounter.EncounterStatus theFrom, Encounter.EncounterStatus theCurrent, SubscriptionTopic.InteractionTrigger... theInteractionTriggers) throws InterruptedException {
+	private SubscriptionTopic createEncounterSubscriptionTopic(Enumerations.EncounterStatus theFrom, Enumerations.EncounterStatus theCurrent, SubscriptionTopic.InteractionTrigger... theInteractionTriggers) throws InterruptedException {
 		SubscriptionTopic retval = new SubscriptionTopic();
 		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -78,7 +78,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		return retval;
 	}
 
-	private Encounter sendEncounterWithStatus(Encounter.EncounterStatus theStatus, boolean theExpectDelivery) throws InterruptedException {
+	private Encounter sendEncounterWithStatus(Enumerations.EncounterStatus theStatus, boolean theExpectDelivery) throws InterruptedException {
 		Encounter encounter = new Encounter();
 		encounter.setStatus(theStatus);
 

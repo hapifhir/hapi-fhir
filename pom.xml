@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.5.13-SNAPSHOT</version>
+	<version>6.5.17-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1752,6 +1752,17 @@
 				<version>${hamcrest_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.exparity</groupId>
+				<artifactId>hamcrest-date</artifactId>
+				<version>2.0.8</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>*</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
 				<version>${hibernate_version}</version>
@@ -2352,7 +2363,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.8</version>
+					<version>0.8.9</version>
 					<configuration>
 						<excludes>
 							<exclude>ca/uhn/fhir/model/dstu2/**/*.class</exclude>

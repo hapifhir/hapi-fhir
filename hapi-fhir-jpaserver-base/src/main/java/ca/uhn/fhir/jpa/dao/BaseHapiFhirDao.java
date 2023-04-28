@@ -466,7 +466,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 								"Tag read/write failed: "
 									+ ex.getMessage() + ". "
 									+ "This is not a failure on its own, "
-									+ "but could be useful information in the result of an actual failure."
+									+ "but could be useful information in the result of an actual failure.", ex
 							);
 							throwables.add(ex);
 						}

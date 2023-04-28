@@ -27,36 +27,20 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.DatatypeUtil;
-import ca.uhn.fhir.util.ExtensionUtil;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.util.PhoneticEncoderUtil;
+import ca.uhn.fhir.util.*;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.SearchParameter;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @Service
 public class SearchParameterCanonicalizer {
@@ -67,6 +51,16 @@ public class SearchParameterCanonicalizer {
 	@Autowired
 	public SearchParameterCanonicalizer(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
+	}
+
+	private static Collection<String> toStrings(Collection<? extends IPrimitiveType<String>> theBase) {
+		HashSet<String> retVal = new HashSet<>();
+		for (IPrimitiveType<String> next : theBase) {
+			if (isNotBlank(next.getValueAsString())) {
+				retVal.add(next.getValueAsString());
+			}
+		}
+		return retVal;
 	}
 
 	public RuntimeSearchParam canonicalizeSearchParameter(IBaseResource theSearchParameter) {
@@ -266,7 +260,23 @@ public class SearchParameterCanonicalizer {
 		String name = terser.getSinglePrimitiveValueOrNull(theNextSp, "code");
 		String description = terser.getSinglePrimitiveValueOrNull(theNextSp, "description");
 		String path = terser.getSinglePrimitiveValueOrNull(theNextSp, "expression");
-		List<String> base = terser.getValues(theNextSp, "base", IPrimitiveType.class).stream().map(t -> t.getValueAsString()).collect(Collectors.toList());
+
+		List<String> base = terser
+			.getValues(theNextSp, "base", IPrimitiveType.class)
+			.stream()
+			.map(IPrimitiveType::getValueAsString)
+			.collect(Collectors.toList());
+		if (theNextSp instanceof IBaseHasExtensions) {
+			((IBaseHasExtensions) theNextSp)
+				.getExtension()
+				.stream()
+				.filter(t -> HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE.equals(t.getUrl()))
+				.filter(t -> t.getValue() instanceof IPrimitiveType)
+				.map(t -> ((IPrimitiveType<?>) t.getValue()))
+				.map(IPrimitiveType::getValueAsString)
+				.filter(StringUtils::isNotBlank)
+				.forEach(base::add);
+		}
 
 		RestSearchParameterTypeEnum paramType = null;
 		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
@@ -314,7 +324,23 @@ public class SearchParameterCanonicalizer {
 				break;
 		}
 		Set<String> providesMembershipInCompartments = Collections.emptySet();
-		Set<String> targets = terser.getValues(theNextSp, "target", IPrimitiveType.class).stream().map(t -> t.getValueAsString()).collect(Collectors.toSet());
+
+		Set<String> targets = terser
+			.getValues(theNextSp, "target", IPrimitiveType.class)
+			.stream()
+			.map(IPrimitiveType::getValueAsString)
+			.collect(Collectors.toSet());
+		if (theNextSp instanceof IBaseHasExtensions) {
+			((IBaseHasExtensions) theNextSp)
+				.getExtension()
+				.stream()
+				.filter(t -> HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE.equals(t.getUrl()))
+				.filter(t -> t.getValue() instanceof IPrimitiveType)
+				.map(t -> ((IPrimitiveType<?>) t.getValue()))
+				.map(IPrimitiveType::getValueAsString)
+				.filter(StringUtils::isNotBlank)
+				.forEach(targets::add);
+		}
 
 		if (isBlank(name) || isBlank(path) || paramType == null) {
 			if ("_text".equals(name) || "_content".equals(name)) {
@@ -356,7 +382,6 @@ public class SearchParameterCanonicalizer {
 		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
 	}
 
-
 	/**
 	 * Extracts any extensions from the resource and populates an extension field in the
 	 */
@@ -396,21 +421,10 @@ public class SearchParameterCanonicalizer {
 			IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(stringValue);
 			if (encoder != null) {
 				theRuntimeSearchParam.setPhoneticEncoder(encoder);
-			}
-			else {
+			} else {
 				ourLog.error("Invalid PhoneticEncoderEnum value '" + stringValue + "'");
 			}
 		}
-	}
-
-	private static Collection<String> toStrings(Collection<? extends IPrimitiveType<String>> theBase) {
-		HashSet<String> retVal = new HashSet<>();
-		for (IPrimitiveType<String> next : theBase) {
-			if (isNotBlank(next.getValueAsString())) {
-				retVal.add(next.getValueAsString());
-			}
-		}
-		return retVal;
 	}
 
 
