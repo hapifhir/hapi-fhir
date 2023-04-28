@@ -34,13 +34,13 @@
  *
  * Job instances and work chunks are stored in the database.  Work is distributed to workers via queues.
  * The queue message is just the ids of the chunk (chunk id, step id, instance id, job definition id, etc.).
- * The worker receives the notification from Spring Messaging ({@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageHandler#handleMessage(Message)),
+ * The worker receives the notification from Spring Messaging ({@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageHandler#handleMessage}),
  * fetches the data from the store and processes the data using the handler defined in for the step.
  * The worker updates chunk state as appropriate.  It may also update the job instance state.
  *
  * </p><p>
  *
- * Once a minute, Quartz runs the  {@link ca.uhn.fhir.batch2.api.IJobMaintenanceService#runMaintenancePass() maintenance loop}.
+ * Once a minute, Quartz runs the  {@link ca.uhn.fhir.batch2.api.IJobMaintenanceService#runMaintenancePass() maintenance pass}.
  * This loop inspects every job, and dispatches to {@link ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor#process() the JobInstanceProcessor}.
  * The JobInstanceProcessor counts the outstanding chunks for a job, and uses these statistics to fire the working state transitions (below).
  *
@@ -49,7 +49,7 @@
  * Job and chunk processing follow state machines described {@link hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md}
  * Chunks have a simple {@link ca.uhn.fhir.batch2.model.WorkChunkStatusEnum state system} with states
  * QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED.
- * The initial state is QUEUED, and the final states are FAILED, CANCELLED, and COMPLETED:
+ * The initial state is QUEUED, and the final states are FAILED, and COMPLETED:
  *
  * <ul>
  *    <li> Chunks are created QUEUED (NB - should be READY or WAITING) and notification is posted to the channel for non-gated steps.</li>
@@ -69,30 +69,33 @@
  *    QUEUED, IN_PROGRESS, ERRORED, COMPLETED, FINALIZE, and FAILED.
  *    ERRORED is a near synonym for IN_PROGRESS and shows that a chunk has shown a transient error during this job.
  *    Hard failures move to final state FAILED.
- *    The initial state is QUEUED, and the terminal states are COMPLETED and FAILED.
+ *    The initial state is QUEUED, and the terminal states are COMPLETED, CANCELLED, and FAILED.
  *    Most transitions happen during the maintenance run, but some are triggered by the worker.
  *
  * <ul>
  *    <li> Jobs are created in QUEUED state, along with their first chunk.  The chunk is also sent to the channel.
- *        {@link ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl#startInstance(JobInstanceStartRequest)}
+ *        {@link ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl#startInstance}
  *        </li>
  *    <li> When workers dequeue a chunk, they trigger a QUEUED->IN_PROGRESS transition to report status.
- *        {@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageHandler.MessageProcess#updateAndValidateJobStatus()}
+ *        {@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageHandler.MessageProcess#updateAndValidateJobStatus}
  *        </li>
  *    <li> As a special case, if the first chunk produces no children, the job advances IN_PROGRESS->COMPLETE
- *    {@link ca.uhn.fhir.batch2.coordinator.JobStepExecutor#executeStep()}</li>
+ *         {@link ca.uhn.fhir.batch2.coordinator.JobStepExecutor#executeStep()}
+ *         </li>
  *    <li> Other transitions happen during maintenance runs. If a job is running, and the user has requested cancellation,
  *         the job transitions (IN_PROGRESS or ERRORED) -> CANCELLED.
  *         </li>
  *    <li> Then the processor looks at chunk statuses.  If any chunks are FAILED, then the job moves
- *        (IN_PROGRESS or ERRORED) -> FAILED. {@link ca.uhn.fhir.batch2.progress.InstanceProgress#calculateNewStatus()}
+ *        (IN_PROGRESS or ERRORED) -> FAILED. {@link ca.uhn.fhir.batch2.progress.InstanceProgress#calculateNewStatus}
  *        </li>
  *    <li> If any chunk is currently in {@link ca.uhn.fhir.batch2.model.WorkChunkStatusEnum#ERRORED ERRORED} state,
- *        the job progresses IN_PROGRESS->ERRORED, and the error message is copied over.</li>
- *    <li> If all chunks are COMPLETED, then the job moves (IN_PROGRESS or ERRORED) -> COMPLETED. </li>
+ *        the job progresses IN_PROGRESS->ERRORED, and the error message is copied over.
+ *        </li>
+ *    <li> If all chunks are COMPLETED, then the job moves (IN_PROGRESS or ERRORED) -> COMPLETED.
+ *        </li>
  *    <li> Gated jobs that have a reducer step will transtion (IN_PROGRESS or ERRORED) -> FINALIZE when
  *         starting the reduction step
- *         {@link ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor#triggerGatedExecutions(JobInstance)}
+ *         {@link ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor#triggerGatedExecutions}
  *         </li>
  * </ul>
  *
@@ -100,7 +103,9 @@
  * <ul>
  *    <li> If the maintenance job is killed while sending notifications about
  *         a gated step advance, remaining chunks will never be notified.  A READY state before QUEUED would catch this.
+ *         A WAITING state for gated chunks will simplify that handling.
  *         </li>
+ *    <li> A running reduction step will not restart if the server is killed. </li>
  * </ul>
  */
 package ca.uhn.fhir.batch2;

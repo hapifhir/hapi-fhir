@@ -194,7 +194,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 		ourLog.info("Received work notification for {}", workNotification);
 
 		// There are three paths through this code:
-		// 1. Normal execution.  We validate, load, update statuses, all in a tx.  Then we proces the chunk.
+		// 1. Normal execution.  We validate, load, update statuses, all in a tx.  Then we process the chunk.
 		// 2. Discard chunk.  If some validation fails (e.g. no chunk with that id), we log and discard the chunk.
 		//    Probably a db rollback, with a stale queue.
 		// 3. Fail and retry.  If we throw an exception out of here, Spring will put the queue message back, and redeliver later.
