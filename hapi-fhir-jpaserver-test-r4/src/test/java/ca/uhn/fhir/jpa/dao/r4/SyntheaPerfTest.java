@@ -66,6 +66,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	@AfterEach
 	public void afterEach() {
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 	}
 
 	@Disabled("Stress test")

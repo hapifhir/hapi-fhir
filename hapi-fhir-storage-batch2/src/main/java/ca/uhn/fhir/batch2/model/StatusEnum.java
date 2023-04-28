@@ -33,6 +33,8 @@ import java.util.Set;
 
 /**
  * Status of a Batch2 Job Instance.
+ * The initial state is QUEUED.
+ * The terminal states are COMPLETED, CANCELLED, or FAILED.
  */
 public enum StatusEnum {
 
@@ -57,9 +59,13 @@ public enum StatusEnum {
 	COMPLETED(false, true, false),
 
 	/**
-	 * Task execution resulted in an error but the error may be transient (or transient status is unknown).
-	 * Retrying may result in success.
+	 * Chunk execution resulted in an error but the error may be transient (or transient status is unknown).
+	 * The job may still complete successfully.
+	 * @deprecated this is basically a synonym for IN_PROGRESS - display should use the presence of an error message on the instance
+	 * to indicate that there has been a transient error.
 	 */
+	@Deprecated(since = "6.6")
+		// wipmb For 6.8 - remove all inbound transitions, and allow transition back to IN_PROGRESS. use message in ui to show danger status
 	ERRORED(true, false, true),
 
 	/**
@@ -69,7 +75,7 @@ public enum StatusEnum {
 	FAILED(true, true, false),
 
 	/**
-	 * Task has been cancelled.
+	 * Task has been cancelled by the user.
 	 */
 	CANCELLED(true, true, false);
 
@@ -183,10 +189,8 @@ public enum StatusEnum {
 				canTransition = true;
 				break;
 			case IN_PROGRESS:
-				canTransition = theNewStatus != QUEUED;
-				break;
 			case ERRORED:
-				canTransition = theNewStatus == FAILED || theNewStatus == COMPLETED || theNewStatus == CANCELLED || theNewStatus == ERRORED;
+				canTransition = theNewStatus != QUEUED;
 				break;
 			case CANCELLED:
 				// terminal state cannot transition
@@ -206,7 +210,8 @@ public enum StatusEnum {
 		}
 
 		if (!canTransition) {
-			ourLog.trace("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
+			// we have a bug?
+			ourLog.warn("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
 		}
 		return canTransition;
 	}

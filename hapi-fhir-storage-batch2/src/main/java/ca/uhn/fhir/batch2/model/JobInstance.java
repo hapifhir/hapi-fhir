@@ -395,10 +395,10 @@ public class JobInstance implements IModelJson, IJobInstance {
 
 		switch (getStatus()) {
 			case IN_PROGRESS:
+			case ERRORED:
 			case FINALIZE:
 				return true;
 			case COMPLETED:
-			case ERRORED:
 			case QUEUED:
 			case FAILED:
 			case CANCELLED:

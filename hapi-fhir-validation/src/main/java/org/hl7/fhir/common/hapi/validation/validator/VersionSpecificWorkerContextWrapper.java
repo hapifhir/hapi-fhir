@@ -244,15 +244,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			if (isNotBlank(code)) {
 				retVal = new ValidationResult(theSystem, new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent()
 					.setCode(code)
-					.setDisplay(display));
+					.setDisplay(display),
+					null);
 			} else if (isNotBlank(issueSeverity)) {
-				retVal = new ValidationResult(ValidationMessage.IssueSeverity.fromCode(issueSeverity), message, ValueSetExpander.TerminologyServiceErrorClass.UNKNOWN);
+				retVal = new ValidationResult(ValidationMessage.IssueSeverity.fromCode(issueSeverity), message, ValueSetExpander.TerminologyServiceErrorClass.UNKNOWN, null);
 			}
 
 		}
 
 		if (retVal == null) {
-			retVal = new ValidationResult(ValidationMessage.IssueSeverity.ERROR, "Validation failed");
+			retVal = new ValidationResult(ValidationMessage.IssueSeverity.ERROR, "Validation failed", null);
 		}
 
 		return retVal;
@@ -327,6 +328,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(1992) + e);
 		}
+	}
+
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String system) {
+		return null;
+	}
+
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String system, String version) {
+		return null;
 	}
 
 	@Override
@@ -558,7 +569,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return validationResultsOk.get(0);
 		}
 
-		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null);
+		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, null);
 	}
 
 	public void invalidateCaches() {

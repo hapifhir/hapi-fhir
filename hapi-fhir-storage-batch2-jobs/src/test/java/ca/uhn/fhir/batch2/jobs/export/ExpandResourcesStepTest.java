@@ -84,7 +84,7 @@ public class ExpandResourcesStepTest {
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		parameters.setOutputFormat("json");
-		parameters.setStartDate(new Date());
+		parameters.setSince(new Date());
 		if (thePartitioned) {
 			parameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
 		}

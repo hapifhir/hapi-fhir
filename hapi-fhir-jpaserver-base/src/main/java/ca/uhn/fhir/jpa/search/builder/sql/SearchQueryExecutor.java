@@ -20,11 +20,13 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
@@ -109,7 +111,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					 * Note that we use the spring managed connection, and the expectation is that a transaction that
 					 * is managed by Spring has been started before this method is called.
 					 */
-					assert TransactionSynchronizationManager.isSynchronizationActive();
+					HapiTransactionService.requireTransaction();
 
 					Query nativeQuery = myEntityManager.createNativeQuery(sql);
 					org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
@@ -118,6 +120,15 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					}
 
 					ourLog.trace("About to execute SQL: {}", sql);
+
+					/*
+					 * These settings help to ensure that we use a search cursor
+					 * as opposed to loading all search results into memory
+					 */
+					hibernateQuery.setFetchSize(500000);
+					hibernateQuery.setCacheable(false);
+					hibernateQuery.setCacheMode(CacheMode.IGNORE);
+					hibernateQuery.setReadOnly(true);
 
 					// This tells hibernate not to flush when we call scroll(), but rather to wait until the transaction commits and
 					// only flush then.  We need to do this so that any exceptions that happen in the transaction happen when

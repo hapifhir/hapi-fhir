@@ -315,9 +315,9 @@ public class BulkDataImportProviderTest {
 	}
 
 	@Test
-	public void testPollForStatus_ERROR() throws IOException {
+	public void testPollForStatus_FAILED() throws IOException {
 		JobInstance jobInfo = new JobInstance()
-			.setStatus(StatusEnum.ERRORED)
+			.setStatus(StatusEnum.FAILED)
 			.setErrorMessage("It failed.")
 			.setErrorCount(123)
 			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
@@ -336,7 +336,7 @@ public class BulkDataImportProviderTest {
 			assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent, containsString("\"diagnostics\": \"Job is in ERRORED state with 123 error count. Last error: It failed.\""));
+			assertThat(responseContent, containsString("\"diagnostics\": \"Job is in FAILED state with 123 error count. Last error: It failed.\""));
 		}
 	}
 

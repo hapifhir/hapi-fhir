@@ -88,8 +88,10 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	/**
 	 * Preload resources from the database in batch. This method is purely
 	 * a performance optimization and must be purely idempotent.
+	 *
+	 * @param thePreFetchIndexes Should resource indexes be loaded
 	 */
-	default <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds) {
+	default <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds, boolean thePreFetchIndexes) {
 		// nothing by default
 	}
 }
