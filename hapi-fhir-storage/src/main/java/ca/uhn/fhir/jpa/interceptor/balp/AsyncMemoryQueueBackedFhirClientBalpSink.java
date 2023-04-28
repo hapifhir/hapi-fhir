@@ -15,9 +15,19 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class AsyncFhirClientBalpSink extends FhirClientBalpSink implements IBalpAuditEventSink {
+/**
+ * This implementation of the {@link IBalpAuditEventSink} transmits audit events to
+ * a FHIR endpoint for creation, using a standard fhir <i>create</i> event. The target
+ * server FHIR version does not need to match the FHIR version of the AuditEvent source,
+ * events will be converted automatically prior to sending.
+ * <p>
+ * This sink transmits events asynchronously using an in-memory queue. This means that
+ * in the event of a server shutdown data could be lost.
+ * </p>
+ */
+public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink implements IBalpAuditEventSink {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AsyncFhirClientBalpSink.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(AsyncMemoryQueueBackedFhirClientBalpSink.class);
 	private final ArrayBlockingQueue<IBaseResource> myQueue;
 	private AtomicLong ourNextThreadId = new AtomicLong(0);
 	private boolean myRunning;
@@ -33,7 +43,7 @@ public class AsyncFhirClientBalpSink extends FhirClientBalpSink implements IBalp
 	 * @param theTargetBaseUrl The FHIR server base URL for the target/sink server to
 	 *                         receive audit events.
 	 */
-	public AsyncFhirClientBalpSink(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl) {
+	public AsyncMemoryQueueBackedFhirClientBalpSink(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl) {
 		this(theFhirContext, theTargetBaseUrl, null);
 	}
 
@@ -49,7 +59,7 @@ public class AsyncFhirClientBalpSink extends FhirClientBalpSink implements IBalp
 	 * @param theClientInterceptors An optional list of interceptors to register against
 	 *                              the client. May be {@literal null}.
 	 */
-	public AsyncFhirClientBalpSink(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl, @Nullable List<Object> theClientInterceptors) {
+	public AsyncMemoryQueueBackedFhirClientBalpSink(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl, @Nullable List<Object> theClientInterceptors) {
 		this(createClient(theFhirContext, theTargetBaseUrl, theClientInterceptors));
 	}
 
@@ -59,7 +69,7 @@ public class AsyncFhirClientBalpSink extends FhirClientBalpSink implements IBalp
 	 *
 	 * @param theClient The FHIR client to use as a sink.
 	 */
-	public AsyncFhirClientBalpSink(IGenericClient theClient) {
+	public AsyncMemoryQueueBackedFhirClientBalpSink(IGenericClient theClient) {
 		super(theClient);
 		myQueue = new ArrayBlockingQueue<>(100);
 	}
@@ -109,6 +119,11 @@ public class AsyncFhirClientBalpSink extends FhirClientBalpSink implements IBalp
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
+
+				// TODO: Currently we transmit events one by one, but a nice optimization
+				// would be to batch them into FHIR transaction Bundles. If we do this, we
+				// would get better performance, but we'd also want to have some retry
+				// logic that submits events individually if a transaction fails.
 
 				if (next != null) {
 					try {

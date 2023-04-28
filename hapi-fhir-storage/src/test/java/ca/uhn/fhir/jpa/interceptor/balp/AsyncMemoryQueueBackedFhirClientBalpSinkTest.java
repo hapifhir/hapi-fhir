@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThan;
 
-public class AsyncFhirClientBalpSinkTest {
+public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 
 	@RegisterExtension
 	@Order(0)
@@ -35,7 +35,7 @@ public class AsyncFhirClientBalpSinkTest {
 	@Test
 	public void recordAuditEvent() {
 		// Setup
-		AsyncFhirClientBalpSink sink = new AsyncFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
+		AsyncMemoryQueueBackedFhirClientBalpSink sink = new AsyncMemoryQueueBackedFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
 		sink.start();
 		try {
 			org.hl7.fhir.r4.model.AuditEvent auditEvent1 = new org.hl7.fhir.r4.model.AuditEvent();
@@ -64,7 +64,7 @@ public class AsyncFhirClientBalpSinkTest {
 	@Test
 	public void recordAuditEvent_AutoRetry() {
 		// Setup
-		AsyncFhirClientBalpSink sink = new AsyncFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
+		AsyncMemoryQueueBackedFhirClientBalpSink sink = new AsyncMemoryQueueBackedFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
 		sink.start();
 		try {
 			org.hl7.fhir.r4.model.AuditEvent auditEvent1 = new org.hl7.fhir.r4.model.AuditEvent();

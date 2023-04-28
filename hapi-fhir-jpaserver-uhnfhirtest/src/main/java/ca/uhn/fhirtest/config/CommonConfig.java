@@ -6,7 +6,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
-import ca.uhn.fhir.jpa.interceptor.balp.AsyncFhirClientBalpSink;
+import ca.uhn.fhir.jpa.interceptor.balp.AsyncMemoryQueueBackedFhirClientBalpSink;
 import ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor;
 import ca.uhn.fhir.jpa.interceptor.balp.IBalpAuditContextServices;
 import ca.uhn.fhir.jpa.interceptor.balp.IBalpAuditEventSink;
@@ -114,7 +114,7 @@ public class CommonConfig {
 
 	@Bean
 	public IBalpAuditEventSink balpAuditEventSink(FhirContext theFhirContext) {
-		return new AsyncFhirClientBalpSink(theFhirContext, "http://localhost:8000/baseAudit");
+		return new AsyncMemoryQueueBackedFhirClientBalpSink(theFhirContext, "http://localhost:8000/baseAudit");
 	}
 
 	@Bean
