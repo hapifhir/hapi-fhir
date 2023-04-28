@@ -118,6 +118,14 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.ORACLE_12C, "clob");
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.POSTGRES_9_4, "oid"); // the PG driver will write oid into a `text` column
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
+
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "character varying");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.DERBY_EMBEDDED, "long varchar");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MARIADB_10_1, "longtext");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MYSQL_5_7, "longtext");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.ORACLE_12C, "long");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.POSTGRES_9_4, "text");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
 	}
 
 	public static Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> getColumnTypeToDriverTypeToSqlType() {

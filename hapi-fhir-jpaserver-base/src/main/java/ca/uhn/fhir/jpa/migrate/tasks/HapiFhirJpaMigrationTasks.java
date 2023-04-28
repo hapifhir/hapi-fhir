@@ -40,7 +40,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
+import software.amazon.awssdk.utils.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,6 +53,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection", "java:S1192"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
@@ -265,44 +268,22 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 
 		// Postgres tuning.
-		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, List.of(
-			// we can't use convering index until the autovacuum runs for those rows, which kills index performance
-			"ALTER TABLE hfj_resource SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_forced_id SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_res_link SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_spidx_coords SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_spidx_date SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_spidx_number SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_spidx_quantity SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_spidx_quantity_nrml SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_spidx_string SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_spidx_token SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_spidx_uri SET (autovacuum_vacuum_scale_factor = 0.01)",
+		String postgresTuningStatementsAll = ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql");
+		List<String> postgresTuningStatements = Arrays
+			.stream(postgresTuningStatementsAll.split("\\n"))
+			.map(org.apache.commons.lang3.StringUtils::trim)
+			.filter(StringUtils::isNotBlank)
+			.filter(t -> !t.startsWith("--"))
+			.collect(Collectors.toList());
+		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, postgresTuningStatements));
 
-			// PG by default tracks the most common 100 values.  But our hashes cover 100s of SPs and need greater depth.
-			// Set stats depth to the max for hash_value columns, and 1000 for hash_identity (one per SP).
-			"alter table hfj_res_link alter column src_path set statistics 10000",
-			"alter table hfj_res_link alter column target_resource_id set statistics 10000",
-			"alter table hfj_res_link alter column src_resource_id set statistics 10000",
-			"alter table hfj_spidx_coords alter column hash_identity set statistics 1000",
-			"alter table hfj_spidx_date alter column hash_identity set statistics 1000",
-			"alter table hfj_spidx_number alter column hash_identity set statistics 1000",
-			"alter table hfj_spidx_quantity alter column hash_identity set statistics 1000",
-			"alter table hfj_spidx_quantity alter column hash_identity_and_units set statistics 10000",
-			"alter table hfj_spidx_quantity alter column hash_identity_sys_units set statistics 10000",
-			"alter table hfj_spidx_quantity_nrml alter column hash_identity set statistics 1000",
-			"alter table hfj_spidx_quantity_nrml alter column hash_identity_and_units set statistics 10000",
-			"alter table hfj_spidx_quantity_nrml alter column hash_identity_sys_units set statistics 10000",
-			"alter table hfj_spidx_string alter column hash_identity set statistics 1000",
-			"alter table hfj_spidx_string alter column hash_exact set statistics 10000",
-			"alter table hfj_spidx_string alter column hash_norm_prefix set statistics 10000",
-			"alter table hfj_spidx_token alter column hash_identity set statistics 1000",
-			"alter table hfj_spidx_token alter column hash_sys set statistics 10000",
-			"alter table hfj_spidx_token alter column hash_sys_and_value set statistics 10000",
-			"alter table hfj_spidx_token alter column hash_value set statistics 10000",
-			"alter table hfj_spidx_uri alter column hash_identity set statistics 1000",
-			"alter table hfj_spidx_uri alter column hash_uri set statistics 10000"
-			)));
+		// Use an unlimited length text column for RES_TEXT_VC
+		version
+			.onTable("HFJ_RES_VER")
+			.modifyColumn("20230421.1", "RES_TEXT_VC")
+			.nullable()
+			.failureAllowed()
+			.withType(ColumnTypeEnum.TEXT);
 
 		{
 			// add hash_norm to res_id to speed up joins on a second string.
@@ -320,7 +301,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			linkTable.addForeignKey("20230424.5", "FK_RESLINK_TARGET")
 				.toColumn("TARGET_RESOURCE_ID").references("HFJ_RESOURCE", "RES_ID");
 		}
-
 	}
 
 	protected void init640() {
