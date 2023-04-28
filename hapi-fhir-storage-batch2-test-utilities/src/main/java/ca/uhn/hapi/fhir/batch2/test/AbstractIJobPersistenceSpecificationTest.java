@@ -38,6 +38,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -57,21 +58,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.theInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Specification tests for batch2 storage and event system.
@@ -318,42 +318,6 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		}
 
 		@Test
-		public void testFetchChunks() {
-			JobInstance instance = createInstance();
-			String instanceId = mySvc.storeNewInstance(instance);
-
-			List<String> ids = new ArrayList<>();
-			for (int i = 0; i < 10; i++) {
-				String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
-				ids.add(id);
-			}
-
-			List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 0);
-			assertNull(chunks.get(0).getData());
-			assertNull(chunks.get(1).getData());
-			assertNull(chunks.get(2).getData());
-			assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-				contains(ids.get(0), ids.get(1), ids.get(2)));
-
-			chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 1);
-			assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-				contains(ids.get(3), ids.get(4), ids.get(5)));
-
-			chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 2);
-			assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-				contains(ids.get(6), ids.get(7), ids.get(8)));
-
-			chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 3);
-			assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-				contains(ids.get(9)));
-
-			chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 4);
-			assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-				empty());
-		}
-
-
-		@Test
 		public void testMarkChunkAsCompleted_Success() {
 			JobInstance instance = createInstance();
 			String instanceId = mySvc.storeNewInstance(instance);
@@ -437,7 +401,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 			});
 
-			List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
+			List<WorkChunk> chunks = ImmutableList.copyOf(mySvc.fetchAllWorkChunksIterator(instanceId, true));
 			assertEquals(1, chunks.size());
 			assertEquals(2, chunks.get(0).getErrorCount());
 		}
@@ -588,6 +552,29 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		}
 	}
 
+	@Test
+	void testDeleteChunksAndMarkInstanceAsChunksPurged_doesWhatItSays() {
+	    // given
+		JobDefinition<?> jd = withJobDefinition();
+		IJobPersistence.CreateResult createResult = newTxTemplate().execute(status->
+				mySvc.onCreateWithFirstChunk(jd, "{}"));
+		String instanceId = createResult.jobInstanceId;
+		for (int i = 0; i < 10; i++) {
+			storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
+		}
+		JobInstance readback = freshFetchJobInstance(instanceId);
+		assertFalse(readback.isWorkChunksPurged());
+		assertTrue(mySvc.fetchAllWorkChunksIterator(instanceId, true).hasNext(), "has chunk");
+
+		// when
+		mySvc.deleteChunksAndMarkInstanceAsChunksPurged(instanceId);
+
+	    // then
+		readback = freshFetchJobInstance(instanceId);
+		assertTrue(readback.isWorkChunksPurged(), "purged set");
+		assertFalse(mySvc.fetchAllWorkChunksIterator(instanceId, true).hasNext(), "chunks gone");
+	}
+	
 	@Test
 	void testInstanceUpdate_modifierApplied() {
 	    // given
