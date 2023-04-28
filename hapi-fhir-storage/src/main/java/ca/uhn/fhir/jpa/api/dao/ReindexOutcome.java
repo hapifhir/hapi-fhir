@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Server - SQL Migration
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,20 +17,27 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.migrate.taskdef;
+package ca.uhn.fhir.jpa.api.dao;
 
-public enum ColumnTypeEnum {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-	LONG,
-	STRING,
-	DATE_ONLY,
-	DATE_TIMESTAMP,
-	BOOLEAN,
-	FLOAT,
-	INT,
-	TINYINT,
-	BLOB,
-	CLOB,
-	DOUBLE,
-	TEXT;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
+public class ReindexOutcome {
+
+	private List<String> myWarnings;
+
+	public List<String> getWarnings() {
+		return defaultIfNull(myWarnings, Collections.emptyList());
+	}
+
+	public void addWarning(String theWarning) {
+		if (myWarnings == null) {
+			myWarnings = new ArrayList<>();
+		}
+		myWarnings.add(theWarning);
+	}
+
 }

@@ -58,11 +58,13 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
 								 @Nonnull IJobDataSink<ResourceIdList> theDataSink) throws JobExecutionFailedException {
 		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
-		ourLog.info("Starting BatchExport job");
+		ourLog.info("Fetching resource IDs for bulk export job instance[{}]", theStepExecutionDetails.getInstance().getInstanceId());
 
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
+		providerParams.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId());
+		providerParams.setChunkId(theStepExecutionDetails.getChunkId());
 		providerParams.setFilters(params.getFilters());
-		providerParams.setStartDate(params.getStartDate());
+		providerParams.setStartDate(params.getSince());
 		providerParams.setExportStyle(params.getExportStyle());
 		providerParams.setGroupId(params.getGroupId());
 		providerParams.setPatientIds(params.getPatientIds());

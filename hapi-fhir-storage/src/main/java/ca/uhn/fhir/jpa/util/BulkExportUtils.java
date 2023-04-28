@@ -37,7 +37,7 @@ public class BulkExportUtils {
 	public static BulkExportParameters createBulkExportJobParametersFromExportOptions(BulkDataExportOptions theOptions) {
 		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
 
-		parameters.setStartDate(theOptions.getSince());
+		parameters.setSince(theOptions.getSince());
 		parameters.setOutputFormat(theOptions.getOutputFormat());
 		parameters.setExportStyle(theOptions.getExportStyle());
 		parameters.setFilters(new ArrayList<>(theOptions.getFilters()));
