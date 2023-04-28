@@ -57,7 +57,7 @@ public class HapiWorkerContextTest extends BaseTest {
 		// Built-in Codes
 
 		vs.setUrl("http://hl7.org/fhir/ValueSet/fm-status");
-		ValidationOptions options = new ValidationOptions().guessSystem();
+		ValidationOptions options = new ValidationOptions().withGuessSystem();
 		outcome = workerCtx.validateCode(options, "active", vs);
 		assertEquals(true, outcome.isOk(), outcome.getMessage());
 
