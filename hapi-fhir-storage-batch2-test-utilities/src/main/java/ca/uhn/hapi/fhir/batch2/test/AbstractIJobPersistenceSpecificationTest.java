@@ -65,10 +65,13 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.theInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Specification tests for batch2 storage and event system.
@@ -549,6 +552,29 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		}
 	}
 
+	@Test
+	void testDeleteChunksAndMarkInstanceAsChunksPurged_doesWhatItSays() {
+	    // given
+		JobDefinition<?> jd = withJobDefinition();
+		IJobPersistence.CreateResult createResult = newTxTemplate().execute(status->
+				mySvc.onCreateWithFirstChunk(jd, "{}"));
+		String instanceId = createResult.jobInstanceId;
+		for (int i = 0; i < 10; i++) {
+			storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
+		}
+		JobInstance readback = freshFetchJobInstance(instanceId);
+		assertFalse(readback.isWorkChunksPurged());
+		assertTrue(mySvc.fetchAllWorkChunksIterator(instanceId, true).hasNext(), "has chunk");
+
+		// when
+		mySvc.deleteChunksAndMarkInstanceAsChunksPurged(instanceId);
+
+	    // then
+		readback = freshFetchJobInstance(instanceId);
+		assertTrue(readback.isWorkChunksPurged(), "purged set");
+		assertFalse(mySvc.fetchAllWorkChunksIterator(instanceId, true).hasNext(), "chunks gone");
+	}
+	
 	@Test
 	void testInstanceUpdate_modifierApplied() {
 	    // given

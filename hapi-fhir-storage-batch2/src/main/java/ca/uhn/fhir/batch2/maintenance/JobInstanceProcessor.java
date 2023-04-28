@@ -133,17 +133,18 @@ public class JobInstanceProcessor {
 				break;
 			case CANCELLED:
 				purgeExpiredInstance(theInstance);
+				//wipmb For 6.8 - Are we deliberately not purging chunks for cancelled jobs?  This is a very complicated way to say that.
 				return;
 		}
 
 		if (theInstance.isFinished() && !theInstance.isWorkChunksPurged()) {
 			myJobPersistence.deleteChunksAndMarkInstanceAsChunksPurged(theInstance.getInstanceId());
 
+			// update final statistics.
+			// wipmb For 6.8 - do we need to run stats again?  If the status changed to finished, then we just ran them above.
 			InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(theInstance.getInstanceId());
-
 			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance->{
 				progress.updateInstance(instance);
-				instance.setWorkChunksPurged(true);
 				return true;
 			});
 		}

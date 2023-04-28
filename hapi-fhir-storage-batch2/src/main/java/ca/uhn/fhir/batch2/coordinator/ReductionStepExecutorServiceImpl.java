@@ -159,7 +159,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.getCurrentStep();
 
-		// wipmb this runs four tx. Can we shorten that to one?
+		// fixme combine the fetch and the case statement.  Use optional for the boolean.
+		// wipmb For 6.8 - this runs four tx. That's at least 2 too many
 		JobInstance instance = executeInTransactionWithSynchronization(() ->
 			myJobPersistence.fetchInstance(theInstanceId).orElseThrow(() -> new InternalErrorException("Unknown instance: " + theInstanceId)));
 

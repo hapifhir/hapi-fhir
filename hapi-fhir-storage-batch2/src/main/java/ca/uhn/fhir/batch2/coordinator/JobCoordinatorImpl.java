@@ -176,7 +176,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		return myJobQuerySvc.fetchAllInstances(theFetchRequest);
 	}
 
-	// wipmb this interface is incoherent - do we return a JobOperationResultJson, or throw ResourceNotFoundException?
+	// wipmb For 6.8 - Clarify this interface. We currently return a JobOperationResultJson, and don't throw ResourceNotFoundException
 	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		return myJobPersistence.cancelInstance(theInstanceId);

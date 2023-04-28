@@ -81,6 +81,7 @@ public class JobInstanceProgressCalculator {
 			instanceProgress.addChunk(next);
 		}
 
+		// wipmb separate status update from stats collection in 6.8
 		instanceProgress.calculateNewStatus();
 
 		return instanceProgress;

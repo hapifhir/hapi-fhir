@@ -99,28 +99,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteChunks() {
-		// Setup
-
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-		for (int i = 0; i < 10; i++) {
-			storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
-		}
-
-		// Execute
-
-		mySvc.deleteChunksAndMarkInstanceAsChunksPurged(instanceId);
-
-		// Verify
-
-		runInTransaction(() -> {
-			assertEquals(1, myJobInstanceRepository.findAll().size());
-			assertEquals(0, myWorkChunkRepository.findAll().size());
-		});
-	}
-
-	@Test
 	public void testStoreAndFetchInstance() {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);

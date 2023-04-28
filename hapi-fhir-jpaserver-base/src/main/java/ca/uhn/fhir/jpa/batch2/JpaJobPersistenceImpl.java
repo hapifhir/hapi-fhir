@@ -414,7 +414,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
 		String operationString = "Cancel job instance " + theInstanceId;
 
-		// wipmb this is much too detailed to be down here - this should be up at the api layer.  Replace with simple enum.
+		// wipmb For 6.8 - This is too detailed to be down here - this should be up at the api layer.
+		// Replace with boolean result or ResourceNotFound exception.  Build the message up at the ui.
 		String messagePrefix = "Job instance <" + theInstanceId + ">";
 		if (recordsChanged > 0) {
 			return JobOperationResultJson.newSuccess(operationString, messagePrefix + " successfully cancelled.");

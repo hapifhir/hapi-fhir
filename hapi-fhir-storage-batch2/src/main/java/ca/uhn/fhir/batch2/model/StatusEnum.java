@@ -63,7 +63,7 @@ public enum StatusEnum {
 	 * to indicate that there has been a transient error.
 	 */
 	@Deprecated(since = "6.6")
-		// wipmb remove all inbound transitions, and allow transition back to IN_PROGRESS.
+		// wipmb For 6.8 - remove all inbound transitions, and allow transition back to IN_PROGRESS. use message in ui to show danger status
 	ERRORED(true, false, true),
 
 	/**

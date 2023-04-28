@@ -120,7 +120,7 @@ public interface IWorkChunkPersistence {
 	 * @param theInstanceId - instance id
 	 * @param theWithData - whether to include the data - not needed for stats collection
 	 * @return - an iterator for fetching work chunks
-	 * wipmb should we replace with a stream?
+	 * wipmb replace with a stream and a consumer in 6.8
 	 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
