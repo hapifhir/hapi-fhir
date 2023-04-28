@@ -863,6 +863,11 @@
 			<id>delopst</id>
 			<name>Primož Delopst</name>
 		</developer>
+		<developer>
+			<id>Zach Smith</id>
+			<name>zachdoctolib</name>
+			<organization>Doctolib</organization>
+		</developer>
 	</developers>
 
 	<licenses>
