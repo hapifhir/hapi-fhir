@@ -86,7 +86,7 @@ public enum DriverTypeEnum {
 		String retval;
 		switch (this) {
 			case H2_EMBEDDED:
-				retval = "h2.sql";
+				retval = "hapifhirh2.sql";
 				break;
 			case DERBY_EMBEDDED:
 				retval = "derbytenseven.sql";
@@ -96,7 +96,7 @@ public enum DriverTypeEnum {
 				retval = "mysql57.sql";
 				break;
 			case POSTGRES_9_4:
-				retval = "hapifhirpostgres94.sql";
+				retval = "hapifhirpostgres94-complete.sql";
 				break;
 			case ORACLE_12C:
 				retval = "oracle12c.sql";
