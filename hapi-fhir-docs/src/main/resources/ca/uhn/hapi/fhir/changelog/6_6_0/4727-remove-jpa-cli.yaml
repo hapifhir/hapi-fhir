@@ -1,0 +1,9 @@
+---
+type: remove
+issue: 4727
+title: "The HAPI FHIR CLI `run-server` command has been removed. This command
+   was used to launch a HAPI FHIR JPA Server instance. The 
+   [hapi-fhir-jpaserver-starter](https://github.com/hapifhir/hapi-fhir-jpaserver-starter/)
+   project has long since duplicated and improved on the CLI version of the 
+   launcher, and maintaining both was been a maintenance burden. Users of the
+   CLI command are recommended to migrate to the starter project."

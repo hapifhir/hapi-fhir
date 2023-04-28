@@ -27,6 +27,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Enumeration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -70,7 +71,7 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
 
 		org.hl7.fhir.r5.model.SearchParameter searchParameter = myVersionCanonicalizer.searchParameterToCanonical(theResource);
-		List<String> base = theResource != null ? searchParameter.getBase().stream().map(CodeType::getCode).collect(Collectors.toList()) : null;
+		List<String> base = theResource != null ? searchParameter.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList()) : null;
 		requestReindexForRelatedResources(reindex, base, theRequestDetails);
 	}
 

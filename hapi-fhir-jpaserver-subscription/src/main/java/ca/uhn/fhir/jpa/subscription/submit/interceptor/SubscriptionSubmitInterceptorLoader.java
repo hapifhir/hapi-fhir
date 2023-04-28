@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
@@ -37,12 +38,15 @@ public class SubscriptionSubmitInterceptorLoader {
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
+	@Autowired(required = false)
+	private SubscriptionTopicValidatingInterceptor mySubscriptionTopicValidatingInterceptor;
 	@Autowired
 	private StorageSettings myStorageSettings;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 	private boolean mySubscriptionValidatingInterceptorRegistered;
 	private boolean mySubscriptionMatcherInterceptorRegistered;
+	private boolean mySubscriptionTopicValidatingInterceptorRegistered;
 
 	@PostConstruct
 	public void start() {
@@ -61,6 +65,11 @@ public class SubscriptionSubmitInterceptorLoader {
 		if (!mySubscriptionValidatingInterceptorRegistered) {
 			myInterceptorRegistry.registerInterceptor(mySubscriptionValidatingInterceptor);
 			mySubscriptionValidatingInterceptorRegistered = true;
+		}
+
+		if (mySubscriptionTopicValidatingInterceptor != null && !mySubscriptionTopicValidatingInterceptorRegistered) {
+			myInterceptorRegistry.registerInterceptor(mySubscriptionTopicValidatingInterceptor);
+			mySubscriptionTopicValidatingInterceptorRegistered = true;
 		}
 	}
 
