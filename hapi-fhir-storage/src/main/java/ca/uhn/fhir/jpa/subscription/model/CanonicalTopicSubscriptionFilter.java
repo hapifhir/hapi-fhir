@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.subscription.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.SearchParameter;
 
 public class CanonicalTopicSubscriptionFilter {
 	@JsonProperty("resourceType")
@@ -32,10 +31,10 @@ public class CanonicalTopicSubscriptionFilter {
 
 
 	@JsonProperty("comparator")
-	SearchParameter.SearchComparator myComparator;
+	Enumerations.SearchComparator myComparator;
 
 	@JsonProperty("modifier")
-	Enumerations.SubscriptionSearchModifier myModifier;
+	Enumerations.SearchModifierCode myModifier;
 
 	@JsonProperty("value")
 	String myValue;
@@ -56,19 +55,19 @@ public class CanonicalTopicSubscriptionFilter {
 		myFilterParameter = theFilterParameter;
 	}
 
-	public SearchParameter.SearchComparator getComparator() {
+	public Enumerations.SearchComparator getComparator() {
 		return myComparator;
 	}
 
-	public void setComparator(SearchParameter.SearchComparator theComparator) {
+	public void setComparator(Enumerations.SearchComparator theComparator) {
 		myComparator = theComparator;
 	}
 
-	public Enumerations.SubscriptionSearchModifier getModifier() {
+	public Enumerations.SearchModifierCode getModifier() {
 		return myModifier;
 	}
 
-	public void setModifier(Enumerations.SubscriptionSearchModifier theModifier) {
+	public void setModifier(Enumerations.SearchModifierCode theModifier) {
 		myModifier = theModifier;
 	}
 

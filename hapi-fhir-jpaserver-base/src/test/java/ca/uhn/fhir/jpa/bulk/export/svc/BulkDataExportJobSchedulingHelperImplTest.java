@@ -32,6 +32,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +40,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import static org.exparity.hamcrest.date.DateMatchers.within;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -105,7 +108,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		jobInstances.get(0).setReport(null);
 
-		setupTestEnabledNoBinaries(expectedRetentionHours, jobInstances);
+		setupTestEnabledNoBinaries(jobInstances);
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
@@ -117,7 +120,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		}
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
+		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
 	}
 
 	@Test
@@ -128,7 +131,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		jobInstances.get(0).setReport("{garbage}");
 
-		setupTestEnabledNoBinaries(expectedRetentionHours, jobInstances);
+		setupTestEnabledNoBinaries(jobInstances);
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
@@ -140,7 +143,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		}
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
+		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
 	}
 
 	@Test
@@ -163,7 +166,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		}
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
+		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
 	}
 
 	@Test
@@ -186,7 +189,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		}
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
+		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
 	}
 
 	@Test
@@ -210,7 +213,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
 
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
+		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
 	}
 
 	@Test
@@ -234,7 +237,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
 
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
+		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
 	}
 
 	@Test
@@ -261,7 +264,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
 
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
+		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
 	}
 
 	@Nonnull
@@ -280,8 +283,8 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		setupTest(true, theRetentionHours, theJobInstances, true);
 	}
 
-	private void setupTestEnabledNoBinaries(int theRetentionHours, List<JobInstance> theJobInstances) {
-		setupTest(true, theRetentionHours, theJobInstances, false);
+	private void setupTestEnabledNoBinaries(List<JobInstance> theJobInstances) {
+		setupTest(true, 1, theJobInstances, false);
 	}
 
 	private void setupTest(boolean theIsEnabled, int theRetentionHours, List<JobInstance> theJobInstances, boolean theIsEnableBinaryMocks) {
@@ -296,11 +299,13 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		final Answer<List<JobInstance>> fetchInstancesAnswer = theInvocationOnMock -> {
 			final TransactionCallback<List<JobInstance>> transactionCallback = theInvocationOnMock.getArgument(0);
+			//noinspection DataFlowIssue
 			return transactionCallback.doInTransaction(null);
 		};
 
 		final Answer<Void> purgeExpiredJobsAnswer = theInvocationOnMock -> {
 			final TransactionCallback<Optional<JobInstance>> transactionCallback = theInvocationOnMock.getArgument(0);
+			//noinspection DataFlowIssue
 			transactionCallback.doInTransaction(null);
 			return null;
 		};

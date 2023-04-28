@@ -128,7 +128,7 @@ public class FhirContext {
 	private volatile Boolean myFormatJsonSupported;
 	private volatile Boolean myFormatNDJsonSupported;
 	private volatile Boolean myFormatRdfSupported;
-	private IFhirValidatorFactory myFhirValidatorFactory = fhirContext -> new FhirValidator(fhirContext);
+	private IFhirValidatorFactory myFhirValidatorFactory = FhirValidator::new;
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
