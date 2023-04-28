@@ -43,6 +43,8 @@ import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
+import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -105,7 +107,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			}
 
 			String payloadId = thePayloadResource.getIdElement().toUnqualified().getValue();
-			ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
+			StopWatch sw = new StopWatch();
 
 			try {
 				operation.execute();
@@ -115,6 +117,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 				throw e;
 			}
 
+			Logs.getSubscriptionTroubleshootingLog().debug("Delivered {} rest-hook payload {} for {} in {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue(), sw);
 		}
 	}
 

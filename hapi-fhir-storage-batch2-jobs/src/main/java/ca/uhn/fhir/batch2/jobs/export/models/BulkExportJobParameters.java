@@ -45,7 +45,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	@JsonProperty("since")
-	private Date myStartDate;
+	private Date mySince;
 
 	@JsonProperty("exportId")
 	private String myExportId;
@@ -90,7 +90,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		params.setPostFetchFilterUrls(theParameters.getPostFetchFilterUrls());
 		params.setGroupId(theParameters.getGroupId());
 		params.setOutputFormat(theParameters.getOutputFormat());
-		params.setStartDate(theParameters.getStartDate());
+		params.setSince(theParameters.getSince());
 		params.setExpandMdm(theParameters.isExpandMdm());
 		params.setPatientIds(theParameters.getPatientIds());
 		params.setOriginalRequestUrl(theParameters.getOriginalRequestUrl());
@@ -114,12 +114,12 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		myResourceTypes = theResourceTypes;
 	}
 
-	public Date getStartDate() {
-		return myStartDate;
+	public Date getSince() {
+		return mySince;
 	}
 
-	public void setStartDate(Date theStartDate) {
-		myStartDate = theStartDate;
+	public void setSince(Date theSince) {
+		mySince = theSince;
 	}
 
 	public List<String> getFilters() {

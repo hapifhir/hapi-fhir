@@ -68,7 +68,7 @@ public class ReindexAppCtx {
 
 	@Bean
 	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep();
+		return new ReindexGenerateRangeChunksStep();
 	}
 
 	@Bean

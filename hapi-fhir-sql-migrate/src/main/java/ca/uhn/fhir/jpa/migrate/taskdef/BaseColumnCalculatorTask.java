@@ -152,7 +152,7 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 			}
 		};
 		myExecutor = new ThreadPoolExecutor(
-			1,
+			maximumPoolSize,
 			maximumPoolSize,
 			0L,
 			TimeUnit.MILLISECONDS,

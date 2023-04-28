@@ -1,14 +1,21 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -34,9 +41,11 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
@@ -48,6 +57,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
@@ -57,9 +67,6 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -67,6 +74,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -89,8 +98,11 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -109,14 +121,6 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("JavadocBlankLines")
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
-	@Autowired
-	private ISearchParamPresentDao mySearchParamPresentDao;
-	@Autowired
-	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
-	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
-
 	@RegisterExtension
 	@Order(0)
 	public static final RestfulServerExtension ourServer = new RestfulServerExtension(FhirContext.forR4Cached())
@@ -124,7 +128,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@RegisterExtension
 	@Order(1)
 	public static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourServer, Patient.class);
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
+	@Autowired
+	private ISearchParamPresentDao mySearchParamPresentDao;
+	@Autowired
+	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
+	@Autowired
+	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	@Autowired
+	private ReindexStep myReindexStep;
 
 	@AfterEach
 	public void afterResetDao() {
@@ -142,6 +154,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
@@ -880,6 +893,64 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 
 	}
+
+	@ParameterizedTest
+	@CsvSource({
+		// NoOp    OptimisticLock  OptimizeMode      ExpectedSelect  ExpectedUpdate
+		"  false,  false,          CURRENT_VERSION,  2,              10",
+		"  true,   false,          CURRENT_VERSION,  2,              0",
+		"  false,  true,           CURRENT_VERSION,  12,             10",
+		"  true,   true,           CURRENT_VERSION,  12,             0",
+		"  false,  false,          ALL_VERSIONS,     22,             20",
+		"  true,   false,          ALL_VERSIONS,     22,             0",
+		"  false,  true,           ALL_VERSIONS,     32,             20",
+		"  true,   true,           ALL_VERSIONS,     32,             0",
+	})
+	public void testReindexJob_OptimizeStorage(boolean theNoOp, boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
+		// Setup
+
+		// In no-op mode, the inlining is already in the state it needs to be in
+		if (theNoOp) {
+			myStorageSettings.setInlineResourceTextBelowSize(10000);
+		} else {
+			myStorageSettings.setInlineResourceTextBelowSize(0);
+		}
+
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		IIdType patientId = createPatient(withActiveTrue());
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId(patientId.toUnqualifiedVersionless());
+			p.setActive(true);
+			p.addIdentifier().setValue("" + i);
+			myPatientDao.update(p, mySrd);
+		}
+		data.addTypedPid("Patient", patientId.getIdPartAsLong());
+		for (int i = 0; i < 9; i++) {
+			IIdType nextPatientId = createPatient(withActiveTrue());
+			data.addTypedPid("Patient", nextPatientId.getIdPartAsLong());
+		}
+
+		myStorageSettings.setInlineResourceTextBelowSize(10000);
+		ReindexJobParameters params = new ReindexJobParameters()
+			.setOptimizeStorage(theOptimizeStorageModeEnum)
+			.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)
+			.setOptimisticLock(theOptimisticLock);
+
+		// execute
+		myCaptureQueriesListener.clear();
+		RunOutcome outcome = myReindexStep.doReindex(data, mock(IJobDataSink.class), "123", "456", params);
+
+		// validate
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(theExpectedUpdateCount, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+		assertEquals(10, outcome.getRecordsProcessed());
+
+	}
+
 
 	public void assertNoPartitionSelectors() {
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
@@ -2776,12 +2847,21 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		}
 
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, input);
+		Bundle output = mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(45, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		assertEquals(input.getEntry().size(), output.getEntry().size());
+
+		runInTransaction(() -> {
+			assertEquals(10, myResourceTableDao.count());
+			assertEquals(10, myResourceHistoryTableDao.count());
+		});
 
 	}
 
@@ -2791,7 +2871,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * as well as a large number of updates (PUT). This means that a lot of URLs and resources
 	 * need to be resolved (ie SQL SELECT) in order to proceed with the transaction. Prior
 	 * to the optimization that introduced this test, we had 140 SELECTs, now it's 17.
-	 *
+	 * <p>
 	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test
