@@ -72,7 +72,6 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 			.sorted()
 			.toList();
 		assertThat(indexInstances.toString(), indexInstances, contains(
-			"_profile NO_CHANGE Reference true",
 			"active NO_CHANGE Token true",
 			"address NO_CHANGE String true",
 			"address-city NO_CHANGE String true",
@@ -80,8 +79,6 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 			"address-postalcode NO_CHANGE String true",
 			"address-state NO_CHANGE String true",
 			"address-use NO_CHANGE Token true",
-			"age NO_CHANGE Number true",
-			"birthOrderBoolean NO_CHANGE Token true",
 			"birthdate NO_CHANGE Date true",
 			"death-date NO_CHANGE Date true",
 			"email NO_CHANGE Token true",
@@ -90,7 +87,6 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 			"identifier NO_CHANGE Token true",
 			"language NO_CHANGE Token true",
 			"link NO_CHANGE Reference true",
-			"mothersMaidenName NO_CHANGE String true",
 			"organization NO_CHANGE Reference true",
 			"part-agree NO_CHANGE Reference true",
 			"phone NO_CHANGE Token true",
@@ -136,7 +132,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
-		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, ResearchStudy.SP_RECRUITMENTTARGET, "NumberIndexes");
+		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, ResearchStudy.SP_RECRUITMENT_TARGET, "NumberIndexes");
 		assertEquals("NO_CHANGE", getPartValue("Action", index));
 		assertEquals("Number", getPartValue("Type", index));
 		assertEquals("3", getPartValue("Value", index));
@@ -294,7 +290,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		IIdType p1id = myPatientDao.create(p1, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameter eyeColourSp = new SearchParameter();
-		eyeColourSp.addBase("Patient");
+		eyeColourSp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
 		eyeColourSp.setCode("eyecolour");
 		eyeColourSp.setType(Enumerations.SearchParamType.STRING);
 		eyeColourSp.setTitle("Eye Colour");
@@ -326,7 +322,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		sp.setCode("family");
 		sp.setExpression("Patient.name.family + '|'");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
 		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
@@ -335,14 +331,14 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		sp.setCode("given");
 		sp.setExpression("Patient.name.given");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
 		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-names-and-gender");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
 		sp.addComponent()
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-family");

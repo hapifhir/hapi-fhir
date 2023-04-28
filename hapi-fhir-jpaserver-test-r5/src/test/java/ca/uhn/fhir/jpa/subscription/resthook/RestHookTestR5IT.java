@@ -676,29 +676,6 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	}
 
 	@Test
-	public void testSubscriptionWithHeaders() throws Exception {
-		createSubscriptionTopic();
-
-		// Add some headers, and we'll also turn back to requested status for fun
-		Subscription subscription = createTopicSubscription();
-		waitForActivatedSubscriptionCount(1);
-
-		subscription.addHeader("X-Foo: FOO");
-		subscription.addHeader("X-Bar: BAR");
-		updateResource(subscription, false);
-
-		Observation sentObservation = sendObservationExpectDelivery();
-
-		// Should see 1 subscription notification
-		assertReceivedTransactionCount(1);
-		Observation receivedObservation = assertBundleAndGetObservation(subscription, sentObservation);
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
-
-		assertThat(getLastSystemProviderHeaders(), hasItem("X-Foo: FOO"));
-		assertThat(getLastSystemProviderHeaders(), hasItem("X-Bar: BAR"));
-	}
-
-	@Test
 	public void testDisableSubscription() throws Exception {
 		createSubscriptionTopic();
 
@@ -792,7 +769,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		String criteria = "Observation?accessType=Catheter,PD%20Catheter";
 
 		SearchParameter sp = new SearchParameter();
-		sp.addBase("Observation");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.OBSERVATION);
 		sp.setCode("accessType");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setExpression("Observation.extension('Observation#accessType')");

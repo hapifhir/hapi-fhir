@@ -1,6 +1,8 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,7 +53,9 @@ public class NpmPackageValidationSupport extends PrePopulatedValidationSupport {
 		for (String nextFile : packageFolder.listFiles()) {
 			if (nextFile.toLowerCase(Locale.US).endsWith(".json")) {
 				String input = new String(packageFolder.getContent().get(nextFile), StandardCharsets.UTF_8);
-				IBaseResource resource = getFhirContext().newJsonParser().parseResource(input);
+				IParser parser = getFhirContext().newJsonParser();
+				parser.setParserErrorHandler(new LenientErrorHandler(false));
+				IBaseResource resource = parser.parseResource(input);
 				super.addResource(resource);
 			}
 		}

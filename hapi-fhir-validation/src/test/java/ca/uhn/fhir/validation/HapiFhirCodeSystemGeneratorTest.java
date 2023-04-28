@@ -48,7 +48,7 @@ public class HapiFhirCodeSystemGeneratorTest {
 		cs.setUrl(StorageResponseCodeEnum.SYSTEM);
 		cs.getAuthorFirstRep().setName("HAPI FHIR");
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		cs.setCaseSensitive(true);
 		cs.setCopyright("Licensed under the terms of the Apache Software License 2.0.");
 		for (var next : StorageResponseCodeEnum.values()) {

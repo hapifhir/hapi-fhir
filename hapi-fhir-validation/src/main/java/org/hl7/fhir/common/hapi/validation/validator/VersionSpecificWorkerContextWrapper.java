@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -122,7 +124,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types) throws FileNotFoundException, IOException, FHIRException {
 		throw new UnsupportedOperationException(Msg.code(653));
 	}
 
@@ -383,6 +385,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public StructureDefinition fetchTypeDefinition(String typeName) {
 		return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+	}
+
+	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String n) {
+		throw new UnsupportedOperationException(Msg.code(2329));
 	}
 
 	@Override

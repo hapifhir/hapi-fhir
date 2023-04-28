@@ -22,6 +22,7 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -170,6 +171,25 @@ public class ExtensionUtil {
 			.findFirst()
 			.orElse(null);
 	}
+
+	/**
+	 * Given a resource or other structure that can have direct extensions,
+	 * pulls out any extensions that have the given theExtensionUrl and a primitive value type,
+	 * and returns a list of the string version of the extension values.
+	 */
+	public static List<String> getExtensionPrimitiveValues(IBaseHasExtensions theBase, String theExtensionUrl) {
+		List<String> values = theBase
+			.getExtension()
+			.stream()
+			.filter(t -> theExtensionUrl.equals(t.getUrl()))
+			.filter(t -> t.getValue() instanceof IPrimitiveType<?>)
+			.map(t->(IPrimitiveType<?>)t.getValue())
+			.map(IPrimitiveType::getValueAsString)
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toList());
+		return values;
+	}
+
 
 	/**
 	 * Gets all extensions that match the specified filter predicate

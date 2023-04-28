@@ -108,14 +108,14 @@ class SubscriptionCanonicalizerTest {
 		assertEquals("Observation", filter1.getResourceType());
 		assertEquals("param1", filter1.getFilterParameter());
 		// WIP STR5 assert comparator once core libs are updated
-		assertEquals(Enumerations.SubscriptionSearchModifier.EQUAL, filter1.getModifier());
+		assertEquals(Enumerations.SearchModifierCode.EXACT, filter1.getModifier());
 		assertEquals("value1", filter1.getValue());
 
 		CanonicalTopicSubscriptionFilter filter2 = canonicalize.getFilters().get(1);
 		assertEquals("CarePlan", filter2.getResourceType());
 		assertEquals("param2", filter2.getFilterParameter());
 		// WIP STR5 assert comparator once core libs are updated
-		assertEquals(Enumerations.SubscriptionSearchModifier.EQUAL, filter1.getModifier());
+		assertEquals(Enumerations.SearchModifierCode.EXACT, filter1.getModifier());
 		assertEquals("value2", filter2.getValue());
 		assertEquals(123, canonicalize.getHeartbeatPeriod());
 		assertEquals(456, canonicalize.getMaxCount());
@@ -126,7 +126,7 @@ class SubscriptionCanonicalizerTest {
 		org.hl7.fhir.r5.model.Subscription.SubscriptionFilterByComponent filter = new org.hl7.fhir.r5.model.Subscription.SubscriptionFilterByComponent();
 		filter.setResourceType(theResourceType);
 		filter.setFilterParameter(theParam);
-		filter.setModifier(Enumerations.SubscriptionSearchModifier.EQUAL);
+		filter.setModifier(Enumerations.SearchModifierCode.EXACT);
 		// WIP STR5 add comparator once core libs are updated
 		filter.setValue(theValue);
 		return filter;

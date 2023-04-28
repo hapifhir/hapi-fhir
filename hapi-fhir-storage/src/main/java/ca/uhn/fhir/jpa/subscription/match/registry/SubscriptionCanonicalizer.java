@@ -403,7 +403,6 @@ public class SubscriptionCanonicalizer {
 
 
 		setPartitionIdOnReturnValue(theSubscription, retVal);
-		retVal.setHeaders(subscription.getHeader());
 		retVal.setChannelExtensions(extractExtension(subscription));
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getContentType());

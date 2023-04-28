@@ -270,7 +270,7 @@ public class BaseController {
 		FhirVersionEnum version = theRequest.getFhirVersion(myConfig);
 		VersionCanonicalizer retVal = myCanonicalizers.get(version);
 		if (retVal == null) {
-			retVal = new VersionCanonicalizer(version);
+			retVal = new VersionCanonicalizer(version.newContext());
 			myCanonicalizers.put(version, retVal);
 		}
 		return retVal;

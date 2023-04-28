@@ -854,6 +854,11 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		createUniqueIndexCoverageBeneficiary();
 
+		runInTransaction(() -> {
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			assertEquals(0, uniques.size(), uniques.toString());
+		});
+
 		executeReindex("Coverage?");
 
 		runInTransaction(() -> {
