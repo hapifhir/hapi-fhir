@@ -1,9 +1,9 @@
 package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.interceptor.balp.AsyncMemoryQueueBackedFhirClientBalpSink;
-import ca.uhn.fhir.jpa.interceptor.balp.IBalpAuditContextServices;
-import ca.uhn.fhir.jpa.interceptor.balp.IBalpAuditEventSink;
+import ca.uhn.fhir.storage.interceptor.balp.AsyncMemoryQueueBackedFhirClientBalpSink;
+import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
+import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditEventSink;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;

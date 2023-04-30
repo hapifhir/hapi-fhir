@@ -1,6 +1,6 @@
 package ca.uhn.fhirtest.config;
 
-import ca.uhn.fhir.jpa.interceptor.balp.IBalpAuditContextServices;
+import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import joptsimple.internal.Strings;
@@ -12,7 +12,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
- * This class is an implementation of the {@link ca.uhn.fhir.jpa.interceptor.balp.IBalpAuditContextServices}
+ * This class is an implementation of the {@link IBalpAuditContextServices}
  * interface for the public HAPI FHIR
  */
 public class FhirTestBalpAuditContextServices implements IBalpAuditContextServices {
