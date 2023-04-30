@@ -173,7 +173,7 @@ public class BalpAuditCaptureInterceptor {
 				patientIds.add(myContextServices.massageResourceIdForStorage(theRequestDetails, resource, resource.getIdElement()));
 			} else {
 				List<RuntimeSearchParam> compartmentSearchParameters = resourceDef.getSearchParamsForCompartmentName("Patient");
-				if (compartmentSearchParameters.size() > 0) {
+				if (!compartmentSearchParameters.isEmpty()) {
 					FhirTerser terser = fhirContext.newTerser();
 					terser
 						.getCompartmentOwnersForResource("Patient", resource, myAdditionalPatientCompartmentParamNames)
