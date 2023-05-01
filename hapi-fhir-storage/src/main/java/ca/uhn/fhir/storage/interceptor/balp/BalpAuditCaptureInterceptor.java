@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.interceptor.balp;
+package ca.uhn.fhir.storage.interceptor.balp;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -17,11 +17,7 @@ import org.hl7.fhir.r4.model.AuditEvent;
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -42,10 +38,10 @@ public class BalpAuditCaptureInterceptor {
 	/**
 	 * Constructor
 	 *
-	 * @param theAuditEventSink This service is the target for generated AuditEvent resources. The {@link BalpAuditCaptureInterceptor}
-	 *                          does not actually store AuditEvents, it simply generates them when appropriate and passes them to
-	 *                          the sink service. The sink service might store them locally, transmit them to a remote
-	 *                          repository, or even simply log them to a syslog.
+	 * @param theAuditEventSink  This service is the target for generated AuditEvent resources. The {@link BalpAuditCaptureInterceptor}
+	 *                           does not actually store AuditEvents, it simply generates them when appropriate and passes them to
+	 *                           the sink service. The sink service might store them locally, transmit them to a remote
+	 *                           repository, or even simply log them to a syslog.
 	 * @param theContextServices This service supplies details to the BALP about the context of a given request. For example,
 	 *                           in order to generate a conformant AuditEvent resource, this interceptor needs to determine the
 	 *                           identity of the user and the client from the {@link ca.uhn.fhir.rest.api.server.RequestDetails}
@@ -56,6 +52,40 @@ public class BalpAuditCaptureInterceptor {
 		Validate.notNull(theContextServices);
 		myAuditEventSink = theAuditEventSink;
 		myContextServices = theContextServices;
+	}
+
+	private static void addEntityPatient(AuditEvent theAuditEvent, String thePatientId) {
+		AuditEvent.AuditEventEntityComponent entityPatient = theAuditEvent.addEntity();
+		entityPatient
+			.getType()
+			.setSystem(BalpConstants.CS_AUDIT_ENTITY_TYPE)
+			.setCode(BalpConstants.CS_AUDIT_ENTITY_TYPE_1_PERSON)
+			.setDisplay(BalpConstants.CS_AUDIT_ENTITY_TYPE_1_PERSON_DISPLAY);
+		entityPatient
+			.getRole()
+			.setSystem(BalpConstants.CS_OBJECT_ROLE)
+			.setCode(BalpConstants.CS_OBJECT_ROLE_1_PATIENT)
+			.setDisplay(BalpConstants.CS_OBJECT_ROLE_1_PATIENT_DISPLAY);
+		entityPatient
+			.getWhat()
+			.setReference(thePatientId);
+	}
+
+	private static void addEntityData(AuditEvent theAuditEvent, String theDataResourceId) {
+		AuditEvent.AuditEventEntityComponent entityData = theAuditEvent.addEntity();
+		entityData
+			.getType()
+			.setSystem(BalpConstants.CS_AUDIT_ENTITY_TYPE)
+			.setCode(BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT)
+			.setDisplay(BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY);
+		entityData
+			.getRole()
+			.setSystem(BalpConstants.CS_OBJECT_ROLE)
+			.setCode(BalpConstants.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE)
+			.setDisplay(BalpConstants.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE_DISPLAY);
+		entityData
+			.getWhat()
+			.setReference(theDataResourceId);
 	}
 
 	public void setAdditionalPatientCompartmentParamNames(Set<String> theAdditionalPatientCompartmentParamNames) {
@@ -78,9 +108,10 @@ public class BalpAuditCaptureInterceptor {
 			case VREAD:
 				handleReadOrVRead(theDetails, theRequestDetails);
 				break;
+			default:
+				// No actions for other operations
 		}
 	}
-
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 	public void hookStoragePrecommitResourceCreated(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
@@ -157,7 +188,7 @@ public class BalpAuditCaptureInterceptor {
 				patientIds.add(myContextServices.massageResourceIdForStorage(theRequestDetails, resource, resource.getIdElement()));
 			} else {
 				List<RuntimeSearchParam> compartmentSearchParameters = resourceDef.getSearchParamsForCompartmentName("Patient");
-				if (compartmentSearchParameters.size() > 0) {
+				if (!compartmentSearchParameters.isEmpty()) {
 					FhirTerser terser = fhirContext.newTerser();
 					terser
 						.getCompartmentOwnersForResource("Patient", resource, myAdditionalPatientCompartmentParamNames)
@@ -178,6 +209,7 @@ public class BalpAuditCaptureInterceptor {
 		addEntityData(auditEvent, resourceId);
 		return auditEvent;
 	}
+
 	@Nonnull
 	private AuditEvent createAuditEventBasicCreateUpdateDelete(ServletRequestDetails theRequestDetails, IBaseResource theResource, BalpProfileEnum theProfile) {
 		return createAuditEventCommonCreate(theRequestDetails, theResource, theProfile);
@@ -220,23 +252,6 @@ public class BalpAuditCaptureInterceptor {
 		AuditEvent auditEvent = createAuditEventCommonRead(theRequestDetails, dataResourceId, profile);
 		addEntityPatient(auditEvent, patientId);
 		return auditEvent;
-	}
-
-	private static void addEntityPatient(AuditEvent theAuditEvent, String thePatientId) {
-		AuditEvent.AuditEventEntityComponent entityPatient = theAuditEvent.addEntity();
-		entityPatient
-			.getType()
-			.setSystem(BalpConstants.CS_AUDIT_ENTITY_TYPE)
-			.setCode(BalpConstants.CS_AUDIT_ENTITY_TYPE_1_PERSON)
-			.setDisplay(BalpConstants.CS_AUDIT_ENTITY_TYPE_1_PERSON_DISPLAY);
-		entityPatient
-			.getRole()
-			.setSystem(BalpConstants.CS_OBJECT_ROLE)
-			.setCode(BalpConstants.CS_OBJECT_ROLE_1_PATIENT)
-			.setDisplay(BalpConstants.CS_OBJECT_ROLE_1_PATIENT_DISPLAY);
-		entityPatient
-			.getWhat()
-			.setReference(thePatientId);
 	}
 
 	@Nonnull
@@ -373,23 +388,6 @@ public class BalpAuditCaptureInterceptor {
 		AuditEvent auditEvent = createAuditEventCommon(theRequestDetails, theProfile);
 		addEntityData(auditEvent, theDataResourceId);
 		return auditEvent;
-	}
-
-	private static void addEntityData(AuditEvent theAuditEvent, String theDataResourceId) {
-		AuditEvent.AuditEventEntityComponent entityData = theAuditEvent.addEntity();
-		entityData
-			.getType()
-			.setSystem(BalpConstants.CS_AUDIT_ENTITY_TYPE)
-			.setCode(BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT)
-			.setDisplay(BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY);
-		entityData
-			.getRole()
-			.setSystem(BalpConstants.CS_OBJECT_ROLE)
-			.setCode(BalpConstants.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE)
-			.setDisplay(BalpConstants.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE_DISPLAY);
-		entityData
-			.getWhat()
-			.setReference(theDataResourceId);
 	}
 
 }

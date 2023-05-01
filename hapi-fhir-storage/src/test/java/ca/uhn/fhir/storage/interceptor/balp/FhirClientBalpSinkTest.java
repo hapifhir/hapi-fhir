@@ -1,6 +1,7 @@
-package ca.uhn.fhir.jpa.interceptor.balp;
+package ca.uhn.fhir.storage.interceptor.balp;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.storage.interceptor.balp.FhirClientBalpSink;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.dstu3.model.AuditEvent;

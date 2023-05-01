@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.interceptor.balp;
+package ca.uhn.fhir.storage.interceptor.balp;
 
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Coding;

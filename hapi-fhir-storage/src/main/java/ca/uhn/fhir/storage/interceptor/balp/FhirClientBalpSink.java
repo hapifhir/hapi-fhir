@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.interceptor.balp;
+package ca.uhn.fhir.storage.interceptor.balp;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;

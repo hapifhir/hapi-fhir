@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.interceptor.balp;
+package ca.uhn.fhir.storage.interceptor.balp;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -29,7 +29,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AsyncMemoryQueueBackedFhirClientBalpSink.class);
 	private final ArrayBlockingQueue<IBaseResource> myQueue;
-	private AtomicLong ourNextThreadId = new AtomicLong(0);
+	private static final AtomicLong ourNextThreadId = new AtomicLong(0);
 	private boolean myRunning;
 	private TransmitterThread myThread;
 
