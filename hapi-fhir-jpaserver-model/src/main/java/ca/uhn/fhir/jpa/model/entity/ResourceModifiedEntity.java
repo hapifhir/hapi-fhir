@@ -29,11 +29,18 @@ import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * This class describes how a resourceModifiedMessage is stored for later processing in the event where
+ * submission to the subscription processing pipeline would fail.  The persisted message does not include a
+ * payload (resource) as an in-memory version of the same message would.  Instead, it points to a payload
+ * through the entity primary key {@link ResourceModifiedEntityPK} which is composed
+ * of the resource Pid and current version.
+ */
 @Entity
 @Table(name = "HFJ_RESOURCE_MODIFIED")
 public class ResourceModifiedEntity implements Serializable {
 
-	public static final int MESSAGE_LENGTH = 768;
+	public static final int MESSAGE_LENGTH = 4000;
 
 	@EmbeddedId
 	private ResourceModifiedEntityPK myResourceModifiedEntityPK;

@@ -64,10 +64,10 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
 	private volatile MessageChannel myMatchingChannel;
 
-	private StorageSettings myStorageSettings;
-	private SubscriptionChannelFactory mySubscriptionChannelFactory;
-	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
-	private PlatformTransactionManager myTxManager;
+	private final StorageSettings myStorageSettings;
+	private final SubscriptionChannelFactory mySubscriptionChannelFactory;
+	private final IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+	private final PlatformTransactionManager myTxManager;
 
 	private boolean myIgnoreOperationOnResourcesOrderForTesting = false;
 
@@ -154,7 +154,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 				ourLog.warn("Resource with primary key {}/{} could not be found", theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion(), exception);
 			} catch (MessageDeliveryException exception) {
 				// we encountered an issue when trying to send the message so mark the transaction for rollback
-				ourLog.warn("Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.", theResourceModifiedMessage.getPayloadId(), theResourceModifiedMessage.getSubscriptionId());
+				ourLog.error("Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.", theResourceModifiedMessage.getPayloadId(), theResourceModifiedMessage.getSubscriptionId());
 				processed = false;
 				theStatus.setRollbackOnly();
 			}

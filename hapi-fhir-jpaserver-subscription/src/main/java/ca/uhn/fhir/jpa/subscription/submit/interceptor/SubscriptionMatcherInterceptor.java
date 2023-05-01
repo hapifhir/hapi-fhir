@@ -121,29 +121,22 @@ public class SubscriptionMatcherInterceptor {
 
 		IResourceModifiedPK resourceModifiedPK = myResourceModifiedMessagePersistenceSvc.persist(msg);
 
-		schedulePostCommitDeliverOrDeliverMessage(msg, resourceModifiedPK);
+		schedulePostCommitMessageSubmission(msg, resourceModifiedPK);
 
 	}
 
-	private void schedulePostCommitDeliverOrDeliverMessage(ResourceModifiedMessage theMsg, IResourceModifiedPK thePersistedResourceModifiedPK) {
+	private void schedulePostCommitMessageSubmission(ResourceModifiedMessage theMsg, IResourceModifiedPK thePersistedResourceModifiedPK) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public int getOrder() {
+				return 0;
+			}
 
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-				@Override
-				public int getOrder() {
-					return 0;
-				}
-
-				@Override
-				public void afterCommit() {
-					myResourceModifiedSubmitterSvc.submitResourceModified(theMsg, thePersistedResourceModifiedPK);
-				}
-			});
-
-		} else{
-			myResourceModifiedSubmitterSvc.submitResourceModified(theMsg, thePersistedResourceModifiedPK);
-		}
+			@Override
+			public void afterCommit() {
+				myResourceModifiedSubmitterSvc.submitResourceModified(theMsg, thePersistedResourceModifiedPK);
+			}
+		});
 
 	}
 
@@ -154,7 +147,7 @@ public class SubscriptionMatcherInterceptor {
 	}
 
 	private boolean isSameResourceVersion(IBaseResource theOldResource, IBaseResource theNewResource) {
-		if(isNull(theOldResource) || isNull(theNewResource)){
+		if (isNull(theOldResource) || isNull(theNewResource)) {
 			return false;
 		}
 

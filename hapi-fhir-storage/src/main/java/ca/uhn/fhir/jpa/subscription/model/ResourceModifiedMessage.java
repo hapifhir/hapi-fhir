@@ -63,7 +63,7 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	}
 
 
-	public String getSubscriptionId() {
+    public String getSubscriptionId() {
 		return mySubscriptionId;
 	}
 

@@ -56,13 +56,13 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK.with;
  */
 public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModifiedMessagePersistenceSvc {
 
-	private FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
 
-	private IResourceModifiedDao myResourceModifiedDao;
+	private final IResourceModifiedDao myResourceModifiedDao;
 
-	private DaoRegistry myDaoRegistry;
+	private final DaoRegistry myDaoRegistry;
 
-	private ObjectMapper myObjectMapper;
+	private final ObjectMapper myObjectMapper;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedMessagePersistenceSvcImpl.class);
 
@@ -150,21 +150,30 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	private String getPayloadLessMessageAsString(ResourceModifiedMessage theMsg) {
-		ResourceModifiedMessage tempMessage = new ResourceModifiedMessage();
-		tempMessage.setPayloadId(theMsg.getPayloadId(myFhirContext));
-		tempMessage.setSubscriptionId(theMsg.getSubscriptionId());
-		tempMessage.setMediaType(theMsg.getMediaType());
-		tempMessage.setOperationType(theMsg.getOperationType());
-		tempMessage.setPartitionId(theMsg.getPartitionId());
-		tempMessage.setTransactionId(theMsg.getTransactionId());
-		tempMessage.setMessageKey(theMsg.getMessageKeyOrNull());
-		tempMessage.copyAdditionalPropertiesFrom(theMsg);
+		ResourceModifiedMessage tempMessage = new PayloadLessResourceModifiedMessage(theMsg);
 
 		try {
 			return myObjectMapper.writeValueAsString(tempMessage);
 		} catch (JsonProcessingException e) {
-			throw new ConfigurationException(Msg.code(2335) + "Failed to json serialize payloadless  ResourceModifiedMessage", e);
+			throw new ConfigurationException(Msg.code(2335) + "Failed to serialize empty ResourceModifiedMessage", e);
 		}
+	}
+
+	private static class PayloadLessResourceModifiedMessage extends ResourceModifiedMessage{
+
+		public PayloadLessResourceModifiedMessage(ResourceModifiedMessage theMsg) {
+			this.myPayloadId = theMsg.getPayloadId();
+			this.myPayloadVersion= theMsg.getPayloadVersion();
+			setSubscriptionId(theMsg.getSubscriptionId());
+			setMediaType(theMsg.getMediaType());
+			setOperationType(theMsg.getOperationType());
+			setPartitionId(theMsg.getPartitionId());
+			setTransactionId(theMsg.getTransactionId());
+			setMessageKey(theMsg.getMessageKeyOrNull());
+			copyAdditionalPropertiesFrom(theMsg);
+		}
+
+
 	}
 
 }

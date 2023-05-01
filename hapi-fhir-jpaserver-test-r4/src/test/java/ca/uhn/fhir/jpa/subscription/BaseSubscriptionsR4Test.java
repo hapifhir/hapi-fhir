@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
@@ -65,7 +66,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	protected ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
 	@Autowired
 	protected IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
-
+	@Autowired
+	protected IResourceModifiedDao myResourceModifiedDao;
 	protected CountingInterceptor myCountingInterceptor;
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
@@ -88,6 +90,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		myResourceModifiedDao.deleteAll();
 	}
 
 	@BeforeEach

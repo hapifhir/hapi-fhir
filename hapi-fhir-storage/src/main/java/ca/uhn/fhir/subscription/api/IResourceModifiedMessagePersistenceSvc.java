@@ -31,18 +31,44 @@ import java.util.List;
  *
  * Client of this interface should persist ResourceModifiedMessage as part of the processing of an operation on
  * a resource.  Upon a successful submission to the subscription pipeline, the persisted message should be deleted
- * or left un-altered for further re-submission at a later time (see {@link IResourceModifiedConsumerWithRetries}.
+ * or left un-altered for re-submission at a later time when submission fails (see {@link IResourceModifiedConsumerWithRetries}.
  */
 public interface IResourceModifiedMessagePersistenceSvc {
 
+	/**
+	 * Find all persisted resourceModifiedMessage and return their primary keys.
+	 *
+	 * @return List of primary keys of all persisted resourceModifiedMessage needing submission.
+	 */
 	List<IResourceModifiedPK> findAllPKs();
 
+	/**
+	 * Delete a resourceModifiedMessage by it's primary key.
+	 *
+	 * @param theResourceModifiedPK The primary key of the resourceModifiedMessage to delete.
+	 * @return Whether the persisted resourceModifiedMessage pointed to by <code>theResourceModifiedPK</code> was deleted.
+	 */
 	boolean deleteByPK(IResourceModifiedPK theResourceModifiedPK);
 
+	/**
+	 * Persisted a resourceModifiedMessage and return the resulting primary key.
+	 *
+	 * @param theMsg The resourceModifiedMessage to persist.
+	 * @return The primary key resulting from persisting <code>theMsg</code>.
+	 */
 	IResourceModifiedPK persist(ResourceModifiedMessage theMsg);
 
+	/**
+	 * Find a persisted resourceModifiedMessage from its primary key.
+	 * @param theResourceModifiedPK The primary key of the resourceModifiedMessage to fetch from persistence.
+	 * @return The resourceModifiedMessage pointed to by <code>theResourceModifiedPK</code>.
+	 */
 	ResourceModifiedMessage findByPK(IResourceModifiedPK theResourceModifiedPK);
 
+	/**
+	 *
+	 * @return the number of persisted resourceModifiedMessage.
+	 */
 	long getMessagePersistedCount();
 
 }

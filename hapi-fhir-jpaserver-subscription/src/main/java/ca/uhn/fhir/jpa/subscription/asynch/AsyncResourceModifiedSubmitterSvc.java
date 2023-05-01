@@ -38,8 +38,8 @@ import java.util.List;
 public class AsyncResourceModifiedSubmitterSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(AsyncResourceModifiedSubmitterSvc.class);
 
-	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
-	private IResourceModifiedConsumerWithRetries myResourceModifiedConsumer;
+	private final IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+	private final IResourceModifiedConsumerWithRetries myResourceModifiedConsumer;
 
 
 	public AsyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc, IResourceModifiedConsumerWithRetries theResourceModifiedConsumer) {
