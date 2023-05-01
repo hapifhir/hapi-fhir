@@ -23,8 +23,11 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedProcessingSchedulerSvc;
 import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
@@ -64,6 +67,11 @@ public class SubscriptionSubmitterConfig {
 	@Bean
 	public SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
 		return new SubscriptionValidatingInterceptor();
+	}
+
+	@Bean
+	public SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
 	}
 
 	@Bean

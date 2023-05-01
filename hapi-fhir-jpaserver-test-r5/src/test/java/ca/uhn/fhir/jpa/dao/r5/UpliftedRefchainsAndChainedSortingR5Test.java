@@ -154,10 +154,10 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setExpression("Bundle.entry[0].resource.as(Composition)");
-		subjectSp.getBase().forEach(sp::addBase);
-		subjectSp.getTargets().forEach(sp::addTarget);
+		subjectSp.getBase().forEach(t->sp.addBase(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
+		subjectSp.getTargets().forEach(t->sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
 		ourLog.info("SP: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
-		mySearchParameterDao.update(sp, mySrd);
+		mySearchParameterDao.create(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
 
@@ -1063,9 +1063,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setExpression(subjectSp.getPath());
-		subjectSp.getBase().forEach(sp::addBase);
-		subjectSp.getTargets().forEach(sp::addTarget);
-		mySearchParameterDao.update(sp, mySrd);
+		subjectSp.getBase().forEach(t->sp.addBase(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
+		subjectSp.getTargets().forEach(t->sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
+		mySearchParameterDao.create(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
 	}

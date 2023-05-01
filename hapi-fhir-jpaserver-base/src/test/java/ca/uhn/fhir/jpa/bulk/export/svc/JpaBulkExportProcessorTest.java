@@ -13,6 +13,8 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -20,8 +22,12 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Observation;
@@ -50,6 +56,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -59,9 +66,12 @@ import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
 
 @ExtendWith(MockitoExtension.class)
 public class JpaBulkExportProcessorTest {
@@ -92,7 +102,7 @@ public class JpaBulkExportProcessorTest {
 		}
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 
 		}
 
@@ -131,12 +141,15 @@ public class JpaBulkExportProcessorTest {
 	@Mock
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
+	@Spy
+	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
+
 	@InjectMocks
 	private JpaBulkExportProcessor myProcessor;
 
 	private ExportPIDIteratorParameters createExportParameters(BulkDataExportOptions.ExportStyle theExportStyle) {
 		ExportPIDIteratorParameters parameters = new ExportPIDIteratorParameters();
-		parameters.setJobId("jobId");
+		parameters.setInstanceId("instanceId");
 		parameters.setExportStyle(theExportStyle);
 		if (theExportStyle == BulkDataExportOptions.ExportStyle.GROUP) {
 			parameters.setGroupId("123");
@@ -196,10 +209,10 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(searchBuilder);
 		// ret
 		when(searchBuilder.createQuery(
-			eq(map),
-			any(SearchRuntimeDetails.class),
 			any(),
-			eq(getPartitionIdFromParams(thePartitioned))))
+			any(),
+			any(),
+			any()))
 			.thenReturn(resultIterator);
 
 		// test
@@ -212,6 +225,12 @@ public class JpaBulkExportProcessorTest {
 		assertTrue(pidIterator.hasNext());
 		assertEquals(pid2, pidIterator.next());
 		assertFalse(pidIterator.hasNext());
+		verify(searchBuilder, times(1)).createQuery(
+			eq(map),
+			any(SearchRuntimeDetails.class),
+			nullable(RequestDetails.class),
+			eq(getPartitionIdFromParams(thePartitioned)));
+
 	}
 
 	private RequestPartitionId getPartitionIdFromParams(boolean thePartitioned) {
@@ -236,8 +255,8 @@ public class JpaBulkExportProcessorTest {
 		try {
 			myProcessor.getResourcePidIterator(parameters);
 			fail();
-		} catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("You attempted to start a Patient Bulk Export,"));
+		} catch (InternalErrorException ex) {
+			assertThat(ex.getMessage(), containsString("You attempted to start a Patient Bulk Export,"));
 		}
 	}
 

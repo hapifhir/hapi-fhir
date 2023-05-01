@@ -87,8 +87,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	public void testReuseSubscriptionIdWithDifferentDatabaseMode() throws Exception {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 
-		String payload = "application/fhir+json";
-		IdType id = createSubscription("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER", payload, null, "sub").getIdElement().toUnqualifiedVersionless();
+		IdType id = createSubscription("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER", Constants.CT_FHIR_JSON_NEW, null, "sub").getIdElement().toUnqualifiedVersionless();
 		waitForActivatedSubscriptionCount(1);
 
 		Subscription subscription = mySubscriptionDao.read(id, mySrd);
@@ -98,8 +97,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		mySubscriptionDao.delete(id, mySrd);
 		waitForActivatedSubscriptionCount(0);
 
-		payload = "application/fhir+json";
-		id = createSubscription("Observation?", payload, null, "sub").getIdElement().toUnqualifiedVersionless();
+		id = createSubscription("Observation?", Constants.CT_FHIR_JSON_NEW, null, "sub").getIdElement().toUnqualifiedVersionless();
 		waitForActivatedSubscriptionCount(1);
 
 		subscription = mySubscriptionDao.read(id, mySrd);
@@ -114,8 +112,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=json";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=json";
 
-		createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
-		createSubscription(criteria2, Constants.CT_FHIR_JSON_NEW);
+		createSubscription(criteria1);
+		createSubscription(criteria2);
 		waitForActivatedSubscriptionCount(2);
 
 		sendObservation(code, "SNOMED-CT");
@@ -130,12 +128,11 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testUpdatesHaveCorrectMetadata() throws Exception {
-		String payload = "application/fhir+json";
 
 		String code = "1000000050";
 		String criteria1 = "Observation?";
 
-		createSubscription(criteria1, payload);
+		createSubscription(criteria1);
 		waitForActivatedSubscriptionCount(1);
 
 		/*
@@ -181,11 +178,9 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testPlaceholderReferencesInTransactionAreResolvedCorrectly() throws Exception {
-
-		String payload = "application/fhir+json";
 		String code = "1000000050";
 		String criteria1 = "Observation?";
-		createSubscription(criteria1, payload);
+		createSubscription(criteria1);
 		waitForActivatedSubscriptionCount(1);
 
 		// Create a transaction that should match
@@ -214,12 +209,10 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testUpdatesHaveCorrectMetadataUsingTransactions() throws Exception {
-		String payload = "application/fhir+json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?";
 
-		createSubscription(criteria1, payload);
+		createSubscription(criteria1);
 		waitForActivatedSubscriptionCount(1);
 
 		/*
@@ -275,12 +268,10 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRepeatedDeliveries() throws Exception {
-		String payload = "application/fhir+json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?";
 
-		createSubscription(criteria1, payload);
+		createSubscription(criteria1);
 		waitForActivatedSubscriptionCount(1);
 
 		for (int i = 0; i < 100; i++) {
@@ -297,12 +288,11 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testSubscriptionRegistryLoadsSubscriptionsFromDatabase() throws Exception {
-		String payload = "application/fhir+json";
 
 		String code = "1000000050";
 		String criteria1 = "Observation?";
 
-		createSubscription(criteria1, payload);
+		createSubscription(criteria1);
 		waitForActivatedSubscriptionCount(1);
 
 		// Manually unregister all subscriptions
@@ -325,8 +315,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	@Test
 	public void testActiveSubscriptionShouldntReActivate() throws Exception {
 		String criteria = "Observation?code=111111111&_format=xml";
-		String payload = "application/fhir+json";
-		createSubscription(criteria, payload);
+		createSubscription(criteria);
 
 		waitForActivatedSubscriptionCount(1);
 		for (int i = 0; i < 5; i++) {
@@ -337,14 +326,12 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionMetaAddDoesntTriggerNewDelivery() throws Exception {
-		String payload = "application/fhir+json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		createSubscription(criteria1, payload);
-		createSubscription(criteria2, payload);
+		createSubscription(criteria1);
+		createSubscription(criteria2);
 		waitForActivatedSubscriptionCount(2);
 
 		ourLog.info("Sending an Observation");
@@ -391,14 +378,12 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	public void testRestHookSubscriptionMetaAddDoesTriggerNewDeliveryIfConfiguredToDoSo() throws Exception {
 		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(true);
 
-		String payload = "application/fhir+json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		createSubscription(criteria1, payload);
-		createSubscription(criteria2, payload);
+		createSubscription(criteria1);
+		createSubscription(criteria2);
 		waitForActivatedSubscriptionCount(2);
 
 		Observation obs = sendObservation(code, "SNOMED-CT");
@@ -441,14 +426,12 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
-		String payload = "application/fhir+json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		createSubscription(criteria1, payload);
-		createSubscription(criteria2, payload);
+		createSubscription(criteria1);
+		createSubscription(criteria2);
 		waitForActivatedSubscriptionCount(2);
 
 		Observation obs = sendObservation(code, "SNOMED-CT");
@@ -474,13 +457,11 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionApplicationJsonDisableVersionIdInDelivery() throws Exception {
-		String payload = "application/json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		waitForActivatedSubscriptionCount(0);
-		Subscription subscription1 = createSubscription(criteria1, payload);
+		Subscription subscription1 = createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 
@@ -522,13 +503,11 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionDoesntGetLatestVersionByDefault() throws Exception {
-		String payload = "application/json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		waitForActivatedSubscriptionCount(0);
-		createSubscription(criteria1, payload);
+		createSubscription(criteria1);
 		waitForActivatedSubscriptionCount(1);
 
 		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
@@ -563,18 +542,20 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals("changed", observation2.getNoteFirstRep().getText());
 	}
 
+	private void createSubscription(String criteria1) {
+		createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
+	}
+
 
 	@ParameterizedTest
 	@ValueSource(strings = {"[*]", "[Observation]", "Observation?"})
 	public void RestHookSubscriptionWithPayloadSendsDeleteRequest(String theCriteria) throws Exception {
-		String payload = "application/json";
-
 		Extension sendDeleteMessagesExtension = new Extension()
 			.setUrl(EX_SEND_DELETE_MESSAGES)
 			.setValue(new BooleanType(true));
 
 		waitForActivatedSubscriptionCount(0);
-		createSubscription(theCriteria, payload, sendDeleteMessagesExtension);
+		createSubscription(theCriteria, Constants.CT_FHIR_JSON_NEW, sendDeleteMessagesExtension);
 		waitForActivatedSubscriptionCount(1);
 
 		ourLog.info("** About to send observation");
@@ -590,14 +571,12 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionGetsLatestVersionWithFlag() throws Exception {
-		String payload = "application/json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		waitForActivatedSubscriptionCount(0);
 
-		Subscription subscription = newSubscription(criteria1, payload);
+		Subscription subscription = newSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
 		subscription
 			.getChannel()
 			.addExtension(HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
@@ -639,14 +618,12 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
-		String payload = "application/json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription(criteria1, payload);
-		Subscription subscription2 = createSubscription(criteria2, payload);
+		Subscription subscription1 = createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription2 = createSubscription(criteria2, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
@@ -719,14 +696,12 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	public void testRestHookSubscriptionApplicationJsonDatabase() throws Exception {
 		// Same test as above, but now run it using database matching
 		myStorageSettings.setEnableInMemorySubscriptionMatching(false);
-		String payload = "application/json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription(criteria1, payload);
-		Subscription subscription2 = createSubscription(criteria2, payload);
+		Subscription subscription1 = createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription2 = createSubscription(criteria2, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
@@ -797,14 +772,12 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionApplicationXml() throws Exception {
-		String payload = "application/xml";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription(criteria1, payload);
-		Subscription subscription2 = createSubscription(criteria2, payload);
+		Subscription subscription1 = createSubscription(criteria1, Constants.CT_FHIR_XML_NEW);
+		Subscription subscription2 = createSubscription(criteria2, Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(2);
 
 		ourLog.info("** About to send observation");
@@ -871,12 +844,10 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionStarCriteria() throws Exception {
-		String payload = "application/json";
-
 		String code = "1000000050";
 		String criteria1 = "[*]";
 
-		createSubscription(criteria1, payload);
+		createSubscription(criteria1);
 		waitForActivatedSubscriptionCount(1);
 
 		sendObservation(code, "SNOMED-CT");
@@ -897,12 +868,10 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionMultiTypeCriteria() throws Exception {
-		String payload = "application/json";
-
 		String code = "1000000050";
 		String criteria1 = "[Observation,Patient]";
 
-		createSubscription(criteria1, payload);
+		createSubscription(criteria1);
 		waitForActivatedSubscriptionCount(1);
 
 		sendOrganization();
@@ -925,12 +894,10 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testSubscriptionTriggerViaSubscription() throws Exception {
-		String payload = "application/xml";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		createSubscription(criteria1, payload);
+		createSubscription(criteria1, Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		ourLog.info("** About to send observation");
@@ -976,14 +943,12 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testUpdateSubscriptionToMatchLater() throws Exception {
-		String payload = "application/xml";
-
 		String code = "1000000050";
 		String criteriaBad = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
 		ourLog.info("** About to create non-matching subscription");
 
-		Subscription subscription2 = createSubscription(criteriaBad, payload);
+		Subscription subscription2 = createSubscription(criteriaBad, Constants.CT_FHIR_XML_NEW);
 
 		ourLog.info("** About to send observation that wont match");
 
@@ -1021,14 +986,12 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionApplicationXmlJson() throws Exception {
-		String payload = "application/fhir+xml";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription(criteria1, payload);
-		Subscription subscription2 = createSubscription(criteria2, payload);
+		Subscription subscription1 = createSubscription(criteria1, Constants.CT_FHIR_XML_NEW);
+		Subscription subscription2 = createSubscription(criteria2, Constants.CT_FHIR_XML_NEW);
 		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
@@ -1042,12 +1005,10 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionInvalidCriteria() throws Exception {
-		String payload = "application/xml";
-
 		String criteria1 = "Observation?codeeeee=SNOMED-CT";
 
 		try {
-			createSubscription(criteria1, payload);
+			createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
@@ -1056,13 +1017,11 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testSubscriptionWithHeaders() throws Exception {
-		String payload = "application/fhir+json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		// Add some headers, and we'll also turn back to requested status for fun
-		Subscription subscription = createSubscription(criteria1, payload);
+		Subscription subscription = createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		subscription.getChannel().addHeader("X-Foo: FOO");
@@ -1084,12 +1043,10 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testDisableSubscription() throws Exception {
-		String payload = "application/fhir+json";
-
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		Subscription subscription = createSubscription(criteria1, payload);
+		Subscription subscription = createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
 
 		sendObservation(code, "SNOMED-CT");
@@ -1117,9 +1074,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	@Test
 	public void testInvalidProvenanceParam() {
 		assertThrows(UnprocessableEntityException.class, () -> {
-			String payload = "application/fhir+json";
 			String criteriabad = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
-			Subscription subscription = newSubscription(criteriabad, payload);
+			Subscription subscription = newSubscription(criteriabad, Constants.CT_FHIR_JSON_NEW);
 			myClient.create().resource(subscription).execute();
 		});
 	}
@@ -1127,9 +1083,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	@Test
 	public void testInvalidProcedureRequestParam() {
 		assertThrows(UnprocessableEntityException.class, () -> {
-			String payload = "application/fhir+json";
 			String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
-			Subscription subscription = newSubscription(criteriabad, payload);
+			Subscription subscription = newSubscription(criteriabad, Constants.CT_FHIR_JSON_NEW);
 			myClient.create().resource(subscription).execute();
 		});
 	}
@@ -1137,9 +1092,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	@Test
 	public void testInvalidBodySiteParam() {
 		assertThrows(UnprocessableEntityException.class, () -> {
-			String payload = "application/fhir+json";
 			String criteriabad = "BodySite?accessType=Catheter";
-			Subscription subscription = newSubscription(criteriabad, payload);
+			Subscription subscription = newSubscription(criteriabad, Constants.CT_FHIR_JSON_NEW);
 			myClient.create().resource(subscription).execute();
 		});
 	}
@@ -1147,9 +1101,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	@Test
 	public void testGoodSubscriptionPersists() {
 		assertEquals(0, subscriptionCount());
-		String payload = "application/fhir+json";
 		String criteriaGood = "Patient?gender=male";
-		Subscription subscription = newSubscription(criteriaGood, payload);
+		Subscription subscription = newSubscription(criteriaGood, Constants.CT_FHIR_JSON_NEW);
 		myClient.create().resource(subscription).execute();
 		await().until(() -> subscriptionCount() == 1);
 	}
@@ -1198,9 +1151,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	@Test
 	public void testBadSubscriptionDoesntPersist() {
 		assertEquals(0, subscriptionCount());
-		String payload = "application/fhir+json";
 		String criteriaBad = "BodySite?accessType=Catheter";
-		Subscription subscription = newSubscription(criteriaBad, payload);
+		Subscription subscription = newSubscription(criteriaBad, Constants.CT_FHIR_JSON_NEW);
 		try {
 			myClient.create().resource(subscription).execute();
 		} catch (UnprocessableEntityException e) {

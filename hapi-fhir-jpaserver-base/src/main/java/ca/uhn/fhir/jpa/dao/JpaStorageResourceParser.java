@@ -76,7 +76,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaStorageResourceParser implements IJpaStorageResourceParser {
-	public static final LenientErrorHandler LENIENT_ERROR_HANDLER = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
+	public static final LenientErrorHandler LENIENT_ERROR_HANDLER = new LenientErrorHandler(false).disableAllErrors();
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageResourceParser.class);
 	@Autowired
 	private FhirContext myFhirContext;
@@ -433,6 +433,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 						tag.setSystem(next.getTag().getSystem());
 						tag.setCode(next.getTag().getCode());
 						tag.setDisplay(next.getTag().getDisplay());
+						tag.setVersion(next.getTag().getVersion());
+						tag.setUserSelected(next.getTag().getUserSelected());
 						break;
 				}
 			}

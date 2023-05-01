@@ -49,11 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   {@link ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl#onWorkChunkCreate}
  *   {@link JpaJobPersistenceImpl#onWorkChunkDequeue(String)}
  *   Chunk execution {@link ca.uhn.fhir.batch2.coordinator.StepExecutor#executeStep}
- *   wipmb figure this out
- state transition triggers.
- on-enter actions
- on-exit actions
- activities in state
 */
 @TestPropertySource(properties = {
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_FALSE

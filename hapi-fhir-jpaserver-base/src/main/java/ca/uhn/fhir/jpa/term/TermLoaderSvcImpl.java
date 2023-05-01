@@ -174,7 +174,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	private static final int LOG_INCREMENT = 1000;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermLoaderSvcImpl.class);
 	// FYI: Hardcoded to R4 because that's what the term svc uses internally
-	private final FhirContext myCtx = FhirContext.forR4();
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private final ITermDeferredStorageSvc myDeferredStorageSvc;
 	private final ITermCodeSystemStorageSvc myCodeSystemStorageSvc;
 
@@ -499,7 +499,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		CodeSystem imgthlaCs;
 		try {
 			String imgthlaCsString = IOUtils.toString(TermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
-			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
+			imgthlaCs = FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
 		} catch (IOException e) {
 			throw new InternalErrorException(Msg.code(869) + "Failed to load imgthla.xml", e);
 		}
@@ -602,7 +602,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			throw new InvalidRequestException(Msg.code(875) + "Did not find loinc.xml in the ZIP distribution.");
 		}
 
-		CodeSystem loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
+		CodeSystem loincCs = FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, loincCsString);
 		if (isNotBlank(loincCs.getVersion())) {
 			throw new InvalidRequestException(Msg.code(876) + "'loinc.xml' file must not have a version defined. To define a version use '" +
 				LOINC_CODESYSTEM_VERSION.getCode() + "' property of 'loincupload.properties' file");

@@ -85,11 +85,22 @@ class ActiveSubscriptionCache {
 		return retval;
 	}
 
-	public List<ActiveSubscription> getTopicSubscriptionsForUrl(String theUrl) {
-		assert !isBlank(theUrl);
+	/**
+	 * R4B and R5 only
+	 * @param theTopic
+	 * @return a list of all subscriptions that are subscribed to the given topic
+	 */
+	public List<ActiveSubscription> getTopicSubscriptionsForTopic(String theTopic) {
+		assert !isBlank(theTopic);
 		return getAll().stream()
 			.filter(as -> as.getSubscription().isTopicSubscription())
-			.filter(as -> theUrl.equals(as.getSubscription().getCriteriaString()))
+			.filter(as -> theTopic.equals(as.getSubscription().getTopic()))
+			.collect(Collectors.toList());
+	}
+
+	public List<ActiveSubscription> getAllNonTopicSubscriptions() {
+		return getAll().stream()
+			.filter(as -> !as.getSubscription().isTopicSubscription())
 			.collect(Collectors.toList());
 	}
 }

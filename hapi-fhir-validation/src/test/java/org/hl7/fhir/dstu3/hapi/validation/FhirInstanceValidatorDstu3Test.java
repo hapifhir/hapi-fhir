@@ -674,6 +674,9 @@ public class FhirInstanceValidatorDstu3Test {
 					} else if (t.getMessage().contains("The markdown contains content that appears to be an embedded")) {
 						// Some DSTU3 structures contain URLs with <> around them
 						return false;
+					} else if (t.getMessage().startsWith("value should not start or finish with whitespace") && t.getMessage().endsWith("\\u00a0'")) {
+						// Some DSTU3 messages end with a unicode Non-breaking space character
+						return false;
 					} else {
 						return true;
 					}

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.5.13-SNAPSHOT</version>
+		<version>6.7.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -268,7 +268,6 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
-							<forkCount>1</forkCount>
 							<excludes>
 								<exclude>**/stresstest/*</exclude>
 							</excludes>
@@ -285,7 +284,6 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
-							<forkCount>1</forkCount>
 							<runOrder>alphabetical</runOrder>
 						</configuration>
 					</plugin>

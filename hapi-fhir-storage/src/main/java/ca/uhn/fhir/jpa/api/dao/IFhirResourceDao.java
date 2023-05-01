@@ -124,6 +124,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
+	<P extends IResourcePersistentId> void expunge(Collection<P> theResourceIds, RequestDetails theRequest);
+
 	ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
 	@Nonnull
@@ -244,6 +246,14 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	void reindex(T theResource, IBasePersistedResource theEntity);
 
+	/**
+	 * Reindex the given resource
+	 *
+	 * @param theResourcePersistentId The ID
+	 * @return
+	 */
+	ReindexOutcome reindex(IResourcePersistentId theResourcePersistentId, ReindexParameters theReindexParameters, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequestDetails);
 
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode);
@@ -352,10 +362,4 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 		return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();
 	}
 
-	/**
-	 * Reindex the given resource
-	 *
-	 * @param theResourcePersistentId The ID
-	 */
-	void reindex(IResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 }

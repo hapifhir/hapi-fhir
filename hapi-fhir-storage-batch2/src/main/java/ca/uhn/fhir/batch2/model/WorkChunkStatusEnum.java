@@ -25,10 +25,13 @@ import java.util.Set;
 
 /**
  * States for the {@link WorkChunk} state machine.
+ * The initial state is QUEUED.
+ * The terminal states are FAILED, COMPLETED.
+ *
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
 public enum WorkChunkStatusEnum {
-	// TODO: Whis is missing a state - WAITING for gated.  it would simplify stats wipmb - not this PR
+	// wipmb For 6.8 Add WAITING for gated, and READY for in db, but not yet sent to channel.
 	QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED;
 
 	private static final EnumMap<WorkChunkStatusEnum, Set<WorkChunkStatusEnum>> ourPriorStates;

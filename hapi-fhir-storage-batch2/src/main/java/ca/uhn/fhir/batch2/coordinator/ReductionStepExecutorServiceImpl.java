@@ -28,7 +28,6 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -52,6 +51,7 @@ import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -62,6 +62,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+
+import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
+import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;
+import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
 
 public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorService, IHasScheduledJobs {
 	public static final String SCHEDULED_JOB_ID = ReductionStepExecutorScheduledJob.class.getName();
@@ -120,7 +124,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	public void triggerReductionStep(String theInstanceId, JobWorkCursor<?, ?, ?> theJobWorkCursor) {
 		myInstanceIdToJobWorkCursor.putIfAbsent(theInstanceId, theJobWorkCursor);
 		if (myCurrentlyExecuting.availablePermits() > 0) {
-			myReducerExecutor.submit(() -> reducerPass());
+			myReducerExecutor.submit(this::reducerPass);
 		}
 	}
 
@@ -154,6 +158,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.getCurrentStep();
 
+		// wipmb For 6.8 - this runs four tx. That's at least 2 too many
+		// combine the fetch and the case statement.  Use optional for the boolean.
 		JobInstance instance = executeInTransactionWithSynchronization(() ->
 			myJobPersistence.fetchInstance(theInstanceId).orElseThrow(() -> new InternalErrorException("Unknown instance: " + theInstanceId)));
 
@@ -161,7 +167,10 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		switch (instance.getStatus()) {
 			case IN_PROGRESS:
 			case ERRORED:
-				if (myJobPersistence.markInstanceAsStatus(instance.getInstanceId(), StatusEnum.FINALIZE)) {
+				// this will take a write lock on the JobInstance, preventing duplicates.
+				boolean changed = executeInTransactionWithSynchronization(() ->
+					myJobPersistence.markInstanceAsStatusWhenStatusIn(instance.getInstanceId(), FINALIZE, EnumSet.of(IN_PROGRESS, ERRORED)));
+				if (changed) {
 					ourLog.info("Job instance {} has been set to FINALIZE state - Beginning reducer step", instance.getInstanceId());
 					shouldProceed = true;
 				}
@@ -177,10 +186,10 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		if (!shouldProceed) {
 			ourLog.warn(
 				"JobInstance[{}] should not be finalized at this time. In memory status is {}. Reduction step will not rerun!"
-					+ " This could be a long running reduction job resulting in the processed msg not being acknowledge,"
+					+ " This could be a long running reduction job resulting in the processed msg not being acknowledged,"
 					+ " or the result of a failed process or server restarting.",
 				instance.getInstanceId(),
-				instance.getStatus().name()
+				instance.getStatus()
 			);
 			return new ReductionStepChunkProcessingResponse(false);
 		}
@@ -188,7 +197,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		PT parameters = instance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker = (IReductionStepWorker<PT, IT, OT>) step.getJobStepWorker();
 
-		instance.setStatus(StatusEnum.FINALIZE);
+		instance.setStatus(FINALIZE);
 
 		boolean defaultSuccessValue = true;
 		ReductionStepChunkProcessingResponse response = new ReductionStepChunkProcessingResponse(defaultSuccessValue);
@@ -196,9 +205,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		try {
 			executeInTransactionWithSynchronization(() -> {
 				try (Stream<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
-					chunkIterator.forEach((chunk) -> {
-						processChunk(chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor);
-					});
+					chunkIterator.forEach(chunk ->
+						processChunk(chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor));
 				}
 				return null;
 			});

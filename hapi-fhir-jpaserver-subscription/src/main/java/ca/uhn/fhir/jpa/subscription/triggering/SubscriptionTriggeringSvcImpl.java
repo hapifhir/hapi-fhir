@@ -497,7 +497,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			}
 		};
 		myExecutorService = new ThreadPoolExecutor(
-			0,
+			10,
 			10,
 			0L,
 			TimeUnit.MILLISECONDS,

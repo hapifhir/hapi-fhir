@@ -359,7 +359,7 @@ public class FhirInstanceValidatorR5Test {
 		med.getContentFirstRep().getAttachment().setContentType(Constants.CT_OCTET_STREAM);
 		med.getContentFirstRep().getAttachment().setDataElement(value);
 		med.getContentFirstRep().getAttachment().setTitle("bbbb syst");
-		med.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		med.setStatus(DocumentReference.DocumentReferenceStatus.CURRENT);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
 
 		encoded = encoded.replace(value.getValueAsString(), "%%%2@()()");
@@ -381,7 +381,7 @@ public class FhirInstanceValidatorR5Test {
 		med.getContentFirstRep().getAttachment().setContentType(Constants.CT_OCTET_STREAM);
 		med.getContentFirstRep().getAttachment().setDataElement(value);
 		med.getContentFirstRep().getAttachment().setTitle("bbbb syst");
-		med.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		med.setStatus(DocumentReference.DocumentReferenceStatus.CURRENT);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
 
 		ourLog.info("Encoded: {}", encoded);
@@ -760,9 +760,13 @@ public class FhirInstanceValidatorR5Test {
 		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("GAGAGAGA");
 
 		results = myVal.validateWithResult(rp);
-		outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome, not(empty()));
+		outcome = logResultsAndReturnAll(results);
 
+		assertThat(outcome.get(0).getMessage(), containsString("None of the codings provided are in the value set 'Patient Relationship Type'"));
+		assertEquals(ResultSeverityEnum.INFORMATION, outcome.get(0).getSeverity());
+		assertThat(outcome.get(1).getMessage(), containsString("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'"));
+		assertEquals(ResultSeverityEnum.ERROR, outcome.get(1).getSeverity());
+		assertEquals(2, outcome.size());
 	}
 
 	@Test
@@ -870,7 +874,7 @@ public class FhirInstanceValidatorR5Test {
 		logResultsAndReturnAll(output);
 		assertThat(
 			output.getMessages().get(0).getMessage(),
-			containsString("The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0-cibuild), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
+			containsString("The value provided ('notvalidcode') is not in the value set 'Observation Status' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
 			);
 	}
 

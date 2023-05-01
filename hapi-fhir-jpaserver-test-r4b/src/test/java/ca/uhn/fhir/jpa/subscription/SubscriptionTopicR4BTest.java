@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicR4BTest.class);
@@ -69,6 +70,11 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		mySubscriptionDeliveredLatch.clear();
 		ourTestSystemProvider.clear();
 		super.after();
+	}
+
+	@Test
+	public void testSubscriptionTopicRegistryBean() {
+		assertNotNull(mySubscriptionTopicRegistry);
 	}
 
 	@Test
@@ -169,7 +175,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		return mySubscriptionTopicRegistry.size() == theTarget;
 	}
 
-	private SubscriptionTopic createEncounterSubscriptionTopic(Encounter.EncounterStatus theFrom, Encounter.EncounterStatus theCurrent, SubscriptionTopic.InteractionTrigger... theInteractionTriggers) {
+	private SubscriptionTopic createEncounterSubscriptionTopic(Encounter.EncounterStatus theFrom, Encounter.EncounterStatus theCurrent, SubscriptionTopic.InteractionTrigger... theInteractionTriggers) throws InterruptedException {
 		SubscriptionTopic retval = new SubscriptionTopic();
 		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -182,7 +188,9 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		queryCriteria.setPrevious("Encounter?status=" + theFrom.toCode());
 		queryCriteria.setCurrent("Encounter?status=" + theCurrent.toCode());
 		queryCriteria.setRequireBoth(true);
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		mySubscriptionTopicDao.create(retval, mySrd);
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
 		return retval;
 	}
 

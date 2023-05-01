@@ -133,9 +133,9 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 //		m.targetFile = new File("hapi-fhir-structures-r4/src/main/resources/org/hl7/fhir/r4/model/fhirversion.properties");
 //		m.execute();
 
-		m = new VersionPropertyFileGeneratorMojo();
-		m.packageName = "org.hl7.fhir.r4b.model";
-		m.targetFile = new File("hapi-fhir-structures-r4b/src/main/resources/org/hl7/fhir/r4b/model/fhirversion.properties");
+//		m = new VersionPropertyFileGeneratorMojo();
+//		m.packageName = "org.hl7.fhir.r4b.model";
+//		m.targetFile = new File("hapi-fhir-structures-r4b/src/main/resources/org/hl7/fhir/r4b/model/fhirversion.properties");
 //		m.execute();
 
 		m = new VersionPropertyFileGeneratorMojo();

@@ -41,6 +41,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent;
@@ -54,6 +55,7 @@ import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.DiagnosticReport;
 import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.IdType;
@@ -723,7 +725,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		validate(operationDefinition);
 		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), equalTo("TestQuery"));
 		String patientResourceName = "Patient";
-		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue(), is(patientResourceName));
+		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue().toCode(), is(patientResourceName));
 		assertThat(operationDefinition.getSystem(), is(false));
 		assertThat(operationDefinition.getType(), is(true));
 		assertThat(operationDefinition.getInstance(), is(false));
@@ -804,9 +806,9 @@ public class ServerCapabilityStatementProviderR5Test {
 		return retVal;
 	}
 
-	private Set<String> toStrings(List<CodeType> theType) {
+	private Set<String> toStrings(List<? extends IPrimitiveType> theType) {
 		HashSet<String> retVal = new HashSet<String>();
-		for (CodeType next : theType) {
+		for (IPrimitiveType next : theType) {
 			retVal.add(next.getValueAsString());
 		}
 		return retVal;

@@ -78,7 +78,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(1);
 
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
-		Patient patient = createPatientOnPartition(buildPatientWithNameAndId("PatientGiven", "ID.PatientGiven.123"), true, false, requestPartitionId1);
+		Patient patient = createPatientOnPartition(buildPatientWithNameAndId("PatientGiven", "ID.PatientGiven.123"), false, false, requestPartitionId1);
 		StringType patientId = new StringType(patient.getIdElement().getValue());
 
 		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
