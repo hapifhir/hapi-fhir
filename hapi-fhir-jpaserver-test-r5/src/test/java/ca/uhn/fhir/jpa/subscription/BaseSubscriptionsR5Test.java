@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
@@ -70,7 +70,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
-	protected SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	protected ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
 	protected CountingInterceptor myCountingInterceptor;
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
@@ -107,7 +107,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingChannel processingChannel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
 		if (processingChannel != null) {
 			processingChannel.clearInterceptorsForUnitTest();
 		}
