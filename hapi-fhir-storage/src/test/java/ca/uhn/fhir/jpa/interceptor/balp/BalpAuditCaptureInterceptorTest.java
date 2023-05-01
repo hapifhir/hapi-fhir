@@ -52,15 +52,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor.CS_AUDIT_ENTITY_TYPE;
-import static ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor.CS_AUDIT_ENTITY_TYPE_1_PERSON;
-import static ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT;
-import static ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor.CS_AUDIT_EVENT_TYPE;
-import static ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor.CS_OBJECT_ROLE;
-import static ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor.CS_OBJECT_ROLE_1_PATIENT;
-import static ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor.CS_OBJECT_ROLE_24_QUERY;
-import static ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE;
-import static ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor.CS_RESTFUL_INTERACTION;
+import static ca.uhn.fhir.jpa.interceptor.balp.BalpConstants.CS_AUDIT_ENTITY_TYPE;
+import static ca.uhn.fhir.jpa.interceptor.balp.BalpConstants.CS_AUDIT_ENTITY_TYPE_1_PERSON;
+import static ca.uhn.fhir.jpa.interceptor.balp.BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT;
+import static ca.uhn.fhir.jpa.interceptor.balp.BalpConstants.CS_AUDIT_EVENT_TYPE;
+import static ca.uhn.fhir.jpa.interceptor.balp.BalpConstants.CS_OBJECT_ROLE;
+import static ca.uhn.fhir.jpa.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_1_PATIENT;
+import static ca.uhn.fhir.jpa.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_24_QUERY;
+import static ca.uhn.fhir.jpa.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE;
+import static ca.uhn.fhir.jpa.interceptor.balp.BalpConstants.CS_RESTFUL_INTERACTION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -120,6 +120,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		when(myContextServices.getAgentClientWho(any())).thenReturn(new Reference().setIdentifier(new Identifier().setSystem("http://clients").setValue("123")));
 		when(myContextServices.getAgentUserWho(any())).thenReturn(new Reference().setIdentifier(new Identifier().setSystem("http://users").setValue("abc")));
 		when(myContextServices.massageResourceIdForStorage(any(), any(), any())).thenCallRealMethod();
+		when(myContextServices.getNetworkAddressType(any())).thenCallRealMethod();
 
 		mySvc = new BalpAuditCaptureInterceptor(myAuditEventSink, myContextServices);
 		ourServer.registerInterceptor(mySvc);
@@ -246,7 +247,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertType(auditEvent, "rest");
 		assertSubType(auditEvent, "delete");
 		assertEquals(AuditEvent.AuditEventAction.D, auditEvent.getAction());
-		assertHasSystemObjectEntities(auditEvent, csId.getValue());
+		assertHasSystemObjectEntities(auditEvent, csId.withVersion("1").getValue());
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent);
 	}
@@ -279,7 +280,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertType(auditEvent, "rest");
 		assertSubType(auditEvent, "delete");
 		assertEquals(AuditEvent.AuditEventAction.D, auditEvent.getAction());
-		assertHasSystemObjectEntities(auditEvent, obsId.getValue());
+		assertHasSystemObjectEntities(auditEvent, obsId.withVersion("1").getValue());
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, ourServer.getBaseUrl() + "/Patient/P1");
 	}
@@ -311,9 +312,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertType(auditEvent, "rest");
 		assertSubType(auditEvent, "delete");
 		assertEquals(AuditEvent.AuditEventAction.D, auditEvent.getAction());
-		assertHasSystemObjectEntities(auditEvent, patientId.getValue());
+		assertHasSystemObjectEntities(auditEvent, patientId.withVersion("1").getValue());
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
-		assertHasPatientEntities(auditEvent, patientId.getValue());
+		assertHasPatientEntities(auditEvent, patientId.withVersion("1").getValue());
 	}
 
 	@Test
@@ -873,7 +874,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_4_DOMAIN_RESOURCE))
 			.map(t -> t.getWhat().getReference())
 			.toList();
-		assertThat(Arrays.asList(theResourceIds).toString(), Arrays.asList(theResourceIds), containsInAnyOrder(systemObjects.toArray(EMPTY_STRING_ARRAY)));
+		assertThat(Arrays.asList(theResourceIds).toString(), systemObjects, containsInAnyOrder(theResourceIds));
 	}
 
 	private static void assertHasPatientEntities(AuditEvent theAuditEvent, String... theResourceIds) {

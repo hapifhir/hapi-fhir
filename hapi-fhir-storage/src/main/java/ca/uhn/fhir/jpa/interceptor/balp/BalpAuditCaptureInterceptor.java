@@ -35,20 +35,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class BalpAuditCaptureInterceptor {
 
-	public static final String CS_AUDIT_EVENT_TYPE = "http://terminology.hl7.org/CodeSystem/audit-event-type";
-	public static final String CS_AUDIT_ENTITY_TYPE = "http://terminology.hl7.org/CodeSystem/audit-entity-type";
-	public static final String CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT = "2";
-	public static final String CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY = "System Object";
-	public static final String CS_AUDIT_ENTITY_TYPE_1_PERSON = "1";
-	public static final String CS_AUDIT_ENTITY_TYPE_1_PERSON_DISPLAY = "Person";
-	public static final String CS_OBJECT_ROLE = "http://terminology.hl7.org/CodeSystem/object-role";
-	public static final String CS_OBJECT_ROLE_1_PATIENT = "1";
-	public static final String CS_OBJECT_ROLE_1_PATIENT_DISPLAY = "Patient";
-	public static final String CS_OBJECT_ROLE_4_DOMAIN_RESOURCE = "4";
-	public static final String CS_OBJECT_ROLE_4_DOMAIN_RESOURCE_DISPLAY = "Domain Resource";
-	public static final String CS_RESTFUL_INTERACTION = "http://hl7.org/fhir/restful-interaction";
-	public static final String CS_OBJECT_ROLE_24_QUERY = "24";
-	private static final String CS_OBJECT_ROLE_24_QUERY_DISPLAY = "Query";
 	private final IBalpAuditEventSink myAuditEventSink;
 	private final IBalpAuditContextServices myContextServices;
 	private Set<String> myAdditionalPatientCompartmentParamNames;
@@ -107,7 +93,7 @@ public class BalpAuditCaptureInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
-	public void hookStoragePrecommitResourceUpdated(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+	public void hookStoragePrecommitResourceUpdated(IBaseResource theOldResource, IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 		handleCreateUpdateDelete(theResource, theRequestDetails, BalpProfileEnum.BASIC_UPDATE, BalpProfileEnum.PATIENT_UPDATE);
 	}
 
@@ -240,14 +226,14 @@ public class BalpAuditCaptureInterceptor {
 		AuditEvent.AuditEventEntityComponent entityPatient = theAuditEvent.addEntity();
 		entityPatient
 			.getType()
-			.setSystem(CS_AUDIT_ENTITY_TYPE)
-			.setCode(CS_AUDIT_ENTITY_TYPE_1_PERSON)
-			.setDisplay(CS_AUDIT_ENTITY_TYPE_1_PERSON_DISPLAY);
+			.setSystem(BalpConstants.CS_AUDIT_ENTITY_TYPE)
+			.setCode(BalpConstants.CS_AUDIT_ENTITY_TYPE_1_PERSON)
+			.setDisplay(BalpConstants.CS_AUDIT_ENTITY_TYPE_1_PERSON_DISPLAY);
 		entityPatient
 			.getRole()
-			.setSystem(CS_OBJECT_ROLE)
-			.setCode(CS_OBJECT_ROLE_1_PATIENT)
-			.setDisplay(CS_OBJECT_ROLE_1_PATIENT_DISPLAY);
+			.setSystem(BalpConstants.CS_OBJECT_ROLE)
+			.setCode(BalpConstants.CS_OBJECT_ROLE_1_PATIENT)
+			.setDisplay(BalpConstants.CS_OBJECT_ROLE_1_PATIENT_DISPLAY);
 		entityPatient
 			.getWhat()
 			.setReference(thePatientId);
@@ -263,11 +249,11 @@ public class BalpAuditCaptureInterceptor {
 		AuditEvent auditEvent = new AuditEvent();
 		auditEvent.getMeta().addProfile(theProfile.getProfileUrl());
 		auditEvent.getType()
-			.setSystem(CS_AUDIT_EVENT_TYPE)
+			.setSystem(BalpConstants.CS_AUDIT_EVENT_TYPE)
 			.setCode("rest")
 			.setDisplay("Restful Operation");
 		auditEvent.addSubtype()
-			.setSystem(CS_RESTFUL_INTERACTION)
+			.setSystem(BalpConstants.CS_RESTFUL_INTERACTION)
 			.setCode(restOperationType.getCode())
 			.setDisplay(restOperationType.getCode());
 		auditEvent.setAction(theProfile.getAction());
@@ -283,23 +269,23 @@ public class BalpAuditCaptureInterceptor {
 		clientAgent.setWho(myContextServices.getAgentClientWho(theRequestDetails));
 		clientAgent
 			.getType()
-			.addCoding()
-			.setSystem("http://dicom.nema.org/resources/ontology/DCM")
-			.setCode("110152")
-			.setDisplay("Destination Role ID");
+			.addCoding(theProfile.getAgentClientTypeCoding());
+		clientAgent
+			.getWho()
+			.setDisplay(myContextServices.getNetworkAddress(theRequestDetails));
 		clientAgent
 			.getNetwork()
-			.setAddress(myContextServices.getNetworkAddress(theRequestDetails));
+			.setAddress(myContextServices.getNetworkAddress(theRequestDetails))
+			.setType(myContextServices.getNetworkAddressType(theRequestDetails));
 		clientAgent.setRequestor(false);
 
 		AuditEvent.AuditEventAgentComponent serverAgent = auditEvent.addAgent();
 		serverAgent
 			.getType()
-			.addCoding()
-			.setSystem("http://dicom.nema.org/resources/ontology/DCM")
-			.setCode("110153")
-			.setDisplay("Source Role ID");
-		serverAgent.getWho().setDisplay(theRequestDetails.getServerBaseForRequest());
+			.addCoding(theProfile.getAgentServerTypeCoding());
+		serverAgent
+			.getWho()
+			.setDisplay(theRequestDetails.getServerBaseForRequest());
 		serverAgent
 			.getNetwork()
 			.setAddress(theRequestDetails.getServerBaseForRequest());
@@ -335,14 +321,14 @@ public class BalpAuditCaptureInterceptor {
 		AuditEvent.AuditEventEntityComponent queryEntity = auditEvent.addEntity();
 		queryEntity
 			.getType()
-			.setSystem(CS_AUDIT_ENTITY_TYPE)
-			.setCode(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT)
-			.setDisplay(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY);
+			.setSystem(BalpConstants.CS_AUDIT_ENTITY_TYPE)
+			.setCode(BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT)
+			.setDisplay(BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY);
 		queryEntity
 			.getRole()
-			.setSystem(CS_OBJECT_ROLE)
-			.setCode(CS_OBJECT_ROLE_24_QUERY)
-			.setDisplay(CS_OBJECT_ROLE_24_QUERY_DISPLAY);
+			.setSystem(BalpConstants.CS_OBJECT_ROLE)
+			.setCode(BalpConstants.CS_OBJECT_ROLE_24_QUERY)
+			.setDisplay(BalpConstants.CS_OBJECT_ROLE_24_QUERY_DISPLAY);
 
 		// Description
 		StringBuilder description = new StringBuilder();
@@ -393,14 +379,14 @@ public class BalpAuditCaptureInterceptor {
 		AuditEvent.AuditEventEntityComponent entityData = theAuditEvent.addEntity();
 		entityData
 			.getType()
-			.setSystem(CS_AUDIT_ENTITY_TYPE)
-			.setCode(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT)
-			.setDisplay(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY);
+			.setSystem(BalpConstants.CS_AUDIT_ENTITY_TYPE)
+			.setCode(BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT)
+			.setDisplay(BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY);
 		entityData
 			.getRole()
-			.setSystem(CS_OBJECT_ROLE)
-			.setCode(CS_OBJECT_ROLE_4_DOMAIN_RESOURCE)
-			.setDisplay(CS_OBJECT_ROLE_4_DOMAIN_RESOURCE_DISPLAY);
+			.setSystem(BalpConstants.CS_OBJECT_ROLE)
+			.setCode(BalpConstants.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE)
+			.setDisplay(BalpConstants.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE_DISPLAY);
 		entityData
 			.getWhat()
 			.setReference(theDataResourceId);
