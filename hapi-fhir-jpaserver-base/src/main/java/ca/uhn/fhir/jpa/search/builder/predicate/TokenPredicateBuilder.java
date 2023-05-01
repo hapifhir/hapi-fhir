@@ -136,6 +136,10 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		TokenParamModifier modifier = null;
 		for (IQueryParameterType nextParameter : theParameters) {
 
+
+
+			
+
 			String code;
 			String system;
 			if (nextParameter instanceof TokenParam) {
