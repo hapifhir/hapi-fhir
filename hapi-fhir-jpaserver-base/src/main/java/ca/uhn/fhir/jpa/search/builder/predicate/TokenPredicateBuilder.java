@@ -138,8 +138,6 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 
 
-			
-
 			String code;
 			String system;
 			if (nextParameter instanceof TokenParam) {

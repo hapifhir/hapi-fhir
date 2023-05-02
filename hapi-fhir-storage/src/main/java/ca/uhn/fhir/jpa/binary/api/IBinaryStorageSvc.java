@@ -45,6 +45,10 @@ public interface IBinaryStorageSvc {
 		return true;//default method here as we don't want to break existing implementations
 	}
 
+	void breakTheApi() {
+		throw new UnsupportedOperationException("This method is here to break the API");
+	}
+
    /**
 	 * Sets the maximum number of bytes that can be stored in a single binary
 	 * file by this service. The default is {@link Long#MAX_VALUE}
