@@ -141,7 +141,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 		myFhirVersion = theFhirVersion;
 	}
 
-	// fixme rename
+	// wipmb forced_id rename
 	public String getForcedId() {
 		return myForcedPid;
 	}

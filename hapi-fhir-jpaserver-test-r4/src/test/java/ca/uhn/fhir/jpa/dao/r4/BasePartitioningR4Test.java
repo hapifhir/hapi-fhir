@@ -135,7 +135,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	protected void dropForcedIdUniqueConstraint() {
-		// fixme need to drop the constraint on forced_id and add it to hfj_resource in migrations
+		// wipmb forced_id need to drop the constraint on forced_id and add it to hfj_resource in migrations
 		runInTransaction(() -> {
 			myEntityManager.createNativeQuery("alter table " + ResourceTable.HFJ_RESOURCE + " drop constraint " + ResourceTable.IDX_FORCEDID_TYPE_FID).executeUpdate();
 		});

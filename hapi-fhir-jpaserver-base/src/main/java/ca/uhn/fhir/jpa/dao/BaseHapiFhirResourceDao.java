@@ -501,7 +501,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private void createForcedIdIfNeeded(ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds) {
-		// fixme how does this change?
+		// wipmb forced_id how does this change?
 		if (isNotBlank(theResourceId) && theEntity.getForcedId() == null) {
 			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theResourceId)) {
 				ForcedId forcedId = new ForcedId();
@@ -1390,7 +1390,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	// fixme remove 2nd param
+	// wipmb forced_id remove 2nd param
 	private BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest, RequestPartitionId requestPartitionId) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
@@ -1496,7 +1496,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (entity == null) {
 			throw new ResourceNotFoundException(Msg.code(1998) + theId);
 		}
-		// fixme used?
+		// wipmb forced_id used?
 		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
 		entity.setTransientForcedId(theId.getIdPart());
 		return entity;
@@ -2013,7 +2013,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return getContext().getResourceDefinition(resourceName);
 	}
 
-	// fixme delete?
+	// wipmb forced_id delete?
 	private void validateGivenIdIsAppropriateToRetrieveResource(IIdType theId, BaseHasResource entity) {
 		if (entity.getForcedId() != null) {
 			if (getStorageSettings().getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY) {

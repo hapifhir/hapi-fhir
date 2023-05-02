@@ -32,7 +32,7 @@ import java.util.List;
  * Don't change the name of this class.  Spring Data requires the name to match.
  * https://stackoverflow.com/questions/11880924/how-to-add-custom-method-to-spring-data-jpa
  *
- * fixme - rewrite the queries
+ * wipmb forced_id - rewrite the queries
  */
 public class IResourceTableDaoImpl implements IForcedIdQueries {
 

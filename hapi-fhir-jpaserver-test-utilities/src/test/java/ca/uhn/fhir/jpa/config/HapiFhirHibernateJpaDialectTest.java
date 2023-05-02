@@ -36,7 +36,7 @@ public class HapiFhirHibernateJpaDialectTest {
 		assertThat(outcome.getMessage(), containsString("this is a message"));
 
 		try {
-			// fixme verify
+			// wipmb forced_id verify
 			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_FORCEDID_TYPE_FID));
 			fail();
 		} catch (ResourceVersionConflictException e) {
@@ -68,7 +68,7 @@ public class HapiFhirHibernateJpaDialectTest {
 		assertEquals("FOO", outcome.getMessage());
 
 		try {
-			// fixme verify
+			// wipmb forced_id verify
 			PersistenceException exception = new PersistenceException("a message", new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_FORCEDID_TYPE_FID));
 			mySvc.translate(exception, "a message");
 			fail();

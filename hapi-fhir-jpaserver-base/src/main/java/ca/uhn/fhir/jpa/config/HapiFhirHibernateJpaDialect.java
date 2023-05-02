@@ -86,7 +86,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 				if (constraintName.contains(ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
 					throw new ResourceVersionConflictException(Msg.code(824) + messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceIndexedCompositeStringUniqueConstraintFailure"));
 				}
-				// fixme need new constraint on resource table - unique
+				// wipmb forced_id need new constraint on resource table - unique
 				if (constraintName.contains(ResourceTable.IDX_FORCEDID_TYPE_FID)) {
 					throw new ResourceVersionConflictException(Msg.code(825) + messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "forcedIdConstraintFailure"));
 				}

@@ -91,9 +91,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private static final long serialVersionUID = 1L;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
 	public static final String RES_TYPE = "RES_TYPE";
-	// fixme rename
+	// wipmb forced_id rename
 	public static final int MAX_FORCED_ID_LENGTH = ForcedId.MAX_FORCED_ID_LENGTH;
-	// fixme rename
+	// wipmb forced_id rename
 	public static final String IDX_FORCEDID_TYPE_FID = ForcedId.IDX_FORCEDID_TYPE_FID;
 
 	/**
@@ -826,7 +826,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private void populateId(IIdType retVal) {
 		if (myFhirId != null) {
 			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-			// fixme I think myFhirId is non-null, except maybe on create path.
+			// wipmb forced_id I think myFhirId is non-null, except maybe on create path.
 		} else if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
 			retVal.setValue(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());

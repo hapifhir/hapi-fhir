@@ -521,7 +521,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 //				assert isNotBlank(nextResourceType);
 //
-//				// fixme need test?
+//				// wipmb forced_id need test?
 //				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 //				CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
 //				Root<ResourceTable> from = criteriaQuery.from(ResourceTable.class);

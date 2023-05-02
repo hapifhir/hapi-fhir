@@ -72,7 +72,7 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	@Transient
 	private transient String myTransientForcedId;
 
-	// fixme - I think this is obsolete with the new column.
+	// wipmb forced_id - I think this is obsolete with the new column.
 	public String getTransientForcedId() {
 		return myTransientForcedId;
 	}
