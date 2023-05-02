@@ -21,9 +21,21 @@ package ca.uhn.fhir.jpa.embedded;
 
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.util.VersionEnum;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.nio.file.Files;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * For testing purposes.
@@ -34,7 +46,9 @@ import javax.sql.DataSource;
  */
 public abstract class JpaEmbeddedDatabase {
 
-	private DriverTypeEnum myDriverType;
+    private static final Logger ourLog = LoggerFactory.getLogger(JpaEmbeddedDatabase.class);
+
+    private DriverTypeEnum myDriverType;
 	private String myUsername;
 	private String myPassword;
 	private String myUrl;
@@ -42,6 +56,8 @@ public abstract class JpaEmbeddedDatabase {
 	private JdbcTemplate myJdbcTemplate;
 
 	public abstract void stop();
+    public abstract void disableConstraints();
+    public abstract void enableConstraints();
 	public abstract void clearDatabase();
 
 	public void initialize(DriverTypeEnum theDriverType, String theUrl, String theUsername, String thePassword){
@@ -77,4 +93,55 @@ public abstract class JpaEmbeddedDatabase {
 		return myConnectionProperties.getDataSource();
 	}
 
+    public void initializeDatabaseForVersion(VersionEnum theVersionEnum) {
+        String fileName = String.format("migration-data/releases/%s/init-scripts/%s.sql", theVersionEnum, getDriverType());
+        ourLog.info("Loading init script: {}", fileName);
+        String sql = getSqlFromResourceFile(fileName);
+        List<String> statements = Arrays.stream(sql.split(";")).collect(Collectors.toList());
+        executeSqlAsBatch(statements);
+    }
+
+    public void insertTestData(VersionEnum theVersionEnum) {
+        disableConstraints();
+        String fileName = String.format("migration-data/releases/%s/test-data/%s.sql", theVersionEnum, getDriverType());
+        ourLog.info("Loading test data: {}", fileName);
+        String sql = getSqlFromResourceFile(fileName);
+        executeSqlAsBatch(sql);
+        enableConstraints();
+    }
+
+    public String getSqlFromResourceFile(String theFileName) {
+        try {
+            File file = new File(this.getClass().getClassLoader().getResource(theFileName).toURI());
+            String sql = Files.readString(file.toPath());
+            return sql;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void executeSqlAsBatch(String theSql){
+        List<String> statements = Arrays.stream(theSql.split(";")).collect(Collectors.toList());
+        executeSqlAsBatch(statements);
+    }
+
+    public void executeSqlAsBatch(List<String> theStatements){
+        try {
+            Connection connection = getDataSource().getConnection();
+            Statement statement = connection.createStatement();
+            for (String sql : theStatements){
+                if (!StringUtils.isBlank(sql)){
+                    statement.addBatch(sql);
+                    ourLog.info("Added to batch: {}", sql);
+                }
+            }
+            statement.executeBatch();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Map<String, Object>> query(String theSql){
+        return getJdbcTemplate().queryForList(theSql);
+    }
 }

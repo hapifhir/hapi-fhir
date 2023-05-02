@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,25 +49,39 @@ public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 		myContainer.stop();
 	}
 
-	@Override
+    @Override
+    public void disableConstraints() {
+        getJdbcTemplate().execute("set session_replication_role to replica");
+    }
+
+    @Override
+    public void enableConstraints() {
+        getJdbcTemplate().execute("set session_replication_role to default");
+    }
+
+    @Override
 	public void clearDatabase() {
 		dropTables();
 		dropSequences();
 	}
 
 	private void dropTables() {
+        List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> tableResult = getJdbcTemplate().queryForList("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
 		for(Map<String, Object> result : tableResult){
 			String tableName = result.get("table_name").toString();
-			getJdbcTemplate().execute(String.format("DROP TABLE \"%s\" CASCADE", tableName));
+			sql.add(String.format("DROP TABLE \"%s\" CASCADE", tableName));
 		}
+        executeSqlAsBatch(sql);
 	}
 
 	private void dropSequences() {
+        List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> sequenceResult = getJdbcTemplate().queryForList("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public'");
 		for(Map<String, Object> sequence : sequenceResult){
 			String sequenceName = sequence.get("sequence_name").toString();
-			getJdbcTemplate().execute(String.format("DROP SEQUENCE \"%s\" CASCADE", sequenceName));
+			sql.add(String.format("DROP SEQUENCE \"%s\" CASCADE", sequenceName));
 		}
+        executeSqlAsBatch(sql);
 	}
 }
