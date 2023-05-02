@@ -61,7 +61,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -2428,13 +2427,14 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId) {
 		@SuppressWarnings("unchecked")
 		List<ResourceTable> resultList = (List<ResourceTable>) myEntityManager.createQuery(
-			"select f.myResource from ForcedId f " +
-				"where f.myResourceType = 'CodeSystem' and f.myForcedId = '" + theForcedId + "'").getResultList();
+			"select r from ResourceTable r " +
+				"where r.myResourceType = 'CodeSystem' and r.myFhirId = :fhirId")
+			.setParameter("fhirId", theForcedId).getResultList();
 		if (resultList.isEmpty()) return Optional.empty();
 
 		if (resultList.size() > 1)
 			throw new NonUniqueResultException(Msg.code(911) + "More than one CodeSystem is pointed by forcedId: " + theForcedId + ". Was constraint "
-				+ ForcedId.IDX_FORCEDID_TYPE_FID + " removed?");
+				+ ResourceTable.IDX_FORCEDID_TYPE_FID + " removed?");
 
 		IFhirResourceDao<CodeSystem> csDao = myDaoRegistry.getResourceDao("CodeSystem");
 		IBaseResource cs = myJpaStorageResourceParser.toResource(resultList.get(0), false);

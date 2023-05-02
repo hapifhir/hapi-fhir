@@ -418,8 +418,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
-	protected IForcedIdDao myForcedIdDao;
-	@Autowired
 	@Qualifier("myCoverageDaoR4")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
 	@Autowired

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -41,7 +41,7 @@ public class IdHelperServiceTest {
 	private JpaStorageSettings myStorageSettings;
 
 	@Mock
-	private IForcedIdDao myForcedIdDao;
+	private IResourceTableDao myResourceTableDao;
 
 	@Mock
 	private MemoryCacheService myMemoryCacheService;
@@ -100,7 +100,8 @@ public class IdHelperServiceTest {
 		// when
 		when(myStorageSettings.isDeleteEnabled())
 			.thenReturn(true);
-		when(myForcedIdDao.findAndResolveByForcedIdWithNoType(Mockito.anyString(),
+		// fixme - simplify?
+		when(myResourceTableDao.findAndResolveByForcedIdWithNoType(Mockito.anyString(),
 			Mockito.anyList(), Mockito.anyBoolean()))
 			.thenReturn(Collections.singletonList(redView))
 			.thenReturn(Collections.singletonList(blueView));
@@ -164,7 +165,7 @@ public class IdHelperServiceTest {
 
 		Collection<Object[]> testForcedIdViews = new ArrayList<>();
 		testForcedIdViews.add(forcedIdView);
-		when(myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean())).thenReturn(testForcedIdViews);
+		when(myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean())).thenReturn(testForcedIdViews);
 
 		IResourceLookup<JpaPid> result = myHelperService.resolveResourceIdentity(partitionId, resourceType, resourceForcedId);
 		assertEquals(forcedIdView[0], result.getResourceType());

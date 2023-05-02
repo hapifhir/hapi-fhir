@@ -25,7 +25,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
@@ -103,8 +102,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private IForcedIdDao myForcedIdDao;
 	@Autowired
 	private FhirContext myContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)

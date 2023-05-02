@@ -20,11 +20,11 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -60,11 +60,10 @@ import java.util.Date;
 	"               h.PARTITION_ID      as PARTITION_ID,   " +
 	"               p.SOURCE_URI        as PROV_SOURCE_URI," +
 	"               p.REQUEST_ID        as PROV_REQUEST_ID," +
-	"               f.forced_id         as FORCED_PID      " +
-	"FROM HFJ_RES_VER h "
-	+ "    LEFT OUTER JOIN HFJ_FORCED_ID f ON f.resource_pid = h.res_id "
-	+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid "
-	+ "    INNER JOIN HFJ_RESOURCE r       ON r.res_id = h.res_id and r.res_ver = h.res_ver")
+	"               r.fhir_id           as FORCED_PID      " +
+	"FROM HFJ_RESOURCE r "
+	+ "    INNER JOIN HFJ_RES_VER h ON r.res_id = h.res_id and r.res_ver = h.res_ver"
+	+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid ")
 public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -104,7 +103,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Column(name = "RES_ENCODING")
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
-	@Column(name = "FORCED_PID", length = ForcedId.MAX_FORCED_ID_LENGTH)
+	@Column(name = "FORCED_PID", length = ResourceTable.MAX_FORCED_ID_LENGTH)
 	private String myForcedPid;
 	@Column(name = "PARTITION_ID")
 	private Integer myPartitionId;
@@ -142,6 +141,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 		myFhirVersion = theFhirVersion;
 	}
 
+	// fixme rename
 	public String getForcedId() {
 		return myForcedPid;
 	}

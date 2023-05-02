@@ -72,6 +72,7 @@ public class ResourceVersionSvcTest {
 	 * to return empty lists (as if no resources were found).
 	 */
 	private void mock_resolveResourcePersistentIdsWithCache_toReturnNothing() {
+		// fixme need to patch this or delete this.  It doesn't look used.
 		CriteriaBuilder cb = Mockito.mock(CriteriaBuilder.class);
 		CriteriaQuery<ForcedId> criteriaQuery = Mockito.mock(CriteriaQuery.class);
 		Root<ForcedId> from = Mockito.mock(Root.class);

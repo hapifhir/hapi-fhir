@@ -30,14 +30,21 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Legacy forced_id implementation.
+ *
+ * @deprecated we now have a fhir_id column directly on HFJ_RESOURCE.
+ * To be deleted in 2024 (zero-downtime).
+ */
+@Deprecated(since = "6.7")
 @Repository
-public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
+public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository {
 
-	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid IN (:resource_pids)")
-	List<ForcedId> findAllByResourcePid(@Param("resource_pids") List<Long> theResourcePids);
-
-	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
-	Optional<ForcedId> findByResourcePid(@Param("resource_pid") Long theResourcePid);
+//	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid IN (:resource_pids)")
+//	List<ForcedId> findAllByResourcePid(@Param("resource_pids") List<Long> theResourcePids);
+//
+//	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
+//	Optional<ForcedId> findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
 	@Modifying
 	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")

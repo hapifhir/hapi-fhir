@@ -95,8 +95,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init620();
 		init640();
 		init660();
+		init680();
 	}
 
+	protected void init680() {
+		Builder version = forVersion(VersionEnum.V6_8_0);
+
+		// wipmb fill in missing fhir_id column.
+		// wipmb new fhir_id constraint on hfj_resource. Drop from forced_id.
+
+	}
 	protected void init660() {
 		Builder version = forVersion(VersionEnum.V6_6_0);
 

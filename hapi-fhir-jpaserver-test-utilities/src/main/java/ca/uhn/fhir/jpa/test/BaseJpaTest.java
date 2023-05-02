@@ -252,7 +252,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
-	private IForcedIdDao myForcedIdDao;
+	protected IForcedIdDao myForcedIdDao;
 	private List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {

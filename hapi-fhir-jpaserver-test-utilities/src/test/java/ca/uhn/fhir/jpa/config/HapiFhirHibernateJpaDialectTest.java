@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hibernate.HibernateException;
 import org.hibernate.PersistentObjectException;
@@ -36,7 +36,8 @@ public class HapiFhirHibernateJpaDialectTest {
 		assertThat(outcome.getMessage(), containsString("this is a message"));
 
 		try {
-			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ForcedId.IDX_FORCEDID_TYPE_FID));
+			// fixme verify
+			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_FORCEDID_TYPE_FID));
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("The operation has failed with a client-assigned ID constraint failure"));
@@ -67,7 +68,8 @@ public class HapiFhirHibernateJpaDialectTest {
 		assertEquals("FOO", outcome.getMessage());
 
 		try {
-			PersistenceException exception = new PersistenceException("a message", new ConstraintViolationException("this is a message", new SQLException("reason"), ForcedId.IDX_FORCEDID_TYPE_FID));
+			// fixme verify
+			PersistenceException exception = new PersistenceException("a message", new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_FORCEDID_TYPE_FID));
 			mySvc.translate(exception, "a message");
 			fail();
 		} catch (ResourceVersionConflictException e) {

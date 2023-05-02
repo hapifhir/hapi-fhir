@@ -63,6 +63,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -72,9 +73,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_FORCEDID_TYPE_FID;
+
 @Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
-@Table(name = ResourceTable.HFJ_RESOURCE, uniqueConstraints = {}, indexes = {
+@Table(name = ResourceTable.HFJ_RESOURCE, uniqueConstraints = {
+	@UniqueConstraint(name = IDX_FORCEDID_TYPE_FID, columnNames = {"RES_TYPE", "FHIR_ID"})
+}, indexes = {
 	// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
 	@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
 	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
@@ -86,6 +91,10 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private static final long serialVersionUID = 1L;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
 	public static final String RES_TYPE = "RES_TYPE";
+	// fixme rename
+	public static final int MAX_FORCED_ID_LENGTH = ForcedId.MAX_FORCED_ID_LENGTH;
+	// fixme rename
+	public static final String IDX_FORCEDID_TYPE_FID = ForcedId.IDX_FORCEDID_TYPE_FID;
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
@@ -817,15 +826,13 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private void populateId(IIdType retVal) {
 		if (myFhirId != null) {
 			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			// fixme I think myFhirId is non-null, except maybe on create path.
 		} else if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
 			retVal.setValue(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		} else if (getForcedId() == null) {
+		} else {
 			Long id = this.getResourceId();
 			retVal.setValue(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		} else {
-			String forcedId = getForcedId().getForcedId();
-			retVal.setValue(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		}
 	}
 
@@ -861,4 +868,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public void setFhirId(String theFhirId) {
 		myFhirId = theFhirId;
 	}
+
+	public String asTypedFhirResourceId() {
+		return getResourceType() + "/" + getFhirId();
+	}
+
 }

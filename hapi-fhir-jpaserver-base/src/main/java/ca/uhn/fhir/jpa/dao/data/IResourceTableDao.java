@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -36,7 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Transactional(propagation = Propagation.MANDATORY)
-public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, IHapiFhirJpaRepository {
+public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
 
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
 	Slice<Long> findIdsOfDeletedResources(Pageable thePageable);

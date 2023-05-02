@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -179,7 +180,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
 				"Patient", Arrays.asList(patientId)
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -187,7 +188,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoType(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoType(
 				"Patient", Arrays.asList(patientId), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -198,7 +199,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
 				"Patient", Arrays.asList(patientId)
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -206,7 +207,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoType(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoType(
 				"Patient", Arrays.asList(patientId), true
 			);
 			assertThat(forcedIds, hasSize(0));
@@ -221,7 +222,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
 				"Patient", Arrays.asList(patientId), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -229,7 +230,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
 				"Patient", Arrays.asList(patientId), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -240,7 +241,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
 				"Patient", Arrays.asList(patientId), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -248,7 +249,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
 				"Patient", Arrays.asList(patientId), true
 			);
 			assertEquals(0, forcedIds.size());
@@ -265,7 +266,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -273,7 +274,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -283,7 +284,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -291,7 +292,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), true
 			);
 			assertEquals(0, forcedIds.size());
@@ -308,7 +309,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -316,7 +317,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -326,7 +327,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
@@ -334,7 +335,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
 			);
 			assertEquals(0, forcedIds.size());

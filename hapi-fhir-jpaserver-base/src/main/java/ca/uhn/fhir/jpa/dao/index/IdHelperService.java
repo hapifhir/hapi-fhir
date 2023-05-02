@@ -25,13 +25,11 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -101,10 +99,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Service
 public class IdHelperService implements IIdHelperService<JpaPid> {
+	// wipmb how much of this can we drop entirely?
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	public static final String RESOURCE_PID = "RESOURCE_PID";
-	@Autowired
-	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
@@ -347,9 +344,10 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	private void doResolvePersistentIds(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, List<JpaPid> theOutputListToPopulate) {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
-		Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
+		Root<ResourceTable> from = criteriaQuery.from(ResourceTable.class);
 
 		/*
+		wipmb comment?
 		 * We don't currently have an index that satisfies these three columns, but the
 		 * index IDX_FORCEDID_TYPE_FID does include myResourceType and myForcedId
 		 * so we're at least minimizing the amount of data we fetch. A largescale test
@@ -357,11 +355,12 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		 * performant.
 		 */
 		criteriaQuery.multiselect(
-			from.get("myResourcePid").as(Long.class),
+			from.get("myId").as(Long.class),
 			from.get("myResourceType").as(String.class),
-			from.get("myForcedId").as(String.class)
+			from.get("myFhirId").as(String.class)
 		);
 
+		// one create one clause per id.
 		List<Predicate> predicates = new ArrayList<>(theIds.size());
 		for (IIdType next : theIds) {
 
@@ -372,12 +371,13 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				andPredicates.add(typeCriteria);
 			}
 
-			Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
+			Predicate idCriteria = cb.equal(from.get("myFhirId").as(String.class), next.getIdPart());
 			andPredicates.add(idCriteria);
 			getOptionalPartitionPredicate(theRequestPartitionId, cb, from).ifPresent(andPredicates::add);
 			predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
 		}
 
+		// join all the clauses as OR
 		criteriaQuery.where(cb.or(predicates.toArray(EMPTY_PREDICATE_ARRAY)));
 
 		TypedQuery<Tuple> query = myEntityManager.createQuery(criteriaQuery);
@@ -404,7 +404,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	 * 2. If it is default partition and default partition id is null, then return predicate for null partition.
 	 * 3. If the requested partition search is not all partition, return the request partition as predicate.
 	 */
-	private Optional<Predicate> getOptionalPartitionPredicate(RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ForcedId> from) {
+	private Optional<Predicate> getOptionalPartitionPredicate(RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ResourceTable> from) {
 		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
 			return Optional.empty();
 		} else if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
@@ -454,7 +454,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	@Override
 	public Optional<String> translatePidIdToForcedIdWithCache(JpaPid theId) {
-		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getId(), pid -> myForcedIdDao.findByResourcePid(pid).map(ForcedId::asTypedFhirResourceId));
+		// wipmb do we still need this?  Check up to see if callers already have it.
+		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getId(), pid -> myResourceTableDao.findById(pid).map(ResourceTable::asTypedFhirResourceId));
 	}
 
 	private ListMultimap<String, String> organizeIdsByResourceType(Collection<IIdType> theIds) {
@@ -516,18 +517,67 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			}
 
 			if (nextIds.size() > 0) {
+				// wipmb replace?
+
+//				assert isNotBlank(nextResourceType);
+//
+//				// fixme need test?
+//				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+//				CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
+//				Root<ResourceTable> from = criteriaQuery.from(ResourceTable.class);
+//				criteriaQuery.multiselect(
+//					from.get("myResourceType").as(String.class),
+//					from.get("myId").as(Long.class),
+//					from.get("myFhirId").as(String.class),
+//					from.get("myDeleted").as(Date.class)
+//				);
+//
+//				Predicate andPredicates = cb.and(
+//					cb.equal(from.get("myResourceType").as(String.class), nextResourceType),
+//				   cb.in(from.get("myFhirId").as(String.class)).in(nextIds));
+//
+//				if (theExcludeDeleted) {
+//					andPredicates = cb.and(andPredicates, cb.isNotNull(from.get("myDeleted").as(Date.class)));
+//				}
+
+//				if (!requestPartitionId.isAllPartitions()) {
+//					// restrict to partition
+//					Predicate partitionPredicate;
+//					if (requestPartitionId.isDefaultPartition()) {
+//						partitionPredicate = cb.isNull(from.get("myPartitionIdValue"));
+//					} else if (requestPartitionId.hasDefaultPartitionId()) {
+//						partitionPredicate = cb.or(
+//							cb.isNull(from.get("myPartitionIdValue")),
+//							cb.in(from.get("myPartitionIdValue").as(Integer.class)).in(requestPartitionId.getPartitionIdsWithoutDefault())
+//						);
+//					} else {
+//						partitionPredicate = cb.in(from.get("myPartitionIdValue").as(Integer.class)).in(requestPartitionId.getPartitionIdsWithoutDefault());
+//					}
+//					andPredicates = cb.and(andPredicates, partitionPredicate);
+//				}
+//
+//				TypedQuery<Tuple> query = myEntityManager.createQuery(criteriaQuery.where(andPredicates));
+//
+//				List<Tuple> views = query.getResultList();
+//
+//				for (Tuple next : views) {
+//					String resourceType = (String) next.get(0);
+//					Long resourcePid = (Long) next.get(1);
+//					String forcedId = (String) next.get(2);
+//					Date deletedAt = (Date) next.get(3);
+
 				Collection<Object[]> views;
 				assert isNotBlank(nextResourceType);
 
 				if (requestPartitionId.isAllPartitions()) {
-					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds, theExcludeDeleted);
+					views = myResourceTableDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds, theExcludeDeleted);
 				} else {
 					if (requestPartitionId.isDefaultPartition()) {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds, theExcludeDeleted);
+						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds, theExcludeDeleted);
 					} else if (requestPartitionId.hasDefaultPartitionId()) {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, requestPartitionId.getPartitionIdsWithoutDefault(), theExcludeDeleted);
+						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, requestPartitionId.getPartitionIdsWithoutDefault(), theExcludeDeleted);
 					} else {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, requestPartitionId.getPartitionIds(), theExcludeDeleted);
+						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, requestPartitionId.getPartitionIds(), theExcludeDeleted);
 					}
 				}
 
@@ -628,11 +678,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			.collect(Collectors.toList());
 
 		new QueryChunker<Long>().chunk(remainingPids, t -> {
-			List<ForcedId> forcedIds = myForcedIdDao.findAllByResourcePid(t);
+			List<ResourceTable> resourceEntities = myResourceTableDao.findAllById(t);
 
-			for (ForcedId forcedId : forcedIds) {
-				Long nextResourcePid = forcedId.getResourceId();
-				Optional<String> nextForcedId = Optional.of(forcedId.asTypedFhirResourceId());
+			for (ResourceTable nextResourceEntity : resourceEntities) {
+				Long nextResourcePid = nextResourceEntity.getId();
+				Optional<String> nextForcedId = Optional.of(nextResourceEntity.asTypedFhirResourceId());
 				retVal.put(nextResourcePid, nextForcedId);
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, nextForcedId);
 			}
