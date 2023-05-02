@@ -222,7 +222,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public ValidationResult validateCode(ValidationOptions theOptions, String code, ValueSet vs) {
-    ValidationOptions options = theOptions.guessSystem();
+    ValidationOptions options = theOptions.withGuessSystem();
     return validateCode(options, null, code, null, vs);
   }
 

@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.model.api;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import java.net.URI;
 
 import org.apache.commons.lang3.StringUtils;

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.LineIterator;
@@ -26,8 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -41,6 +45,7 @@ import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearc
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -687,14 +692,32 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, expectedContainedIds, Collections.emptyList());
 	}
 
-	private void verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
+	@Test
+	public void testSystemBulkExport() {
+		List<String> expectedIds = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			expectedIds.add(createPatient(withActiveTrue()).getValue());
+			expectedIds.add(createObservation(withStatus("final")).getValue());
+		}
+
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Set.of("Patient", "Observation"));
+		options.setFilters(Set.of("Patient?active=true", "Patient?active=false", "Observation?status=final"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
+		assertEquals(40, finalJobInstance.getCombinedRecordsProcessed());
+	}
+
+	private JobInstance verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 
 		assertNotNull(startResponse);
 		assertFalse(startResponse.isUsesCachedResult());
 
 		// Run a scheduled pass to build the export
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
+		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
 
 		await()
 			.atMost(200, TimeUnit.SECONDS)
@@ -737,6 +760,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				}
 
 			}
+
+			return jobInstance;
 		}
 
 		for (String containedString : theContainedList) {
@@ -745,7 +770,115 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		for (String excludedString : theExcludedList) {
 			assertThat("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds, foundIds, not(hasItem(excludedString)));
 		}
+		return jobInstance;
 	}
+
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_NoParams() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("foo");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: foo"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_NoParamsAfterQuestionMark() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Patient?");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: Patient?"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_InvalidResourceType() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Foo?active=true");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, unknown resource type: Foo"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_UnsupportedParam() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Observation?subject.identifier=blah");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Chained parameters are not supported"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_UnknownParam() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Observation?foo=blah");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString("Invalid post-fetch filter URL."));
+			assertThat(e.getMessage(), containsString("Resource type Observation does not have a parameter with name: foo"));
+
+		}
+	}
+
+	@Nonnull
+	private static BulkDataExportOptions createOptionsWithPostFetchFilterUrl(String postFetchUrl) {
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Set.of("Patient"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		options.setPostFetchFilterUrls(Set.of(postFetchUrl));
+		return options;
+	}
+
 
 	private static Stream<Set<String>> bulkExportOptionsResourceTypes() {
 		return Stream.of(Set.of("Patient", "Group"), Set.of("Patient", "Group", "Device"));

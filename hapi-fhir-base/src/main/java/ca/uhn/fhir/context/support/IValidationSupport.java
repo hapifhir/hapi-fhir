@@ -127,6 +127,16 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Load and return all possible search parameters
+	 *
+	 * @since 6.6.0
+	 */
+	@Nullable
+	default <T extends IBaseResource> List<T> fetchAllSearchParameters() {
+		return null;
+	}
+
+	/**
 	 * Load and return all possible structure definitions
 	 */
 	@Nullable

@@ -473,7 +473,6 @@ public class JsonParserR4Test extends BaseTest {
 
 	}
 
-
 	@Test
 	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions() {
 
@@ -485,14 +484,15 @@ public class JsonParserR4Test extends BaseTest {
 		child.setUrl("http://child");
 		child.setValue(new StringType("CHILD_VALUE"));
 
+		// According to issue4129, all error handlers should reject malformed resources
 		// Lenient error handler
 		IParser parser = ourCtx.newJsonParser();
-		String output = parser.encodeResourceToString(p);
-		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("http://root"));
-		assertThat(output, containsString("ROOT_VALUE"));
-		assertThat(output, containsString("http://child"));
-		assertThat(output, containsString("CHILD_VALUE"));
+		try {
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
+		}
 
 		// Strict error handler
 		try {
@@ -503,6 +503,30 @@ public class JsonParserR4Test extends BaseTest {
 			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
+	}
+
+	@Test
+	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions_withDisableAllErrorsShouldSucceed() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setUrl("http://root");
+		root.setValue(new StringType("ROOT_VALUE"));
+		Extension child = root.addExtension();
+		child.setUrl("http://child");
+		child.setValue(new StringType("CHILD_VALUE"));
+
+		// Lenient error handler - should parse successfully with no error
+		LenientErrorHandler errorHandler = new LenientErrorHandler(true).disableAllErrors();
+		IParser parser = ourCtx.newJsonParser().setParserErrorHandler(errorHandler);
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("http://root"));
+		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output, containsString("http://child"));
+		assertThat(output, containsString("CHILD_VALUE"));
+		assertEquals(false, errorHandler.isErrorOnInvalidExtension());
+		assertEquals(false, errorHandler.isErrorOnInvalidValue());
 	}
 
 	@Test

@@ -432,7 +432,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult result = val.validateWithResult(operationDefinition);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("This property must be an Array, not a Primitive property", all.get(0).getMessage());
+		assertEquals("The property resource  must be a JSON Array, not a Primitive property (at OperationDefinition)", all.get(0).getMessage());
 	}
 
 	@Test

@@ -109,6 +109,13 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		return loadFromCacheWithAsyncRefresh(myCache, key, t -> super.fetchAllStructureDefinitions());
 	}
 
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllSearchParameters() {
+		String key = "fetchAllSearchParameters";
+		return loadFromCacheWithAsyncRefresh(myCache, key, t -> super.fetchAllSearchParameters());
+	}
+
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
 		String key = "fetchAllNonBaseStructureDefinitions";

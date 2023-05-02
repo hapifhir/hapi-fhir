@@ -74,6 +74,10 @@ public class SubscriptionRegistry {
 		return myActiveSubscriptionCache.getAll();
 	}
 
+	public synchronized List<ActiveSubscription> getTopicSubscriptionsByTopic(String theTopic) {
+		return myActiveSubscriptionCache.getTopicSubscriptionsForTopic(theTopic);
+	}
+
 	private Optional<CanonicalSubscription> hasSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
@@ -208,5 +212,9 @@ public class SubscriptionRegistry {
 
 	public int size() {
 		return myActiveSubscriptionCache.size();
+	}
+
+	public synchronized List<ActiveSubscription> getAllNonTopicSubscriptions() {
+		return myActiveSubscriptionCache.getAllNonTopicSubscriptions();
 	}
 }

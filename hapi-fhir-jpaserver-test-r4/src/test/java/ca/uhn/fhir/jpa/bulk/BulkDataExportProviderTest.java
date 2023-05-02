@@ -67,6 +67,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -190,6 +191,7 @@ public class BulkDataExportProviderTest {
 		String patientResource = "Patient";
 		String practitionerResource = "Practitioner";
 		String filter = "Patient?identifier=foo";
+		String postFetchFilter = "Patient?_tag=foo";
 		when(myJobRunner.startNewJob(any()))
 			.thenReturn(createJobStartResponse());
 
@@ -200,6 +202,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType(patientResource + ", " + practitionerResource));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType(filter));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_POST_FETCH_FILTER_URL, new StringType(postFetchFilter));
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
@@ -234,8 +237,9 @@ public class BulkDataExportProviderTest {
 		assertTrue(params.getResourceTypes().contains(patientResource));
 		assertTrue(params.getResourceTypes().contains(practitionerResource));
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
-		assertNotNull(params.getStartDate());
+		assertNotNull(params.getSince());
 		assertTrue(params.getFilters().contains(filter));
+		assertThat(params.getPostFetchFilterUrls(), contains("Patient?_tag=foo"));
 	}
 
 	@Test
@@ -292,7 +296,7 @@ public class BulkDataExportProviderTest {
 		BulkExportParameters params = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertThat(params.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
-		assertThat(params.getStartDate(), notNullValue());
+		assertThat(params.getSince(), notNullValue());
 		assertThat(params.getFilters(), containsInAnyOrder("Patient?identifier=foo"));
 	}
 
@@ -321,7 +325,7 @@ public class BulkDataExportProviderTest {
 		BulkExportParameters params = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertThat(params.getResourceTypes(), containsInAnyOrder("Patient", "EpisodeOfCare"));
-		assertThat(params.getStartDate(), nullValue());
+		assertThat(params.getSince(), nullValue());
 		assertThat(params.getFilters(), containsInAnyOrder("Patient?_id=P999999990", "EpisodeOfCare?patient=P999999990"));
 	}
 
@@ -606,7 +610,7 @@ public class BulkDataExportProviderTest {
 
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes(), containsInAnyOrder("Observation", "DiagnosticReport"));
-		assertThat(bp.getStartDate(), notNullValue());
+		assertThat(bp.getSince(), notNullValue());
 		assertThat(bp.getFilters(), notNullValue());
 		assertEquals(GROUP_ID, bp.getGroupId());
 		assertThat(bp.isExpandMdm(), is(equalTo(true)));
@@ -641,7 +645,7 @@ public class BulkDataExportProviderTest {
 		BulkExportParameters bp = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
-		assertThat(bp.getStartDate(), notNullValue());
+		assertThat(bp.getSince(), notNullValue());
 		assertThat(bp.getFilters(), notNullValue());
 		assertEquals(GROUP_ID, bp.getGroupId());
 		assertThat(bp.isExpandMdm(), is(equalTo(true)));
@@ -816,7 +820,7 @@ public class BulkDataExportProviderTest {
 		BulkExportParameters bp = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes(), containsInAnyOrder("Immunization", "Observation"));
-		assertThat(bp.getStartDate(), notNullValue());
+		assertThat(bp.getSince(), notNullValue());
 		assertThat(bp.getFilters(), containsInAnyOrder("Immunization?vaccine-code=foo"));
 	}
 

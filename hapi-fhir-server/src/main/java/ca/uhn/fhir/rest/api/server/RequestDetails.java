@@ -91,7 +91,7 @@ public abstract class RequestDetails {
 	/**
 	 * Copy constructor
 	 */
-	public RequestDetails(ServletRequestDetails theRequestDetails) {
+	public RequestDetails(RequestDetails theRequestDetails) {
 		myInterceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 		myRequestStopwatch = theRequestDetails.getRequestStopwatch();
 		myTenantId = theRequestDetails.getTenantId();

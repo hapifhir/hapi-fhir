@@ -8,7 +8,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -16,6 +19,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,7 +179,46 @@ public class FhirPatchApplyR4Test {
 
 		svc.apply(patient, patch);
 
+		assertEquals(1, patient.getIdentifier().size());
+
 		assertEquals("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
+
+	}
+
+	@Test
+	public void testDeleteExtensionFromListByFilter() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addExtension().setUrl("url1")
+			.addExtension(new Extension().setUrl("text").setValue(new StringType("first text")))
+			.addExtension(new Extension().setUrl("code").setValue(new CodeableConcept().addCoding(new Coding("sys", "123", "Abc"))));
+		patient.addExtension().setUrl("url2")
+			.addExtension(new Extension().setUrl("code").setValue(new CodeableConcept().addCoding(new Coding("sys", "234", "Def"))))
+			.addExtension(new Extension().setUrl("detail").setValue(new IntegerType(5)));
+		patient.addExtension().setUrl("url3")
+			.addExtension(new Extension().setUrl("text").setValue(new StringType("third text")))
+			.addExtension(new Extension().setUrl("code").setValue(new CodeableConcept().addCoding(new Coding("sys", "345", "Ghi"))))
+			.addExtension(new Extension().setUrl("detail").setValue(new IntegerType(12)));
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("delete"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.extension.where(url = 'url2')"));
+
+		svc.apply(patient, patch);
+
+		assertEquals(2, patient.getExtension().size());
+
+		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"url1\",\"extension\":[{\"url\":\"text\",\"valueString\":\"first text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"123\",\"display\":\"Abc\"}]}}]},{\"url\":\"url3\",\"extension\":[{\"url\":\"text\",\"valueString\":\"third text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"345\",\"display\":\"Ghi\"}]}},{\"url\":\"detail\",\"valueInteger\":12}]}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
 
 	}
 
@@ -344,7 +387,7 @@ public class FhirPatchApplyR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		//Given: We create a patch request to add a new active statuts
+		//Given: We create a patch request to add a new active status
 		BooleanType theValue = new BooleanType(false);
 		Parameters patch = new Parameters();
 		patch.addParameter(createPatchAddOperation("Patient", "active", theValue));
@@ -353,6 +396,37 @@ public class FhirPatchApplyR4Test {
 		svc.apply(patient, patch);
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		//TODO THIS SHOULD THROW AN EXCEPTION. you cannot `add` to a field that is already set.
+	}
+
+	@Test
+	public void testAddExtensionWithChoiceType() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent addOperation = createPatchAddOperation("Patient", "extension", null);
+		addOperation
+			.addPart()
+			.setName("value")
+			.addPart(
+				new Parameters.ParametersParameterComponent()
+					.setName("url")
+					.setValue(new UriType("http://foo/fhir/extension/foo"))
+			)
+			.addPart(
+				new Parameters.ParametersParameterComponent()
+					.setName("value")
+					.setValue(new StringType("foo"))
+			);
+		patch.addParameter(addOperation);
+
+		svc.apply(patient, patch);
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it adds the new extension correctly.
+		assertThat(patient.getExtension(), hasSize(1));
+		assertThat(patient.getExtension().get(0).getUrl(), is(equalTo("http://foo/fhir/extension/foo")));
+		assertThat(patient.getExtension().get(0).getValueAsPrimitive().getValueAsString(), is(equalTo("foo")));
 	}
 
 	private Parameters.ParametersParameterComponent createPatchAddOperation(String thePath, String theName, Type theValue) {

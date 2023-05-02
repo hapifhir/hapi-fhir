@@ -96,9 +96,23 @@ public class FhirPatch {
 			Integer removeIndex = null;
 			Integer insertIndex = null;
 			if ("delete".equals(type)) {
-
-				doDelete(theResource, path);
-				return;
+				if (path.endsWith(")")) {
+					// This is probably a filter, so we're probably dealing with a list
+					int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
+					int lastDotIndex = path.lastIndexOf('.', filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
+					int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex-1);
+					containingPath = path.substring(0, secondLastDotIndex);
+					elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);
+				} else if (path.endsWith("]")) {
+					// This is almost definitely a list
+					int openBracketIndex = path.lastIndexOf('[');
+					int lastDotIndex = path.lastIndexOf('.', openBracketIndex);
+					containingPath = path.substring(0, lastDotIndex);
+					elementName = path.substring(lastDotIndex + 1, openBracketIndex);
+				} else {
+					doDelete(theResource, path);
+					continue;
+				}
 
 			} else if ("add".equals(type)) {
 
@@ -181,6 +195,17 @@ public class FhirPatch {
 					}
 
 					continue;
+				} else if ("delete".equals(type)) {
+					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
+					List<IBase> elementsToRemove = myContext.newFhirPath().evaluate(theResource, path, IBase.class);
+					existingValues.removeAll(elementsToRemove);
+
+					childDef.getMutator().setValue(next, null);
+					for (IBase nextNewValue : existingValues) {
+						childDef.getMutator().addValue(next, nextNewValue);
+					}
+
+					continue;
 				}
 
 				IBase newValue;
@@ -200,6 +225,10 @@ public class FhirPatch {
 								if (value.isPresent()) {
 
 									BaseRuntimeChildDefinition partChildDef = childElement.getChildByName(name);
+									if (partChildDef == null) {
+										name = name + "[x]";
+										partChildDef = childElement.getChildByName(name);
+									}
 									partChildDef.getMutator().addValue(newValue, value.get());
 
 								}

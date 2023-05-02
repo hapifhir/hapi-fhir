@@ -38,7 +38,7 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	/**
 	 * The earliest date from which to export resources.
 	 */
-	private Date myStartDate;
+	private Date mySince;
 
 	/**
 	 * Filters are used to narrow down the resources to export.
@@ -47,6 +47,11 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	 * "group=a" is a filter
 	 */
 	private List<String> myFilters;
+
+	/**
+	 * URLs to be applied by the inMemoryMatcher after the SQL select
+	 */
+	private List<String> myPostFetchFilterUrls;
 
 	/**
 	 * Export style - Patient, Group or Everything
@@ -80,6 +85,9 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	 * The request which originated the request.
 	 */
 	private String myOriginalRequestUrl;
+	private String myExportIdentifier;
+
+
 
 	/**
 	 * The partition for the request if applicable.
@@ -102,16 +110,23 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 		return myResourceTypes;
 	}
 
+	public void setExportIdentifier(String theExportIdentifier) {
+		myExportIdentifier = theExportIdentifier;
+	}
+	public String getExportIdentifier() {
+		return myExportIdentifier;
+	}
+
 	public void setResourceTypes(List<String> theResourceTypes) {
 		myResourceTypes = theResourceTypes;
 	}
 
-	public Date getStartDate() {
-		return myStartDate;
+	public Date getSince() {
+		return mySince;
 	}
 
-	public void setStartDate(Date theStartDate) {
-		myStartDate = theStartDate;
+	public void setSince(Date theSince) {
+		mySince = theSince;
 	}
 
 	public List<String> getFilters() {
@@ -123,6 +138,17 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 
 	public void setFilters(List<String> theFilters) {
 		myFilters = theFilters;
+	}
+
+	public List<String> getPostFetchFilterUrls() {
+		if (myPostFetchFilterUrls == null) {
+			myPostFetchFilterUrls = new ArrayList<>();
+		}
+		return myPostFetchFilterUrls;
+	}
+
+	public void setPostFetchFilterUrls(List<String> thePostFetchFilterUrls) {
+		myPostFetchFilterUrls = thePostFetchFilterUrls;
 	}
 
 	public BulkDataExportOptions.ExportStyle getExportStyle() {

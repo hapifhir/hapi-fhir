@@ -27,18 +27,21 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -46,10 +49,12 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 @Interceptor
@@ -67,6 +72,8 @@ public class SubscriptionValidatingInterceptor {
 	private FhirContext myFhirContext;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@Autowired
+	private SubscriptionQueryValidator mySubscriptionQueryValidator;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void resourcePreCreate(IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
@@ -139,16 +146,23 @@ public class SubscriptionValidatingInterceptor {
 
 		if (!finished) {
 
-			validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
+			if (subscription.isTopicSubscription()) {
+				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getTopic());
+				if (!oTopic.isPresent()) {
+					throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: " + subscription.getTopic());
+				}
+			} else {
+				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
 
-			if (subscription.getPayloadSearchCriteria() != null) {
-				validateQuery(subscription.getPayloadSearchCriteria(), "Subscription.extension(url='" + HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA + "')");
+				if (subscription.getPayloadSearchCriteria() != null) {
+					validateQuery(subscription.getPayloadSearchCriteria(), "Subscription.extension(url='" + HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA + "')");
+				}
 			}
 
 			validateChannelType(subscription);
 
 			try {
-				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription.getCriteriaString());
+				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription);
 				mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, strategy);
 			} catch (InvalidRequestException | DataFormatException e) {
 				throw new UnprocessableEntityException(Msg.code(9) + "Invalid subscription criteria submitted: " + subscription.getCriteriaString() + " " + e.getMessage());
@@ -204,39 +218,16 @@ public class SubscriptionValidatingInterceptor {
 	}
 
 	public void validateQuery(String theQuery, String theFieldName) {
-		if (isBlank(theQuery)) {
-			throw new UnprocessableEntityException(Msg.code(11) + theFieldName + " must be populated");
-		}
+		mySubscriptionQueryValidator.validateCriteria(theQuery, theFieldName);
+	}
 
-		SubscriptionCriteriaParser.SubscriptionCriteria parsedCriteria = SubscriptionCriteriaParser.parse(theQuery);
-		if (parsedCriteria == null) {
-			throw new UnprocessableEntityException(Msg.code(12) + theFieldName + " can not be parsed");
-		}
-
-		if (parsedCriteria.getType() == SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION) {
-			return;
-		}
-
-		for (String next : parsedCriteria.getApplicableResourceTypes()) {
-			if (!myDaoRegistry.isResourceTypeSupported(next)) {
-				throw new UnprocessableEntityException(Msg.code(13) + theFieldName + " contains invalid/unsupported resource type: " + next);
-			}
-		}
-
-		if (parsedCriteria.getType() != SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
-			return;
-		}
-
-		int sep = theQuery.indexOf('?');
-		if (sep <= 1) {
-			throw new UnprocessableEntityException(Msg.code(14) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
-		}
-
-		String resType = theQuery.substring(0, sep);
-		if (resType.contains("/")) {
-			throw new UnprocessableEntityException(Msg.code(15) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
-		}
-
+	private Optional<IBaseResource> findSubscriptionTopicByUrl(String theCriteria) {
+		myDaoRegistry.getResourceDao("SubscriptionTopic");
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(SubscriptionTopic.SP_URL, new UriParam(theCriteria));
+		IFhirResourceDao subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
+		IBundleProvider search = subscriptionTopicDao.search(map, new SystemRequestDetails());
+		return search.getResources(0, 1).stream().findFirst();
 	}
 
 	public void validateMessageSubscriptionEndpoint(String theEndpointUrl) {
@@ -310,6 +301,7 @@ public class SubscriptionValidatingInterceptor {
 	@SuppressWarnings("WeakerAccess")
 	public void setSubscriptionStrategyEvaluatorForUnitTest(SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
+		mySubscriptionQueryValidator = new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator);
 	}
 
 }

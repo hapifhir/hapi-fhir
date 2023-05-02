@@ -200,6 +200,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			return;
 		}
 		try {
+			ourLog.info("Maintenance pass starting.");
 			doMaintenancePass();
 		} catch (Exception e) {
 			ourLog.error("Maintenance pass failed", e);
@@ -221,7 +222,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 					myJobDefinitionRegistry.setJobDefinition(instance);
 					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
 						myBatchJobSender, instanceId, progressAccumulator, myReductionStepExecutorService, myJobDefinitionRegistry);
-					ourLog.debug("Triggering maintenance process for instance {} in status {}", instanceId, instance.getStatus().name());
+					ourLog.debug("Triggering maintenance process for instance {} in status {}", instanceId, instance.getStatus());
 					jobInstanceProcessor.process();
 				}
 			}

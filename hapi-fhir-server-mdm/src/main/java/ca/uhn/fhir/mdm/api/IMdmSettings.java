@@ -54,4 +54,12 @@ public interface IMdmSettings {
 	}
 
 	int getCandidateSearchLimit();
+
+	String getGoldenResourcePartitionName();
+
+	void setGoldenResourcePartitionName(String theGoldenResourcePartitionName);
+
+	boolean getSearchAllPartitionForMatch();
+
+	void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch);
 }

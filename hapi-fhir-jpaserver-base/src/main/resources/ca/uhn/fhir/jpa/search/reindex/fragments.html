@@ -1,0 +1,31 @@
+<div xmlns:th="http://www.thymeleaf.org">
+
+   <!--/*
+   Each index will be in a Patameters.part instance that looks like the following:
+
+   "part": [ {
+      "name": "uri",
+      "part": [ {
+         "name": "Action",
+         "valueCode": "ADD"
+      }, {
+         "name": "Type",
+         "valueCode": "Uri"
+      }, {
+         "name": "Value",
+         "valueUri": "http://some-codesystem"
+      }
+   ]
+
+   This fragment takes the containing part (via thePart) and the name of the
+   child part (via theName) and outputs the primitive value of the child part's
+   value object. So, given the example above, for name="Type" this would
+   output "Uri".
+   */-->
+   <th:block th:fragment="renderPart (thePart, theName)">
+      <th:block th:each="childPart : ${thePart.getPart()}">
+         <th:block th:if="${childPart.name == theName}" th:text="${childPart.value.getValueAsString()}"/>
+      </th:block>
+   </th:block>
+
+</div>

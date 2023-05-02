@@ -99,7 +99,7 @@ public class Batch2JobHelper {
 				.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
 			String currentStatus = myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
-			fail("Job still has status " + currentStatus + " - All statuses:\n" + statuses);
+			fail("Job " + theBatchJobId + " still has status " + currentStatus + " - All statuses:\n" + statuses);
 		}
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
@@ -131,7 +131,9 @@ public class Batch2JobHelper {
 	}
 
 	private boolean hasStatus(String theBatchJobId, StatusEnum[] theExpectedStatuses) {
-		return ArrayUtils.contains(theExpectedStatuses, getStatus(theBatchJobId));
+		StatusEnum status = getStatus(theBatchJobId);
+		ourLog.debug("Checking status of {} in {}: is {}", theBatchJobId, theExpectedStatuses, status);
+		return ArrayUtils.contains(theExpectedStatuses, status);
 	}
 
 	private StatusEnum getStatus(String theBatchJobId) {

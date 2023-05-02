@@ -19,11 +19,14 @@
  */
 package ca.uhn.hapi.converters.canonical;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.util.HapiExtensions;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_40;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_14_40;
@@ -41,10 +44,13 @@ import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.dstu2.model.Resource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -52,12 +58,17 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.model.CapabilityStatement;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StructureDefinition;
 
+import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -83,14 +94,16 @@ public class VersionCanonicalizer {
 	private static final BaseAdvisor_14_50 ADVISOR_14_50 = new BaseAdvisor_14_50(false);
 
 	private final IStrategy myStrategy;
+	private final FhirContext myContext;
 
-	public VersionCanonicalizer(FhirContext theTargetContext) {
-		this(theTargetContext.getVersion().getVersion());
+	public VersionCanonicalizer(FhirVersionEnum theTargetVersion) {
+		this(theTargetVersion.newContextCached());
 	}
 
-	@SuppressWarnings({"EnhancedSwitchMigration"})
-	public VersionCanonicalizer(FhirVersionEnum theTargetVersion) {
-		switch (theTargetVersion) {
+	public VersionCanonicalizer(FhirContext theTargetContext) {
+		myContext = theTargetContext;
+		FhirVersionEnum targetVersion = theTargetContext.getVersion().getVersion();
+		switch (targetVersion) {
 			case DSTU2:
 				myStrategy = new Dstu2Strategy(false);
 				break;
@@ -113,9 +126,11 @@ public class VersionCanonicalizer {
 				myStrategy = new R5Strategy();
 				break;
 			default:
-				throw new IllegalStateException(Msg.code(193) + "Can't handle version: " + theTargetVersion);
+				throw new IllegalStateException(Msg.code(193) + "Can't handle version: " + targetVersion);
 		}
 	}
+
+	@SuppressWarnings({"EnhancedSwitchMigration"})
 
 
 	/**
@@ -123,6 +138,13 @@ public class VersionCanonicalizer {
 	 */
 	public CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement) {
 		return myStrategy.capabilityStatementToCanonical(theCapabilityStatement);
+	}
+
+	/**
+	 * Canonical version: R5
+	 */
+	public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theCapabilityStatement) {
+		return myStrategy.capabilityStatementFromCanonical(theCapabilityStatement);
 	}
 
 	/**
@@ -176,8 +198,43 @@ public class VersionCanonicalizer {
 		return myStrategy.conceptMapToCanonical(theConceptMap);
 	}
 
+	/**
+	 * Canonical version: R5
+	 * <p>
+	 * Note that this method will look for any nonstandard resource types specified in
+	 * {@literal SearchParameter.base} or {@literal SearchParameter.target} and move them into
+	 * extensions with the URLs {@link HapiExtensions#EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE}
+	 * and {@link HapiExtensions#EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE} respectively. If any
+	 * nonstandard resource types are found, all resource types in the respective list are moved into
+	 * the extension (including standard types) and the source list is cleared.
+	 */
 	public <T extends IBaseResource> SearchParameter searchParameterToCanonical(T theSearchParameter) {
-		return myStrategy.searchParameterToCanonical(theSearchParameter);
+
+		/*
+		 * The R4 model allows custom types to be put into SearchParameter.base and
+		 * SearchParameter.target because those fields use a simple CodeType. But
+		 * in R5 it uses an Enumeration, so it's not actually possible to put custom
+		 * resource types into those fields. This means that the version converter fails
+		 * with an exception unless we remove those values from those fields before
+		 * conversion. However, we don't want to affect the state of the originally
+		 * passed in resource since that may affect other things. So, we clone
+		 * it first. This is a pain in the butt, but there doesn't seem to be any
+		 * better option.
+		 */
+		T input = myContext.newTerser().clone(theSearchParameter);
+
+		List<String> baseExtensionValues = extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(input, "base");
+		List<String> targetExtensionValues = extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(input, "target");
+
+		SearchParameter retVal = myStrategy.searchParameterToCanonical(input);
+
+		baseExtensionValues.forEach(t -> retVal.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE, new CodeType(t)));
+		targetExtensionValues.forEach(t -> retVal.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new CodeType(t)));
+		return retVal;
+	}
+
+	public IBaseResource searchParameterFromCanonical(SearchParameter theSearchParameter) {
+		return myStrategy.searchParameterFromCanonical(theSearchParameter);
 	}
 
 	public IBaseParameters parametersFromCanonical(Parameters theParameters) {
@@ -214,6 +271,28 @@ public class VersionCanonicalizer {
 		return myStrategy.codeSystemToValidatorCanonical(theResource);
 	}
 
+	@Nonnull
+	private List<String> extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(IBaseResource theSearchParameter, String theChildName) {
+
+		BaseRuntimeChildDefinition child = myContext.getResourceDefinition(theSearchParameter).getChildByName(theChildName);
+		List<IBase> baseList = child.getAccessor().getValues(theSearchParameter);
+
+		List<String> baseExtensionValues = baseList
+			.stream()
+			.filter(Objects::nonNull)
+			.filter(t -> t instanceof IPrimitiveType)
+			.map(t -> (IPrimitiveType<?>) t)
+			.map(IPrimitiveType::getValueAsString)
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toList());
+		if (baseExtensionValues.stream().allMatch(Enumerations.VersionIndependentResourceTypesAll::isValidCode)) {
+			baseExtensionValues.clear();
+		} else {
+			baseList.clear();
+		}
+		return baseExtensionValues;
+	}
+
 	private interface IStrategy {
 
 		CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement);
@@ -245,6 +324,10 @@ public class VersionCanonicalizer {
 		org.hl7.fhir.r5.model.ValueSet valueSetToValidatorCanonical(IBaseResource theResource);
 
 		org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource);
+
+		IBaseResource searchParameterFromCanonical(SearchParameter theResource);
+
+		IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource);
 	}
 
 	private static class Dstu2Strategy implements IStrategy {
@@ -272,7 +355,7 @@ public class VersionCanonicalizer {
 			retVal.setSystem(coding.getSystem());
 			retVal.setDisplay(coding.getDisplay());
 			retVal.setVersion(coding.getVersion());
-			retVal.setUserSelected( ! coding.getUserSelectedElement().isEmpty() && coding.getUserSelected() );
+			retVal.setUserSelected(!coding.getUserSelectedElement().isEmpty() && coding.getUserSelected());
 
 			return retVal;
 		}
@@ -374,7 +457,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource valueSetFromValidatorCanonical(org.hl7.fhir.r5.model.ValueSet theResource) {
 			Resource converted = VersionConvertorFactory_10_50.convertResource(theResource, ADVISOR_10_50);
-			return reencodeToHl7Org(converted);
+			return reencodeFromHl7Org(converted);
 		}
 
 		@Override
@@ -393,6 +476,18 @@ public class VersionCanonicalizer {
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theResource);
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
+		}
+
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			Resource resource = VersionConvertorFactory_10_50.convertResource(theResource, ADVISOR_10_50);
+			return reencodeFromHl7Org(resource);
+		}
+
+		@Override
+		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
+			Resource converted = VersionConvertorFactory_10_50.convertResource(theResource, ADVISOR_10_50);
+			return (IBaseConformance) reencodeToHl7Org(converted);
 		}
 
 		private Resource reencodeToHl7Org(IBaseResource theInput) {
@@ -487,6 +582,16 @@ public class VersionCanonicalizer {
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
 		}
+
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			return VersionConvertorFactory_14_50.convertResource(theResource, ADVISOR_14_50);
+		}
+
+		@Override
+		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
+			return (IBaseConformance) VersionConvertorFactory_14_50.convertResource(theResource, ADVISOR_14_50);
+		}
 	}
 
 	private static class Dstu3Strategy implements IStrategy {
@@ -565,6 +670,16 @@ public class VersionCanonicalizer {
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
 		}
+
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			return VersionConvertorFactory_30_50.convertResource(theResource, ADVISOR_30_50);
+		}
+
+		@Override
+		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
+			return (IBaseConformance) VersionConvertorFactory_30_50.convertResource(theResource, ADVISOR_30_50);
+		}
 	}
 
 	private static class R4Strategy implements IStrategy {
@@ -641,6 +756,16 @@ public class VersionCanonicalizer {
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
+		}
+
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			return VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
+		}
+
+		@Override
+		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
+			return (IBaseConformance) VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
 		}
 
 	}
@@ -729,8 +854,17 @@ public class VersionCanonicalizer {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
 		}
 
-	}
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			return VersionConvertorFactory_43_50.convertResource(theResource, ADVISOR_43_50);
+		}
 
+		@Override
+		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
+			return (IBaseConformance) VersionConvertorFactory_43_50.convertResource(theResource, ADVISOR_43_50);
+		}
+
+	}
 
 	private static class R5Strategy implements IStrategy {
 
@@ -807,6 +941,16 @@ public class VersionCanonicalizer {
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) theResource;
+		}
+
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			return theResource;
+		}
+
+		@Override
+		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
+			return theResource;
 		}
 
 	}

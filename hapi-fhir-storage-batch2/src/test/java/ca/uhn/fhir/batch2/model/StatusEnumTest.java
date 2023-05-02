@@ -14,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class StatusEnumTest {
 	@Test
 	public void testEndedStatuses() {
-		assertThat(StatusEnum.getEndedStatuses(), containsInAnyOrder(StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.CANCELLED, StatusEnum.ERRORED));
+		assertThat(StatusEnum.getEndedStatuses(), containsInAnyOrder(StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.CANCELLED));
 	}
 	@Test
 	public void testNotEndedStatuses() {
-		assertThat(StatusEnum.getNotEndedStatuses(), containsInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.FINALIZE));
+		assertThat(StatusEnum.getNotEndedStatuses(), containsInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.ERRORED, StatusEnum.FINALIZE));
 	}
 
 	@ParameterizedTest
@@ -39,7 +39,7 @@ class StatusEnumTest {
 
 		"COMPLETED, QUEUED, false",
 		"COMPLETED, IN_PROGRESS, false",
-		"COMPLETED, COMPLETED, true",
+		"COMPLETED, COMPLETED, false",
 		"COMPLETED, CANCELLED, false",
 		"COMPLETED, ERRORED, false",
 		"COMPLETED, FAILED, false",
@@ -47,12 +47,12 @@ class StatusEnumTest {
 		"CANCELLED, QUEUED, false",
 		"CANCELLED, IN_PROGRESS, false",
 		"CANCELLED, COMPLETED, false",
-		"CANCELLED, CANCELLED, true",
+		"CANCELLED, CANCELLED, false",
 		"CANCELLED, ERRORED, false",
 		"CANCELLED, FAILED, false",
 
 		"ERRORED, QUEUED, false",
-		"ERRORED, IN_PROGRESS, false",
+		"ERRORED, IN_PROGRESS, true",
 		"ERRORED, COMPLETED, true",
 		"ERRORED, CANCELLED, true",
 		"ERRORED, ERRORED, true",
@@ -84,8 +84,7 @@ class StatusEnumTest {
 	@ParameterizedTest
 	@EnumSource(StatusEnum.class)
 	public void testCancellableStates(StatusEnum theState) {
-		assertEquals(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState), theState.isCancellable()
-			|| theState == StatusEnum.CANCELLED); // hack: isLegalStateTransition() always returns true for self-transition
+		assertEquals(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState), theState.isCancellable());
 	}
 
 	@Test

@@ -110,7 +110,7 @@ public class TolerantJsonParser extends JsonParser {
 	}
 
 	public static TolerantJsonParser createWithLenientErrorHandling(FhirContext theContext, @Nullable Long theResourcePid) {
-		LenientErrorHandler errorHandler = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
+		LenientErrorHandler errorHandler = new LenientErrorHandler(false).disableAllErrors();
 		return new TolerantJsonParser(theContext, errorHandler, theResourcePid);
 	}
 }

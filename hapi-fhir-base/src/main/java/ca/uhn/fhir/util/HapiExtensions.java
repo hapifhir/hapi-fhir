@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.util;
 
+import java.util.Set;
+
 public class HapiExtensions {
 
 	/**
@@ -154,6 +156,9 @@ public class HapiExtensions {
 	 * HAPI FHIR documentation for an explanation of how these work.
 	 */
 	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME = "element-name";
+
+	public static final String EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE = "http://hl7.org/fhir/tools/CustomBaseResource";
+	public static final String EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE = "http://hl7.org/fhir/tools/CustomTargetResource";
 
 	/**
 	 * Non instantiable

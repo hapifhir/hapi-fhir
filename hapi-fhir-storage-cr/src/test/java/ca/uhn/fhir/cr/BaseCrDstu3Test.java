@@ -55,14 +55,6 @@ public abstract class BaseCrDstu3Test extends BaseJpaDstu3Test implements IResou
 		return ourFhirContext;
 	}
 
-	public Bundle loadBundle(String theLocation) {
-		return loadBundle(Bundle.class, theLocation);
-	}
-
-	public IParser getFhirParser() {
-		return ourParser;
-	}
-
 	public StubServiceBuilder mockNotFound(String theResource) {
 		OperationOutcome outcome = new OperationOutcome();
 		outcome.getText().setStatusAsString("generated");
@@ -106,10 +98,6 @@ public abstract class BaseCrDstu3Test extends BaseJpaDstu3Test implements IResou
 			.willReturn(success());
 	}
 
-	public Bundle makeBundle(List<? extends Resource> theResources) {
-		return makeBundle(theResources.toArray(new Resource[theResources.size()]));
-	}
-
 	public Bundle makeBundle(Resource... theResources) {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.SEARCHSET);
@@ -120,5 +108,9 @@ public abstract class BaseCrDstu3Test extends BaseJpaDstu3Test implements IResou
 			}
 		}
 		return bundle;
+	}
+
+	public Bundle loadBundle(String theLocation) {
+		return loadBundle(Bundle.class, theLocation);
 	}
 }
