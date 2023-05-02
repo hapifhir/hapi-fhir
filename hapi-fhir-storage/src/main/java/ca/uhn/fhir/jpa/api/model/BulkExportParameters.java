@@ -38,7 +38,7 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	/**
 	 * The earliest date from which to export resources.
 	 */
-	private Date myStartDate;
+	private Date mySince;
 
 	/**
 	 * Filters are used to narrow down the resources to export.
@@ -121,12 +121,12 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 		myResourceTypes = theResourceTypes;
 	}
 
-	public Date getStartDate() {
-		return myStartDate;
+	public Date getSince() {
+		return mySince;
 	}
 
-	public void setStartDate(Date theStartDate) {
-		myStartDate = theStartDate;
+	public void setSince(Date theSince) {
+		mySince = theSince;
 	}
 
 	public List<String> getFilters() {

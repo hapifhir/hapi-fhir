@@ -53,7 +53,6 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -320,16 +319,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return statusesForStep.isEmpty() || statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
 	}
 
-	/**
-	 * Note: Not @Transactional because {@link #fetchChunks(String, boolean, int, int, Consumer)} starts a transaction
-	 */
-	@Override
-	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
-		ArrayList<WorkChunk> chunks = new ArrayList<>();
-		fetchChunks(theInstanceId, false, thePageSize, thePageIndex, chunks::add);
-		return chunks;
-	}
-
 	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
 		myTransactionService
 			.withSystemRequest()
@@ -375,7 +364,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional
 	public boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier) {
 		Batch2JobInstanceEntity instanceEntity = myEntityManager.find(Batch2JobInstanceEntity.class, theInstanceId, LockModeType.PESSIMISTIC_WRITE);
 		if (null == instanceEntity) {
@@ -408,29 +396,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId) {
 		ourLog.info("Deleting all chunks for instance ID: {}", theInstanceId);
-		myJobInstanceRepository.updateWorkChunksPurgedTrue(theInstanceId);
-		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
+		int updateCount = myJobInstanceRepository.updateWorkChunksPurgedTrue(theInstanceId);
+		int deleteCount = myWorkChunkRepository.deleteAllForInstance(theInstanceId);
+		ourLog.debug("Purged {} chunks, and updated {} instance.", deleteCount, updateCount);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean markInstanceAsCompleted(String theInstanceId) {
-		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
-		return recordsChanged > 0;
-	}
-
-	@Override
-	public boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
-		int recordsChanged =	myTransactionService
-			.withSystemRequest()
-			.execute(()->myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum));
-		return recordsChanged > 0;
-	}
-
-	@Override
-	public boolean markInstanceAsStatusWhenStatusIn(String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates) {
-		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum);
-		ourLog.debug("Update job {} to status {} if in status {}: {}", theInstance, theStatusEnum, thePriorStates, recordsChanged>0);
+	public boolean markInstanceAsStatusWhenStatusIn(String theInstanceId, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates) {
+		int recordsChanged = myJobInstanceRepository.updateInstanceStatusIfIn(theInstanceId, theStatusEnum, thePriorStates);
+		ourLog.debug("Update job {} to status {} if in status {}: {}", theInstanceId, theStatusEnum, thePriorStates, recordsChanged>0);
 		return recordsChanged > 0;
 	}
 
@@ -440,7 +414,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
 		String operationString = "Cancel job instance " + theInstanceId;
 
-		// TODO MB this is much too detailed to be down here - this should be up at the api layer.  Replace with simple enum.
+		// wipmb For 6.8 - This is too detailed to be down here - this should be up at the api layer.
+		// Replace with boolean result or ResourceNotFound exception.  Build the message up at the ui.
 		String messagePrefix = "Job instance <" + theInstanceId + ">";
 		if (recordsChanged > 0) {
 			return JobOperationResultJson.newSuccess(operationString, messagePrefix + " successfully cancelled.");

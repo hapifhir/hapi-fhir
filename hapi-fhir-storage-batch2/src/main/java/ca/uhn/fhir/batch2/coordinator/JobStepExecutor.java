@@ -86,6 +86,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			});
 		}
 
+		// This flag could be stale, but checking for fast-track is a safe operation.
 		if (myInstance.isFastTracking()) {
 			handleFastTracking(stepExecutorOutput.getDataSink());
 		}
@@ -94,6 +95,8 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private void handleFastTracking(BaseDataSink<PT, IT, OT> theDataSink) {
 		if (theDataSink.getWorkChunkCount() <= 1) {
 			ourLog.debug("Gated job {} step {} produced exactly one chunk:  Triggering a maintenance pass.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId());
+			// wipmb 6.8 either delete fast-tracking, or narrow this call to just this instance and step
+			// This runs full maintenance for EVERY job as each chunk completes in a fast tracked job.  That's a LOT of work.
 			boolean success = myJobMaintenanceService.triggerMaintenancePass();
 			if (!success) {
 				myJobPersistence.updateInstance(myInstance.getInstanceId(), instance-> {

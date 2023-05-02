@@ -78,7 +78,7 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 
 	@Modifying
 	@Query("DELETE FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId")
-	void deleteAllForInstance(@Param("instanceId") String theInstanceId);
+	int deleteAllForInstance(@Param("instanceId") String theInstanceId);
 
 	@Query("SELECT e.myId from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus = :status")
 	List<String> fetchAllChunkIdsForStepWithStatus(@Param("instanceId")String theInstanceId, @Param("stepId")String theStepId, @Param("status") WorkChunkStatusEnum theStatus);

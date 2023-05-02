@@ -165,7 +165,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		preFetchConditionalUrls(theTransactionDetails, theEntries, theVersionAdapter, theRequestPartitionId, idsToPreFetch);
 
 		IFhirSystemDao<?, ?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
-		systemDao.preFetchResources(JpaPid.fromLongList(idsToPreFetch));
+		systemDao.preFetchResources(JpaPid.fromLongList(idsToPreFetch), true);
 	}
 
 	private void preFetchResourcesById(TransactionDetails theTransactionDetails, List<IBase> theEntries, ITransactionProcessorVersionAdapter theVersionAdapter, RequestPartitionId theRequestPartitionId, Set<String> foundIds, List<Long> idsToPreFetch) {

@@ -239,6 +239,7 @@ public class BulkDataImportProvider {
 				streamOperationOutcomeResponse(response, msg, "information");
 				break;
 			}
+			case ERRORED:
 			case IN_PROGRESS: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 				String msg = "Job was created at " + renderTime(instance.getCreateTime()) +
@@ -258,8 +259,7 @@ public class BulkDataImportProvider {
 				streamOperationOutcomeResponse(response, msg, "information");
 				break;
 			}
-			case FAILED:
-			case ERRORED: {
+			case FAILED: {
 				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
 				String msg = "Job is in " + instance.getStatus() + " state with " +
 					instance.getErrorCount() + " error count. Last error: " + instance.getErrorMessage();

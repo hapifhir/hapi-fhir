@@ -52,15 +52,12 @@ public class JobInstanceProgressCalculator {
 		myJobPersistence.updateInstance(theInstanceId, currentInstance->{
 			instanceProgress.updateInstance(currentInstance);
 
-			if (instanceProgress.changed() || currentInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-				if (currentInstance.getCombinedRecordsProcessed() > 0) {
-					ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed(), currentInstance.getCombinedRecordsProcessedPerSecond(), currentInstance.getEstimatedTimeRemaining());
-				} else {
-					ourLog.info("Job {} of type {} has status {} - {} records processed", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed());
-				}
-				ourLog.debug(instanceProgress.toString());
+			if (currentInstance.getCombinedRecordsProcessed() > 0) {
+				ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed(), currentInstance.getCombinedRecordsProcessedPerSecond(), currentInstance.getEstimatedTimeRemaining());
+			} else {
+				ourLog.info("Job {} of type {} has status {} - {} records processed", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed());
 			}
-
+			ourLog.debug(instanceProgress.toString());
 
 			if (instanceProgress.hasNewStatus()) {
 				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
@@ -84,6 +81,7 @@ public class JobInstanceProgressCalculator {
 			instanceProgress.addChunk(next);
 		}
 
+		// wipmb separate status update from stats collection in 6.8
 		instanceProgress.calculateNewStatus();
 
 		return instanceProgress;

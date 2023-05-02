@@ -105,7 +105,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	}
 
 	/**
-	 * Projection constructor for no-date path.
+	 * Projection constructor for no-data path.
 	 */
 	public Batch2WorkChunkEntity(String theId, int theSequence, String theJobDefinitionId, int theJobDefinitionVersion,
 										  String theInstanceId, String theTargetStepId, WorkChunkStatusEnum theStatus,

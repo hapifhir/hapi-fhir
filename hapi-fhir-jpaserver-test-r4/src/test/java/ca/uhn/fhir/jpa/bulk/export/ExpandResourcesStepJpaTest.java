@@ -63,8 +63,8 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 			.boxed()
 			.map(t -> {
 				Patient p = new Patient();
-				p.getMeta().addTag().setSystem("http://static").setCode("tag");
-				p.getMeta().addTag().setSystem("http://dynamic").setCode("tag" + t);
+				p.getMeta().addTag().setSystem("http://static").setCode("tag").setUserSelected(true).setVersion("1");
+				p.getMeta().addTag().setSystem("http://dynamic").setCode("tag" + t).setUserSelected(true).setVersion("1");
 				return myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 			}).toList();
 		assertEquals(count, ids.size());
@@ -89,10 +89,8 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		verify(mySink, times(1)).accept(myWorkChunkCaptor.capture());
 		ExpandedResourcesList expandedResourceList = myWorkChunkCaptor.getValue();
 		assertEquals(10, expandedResourceList.getStringifiedResources().size());
-		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://static\",\"code\":\"tag\"}"));
-		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://dynamic\",\"code\":\"tag0\"}"));
-		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://static\",\"code\":\"tag\"}"));
-		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://dynamic\",\"code\":\"tag1\"}"));
+		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
+		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
 
 		// Verify query counts
 		assertEquals(theExpectedSelectQueries, myCaptureQueriesListener.countSelectQueries());
