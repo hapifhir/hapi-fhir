@@ -3,10 +3,15 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -27,6 +32,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -174,6 +180,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -335,6 +342,92 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(output, containsString("Unknown search parameter &quot;a&quot;"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
+	}
+
+	@Test
+	public void testSearchResourcesOnProfile_whenProfileIsMissing_returnsResourcesWithMissingProfile(){
+		// given
+		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.addBase("Organization");
+		searchParameter.setCode("_profile");
+		searchParameter.setType(Enumerations.SearchParamType.URI);
+		searchParameter.setExpression("meta.profile");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
+		searchParameterDao.create(searchParameter, (RequestDetails) null);
+
+		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
+		Organization organizationWithNoProfile = new Organization();
+		organizationWithNoProfile.setName("noProfile");
+		organizationDao.create(organizationWithNoProfile);
+
+		Organization organizationWithProfile = new Organization();
+		organizationWithProfile.setName("withProfile");
+		organizationWithProfile.getMeta().addProfile("http://foo");
+		organizationDao.create(organizationWithProfile);
+
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamUri> matched = myResourceIndexedSearchParamUriDao.findAll().stream()
+				.filter(theRow -> theRow.getResourceType().equals("Organization"))
+				.filter(theRow -> theRow.getParamName().equals("_profile"))
+				.collect(Collectors.toList());
+
+			assertThat(matched, equalTo(2l));
+		});
+
+		// when
+		runInTransaction(() -> {
+			long matched = myResourceIndexedSearchParamUriDao.findAll().stream()
+				.filter(theRow -> theRow.getResourceType().equals("Organization"))
+				.filter(theRow -> theRow.getParamName().equals("_profile"))
+				.filter(theRow -> theRow.isMissing() == true)
+				.count();
+
+			// then
+			assertThat(matched, equalTo(1l));
+		});
+
+	}
+
+	@Test  // this test can be removed when the one above will be well understood
+	public void testSearchResourcesOnProfile_whenProfileIsMissing_returnsResourcesWithMissingProfile2(){
+		// given
+		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.addBase("Organization");
+		searchParameter.setCode("_profile");
+		searchParameter.setType(Enumerations.SearchParamType.URI);
+		searchParameter.setExpression("meta.profile");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myClient.create().resource(searchParameter).execute();
+
+		mySearchParamRegistry.forceRefresh();
+
+		Organization organizationWithNoProfile = new Organization();
+		organizationWithNoProfile.setName("noProfile");
+		myClient.create().resource(organizationWithNoProfile).execute().getId();
+
+		Organization organizationWithProfile = new Organization();
+		organizationWithProfile.setName("withProfile");
+		organizationWithProfile.getMeta().addProfile("http://foo");
+		String expectedOrganizationId = myClient.create().resource(organizationWithProfile).execute().getId().getIdPart();
+
+		String searchOrganizationWithMissingProfile = "Organization?_profile:missing=true";
+
+		// when
+		Bundle withMissingProfileBundle = myClient.search().byUrl(searchOrganizationWithMissingProfile).returnBundle(Bundle.class).execute();
+
+		// then
+		assertThat(withMissingProfileBundle.getEntry(), hasSize(1));
+
+		String returnedOrganizationId = withMissingProfileBundle.getEntry().get(0).getResource().getIdElement().getIdPart();
+		assertThat(expectedOrganizationId, equalTo(returnedOrganizationId));
 	}
 
 	@Test
