@@ -42,7 +42,7 @@ public @interface Interceptor {
 
 	/**
 	 * The order that interceptors should be called in. Lower numbers happen before higher numbers. Default is 0
-	 * and allowable values can be positive or negative or 0.
+	 * and allowable values can be positive or negative or 0. Ignored when annotation is set on a method.
 	 */
 	int order() default DEFAULT_ORDER;
 }
