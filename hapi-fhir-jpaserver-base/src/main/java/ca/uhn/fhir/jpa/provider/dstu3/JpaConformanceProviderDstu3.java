@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.provider.dstu3;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -59,7 +58,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider {
 
 	private volatile CapabilityStatement myCachedValue;
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private ISearchParamRegistry mySearchParamRegistry;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
@@ -81,11 +80,11 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu3(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
+	public JpaConformanceProviderDstu3(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, JpaStorageSettings theStorageSettings, ISearchParamRegistry theSearchParamRegistry) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 		myServerConfiguration = theRestfulServer.createConfiguration();
 		super.setCache(false);
 		setSearchParamRegistry(theSearchParamRegistry);
@@ -114,7 +113,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 				nextResource.setVersioning(ResourceVersionPolicy.VERSIONEDUPDATE);
 
 				ConditionalDeleteStatus conditionalDelete = nextResource.getConditionalDelete();
-				if (conditionalDelete == ConditionalDeleteStatus.MULTIPLE && myDaoConfig.isAllowMultipleDelete() == false) {
+				if (conditionalDelete == ConditionalDeleteStatus.MULTIPLE && myStorageSettings.isAllowMultipleDelete() == false) {
 					nextResource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
 				}
 
@@ -172,11 +171,11 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 		massage(retVal);
 
-		if (myDaoConfig.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myDaoConfig.getWebsocketContextPath())) {
+		if (myStorageSettings.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
+			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
 				Extension websocketExtension = new Extension();
 				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new UriType(myDaoConfig.getWebsocketContextPath()));
+				websocketExtension.setValue(new UriType(myStorageSettings.getWebsocketContextPath()));
 				retVal.getRestFirstRep().addExtension(websocketExtension);
 			}
 		}
@@ -218,7 +217,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 	protected boolean searchParamEnabled(String theSearchParam) {
 		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
-		return !Constants.PARAM_FILTER.equals(theSearchParam) || myDaoConfig.isFilterParameterEnabled();
+		return !Constants.PARAM_FILTER.equals(theSearchParam) || myStorageSettings.isFilterParameterEnabled();
 	}
 
 
@@ -275,8 +274,8 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		// nothing
 	}
 
-	public void setDaoConfig(DaoConfig myDaoConfig) {
-		this.myDaoConfig = myDaoConfig;
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		this.myStorageSettings = theStorageSettings;
 	}
 
 	@CoverageIgnore

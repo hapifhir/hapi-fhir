@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.context.phonetic.ApacheEncoder;
 import ca.uhn.fhir.context.phonetic.NumericEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
@@ -54,9 +54,9 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setFetchSizeDefaultMaximum(new JpaStorageSettings().getFetchSizeDefaultMaximum());
 
 		createPhoneticSearchParameter(NAME_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX, "Patient.name");
 		createPhoneticSearchParameter(ADDRESS_LINE_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX, "Patient.address.line");

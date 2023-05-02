@@ -51,6 +51,12 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 		return myWrap.fetchAllStructureDefinitions();
 	}
 
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllSearchParameters() {
+		return myWrap.fetchAllSearchParameters();
+	}
+
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		return myWrap.fetchResource(theClass, theUri);

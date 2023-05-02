@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
@@ -25,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,15 +40,15 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 
-		myModelConfig.setIndexIdentifierOfType(new ModelConfig().isIndexIdentifierOfType());
+		myStorageSettings.setIndexIdentifierOfType(new JpaStorageSettings().isIndexIdentifierOfType());
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
@@ -61,14 +59,14 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test
@@ -222,7 +220,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 	@Test
 	public void testSearch_OfType_PartialBlocked() {
-		myModelConfig.setIndexIdentifierOfType(true);
+		myStorageSettings.setIndexIdentifierOfType(true);
 
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=A";
@@ -290,7 +288,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 	}
 	
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
+	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
 

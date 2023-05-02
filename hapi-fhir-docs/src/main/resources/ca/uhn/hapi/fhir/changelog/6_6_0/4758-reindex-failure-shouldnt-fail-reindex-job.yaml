@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4758
+title: "An unexpected failure to reindex a single resource during a reindex job will no
+   longer cause the entire job to fail."

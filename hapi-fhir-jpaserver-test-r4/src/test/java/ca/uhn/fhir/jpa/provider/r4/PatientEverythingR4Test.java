@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
@@ -56,7 +57,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Override
@@ -64,11 +65,11 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setEverythingIncludesFetchPageSize(new DaoConfig().getEverythingIncludesFetchPageSize());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setEverythingIncludesFetchPageSize(new JpaStorageSettings().getEverythingIncludesFetchPageSize());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 	}
 
 	@Override
@@ -77,7 +78,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		
 		Organization org = new Organization();
 		org.setName("an org");
@@ -107,7 +108,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		Task task = new Task();
 		task.setStatus(Task.TaskStatus.COMPLETED);
 		task.getOwner().setReference(patId);
-		taskId =  myClient.create().resource(task).execute().getId().toUnqualifiedVersionless().getValue();
+		taskId = myClient.create().resource(task).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter wrongEnc1 = new Encounter();
 		wrongEnc1.setStatus(EncounterStatus.ARRIVED);
@@ -128,7 +129,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingWithCanonicalReferences() throws Exception {
-		myDaoConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("http://example.com/Organization/123"));
@@ -169,18 +170,18 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void testEverythingReturnsCorrectResources() throws Exception {
-		
+
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
-		
+
 		assertNull(bundle.getLink("next"));
-		
+
 		Set<String> actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
-		
+
 		ourLog.info("Found IDs: {}", actual);
-		
+
 		assertThat(actual, hasItem(patId));
 		assertThat(actual, hasItem(encId1));
 		assertThat(actual, hasItem(encId2));
@@ -196,19 +197,19 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void testEverythingReturnsCorrectResourcesSmallPage() throws Exception {
-		myDaoConfig.setEverythingIncludesFetchPageSize(1);
+		myStorageSettings.setEverythingIncludesFetchPageSize(1);
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
-		
+
 		assertNull(bundle.getLink("next"));
-		
+
 		Set<String> actual = new TreeSet<String>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
-		
+
 		ourLog.info("Found IDs: {}", actual);
-		
+
 		assertThat(actual, hasItem(patId));
 		assertThat(actual, hasItem(encId1));
 		assertThat(actual, hasItem(encId2));
@@ -217,19 +218,19 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual, not(hasItem(myWrongPatId)));
 		assertThat(actual, not(hasItem(myWrongEnc1)));
 	}
-	
+
 	/**
 	 * See #674
 	 */
 	@Test
 	public void testEverythingPagesWithCorrectEncodingJson() throws Exception {
-		
+
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
-		
+
 		assertNotNull(bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl(), containsString("_format=json"));
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
-		
+
 		assertNotNull(bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl(), containsString("_format=json"));
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
@@ -240,9 +241,9 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void testEverythingPagesWithCorrectEncodingXml() throws Exception {
-		
+
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=xml&_count=1", EncodingEnum.XML);
-		
+
 		assertNotNull(bundle.getLink("next").getUrl());
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl(), containsString("_format=xml"));
@@ -253,12 +254,13 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(bundle.getLink("next").getUrl(), containsString("_format=xml"));
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
 	}
+
 	@Test
 	//See https://github.com/hapifhir/hapi-fhir/issues/3215
 	public void testEverythingWithLargeResultSetDoesNotNpe() throws IOException {
 		for (int i = 0; i < 500; i++) {
 			Observation obs1 = new Observation();
-			obs1.setSubject(new Reference( patId));
+			obs1.setSubject(new Reference(patId));
 			obs1.getCode().addCoding().setCode("CODE1");
 			obs1.setValue(new StringType("obsvalue1"));
 			myObservationDao.create(obs1, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
@@ -283,7 +285,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
-		
+
 		return bundle;
 	}
 

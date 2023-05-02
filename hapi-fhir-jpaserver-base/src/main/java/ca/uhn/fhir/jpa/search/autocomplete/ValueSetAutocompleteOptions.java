@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.autocomplete;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -68,7 +67,7 @@ public class ValueSetAutocompleteOptions {
 	}
 
 	public static ValueSetAutocompleteOptions validateAndParseOptions(
-		DaoConfig theDaoConfig,
+		JpaStorageSettings theStorageSettings,
 		IPrimitiveType<String> theContext,
 		IPrimitiveType<String> theFilter,
 		IPrimitiveType<Integer> theCount,
@@ -82,7 +81,7 @@ public class ValueSetAutocompleteOptions {
 		if (haveId || haveIdentifier || haveValueSet) {
 			throw new InvalidRequestException(Msg.code(2020) + "$expand with contexDirection='existing' is only supported at the type leve. It is not supported at instance level, with a url specified, or with a ValueSet .");
 		}
-		if (!theDaoConfig.isAdvancedHSearchIndexing()) {
+		if (!theStorageSettings.isAdvancedHSearchIndexing()) {
 			throw new InvalidRequestException(Msg.code(2022) + "$expand with contexDirection='existing' requires Extended Lucene Indexing.");
 		}
 		if (theContext == null || theContext.isEmpty()) {

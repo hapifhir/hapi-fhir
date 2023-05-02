@@ -27,6 +27,7 @@ public class FhirPathR5 implements IFhirPath {
 	public FhirPathR5(FhirContext theCtx) {
 		IValidationSupport validationSupport = theCtx.getValidationSupport();
 		myEngine = new FHIRPathEngine(new HapiWorkerContext(theCtx, validationSupport));
+		myEngine.setDoNotEnforceAsSingletonRule(true);
 	}
 
 	@SuppressWarnings("unchecked")

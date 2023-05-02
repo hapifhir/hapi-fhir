@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.messaging;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.messaging;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.messaging;
 
 
 
@@ -31,6 +30,8 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseResourceMessage implements IResourceMessage, IModelJson {
@@ -163,13 +164,39 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 		myMediaType = theMediaType;
 	}
 
+	@Deprecated
 	@Nullable
 	public String getMessageKeyOrNull() {
+		return getMessageKey();
+	}
+
+	@Nullable
+	public String getMessageKey() {
 		return myMessageKey;
 	}
 
 	public void setMessageKey(String theMessageKey) {
 		myMessageKey = theMessageKey;
+	}
+
+	/**
+	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns <code>null</code>.
+	 *
+	 * @return the message key value or default
+	 */
+	@Nullable
+	public String getMessageKeyOrDefault() {
+		return defaultString(getMessageKey(), getMessageKeyDefaultValue());
+	}
+
+	/**
+	 * Provides a fallback value when method {@link #getMessageKey()} returns <code>null</code>.
+	 *
+	 * @return null by default
+	 */
+	@Nullable
+	protected String getMessageKeyDefaultValue(){
+		return null;
 	}
 
 	public enum OperationTypeEnum {
@@ -189,4 +216,5 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 			return myRestOperationTypeEnum;
 		}
 	}
+
 }

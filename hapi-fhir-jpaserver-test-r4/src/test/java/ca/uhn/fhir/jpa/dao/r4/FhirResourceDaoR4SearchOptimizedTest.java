@@ -1,13 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -18,6 +17,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -95,16 +95,16 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 	}
 
 	@AfterEach
 	public final void after() {
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myCaptureQueriesListener.setCaptureQueryStackTrace(false);
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 	}
 
 	private void create200Patients() {
@@ -123,7 +123,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testFetchCountOnly() {
 		create200Patients();
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setSort(new SortSpec(Patient.SP_NAME));
@@ -139,7 +139,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@Test
 	public void testFetchCountWithMultipleIndexesOnOneResource() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		create200Patients();
 
 		// Already have 200, let's add number 201 with a bunch of similar names
@@ -153,7 +153,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		p.addName().addGiven("FAMB");
 		myPatientDao.update(p);
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 		SearchParameterMap params;
 		IBundleProvider results;
 		String uuid;
@@ -221,7 +221,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(25);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(10);
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(1000, -1));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(1000, -1));
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setSort(new SortSpec(Patient.SP_NAME));
@@ -251,7 +251,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testFetchCountAndData() {
 		create200Patients();
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setSort(new SortSpec(Patient.SP_NAME));
@@ -292,7 +292,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testCountEvenIfPreviousSimilarSearchDidNotRequestIt() {
 		create200Patients();
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setSort(new SortSpec(Patient.SP_NAME));
@@ -330,7 +330,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testFetchRightUpToActualNumberExistingThenFetchAnotherPage() {
 		create200Patients();
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(200, -1));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(200, -1));
 
 		/*
 		 * Load the first page of 200
@@ -390,7 +390,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testFetchOnlySmallBatches() {
 		create200Patients();
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 
 		/*
 		 * Load the first page of 10
@@ -525,7 +525,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testFetchMoreThanFirstPageSizeInFirstPage() {
 		create200Patients();
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, -1));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, -1));
 
 		/*
 		 * Load a page that exceeds the initial page siz
@@ -567,7 +567,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testFetchUnlimited() {
 		create200Patients();
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, -1));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, -1));
 
 		/*
 		 * Load the first page of 10
@@ -628,7 +628,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	@Test
 	public void testFetchSecondBatchInManyThreads() throws Throwable {
 		create200Patients();
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, -1));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, -1));
 
 		/*
 		 * Load the first page of 10
@@ -704,7 +704,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testSearchThatOnlyReturnsASmallResult() {
 		create200Patients();
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setSort(new SortSpec(Patient.SP_NAME));
@@ -1106,13 +1106,13 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterResetDao() {
-		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 	}
 
 	@Test
 	public void testWritesPerformMinimalSqlStatements() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("sys1").setValue("val1");
@@ -1185,7 +1185,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateClientAssignedId() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		myCaptureQueriesListener.clear();
 		ourLog.info("** Starting Update Non-Existing resource with client assigned ID");
@@ -1230,7 +1230,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@Test
 	public void testOneRowPerUpdate() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		myCaptureQueriesListener.clear();
 		Patient p = new Patient();
@@ -1261,7 +1261,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@Test
 	public void testUpdateReusesIndexes() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		myCaptureQueriesListener.clear();
 
@@ -1285,7 +1285,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@Test
 	public void testUpdateReusesIndexesString() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		SearchParameterMap m1 = new SearchParameterMap().add("family", new StringParam("family1")).setLoadSynchronous(true);
 		SearchParameterMap m2 = new SearchParameterMap().add("family", new StringParam("family2")).setLoadSynchronous(true);
 
@@ -1318,7 +1318,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@Test
 	public void testUpdateReusesIndexesToken() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		SearchParameterMap m1 = new SearchParameterMap().add("gender", new TokenParam("male")).setLoadSynchronous(true);
 		SearchParameterMap m2 = new SearchParameterMap().add("gender", new TokenParam("female")).setLoadSynchronous(true);
 
@@ -1391,7 +1391,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		org2.setName("org2");
 		IIdType orgId2 = myOrganizationDao.create(org2).getId().toUnqualifiedVersionless();
 
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		SearchParameterMap m1 = new SearchParameterMap().add("organization", new ReferenceParam(orgId1.getValue())).setLoadSynchronous(true);
 		SearchParameterMap m2 = new SearchParameterMap().add("organization", new ReferenceParam(orgId2.getValue())).setLoadSynchronous(true);
 

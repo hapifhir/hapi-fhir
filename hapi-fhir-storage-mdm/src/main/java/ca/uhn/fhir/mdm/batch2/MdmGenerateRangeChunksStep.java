@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.batch2;
-
 /*-
  * #%L
  * hapi-fhir-storage-mdm
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.batch2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.batch2;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -26,7 +25,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.config.Batch2Constants;
+import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

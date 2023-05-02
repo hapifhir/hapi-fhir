@@ -39,7 +39,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(true);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(true);
 	}
 
 	PointcutLatch myPointcutLatch = new PointcutLatch(Pointcut.STORAGE_TRANSACTION_PROCESSED);

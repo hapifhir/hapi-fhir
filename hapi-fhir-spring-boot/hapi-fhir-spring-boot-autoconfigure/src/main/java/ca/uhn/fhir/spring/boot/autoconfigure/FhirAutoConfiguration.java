@@ -1,5 +1,3 @@
-package ca.uhn.fhir.spring.boot.autoconfigure;
-
 /*-
  * #%L
  * hapi-fhir-spring-boot-autoconfigure
@@ -19,17 +17,17 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.spring.boot.autoconfigure;
 
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.JpaDstu2Config;
 import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
 import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
@@ -184,7 +182,7 @@ public class FhirAutoConfiguration {
 			SubscriptionSubmitterConfig.class,
 			SearchParamSubmitterConfig.class
 		})
-		static class FhirJpaDaoConfiguration {
+		static class FhirJpaStorageSettingsConfiguration {
 
 			@Autowired
 			private EntityManagerFactory emf;
@@ -198,9 +196,8 @@ public class FhirAutoConfiguration {
 			@Bean
 			@ConditionalOnMissingBean
 			@ConfigurationProperties("hapi.fhir.jpa")
-			public DaoConfig fhirDaoConfig() {
-				DaoConfig fhirDaoConfig = new DaoConfig();
-				return fhirDaoConfig;
+			public JpaStorageSettings storageSettings() {
+				return new JpaStorageSettings();
 			}
 
 			@Bean
@@ -211,16 +208,10 @@ public class FhirAutoConfiguration {
 			}
 
 
-			@Bean
-			@ConditionalOnMissingBean
-			@ConfigurationProperties("hapi.fhir.jpa")
-			public ModelConfig fhirModelConfig() {
-				return fhirDaoConfig().getModelConfig();
-			}
 		}
 
 		@Configuration
-		@ConditionalOnBean({DaoConfig.class, RestfulServer.class})
+		@ConditionalOnBean({JpaStorageSettings.class, RestfulServer.class})
 		@SuppressWarnings("rawtypes")
 		static class RestfulServerCustomizer implements FhirRestfulServerCustomizer {
 

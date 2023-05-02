@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -49,7 +48,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
-import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
@@ -267,7 +266,10 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmPartitionHelper mdmPartitionHelper() {return new MdmPartitionHelper();}
+	MdmPartitionHelper mdmPartitionHelper(MessageHelper theMessageHelper,
+													  IMdmSettings theMdmSettings) {
+		return new MdmPartitionHelper(theMessageHelper, theMdmSettings);
+	}
 
 	@Bean
 	public IGoldenResourceSearchSvc goldenResourceSearchSvc() {

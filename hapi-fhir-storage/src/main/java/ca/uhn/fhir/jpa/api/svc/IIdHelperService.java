@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,9 +17,11 @@ package ca.uhn.fhir.jpa.api.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -115,10 +115,10 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 
 	/**
 	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
-	 * (meaning client ID strategy is {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ALPHANUMERIC})
+	 * (meaning client ID strategy is {@link JpaStorageSettings.ClientIdStrategyEnum#ALPHANUMERIC})
 	 * this will return true if the ID has any non-digit characters.
 	 * <p>
-	 * In {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ANY} mode it will always return true.
+	 * In {@link JpaStorageSettings.ClientIdStrategyEnum#ANY} mode it will always return true.
 	 */
 	boolean idRequiresForcedId(String theId);
 
@@ -133,7 +133,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 
 	Optional<String> translatePidIdToForcedIdWithCache(T theResourcePersistentId);
 
-	PersistentIdToForcedIdMap translatePidsToForcedIds(Set<T> theResourceIds);
+	PersistentIdToForcedIdMap<T> translatePidsToForcedIds(Set<T> theResourceIds);
 
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.registry;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -34,10 +33,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ReadOnlySearchParamCache {
 
@@ -92,49 +95,58 @@ public class ReadOnlySearchParamCache {
 
 		Set<String> resourceNames = theFhirContext.getResourceTypes();
 
-		IBaseBundle allSearchParameterBundle = null;
+		/*
+		 * For R4/R4B we include a Bundle of SearchParameters from the core spec in
+		 * hapi-fhir-validation-resources-r4/r4b
+		 *
+		 * For R5 we include the NPM core R5 packages in
+		 * hapi-fhir-validation-resources-r5, so we get them from it
+		 */
+		List<IBaseResource> searchParams = null;
 		if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-			allSearchParameterBundle = (IBaseBundle) theFhirContext.newJsonParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
+			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext.newJsonParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
+			searchParams = BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle);
+		} else if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
+			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext.newXmlParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4b/model/sp/search-parameters.xml"));
+			searchParams = BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle);
 		} else if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
-			allSearchParameterBundle = (IBaseBundle) theFhirContext.newXmlParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r5/model/sp/search-parameters.xml"));
+			searchParams = FhirContext.forR5Cached().getValidationSupport().fetchAllSearchParameters();
 		}
 
-		if (allSearchParameterBundle != null) {
-			// For each SearchParameter resource in the bundle of all search parameters defined in this version of FHIR
-			for (IBaseResource next : BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle)) {
-				RuntimeSearchParam nextCanonical = theCanonicalizer.canonicalizeSearchParameter(next);
+		searchParams = defaultIfNull(searchParams, Collections.emptyList());
+		for (IBaseResource next : searchParams) {
+			RuntimeSearchParam nextCanonical = theCanonicalizer.canonicalizeSearchParameter(next);
 
-				if (nextCanonical != null) {
+			if (nextCanonical != null) {
 
-					// Force status to ACTIVE - For whatever reason the R5 draft SPs ship with
-					// a status of DRAFT which means the server doesn't actually apply them.
-					// At least this was the case as of 2021-12-24 - JA
-					nextCanonical = new RuntimeSearchParam(
-						nextCanonical.getId(),
-						nextCanonical.getUri(),
-						nextCanonical.getName(),
-						nextCanonical.getDescription(),
-						nextCanonical.getPath(),
-						nextCanonical.getParamType(),
-						nextCanonical.getProvidesMembershipInCompartments(),
-						nextCanonical.getTargets(),
-						RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
-						nextCanonical.getComboSearchParamType(),
-						nextCanonical.getComponents(),
-						nextCanonical.getBase());
+				// Force status to ACTIVE - For whatever reason the R5 draft SPs ship with
+				// a status of DRAFT which means the server doesn't actually apply them.
+				// At least this was the case as of 2021-12-24 - JA
+				nextCanonical = new RuntimeSearchParam(
+					nextCanonical.getId(),
+					nextCanonical.getUri(),
+					nextCanonical.getName(),
+					nextCanonical.getDescription(),
+					nextCanonical.getPath(),
+					nextCanonical.getParamType(),
+					nextCanonical.getProvidesMembershipInCompartments(),
+					nextCanonical.getTargets(),
+					RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
+					nextCanonical.getComboSearchParamType(),
+					nextCanonical.getComponents(),
+					nextCanonical.getBase());
 
-					Collection<String> base = nextCanonical.getBase();
-					if (base.contains("Resource") || base.contains("DomainResource")) {
-						base = resourceNames;
-					}
+				Collection<String> base = nextCanonical.getBase();
+				if (base.contains("Resource") || base.contains("DomainResource")) {
+					base = resourceNames;
+				}
 
-					// Add it to our return value if permitted by the pattern parameters
-					for (String nextResourceName : base) {
-						ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
-						String nextParamName = nextCanonical.getName();
-						if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
-							resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextCanonical);
-						}
+				// Add it to our return value if permitted by the pattern parameters
+				for (String nextResourceName : base) {
+					ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
+					String nextParamName = nextCanonical.getName();
+					if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
+						resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextCanonical);
 					}
 				}
 			}

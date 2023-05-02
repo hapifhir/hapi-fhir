@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.r4.measure;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cr.r4.measure;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -37,7 +36,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 
-@Component
 public class MeasureOperationsProvider {
 	@Autowired
 	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;

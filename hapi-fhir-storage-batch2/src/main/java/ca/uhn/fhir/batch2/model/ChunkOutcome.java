@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.model;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,12 +17,12 @@ package ca.uhn.fhir.batch2.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.model;
 
 public class ChunkOutcome {
 	public enum Status {
 		SUCCESS,
-		FAIL,
-		ABORT;
+		FAILED;
 	}
 
 	private final Status myStatus;
@@ -33,7 +31,7 @@ public class ChunkOutcome {
 		myStatus = theStatus;
 	}
 
-	public Status getStatuss() {
+	public Status getStatus() {
 		return myStatus;
 	}
 

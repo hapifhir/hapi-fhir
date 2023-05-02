@@ -5,13 +5,14 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -50,6 +51,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
@@ -88,13 +90,13 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Test
 	public void testPerfInterceptors() {
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(15, 100));
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(15, 100));
 		for (int i = 0; i < 30; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("FAM" + i);
@@ -237,7 +239,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testCreateReflexResourceTheHardWay() {
-		ServerOperationInterceptorAdapter interceptor = new ReflexInterceptor();
+		ReflexInterceptor interceptor = new ReflexInterceptor();
 
 		myServer.getRestfulServer().registerInterceptor(interceptor);
 		try {
@@ -247,13 +249,17 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			IIdType pid = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 			await()
+				.atMost(60, TimeUnit.SECONDS)
+				.pollInterval(1, TimeUnit.SECONDS)
 				.until(()->{
 						Bundle observations = myClient
 							.search()
 							.forResource("Observation")
 							.where(Observation.SUBJECT.hasId(pid))
 							.returnBundle(Bundle.class)
+							.cacheControl(CacheControlDirective.noCache())
 							.execute();
+						ourLog.info("Have {} observations", observations.getEntry().size());
 						return observations.getEntry().size();
 					},
 					equalTo(1));
@@ -556,22 +562,27 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	}
 
-	public class ReflexInterceptor extends ServerOperationInterceptorAdapter {
-		@Override
+	@Interceptor
+	public class ReflexInterceptor {
+
+		@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 		public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+			ourLog.info("resourceCreated with {}", theResource);
 			if (theResource instanceof Patient) {
 				((ServletRequestDetails) theRequest).getServletRequest().setAttribute("CREATED_PATIENT", theResource);
 			}
 		}
 
-		@Override
+		@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 		public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
 			Patient createdPatient = (Patient) theRequestDetails.getServletRequest().getAttribute("CREATED_PATIENT");
+			ourLog.info("processingCompletedNormally with {}", createdPatient);
 			if (createdPatient != null) {
 				Observation observation = new Observation();
 				observation.setSubject(new Reference(createdPatient.getId()));
 
-				myClient.create().resource(observation).execute();
+				IIdType id = myClient.create().resource(observation).execute().getId();
+				ourLog.info("Created Observation with ID: {}", id);
 			}
 		}
 	}

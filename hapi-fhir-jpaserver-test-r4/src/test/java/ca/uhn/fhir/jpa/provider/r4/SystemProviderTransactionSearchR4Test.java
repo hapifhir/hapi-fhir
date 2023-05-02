@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.rp.r4.MedicationRequestResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.MedicationResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
@@ -65,7 +65,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myDaoConfig.setMaximumSearchResultCountInTransaction(new DaoConfig().getMaximumSearchResultCountInTransaction());
+		myStorageSettings.setMaximumSearchResultCountInTransaction(new JpaStorageSettings().getMaximumSearchResultCountInTransaction());
 	}
 
 	@BeforeEach
@@ -156,7 +156,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.setMethod(HTTPVerb.GET)
 			.setUrl("Patient?_count=5&_sort=_id");
 
-		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
+		myStorageSettings.setMaximumSearchResultCountInTransaction(100);
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
@@ -303,7 +303,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.setMethod(HTTPVerb.GET)
 			.setUrl("Patient?_count=5&_sort=_id");
 
-		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
+		myStorageSettings.setMaximumSearchResultCountInTransaction(100);
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));

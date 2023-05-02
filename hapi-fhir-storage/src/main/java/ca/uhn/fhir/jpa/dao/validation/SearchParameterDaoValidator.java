@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.validation;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,12 +17,13 @@ package ca.uhn.fhir.jpa.dao.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ElementUtil;
@@ -42,12 +41,12 @@ public class SearchParameterDaoValidator {
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
 
 	private final FhirContext myFhirContext;
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	private final ISearchParamRegistry mySearchParamRegistry;
 
-	public SearchParameterDaoValidator(FhirContext theContext, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
+	public SearchParameterDaoValidator(FhirContext theContext, JpaStorageSettings theStorageSettings, ISearchParamRegistry theSearchParamRegistry) {
 		myFhirContext = theContext;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
@@ -56,7 +55,7 @@ public class SearchParameterDaoValidator {
 		 * If overriding built-in SPs is disabled on this server, make sure we aren't
 		 * doing that
 		 */
-		if (myDaoConfig.getModelConfig().isDefaultSearchParamsCanBeOverridden() == false) {
+		if (myStorageSettings.isDefaultSearchParamsCanBeOverridden() == false) {
 			for (IPrimitiveType<?> nextBaseType : searchParameter.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
 				RuntimeSearchParam existingSearchParam = mySearchParamRegistry.getActiveSearchParam(nextBase, searchParameter.getCode());
@@ -113,7 +112,7 @@ public class SearchParameterDaoValidator {
 				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
 			} else {
 
-				if (myDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
+				if (myStorageSettings.isValidateSearchParameterExpressionsOnSave()) {
 
 					validateExpressionPath(searchParameter);
 
@@ -130,7 +129,10 @@ public class SearchParameterDaoValidator {
 	}
 
 	private boolean isCompositeWithoutBase(SearchParameter searchParameter) {
-		return ElementUtil.isEmpty(searchParameter.getBase()) && (searchParameter.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(searchParameter.getType().name()));
+		return
+			ElementUtil.isEmpty(searchParameter.getBase()) &&
+			ElementUtil.isEmpty(searchParameter.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE)) &&
+			(searchParameter.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(searchParameter.getType().name()));
 	}
 
 	private boolean isCompositeWithoutExpression(SearchParameter searchParameter) {

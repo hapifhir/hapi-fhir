@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.autocomplete;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,14 +34,14 @@ import java.util.List;
  */
 public class ValueSetAutocompleteSearch {
 	private final FhirContext myFhirContext;
-	private final ModelConfig myModelConfig;
+	private final StorageSettings myStorageSettings;
 	private final TokenAutocompleteSearch myAutocompleteSearch;
 	static final int DEFAULT_SIZE = 30;
 
-	public ValueSetAutocompleteSearch(FhirContext theFhirContext, ModelConfig theModelConfig, SearchSession theSession) {
+	public ValueSetAutocompleteSearch(FhirContext theFhirContext, StorageSettings theStorageSettings, SearchSession theSession) {
 		myFhirContext = theFhirContext;
-		myModelConfig = theModelConfig;
-		myAutocompleteSearch = new TokenAutocompleteSearch(myFhirContext, myModelConfig, theSession);
+		myStorageSettings = theStorageSettings;
+		myAutocompleteSearch = new TokenAutocompleteSearch(myFhirContext, myStorageSettings, theSession);
 	}
 
 	public IBaseResource search(ValueSetAutocompleteOptions theOptions) {

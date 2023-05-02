@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -27,15 +26,15 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -108,11 +107,9 @@ public abstract class BaseStorageDao {
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
-	protected ModelConfig myModelConfig;
-	@Autowired
 	protected IResourceVersionSvc myResourceVersionSvc;
 	@Autowired
-	protected DaoConfig myDaoConfig;
+	protected JpaStorageSettings myStorageSettings;
 
 	@VisibleForTesting
 	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
@@ -143,7 +140,7 @@ public abstract class BaseStorageDao {
 
 		verifyBundleTypeIsAppropriateForStorage(theResource);
 
-		if (!getConfig().getTreatBaseUrlsAsLocal().isEmpty()) {
+		if (!getStorageSettings().getTreatBaseUrlsAsLocal().isEmpty()) {
 			replaceAbsoluteReferencesWithRelative(theResource, myFhirContext.newTerser());
 		}
 
@@ -177,7 +174,7 @@ public abstract class BaseStorageDao {
 	 */
 	private void verifyBundleTypeIsAppropriateForStorage(IBaseResource theResource) {
 		if (theResource instanceof IBaseBundle) {
-			Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
+			Set<String> allowedBundleTypes = getStorageSettings().getBundleTypesAllowedForStorage();
 			String bundleType = BundleUtil.getBundleType(getContext(), (IBaseBundle) theResource);
 			bundleType = defaultString(bundleType);
 			if (!allowedBundleTypes.contains(bundleType)) {
@@ -195,7 +192,7 @@ public abstract class BaseStorageDao {
 		for (ResourceReferenceInfo nextRef : refs) {
 			IIdType refId = nextRef.getResourceReference().getReferenceElement();
 			if (refId != null && refId.hasBaseUrl()) {
-				if (getConfig().getTreatBaseUrlsAsLocal().contains(refId.getBaseUrl())) {
+				if (getStorageSettings().getTreatBaseUrlsAsLocal().contains(refId.getBaseUrl())) {
 					IIdType newRefId = refId.toUnqualified();
 					nextRef.getResourceReference().setReference(newRefId.getValue());
 				}
@@ -204,7 +201,7 @@ public abstract class BaseStorageDao {
 	}
 
 	/**
-	 * Handle {@link ModelConfig#getAutoVersionReferenceAtPaths() auto-populate-versions}
+	 * Handle {@link JpaStorageSettings#getAutoVersionReferenceAtPaths() auto-populate-versions}
 	 * <p>
 	 * We only do this if thePerformIndexing is true because if it's false, that means
 	 * we're in a FHIR transaction during the first phase of write operation processing,
@@ -216,12 +213,12 @@ public abstract class BaseStorageDao {
 	 * <p>
 	 * Also note that {@link BaseTransactionProcessor} also has code to do auto-versioning
 	 * and it is the one that takes care of the placeholder IDs. Look for the other caller of
-	 * {@link #extractReferencesToAutoVersion(FhirContext, ModelConfig, IBaseResource)}
+	 * {@link #extractReferencesToAutoVersion(FhirContext, StorageSettings, IBaseResource)}
 	 * to find this.
 	 */
 	private void performAutoVersioning(IBaseResource theResource, boolean thePerformIndexing) {
 		if (thePerformIndexing) {
-			Set<IBaseReference> referencesToVersion = extractReferencesToAutoVersion(myFhirContext, myModelConfig, theResource);
+			Set<IBaseReference> referencesToVersion = extractReferencesToAutoVersion(myFhirContext, myStorageSettings, theResource);
 			for (IBaseReference nextReference : referencesToVersion) {
 				IIdType referenceElement = nextReference.getReferenceElement();
 				if (!referenceElement.hasBaseUrl()) {
@@ -239,7 +236,7 @@ public abstract class BaseStorageDao {
 						// the resource exists... latest id
 						// will be the value in the IResourcePersistentId
 						version = resourceVersionMap.getResourcePersistentId(referenceElement).getVersion();
-					} else if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+					} else if (myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
 						// if idToPID doesn't contain object
 						// but autcreateplaceholders is on
 						// then the version will be 1 (the first version)
@@ -259,7 +256,11 @@ public abstract class BaseStorageDao {
 
 	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource, @Nullable String theMatchUrl, @Nonnull RestOperationTypeEnum theOperationType) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
-		outcome.setPersistentId(theEntity.getPersistentId());
+
+		IResourcePersistentId persistentId = theEntity.getPersistentId();
+		persistentId.setAssociatedResourceId(theResource.getIdElement());
+
+		outcome.setPersistentId(persistentId);
 		outcome.setMatchUrl(theMatchUrl);
 		outcome.setOperationType(theOperationType);
 
@@ -431,9 +432,9 @@ public abstract class BaseStorageDao {
 	}
 
 	/**
-	 * Provide the DaoConfig
+	 * Provide the JpaStorageSettings
 	 */
-	protected abstract DaoConfig getConfig();
+	protected abstract JpaStorageSettings getStorageSettings();
 
 	/**
 	 * Returns the resource type for this DAO, or null if this is a system-level DAO
@@ -555,14 +556,14 @@ public abstract class BaseStorageDao {
 	}
 
 	/**
-	 * @see ModelConfig#getAutoVersionReferenceAtPaths()
+	 * @see StorageSettings#getAutoVersionReferenceAtPaths()
 	 */
 	@Nonnull
-	public static Set<IBaseReference> extractReferencesToAutoVersion(FhirContext theFhirContext, ModelConfig theModelConfig, IBaseResource theResource) {
+	public static Set<IBaseReference> extractReferencesToAutoVersion(FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
 		Map<IBaseReference, Object> references = Collections.emptyMap();
-		if (!theModelConfig.getAutoVersionReferenceAtPaths().isEmpty()) {
+		if (!theStorageSettings.getAutoVersionReferenceAtPaths().isEmpty()) {
 			String resourceName = theFhirContext.getResourceType(theResource);
-			for (String nextPath : theModelConfig.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
+			for (String nextPath : theStorageSettings.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
 				List<IBaseReference> nextReferences = theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
 				for (IBaseReference next : nextReferences) {
 					if (next.getReferenceElement().hasVersionIdPart()) {

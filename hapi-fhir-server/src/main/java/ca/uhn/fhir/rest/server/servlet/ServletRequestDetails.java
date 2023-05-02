@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.servlet;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.servlet;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.servlet;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;

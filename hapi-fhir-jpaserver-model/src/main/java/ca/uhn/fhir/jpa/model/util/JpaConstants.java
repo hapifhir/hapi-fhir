@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.util;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -197,10 +196,21 @@ public class JpaConstants {
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
+
+	/**
+	 * Parameter for the $export operation to identify binaries with a given identifier.
+	 */
+	public static final String PARAM_EXPORT_IDENTIFIER = "_exportId";
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_TYPE_POST_FETCH_FILTER_URL = "_typePostFetchFilterUrl";
 	/**
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_PATIENT = "patient";
+
+
 
 	/**
 	 * Parameter for the $import operation
@@ -285,8 +295,12 @@ public class JpaConstants {
 	 * IPS Generation operation URL
 	 */
 	public static final String SUMMARY_OPERATION_URL = "http://hl7.org/fhir/uv/ips/OperationDefinition/summary";
+    public static final String ORG_HIBERNATE_TYPE_TEXT_TYPE = "org.hibernate.type.TextType";
+	public static final String BULK_META_EXTENSION_EXPORT_IDENTIFIER = "https://hapifhir.org/NamingSystem/bulk-export-identifier";
+	public static final String BULK_META_EXTENSION_JOB_ID = "https://hapifhir.org/NamingSystem/bulk-export-job-id";
+	public static final String BULK_META_EXTENSION_RESOURCE_TYPE = "https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
 
-	/**
+    /**
 	 * Non-instantiable
 	 */
 	private JpaConstants() {

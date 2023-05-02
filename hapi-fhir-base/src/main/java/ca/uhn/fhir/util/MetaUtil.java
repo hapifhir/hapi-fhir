@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,12 +17,14 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -36,12 +36,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 
 public class MetaUtil {
 	private static final Logger ourLog = LoggerFactory.getLogger(MetaUtil.class);
 
 	private MetaUtil() {
 		// non-instantiable
+	}
+
+	public static String cleanProvenanceSourceUriOrEmpty(String theProvenanceSourceUri) {
+		String sanitizedProvenance = defaultString(theProvenanceSourceUri);
+		return StringUtils.substringBefore(sanitizedProvenance, "#");
 	}
 
 	public static String getSource(FhirContext theContext, IBaseMetaType theMeta) {
@@ -78,6 +86,17 @@ public class MetaUtil {
 			retVal = ((IPrimitiveType<?>) sourceValues.get(0)).getValueAsString();
 		}
 		return retVal;
+	}
+
+	public static <R extends IBaseResource> void populateResourceSource(FhirContext theFhirContext, String theProvenanceSourceUri, String theProvenanceRequestId, R theRetVal) {
+		String sourceString = cleanProvenanceSourceUriOrEmpty(theProvenanceSourceUri);
+		if (isNotBlank(theProvenanceRequestId)){
+			sourceString = sourceString + "#" + theProvenanceRequestId;
+		}
+
+		if (isNotBlank(sourceString)){
+			setSource(theFhirContext, theRetVal, sourceString);
+		}
 	}
 
 	/**
@@ -118,5 +137,6 @@ public class MetaUtil {
 		}
 		sourceElement.setValueAsString(theValue);
 	}
+
 
 }

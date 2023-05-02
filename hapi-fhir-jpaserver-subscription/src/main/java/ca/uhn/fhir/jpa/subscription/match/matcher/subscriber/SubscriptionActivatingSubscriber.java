@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,19 +17,22 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +49,16 @@ import javax.annotation.Nonnull;
  * <p>
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
-public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
+public class SubscriptionActivatingSubscriber implements MessageHandler {
 	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
+	@Autowired
+	private FhirContext myFhirContext;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private StorageSettings myStorageSettings;
 
 	/**
 	 * Constructor
@@ -72,7 +75,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		}
 
 		ResourceModifiedMessage payload = ((ResourceModifiedJsonMessage) theMessage).getPayload();
-		if (!isSubscription(payload)) {
+		if (!payload.hasPayloadType(myFhirContext, "Subscription")) {
 			return;
 		}
 
@@ -81,6 +84,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 			case UPDATE:
 				activateSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
 				break;
+			case TRANSACTION:
 			case DELETE:
 			case MANUALLY_TRIGGERED:
 			default:
@@ -102,7 +106,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 
 		// Only activate supported subscriptions
 		if (subscriptionChannelType == null
-				|| !myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
+				|| !myStorageSettings.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 
@@ -142,6 +146,11 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 			subscriptionDao.update(subscription, srd);
 			return false;
 		}
+	}
+
+	public boolean isChannelTypeSupported(IBaseResource theSubscription) {
+		Subscription.SubscriptionChannelType channelType = mySubscriptionCanonicalizer.getChannelType(theSubscription).toCanonical();
+		return myStorageSettings.getSupportedSubscriptionTypes().contains(channelType);
 	}
 
 }

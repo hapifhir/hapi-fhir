@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -114,7 +114,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 				myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
-		myCodeSystemDao.readEntity(myExtensionalCsId, null).getId();
+		myCodeSystemDao.readEntity(myExtensionalCsId, null);
 	}
 
 	private void loadAndPersistValueSet() throws IOException {
@@ -145,7 +145,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = myValueSetDao.readEntity(myExtensionalVsId, null).getId();
+		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId();
 	}
 
 	private CodeSystem createExternalCs() {
@@ -254,7 +254,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@Test
 	public void testExpandByIdWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
@@ -311,7 +311,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@Test
 	public void testExpandByIdWithFilterWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
@@ -339,7 +339,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@Test
 	public void testExpandByIdWithFilterWithPreExpansionWithPrefixValue() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
@@ -366,7 +366,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@Test
 	public void testExpandByIdWithFilterWithPreExpansionWithoutPrefixValue() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
@@ -412,7 +412,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@Test
 	public void testExpandByUrlNoPreExpand() throws Exception {
-		myDaoConfig.setPreExpandValueSets(false);
+		myStorageSettings.setPreExpandValueSets(false);
 		loadAndPersistCodeSystemAndValueSet();
 
 		Parameters respParam = myClient
@@ -450,7 +450,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@Test
 	public void testExpandByUrlWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
@@ -478,7 +478,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@Test
 	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -520,7 +520,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@Test
 	public void testExpandByValueSetWithPreExpansion() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystem();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -828,7 +828,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations();
 
@@ -858,7 +858,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansionUsingTransactionBundle() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations();
 
@@ -1543,7 +1543,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@AfterEach
 	public void afterResetPreExpansionDefault() {
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
 	}
 
 	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {

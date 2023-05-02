@@ -1,27 +1,3 @@
-package ca.uhn.fhir.jpa.provider;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.ParametersUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jboss.logging.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Set;
-import java.util.TreeSet;
-
 /*
  * #%L
  * HAPI FHIR Storage api
@@ -41,13 +17,36 @@ import java.util.TreeSet;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jboss.logging.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Set;
+import java.util.TreeSet;
 
 public abstract class BaseJpaProvider {
 	public static final String REMOTE_ADDR = "req.remoteAddr";
 	public static final String REMOTE_UA = "req.userAgent";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaProvider.class);
 	@Autowired
-	protected DaoConfig myDaoConfig;
+	protected JpaStorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myContext;
 
@@ -55,8 +54,8 @@ public abstract class BaseJpaProvider {
 		super();
 	}
 
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	protected ExpungeOptions createExpungeOptions(IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {

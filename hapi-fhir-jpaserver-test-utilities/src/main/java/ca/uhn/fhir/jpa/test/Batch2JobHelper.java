@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.test;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
@@ -60,7 +59,7 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobCompletion(Batch2JobStartResponse theStartResponse) {
-		return awaitJobCompletion(theStartResponse.getJobId());
+		return awaitJobCompletion(theStartResponse.getInstanceId());
 	}
 
 	public JobInstance awaitJobCompletion(String theBatchJobId) {
@@ -70,7 +69,6 @@ public class Batch2JobHelper {
 	public JobInstance awaitJobCompletionWithoutMaintenancePass(String theBatchJobId) {
 		return awaitJobHasStatusWithoutMaintenancePass(theBatchJobId, StatusEnum.COMPLETED);
 	}
-
 
 	public JobInstance awaitJobCancelled(String theBatchJobId) {
 		return awaitJobHasStatus(theBatchJobId, StatusEnum.CANCELLED);
@@ -101,11 +99,10 @@ public class Batch2JobHelper {
 				.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
 			String currentStatus = myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
-			fail("Job still has status " + currentStatus + " - All statuses:\n" + statuses);
+			fail("Job " + theBatchJobId + " still has status " + currentStatus + " - All statuses:\n" + statuses);
 		}
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
-
 
 	public JobInstance awaitJobawaitJobHasStatusWithoutMaintenancePass(String theBatchJobId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
@@ -125,7 +122,7 @@ public class Batch2JobHelper {
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
 
-	private boolean checkStatusWithMaintenancePass(String theBatchJobId, StatusEnum... theExpectedStatuses) {
+	private boolean checkStatusWithMaintenancePass(String theBatchJobId, StatusEnum... theExpectedStatuses) throws InterruptedException {
 		if (hasStatus(theBatchJobId, theExpectedStatuses)) {
 			return true;
 		}
@@ -134,7 +131,9 @@ public class Batch2JobHelper {
 	}
 
 	private boolean hasStatus(String theBatchJobId, StatusEnum[] theExpectedStatuses) {
-		return ArrayUtils.contains(theExpectedStatuses, getStatus(theBatchJobId));
+		StatusEnum status = getStatus(theBatchJobId);
+		ourLog.debug("Checking status of {} in {}: is {}", theBatchJobId, theExpectedStatuses, status);
+		return ArrayUtils.contains(theExpectedStatuses, status);
 	}
 
 	private StatusEnum getStatus(String theBatchJobId) {
@@ -142,7 +141,7 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobFailure(Batch2JobStartResponse theStartResponse) {
-		return awaitJobFailure(theStartResponse.getJobId());
+		return awaitJobFailure(theStartResponse.getInstanceId());
 	}
 
 	public JobInstance awaitJobFailure(String theJobId) {
@@ -168,7 +167,6 @@ public class Batch2JobHelper {
 	public long getCombinedRecordsProcessed(String theJobId) {
 		JobInstance job = myJobCoordinator.getInstance(theJobId);
 		return job.getCombinedRecordsProcessed();
-
 	}
 
 	public void awaitAllJobsOfJobDefinitionIdToComplete(String theJobDefinitionId) {
@@ -241,6 +239,14 @@ public class Batch2JobHelper {
 
 	public void runMaintenancePass() {
 		myJobMaintenanceService.runMaintenancePass();
+	}
+
+	/**
+	 * Forces a run of the maintenance pass without waiting for
+	 * the semaphore to release
+	 */
+	public void forceRunMaintenancePass() {
+		myJobMaintenanceService.forceMaintenancePass();
 	}
 
 	public void cancelAllJobsAndAwaitCancellation() {

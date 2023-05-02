@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.autocomplete;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,10 +17,11 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import com.google.gson.JsonObject;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
@@ -48,12 +47,12 @@ class TokenAutocompleteSearch {
 	private static final AggregationKey<JsonObject> AGGREGATION_KEY = AggregationKey.of("autocomplete");
 
 	private final FhirContext myFhirContext;
-	private final ModelConfig myModelConfig;
+	private final StorageSettings myStorageSettings;
 	private final SearchSession mySession;
 
-	public TokenAutocompleteSearch(FhirContext theFhirContext, ModelConfig theModelConfig, SearchSession theSession) {
+	public TokenAutocompleteSearch(FhirContext theFhirContext, StorageSettings theStorageSettings, SearchSession theSession) {
 		myFhirContext = theFhirContext;
-		myModelConfig = theModelConfig;
+		myStorageSettings = theStorageSettings;
 		mySession = theSession;
 	}
 
@@ -74,7 +73,7 @@ class TokenAutocompleteSearch {
 		// compose the query json
 		SearchQueryOptionsStep<?, ?, SearchLoadingOptionsStep, ?, ?> query = mySession.search(ResourceTable.class)
 			.where(predFactory -> predFactory.bool(boolBuilder -> {
-				ExtendedHSearchClauseBuilder clauseBuilder = new ExtendedHSearchClauseBuilder(myFhirContext, myModelConfig, boolBuilder, predFactory);
+				ExtendedHSearchClauseBuilder clauseBuilder = new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, boolBuilder, predFactory);
 
 				// we apply resource-level predicates here, at the top level
 				if (isNotBlank(theResourceName)) {

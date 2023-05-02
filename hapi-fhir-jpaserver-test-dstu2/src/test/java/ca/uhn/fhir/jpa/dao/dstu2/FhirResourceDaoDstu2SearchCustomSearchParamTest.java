@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -37,7 +36,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,13 +58,13 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new JpaStorageSettings().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setValidateSearchParameterExpressionsOnSave(new DaoConfig().isValidateSearchParameterExpressionsOnSave());
+		myStorageSettings.setValidateSearchParameterExpressionsOnSave(new JpaStorageSettings().isValidateSearchParameterExpressionsOnSave());
 	}
 
 
@@ -88,7 +86,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 
 	@Test
 	public void testIndexFailsIfInvalidSearchParameterExists() {
-		myDaoConfig.setValidateSearchParameterExpressionsOnSave(false);
+		myStorageSettings.setValidateSearchParameterExpressionsOnSave(false);
 
 		SearchParameter threadIdSp = new SearchParameter();
 		threadIdSp.setBase(ResourceTypeEnum.COMMUNICATION);
@@ -280,7 +278,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 
 	@Test
 	public void testOverrideAndDisableBuiltInSearchParametersWithOverridingEnabled() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 
 		SearchParameter memberSp = new SearchParameter();
 		memberSp.setCode("member");

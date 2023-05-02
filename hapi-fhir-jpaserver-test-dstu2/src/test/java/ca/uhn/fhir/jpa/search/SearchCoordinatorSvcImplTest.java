@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.SearchConfig;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -42,9 +42,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -83,11 +80,12 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked"})
 @ExtendWith(MockitoExtension.class)
-public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
+public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
-
-	@Mock private SearchStrategyFactory mySearchStrategyFactory;
-
+	@Spy
+	protected FhirContext myContext = FhirContext.forDstu2Cached();
+	@Mock
+	private SearchStrategyFactory mySearchStrategyFactory;
 	@Mock
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Mock
@@ -104,9 +102,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	@Mock
 	private ISynchronousSearchSvc mySynchronousSearchSvc;
 	@Spy
-	protected FhirContext myContext = FhirContext.forDstu2Cached();
-
-	@Spy
 	private ExceptionService myExceptionSvc = new ExceptionService(myContext);
 
 	private SearchCoordinatorSvcImpl mySvc;
@@ -121,6 +116,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	@BeforeEach
 	public void before() {
 		HapiSystemProperties.enableUnitTestCaptureStack();
+		HapiSystemProperties.enableUnitTestMode();
 
 		myCurrentSearch = null;
 
@@ -129,7 +125,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		// classes. This forces them in
 		mySvc = new SearchCoordinatorSvcImpl(
 			myContext,
-			myDaoConfig,
+			myStorageSettings,
 			myInterceptorBroadcaster,
 			myTransactionService,
 			mySearchCacheSvc,
@@ -138,7 +134,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			mySearchBuilderFactory,
 			mySynchronousSearchSvc,
 			myPersistedJpaBundleProviderFactory,
-			myPartitionHelperSvc,
 			null, // search param registry
 			mySearchStrategyFactory,
 			myExceptionSvc,
@@ -181,7 +176,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			assertEquals(allResults.size(), oldResults.size());
 			allResults.addAll(newResults);
 			return null;
-		}).when(mySearchResultCacheSvc).storeResults(any(), anyList(), anyList());
+		}).when(mySearchResultCacheSvc).storeResults(any(), anyList(), anyList(), any(), any());
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
@@ -191,7 +186,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		when(mySearchBuilder.createQuery(any(), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		when(mySearchCacheSvc.save(any())).thenAnswer(t -> {
+		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
 			Search search = t.getArgument(0, Search.class);
 			myCurrentSearch = search;
 			return search;
@@ -211,7 +206,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
-		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture());
+		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture(), any());
 
 		assertEquals(790, allResults.size());
 		assertEquals(10, allResults.get(0).getId());
@@ -228,15 +223,15 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		myCurrentSearch.setStatus(SearchStatusEnum.PASSCMPLET);
 		myCurrentSearch.setNumFound(10);
 
-		when(mySearchCacheSvc.fetchByUuid(any())).thenAnswer(t -> Optional.ofNullable(myCurrentSearch));
+		when(mySearchCacheSvc.fetchByUuid(any(), any())).thenAnswer(t -> Optional.ofNullable(myCurrentSearch));
 
-		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t -> {
-			when(mySearchCacheSvc.fetchByUuid(any())).thenAnswer(t2 -> Optional.empty());
+		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any(), any())).thenAnswer(t -> {
+			when(mySearchCacheSvc.fetchByUuid(any(), any())).thenAnswer(t2 -> Optional.empty());
 			return Optional.empty();
 		});
 
 		try {
-			mySvc.getResources("1234-5678", 0, 100, null);
+			mySvc.getResources("1234-5678", 0, 100, null, null);
 			fail();
 		} catch (ResourceGoneException e) {
 			assertEquals("Search ID \"1234-5678\" does not exist and may have expired", e.getMessage());
@@ -252,13 +247,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		myCurrentSearch.setStatus(SearchStatusEnum.PASSCMPLET);
 		myCurrentSearch.setNumFound(10);
 
-		when(mySearchCacheSvc.fetchByUuid(any())).thenAnswer(t -> {
+		when(mySearchCacheSvc.fetchByUuid(any(), any())).thenAnswer(t -> {
 			sleepAtLeast(100);
 			return Optional.ofNullable(myCurrentSearch);
 		});
 
 		try {
-			mySvc.getResources("1234-5678", 0, 100, null);
+			mySvc.getResources("1234-5678", 0, 100, null, null);
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), containsString("Request timed out"));
@@ -298,15 +293,16 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	}
 
 	private void initAsyncSearches() {
-		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchTask.class), nullable(ISearchBuilder.class))).thenAnswer(t->{
+		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchTask.class), nullable(ISearchBuilder.class), nullable(RequestPartitionId.class))).thenAnswer(t -> {
 			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
 			Search search = t.getArgument(1, Search.class);
 			SearchTask searchTask = t.getArgument(2, SearchTask.class);
 			ISearchBuilder<JpaPid> searchBuilder = t.getArgument(3, ISearchBuilder.class);
-			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails);
-			retVal.setDaoConfigForUnitTest(new DaoConfig());
+			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails, null);
+			retVal.setStorageSettingsForUnitTest(new JpaStorageSettings());
 			retVal.setTxServiceForUnitTest(myTransactionService);
 			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
+			retVal.setRequestPartitionHelperSvcForUnitTest(myPartitionHelperSvc);
 			retVal.setContext(myContext);
 			return retVal;
 		});
@@ -336,7 +332,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			try {
 				assertNotNull(searchId);
 				ourLog.info("About to pull the first resource");
-				List<JpaPid> resources = mySvc.getResources(searchId, 0, 1, null);
+				List<JpaPid> resources = mySvc.getResources(searchId, 0, 1, null, null);
 				ourLog.info("Done pulling the first resource");
 				assertEquals(1, resources.size());
 			} finally {
@@ -345,14 +341,14 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		};
 		new Thread(taskStarter).start();
 
-		await().until(()->iter.getCountReturned() >= 3);
+		await().until(() -> iter.getCountReturned() >= 3);
 
 		ourLog.info("About to cancel all searches");
 		mySvc.cancelAllActiveSearches();
 		ourLog.info("Done cancelling all searches");
 
 		try {
-			mySvc.getResources(searchId, 0, 1, null);
+			mySvc.getResources(searchId, 0, 1, null, null);
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -376,9 +372,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		List<JpaPid> pids = createPidSequence(800);
 		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
-		when(mySearchCacheSvc.save(any())).thenAnswer(t ->{
+		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
 			ourLog.info("Saving search");
-			return t.getArgument( 0, Search.class);
+			return t.getArgument(0, Search.class);
 		});
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -389,7 +385,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		assertEquals(790, result.size());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
-		verify(mySearchCacheSvc, atLeast(1)).save(searchCaptor.capture());
+		verify(mySearchCacheSvc, atLeast(1)).save(searchCaptor.capture(), any());
 		Search search = searchCaptor.getValue();
 		assertEquals(SearchTypeEnum.SEARCH, search.getSearchType());
 
@@ -451,8 +447,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		search.setSearchType(SearchTypeEnum.SEARCH);
 		search.setResourceType("Patient");
 		search.setStatus(SearchStatusEnum.LOADING);
+		search.setSearchParameterMap(new SearchParameterMap());
 
-		when(mySearchCacheSvc.fetchByUuid(eq(uuid))).thenReturn(Optional.of(search));
+		when(mySearchCacheSvc.fetchByUuid(eq(uuid), any())).thenReturn(Optional.of(search));
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		PersistedJpaBundleProvider provider;
@@ -465,7 +462,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 				// ignore
 			}
 
-			when(mySearchResultCacheSvc.fetchResultPids(any(Search.class), anyInt(), anyInt())).thenAnswer(theInvocation -> {
+			when(mySearchResultCacheSvc.fetchResultPids(any(Search.class), anyInt(), anyInt(), any(), any())).thenAnswer(theInvocation -> {
 				ArrayList<IResourcePersistentId> results = new ArrayList<>();
 				for (long i = theInvocation.getArgument(1, Integer.class); i < theInvocation.getArgument(2, Integer.class); i++) {
 					Long nextPid = i + 10L;
@@ -494,7 +491,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
-		provider.setDaoConfigForUnitTest(new DaoConfig());
+		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
+		provider.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		resources = provider.getResources(20, 40);
 		assertEquals(20, resources.size());
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
@@ -513,7 +511,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
-		provider.setDaoConfigForUnitTest(new DaoConfig());
+		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
+		provider.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		return provider;
 	}
 
@@ -567,14 +566,14 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		search.setStatus(SearchStatusEnum.FINISHED);
 		search.setNumFound(100);
 		search.setTotalCount(100);
-		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"))).thenReturn(Optional.of(search));
+		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"), any())).thenReturn(Optional.of(search));
 
-		when(mySearchResultCacheSvc.fetchResultPids(any(), anyInt(), anyInt())).thenReturn(null);
+		when(mySearchResultCacheSvc.fetchResultPids(any(), anyInt(), anyInt(), any(), any())).thenReturn(null);
 
 		try {
-			mySvc.getResources("0000-1111", 0, 10, null);
+			mySvc.getResources("0000-1111", 0, 10, null, null);
 			fail();
-		}  catch (ResourceGoneException e) {
+		} catch (ResourceGoneException e) {
 			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
 		}
 
@@ -594,29 +593,72 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		search.setStatus(SearchStatusEnum.PASSCMPLET);
 		search.setNumFound(5);
 		search.setSearchParameterMap(new SearchParameterMap());
-		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"))).thenReturn(Optional.of(search));
+		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"), any())).thenReturn(Optional.of(search));
 
-		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t->{
+		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any(), any())).thenAnswer(t -> {
 			search.setStatus(SearchStatusEnum.LOADING);
 			return Optional.of(search);
 		});
 		mockSearchTask();
 
-		when(mySearchResultCacheSvc.fetchAllResultPids(any())).thenReturn(null);
+		when(mySearchResultCacheSvc.fetchAllResultPids(any(), any(), any())).thenReturn(null);
 
 		try {
-			mySvc.getResources("0000-1111", 0, 10, null);
+			mySvc.getResources("0000-1111", 0, 10, null, null);
 			fail();
-		}  catch (ResourceGoneException e) {
+		} catch (ResourceGoneException e) {
 			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
 		}
 
 	}
 
+	private void mockSearchTask() {
+		IPagingProvider pagingProvider = mock(IPagingProvider.class);
+		lenient().when(pagingProvider.getMaximumPageSize())
+			.thenReturn(500);
+		when(myBeanFactory.getBean(anyString(), any(SearchTaskParameters.class)))
+			.thenAnswer(invocation -> {
+				String type = invocation.getArgument(0);
+				switch (type) {
+					case SearchConfig.SEARCH_TASK -> {
+						return new SearchTask(
+							invocation.getArgument(1),
+							myTransactionService,
+							ourCtx,
+							myInterceptorBroadcaster,
+							mySearchBuilderFactory,
+							mySearchResultCacheSvc,
+							myStorageSettings,
+							mySearchCacheSvc,
+							pagingProvider
+						);
+					}
+					case SearchConfig.CONTINUE_TASK -> {
+						return new SearchContinuationTask(
+							invocation.getArgument(1),
+							myTransactionService,
+							ourCtx,
+							myInterceptorBroadcaster,
+							mySearchBuilderFactory,
+							mySearchResultCacheSvc,
+							myStorageSettings,
+							mySearchCacheSvc,
+							pagingProvider,
+							myExceptionSvc
+						);
+					}
+					default -> {
+						fail("Invalid bean type: " + type);
+						return null;
+					}
+				}
+			});
+	}
+
 	public static class FailAfterNIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
 
-		private int myCount;
 		private final IResultIterator<JpaPid> myWrap;
+		private int myCount;
 
 		FailAfterNIterator(IResultIterator theWrap, int theCount) {
 			myWrap = theWrap;
@@ -740,46 +782,5 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		public void close() {
 			// nothing
 		}
-	}
-
-
-	private void mockSearchTask() {
-		IPagingProvider pagingProvider = mock(IPagingProvider.class);
-		lenient().when(pagingProvider.getMaximumPageSize())
-			.thenReturn(500);
-		when(myBeanFactory.getBean(anyString(), any(SearchTaskParameters.class)))
-			.thenAnswer(invocation -> {
-				String type = invocation.getArgument(0);
-				switch (type) {
-					case SearchConfig.SEARCH_TASK:
-						return new SearchTask(
-							invocation.getArgument(1),
-							myTransactionService,
-							ourCtx,
-                                myInterceptorBroadcaster,
-							mySearchBuilderFactory,
-							mySearchResultCacheSvc,
-							myDaoConfig,
-							mySearchCacheSvc,
-							pagingProvider
-						);
-					case SearchConfig.CONTINUE_TASK:
-						return new SearchContinuationTask(
-							invocation.getArgument(1),
-							myTransactionService,
-							ourCtx,
-							myInterceptorBroadcaster,
-							mySearchBuilderFactory,
-							mySearchResultCacheSvc,
-							myDaoConfig,
-							mySearchCacheSvc,
-							pagingProvider,
-							myExceptionSvc
-						);
-					default:
-						fail("Invalid bean type: " + type);
-						return null;
-				}
-			});
 	}
 }

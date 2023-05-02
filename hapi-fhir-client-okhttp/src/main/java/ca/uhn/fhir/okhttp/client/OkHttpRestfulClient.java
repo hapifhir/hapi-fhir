@@ -1,5 +1,3 @@
-package ca.uhn.fhir.okhttp.client;
-
 /*-
  * #%L
  * HAPI FHIR OkHttp Client
@@ -19,6 +17,7 @@ package ca.uhn.fhir.okhttp.client;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.okhttp.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
@@ -89,13 +88,13 @@ public class OkHttpRestfulClient implements IHttpClient {
     }
 
     private RequestBody createPostBody(String theContents, String theContentType) {
-        return RequestBody.create(MediaType.parse(theContentType), theContents);
+		 return RequestBody.create(MediaType.parse(theContentType), theContents);
     }
 
     @Override
     public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
         initBaseRequest(theContext, theEncoding, getFormBodyFromParams(theParams));
-        return myRequest;
+		 return myRequest;
     }
 
     private RequestBody getFormBodyFromParams(Map<String, List<String>> queryParams) {

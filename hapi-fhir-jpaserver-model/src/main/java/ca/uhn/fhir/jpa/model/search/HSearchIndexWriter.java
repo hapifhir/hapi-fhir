@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.model.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.search;
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.fhir.ucum.Pair;
@@ -70,10 +69,10 @@ public class HSearchIndexWriter {
 
 
 	final HSearchElementCache myNodeCache;
-	final ModelConfig myModelConfig;
+	final StorageSettings myStorageSettings;
 
-	HSearchIndexWriter(ModelConfig theModelConfig, DocumentElement theRoot) {
-		myModelConfig = theModelConfig;
+	HSearchIndexWriter(StorageSettings theStorageSettings, DocumentElement theRoot) {
+		myStorageSettings = theStorageSettings;
 		myNodeCache = new HSearchElementCache(theRoot);
 	}
 
@@ -81,8 +80,8 @@ public class HSearchIndexWriter {
 		return myNodeCache.getObjectElement(SEARCH_PARAM_ROOT, theSearchParamName, theIndexType);
 	}
 
-	public static HSearchIndexWriter forRoot(ModelConfig theModelConfig, DocumentElement theDocument) {
-		return new HSearchIndexWriter(theModelConfig, theDocument);
+	public static HSearchIndexWriter forRoot(StorageSettings theStorageSettings, DocumentElement theDocument) {
+		return new HSearchIndexWriter(theStorageSettings, theDocument);
 	}
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
@@ -169,7 +168,7 @@ public class HSearchIndexWriter {
 		addDocumentValue(nestedQtyNode, QTY_SYSTEM, theValue.getSystem());
 		addDocumentValue(nestedQtyNode, QTY_VALUE, theValue.getValue());
 
-		if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
+		if ( ! myStorageSettings.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
 			return;
 		}
 

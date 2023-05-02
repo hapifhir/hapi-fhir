@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.svc.candidate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,16 +17,17 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -50,6 +49,8 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	private MdmResourceDaoSvc myMdmResourceDaoSvc;
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
+	@Autowired
+	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Override
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theIncomingResource) {
@@ -58,7 +59,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theIncomingResource);
 		if (!eidFromResource.isEmpty()) {
 			for (CanonicalEID eid : eidFromResource) {
-				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theIncomingResource.getIdElement().getResourceType(), (RequestPartitionId) theIncomingResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theIncomingResource.getIdElement().getResourceType(), myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theIncomingResource));
 				if (oFoundGoldenResource.isPresent()) {
 					IAnyResource foundGoldenResource = oFoundGoldenResource.get();
 					// Exclude manually declared NO_MATCH links from candidates

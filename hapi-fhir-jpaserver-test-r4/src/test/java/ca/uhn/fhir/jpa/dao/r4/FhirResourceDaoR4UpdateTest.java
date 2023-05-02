@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -26,6 +27,7 @@ import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
@@ -46,6 +48,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,10 +65,10 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterResetDao() {
-		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
-		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
+		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myStorageSettings.setResourceServerIdStrategy(new JpaStorageSettings().getResourceServerIdStrategy());
+		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
 	}
 
 
@@ -373,7 +376,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testHardMetaCapIsEnforcedOnCreate() {
-		myDaoConfig.setResourceMetaCountHardLimit(3);
+		myStorageSettings.setResourceMetaCountHardLimit(3);
 
 		IIdType id;
 		{
@@ -394,7 +397,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testHardMetaCapIsEnforcedOnMetaAdd() {
-		myDaoConfig.setResourceMetaCountHardLimit(3);
+		myStorageSettings.setResourceMetaCountHardLimit(3);
 
 		IIdType id;
 		{
@@ -544,12 +547,10 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().setFamily("Hello");
-		p.setId("Patient/" + methodName);
 
 		myPatientDao.update(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
-		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getIdElement());
 		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
@@ -578,17 +579,67 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().setFamily("Hello");
-		p.setId("Patient/" + methodName);
 
 		String matchUrl = "Patient?_lastUpdated=gt" + start.getValueAsString();
 		ourLog.info("URL is: {}", matchUrl);
 		myPatientDao.update(p, matchUrl, mySrd);
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
-		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getIdElement());
 		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+
+	}
+
+	@Test
+	public void testUpdateConditionalByLastUpdatedWithId() throws Exception {
+		String methodName = "testUpdateByUrl";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		myPatientDao.create(p, mySrd).getId();
+
+		InstantDt start = InstantDt.withCurrentTime();
+		ourLog.info("First time: {}", start.getValueAsString());
+		Thread.sleep(100);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got ID: {}", id);
+
+		Thread.sleep(100);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId("Patient/" + methodName);
+
+		String matchUrl = "Patient?_lastUpdated=gt" + start.getValueAsString();
+		ourLog.info("URL is: {}", matchUrl);
+
+		try {
+			myPatientDao.update(p, matchUrl, mySrd);
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("2279"));
+		}
+	}
+
+	@Test
+	public void testUpdateResourceCreatedWithConditionalUrl_willRemoveEntryInSearchUrlTable(){
+		String identifierCode = "20210427133226.4440+800";
+		String matchUrl = "identifier=20210427133226.4440+800";
+		Observation obs = new Observation();
+		obs.addIdentifier().setValue(identifierCode);
+		myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
+		assertThat(myResourceSearchUrlDao.findAll(), hasSize(1));
+
+		// when
+		obs.setStatus(Observation.ObservationStatus.CORRECTED);
+		myObservationDao.update(obs, mySrd);
+
+		// then
+		assertThat(myResourceSearchUrlDao.findAll(), hasSize(0));
 
 	}
 
@@ -627,12 +678,10 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			p = new Patient();
 			p.addIdentifier().setSystem("urn:system").setValue(methodName);
 			p.addName().setFamily("Hello");
-			p.setId("Patient/" + methodName);
 
 			myPatientDao.update(p, "Patient?_lastUpdated=gt" + start.getValueAsString(), mySrd);
 
 			p = myPatientDao.read(id.toVersionless(), mySrd);
-			assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
 			assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 			assertNotEquals(id, p.getIdElement());
 			assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
@@ -874,7 +923,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testUpdateWithNoChangeDetectionDisabledUpdateUnchanged() {
-		myDaoConfig.setSuppressUpdatesWithNoChange(false);
+		myStorageSettings.setSuppressUpdatesWithNoChange(false);
 
 		String name = "testUpdateUnchanged";
 		IIdType id1, id2;
@@ -1059,8 +1108,8 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testUpdateWithUuidServerResourceStrategy_ClientIdNotAllowed() {
-		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
 
 		Patient p = new Patient();
 		p.setId(UUID.randomUUID().toString());

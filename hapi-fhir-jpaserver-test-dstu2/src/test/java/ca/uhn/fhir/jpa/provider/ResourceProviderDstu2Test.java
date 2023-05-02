@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -144,9 +144,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
@@ -159,12 +159,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void before() throws Exception {
 		super.before();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
@@ -633,7 +633,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testDeleteConditionalMultiple() {
 		String methodName = "testDeleteConditionalMultiple";
 
-		myDaoConfig.setAllowMultipleDelete(false);
+		myStorageSettings.setAllowMultipleDelete(false);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -663,7 +663,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		myClient.read().resource("Patient").withId(id1).execute();
 		myClient.read().resource("Patient").withId(id2).execute();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		//@formatter:off
 		myClient
@@ -2786,13 +2786,13 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	@Disabled
 	public void testValidateDavidsAllergyIntolerance() throws Exception {
-		myDaoConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		/*
 		 * Upload structurredef
 		 */
 
-		String contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-sd-david.json"), "UTF-8");
+		String contents = ClasspathUtil.loadResource("/allergyintolerance-sd-david.json");
 		HttpEntityEnclosingRequestBase post = new HttpPut(myServerBase + "/StructureDefinition/ohAllergyIntolerance");
 		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -2809,7 +2809,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		 * Validate
 		 */
 
-		contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-david.json"), "UTF-8");
+		contents = ClasspathUtil.loadResource("/allergyintolerance-david.json");
 
 		post = new HttpPost(myServerBase + "/AllergyIntolerance/$validate?_pretty=true");
 		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));

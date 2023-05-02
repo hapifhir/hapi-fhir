@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
@@ -13,9 +14,10 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -44,7 +46,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.Spy;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.http.HttpServletResponse;
@@ -67,16 +69,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
 public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
-
-	@Autowired
-	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
 
 	@Override
 	@AfterEach
@@ -624,6 +622,25 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		@Mock
 		private IBatch2JobRunner myJobRunner;
 
+		@Spy
+		private RequestPartitionHelperSvc myRequestPartitionHelperSvc = new MultitenantServerR4Test.PartitionTesting.MyRequestPartitionHelperSvc();
+
+		String myTenantName = null;
+
+		private class MyRequestPartitionHelperSvc extends RequestPartitionHelperSvc {
+
+			@Override
+			public RequestPartitionId determineReadPartitionForRequest(RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
+				return RequestPartitionId.fromPartitionName(myTenantName);
+			}
+
+			@Override
+			public void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
+				return;
+			}
+
+		}
+
 		@Test
 		public void testBulkExportForDifferentPartitions() throws IOException {
 			setBulkDataExportProvider();
@@ -654,7 +671,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 
 			Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
-			startResponse.setJobId(jobId);
+			startResponse.setInstanceId(jobId);
 			when(myJobRunner.startNewJob(any()))
 				.thenReturn(startResponse);
 			when(myJobRunner.getJobInfo(anyString()))
@@ -666,8 +683,6 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			reqDetails.addHeader(Constants.HEADER_PREFER,
 				"respond-async");
 			servletRequestDetails.setServletRequest(reqDetails);
-			doReturn(JpaConstants.DEFAULT_PARTITION_NAME + "/")
-				.when(servletRequestDetails).getServerBaseForRequest();
 			when(servletRequestDetails.getServer())
 				.thenReturn(mockServer);
 			when(servletRequestDetails.getServletResponse())
@@ -681,11 +696,12 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			}
 
 			//perform export-poll-status
+			myTenantName = createInPartition;
 			HttpGet get = new HttpGet(buildExportUrl(createInPartition, jobId));
 			try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 				String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
-				assertThat(responseJson.getOutput().get(0).getUrl(), containsString(JpaConstants.DEFAULT_PARTITION_NAME + "/Binary/"));
+				assertThat(responseJson.getOutput().get(0).getUrl(), containsString(createInPartition + "/Binary/"));
 			}
 		}
 

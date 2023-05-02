@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -30,7 +30,7 @@ import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -152,7 +152,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = myValueSetDao.readEntity(myExtensionalVsId, null).getId();
+		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId();
 	}
 
 	private CodeSystem createExternalCs() {
@@ -260,7 +260,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByIdWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -293,7 +293,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByIdWithPreExpansionWithOffset() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -330,7 +330,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByIdWithPreExpansionWithCount() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -359,7 +359,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByIdWithPreExpansionWithOffsetAndCount() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -410,7 +410,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByIdWithFilterWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -452,7 +452,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlNoPreExpand() throws Exception {
-		myDaoConfig.setPreExpandValueSets(false);
+		myStorageSettings.setPreExpandValueSets(false);
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
 		Parameters respParam = myClient
@@ -490,7 +490,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -513,7 +513,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansionWithOffset() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -544,7 +544,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansionWithCount() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -574,7 +574,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansionWithOffsetAndCount() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -607,7 +607,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -649,7 +649,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByValueSetWithPreExpansion() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -674,7 +674,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByValueSetWithPreExpansionWithOffset() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -707,7 +707,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByValueSetWithPreExpansionWithCount() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -740,7 +740,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByValueSetWithPreExpansionWithOffsetAndCount() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -1021,7 +1021,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HTTPVerb.POST);
 
@@ -1050,7 +1050,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansionUsingTransactionBundle() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(Bundle.HTTPVerb.POST);
 
@@ -1441,7 +1441,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@AfterEach
 	public void afterResetPreExpansionDefault() {
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
 	}
 
 

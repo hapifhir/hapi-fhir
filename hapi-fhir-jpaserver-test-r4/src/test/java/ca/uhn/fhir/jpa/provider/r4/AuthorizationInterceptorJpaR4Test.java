@@ -84,9 +84,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setDeleteExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
 		myServer.getRestfulServer().registerInterceptor(new BulkDataExportProvider());
 	}
 
@@ -224,6 +224,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 						}
 					}).andThen()
 					.allow().createConditional().resourcesOfType("Patient").andThen()
+					.allow().read().resourcesOfType("Patient").withAnyId().andThen()
 					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
 					.build();
 			}

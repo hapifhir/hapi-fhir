@@ -11,7 +11,6 @@ import org.hl7.fhir.dstu3.model.Location;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test
@@ -68,6 +67,10 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		assertThat(ids, contains(locId));
 	}
 
+
+	@Test
+	public void testNearSearchChained() {
+	}
 	@Test
 	public void testNearSearchApproximate() {
 		Location loc = new Location();

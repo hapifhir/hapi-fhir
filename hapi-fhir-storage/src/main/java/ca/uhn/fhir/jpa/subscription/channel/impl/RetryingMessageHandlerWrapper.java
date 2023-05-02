@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.channel.impl;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.util.BaseUnrecoverableRuntimeException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +34,7 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.policy.TimeoutRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.transaction.CannotCreateTransactionException;
 
 import javax.annotation.Nonnull;
 
@@ -65,6 +66,15 @@ class RetryingMessageHandlerWrapper implements MessageHandler {
 				ourLog.error("Failure {} processing message in channel[{}]: {}", theContext.getRetryCount(), myChannelName, theThrowable.toString());
 				ourLog.error("Failure", theThrowable);
 				if (theThrowable instanceof BaseUnrecoverableRuntimeException) {
+					theContext.setExhaustedOnly();
+				}
+				if (ExceptionUtils.indexOfThrowable(theThrowable, CannotCreateTransactionException.class) != -1) {
+					/*
+					 * This exception means that we can't open a transaction, which
+					 * means the EntityManager is closed. This can happen if we are shutting
+					 * down while there is still a message in the queue - No sense
+					 * retrying indefinitely in that case
+					 */
 					theContext.setExhaustedOnly();
 				}
 			}

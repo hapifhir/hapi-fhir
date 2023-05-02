@@ -1,7 +1,3 @@
-package ca.uhn.fhir.jpa.dao.data;
-
-import java.util.Collection;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -21,18 +17,20 @@ import java.util.Collection;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import java.util.Collection;
 
 public interface IResourceIndexedSearchParamUriDao extends JpaRepository<ResourceIndexedSearchParamUri, Long>, IHapiFhirJpaRepository {
 	
-	@Query("SELECT DISTINCT p.myUri FROM ResourceIndexedSearchParamUri p WHERE p.myResourceType = :resource_type AND p.myParamName = :param_name")
-	public Collection<String> findAllByResourceTypeAndParamName(@Param("resource_type") String theResourceType, @Param("param_name") String theParamName);
+	@Query("SELECT DISTINCT p.myUri FROM ResourceIndexedSearchParamUri p WHERE p.myHashIdentity = :hash_identity")
+	public Collection<String> findAllByHashIdentity(@Param("hash_identity") long theHashIdentity);
 
 	@Modifying
 	@Query("delete from ResourceIndexedSearchParamUri t WHERE t.myResourcePid = :resid")

@@ -1,10 +1,3 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,6 +17,12 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
+
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * Represents an <b>HTTP 500 Internal Error</b> response.

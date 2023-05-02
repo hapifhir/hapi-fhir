@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 public enum ColumnTypeEnum {
 
@@ -29,7 +28,9 @@ public enum ColumnTypeEnum {
 	BOOLEAN,
 	FLOAT,
 	INT,
+	TINYINT,
 	BLOB,
 	CLOB,
-	DOUBLE;
+	DOUBLE,
+	TEXT;
 }

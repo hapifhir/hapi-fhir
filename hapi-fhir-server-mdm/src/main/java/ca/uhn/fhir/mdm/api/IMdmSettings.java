@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.api;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -55,4 +54,12 @@ public interface IMdmSettings {
 	}
 
 	int getCandidateSearchLimit();
+
+	String getGoldenResourcePartitionName();
+
+	void setGoldenResourcePartitionName(String theGoldenResourcePartitionName);
+
+	boolean getSearchAllPartitionForMatch();
+
+	void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch);
 }

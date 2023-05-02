@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -10,8 +11,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -52,7 +51,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ResourceReindexingSvcImplTest extends BaseJpaTest {
+public class ResourceReindexingSvcImplTest {
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
@@ -88,23 +87,14 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	private final ResourceReindexer myResourceReindexer = new ResourceReindexer(ourFhirContext);
 	@InjectMocks
 	private final ResourceReindexingSvcImpl mySvc = new ResourceReindexingSvcImpl();
-
-	@Override
-	public FhirContext getFhirContext() {
-		return ourFhirContext;
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
-	}
+	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setReindexThreadCount(2);
+	public void before() throws Exception {
+		myStorageSettings.setReindexThreadCount(2);
 
 		mySvc.setContextForUnitTest(ourFhirContext);
-		mySvc.setDaoConfigForUnitTest(myDaoConfig);
+		mySvc.setStorageSettingsForUnitTest(myStorageSettings);
 		mySvc.setResourceReindexerForUnitTest(myResourceReindexer);
 		mySvc.start();
 	}

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -44,14 +44,14 @@ import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLE
 public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHasScheduledJobs {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public void pollForStaleSearchesAndDeleteThem() {
-		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem();
+		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHas
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public synchronized void schedulePollForStaleSearches() {
-		if (!myDaoConfig.isSchedulingDisabled() && myDaoConfig.isEnableTaskStaleSearchCleanup()) {
+		if (!myStorageSettings.isSchedulingDisabled() && myStorageSettings.isEnableTaskStaleSearchCleanup()) {
 			pollForStaleSearchesAndDeleteThem();
 		}
 	}

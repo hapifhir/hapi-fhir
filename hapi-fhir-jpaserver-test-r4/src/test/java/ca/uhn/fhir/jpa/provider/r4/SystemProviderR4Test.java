@@ -8,7 +8,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.DiagnosticReportResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.LocationResourceProvider;
@@ -125,11 +125,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setDeleteExpungeEnabled(new JpaStorageSettings().isDeleteExpungeEnabled());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 	}
 
 	@BeforeEach
@@ -466,7 +466,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionDeleteWithDuplicateDeletes() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
@@ -666,19 +666,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		assertEquals(id1_4.toVersionless(), id2_4.toVersionless());
 	}
 
-	/**
-	 * This is Gramahe's test transaction - it requires some set up in order to work
-	 */
-	@Test
-	@Disabled
-	public void testTransactionFromBundle3() throws Exception {
-
-		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/grahame-transaction.xml");
-		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
-		ourLog.info(response);
-	}
-
 	@Test
 	public void testTransactionFromBundle4() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/simone_bundle.xml");
@@ -790,7 +777,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionWithInlineConditionalUrl() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
@@ -850,7 +837,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	 * FOrmat has changed, source is no longer valid
 	 */
 	@Test
-	@Disabled
+	@Disabled("input file needs to be upgraded to R4 format")
 	public void testValidateUsingIncomingResources() throws Exception {
 		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
@@ -926,9 +913,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteExpungeOperation() {
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setDeleteExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
 
 		// setup
 		for (int i = 0; i < 12; ++i) {

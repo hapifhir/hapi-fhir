@@ -1,11 +1,3 @@
-package ca.uhn.fhir.parser;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
-import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -25,9 +17,16 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
- * The default error handler, which logs issues but does not abort parsing, with only one exception:
+ * The default error handler, which logs issues but does not abort parsing, with only two exceptions:
  * <p>
  * The {@link #invalidValue(ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation, String, String)}
  * method will throw a {@link DataFormatException} by default since ignoring this type of error
@@ -37,12 +36,20 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * 
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
  * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
+ *
+ * <p>
+ * The {@link #extensionContainsValueAndNestedExtensions(ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation)}
+ * method will throw a {@link DataFormatException} by default since ignoring this type of error will allow malformed
+ * resouces to be created and result in errors when attempts to read, update or delete the resource in the future.
+ *  See {@link #setErrorOnInvalidExtension(boolean)} for information on this.
+ * </p>
  */
 public class LenientErrorHandler extends ParseErrorHandler implements IParserErrorHandler {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LenientErrorHandler.class);
 	private static final StrictErrorHandler STRICT_ERROR_HANDLER = new StrictErrorHandler();
 	private boolean myErrorOnInvalidValue = true;
+	private boolean myErrorOnInvalidExtension = true;
 	private boolean myLogErrors;
 
 	/**
@@ -93,7 +100,7 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 
 	/**
 	 * If set to <code>false</code> (default is <code>true</code>) invalid values will be logged. By
-	 * default invalid attribute values cause this error handler to throw a {@link DataFormatException} (unlike
+	 * default, invalid attribute values cause this error handler to throw a {@link DataFormatException} (unlike
 	 * other methods in this class which default to simply logging errors).
 	 * <p>
 	 * Note that empty values (e.g. <code>""</code>) will not lead to an error when this is set to
@@ -106,6 +113,17 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 		return myErrorOnInvalidValue;
 	}
 
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) invalid extensions will be logged. By
+	 * default, invalid resource extensions cause this error handler to throw a {@link DataFormatException} (unlike
+	 * other methods in this class which default to simply logging errors).
+	 *
+	 * @see #setErrorOnInvalidExtension(boolean)
+	 */
+	public boolean isErrorOnInvalidExtension() {
+		return myErrorOnInvalidExtension;
+	}
+
 	@Override
 	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
 		if (myLogErrors) {
@@ -115,7 +133,7 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 
 	/**
 	 * If set to <code>false</code> (default is <code>true</code>) invalid values will be logged. By
-	 * default invalid attribute values cause this error handler to throw a {@link DataFormatException} (unlike
+	 * default, invalid attribute values cause this error handler to throw a {@link DataFormatException} (unlike
 	 * other methods in this class which default to simply logging errors).
 	 * <p>
 	 * Note that empty values (e.g. <code>""</code>) will not lead to an error when this is set to
@@ -127,6 +145,28 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	 */
 	public LenientErrorHandler setErrorOnInvalidValue(boolean theErrorOnInvalidValue) {
 		myErrorOnInvalidValue = theErrorOnInvalidValue;
+		return this;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) invalid extensions will be logged. By
+	 * default, invalid resource extensions cause this error handler to throw a {@link DataFormatException} (unlike
+	 * other methods in this class which default to simply logging errors).
+	 *
+	 * @return Returns a reference to <code>this</code> for easy method chaining
+	 * @see #isErrorOnInvalidExtension()
+	 */
+	public LenientErrorHandler setErrorOnInvalidExtension(boolean theErrorOnInvalidExtension) {
+		myErrorOnInvalidExtension = theErrorOnInvalidExtension;
+		return this;
+	}
+
+	/**
+	 * If this method is called, both invalid resource extensions and invalid attribute values will set to simply logging errors.
+	 */
+	public LenientErrorHandler disableAllErrors() {
+		myErrorOnInvalidValue = false;
+		myErrorOnInvalidExtension = false;
 		return this;
 	}
 
@@ -159,8 +199,10 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	}
 
 	@Override
-	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
-		if (myLogErrors) {
+	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation){
+		if (myErrorOnInvalidExtension) {
+			STRICT_ERROR_HANDLER.extensionContainsValueAndNestedExtensions(theLocation);
+		} else if (myLogErrors) {
 			ourLog.warn("{}Extension contains both a value and nested extensions", describeLocation(theLocation));
 		}
 	}

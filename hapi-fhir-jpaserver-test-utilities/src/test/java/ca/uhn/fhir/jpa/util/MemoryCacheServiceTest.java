@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
@@ -37,9 +37,9 @@ class MemoryCacheServiceTest {
 
 	@BeforeEach
 	public void setUp() {
-		DaoConfig daoConfig = new DaoConfig();
-		daoConfig.setMassIngestionMode(false);
-		mySvc = new MemoryCacheService(daoConfig);
+		JpaStorageSettings storageSettings = new JpaStorageSettings();
+		storageSettings.setMassIngestionMode(false);
+		mySvc = new MemoryCacheService(storageSettings);
 	}
 
 	@Test
@@ -47,13 +47,18 @@ class MemoryCacheServiceTest {
 		String system = "http://example.com";
 		TagTypeEnum type = TagTypeEnum.TAG;
 		String code = "t";
+		String version = "Ver 3.0";
+		Boolean userSelected = true;
 
-		MemoryCacheService.TagDefinitionCacheKey cacheKey = new MemoryCacheService.TagDefinitionCacheKey(type, system, code);
+		MemoryCacheService.TagDefinitionCacheKey cacheKey = new MemoryCacheService.TagDefinitionCacheKey(
+			type, system, code, version, userSelected);
 
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
 		assertThat(retVal, nullValue());
 
 		TagDefinition tagDef = new TagDefinition(type, system, code, "theLabel");
+		tagDef.setVersion(version);
+		tagDef.setUserSelected(userSelected);
 		mySvc.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey, tagDef);
 
 		retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);

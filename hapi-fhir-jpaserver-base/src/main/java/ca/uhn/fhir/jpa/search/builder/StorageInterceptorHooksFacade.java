@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,12 +17,13 @@ package ca.uhn.fhir.jpa.search.builder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -46,13 +45,15 @@ public class StorageInterceptorHooksFacade {
 	 * @param theRequestDetails
 	 * @param theParams
 	 * @param search
+	 * @param theRequestPartitionId
 	 */
-	public void callStoragePresearchRegistered(RequestDetails theRequestDetails, SearchParameterMap theParams, Search search) {
+	public void callStoragePresearchRegistered(RequestDetails theRequestDetails, SearchParameterMap theParams, Search search, RequestPartitionId theRequestPartitionId) {
 		HookParams params = new HookParams()
 			.add(ICachedSearchDetails.class, search)
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-			.add(SearchParameterMap.class, theParams);
+			.add(SearchParameterMap.class, theParams)
+			.add(RequestPartitionId.class, theRequestPartitionId);
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 	}
 	//private IInterceptorBroadcaster myInterceptorBroadcaster;

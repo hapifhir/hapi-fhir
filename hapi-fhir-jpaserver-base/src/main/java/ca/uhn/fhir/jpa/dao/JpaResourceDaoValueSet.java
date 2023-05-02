@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
@@ -95,7 +94,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 
 		if (isAutocompleteExtension) {
 			// this is a funky extension for NIH.  Do our own thing and return.
-			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(myDaoConfig, theContext, theFilter, theCount, theId, theUrl, theValueSet);
+			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(myStorageSettings, theContext, theFilter, theCount, theId, theUrl, theValueSet);
 			if (myFulltextSearch == null || myFulltextSearch.isDisabled()) {
 				throw new InvalidRequestException(Msg.code(2083) + " Autocomplete is not supported on this server, as the fulltext search service is not configured.");
 			} else {
@@ -119,7 +118,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			throw new InvalidRequestException(Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
-		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter, theDisplayLanguage);
+		ValueSetExpansionOptions options = createValueSetExpansionOptions(myStorageSettings, theOffset, theCount, theIncludeHierarchy, theFilter, theDisplayLanguage);
 
 		IValidationSupport.ValueSetExpansionOutcome outcome;
 		if (haveId) {
@@ -176,8 +175,8 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		String valueSetIdentifier;
 		if (theValueSetId != null) {
 			IBaseResource valueSet = read(theValueSetId, theRequestDetails);
-			StringBuilder valueSetIdentifierBuilder = new StringBuilder(CommonCodeSystemsTerminologyService.getValueSetUrl(valueSet));
-			String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(valueSet);
+			StringBuilder valueSetIdentifierBuilder = new StringBuilder(CommonCodeSystemsTerminologyService.getValueSetUrl(myFhirContext, valueSet));
+			String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(myFhirContext, valueSet);
 			if (valueSetVersion != null) {
 				valueSetIdentifierBuilder.append("|").append(valueSetVersion);
 			}
@@ -235,7 +234,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (getConfig().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
+		if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
 				myTerminologySvc.storeTermValueSet(retVal, valueSet);

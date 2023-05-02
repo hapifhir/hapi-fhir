@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
+import ca.uhn.fhir.rest.server.util.NarrativeUtil;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -269,7 +270,7 @@ public class BaseController {
 		FhirVersionEnum version = theRequest.getFhirVersion(myConfig);
 		VersionCanonicalizer retVal = myCanonicalizers.get(version);
 		if (retVal == null) {
-			retVal = new VersionCanonicalizer(version);
+			retVal = new VersionCanonicalizer(version.newContext());
 			myCanonicalizers.put(version, retVal);
 		}
 		return retVal;
@@ -484,6 +485,8 @@ public class BaseController {
 						} else if (theResultType == ResultType.BUNDLE) {
 							resultDescription.append("JSON bundle");
 							riBundle = context.newJsonParser().parseResource(resultBody);
+						} else if (theResultType == ResultType.PARAMETERS) {
+							resultDescription.append("JSON parameters");
 						}
 						break;
 					case XML:
@@ -493,6 +496,8 @@ public class BaseController {
 						} else if (theResultType == ResultType.BUNDLE) {
 							resultDescription.append("XML bundle");
 							riBundle = context.newXmlParser().parseResource(resultBody);
+						} else if (theResultType == ResultType.PARAMETERS) {
+							resultDescription.append("XML parameters");
 						}
 						break;
 				}
@@ -522,7 +527,7 @@ public class BaseController {
 			theModelMap.put("resultBodyIsLong", resultBodyText.length() > 1000);
 			theModelMap.put("requestHeaders", requestHeaders);
 			theModelMap.put("responseHeaders", responseHeaders);
-			theModelMap.put("narrative", narrativeString);
+			theModelMap.put("narrative", NarrativeUtil.sanitize(narrativeString));
 			theModelMap.put("latencyMs", theLatency);
 
 			theModelMap.put("config", myConfig);
@@ -548,7 +553,7 @@ public class BaseController {
 	}
 
 	protected enum ResultType {
-		BUNDLE, NONE, RESOURCE, TAGLIST
+		BUNDLE, NONE, RESOURCE, TAGLIST, PARAMETERS
 	}
 
 	public static class CaptureInterceptor implements IClientInterceptor {

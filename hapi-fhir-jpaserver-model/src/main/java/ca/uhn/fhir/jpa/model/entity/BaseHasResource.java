@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
@@ -19,9 +17,11 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import org.hibernate.annotations.OptimisticLock;
 
@@ -38,8 +38,10 @@ import java.util.Date;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @MappedSuperclass
-public abstract class BaseHasResource extends BasePartitionable implements IBaseResourceEntity, IBasePersistedResource {
+public abstract class BaseHasResource extends BasePartitionable implements IBaseResourceEntity, IBasePersistedResource<JpaPid> {
 
+	public static final String RES_PUBLISHED = "RES_PUBLISHED";
+	public static final String RES_UPDATED = "RES_UPDATED";
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myDeleted;
@@ -54,12 +56,12 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	private boolean myHasTags;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "RES_PUBLISHED", nullable = false)
+	@Column(name = RES_PUBLISHED, nullable = false)
 	@OptimisticLock(excluded = true)
 	private Date myPublished;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "RES_UPDATED", nullable = false)
+	@Column(name = RES_UPDATED, nullable = false)
 	@OptimisticLock(excluded = true)
 	private Date myUpdated;
 

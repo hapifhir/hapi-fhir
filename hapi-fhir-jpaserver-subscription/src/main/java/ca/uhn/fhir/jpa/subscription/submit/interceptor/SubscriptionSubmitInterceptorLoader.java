@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.submit.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,9 +17,11 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
@@ -38,16 +38,19 @@ public class SubscriptionSubmitInterceptorLoader {
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
+	@Autowired(required = false)
+	private SubscriptionTopicValidatingInterceptor mySubscriptionTopicValidatingInterceptor;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 	private boolean mySubscriptionValidatingInterceptorRegistered;
 	private boolean mySubscriptionMatcherInterceptorRegistered;
+	private boolean mySubscriptionTopicValidatingInterceptorRegistered;
 
 	@PostConstruct
 	public void start() {
-		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
+		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myStorageSettings.getSupportedSubscriptionTypes();
 
 		if (supportedSubscriptionTypes.isEmpty()) {
 			ourLog.info("Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");
@@ -62,6 +65,11 @@ public class SubscriptionSubmitInterceptorLoader {
 		if (!mySubscriptionValidatingInterceptorRegistered) {
 			myInterceptorRegistry.registerInterceptor(mySubscriptionValidatingInterceptor);
 			mySubscriptionValidatingInterceptorRegistered = true;
+		}
+
+		if (mySubscriptionTopicValidatingInterceptor != null && !mySubscriptionTopicValidatingInterceptorRegistered) {
+			myInterceptorRegistry.registerInterceptor(mySubscriptionTopicValidatingInterceptor);
+			mySubscriptionTopicValidatingInterceptorRegistered = true;
 		}
 	}
 

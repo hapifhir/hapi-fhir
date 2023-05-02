@@ -1,5 +1,3 @@
-package sample.fhir.server.jersey;
-
 /*-
  * #%L
  * hapi-fhir-spring-boot-sample-server-jersey
@@ -19,6 +17,7 @@ package sample.fhir.server.jersey;
  * limitations under the License.
  * #L%
  */
+package sample.fhir.server.jersey;
 
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 

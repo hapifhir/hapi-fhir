@@ -8,12 +8,12 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -22,6 +22,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -34,6 +36,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -43,6 +46,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
 
 @ExtendWith(MockitoExtension.class)
 public class FetchResourceIdsStepTest {
@@ -52,12 +56,12 @@ public class FetchResourceIdsStepTest {
 	private ListAppender<ILoggingEvent> myAppender;
 
 	@Mock
-	private IBulkExportProcessor myBulkExportProcessor;
+	private IBulkExportProcessor<JpaPid> myBulkExportProcessor;
 
 	@InjectMocks
 	private FetchResourceIdsStep myFirstStep;
 	@Mock
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@BeforeEach
 	public void init() {
@@ -69,37 +73,42 @@ public class FetchResourceIdsStepTest {
 		ourLog.detachAppender(myAppender);
 	}
 
-	private BulkExportJobParameters createParameters() {
+	private BulkExportJobParameters createParameters(boolean thePartitioned) {
 		BulkExportJobParameters jobParameters = new BulkExportJobParameters();
-		jobParameters.setStartDate(new Date());
+		jobParameters.setSince(new Date());
 		jobParameters.setOutputFormat("json");
 		jobParameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		jobParameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
+		if (thePartitioned) {
+			jobParameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
+		} else {
+			jobParameters.setPartitionId(RequestPartitionId.allPartitions());
+		}
 		return jobParameters;
 	}
 
 	private StepExecutionDetails<BulkExportJobParameters, VoidModel> createInput(BulkExportJobParameters theParameters,
 																										  JobInstance theInstance) {
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = new StepExecutionDetails<>(
+		return new StepExecutionDetails<>(
 			theParameters,
 			null,
 			theInstance,
 			"1"
 		);
-		return input;
 	}
 
-	@Test
-	public void run_withValidInputs_succeeds() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void run_withValidInputs_succeeds(boolean thePartitioned) {
 		// setup
 		IJobDataSink<ResourceIdList> sink = mock(IJobDataSink.class);
-		BulkExportJobParameters parameters = createParameters();
+		BulkExportJobParameters parameters = createParameters(thePartitioned);
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
 		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
 		ourLog.setLevel(Level.INFO);
-		List<IResourcePersistentId> patientIds = new ArrayList<>();
-		List<IResourcePersistentId> observationIds = new ArrayList<>();
+		List<JpaPid> patientIds = new ArrayList<>();
+		List<JpaPid> observationIds = new ArrayList<>();
 
 		{
 			JpaPid id1 = JpaPid.fromId(123L);
@@ -120,7 +129,7 @@ public class FetchResourceIdsStepTest {
 		)).thenReturn(patientIds.iterator())
 			.thenReturn(observationIds.iterator());
 		int maxFileCapacity = 1000;
-		when(myDaoConfig.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
 		// test
 		RunOutcome outcome = myFirstStep.run(input, sink);
@@ -133,9 +142,7 @@ public class FetchResourceIdsStepTest {
 
 		List<ResourceIdList> results = resultCaptor.getAllValues();
 		assertEquals(parameters.getResourceTypes().size(), results.size());
-		for (int i = 0; i < results.size(); i++) {
-			ResourceIdList idList = results.get(i);
-
+		for (ResourceIdList idList: results) {
 			String resourceType = idList.getResourceType();
 			assertTrue(parameters.getResourceTypes().contains(resourceType));
 
@@ -154,13 +161,19 @@ public class FetchResourceIdsStepTest {
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender, atLeastOnce()).doAppend(logCaptor.capture());
 		List<ILoggingEvent> events = logCaptor.getAllValues();
-		assertTrue(events.get(0).getMessage().contains("Starting BatchExport job"));
-		assertTrue(events.get(1).getMessage().contains("Running FetchResource"));
-		assertTrue(events.get(2).getMessage().contains("Running FetchResource"));
-		assertTrue(events.get(3).getFormattedMessage().contains("Submitted "
+		assertThat(events.get(0).getMessage(), containsString("Fetching resource IDs for bulk export job instance"));
+		assertThat(events.get(1).getMessage(), containsString("Running FetchResource"));
+		assertThat(events.get(2).getMessage(), containsString("Running FetchResource"));
+		assertThat(events.get(3).getFormattedMessage(), containsString("Submitted "
 			+ parameters.getResourceTypes().size()
 			+ " groups of ids for processing"
 		));
+
+		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
+		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());
+		List<ExportPIDIteratorParameters> capturedParameters = mapppedParamsCaptor.getAllValues();
+		assertEquals(parameters.getPartitionId(), capturedParameters.get(0).getPartitionIdOrAllPartitions());
+		assertEquals(parameters.getPartitionId(), capturedParameters.get(1).getPartitionIdOrAllPartitions());
 	}
 
 	@Test
@@ -169,15 +182,15 @@ public class FetchResourceIdsStepTest {
 		IJobDataSink<ResourceIdList> sink = mock(IJobDataSink.class);
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
-		BulkExportJobParameters parameters = createParameters();
+		BulkExportJobParameters parameters = createParameters(false);
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
 		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
 		ourLog.setLevel(Level.INFO);
-		List<IResourcePersistentId> patientIds = new ArrayList<>();
+		List<JpaPid> patientIds = new ArrayList<>();
 
 		// when
 		int maxFileCapacity = 5;
-		when(myDaoConfig.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
 		for (int i = 0; i <= maxFileCapacity; i++) {
 			JpaPid id = JpaPid.fromId((long) i);
@@ -202,7 +215,7 @@ public class FetchResourceIdsStepTest {
 
 		// verify all submitted ids are there
 		boolean found = false;
-		for (IResourcePersistentId pid : patientIds) {
+		for (JpaPid pid : patientIds) {
 			BatchResourceId batchResourceId = BatchResourceId.getIdFromPID(pid, "Patient");
 			for (ResourceIdList idList : listIds) {
 				found = idList.getIds().contains(batchResourceId);

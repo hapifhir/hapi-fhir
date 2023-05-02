@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.config;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cr.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -60,7 +59,6 @@ import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
-import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
@@ -69,6 +67,7 @@ import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDec
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
@@ -78,6 +77,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -89,7 +89,7 @@ import java.util.concurrent.ForkJoinPool;
 
 @Import(AdapterConfiguration.class)
 @Configuration
-public abstract class BaseClinicalReasoningConfig {
+public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 
 	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
 
@@ -111,22 +111,22 @@ public abstract class BaseClinicalReasoningConfig {
 
 	@Bean
 	public CrProperties.CqlProperties cqlProperties(CrProperties theCrProperties) {
-		return theCrProperties.getCql();
+		return theCrProperties.getCqlProperties();
 	}
 
 	@Bean
 	public CrProperties.MeasureProperties measureProperties(CrProperties theCrProperties) {
-		return theCrProperties.getMeasure();
+		return theCrProperties.getMeasureProperties();
 	}
 
 	@Bean
 	public MeasureEvaluationOptions measureEvaluationOptions(CrProperties theCrProperties) {
-		return theCrProperties.getMeasure().getMeasureEvaluation();
+		return theCrProperties.getMeasureProperties().getMeasureEvaluationOptions();
 	}
 
 	@Bean
 	public CqlOptions cqlOptions(CrProperties theCrProperties) {
-		return theCrProperties.getCql().getOptions();
+		return theCrProperties.getCqlProperties().getCqlOptions();
 	}
 
 	@Bean
@@ -136,7 +136,7 @@ public abstract class BaseClinicalReasoningConfig {
 
 	@Bean
 	public CqlTranslatorOptions cqlTranslatorOptions(FhirContext theFhirContext, CrProperties.CqlProperties theCqlProperties) {
-		CqlTranslatorOptions options = theCqlProperties.getOptions().getCqlTranslatorOptions();
+		CqlTranslatorOptions options = theCqlProperties.getCqlOptions().getCqlTranslatorOptions();
 
 		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)
 			&& (options.getCompatibilityLevel().equals("1.5") || options.getCompatibilityLevel().equals("1.4"))) {
@@ -150,21 +150,10 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
+	@Scope("prototype")
 	public ModelManager modelManager(
 		Map<ModelIdentifier, Model> theGlobalModelCache) {
 		return new CacheAwareModelManager(theGlobalModelCache);
-	}
-
-	@Bean
-	public ILibraryManagerFactory libraryManagerFactory(
-		ModelManager theModelManager) {
-		return (providers) -> {
-			LibraryManager libraryManager = new LibraryManager(theModelManager);
-			for (LibrarySourceProvider provider : providers) {
-				libraryManager.getLibrarySourceLoader().registerProvider(provider);
-			}
-			return libraryManager;
-		};
 	}
 
 	@Bean
@@ -216,13 +205,6 @@ public abstract class BaseClinicalReasoningConfig {
 		return new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Bean
-	IFhirResourceDaoValueSet<IBaseResource> valueSetDao(DaoRegistry theDaoRegistry) {
-		return (IFhirResourceDaoValueSet<IBaseResource>) theDaoRegistry
-			.getResourceDao("ValueSet");
-	}
-
 	@Bean
 	public ITerminologyProviderFactory terminologyProviderFactory(
 		IValidationSupport theValidationSupport,
@@ -237,12 +219,13 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
+	@Scope("prototype")
 	ILibraryLoaderFactory libraryLoaderFactory(
 		Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> theGlobalLibraryCache,
 		ModelManager theModelManager, CqlTranslatorOptions theCqlTranslatorOptions, CrProperties.CqlProperties theCqlProperties) {
 		return lcp -> {
 
-			if (theCqlProperties.getOptions().useEmbeddedLibraries()) {
+			if (theCqlProperties.getCqlOptions().useEmbeddedLibraries()) {
 				lcp.add(new FhirLibrarySourceProvider());
 			}
 

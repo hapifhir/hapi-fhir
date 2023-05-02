@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.hl7.fhir.instance.model.api.IBaseResource;

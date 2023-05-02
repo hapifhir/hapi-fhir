@@ -89,7 +89,7 @@ public class BulkImportCommandIT {
 
 	private Batch2JobStartResponse createJobStartResponse(String theId) {
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setJobId(theId);
+		response.setInstanceId(theId);
 		return response;
 	}
 

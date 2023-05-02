@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -194,6 +193,10 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	public void setEndTime(Date theEndTime) {
 		myEndTime = theEndTime;
+	}
+
+	public void setUpdateTime(Date theTime) {
+		myUpdateTime = theTime;
 	}
 
 	public Date getUpdateTime() {

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -73,12 +73,12 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 		mySubscriptionIds.clear();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
 		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}

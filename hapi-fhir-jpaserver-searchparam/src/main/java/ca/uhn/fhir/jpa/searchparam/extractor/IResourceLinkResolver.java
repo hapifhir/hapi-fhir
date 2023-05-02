@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.extractor;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -27,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface IResourceLinkResolver {
 
@@ -35,15 +35,33 @@ public interface IResourceLinkResolver {
 	 * so that we can create indexed links between resources, and so that we can validate that the target actually
 	 * exists in cases where we need to check that.
 	 * <p>
-	 * This method returns an {@link IResourceLookup} so as to avoid needing to resolve the entire resource.
+	 * This method returns an {@link IResourceLookup} to avoid needing to resolve the entire resource.
 	 *
 	 * @param theRequestPartitionId The partition ID of the target resource
-	 * @param theSourceResourceName
+	 * @param theSourceResourceName The resource type for the resource containing the reference
 	 * @param thePathAndRef         The path and reference
 	 * @param theRequest            The incoming request, if any
-	 * @param theTransactionDetails
+	 * @param theTransactionDetails The current TransactionDetails object
 	 */
 	IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+
+	/**
+	 * This method resolves the target of a reference found within a resource that is being created/updated. We do this
+	 * so that we can create indexed links between resources, and so that we can validate that the target actually
+	 * exists in cases where we need to check that.
+	 * <p>
+	 * This method returns an {@link IResourceLookup} to avoid needing to resolve the entire resource.
+	 *
+	 * @param theRequestPartitionId The partition ID of the target resource
+	 * @param theSourceResourceName The resource type for the resource containing the reference
+	 * @param thePathAndRef         The path and reference
+	 * @param theRequest            The incoming request, if any
+	 * @param theTransactionDetails The current TransactionDetails object
+	 */
+	@Nullable
+	IBaseResource loadTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+
+
 
 	void validateTypeOrThrowException(Class<? extends IBaseResource> theType);
 

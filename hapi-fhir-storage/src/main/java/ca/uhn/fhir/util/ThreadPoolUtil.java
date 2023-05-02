@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import org.apache.commons.lang3.Validate;
@@ -44,8 +43,7 @@ public final class ThreadPoolUtil {
 
 	@Nonnull
 	public static ThreadPoolTaskExecutor newThreadPool(int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix, int theQueueCapacity, TaskDecorator taskDecorator) {
-		assert theCorePoolSize == theMaxPoolSize || theQueueCapacity == 0 : "If the queue capacity is greater than 0, core pool size needs to match max pool size or the system won't grow the queue";
-
+		Validate.isTrue(theCorePoolSize == theMaxPoolSize || theQueueCapacity == 0, "If the queue capacity is greater than 0, core pool size needs to match max pool size or the system won't grow the queue");
 		Validate.isTrue(theThreadNamePrefix.endsWith("-"), "Thread pool prefix name must end with a hyphen");
 		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
 		asyncTaskExecutor.setCorePoolSize(theCorePoolSize);

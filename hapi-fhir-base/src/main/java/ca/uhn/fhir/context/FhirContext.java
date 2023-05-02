@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
@@ -57,26 +76,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 /**
  * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then
  * used as a factory for various other types of objects (parsers, clients, etc.).
@@ -129,7 +128,7 @@ public class FhirContext {
 	private volatile Boolean myFormatJsonSupported;
 	private volatile Boolean myFormatNDJsonSupported;
 	private volatile Boolean myFormatRdfSupported;
-	private IFhirValidatorFactory myFhirValidatorFactory = fhirContext -> new FhirValidator(fhirContext);
+	private IFhirValidatorFactory myFhirValidatorFactory = FhirValidator::new;
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -1141,8 +1140,19 @@ public class FhirContext {
 	}
 
 	// TODO KHS add the other primitive types
+	@Deprecated(since = "6.6.0", forRemoval = true)
 	public IPrimitiveType<Boolean> getPrimitiveBoolean(Boolean theValue) {
+		return newPrimitiveBoolean(theValue);
+	}
+
+	public IPrimitiveType<Boolean> newPrimitiveBoolean(Boolean theValue) {
 		IPrimitiveType<Boolean> retval = (IPrimitiveType<Boolean>) getElementDefinition("boolean").newInstance();
+		retval.setValue(theValue);
+		return retval;
+	}
+
+	public IPrimitiveType<String > newPrimitiveString(String theValue) {
+		IPrimitiveType<String> retval = (IPrimitiveType<String>) getElementDefinition("string").newInstance();
 		retval.setValue(theValue);
 		return retval;
 	}

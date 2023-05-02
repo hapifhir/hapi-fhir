@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -15,6 +15,7 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,6 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class NpmDstu3Test extends BaseJpaDstu3Test {
 
@@ -61,7 +61,7 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 
 		int port = JettyUtil.getPortForStartedServer(myServer);
 		jpaPackageCache.getPackageServers().clear();
-		jpaPackageCache.addPackageServer("http://localhost:" + port);
+		jpaPackageCache.addPackageServer(new PackageServer("http://localhost:" + port));
 
 		myResponses.clear();
 	}
@@ -90,22 +90,18 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 
 		CodeSystem cs = (CodeSystem) myNpmJpaValidationSupport.fetchCodeSystem("http://fhir.de/CodeSystem/deuev/anlage-8-laenderkennzeichen");
 		assertEquals("http://fhir.de/CodeSystem/deuev/anlage-8-laenderkennzeichen", cs.getUrl());
-		
+
 		// Try and validate using a profile from the IG
 		Condition condition = new Condition();
 		condition.setClinicalStatus(Condition.ConditionClinicalStatus.RESOLVED);
 		condition.getMeta().addProfile("http://fhir.de/StructureDefinition/condition-de-basis/0.2");
-		try {
-			myConditionDao.validate(condition, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
-			fail();
-		} catch (PreconditionFailedException e) {
-			ourLog.debug("Fail Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+		MethodOutcome result = myConditionDao.validate(condition, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+		OperationOutcome oo = (OperationOutcome) result.getOperationOutcome();
+		assertHasErrors(oo);
+		ourLog.debug("Fail Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertThat(oo.getIssueFirstRep().getDiagnostics(),
-				containsString("Condition.subject: minimum required = 1, but only found 0 (from http://fhir.de/StructureDefinition/condition-de-basis/0.2"));
-		}
-		
+		assertThat(oo.getIssueFirstRep().getDiagnostics(),
+			containsString("Condition.subject: minimum required = 1, but only found 0 (from http://fhir.de/StructureDefinition/condition-de-basis/0.2"));
 	}
 
 

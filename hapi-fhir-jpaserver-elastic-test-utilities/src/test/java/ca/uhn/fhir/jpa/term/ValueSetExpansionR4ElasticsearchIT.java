@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -17,13 +17,13 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -72,8 +72,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 	protected static final String CS_URL = "http://example.com/my_code_system";
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
@@ -106,7 +104,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
 
-
 	@BeforeEach
 	public void beforeEach() {
 		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE)).thenReturn(Boolean.TRUE);
@@ -115,12 +112,12 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
+		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
 	}
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportJobSchedulingHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportJobSchedulingHelper);
 	}
 
 	void createCodeSystem() {
@@ -188,7 +185,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 
 		// Codes available exceeds the max
-		myDaoConfig.setMaximumExpansionSize(50);
+		myStorageSettings.setMaximumExpansionSize(50);
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
@@ -200,7 +197,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		}
 
 		// Increase the max so it won't exceed
-		myDaoConfig.setMaximumExpansionSize(150);
+		myStorageSettings.setMaximumExpansionSize(150);
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
@@ -325,10 +322,10 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		int valuesPerPropKey = thePropertiesCount / thePropertyKeysCount;
 
 		int propsCreated = 0;
-		while(propsCreated < thePropertiesCount) {
+		while (propsCreated < thePropertiesCount) {
 
 			int propKeysCreated = 0;
-			while(propKeysCreated < thePropertyKeysCount && propsCreated < thePropertiesCount) {
+			while (propKeysCreated < thePropertyKeysCount && propsCreated < thePropertiesCount) {
 				String propKey = String.format("%05d", propKeysCreated);
 				String propSeq = String.format("%05d", propsCreated);
 				theTermConcept.addPropertyString("prop-key-" + propKey, "value-" + propSeq);

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,12 +17,13 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -120,7 +119,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 
@@ -499,7 +498,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				termConceptProperty.setConcept(theConceptToAdd);
 				termConceptProperty.setCodeSystemVersion(theCsv);
 			});
-		if (theStatisticsTracker.getUpdatedConceptCount() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+		if (theStatisticsTracker.getUpdatedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
 			saveConcept(conceptToAdd);
 			Long nextConceptPid = conceptToAdd.getId();
 			Validate.notNull(nextConceptPid);
@@ -522,7 +521,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			conceptToAdd.getParents().add(parentLink);
 			ourLog.info("Saving parent/child link - Parent[{}] Child[{}]", parentLink.getParent().getCode(), parentLink.getChild().getCode());
 
-			if (theStatisticsTracker.getUpdatedConceptCount() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+			if (theStatisticsTracker.getUpdatedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
 				myConceptParentChildLinkDao.save(parentLink);
 			} else {
 				myDeferredStorageSvc.addConceptLinkToStorageQueue(parentLink);
@@ -574,7 +573,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theConcept.setCodeSystemVersion(theCodeSystem);
 		theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 
-		if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+		if (theConceptsStack.size() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
 			saveConcept(theConcept);
 		} else {
 			myDeferredStorageSvc.addConceptToStorageQueue(theConcept);
@@ -585,7 +584,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
-			if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+			if (theConceptsStack.size() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
 				saveConceptLink(next);
 			} else {
 				myDeferredStorageSvc.addConceptLinkToStorageQueue(next);

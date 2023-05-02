@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.index;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -127,8 +126,8 @@ public class DaoSearchParamSynchronizer {
 	}
 
 
-	<T> List<T> subtract(Collection<T> theSubtractFrom, Collection<T> theToSubtract) {
-		assert theSubtractFrom != theToSubtract;
+	public static <T> List<T> subtract(Collection<T> theSubtractFrom, Collection<T> theToSubtract) {
+		assert theSubtractFrom != theToSubtract || (theSubtractFrom.isEmpty());
 
 		if (theSubtractFrom.isEmpty()) {
 			return new ArrayList<>();

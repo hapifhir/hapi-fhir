@@ -1,5 +1,3 @@
-package ca.uhn.fhir.validation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -333,7 +332,7 @@ public class FhirValidator {
 				retval.addAll(messages);
 			}
 		} catch (InterruptedException | ExecutionException exp) {
-			throw new InternalErrorException(Msg.code(1975) + exp);
+			throw new InternalErrorException(Msg.code(2246) + exp);
 		}
 		return retval;
 	}

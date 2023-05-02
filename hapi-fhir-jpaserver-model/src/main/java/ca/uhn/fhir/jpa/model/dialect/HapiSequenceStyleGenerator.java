@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.dialect;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,33 +17,27 @@ package ca.uhn.fhir.jpa.model.dialect;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.dialect;
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.boot.model.relational.Database;
 import org.hibernate.boot.model.relational.SqlStringGenerationContext;
-import org.hibernate.boot.registry.StandardServiceInitiator;
-import org.hibernate.boot.registry.internal.StandardServiceRegistryImpl;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.BulkInsertionCapableIdentifierGenerator;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.id.PersistentIdentifierGenerator;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.id.enhanced.StandardOptimizerDescriptor;
-import org.hibernate.service.Service;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.spi.ServiceRegistryImplementor;
 import org.hibernate.type.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Properties;
-
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 /**
  * This is a sequence generator that wraps the Hibernate default sequence generator {@link SequenceStyleGenerator}
@@ -55,7 +47,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class HapiSequenceStyleGenerator implements IdentifierGenerator, PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator {
 	private final SequenceStyleGenerator myGen = new SequenceStyleGenerator();
 	@Autowired
-	private ModelConfig myModelConfig;
+	private StorageSettings myStorageSettings;
 	private ISequenceValueMassager myIdMassager;
 	private boolean myConfigured;
 	private String myGeneratorName;
@@ -72,17 +64,21 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 
 	@Override
 	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject) throws HibernateException {
-		Long next = (Long) myGen.generate(theSession, theObject);
-		return myIdMassager.massage(myGeneratorName, next);
+		Long retVal = myIdMassager.generate(myGeneratorName);
+		if (retVal == null) {
+			Long next = (Long) myGen.generate(theSession, theObject);
+			retVal = myIdMassager.massage(myGeneratorName, next);
+		}
+		return retVal;
 	}
 
 	@Override
 	public void configure(Type theType, Properties theParams, ServiceRegistry theServiceRegistry) throws MappingException {
 
 		// Instantiate the ID massager
-		// ModelConfig should only be null when running in the DDL generation maven plugin
-		if (myModelConfig != null) {
-			myIdMassager = ReflectionUtil.newInstance(myModelConfig.getSequenceValueMassagerClass());
+		// StorageSettings should only be null when running in the DDL generation maven plugin
+		if (myStorageSettings != null) {
+			myIdMassager = ReflectionUtil.newInstance(myStorageSettings.getSequenceValueMassagerClass());
 		}
 
 		// Create a HAPI FHIR sequence style generator

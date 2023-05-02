@@ -1,5 +1,3 @@
-package ca.uhn.test.concurrency;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.test.concurrency;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.test.concurrency;
 
 
 import ca.uhn.fhir.i18n.Msg;
@@ -44,6 +43,7 @@ import java.util.stream.Collectors;
 // This class is primarily used for testing.
 public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private static final Logger ourLog = LoggerFactory.getLogger(PointcutLatch.class);
+
 	private static final int DEFAULT_TIMEOUT_SECONDS = 10;
 	private static final FhirObjectPrinter ourFhirObjectToStringMapper = new FhirObjectPrinter();
 

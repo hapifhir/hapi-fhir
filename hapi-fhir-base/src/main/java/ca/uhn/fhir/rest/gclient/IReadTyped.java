@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.gclient;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;

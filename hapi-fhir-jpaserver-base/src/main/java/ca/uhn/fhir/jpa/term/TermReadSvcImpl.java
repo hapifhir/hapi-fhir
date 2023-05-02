@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.term;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -28,7 +27,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -235,7 +234,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Autowired
 	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
@@ -350,8 +349,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
 		boolean retVal = theSetToPopulate.add(theConcept);
 		if (retVal) {
-			if (theSetToPopulate.size() >= myDaoConfig.getMaximumExpansionSize()) {
-				String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
+			if (theSetToPopulate.size() >= myStorageSettings.getMaximumExpansionSize()) {
+				String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "expansionTooLarge", myStorageSettings.getMaximumExpansionSize());
 				throw new ExpansionTooCostlyException(Msg.code(885) + msg);
 			}
 		}
@@ -432,7 +431,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		int count = expansionOptions.getCount();
 
 		ValueSetExpansionComponentWithConceptAccumulator accumulator = new ValueSetExpansionComponentWithConceptAccumulator(myContext, count, expansionOptions.isIncludeHierarchy());
-		accumulator.setHardExpansionMaximumSize(myDaoConfig.getMaximumExpansionSize());
+		accumulator.setHardExpansionMaximumSize(myStorageSettings.getMaximumExpansionSize());
 		accumulator.setSkipCountRemaining(offset);
 		accumulator.setIdentifier(UUID.randomUUID().toString());
 		accumulator.setTimestamp(new Date());
@@ -535,7 +534,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		offset = Math.min(offset, theTermValueSet.getTotalConcepts().intValue());
 
 		Integer count = theAccumulator.getCapacityRemaining();
-		count = defaultIfNull(count, myDaoConfig.getMaximumExpansionSize());
+		count = defaultIfNull(count, myStorageSettings.getMaximumExpansionSize());
 
 		int conceptsExpanded = 0;
 		int designationsExpanded = 0;
@@ -1900,7 +1899,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Override
 	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {
-		if (!myDaoConfig.isEnableTaskPreExpandValueSets()) {
+		if (!myStorageSettings.isEnableTaskPreExpandValueSets()) {
 			return;
 		}
 		if (isNotSafeToPreExpandValueSets()) {

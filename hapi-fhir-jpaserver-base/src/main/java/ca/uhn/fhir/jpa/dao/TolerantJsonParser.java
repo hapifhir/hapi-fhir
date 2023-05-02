@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -111,7 +110,7 @@ public class TolerantJsonParser extends JsonParser {
 	}
 
 	public static TolerantJsonParser createWithLenientErrorHandling(FhirContext theContext, @Nullable Long theResourcePid) {
-		LenientErrorHandler errorHandler = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
+		LenientErrorHandler errorHandler = new LenientErrorHandler(false).disableAllErrors();
 		return new TolerantJsonParser(theContext, errorHandler, theResourcePid);
 	}
 }

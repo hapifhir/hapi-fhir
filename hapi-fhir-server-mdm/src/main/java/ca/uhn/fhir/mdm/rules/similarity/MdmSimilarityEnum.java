@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.rules.similarity;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.rules.similarity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.rules.similarity;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -97,13 +97,13 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		super.after();
 
 		myServer.unregisterInterceptor(myRequestValidatingInterceptor);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		myPagingProvider.setMaximumPageSize(myPreviousMaxPageSize);
 
 		SearchCoordinatorSvcImpl searchCoordinator = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 		searchCoordinator.setLoadingThrottleForUnitTests(null);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 
 	}
 
@@ -121,12 +121,12 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myPagingProvider.setMaximumPageSize(300);
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testNoDuplicatesInSearchResults() throws Exception {
 		int resourceCount = 1000;
 		int queryCount = 30;
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(50, 200, -1));
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(50, 200, -1));
 
 		SearchCoordinatorSvcImpl searchCoordinator = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 		searchCoordinator.setLoadingThrottleForUnitTests(10);
@@ -198,10 +198,10 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(resourceCount, ids.size());
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testPageThroughLotsOfPages() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		/*
 		 * This test creates a really huge number of resources to make sure that even large scale
@@ -270,10 +270,10 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(count - 1000, Sets.newHashSet(ids).size());
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testPageThroughLotsOfPages2() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		Bundle bundle = new Bundle();
 
@@ -306,7 +306,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testSearchWithLargeNumberOfIncludes() {
 
@@ -355,7 +355,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1001, resultsAndIncludes.size());
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testUpdateListWithLargeNumberOfEntries() {
 		int numPatients = 3000;
@@ -395,7 +395,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testMultithreadedSearch() throws Exception {
 		Bundle input = new Bundle();
@@ -532,7 +532,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	 * JpaValidationSupportDstuXX be transactional, which it should have been
 	 * anyhow.
 	 */
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testMultithreadedSearchWithValidation() throws Exception {
 		myServer.registerInterceptor(myRequestValidatingInterceptor);
@@ -571,14 +571,14 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		validateNoErrors(tasks);
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void test_DeleteExpunge_withLargeBatchSizeManyResources() {
 		// setup
 		int batchSize = 1000;
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setDeleteExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
 
 		// create patients
 		for (int i = 0; i < batchSize; i++) {
@@ -613,12 +613,12 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertThat(deleteCount, is(equalTo(59)));
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testDeleteExpungeOperationOverLargeDataset() {
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setDeleteExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
 
 		// setup
 		Patient patient = new Patient();

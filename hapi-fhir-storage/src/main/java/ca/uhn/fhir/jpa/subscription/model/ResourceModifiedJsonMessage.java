@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -56,11 +55,20 @@ public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifie
 
 	@Override
 	@Nullable
-	public String getMessageKeyOrNull() {
+	public String getMessageKey() {
 		if (myPayload == null) {
 			return null;
 		}
-		return myPayload.getMessageKeyOrNull();
+		return myPayload.getMessageKey();
+	}
+
+	@Override
+	@Nullable
+	public String getMessageKeyOrDefault() {
+		if (myPayload == null) {
+			return null;
+		}
+		return myPayload.getMessageKeyOrDefault();
 	}
 
 	@Override

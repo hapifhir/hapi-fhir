@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -44,7 +43,7 @@ import javax.persistence.Table;
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_COORDS", indexes = {
-	@Index(name = "IDX_SP_COORDS_HASH", columnList = "HASH_IDENTITY,SP_LATITUDE,SP_LONGITUDE"),
+	@Index(name = "IDX_SP_COORDS_HASH_V2", columnList = "HASH_IDENTITY,SP_LATITUDE,SP_LONGITUDE,RES_ID,PARTITION_ID"),
 	@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
 })

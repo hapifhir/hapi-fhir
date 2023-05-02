@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.partition;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.partition;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -29,7 +28,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -47,7 +45,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
 import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCallHooks;
 import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCallHooksAndReturnObject;
 import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.hasHooks;
@@ -94,39 +91,44 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	 */
 	@Nonnull
 	@Override
-	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, ReadPartitionIdRequestDetails theDetails) {
+	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
 		RequestPartitionId requestPartitionId;
 
-		boolean nonPartitionableResource = !isResourcePartitionable(theResourceType);
+		String resourceType = theDetails != null ? theDetails.getResourceType() : null;
+		boolean nonPartitionableResource = !isResourcePartitionable(resourceType);
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			// Handle system requests
+
+			RequestDetails requestDetails = theRequest;
 			//TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through SystemRequestDetails instead.
-			if ((theRequest == null || theRequest instanceof SystemRequestDetails) && nonPartitionableResource) {
-				return RequestPartitionId.defaultPartition();
+			if (requestDetails == null) {
+				requestDetails = new SystemRequestDetails();
 			}
 
-			if (theRequest instanceof SystemRequestDetails && systemRequestHasExplicitPartition((SystemRequestDetails) theRequest)) {
-				requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
-			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequest)) {
+			// Handle system requests
+			if (requestDetails instanceof SystemRequestDetails && systemRequestHasExplicitPartition((SystemRequestDetails) requestDetails) && !nonPartitionableResource) {
+				requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) requestDetails, nonPartitionableResource);
+			} else if ((requestDetails instanceof SystemRequestDetails) && nonPartitionableResource) {
+				return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, requestDetails)) {
 				// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
 				HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
-			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
+					.add(RequestDetails.class, requestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, requestDetails);
+				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, requestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
+			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, requestDetails)) {
 				// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 				HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(RequestDetails.class, requestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, requestDetails)
 					.add(ReadPartitionIdRequestDetails.class, theDetails);
-				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
+				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, requestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 			} else {
 				requestPartitionId = null;
 			}
 
 			validateRequestPartitionNotNull(requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
 
-			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, theResourceType);
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, requestDetails, resourceType);
 		}
 
 		return RequestPartitionId.allPartitions();
@@ -136,17 +138,26 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	public RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails) {
 		RequestPartitionId retVal = null;
 
-		if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequestDetails)) {
-			// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
-			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			retVal = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
-
-			if (retVal != null) {
-				retVal = validateNormalizeAndNotifyHooksForRead(retVal, theRequestDetails, null);
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			if (theRequestDetails instanceof SystemRequestDetails) {
+				SystemRequestDetails systemRequestDetails = (SystemRequestDetails) theRequestDetails;
+				retVal = systemRequestDetails.getRequestPartitionId();
 			}
+		}
 
+		if (retVal == null) {
+			if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequestDetails)) {
+				// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				retVal = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
+
+				if (retVal != null) {
+					retVal = validateNormalizeAndNotifyHooksForRead(retVal, theRequestDetails, null);
+				}
+
+			}
 		}
 
 		return retVal;
@@ -240,16 +251,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	private boolean systemRequestHasExplicitPartition(@Nonnull SystemRequestDetails theRequest) {
 		return theRequest.getRequestPartitionId() != null || theRequest.getTenantId() != null;
-	}
-
-	@Nonnull
-	@Override
-	public PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId) {
-		Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
-		if (partitionId == null) {
-			partitionId = myPartitionSettings.getDefaultPartitionId();
-		}
-		return new PartitionablePartitionId(partitionId, theRequestPartitionId.getPartitionDate());
 	}
 
 	@Nonnull

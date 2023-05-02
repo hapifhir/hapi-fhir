@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -26,8 +25,10 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -53,13 +54,15 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCreatePlaceholdersR4Test.class);
 
+	private static final String TEST_IDENTIFIER_SYSTEM = "http://some-system.com";
+
 	@AfterEach
 	public final void afterResetDao() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
-		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
-		myDaoConfig.setBundleTypesAllowedForStorage(new DaoConfig().getBundleTypesAllowedForStorage());
-		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myStorageSettings.setBundleTypesAllowedForStorage(new JpaStorageSettings().getBundleTypesAllowedForStorage());
+		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
 	}
 
 	@Test
@@ -77,8 +80,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateWithBadReferenceIsPermitted() {
-		assertFalse(myDaoConfig.isAutoCreatePlaceholderReferenceTargets());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		assertFalse(myStorageSettings.isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		Observation o = new Observation();
 		o.setStatus(ObservationStatus.FINAL);
@@ -88,7 +91,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateWithMultiplePlaceholders() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		Task task = new Task();
 		task.addNote().setText("A note");
@@ -128,8 +131,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testUpdateWithBadReferenceIsPermittedAlphanumeric() {
-		assertFalse(myDaoConfig.isAutoCreatePlaceholderReferenceTargets());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		assertFalse(myStorageSettings.isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		Observation o = new Observation();
 		o.setStatus(ObservationStatus.FINAL);
@@ -154,9 +157,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testUpdateWithBadReferenceIsPermittedNumeric() {
-		assertFalse(myDaoConfig.isAutoCreatePlaceholderReferenceTargets());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+		assertFalse(myStorageSettings.isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		myCaptureQueriesListener.clear();
 
@@ -166,8 +169,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.logAllQueries();
 
-		runInTransaction(()->{
-			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(()->new IllegalArgumentException());
+		runInTransaction(() -> {
+			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals(1, entity.getVersion());
 		});
 
@@ -184,8 +187,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		o.getSubject().setReference("Patient/999999999999999");
 		myObservationDao.update(o, mySrd);
 
-		runInTransaction(()->{
-			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(()->new IllegalArgumentException());
+		runInTransaction(() -> {
+			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals(2, entity.getVersion());
 		});
 
@@ -196,12 +199,12 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		map.add("_id", new TokenParam("999999999999999"));
 		IBundleProvider outcome = myPatientDao.search(map);
 		assertEquals(1, outcome.size().intValue());
-		assertEquals("Patient/999999999999999", outcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals("Patient/999999999999999", outcome.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
 	public void testCreatePlaceholderExtension_WithUpdateToTarget() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		// Create an Observation that references a Patient
 		Observation obsToCreate = new Observation();
@@ -245,9 +248,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_IdentifierNotCopied() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(false);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(false);
 
 		Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
@@ -268,13 +271,13 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	//	IF the inline match URL does include an identifier
 	//	AND the reference does not include an identifier
 	//	AND a placeholder reference target is to be created
-   //	DO use the value of the inline match URL's identifier to populate an identifier in the placeholder
+	//	DO use the value of the inline match URL's identifier to populate an identifier in the placeholder
 
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_NoReferenceDefined() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
 		/*
 		 * Create an Observation that references a Patient
@@ -316,9 +319,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	//	DO use the value of the reference's identifier to populate an identifier in the placeholder
 	@Test
 	public void testCreatePlaceholderReferenceWhereInlineMatchUrlDoesNotContainIdentifierButSubjectReferenceDoes() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
 		/*
 		 * Create an Observation that references a Patient
@@ -362,9 +365,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	//	DO use only the value of the reference's identifier to populate an identifier in the placeholder
 	@Test
 	public void testCreatePlaceholderWithMatchingInlineAndSubjectReferenceIdentifiersCreatesOnlyOne() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
 		/*
 		 * Create an Observation that references a Patient
@@ -400,6 +403,75 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testCreatePlaceholderWithMatchingInlineAndSubjectReferenceIdentifiersCreatesOnlyOne_withConditionalUrl() {
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		final String system = "http://bar";
+		final String value = "http://something.something/b";
+
+		/*
+		 * Create an Observation that references a Patient
+		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
+		 */
+		final Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		obsToCreate.getSubject().setReference(String.format("%s?identifier=%s|%s", ResourceType.Patient.name(), system, value));
+		obsToCreate.getSubject().getIdentifier().setSystem(system).setValue(value);
+		final IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
+
+		// Read the Observation
+		final Observation createdObs = myObservationDao.read(obsId, new SystemRequestDetails());
+
+		//Read the Placeholder Patient
+		final Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()), new SystemRequestDetails());
+
+		//Ensure the Obs has the right placeholder ID.
+		final IIdType placeholderPatId = placeholderPat.getIdElement();
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
+		assertTrue(placeholderPatId.isIdPartValidLong());
+		assertTrue(placeholderPatId.isVersionIdPartValidLong());
+
+
+			/*
+		 * Should have a single identifier populated.
+		 */
+		assertEquals(1, placeholderPat.getIdentifier().size());
+		final List<Identifier> identifiers = placeholderPat.getIdentifier();
+		Identifier identifier = identifiers.get(0);
+		assertThat(identifier.getSystem(), is(equalTo(system)));
+		assertThat(identifier.getValue(), is(equalTo(value)));
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_conditionalCreateOrganizationAndOrganization() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		final String identifierValue = "http://some-url-value/Organization/ID2";
+
+		// Test fails with Organization and Organization
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+
+		myPatientDao.create(patient, mySrd);
+
+		//Read the Placeholder Observation
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
+		assertEquals(1, organizationSearch.getAllResourceIds().size());
+	}
+
 	//	Case 4:
 	//
 	//	IF the inline match URL does include an identifier
@@ -409,9 +481,12 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	//	DO use both the value of the inline match URL's identifier and the value of the reference's identifier to populate two identifiers in the placeholder
 	@Test
 	public void testCreatePlaceholderWithMisMatchedIdentifiers_BothIdentifiersCopied() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		final String system = "http://bar";
+		final String value = "321";
 
 		/*
 		 * Create an Observation that references a Patient
@@ -420,7 +495,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
 		obsToCreate.getSubject().setReference("Patient?identifier=http://foo|123");
-		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("321");
+		obsToCreate.getSubject().getIdentifier().setSystem(system).setValue(value);
 		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
 
 		// Read the Observation
@@ -446,8 +521,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertThat(identifiers.get(1).getValue(), is(equalTo("123")));
 
 		//subject identifier
-		assertThat(identifiers.get(0).getSystem(), is(equalTo("http://bar")));
-		assertThat(identifiers.get(0).getValue(), is(equalTo("321")));
+		assertThat(identifiers.get(0).getSystem(), is(equalTo(system)));
+		assertThat(identifiers.get(0).getValue(), is(equalTo(value)));
 
 
 		// Conditionally update a Patient with the same identifier
@@ -473,8 +548,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_IdentifierCopiedByDefault_WithUpdateToTarget() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		/*
 		 * Create an Observation that references a Patient
@@ -523,8 +598,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_IdentifierCopiedByDefault_NotPreExisting() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
@@ -544,9 +619,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_IdentifierNotCopiedBecauseNoFieldMatches() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setBundleTypesAllowedForStorage(Sets.newHashSet(""));
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setBundleTypesAllowedForStorage(Sets.newHashSet(""));
 
 		AuditEvent eventToCreate = new AuditEvent();
 		Reference what = eventToCreate.addEntity().getWhat();
@@ -561,8 +636,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_PreExisting() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient patient = new Patient();
 		patient.setId("ABC");
@@ -581,7 +656,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testAutocreatePlaceholderTest() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		Observation obs = new Observation();
 		obs.setId("Observation/DEF");
@@ -600,8 +675,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testAutocreatePlaceholderWithTargetExistingAlreadyTest() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoVersionReferenceAtPaths("Observation.subject");
 
 		String patientId = "Patient/RED";
 
@@ -638,8 +713,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testAutocreatePlaceholderWithExistingTargetWithServerAssignedIdTest() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoVersionReferenceAtPaths("Observation.subject");
 
 		// create
 		Patient patient = new Patient();
@@ -670,10 +745,10 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testMultipleVersionedReferencesToAutocreatedPlaceholder() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		HashSet<String> refPaths = new HashSet<>();
 		refPaths.add("Observation.subject");
-		myModelConfig.setAutoVersionReferenceAtPaths(refPaths);
+		myStorageSettings.setAutoVersionReferenceAtPaths(refPaths);
 
 
 		Observation obs1 = new Observation();
@@ -696,7 +771,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testMultipleReferencesToAutocreatedPlaceholder() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		Observation obs1 = new Observation();
 		obs1.setId("Observation/DEF1");

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -82,7 +81,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private transient PartitionSettings myPartitionSettings;
 
 	@Transient
-	private transient ModelConfig myModelConfig;
+	private transient StorageSettings myStorageSettings;
 
 	@Override
 	public abstract Long getId();
@@ -111,7 +110,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		myMissing = source.myMissing;
 		myParamName = source.myParamName;
 		myUpdated = source.myUpdated;
-		myModelConfig = source.myModelConfig;
+		myStorageSettings = source.myStorageSettings;
 		myPartitionSettings = source.myPartitionSettings;
 		setPartitionId(source.getPartitionId());
 	}
@@ -160,12 +159,12 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return this;
 	}
 
-	public ModelConfig getModelConfig() {
-		return myModelConfig;
+	public StorageSettings getStorageSettings() {
+		return myStorageSettings;
 	}
 
-	public BaseResourceIndexedSearchParam setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
+	public BaseResourceIndexedSearchParam setStorageSettings(StorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 		return this;
 	}
 

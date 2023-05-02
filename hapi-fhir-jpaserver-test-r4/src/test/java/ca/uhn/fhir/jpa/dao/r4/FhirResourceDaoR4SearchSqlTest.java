@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -17,8 +17,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -32,12 +37,12 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 	}
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setTagStorageMode(DaoConfig.DEFAULT_TAG_STORAGE_MODE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.DEFAULT_TAG_STORAGE_MODE);
 	}
 
 	/**
@@ -105,11 +110,12 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchByProfile_InlineMode() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
-		boolean reindexParamCache = myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange();
-		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+		boolean reindexParamCache = myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 
-		SearchParameter searchParameter = FhirResourceDaoR4TagsTest.createSearchParamForInlineResourceProfile();
+// 		SearchParameter searchParameter = FhirResourceDaoR4TagsTest.createSearchParamForInlineResourceProfile();
+		SearchParameter searchParameter = FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineProfile();
 		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
@@ -136,7 +142,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 		assertThat(toUnqualifiedVersionlessIds(outcome), Matchers.contains(id));
 
-		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(reindexParamCache);
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(reindexParamCache);
 	}
 
 

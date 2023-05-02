@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,7 +17,9 @@ package ca.uhn.fhir.jpa.api.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.model;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 
 import java.util.Date;
@@ -46,6 +46,8 @@ public class Batch2JobInfo {
 
 	// the output report (stringified json of whatever the reduction step outputs)
 	private String myReport;
+
+	private RequestPartitionId myRequestPartitionId;
 
 	public String getJobId() {
 		return myJobId;
@@ -101,5 +103,13 @@ public class Batch2JobInfo {
 
 	public void setErrorMsg(String theErrorMsg) {
 		myErrorMsg = theErrorMsg;
+	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
+	}
+
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+		myRequestPartitionId = theRequestPartitionId;
 	}
 }

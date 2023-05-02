@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -99,7 +98,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion,
 			theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (getConfig().isLastNEnabled()) {
+		if (getStorageSettings().isLastNEnabled()) {
 			if (!retVal.isUnchangedInCurrentOperation()) {
 				if (retVal.getDeleted() == null) {
 					// Update indexes here for LastN operation.

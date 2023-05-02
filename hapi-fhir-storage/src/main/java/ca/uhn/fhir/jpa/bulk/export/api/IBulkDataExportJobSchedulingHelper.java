@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.export.api;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.export.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.api;
 
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,5 +34,6 @@ public interface IBulkDataExportJobSchedulingHelper {
 	 * Stops all invoked jobs, and then purges them.
 	 */
 	@Transactional(propagation = Propagation.NEVER)
+	@Deprecated
 	void cancelAndPurgeAllJobs();
 }

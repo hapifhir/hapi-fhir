@@ -1,5 +1,3 @@
-package ca.uhn.fhir.exception;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.exception;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.exception;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 

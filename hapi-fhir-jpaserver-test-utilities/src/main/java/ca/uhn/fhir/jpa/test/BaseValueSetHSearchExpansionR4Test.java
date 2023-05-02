@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.test;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,10 +17,11 @@ package ca.uhn.fhir.jpa.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -117,63 +116,44 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
 	private static final String CS_URL_3 = "http://example.com/my_code_system3";
-
-	@Autowired FhirContext myFhirContext;
-	@Autowired PlatformTransactionManager myTxManager;
-
-	@Autowired
-	private EntityManager myEntityManager;
-
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
-
-	@Autowired
-	protected DaoConfig myDaoConfig;
-
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<org.hl7.fhir.r4.model.CodeSystem> myCodeSystemDao;
-
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
-
 	@Autowired
 	protected ITermReadSvc myTermSvc;
-
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
-
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
-
-	@Autowired
-	private IFhirSystemDao mySystemDao;
-
-	@Autowired
-	private IResourceReindexingSvc myResourceReindexingSvc;
-
-	@Autowired
-	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
-
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-
-	@Autowired
-	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
-
 	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
-
+	@Autowired
+	FhirContext myFhirContext;
+	@Autowired
+	PlatformTransactionManager myTxManager;
+	@Autowired
+	private EntityManager myEntityManager;
+	@Autowired
+	private IFhirSystemDao mySystemDao;
+	@Autowired
+	private IResourceReindexingSvc myResourceReindexingSvc;
+	@Autowired
+	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
-
 
 	@BeforeEach
 	public void beforeEach() {
@@ -182,30 +162,30 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 		purgeHibernateSearch(myEntityManager);
 
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setSchedulingDisabled(true);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
-		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@AfterEach()
 	public void afterCleanupDao() {
-		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
-		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
+		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
+		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
 	}
 
 	@AfterEach
@@ -218,6 +198,246 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		deferredSvc.clearDeferred();
 	}
 
+	private List<String> generateCodes(int theCodesQueriedCount) {
+		return IntStream.range(0, theCodesQueriedCount)
+			.mapToObj(i -> "generated-code-" + i).collect(Collectors.toList());
+	}
+
+	public long createLoincSystemWithSomeCodes() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(LOINC_URI);
+		codeSystem.setId("test-loinc");
+		codeSystem.setVersion("SYSTEM VERSION");
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		IIdType csId = myCodeSystemDao.create(codeSystem).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(csId.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion termCodeSystemVersion = new TermCodeSystemVersion();
+		termCodeSystemVersion.setResource(table);
+
+		TermConcept code1 = new TermConcept(termCodeSystemVersion, "50015-7"); // has -3 as a child
+		TermConcept code2 = new TermConcept(termCodeSystemVersion, "43343-3"); // has -4 as a child
+		TermConcept code3 = new TermConcept(termCodeSystemVersion, "43343-4"); //has no children
+		TermConcept code4 = new TermConcept(termCodeSystemVersion, "47239-9"); //has no children
+
+		code1.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
+		code1.addPropertyCoding(
+			"child",
+			LOINC_URI,
+			code2.getCode(),
+			code2.getDisplay());
+		code1.addChild(code2, RelationshipTypeEnum.ISA);
+		termCodeSystemVersion.getConcepts().add(code1);
+
+		code2.addPropertyString("SYSTEM", "Ser");
+		code2.addPropertyString("HELLO", "12345-1");
+		code2.addPropertyCoding(
+			"parent",
+			LOINC_URI,
+			code1.getCode(),
+			code1.getDisplay());
+		code2.addPropertyCoding(
+			"child",
+			LOINC_URI,
+			code3.getCode(),
+			code3.getDisplay());
+		code2.addChild(code3, RelationshipTypeEnum.ISA);
+		code2.addPropertyCoding(
+			"child",
+			LOINC_URI,
+			code4.getCode(),
+			code4.getDisplay());
+		code2.addChild(code4, RelationshipTypeEnum.ISA);
+		termCodeSystemVersion.getConcepts().add(code2);
+
+		code3.addPropertyString("SYSTEM", "Ser");
+		code3.addPropertyString("HELLO", "12345-2");
+		code3.addPropertyCoding(
+			"parent",
+			LOINC_URI,
+			code2.getCode(),
+			code2.getDisplay());
+		termCodeSystemVersion.getConcepts().add(code3);
+
+		code4.addPropertyString("SYSTEM", "^Patient");
+		code4.addPropertyString("EXTERNAL_COPYRIGHT_NOTICE", "Copyright © 2006 World Health Organization...");
+		code4.addPropertyCoding(
+			"parent",
+			LOINC_URI,
+			code2.getCode(),
+			code2.getDisplay());
+		termCodeSystemVersion.getConcepts().add(code4);
+
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", termCodeSystemVersion, table);
+
+		return csId.getIdPartAsLong();
+	}
+
+	private IIdType createCodeSystem() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setName("SYSTEM NAME");
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept parent;
+		parent = new TermConcept(cs, "ParentWithNoChildrenA");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenB");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenC");
+		cs.getConcepts().add(parent);
+
+		TermConcept parentA = new TermConcept(cs, "ParentA");
+		cs.getConcepts().add(parentA);
+
+		TermConcept childAA = new TermConcept(cs, "childAA");
+		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAA = new TermConcept(cs, "childAAA");
+		childAAA.addPropertyString("propA", "valueAAA");
+		childAAA.addPropertyString("propB", "foo");
+		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAB = new TermConcept(cs, "childAAB");
+		childAAB.addPropertyString("propA", "valueAAB");
+		childAAB.addPropertyString("propB", "foo");
+		childAAB.addDesignation()
+			.setLanguage("D1L")
+			.setUseSystem("D1S")
+			.setUseCode("D1C")
+			.setUseDisplay("D1D")
+			.setValue("D1V");
+		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
+
+		TermConcept childAB = new TermConcept(cs, "childAB");
+		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
+
+		TermConcept parentB = new TermConcept(cs, "ParentB");
+		cs.getConcepts().add(parentB);
+
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		return id;
+	}
+
+	private void createCodeSystem2() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL_2);
+		codeSystem.setVersion("SYSTEM VERSION");
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept parentA = new TermConcept(cs, "CS2");
+		cs.getConcepts().add(parentA);
+
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+
+	}
+
+	private IIdType createCodeSystem3() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL_3);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setName("SYSTEM NAME 3");
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept parent;
+		parent = new TermConcept(cs, "ParentWithNoChildrenA");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenB");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenC");
+		cs.getConcepts().add(parent);
+
+		TermConcept parentA = new TermConcept(cs, "ParentA");
+		cs.getConcepts().add(parentA);
+
+		TermConcept childAA = new TermConcept(cs, "childAA");
+		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAA = new TermConcept(cs, "childAAA");
+		childAAA.addPropertyString("propA", "valueAAA");
+		childAAA.addPropertyString("propB", "foo");
+		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAB = new TermConcept(cs, "childAAB");
+		childAAB.addPropertyString("propA", "valueAAB");
+		childAAB.addPropertyString("propB", "foo");
+		childAAB.addDesignation()
+			.setLanguage("D1L")
+			.setUseSystem("D1S")
+			.setUseCode("D1C")
+			.setUseDisplay("D1D")
+			.setValue("D1V");
+		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAC = new TermConcept(cs, "childAAC");
+		childAAC.addPropertyString("propA", "valueAAC");
+		childAAC.addPropertyString("propB", "No IG exists");
+		childAA.addChild(childAAC, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAD = new TermConcept(cs, "childAAD");
+		childAAD.addPropertyString("propA", "valueAAD");
+		childAAD.addPropertyString("propB", "IG exists");
+		childAA.addChild(childAAD, RelationshipTypeEnum.ISA);
+
+		// this one shouldn't come up in search result because searched argument is not in searched property (propB) but in propA
+		TermConcept childAAE = new TermConcept(cs, "childAAE");
+		childAAE.addPropertyString("propA", "IG exists");
+		childAAE.addPropertyString("propB", "valueAAE");
+		childAA.addChild(childAAE, RelationshipTypeEnum.ISA);
+
+		TermConcept childAB = new TermConcept(cs, "childAB");
+		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
+
+		TermConcept parentB = new TermConcept(cs, "ParentB");
+		cs.getConcepts().add(parentB);
+
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		return id;
+	}
+
+	private List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
+		List<String> retVal = new ArrayList<>();
+
+		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {
+			retVal.add(next.getCode());
+		}
+
+		return retVal;
+	}
+
+	@Override
+	protected FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
+	}
 
 	@Nested
 	public class TestExpandLoincValueSetFilter {
@@ -1441,7 +1661,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 
 			// Codes available exceeds the max
-			myDaoConfig.setMaximumExpansionSize(50);
+			myStorageSettings.setMaximumExpansionSize(50);
 			ValueSet vs = new ValueSet();
 			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
@@ -1453,7 +1673,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			}
 
 			// Increase the max so it won't exceed
-			myDaoConfig.setMaximumExpansionSize(150);
+			myStorageSettings.setMaximumExpansionSize(150);
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
@@ -1477,9 +1697,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 
-
 	}
-
 
 	@Nested
 	public class TestExpandValueSetProperty {
@@ -1705,7 +1923,6 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 	}
 
-
 	/**
 	 * Test associated to searching with a number of terms larger than BooleanQuery.getMaxClauseCount()
 	 */
@@ -1740,7 +1957,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			// insert existing codes into list of codes searched
 			allCodesNotIncludingSearched.addAll(insertIndex, existingCodes);
 
-			List<EntityReference> hits =  search(allCodesNotIncludingSearched);
+			List<EntityReference> hits = search(allCodesNotIncludingSearched);
 			assertEquals(existingCodes.size(), hits.size());
 		}
 
@@ -1807,254 +2024,5 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 		}
 
-	}
-
-
-	private List<String> generateCodes(int theCodesQueriedCount) {
-		return IntStream.range(0, theCodesQueriedCount)
-			.mapToObj(i -> "generated-code-" + i).collect(Collectors.toList());
-	}
-
-
-
-	public long createLoincSystemWithSomeCodes() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(LOINC_URI);
-		codeSystem.setId("test-loinc");
-		codeSystem.setVersion("SYSTEM VERSION");
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		IIdType csId = myCodeSystemDao.create(codeSystem).getId().toUnqualified();
-
-		ResourceTable table = myResourceTableDao.findById(csId.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
-
-		TermCodeSystemVersion termCodeSystemVersion = new TermCodeSystemVersion();
-		termCodeSystemVersion.setResource(table);
-
-		TermConcept code1 = new TermConcept(termCodeSystemVersion, "50015-7"); // has -3 as a child
-		TermConcept code2 = new TermConcept(termCodeSystemVersion, "43343-3"); // has -4 as a child
-		TermConcept code3 = new TermConcept(termCodeSystemVersion, "43343-4"); //has no children
-		TermConcept code4 = new TermConcept(termCodeSystemVersion, "47239-9"); //has no children
-
-		code1.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
-		code1.addPropertyCoding(
-			"child",
-			LOINC_URI,
-			code2.getCode(),
-			code2.getDisplay());
-		code1.addChild(code2, RelationshipTypeEnum.ISA);
-		termCodeSystemVersion.getConcepts().add(code1);
-
-		code2.addPropertyString("SYSTEM", "Ser");
-		code2.addPropertyString("HELLO", "12345-1");
-		code2.addPropertyCoding(
-			"parent",
-			LOINC_URI,
-			code1.getCode(),
-			code1.getDisplay());
-		code2.addPropertyCoding(
-			"child",
-			LOINC_URI,
-			code3.getCode(),
-			code3.getDisplay());
-		code2.addChild(code3, RelationshipTypeEnum.ISA);
-		code2.addPropertyCoding(
-			"child",
-			LOINC_URI,
-			code4.getCode(),
-			code4.getDisplay());
-		code2.addChild(code4, RelationshipTypeEnum.ISA);
-		termCodeSystemVersion.getConcepts().add(code2);
-
-		code3.addPropertyString("SYSTEM", "Ser");
-		code3.addPropertyString("HELLO", "12345-2");
-		code3.addPropertyCoding(
-			"parent",
-			LOINC_URI,
-			code2.getCode(),
-			code2.getDisplay());
-		termCodeSystemVersion.getConcepts().add(code3);
-
-		code4.addPropertyString("SYSTEM", "^Patient");
-		code4.addPropertyString("EXTERNAL_COPYRIGHT_NOTICE", "Copyright © 2006 World Health Organization...");
-		code4.addPropertyCoding(
-			"parent",
-			LOINC_URI,
-			code2.getCode(),
-			code2.getDisplay());
-		termCodeSystemVersion.getConcepts().add(code4);
-
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", termCodeSystemVersion, table);
-
-		return csId.getIdPartAsLong();
-	}
-
-
-
-
-	private IIdType createCodeSystem() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(CS_URL);
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		codeSystem.setName("SYSTEM NAME");
-		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
-
-		TermCodeSystemVersion cs = new TermCodeSystemVersion();
-		cs.setResource(table);
-
-		TermConcept parent;
-		parent = new TermConcept(cs, "ParentWithNoChildrenA");
-		cs.getConcepts().add(parent);
-		parent = new TermConcept(cs, "ParentWithNoChildrenB");
-		cs.getConcepts().add(parent);
-		parent = new TermConcept(cs, "ParentWithNoChildrenC");
-		cs.getConcepts().add(parent);
-
-		TermConcept parentA = new TermConcept(cs, "ParentA");
-		cs.getConcepts().add(parentA);
-
-		TermConcept childAA = new TermConcept(cs, "childAA");
-		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAA = new TermConcept(cs, "childAAA");
-		childAAA.addPropertyString("propA", "valueAAA");
-		childAAA.addPropertyString("propB", "foo");
-		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAB = new TermConcept(cs, "childAAB");
-		childAAB.addPropertyString("propA", "valueAAB");
-		childAAB.addPropertyString("propB", "foo");
-		childAAB.addDesignation()
-			.setLanguage("D1L")
-			.setUseSystem("D1S")
-			.setUseCode("D1C")
-			.setUseDisplay("D1D")
-			.setValue("D1V");
-		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
-
-		TermConcept childAB = new TermConcept(cs, "childAB");
-		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
-
-		TermConcept parentB = new TermConcept(cs, "ParentB");
-		cs.getConcepts().add(parentB);
-
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
-
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-
-		return id;
-	}
-
-	private void createCodeSystem2() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(CS_URL_2);
-		codeSystem.setVersion("SYSTEM VERSION");
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
-
-		TermCodeSystemVersion cs = new TermCodeSystemVersion();
-		cs.setResource(table);
-
-		TermConcept parentA = new TermConcept(cs, "CS2");
-		cs.getConcepts().add(parentA);
-
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
-
-	}
-
-	private IIdType createCodeSystem3() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(CS_URL_3);
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		codeSystem.setName("SYSTEM NAME 3");
-		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
-
-		TermCodeSystemVersion cs = new TermCodeSystemVersion();
-		cs.setResource(table);
-
-		TermConcept parent;
-		parent = new TermConcept(cs, "ParentWithNoChildrenA");
-		cs.getConcepts().add(parent);
-		parent = new TermConcept(cs, "ParentWithNoChildrenB");
-		cs.getConcepts().add(parent);
-		parent = new TermConcept(cs, "ParentWithNoChildrenC");
-		cs.getConcepts().add(parent);
-
-		TermConcept parentA = new TermConcept(cs, "ParentA");
-		cs.getConcepts().add(parentA);
-
-		TermConcept childAA = new TermConcept(cs, "childAA");
-		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAA = new TermConcept(cs, "childAAA");
-		childAAA.addPropertyString("propA", "valueAAA");
-		childAAA.addPropertyString("propB", "foo");
-		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAB = new TermConcept(cs, "childAAB");
-		childAAB.addPropertyString("propA", "valueAAB");
-		childAAB.addPropertyString("propB", "foo");
-		childAAB.addDesignation()
-			.setLanguage("D1L")
-			.setUseSystem("D1S")
-			.setUseCode("D1C")
-			.setUseDisplay("D1D")
-			.setValue("D1V");
-		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAC = new TermConcept(cs, "childAAC");
-		childAAC.addPropertyString("propA", "valueAAC");
-		childAAC.addPropertyString("propB", "No IG exists");
-		childAA.addChild(childAAC, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAD = new TermConcept(cs, "childAAD");
-		childAAD.addPropertyString("propA", "valueAAD");
-		childAAD.addPropertyString("propB", "IG exists");
-		childAA.addChild(childAAD, RelationshipTypeEnum.ISA);
-
-		// this one shouldn't come up in search result because searched argument is not in searched property (propB) but in propA
-		TermConcept childAAE = new TermConcept(cs, "childAAE");
-		childAAE.addPropertyString("propA", "IG exists");
-		childAAE.addPropertyString("propB", "valueAAE");
-		childAA.addChild(childAAE, RelationshipTypeEnum.ISA);
-
-		TermConcept childAB = new TermConcept(cs, "childAB");
-		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
-
-		TermConcept parentB = new TermConcept(cs, "ParentB");
-		cs.getConcepts().add(parentB);
-
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
-
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-
-		return id;
-	}
-
-
-	private List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
-		List<String> retVal = new ArrayList<>();
-
-		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {
-			retVal.add(next.getCode());
-		}
-
-		return retVal;
-	}
-
-
-	@Override
-	protected FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
 	}
 }

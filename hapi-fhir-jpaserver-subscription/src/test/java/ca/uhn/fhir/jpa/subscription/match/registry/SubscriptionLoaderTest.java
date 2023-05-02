@@ -6,10 +6,10 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ch.qos.logback.classic.Level;
@@ -36,7 +36,6 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +54,7 @@ public class SubscriptionLoaderTest {
 	private SubscriptionRegistry mySubscriptionRegistry;
 
 	@Mock
-	private DaoRegistry myDaoRegistery;
+	private DaoRegistry myDaoRegistry;
 
 	@Mock
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingInterceptor;
@@ -76,6 +75,8 @@ public class SubscriptionLoaderTest {
 	@Mock
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
+	@Mock
+	private IFhirResourceDao mySubscriptionDao;
 	@InjectMocks
 	private SubscriptionLoader mySubscriptionLoader;
 
@@ -94,6 +95,8 @@ public class SubscriptionLoaderTest {
 			any(SubscriptionLoader.class),
 			anyLong()
 		)).thenReturn(mySubscriptionCache);
+
+		when(myDaoRegistry.getResourceDaoOrNull("Subscription")).thenReturn(mySubscriptionDao);
 
 		mySubscriptionLoader.registerListener();
 	}
@@ -117,16 +120,15 @@ public class SubscriptionLoaderTest {
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/123");
 		subscription.setError("THIS IS AN ERROR");
-		IFhirResourceDao<Subscription> subscriptionDao = mock(IFhirResourceDao.class);
 
 		ourLogger.setLevel(Level.ERROR);
 
 		// when
-		when(myDaoRegistery.getSubscriptionDao())
-				.thenReturn(subscriptionDao);
-		when(myDaoRegistery.isResourceTypeSupported(anyString()))
+		when(myDaoRegistry.getResourceDao("Subscription"))
+				.thenReturn(mySubscriptionDao);
+		when(myDaoRegistry.isResourceTypeSupported("Subscription"))
 				.thenReturn(true);
-		when(subscriptionDao.search(any(SearchParameterMap.class), any(SystemRequestDetails.class)))
+		when(mySubscriptionDao.search(any(SearchParameterMap.class), any(SystemRequestDetails.class)))
 			.thenReturn(getSubscriptionList(
 				Collections.singletonList(subscription)
 			));
@@ -134,13 +136,16 @@ public class SubscriptionLoaderTest {
 		when(mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(any(IBaseResource.class)))
 				.thenReturn(false);
 
+		when(mySubscriptionActivatingInterceptor.isChannelTypeSupported(any(IBaseResource.class)))
+			.thenReturn(true);
+
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(any())).thenReturn(SubscriptionConstants.REQUESTED_STATUS);
 		
 		// test
-		mySubscriptionLoader.syncSubscriptions();
+		mySubscriptionLoader.syncDatabaseToCache();
 
 		// verify
-		verify(subscriptionDao)
+		verify(mySubscriptionDao)
 			.search(any(SearchParameterMap.class), any(SystemRequestDetails.class));
 
 		ArgumentCaptor<ILoggingEvent> eventCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);

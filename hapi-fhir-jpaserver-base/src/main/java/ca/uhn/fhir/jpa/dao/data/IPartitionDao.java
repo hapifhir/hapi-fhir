@@ -1,12 +1,3 @@
-package ca.uhn.fhir.jpa.dao.data;
-
-import ca.uhn.fhir.jpa.entity.PartitionEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import java.util.Optional;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -26,6 +17,14 @@ import java.util.Optional;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
+
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
 
 public interface IPartitionDao extends JpaRepository<PartitionEntity, Integer>, IHapiFhirJpaRepository {
 

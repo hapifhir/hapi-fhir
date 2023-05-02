@@ -1,5 +1,3 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
@@ -19,8 +17,10 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
 
 @SuppressWarnings("unused")
@@ -33,7 +33,11 @@ FhirContext ctx = FhirContext.forDstu2();
 String propFile = "classpath:/com/foo/customnarrative.properties";
 CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator(propFile);
 
+Patient patient = new Patient();
+
 ctx.setNarrativeGenerator(gen);
+String output = ctx.newJsonParser().encodeResourceToString(patient);
+System.out.println(output);
 //END SNIPPET: gen
 
 	

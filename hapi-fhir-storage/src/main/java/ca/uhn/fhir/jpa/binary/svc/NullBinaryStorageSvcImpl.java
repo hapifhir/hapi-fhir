@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.binary.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.binary.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.svc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
@@ -35,6 +34,11 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	@Override
 	public long getMaximumBinarySize() {
 		return 0;
+	}
+
+	@Override
+	public boolean isValidBlobId(String theNewBlobId) {
+		return true;
 	}
 
 	@Override

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.model.primitive;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.primitive;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.primitive;
 
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;

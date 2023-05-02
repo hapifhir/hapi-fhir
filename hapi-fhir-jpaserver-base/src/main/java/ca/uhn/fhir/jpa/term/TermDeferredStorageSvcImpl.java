@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -374,7 +373,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		request.setParameters(parameters);
 
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-		myJobExecutions.add(response.getJobId());
+		myJobExecutions.add(response.getInstanceId());
 	}
 
 	private void deleteTermCodeSystemOffline(Long theCodeSystemPid) {
@@ -384,7 +383,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		request.setParameters(parameters);
 		request.setJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-		myJobExecutions.add(response.getJobId());
+		myJobExecutions.add(response.getInstanceId());
 	}
 
 

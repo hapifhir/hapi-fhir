@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
@@ -1927,5 +1926,12 @@ public class XmlUtil {
 		}
 		transformer.transform(new DOMSource(theElement), new StreamResult(buffer));
 		return buffer.toString();
+	}
+
+	/**
+	 * FOR UNIT TESTS ONLY - Used to reset OutputFactory for test cases that customize OutputFactory
+	 */
+	public static void resetOutputFactoryForTest() {
+		ourOutputFactory = null;
 	}
 }

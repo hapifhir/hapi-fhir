@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4b;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
@@ -43,7 +43,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -54,7 +53,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.PreventDanglingInterceptorsExtension;
 import ca.uhn.fhir.jpa.test.config.TestR4BConfig;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.parser.IParser;
@@ -118,7 +116,6 @@ import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -209,8 +206,6 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	@Autowired
 	@Qualifier("myConditionDaoR4B")
 	protected IFhirResourceDao<Condition> myConditionDao;
-	@Autowired
-	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoR4B")
 	protected IFhirResourceDao<Device> myDeviceDao;
@@ -384,7 +379,6 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataSchedulerHelper;
 
-
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
@@ -404,12 +398,12 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 
 	@AfterEach()
 	public void afterCleanupDao() {
-		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
-		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+		this.myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
+		this.myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
+		this.myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
+		this.myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		this.myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
+		this.myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -442,14 +436,14 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	public void beforeFlushFT() {
 		purgeHibernateSearch(myEntityManager);
 
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		this.myStorageSettings.setSchedulingDisabled(true);
+		this.myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper);
+		purgeDatabase(this.myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper);
 	}
 
 	@BeforeEach

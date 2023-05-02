@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 public enum SubscriptionMatchingStrategy {
 	/**
@@ -26,9 +25,14 @@ public enum SubscriptionMatchingStrategy {
 	 */
 	IN_MEMORY,
 
-	/**
+    /**
 	 * Resources cannot be matched against this subscription in-memory.  We need to make a call to a FHIR Repository to determine a match
 	 */
-	DATABASE
+	DATABASE,
+
+	/**
+	 * This subscription uses a SubscriptionTopic for its matching
+	 */
+	TOPIC
 }
 

@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTermDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
 	}
@@ -377,7 +376,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testAddLargeHierarchy() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(5);
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(5);
 
 		createNotPresentCodeSystem();
 		ValueSet vs;
@@ -451,7 +450,6 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testAddWithPropertiesAndDesignations() {
 
 		// Create not-present
@@ -460,10 +458,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		cs.setUrl("http://foo/cs");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs.setVersion("1.2.3");
-		myCodeSystemDao.create(cs);
 
-		CodeSystem delta = new CodeSystem();
-		CodeSystem.ConceptDefinitionComponent concept = delta
+		CodeSystem.ConceptDefinitionComponent concept = cs
 			.addConcept()
 			.setCode("lunch")
 			.setDisplay("I'm having dog food");
@@ -483,6 +479,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		concept.addProperty()
 			.setCode("useless_sct_code")
 			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
+		myCodeSystemDao.create(cs, mySrd);
 
 		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo/cs", "lunch", null);
 		assertEquals(true, result.isFound());

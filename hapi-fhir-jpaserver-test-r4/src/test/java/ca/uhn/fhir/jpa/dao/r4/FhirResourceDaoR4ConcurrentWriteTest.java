@@ -1,20 +1,24 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -33,15 +37,18 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,6 +60,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -60,22 +68,27 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings({"deprecation", "Duplicates"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ConcurrentWriteTest.class);
+
+	private static final int THREAD_COUNT = 10;
+
 	private ExecutorService myExecutor;
 	private UserRequestRetryVersionConflictsInterceptor myRetryInterceptor;
 	private TransactionConcurrencySemaphoreInterceptor myConcurrencySemaphoreInterceptor;
 
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myExecutor = Executors.newFixedThreadPool(10);
+	public void before() throws Exception {
+		super.before();
+		myExecutor = Executors.newFixedThreadPool(THREAD_COUNT);
 		myRetryInterceptor = new UserRequestRetryVersionConflictsInterceptor();
 		myConcurrencySemaphoreInterceptor = new TransactionConcurrencySemaphoreInterceptor(myMemoryCacheService);
 
 		RestfulServer server = new RestfulServer(myFhirContext);
 		when(mySrd.getServer()).thenReturn(server);
-
 	}
 
 	@AfterEach
@@ -86,8 +99,65 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testTransaction_multiThreaded()
+		throws InterruptedException, ExecutionException {
+		// setup
+		Bundle bundle1 = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/test-bundle.json");
+		Bundle bundle2 = ClasspathUtil.loadResource(myFhirContext,
+			Bundle.class, "/r4/test-bundle2.json");
+		Bundle[] bundles = {
+			bundle1,
+			bundle2
+		};
+		int calls = bundles.length;
+		AtomicInteger counter = new AtomicInteger();
+		PointcutLatch latch = new PointcutLatch("transactionLatch");
+		Collection<Callable<Bundle>> callables = new ArrayList<>();
+
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+
+		latch.setDefaultTimeoutSeconds(5);
+		latch.setExpectedCount(calls);
+		for (int i = 0; i < calls; i++) {
+			int mc = i;
+			Bundle bundle = bundles[i];
+			Callable<Bundle> task = () -> {
+				String name = "task_" + mc;
+				StopWatch watch = new StopWatch();
+				ourLog.info("Starting thread " + name);
+				watch.startTask(name);
+				SystemRequestDetails details = new SystemRequestDetails();
+				details.setRetry(true);
+				details.setMaxRetries(3);
+				Bundle b = mySystemDao.transaction(details,
+					bundle);
+				int c = counter.incrementAndGet();
+				latch.call(1);
+				watch.endCurrentTask();
+				long timeMS = watch.getMillis();
+				ourLog.info("Ending thread " + name + " after " + timeMS + "ms");
+				return b;
+			};
+			callables.add(task);
+		}
+
+		// test
+		List<Future<Bundle>> futures = myExecutor.invokeAll(callables);
+
+		// validate
+		assertEquals(futures.size(), calls);
+		for (Future<Bundle> future : futures) {
+			// make sure no exceptions
+			Bundle b = future.get();
+			assertNotNull(b);
+		}
+		latch.awaitExpected();
+		assertEquals(counter.get(), calls);
+	}
+
+	@Test
 	public void testTransactionCreates_NoGuard() {
-		myDaoConfig.setMatchUrlCache(true);
+		myStorageSettings.setMatchUrlCache(true);
 
 		AtomicInteger passCounter = new AtomicInteger(0);
 		AtomicInteger fuzzCounter = new AtomicInteger(0);
@@ -128,6 +198,10 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	 * Make a transaction with conditional updates that will fail due to
 	 * constraint errors and be retried automatically. Make sure that the
 	 * retry succeeds and that the data ultimately gets written.
+	 *
+	 * This test used to use a composite unique search parameter, but
+	 * can now rely on the {@link ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity}
+	 * instead.
 	 */
 	@Test
 	public void testTransactionCreates_WithRetry() throws ExecutionException, InterruptedException {
@@ -211,7 +285,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate() throws ExecutionException, InterruptedException {
-		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 		myInterceptorRegistry.registerInterceptor(myConcurrencySemaphoreInterceptor);
 		myConcurrencySemaphoreInterceptor.setLogWaits(true);
 
@@ -468,7 +542,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 					assertThat(e.getMessage(), containsString("duplicate unique index matching query: Patient?gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale"));
 				} catch (ResourceVersionConflictException e) {
 					// expected - This is as a result of the unique SP
-					assertThat(e.getMessage(), containsString("would have resulted in a duplicate value for a unique index"));
+					assertThat(e.getMessage(), containsString("duplicate"));
 				}
 			};
 			Future<?> future = myExecutor.submit(task);
@@ -765,7 +839,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionWithCreateClientAssignedIdAndReferenceToThatId() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setDeleteEnabled(false);
 
 		ServletRequestDetails srd = mock(ServletRequestDetails.class);
 		setupRetryBehaviour(srd);

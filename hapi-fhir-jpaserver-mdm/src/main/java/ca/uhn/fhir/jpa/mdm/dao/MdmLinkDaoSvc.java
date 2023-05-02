@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.dao;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,13 +17,16 @@ package ca.uhn.fhir.jpa.mdm.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.history.Revisions;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,11 +75,9 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		mdmLink.setEidMatch(theMatchOutcome.isEidMatch() | mdmLink.isEidMatchPresent());
 		mdmLink.setHadToCreateNewGoldenResource(theMatchOutcome.isCreatedNewResource() | mdmLink.getHadToCreateNewGoldenResource());
 		mdmLink.setMdmSourceType(myFhirContext.getResourceType(theSourceResource));
-		if (mdmLink.getScore() != null) {
-			mdmLink.setScore(Math.max(theMatchOutcome.score, mdmLink.getScore()));
-		} else {
-			mdmLink.setScore(theMatchOutcome.score);
-		}
+
+		setScoreProperties(theMatchOutcome, mdmLink);
+
 		// Add partition for the mdm link if it's available in the source resource
 		RequestPartitionId partitionId = (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (partitionId != null && partitionId.getFirstPartitionIdOrNull() != null) {
@@ -89,6 +89,24 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		ourLog.debug(message);
 		save(mdmLink);
 		return mdmLink;
+	}
+
+	private void setScoreProperties(MdmMatchOutcome theMatchOutcome, M mdmLink) {
+		if (theMatchOutcome.getScore() != null) {
+			mdmLink.setScore(  mdmLink.getScore() != null
+				? Math.max(theMatchOutcome.getNormalizedScore(), mdmLink.getScore())
+				: theMatchOutcome.getNormalizedScore() );
+		}
+
+		if (theMatchOutcome.getVector() != null) {
+			mdmLink.setVector( mdmLink.getVector() != null
+				? Math.max(theMatchOutcome.getVector(), mdmLink.getVector())
+				: theMatchOutcome.getVector() );
+		}
+
+		mdmLink.setRuleCount( mdmLink.getRuleCount() != null
+			? Math.max(theMatchOutcome.getMdmRuleCount(), mdmLink.getRuleCount())
+			: theMatchOutcome.getMdmRuleCount() );
 	}
 
 	@Nonnull
@@ -127,7 +145,6 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	 * @param theSourceResourcePid The ResourcepersistenceId of the Source resource
 	 * @return The {@link IMdmLink} entity that matches these criteria if exists
 	 */
-	@SuppressWarnings("unchecked")
 	public Optional<M> getLinkByGoldenResourcePidAndSourceResourcePid(P theGoldenResourcePid, P theSourceResourcePid) {
 		if (theSourceResourcePid == null || theGoldenResourcePid == null) {
 			return Optional.empty();
@@ -370,5 +387,16 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	@Transactional(propagation = Propagation.MANDATORY)
 	public void deleteLinksWithAnyReferenceToPids(List<P> theGoldenResourcePids) {
 		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
+	}
+
+	// TODO: LD:  delete for good on the next bump
+	@Deprecated(since = "6.5.7", forRemoval = true)
+	public Revisions<Long, M> findMdmLinkHistory(M mdmLink) {
+		return myMdmLinkDao.findHistory(mdmLink.getId());
+	}
+
+	@Transactional
+	public List<MdmLinkWithRevision<M>> findMdmLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+		return myMdmLinkDao.getHistoryForIds(theMdmHistorySearchParameters);
 	}
 }

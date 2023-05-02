@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.extractor;
-
 /*
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,10 +17,11 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
@@ -48,8 +47,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 	// This constructor is used by tests
 	@VisibleForTesting
-	public SearchParamExtractorDstu3(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
-		super(theModelConfig, thePartitionSettings, theCtx, theSearchParamRegistry);
+	public SearchParamExtractorDstu3(StorageSettings theStorageSettings, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+		super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
 		initFhirPathEngine();
 		start();
 	}

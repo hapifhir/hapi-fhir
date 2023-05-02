@@ -1,16 +1,19 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +21,10 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -28,7 +35,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
+		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
 	}
 
 	@Test
@@ -76,10 +83,9 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
 	public void testDeleteDisabled() {
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setDeleteEnabled(false);
 
 		Patient p = new Patient();
 		p.setActive(true);
@@ -92,7 +98,6 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 			assertEquals(Msg.code(966) + "Resource deletion is not permitted on this server", e.getMessage());
 		}
 	}
-
 
 	@Test
 	public void testDeleteCircularReferenceInTransaction() {
@@ -174,7 +179,6 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
 	public void testResourceIsConsideredDeletedIfOnlyResourceTableEntryIsDeleted() {
 
@@ -216,13 +220,21 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
-	public void testDeleteIgnoreReferentialIntegrityForPaths() {
+	public void testDeleteResourceCreatedWithConditionalUrl_willRemoveEntryInSearchUrlTable() {
+		String identifierCode = "20210427133226.4440+800";
+		String matchUrl = "identifier=20210427133226.4440+800";
+		Observation obs = new Observation();
+		obs.addIdentifier().setValue(identifierCode);
+		IIdType firstObservationId = myObservationDao.create(obs, matchUrl, new SystemRequestDetails()).getId();
+		assertThat(myResourceSearchUrlDao.findAll(), hasSize(1));
 
+		// when
+		myObservationDao.delete(obs.getIdElement(), mySrd);
+		DaoMethodOutcome daoMethodOutcome = myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
 
-
+		// then
+		assertThat(daoMethodOutcome.getCreated(), equalTo(Boolean.TRUE));
+		assertThat(firstObservationId.getIdPart(), not(equalTo(daoMethodOutcome.getId())));
 	}
-
-
 }

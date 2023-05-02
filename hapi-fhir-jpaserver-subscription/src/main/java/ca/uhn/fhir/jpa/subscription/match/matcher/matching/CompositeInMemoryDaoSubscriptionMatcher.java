@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -34,7 +34,7 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 	private final DaoSubscriptionMatcher myDaoSubscriptionMatcher;
 	private final InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
 	@Autowired
-	DaoConfig myDaoConfig;
+	StorageSettings myStorageSettings;
 
 	public CompositeInMemoryDaoSubscriptionMatcher(DaoSubscriptionMatcher theDaoSubscriptionMatcher, InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
 		myDaoSubscriptionMatcher = theDaoSubscriptionMatcher;
@@ -44,7 +44,7 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
 		InMemoryMatchResult result;
-		if (myDaoConfig.isEnableInMemorySubscriptionMatching()) {
+		if (myStorageSettings.isEnableInMemorySubscriptionMatching()) {
 			result = myInMemorySubscriptionMatcher.match(theSubscription, theMsg);
 			if (result.supported()) {
 				result.setInMemory(true);

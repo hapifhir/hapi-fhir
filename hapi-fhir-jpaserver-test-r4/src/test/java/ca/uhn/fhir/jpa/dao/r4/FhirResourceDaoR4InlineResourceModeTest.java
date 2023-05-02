@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -24,12 +24,12 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void beforeSetDao() {
-		myDaoConfig.setInlineResourceTextBelowSize(5000);
+		myStorageSettings.setInlineResourceTextBelowSize(5000);
 	}
 
 	@AfterEach
 	public void afterResetDao() {
-		myDaoConfig.setInlineResourceTextBelowSize(new DaoConfig().getInlineResourceTextBelowSize());
+		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 	}
 
 	@Test

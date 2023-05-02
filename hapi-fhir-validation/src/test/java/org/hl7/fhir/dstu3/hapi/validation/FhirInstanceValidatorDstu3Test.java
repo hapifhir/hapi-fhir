@@ -100,7 +100,7 @@ import static org.mockito.Mockito.when;
 public class FhirInstanceValidatorDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu3Test.class);
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static IValidationSupport myDefaultValidationSupport = ourCtx.getValidationSupport();
 	@RegisterExtension
 	public LoggingExtension myLoggingExtension = new LoggingExtension();
@@ -673,6 +673,9 @@ public class FhirInstanceValidatorDstu3Test {
 						return false;
 					} else if (t.getMessage().contains("The markdown contains content that appears to be an embedded")) {
 						// Some DSTU3 structures contain URLs with <> around them
+						return false;
+					} else if (t.getMessage().startsWith("value should not start or finish with whitespace") && t.getMessage().endsWith("\\u00a0'")) {
+						// Some DSTU3 messages end with a unicode Non-breaking space character
 						return false;
 					} else {
 						return true;

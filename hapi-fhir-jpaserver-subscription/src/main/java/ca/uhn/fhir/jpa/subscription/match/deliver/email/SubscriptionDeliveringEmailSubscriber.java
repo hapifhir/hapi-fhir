@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.email;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.email;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.deliver.email;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
@@ -42,7 +41,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringEmailSubscriber.class);
 
 	@Autowired
-	private ModelConfig myModelConfig;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myCtx;
 
@@ -76,7 +75,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 			}
 		}
 
-		String from = processEmailAddressUri(defaultString(subscription.getEmailDetails().getFrom(), myModelConfig.getEmailFromAddress()));
+		String from = processEmailAddressUri(defaultString(subscription.getEmailDetails().getFrom(), myStorageSettings.getEmailFromAddress()));
 		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
 
 		EmailDetails details = new EmailDetails();

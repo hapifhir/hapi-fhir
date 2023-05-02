@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
@@ -98,6 +97,20 @@ public class HapiMigrator {
 			}
 		}
 		return statementBuilder;
+	}
+
+	/**
+	 * Helper method to clear a lock with a given UUID.
+	 * @param theUUID the
+	 */
+	public void clearMigrationLockWithUUID(String theUUID) {
+		ourLog.info("Attempting to remove lock entry. [uuid={}]", theUUID);
+		boolean success = myHapiMigrationStorageSvc.deleteLockRecord(theUUID);
+		if (success) {
+			ourLog.info("Successfully removed lock entry. [uuid={}]", theUUID);
+		} else {
+			ourLog.error("Did not successfully remove lock entry. [uuid={}]", theUUID);
+		}
 	}
 
 	public MigrationResult migrate() {

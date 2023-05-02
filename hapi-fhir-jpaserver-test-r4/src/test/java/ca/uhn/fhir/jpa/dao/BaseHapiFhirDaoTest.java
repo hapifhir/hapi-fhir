@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.AsyncUtil;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -77,12 +78,14 @@ public class BaseHapiFhirDaoTest {
 														 TagTypeEnum theEnum,
 														 String theScheme,
 														 String theTerm,
-														 String theLabel) {
+														 String theLabel,
+														 String theVersion,
+														 Boolean theUserSelected ) {
 			// we need to init synchronization due to what
 			// the underlying class is doing
 			try {
 				TransactionSynchronizationManager.initSynchronization();
-				return super.getTagOrNull(theDetails, theEnum, theScheme, theTerm, theLabel);
+				return super.getTagOrNull(theDetails, theEnum, theScheme, theTerm, theLabel, theVersion, theUserSelected);
 			} finally {
 				TransactionSynchronizationManager.clearSynchronization();
 			}
@@ -175,12 +178,13 @@ public class BaseHapiFhirDaoTest {
 		String scheme = "http://localhost";
 		String term = "code123";
 		String label = "hollow world";
+		String version = "v1.0";
+		Boolean userSelected  = true;
 		String raceConditionError = "Entity exists; if this is logged, you have race condition issues!";
 
-		TagDefinition tagDefinition = new TagDefinition(tagType,
-			scheme,
-			term,
-			label);
+		TagDefinition tagDefinition = new TagDefinition(tagType, scheme, term, label);
+		tagDefinition.setVersion(version);
+		tagDefinition.setUserSelected(userSelected);
 
 		// mock objects
 		CriteriaBuilder builder = getMockedCriteriaBuilder();
@@ -270,7 +274,7 @@ public class BaseHapiFhirDaoTest {
 		Runnable task = () -> {
 			latch.countDown();
 			try {
-				TagDefinition retTag = myTestDao.getTagOrNull(new TransactionDetails(), tagType, scheme, term, label);
+				TagDefinition retTag = myTestDao.getTagOrNull(new TransactionDetails(), tagType, scheme, term, label, version, userSelected);
 				outcomes.put(retTag.hashCode(), retTag);
 				counter.incrementAndGet();
 			} catch (Exception ex) {
@@ -330,6 +334,8 @@ public class BaseHapiFhirDaoTest {
 		String scheme = "http://localhost";
 		String term = "code123";
 		String label = "hollow world";
+		String version = "v1.0";
+		Boolean userSelected = true;
 		TransactionDetails transactionDetails = new TransactionDetails();
 		String exMsg = "Hi there";
 		String readError = "No read for you";
@@ -358,7 +364,7 @@ public class BaseHapiFhirDaoTest {
 
 		// test
 		try {
-			myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label);
+			myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label, version, userSelected);
 			fail();
 		} catch (Exception ex) {
 			// verify
@@ -387,9 +393,10 @@ public class BaseHapiFhirDaoTest {
 
 	@Test
 	public void cleanProvenanceSourceUri() {
-		assertEquals("", BaseHapiFhirDao.cleanProvenanceSourceUri(null));
-		assertEquals("abc", BaseHapiFhirDao.cleanProvenanceSourceUri("abc"));
-		assertEquals("abc", BaseHapiFhirDao.cleanProvenanceSourceUri("abc#def"));
-		assertEquals("abc", BaseHapiFhirDao.cleanProvenanceSourceUri("abc#def#ghi"));
+		assertEquals("", MetaUtil.cleanProvenanceSourceUriOrEmpty(null));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def#ghi"));
 	}
 }

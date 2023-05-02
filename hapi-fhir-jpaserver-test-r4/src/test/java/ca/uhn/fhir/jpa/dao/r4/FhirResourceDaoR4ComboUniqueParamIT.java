@@ -10,10 +10,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
-import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -41,7 +39,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
@@ -379,7 +376,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testDoubleMatchingOnAnd_Search() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueIndexPatientIdentifier();
 
 		Patient pt = new Patient();
@@ -678,8 +675,8 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 	 */
 	@Test
 	public void testDuplicateUniqueValuesAreReIndexed() {
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setReindexThreadCount(1);
+		myStorageSettings.setSchedulingDisabled(true);
+		myStorageSettings.setReindexThreadCount(1);
 
 		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation");
 		assertEquals(0, uniqueSearchParams.size());
@@ -740,7 +737,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingDisabled() {
-		myDaoConfig.setUniqueIndexesCheckedBeforeSave(false);
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
 
 		createUniqueBirthdateAndGenderSps();
 
@@ -769,8 +766,8 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 			fail();
-		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1093) + "Can not create resource of type Patient as it would create a duplicate unique index matching query: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale (existing index belongs to Patient/" + id1.getIdPart() + ", new unique index created by SearchParameter/patient-gender-birthdate)", e.getMessage());
+		} catch (ResourceVersionConflictException e) {
+			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 	}
 
@@ -789,7 +786,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.create(pt);
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (ResourceVersionConflictException e) {
 			// good
 		}
 
@@ -856,6 +853,11 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id3 = myCoverageDao.create(cov).getId().toUnqualifiedVersionless();
 
 		createUniqueIndexCoverageBeneficiary();
+
+		runInTransaction(() -> {
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			assertEquals(0, uniques.size(), uniques.toString());
+		});
 
 		executeReindex("Coverage?");
 
@@ -1060,7 +1062,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testSearchSynchronousUsingUniqueComposite() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueBirthdateAndGenderSps();
 
 		Patient pt1 = new Patient();
@@ -1203,7 +1205,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testUniqueValuesAreIndexed_Reference_UsingModifierSyntax() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueNameAndManagingOrganizationSps();
 
 		Organization org = new Organization();
@@ -1539,7 +1541,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 
@@ -1554,7 +1556,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.update(pt2);
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 
@@ -1562,7 +1564,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testReplaceOneWithAnother() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueBirthdateAndGenderSps();
 
 		Patient pt1 = new Patient();

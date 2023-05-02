@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
@@ -116,20 +116,20 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setAllowInlineMatchUrlReferences(false);
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myDaoConfig.setMaximumDeleteConflictQueryCount(new DaoConfig().getMaximumDeleteConflictQueryCount());
-		myDaoConfig.setBundleBatchPoolSize(new DaoConfig().getBundleBatchPoolSize());
-		myDaoConfig.setBundleBatchMaxPoolSize(new DaoConfig().getBundleBatchMaxPoolSize());
+		myStorageSettings.setAllowInlineMatchUrlReferences(false);
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myStorageSettings.setMaximumDeleteConflictQueryCount(new JpaStorageSettings().getMaximumDeleteConflictQueryCount());
+		myStorageSettings.setBundleBatchPoolSize(new JpaStorageSettings().getBundleBatchPoolSize());
+		myStorageSettings.setBundleBatchMaxPoolSize(new JpaStorageSettings().getBundleBatchMaxPoolSize());
 
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setBundleBatchPoolSize(1);
-		myDaoConfig.setBundleBatchMaxPoolSize(1);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setBundleBatchPoolSize(1);
+		myStorageSettings.setBundleBatchMaxPoolSize(1);
 	}
 
 	private Bundle createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb theVerb) {
@@ -689,7 +689,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		String methodName = "testTransactionCreateInlineMatchUrlWithNoMatches";
 		Bundle request = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
@@ -709,7 +709,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch";
 		Bundle request = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -742,7 +742,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch2";
 		Bundle request = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addName().addGiven("Heute");
@@ -810,7 +810,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		String methodName = "testTransactionCreateInlineMatchUrlWithTwoMatches";
 		Bundle request = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -829,7 +829,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1092) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
+			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
 		}
 	}
 
@@ -905,7 +905,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 
@@ -1344,7 +1344,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionDeleteMatchUrlWithTwoMatch() {
-		myDaoConfig.setAllowMultipleDelete(false);
+		myStorageSettings.setAllowMultipleDelete(false);
 
 		String methodName = "testTransactionDeleteMatchUrlWithTwoMatch";
 
@@ -1741,8 +1741,8 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	@Test
 	@Disabled
 	public void testTransactionFromBundle_Slow() throws Exception {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-		myDaoConfig.setMaximumDeleteConflictQueryCount(10000);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setMaximumDeleteConflictQueryCount(10000);
 
 		StopWatch sw = new StopWatch();
 		sw.startTask("Parse Bundle");
@@ -1854,7 +1854,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionOruBundle() throws IOException {
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		String input = IOUtils.toString(getClass().getResourceAsStream("/oruBundle.json"), StandardCharsets.UTF_8);
 
@@ -2052,7 +2052,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 
@@ -2418,7 +2418,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionWithInlineMatchUrl() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
@@ -2434,7 +2434,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionWithInlineMatchUrlMultipleMatches() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
@@ -2451,14 +2451,14 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, bundle);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1092) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
+			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
 		}
 
 	}
 
 	@Test
 	public void testTransactionWithInlineMatchUrlNoMatches() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, input);

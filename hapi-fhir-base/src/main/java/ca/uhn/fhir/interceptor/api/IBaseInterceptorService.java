@@ -1,5 +1,3 @@
-package ca.uhn.fhir.interceptor.api;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.interceptor.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.api;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -26,51 +25,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public interface IBaseInterceptorService<POINTCUT extends IPointcut> extends IBaseInterceptorBroadcaster<POINTCUT> {
-
-	/**
-	 * Register an interceptor that will be used in a {@link ThreadLocal} context.
-	 * This means that events will only be broadcast to the given interceptor if
-	 * they were fired from the current thread.
-	 * <p>
-	 * Note that it is almost always desirable to call this method with a
-	 * try-finally statement that removes the interceptor afterwards, since
-	 * this can lead to memory leakage, poor performance due to ever-increasing
-	 * numbers of interceptors, etc.
-	 * </p>
-	 * <p>
-	 * Note that most methods such as {@link #getAllRegisteredInterceptors()} and
-	 * {@link #unregisterAllInterceptors()} do not affect thread local interceptors
-	 * as they are kept in a separate list.
-	 * </p>
-	 * <p>
-	 *    ThreadLocal interceptors are now disabled by default as of HAPI FHIR 6.2.0 and must be manually
-	 *    enabled by calling {@link ca.uhn.fhir.interceptor.executor.BaseInterceptorService#setThreadlocalInvokersEnabled(boolean)}.
-	 *    They are now deprecated. Registering a threadlocal interceptor without enabling this feature will
-	 *    result in a {@link IllegalArgumentException}.
-	 * </p>
-	 *
-	 * @param theInterceptor The interceptor
-	 * @return Returns <code>true</code> if at least one valid hook method was found on this interceptor
-	 * @deprecated Threadlocal interceptors have been deprecated as of HAPI FHIR 6.2.0 and will be removed in a future release due to lack of use. If you feel that this is a bad decision, please speak up on the HAPI FHIR mailing list.
-	 */
-	@Deprecated
-	boolean registerThreadLocalInterceptor(Object theInterceptor);
-
-	/**
-	 * Unregisters a ThreadLocal interceptor
-	 * <p>
-	 *    ThreadLocal interceptors are now disabled by default as of HAPI FHIR 6.2.0 and must be manually
-	 *    enabled by calling {@link ca.uhn.fhir.interceptor.executor.BaseInterceptorService#setThreadlocalInvokersEnabled(boolean)}.
-	 *    They are now deprecated. Registering a threadlocal interceptor without enabling this feature will
-	 *    result in a {@link IllegalArgumentException}.
-	 * </p>
-	 *
-	 * @param theInterceptor The interceptor
-	 * @see #registerThreadLocalInterceptor(Object)
-	 * @deprecated Threadlocal interceptors have been deprecated as of HAPI FHIR 6.2.0 and will be removed in a future release due to lack of use. If you feel that this is a bad decision, please speak up on the HAPI FHIR mailing list.
-	 */
-	@Deprecated
-	void unregisterThreadLocalInterceptor(Object theInterceptor);
 
 	/**
 	 * Register an interceptor. This method has no effect if the given interceptor is already registered.
@@ -94,8 +48,7 @@ public interface IBaseInterceptorService<POINTCUT extends IPointcut> extends IBa
 	List<Object> getAllRegisteredInterceptors();
 
 	/**
-	 * Unregisters all registered interceptors. Note that this method does not unregister
-	 * any {@link #registerThreadLocalInterceptor(Object) thread local interceptors}.
+	 * Unregisters all registered interceptors.
 	 */
 	void unregisterAllInterceptors();
 

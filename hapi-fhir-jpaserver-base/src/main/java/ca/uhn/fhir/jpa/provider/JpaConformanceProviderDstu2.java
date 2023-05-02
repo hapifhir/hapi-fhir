@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.provider;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,11 +17,12 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -58,7 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 
 	private volatile Conformance myCachedValue;
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
@@ -69,7 +68,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	 * Constructor
 	 */
 	@CoverageIgnore
-	public JpaConformanceProviderDstu2(){
+	public JpaConformanceProviderDstu2() {
 		super();
 		super.setCache(false);
 		setIncludeResourceCounts(true);
@@ -78,11 +77,11 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, MetaDt> theSystemDao, DaoConfig theDaoConfig) {
+	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, MetaDt> theSystemDao, JpaStorageSettings theStorageSettings) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 		super.setCache(false);
 		setIncludeResourceCounts(true);
 	}
@@ -105,7 +104,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 			for (RestResource nextResource : nextRest.getResource()) {
 
 				ConditionalDeleteStatusEnum conditionalDelete = nextResource.getConditionalDeleteElement().getValueAsEnum();
-				if (conditionalDelete == ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED && myDaoConfig.isAllowMultipleDelete() == false) {
+				if (conditionalDelete == ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED && myStorageSettings.isAllowMultipleDelete() == false) {
 					nextResource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
 				}
 
@@ -131,11 +130,11 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 			}
 		}
 
-		if (myDaoConfig.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myDaoConfig.getWebsocketContextPath())) {
+		if (myStorageSettings.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
+			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
 				ExtensionDt websocketExtension = new ExtensionDt();
 				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new UriDt(myDaoConfig.getWebsocketContextPath()));
+				websocketExtension.setValue(new UriDt(myStorageSettings.getWebsocketContextPath()));
 				retVal.getRestFirstRep().addUndeclaredExtension(websocketExtension);
 			}
 		}
@@ -151,8 +150,8 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 		return myIncludeResourceCounts;
 	}
 
-	public void setDaoConfig(DaoConfig myDaoConfig) {
-		this.myDaoConfig = myDaoConfig;
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		this.myStorageSettings = theStorageSettings;
 	}
 
 	@CoverageIgnore

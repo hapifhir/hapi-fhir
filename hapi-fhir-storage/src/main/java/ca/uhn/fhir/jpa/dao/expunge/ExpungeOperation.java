@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.expunge;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.expunge;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -46,7 +45,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	@Autowired
 	private IResourceExpungeService myExpungeDaoService;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	private final String myResourceName;
 	private final IResourcePersistentId myResourceId;
@@ -119,7 +118,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private PartitionRunner getPartitionRunner() {
-		return new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount(), myTxService, myRequestDetails);
+		return new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myStorageSettings.getExpungeBatchSize(), myStorageSettings.getExpungeThreadCount(), myTxService, myRequestDetails);
 	}
 
 	private void deleteCurrentVersionsOfDeletedResources(List<IResourcePersistentId> theResourceIds) {

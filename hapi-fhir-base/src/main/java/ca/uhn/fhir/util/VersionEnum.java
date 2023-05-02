@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 public enum VersionEnum {
 	V0_1,
@@ -114,8 +113,12 @@ public enum VersionEnum {
 	// Dev Build
 	V6_3_0,
 	V6_4_0,
+	V6_4_1,
+	V6_4_2,
 	V6_5_0,
-	V6_6_0
+	V6_6_0,
+	V6_7_0,
+	V6_8_0
 	;
 
 	public static VersionEnum latestVersion() {

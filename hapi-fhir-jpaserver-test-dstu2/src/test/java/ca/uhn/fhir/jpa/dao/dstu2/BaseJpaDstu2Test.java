@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -44,6 +43,7 @@ import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationAdministration;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
@@ -76,6 +76,9 @@ import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu2Config.class})
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
@@ -105,8 +108,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
-	@Autowired
-	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu2")
 	protected IFhirResourceDao<Device> myDeviceDao;
@@ -215,6 +216,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	private ValidationSupportChain myJpaValidationSupportChain;
 
+
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
@@ -222,19 +224,19 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	public void beforeFlushFT() {
 		purgeHibernateSearch(myEntityManager);
 
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setSchedulingDisabled(true);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkExportJobSchedulingHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkExportJobSchedulingHelper);
 	}
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 	}
 
 	@Override
@@ -266,5 +268,17 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
 		}
 		return retVal;
+	}
+
+	public void assertHasErrors(OperationOutcome theOperationOutcome) {
+		assertTrue(hasValidationErrors(theOperationOutcome), "Expected validation errors, found none");
+	}
+
+	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
+		assertFalse(hasValidationErrors(theOperationOutcome), "Expected no validation errors, found some");
+	}
+
+	private static boolean hasValidationErrors(OperationOutcome theOperationOutcome) {
+		return theOperationOutcome.getIssue().stream().anyMatch(t -> "error".equals(t.getSeverity()));
 	}
 }

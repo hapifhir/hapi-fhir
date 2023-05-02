@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.step;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.step;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.step;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -35,7 +34,7 @@ import org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import java.util.Date;
 
-import static ca.uhn.fhir.batch2.config.Batch2Constants.BATCH_START_DATE;
+import static ca.uhn.fhir.batch2.util.Batch2Constants.BATCH_START_DATE;
 
 public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters> implements IFirstJobStepWorker<PT, PartitionedUrlChunkRangeJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();

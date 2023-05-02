@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.provider;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,10 +17,10 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeProvider;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
-import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
@@ -40,6 +38,9 @@ import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Parameters;
@@ -51,6 +52,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -92,7 +95,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
-			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(s, mySystemDao, myDaoConfig, mySearchParamRegistry, myValidationSupport);
+			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(s, mySystemDao, myStorageSettings, mySearchParamRegistry, myValidationSupport);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			s.setServerConformanceProvider(confProvider);
 
@@ -210,6 +213,21 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 
 		return false;
+	}
+
+	protected List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
+		List<String> ids;
+		HttpGet get = new HttpGet(uri);
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
+			ids = toUnqualifiedVersionlessIdValues(bundle);
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		}
+
+		return ids;
 	}
 
 }

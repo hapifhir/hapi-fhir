@@ -68,6 +68,8 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH);
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
+		assertLinksMatchScore(1.0);
+		assertLinksMatchVector((Long) null);
 	}
 
 	@Test
@@ -79,6 +81,8 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH);
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
+		assertLinksMatchScore(1.0);
+		assertLinksMatchVector((Long) null);
 	}
 
 	@Test
@@ -93,6 +97,8 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, true);
 		assertLinksMatchedByEid(false, false);
+		assertLinksMatchScore(1.0, 1.0);
+		assertLinksMatchVector(null, null);
 	}
 
 	@Test
@@ -107,6 +113,8 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, false);
+		assertLinksMatchScore(1.0, 2.0/3.0);
+		assertLinksMatchVector(null, 6L);
 	}
 
 	@Test
@@ -127,6 +135,8 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, NO_MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false, true);
 		assertLinksMatchedByEid(false, false, false);
+		assertLinksMatchScore(1.0, null, 1.0);
+		assertLinksMatchVector(null, null, null);
 	}
 
 	@Test
@@ -152,6 +162,8 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, NO_MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false, true);
 		assertLinksMatchedByEid(false, false, false);
+		assertLinksMatchScore(1.0, null, 1.0);
+		assertLinksMatchVector(null, null, null);
 	}
 
 	@Test

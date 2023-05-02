@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,19 +17,20 @@ package ca.uhn.fhir.jpa.mdm.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -89,7 +88,7 @@ public class MdmSubscriptionLoader {
 		}
 		//After loading all the subscriptions, sync the subscriptions to the registry.
 		if (subscriptions != null && subscriptions.size() > 0) {
-			mySubscriptionLoader.syncSubscriptions();
+			mySubscriptionLoader.syncDatabaseToCache();
 		}
 	}
 

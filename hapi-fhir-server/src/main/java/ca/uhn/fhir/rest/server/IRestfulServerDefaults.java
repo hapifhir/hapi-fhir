@@ -1,13 +1,3 @@
-package ca.uhn.fhir.rest.server;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.AddProfileTagEnum;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -27,6 +17,15 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+
+import java.util.List;
 
 public interface IRestfulServerDefaults {
 	/**
@@ -75,7 +74,7 @@ public interface IRestfulServerDefaults {
 	IPagingProvider getPagingProvider();
 
 	/**
-	 * Default page size for searches. Null means no limit (DaoConfig might have size limit however)
+	 * Default page size for searches. Null means no limit (JpaStorageSettings might have size limit however)
 	 */
 	default Integer getDefaultPageSize() {
 		return null;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.model.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.search;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimaps;
@@ -45,7 +44,7 @@ public class ExtendedHSearchIndexData {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedHSearchIndexData.class);
 
 	final FhirContext myFhirContext;
-	final ModelConfig myModelConfig;
+	final StorageSettings myStorageSettings;
 
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
 	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
@@ -59,9 +58,9 @@ public class ExtendedHSearchIndexData {
 	private String myResourceJSON;
 	private IBaseResource myResource;
 
-	public ExtendedHSearchIndexData(FhirContext theFhirContext, ModelConfig theModelConfig, IBaseResource theResource) {
+	public ExtendedHSearchIndexData(FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
 		this.myFhirContext = theFhirContext;
-		this.myModelConfig = theModelConfig;
+		this.myStorageSettings = theStorageSettings;
 		myResource = theResource;
 	}
 
@@ -83,7 +82,7 @@ public class ExtendedHSearchIndexData {
 	 * @param theDocument the Hibernate Search document for ResourceTable
 	 */
 	public void writeIndexElements(DocumentElement theDocument) {
-		HSearchIndexWriter indexWriter = HSearchIndexWriter.forRoot(myModelConfig, theDocument);
+		HSearchIndexWriter indexWriter = HSearchIndexWriter.forRoot(myStorageSettings, theDocument);
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
 

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.dao;
-
 /*
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -27,8 +26,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -125,6 +123,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
+	<P extends IResourcePersistentId> void expunge(Collection<P> theResourceIds, RequestDetails theRequest);
+
 	ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
 	@Nonnull
@@ -188,16 +188,17 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Read a resource by its internal PID
+	 *
 	 * @throws ResourceNotFoundException If the ID is not known to the server
-	 * @throws ResourceGoneException If the resource has been deleted
+	 * @throws ResourceGoneException     If the resource has been deleted
 	 */
 	T readByPid(IResourcePersistentId thePid);
 
 	/**
 	 * Read a resource by its internal PID
-	 * @throws ResourceNotFoundException If the ID is not known to the server
-	 * @throws ResourceGoneException If the resource has been deleted and theDeletedOk is true
 	 *
+	 * @throws ResourceNotFoundException If the ID is not known to the server
+	 * @throws ResourceGoneException     If the resource has been deleted and theDeletedOk is true
 	 */
 	default T readByPid(IResourcePersistentId thePid, boolean theDeletedOk) {
 		throw new UnsupportedOperationException(Msg.code(571));
@@ -206,31 +207,44 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * @param theRequestDetails The request details including permissions and partitioning information
 	 * @throws ResourceNotFoundException If the ID is not known to the server
-	 * @throws ResourceGoneException If the resource has been deleted
+	 * @throws ResourceGoneException     If the resource has been deleted
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails);
 
 	/**
 	 * Should deleted resources be returned successfully. This should be false for
 	 * a normal FHIR read.
+	 *
 	 * @throws ResourceNotFoundException If the ID is not known to the server
-	 * @throws ResourceGoneException If the resource has been deleted and theDeletedOk is true
+	 * @throws ResourceGoneException     If the resource has been deleted and theDeletedOk is true
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk);
 
-	BaseHasResource readEntity(IIdType theId, RequestDetails theRequest);
-
 	/**
-	 * @param theCheckForForcedId If true, this method should fail if the requested ID contains a numeric PID which exists, but is
-	 *                            obscured by a "forced ID" so should not exist as far as the outside world is concerned.
+	 * Read an entity from the database, and return it. Note that here we're talking about whatever the
+	 * native database representation is, not the parsed {@link IBaseResource} instance.
+	 *
+	 * @param theId      The resource ID to fetch
+	 * @param theRequest The request details object associated with the request
 	 */
-	BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest);
+	IBasePersistedResource readEntity(IIdType theId, RequestDetails theRequest);
 
 	/**
 	 * Updates index tables associated with the given resource. Does not create a new
 	 * version or update the resource's update time.
+	 *
+	 * @param theResource The FHIR resource object corresponding to the entity to reindex
+	 * @param theEntity   The storage entity to reindex
 	 */
-	void reindex(T theResource, ResourceTable theEntity);
+	void reindex(T theResource, IBasePersistedResource theEntity);
+
+	/**
+	 * Reindex the given resource
+	 *
+	 * @param theResourcePersistentId The ID
+	 * @return
+	 */
+	ReindexOutcome reindex(IResourcePersistentId theResourcePersistentId, ReindexParameters theReindexParameters, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequestDetails);
 
@@ -310,14 +324,16 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * Not supported in DSTU1!
 	 *
 	 * @param theRequestDetails The request details including permissions and partitioning information
+	 * @return MethodOutcome even if the resource fails validation it should still successfully return with a response status of 200
 	 */
+
 	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails);
 
 	RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria);
 
 	/**
 	 * Delete a list of resource Pids
-	 *
+	 * <p>
 	 * CAUTION: This list does not throw an exception if there are delete conflicts.  It should always be followed by
 	 * a call to DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(fhirContext, conflicts);
 	 * to actually throw the exception.  The reason this method doesn't do that itself is that it is expected to be
@@ -338,10 +354,4 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 		return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();
 	}
 
-	/**
-	 * Reindex the given resource
-	 *
-	 * @param theResourcePersistentId The ID
-	 */
-	void reindex(IResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 }

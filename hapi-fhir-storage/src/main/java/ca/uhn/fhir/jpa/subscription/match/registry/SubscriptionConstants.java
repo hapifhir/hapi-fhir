@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.registry;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import org.hl7.fhir.dstu2.model.Subscription;
 
@@ -47,4 +46,5 @@ public class SubscriptionConstants {
 	public static final String REQUESTED_STATUS = Subscription.SubscriptionStatus.REQUESTED.toCode();
 	public static final String ACTIVE_STATUS = Subscription.SubscriptionStatus.ACTIVE.toCode();
 	public static final String ERROR_STATUS = Subscription.SubscriptionStatus.ERROR.toCode();
+    public static final String SUBSCRIPTION_TOPIC_PROFILE_URL = "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-subscription";
 }

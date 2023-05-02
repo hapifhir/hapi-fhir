@@ -57,7 +57,7 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 		s.registerProvider(myBinaryAccessProvider);
 		s.getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
 
-		JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(s, mySystemDao, myDaoConfig, mySearchParamRegistry, myValidationSupport);
+		JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(s, mySystemDao, this.myStorageSettings, mySearchParamRegistry, myValidationSupport);
 		confProvider.setImplementationDescription("THIS IS THE DESC");
 		s.setServerConformanceProvider(confProvider);
 

@@ -1,51 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
-import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
-import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
-import ca.uhn.fhir.jpa.util.QueryChunker;
-import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.util.StopWatch;
-import com.google.common.annotations.VisibleForTesting;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -65,6 +17,60 @@ import java.util.stream.Collectors;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.util.QueryChunker;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Nullable;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseStorageDao implements IFhirSystemDao<T, MT> {
 
@@ -88,6 +94,10 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	private IResourceTagDao myResourceTagDao;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	@Autowired
+	private IHapiTransactionService myTransactionService;
 
 	@VisibleForTesting
 	public void setTransactionProcessorForUnitTest(TransactionProcessor theTransactionProcessor) {
@@ -102,11 +112,11 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	private void validateExpungeEnabled(ExpungeOptions theExpungeOptions) {
-		if (!getConfig().isExpungeEnabled()) {
+		if (!getStorageSettings().isExpungeEnabled()) {
 			throw new MethodNotAllowedException(Msg.code(2080) + "$expunge is not enabled on this server");
 		}
 
-		if (theExpungeOptions.isExpungeEverything() && !getConfig().isAllowMultipleDelete()) {
+		if (theExpungeOptions.isExpungeEverything() && !getStorageSettings().isAllowMultipleDelete()) {
 			throw new MethodNotAllowedException(Msg.code(2081) + "Multiple delete is not enabled on this server");
 		}
 	}
@@ -124,7 +134,6 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		return retVal;
 	}
 
-	@Transactional(propagation = Propagation.SUPPORTS)
 	@Nullable
 	@Override
 	public Map<String, Long> getResourceCountsFromCache() {
@@ -138,32 +147,37 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
 		StopWatch w = new StopWatch();
-		IBundleProvider retVal = myPersistedJpaBundleProviderFactory.history(theRequestDetails, null, null, theSince, theUntil, theOffset);
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(null, null);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, details);
+		IBundleProvider retVal = myTransactionService
+			.withRequest(theRequestDetails)
+			.withRequestPartitionId(requestPartitionId)
+			.execute(() -> myPersistedJpaBundleProviderFactory.history(theRequestDetails, null, null, theSince, theUntil, theOffset, requestPartitionId));
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
 		return retVal;
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
 	public T transaction(RequestDetails theRequestDetails, T theRequest) {
+		HapiTransactionService.noTransactionAllowed();
 		return myTransactionProcessor.transaction(theRequestDetails, theRequest, false);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.MANDATORY)
 	public T transactionNested(RequestDetails theRequestDetails, T theRequest) {
+		HapiTransactionService.requireTransaction();
 		return myTransactionProcessor.transaction(theRequestDetails, theRequest, true);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.MANDATORY)
-	public <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds) {
+	public <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds, boolean thePreFetchIndexes) {
+		HapiTransactionService.requireTransaction();
 		List<Long> pids = theResolvedIds
 			.stream()
 			.map(t -> ((JpaPid) t).getId())
 			.collect(Collectors.toList());
 
-		new QueryChunker<Long>().chunk(pids, ids->{
+		new QueryChunker<Long>().chunk(pids, ids -> {
 
 			/*
 			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
@@ -182,47 +196,49 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 				List<Long> entityIds;
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsStringPopulated()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "string", "myParamsString", null);
-				}
+				if (thePreFetchIndexes) {
+					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsStringPopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "string", "myParamsString", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsTokenPopulated()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "token", "myParamsToken", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsTokenPopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "token", "myParamsToken", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "date", "myParamsDate", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsDatePopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "date", "myParamsDate", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsQuantityPopulated()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "quantity", "myParamsQuantity", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsQuantityPopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "quantity", "myParamsQuantity", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasLinks()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isHasLinks).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasTags()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					myResourceTagDao.findByResourceIds(entityIds);
-					preFetchIndexes(entityIds, "tags", "myTags", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(BaseHasResource::isHasTags).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						myResourceTagDao.findByResourceIds(entityIds);
+						preFetchIndexes(entityIds, "tags", "myTags", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().map(t->t.getId()).collect(Collectors.toList());
-				if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
-					preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
+					entityIds = loadedResourceTableEntries.stream().map(ResourceTable::getId).collect(Collectors.toList());
+					if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
+						preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
+					}
 				}
 
 				new QueryChunker<ResourceTable>().chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {
 
 					Map<Long, ResourceTable> entities = entries
 						.stream()
-						.collect(Collectors.toMap(t -> t.getId(), t -> t));
+						.collect(Collectors.toMap(ResourceTable::getId, t -> t));
 
 					CriteriaBuilder b = myEntityManager.getCriteriaBuilder();
 					CriteriaQuery<ResourceHistoryTable> q = b.createQuery(ResourceHistoryTable.class);
@@ -255,7 +271,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	private void preFetchIndexes(List<Long> theIds, String typeDesc, String fieldName, @Nullable List<ResourceTable> theEntityListToPopulate) {
-		new QueryChunker<Long>().chunk(theIds, ids->{
+		new QueryChunker<Long>().chunk(theIds, ids -> {
 			TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
 			query.setParameter("IDS", ids);
 			List<ResourceTable> indexFetchOutcome = query.getResultList();
@@ -280,8 +296,8 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	@Override
-	protected DaoConfig getConfig() {
-		return myDaoConfig;
+	protected JpaStorageSettings getStorageSettings() {
+		return myStorageSettings;
 	}
 
 	@Override
@@ -290,8 +306,8 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	@VisibleForTesting
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 }

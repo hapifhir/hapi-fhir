@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
@@ -38,7 +38,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	@AfterEach
 	public final void after() throws Exception {
 		super.after();
-		myDaoConfig.setTagStorageMode(DaoConfig.DEFAULT_TAG_STORAGE_MODE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.DEFAULT_TAG_STORAGE_MODE);
 	}
 
 
@@ -353,7 +353,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testInlineTags_StoreAndRetrieve() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		// Store a first version
 		Patient patient = new Patient();
@@ -409,7 +409,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testInlineTags_Search_Tag() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createResourceTagSearchParameter();
 		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
@@ -429,7 +429,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testMetaDelete_TagStorageModeNonVersioned_ShouldShowRemainingTagsInGetAllResources() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 		Patient pt = new Patient();
 		Meta pMeta = new Meta();
 		pMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
@@ -474,7 +474,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testInlineTags_Search_Profile() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParamForInlineResourceProfile();
 		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
@@ -493,18 +493,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testInlineTags_Search_Security() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
-		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.setId("SearchParameter/resource-security");
-		for (String next : myFhirContext.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
-			searchParameter.addBase(next);
-		}
-		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
-		searchParameter.setCode("_security");
-		searchParameter.setName("Security");
-		searchParameter.setExpression("meta.security");
+		FhirContext fhirContext = myFhirContext;
+		SearchParameter searchParameter = createSecuritySearchParameter(fhirContext);
 		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
@@ -518,6 +510,21 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 
 		validatePatientSearchResultsForInlineTags(outcome);
+	}
+
+	@Nonnull
+	public static SearchParameter createSecuritySearchParameter(FhirContext fhirContext) {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("SearchParameter/resource-security");
+		for (String next : fhirContext.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+			searchParameter.addBase(next);
+		}
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setCode("_security");
+		searchParameter.setName("Security");
+		searchParameter.setExpression("meta.security");
+		return searchParameter;
 	}
 
 	private void validatePatientSearchResultsForInlineTags(Bundle outcome) {
@@ -559,7 +566,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	}
 
 	private void initializeNonVersioned() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 
 		Patient patient = new Patient();
 		patient.setId("Patient/A");
@@ -577,7 +584,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	}
 
 	private void initializeVersioned() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.VERSIONED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.VERSIONED);
 
 		Patient patient = new Patient();
 		patient.setId("Patient/A");
@@ -595,32 +602,32 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	}
 
 	@Nonnull
-	private List<String> toTags(Patient patient) {
+	static List<String> toTags(Patient patient) {
 		return toTags(patient.getMeta());
 	}
 
 	@Nonnull
-	private List<String> toSecurityLabels(Patient patient) {
+	static List<String> toSecurityLabels(Patient patient) {
 		return toSecurityLabels(patient.getMeta());
 	}
 
 	@Nonnull
-	private List<String> toProfiles(Patient patient) {
+	static List<String> toProfiles(Patient patient) {
 		return toProfiles(patient.getMeta());
 	}
 
 	@Nonnull
-	private static List<String> toTags(Meta meta) {
+	static List<String> toTags(Meta meta) {
 		return meta.getTag().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
 	}
 
 	@Nonnull
-	private static List<String> toSecurityLabels(Meta meta) {
+	static List<String> toSecurityLabels(Meta meta) {
 		return meta.getSecurity().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
 	}
 
 	@Nonnull
-	private static List<String> toProfiles(Meta meta) {
+	static List<String> toProfiles(Meta meta) {
 		return meta.getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList());
 	}
 

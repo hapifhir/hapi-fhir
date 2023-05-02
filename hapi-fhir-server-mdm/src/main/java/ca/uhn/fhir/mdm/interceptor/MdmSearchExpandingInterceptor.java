@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,11 +17,12 @@ package ca.uhn.fhir.mdm.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -57,11 +56,11 @@ public class MdmSearchExpandingInterceptor {
 	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void hook(SearchParameterMap theSearchParameterMap) {
-		if (myDaoConfig.isAllowMdmExpansion()) {
+		if (myStorageSettings.isAllowMdmExpansion()) {
 			for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
 				String paramName = set.getKey();
 				List<List<IQueryParameterType>> andList = set.getValue();

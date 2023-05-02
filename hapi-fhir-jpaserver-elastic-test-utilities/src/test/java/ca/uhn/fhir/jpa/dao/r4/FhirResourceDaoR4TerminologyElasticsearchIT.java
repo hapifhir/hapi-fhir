@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -56,8 +55,6 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TerminologyElasticsearchIT.class);
 
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
@@ -83,7 +80,6 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
-
 
 	@BeforeEach
 	public void beforeEach() {
@@ -155,7 +151,7 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@AfterAll

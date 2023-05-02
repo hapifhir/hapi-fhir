@@ -6,10 +6,9 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -78,15 +77,15 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new JpaStorageSettings().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 	}
 
 	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 	}
 
 	@Override
@@ -94,7 +93,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new JpaStorageSettings().isDefaultSearchParamsCanBeOverridden());
 		mySearchParamRegistry.forceRefresh();
 	}
 
@@ -148,7 +147,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 	@Test
 	public void testConformanceOverrideAllowed() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 
 		CapabilityStatement conformance = myClient
 			.fetchConformance()
@@ -401,10 +400,6 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
-
-		myCaptureQueriesListener.clear();
-		mySearchParamRegistry.forceRefresh();
-		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);

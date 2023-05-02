@@ -43,7 +43,7 @@ import static org.hamcrest.Matchers.contains;
 public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDstu2Test {
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithSubscriptionIdDstu2Test.class);
 	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myModelConfig);
+	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
 	private String myPatientId;
 	private String mySubscriptionId;
 	@Autowired

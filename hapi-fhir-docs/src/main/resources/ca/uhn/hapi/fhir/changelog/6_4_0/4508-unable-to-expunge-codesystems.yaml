@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4508
+title: "Deleting CodeSystem resources by URL then expunging would fail to
+ expunge and a foreign key error would be thrown. This has been fixed."

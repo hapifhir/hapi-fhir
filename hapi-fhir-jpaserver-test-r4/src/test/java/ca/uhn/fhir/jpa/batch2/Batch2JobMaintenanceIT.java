@@ -39,6 +39,17 @@ import java.util.List;
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * The on-enter actions are defined in
+ * {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater#handleStatusChange}
+ * {@link ca.uhn.fhir.batch2.progress.InstanceProgress#updateStatus(JobInstance)}
+ * {@link JobInstanceProcessor#cleanupInstance()}
+
+ * For chunks:
+ *   {@link ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl#onWorkChunkCreate}
+ *   {@link JpaJobPersistenceImpl#onWorkChunkDequeue(String)}
+ *   Chunk execution {@link ca.uhn.fhir.batch2.coordinator.StepExecutor#executeStep}
+*/
 @TestPropertySource(properties = {
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_FALSE
 })
@@ -88,7 +99,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myWorkChannel.clearInterceptorsForUnitTest();
-		myDaoConfig.setJobFastTrackingEnabled(true);
+		myStorageSettings.setJobFastTrackingEnabled(true);
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
 		jobMaintenanceService.setMaintenanceJobStartedCallback(() -> {});
 	}
@@ -111,7 +122,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
-		String batchJobId = myJobCoordinator.startInstance(request).getJobId();
+		String batchJobId = myJobCoordinator.startInstance(request).getInstanceId();
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.assertFastTracking(batchJobId);
@@ -143,7 +154,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 	@Test
 	public void testFirstStepToSecondStepFasttrackingDisabled_singleChunkDoesNotFasttrack() throws InterruptedException {
-		myDaoConfig.setJobFastTrackingEnabled(false);
+		myStorageSettings.setJobFastTrackingEnabled(false);
 
 		IJobStepWorker<Batch2JobMaintenanceIT.TestJobParameters, VoidModel, Batch2JobMaintenanceIT.FirstStepOutput> firstStep = (step, sink) -> {
 			sink.accept(new Batch2JobMaintenanceIT.FirstStepOutput());
@@ -162,7 +173,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
-		String batchJobId = myJobCoordinator.startInstance(request).getJobId();
+		String batchJobId = myJobCoordinator.startInstance(request).getInstanceId();
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.assertFastTracking(batchJobId);

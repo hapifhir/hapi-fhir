@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -66,14 +66,16 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setMaximumExpansionSize(5000);
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setMaximumExpansionSize(5000);
 		myCachingValidationSupport.invalidateCaches();
 	}
 
@@ -784,7 +786,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 	@Test
 	public void testIndexingIsDeferredForLargeCodeSystems() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(1);
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(1);
 
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
 
@@ -851,7 +853,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@Disabled
 	public void testRefuseCostlyExpansionFhirCodesystem() {
 		createLocalCsAndVs();
-		myDaoConfig.setMaximumExpansionSize(1);
+		myStorageSettings.setMaximumExpansionSize(1);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/audit-event-type").setModifier(TokenParamModifier.IN));
@@ -866,7 +868,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@Test
 	public void testRefuseCostlyExpansionLocalCodesystem() {
 		createLocalCsAndVs();
-		myDaoConfig.setMaximumExpansionSize(1);
+		myStorageSettings.setMaximumExpansionSize(1);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.ABOVE));

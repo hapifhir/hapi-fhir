@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.provider;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -173,7 +172,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
-			throw new ResourceNotFoundException(Msg.code(1979) + theId);
+			throw new ResourceNotFoundException(Msg.code(2250) + theId);
 		}
 
 		T deletedInstance = (T) myFhirContext.getResourceDefinition(myResourceType).newInstance();
@@ -240,7 +239,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	public synchronized List<IBaseResource> historyInstance(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		LinkedList<T> retVal = myIdToHistory.get(theId.getIdPart());
 		if (retVal == null) {
-			throw new ResourceNotFoundException(Msg.code(1980) + theId);
+			throw new ResourceNotFoundException(Msg.code(2248) + theId);
 		}
 
 		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
@@ -255,7 +254,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	public synchronized T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
-			throw new ResourceNotFoundException(Msg.code(1981) + theId);
+			throw new ResourceNotFoundException(Msg.code(2247) + theId);
 		}
 
 		T retVal;
@@ -271,14 +270,14 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		}
 
 		if (retVal == null || ResourceMetadataKeyEnum.DELETED_AT.get(retVal) != null) {
-			throw new ResourceGoneException(Msg.code(1983) + theId);
+			throw new ResourceGoneException(Msg.code(2244) + theId);
 		}
 
 		myReadCount.incrementAndGet();
 
 		retVal = fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 		if (retVal == null) {
-			throw new ResourceNotFoundException(Msg.code(1984) + theId);
+			throw new ResourceNotFoundException(Msg.code(2243) + theId);
 		}
 		return retVal;
 	}

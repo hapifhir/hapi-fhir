@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.reindex;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,11 +17,12 @@ package ca.uhn.fhir.jpa.search.reindex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.reindex;
 
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
@@ -94,7 +93,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 	@Autowired
 	private IResourceReindexJobDao myReindexJobDao;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	private TransactionTemplate myTxTemplate;
@@ -116,8 +115,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 	private ResourceReindexer myResourceReindexer;
 
 	@VisibleForTesting
-	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	@VisibleForTesting
@@ -133,7 +132,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 
 	public void initExecutor() {
 		// Create the threadpool executor used for reindex jobs
-		int reindexThreadCount = myDaoConfig.getReindexThreadCount();
+		int reindexThreadCount = myStorageSettings.getReindexThreadCount();
 		RejectedExecutionHandler rejectHandler = new BlockPolicy();
 		myTaskExecutor = new ThreadPoolExecutor(0, reindexThreadCount,
 			0L, TimeUnit.MILLISECONDS,
@@ -202,7 +201,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public Integer runReindexingPass() {
-		if (myDaoConfig.isSchedulingDisabled() || !myDaoConfig.isEnableTaskPreExpandValueSets()) {
+		if (myStorageSettings.isSchedulingDisabled() || !myStorageSettings.isEnableTaskPreExpandValueSets()) {
 			return null;
 		}
 		if (myIndexingLock.tryLock()) {

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -37,7 +36,7 @@ import java.util.function.Supplier;
  * Figure out how we're going to run the query up front, and build a branchless strategy object.
  */
 public class SearchStrategyFactory {
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	@Nullable
 	private final IFulltextSearchSvc myFulltextSearchSvc;
 
@@ -52,16 +51,16 @@ public class SearchStrategyFactory {
 //	public class JPAHybridHSearchSavedSearch implements  ISearchStrategy {};
 //	public class SavedSearchAdaptorStrategy implements  ISearchStrategy {};
 
-	public SearchStrategyFactory(DaoConfig theDaoConfig, @Nullable IFulltextSearchSvc theFulltextSearchSvc) {
-		myDaoConfig = theDaoConfig;
+	public SearchStrategyFactory(JpaStorageSettings theStorageSettings, @Nullable IFulltextSearchSvc theFulltextSearchSvc) {
+		myStorageSettings = theStorageSettings;
 		myFulltextSearchSvc = theFulltextSearchSvc;
 	}
 
 	public boolean isSupportsHSearchDirect(String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		return
 			myFulltextSearchSvc != null &&
-			myDaoConfig.isStoreResourceInHSearchIndex() &&
-			myDaoConfig.isAdvancedHSearchIndexing() &&
+			myStorageSettings.isStoreResourceInHSearchIndex() &&
+			myStorageSettings.isAdvancedHSearchIndexing() &&
 			myFulltextSearchSvc.supportsAllOf(theParams) &&
 			theParams.getSummaryMode() == null &&
 			theParams.getSearchTotalMode() == null;

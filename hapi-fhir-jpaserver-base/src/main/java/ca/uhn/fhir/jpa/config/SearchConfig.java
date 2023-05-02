@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,10 +17,11 @@ package ca.uhn.fhir.jpa.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -33,7 +32,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ExceptionService;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
@@ -63,15 +61,13 @@ public class SearchConfig {
 	public static final String CONTINUE_TASK = "continueTask";
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	@Autowired
 	private SqlObjectFactory mySqlBuilderFactory;
 	@Autowired
 	private HibernatePropertiesProvider myDialectProvider;
-	@Autowired
-	private ModelConfig myModelConfig;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -115,7 +111,7 @@ public class SearchConfig {
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
 		return new SearchCoordinatorSvcImpl(
 			myContext,
-			myDaoConfig,
+			myStorageSettings,
 			myInterceptorBroadcaster,
 			myHapiTransactionService,
 			mySearchCacheSvc,
@@ -124,8 +120,7 @@ public class SearchConfig {
 			mySearchBuilderFactory,
 			mySynchronousSearchSvc,
 			myPersistedJpaBundleProviderFactory,
-			myRequestPartitionHelperService,
-			mySearchParamRegistry,
+                mySearchParamRegistry,
 			mySearchStrategyFactory,
 			exceptionService(),
 			myBeanFactory
@@ -139,14 +134,13 @@ public class SearchConfig {
 
 	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
 	@Scope("prototype")
-	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType, DaoConfig theDaoConfig) {
+	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		return new SearchBuilder(theDao,
 			theResourceName,
-			myDaoConfig,
+			myStorageSettings,
 			myEntityManagerFactory,
 			mySqlBuilderFactory,
 			myDialectProvider,
-			myModelConfig,
 			mySearchParamRegistry,
 			myPartitionSettings,
 			myInterceptorBroadcaster,
@@ -168,7 +162,7 @@ public class SearchConfig {
                 myInterceptorBroadcaster,
 			mySearchBuilderFactory,
 			mySearchResultCacheSvc,
-			myDaoConfig,
+			myStorageSettings,
 			mySearchCacheSvc,
 			myPagingProvider
 		);
@@ -184,7 +178,7 @@ public class SearchConfig {
 			myInterceptorBroadcaster,
 			mySearchBuilderFactory,
 			mySearchResultCacheSvc,
-			myDaoConfig,
+			myStorageSettings,
 			mySearchCacheSvc,
 			myPagingProvider,
 			exceptionService() // singleton

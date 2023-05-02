@@ -28,6 +28,7 @@ import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.r5.profilemodel.PEBuilder;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
@@ -39,6 +40,8 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -87,6 +90,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		}
 	}
 
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String theS) {
+		return null;
+	}
+
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String theS, String theS1) {
+		return null;
+	}
+
 
 	@Override
 	public List<String> getResourceNames() {
@@ -106,7 +119,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public Map<String, NamingSystem> getNSUrlMap() {
-		throw new UnsupportedOperationException(Msg.code(2107));
+		throw new UnsupportedOperationException(Msg.code(2241));
 	}
 
 	@Override
@@ -128,7 +141,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			}
 		}
 
-		return new ValidationResult(IssueSeverity.ERROR, null);
+		return new ValidationResult(IssueSeverity.ERROR, null, null);
 	}
 
 	@Override
@@ -167,7 +180,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			severity = IssueSeverity.fromCode(result.getSeverityCode());
 		}
 		ConceptDefinitionComponent definition = new ConceptDefinitionComponent().setCode(result.getCode());
-		return new ValidationResult(severity, result.getMessage(), theSystem, definition);
+		return new ValidationResult(severity, result.getMessage(), theSystem, definition, null, null);
 	}
 
 	@Override
@@ -186,11 +199,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
 			definition.setCode(theCode);
 			definition.setDisplay(outcome.getDisplay());
-			return new ValidationResult(theSystem, definition);
+			return new ValidationResult(theSystem, definition, null);
 		}
 
 		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" +
-			Constants.codeSystemWithDefaultDescription(theSystem) + "]");
+			Constants.codeSystemWithDefaultDescription(theSystem) + "]", null);
 	}
 
 	@Override
@@ -281,6 +294,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
 	}
 
+	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String n) {
+		throw new UnsupportedOperationException(Msg.code(234));
+	}
+
 
 	@Override
 	public <T extends org.hl7.fhir.r5.model.Resource> T fetchResource(Class<T> theClass, String theUri) {
@@ -302,6 +320,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		return retVal;
 	}
 
+	@Override
 	public <T extends Resource> T fetchResourceWithException(Class<T> theClass, String uri, Resource sourceOfReference) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(2213));
 	}
@@ -376,8 +395,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
-		throw new UnsupportedOperationException(Msg.code(234));
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types) throws FileNotFoundException, IOException, FHIRException {
+		throw new UnsupportedOperationException(Msg.code(2328));
 	}
 
 	@Override
@@ -446,5 +465,15 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public IWorkerContext setPackageTracker(IWorkerContextManager.IPackageLoadingTracker theIPackageLoadingTracker) {
 		throw new UnsupportedOperationException(Msg.code(220));
+	}
+
+	@Override
+	public String getSpecUrl() {
+		return "";
+	}
+
+	@Override
+	public PEBuilder getProfiledElementBuilder(PEBuilder.PEElementPropertiesPolicy thePEElementPropertiesPolicy, boolean theB) {
+		throw new UnsupportedOperationException(Msg.code(2261));
 	}
 }

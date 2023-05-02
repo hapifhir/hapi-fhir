@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages;
 
 /**
  * Used internally to indicate a failure to install the implementation guide

@@ -1,38 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
-import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
-import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
-
-import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTypeEnum.DELETE;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -52,6 +17,33 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
+
+import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTypeEnum.DELETE;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SubscriptionMatchingSubscriber implements MessageHandler {
 	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
@@ -66,7 +58,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
+	private SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
 
 	/**
 	 * Constructor
@@ -119,7 +111,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getPayloadId(myFhirContext);
 
-		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
+		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAllNonTopicSubscriptions();
 
 		ourLog.trace("Testing {} subscriptions for applicability", subscriptions.size());
 		boolean anySubscriptionsMatchedResource = false;
@@ -148,7 +140,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			!theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
 			return false;
 		}
-		String nextSubscriptionId = getId(theActiveSubscription);
+		String nextSubscriptionId = theActiveSubscription.getId();
 
 		if (isNotBlank(theMsg.getSubscriptionId())) {
 			if (!theMsg.getSubscriptionId().equals(nextSubscriptionId)) {
@@ -192,71 +184,13 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		}
 
 		IBaseResource payload = theMsg.getNewPayload(myFhirContext);
-
-		EncodingEnum encoding = null;
-		if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
-			encoding = EncodingEnum.forContentType(subscription.getPayloadString());
-		}
-		encoding = defaultIfNull(encoding, EncodingEnum.JSON);
-
-		ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-		deliveryMsg.setPartitionId(theMsg.getPartitionId());
-
-		if (payload != null) {
-			deliveryMsg.setPayload(myFhirContext, payload, encoding);
-		} else {
-			deliveryMsg.setPayloadId(theMsg.getPayloadId(myFhirContext));
-		}
-		deliveryMsg.setSubscription(subscription);
-		deliveryMsg.setOperationType(theMsg.getOperationType());
-		deliveryMsg.setTransactionId(theMsg.getTransactionId());
-		deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
-
-		// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
-		HookParams params = new HookParams()
-			.add(CanonicalSubscription.class, theActiveSubscription.getSubscription())
-			.add(ResourceDeliveryMessage.class, deliveryMsg)
-			.add(InMemoryMatchResult.class, matchResult);
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, params)) {
-			ourLog.info("Interceptor has decided to abort processing of subscription {}", nextSubscriptionId);
-			return false;
-		}
-
-		return sendToDeliveryChannel(theActiveSubscription, deliveryMsg);
+		return mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, theActiveSubscription, matchResult);
 	}
 
-	private boolean sendToDeliveryChannel(ActiveSubscription nextActiveSubscription, ResourceDeliveryMessage theDeliveryMsg) {
-		boolean retVal = false;
-		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(theDeliveryMsg);
-		MessageChannel deliveryChannel = mySubscriptionChannelRegistry.getDeliverySenderChannel(nextActiveSubscription.getChannelName());
-		if (deliveryChannel != null) {
-			retVal = true;
-			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);
-		} else {
-			ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getId());
-		}
-		return retVal;
-	}
-
-	private void trySendToDeliveryChannel(ResourceDeliveryJsonMessage theWrappedMsg, MessageChannel theDeliveryChannel) {
-		try {
-			boolean success = theDeliveryChannel.send(theWrappedMsg);
-			if (!success) {
-				ourLog.warn("Failed to send message to Delivery Channel.");
-			}
-		} catch (RuntimeException e) {
-			ourLog.error("Failed to send message to Delivery Channel", e);
-			throw new RuntimeException(Msg.code(7) + "Failed to send message to Delivery Channel", e);
-		}
-	}
-
-	private String getId(ActiveSubscription theActiveSubscription) {
-		return theActiveSubscription.getId();
-	}
 
 	private boolean resourceTypeIsAppropriateForSubscription(ActiveSubscription theActiveSubscription, IIdType theResourceId) {
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = theActiveSubscription.getCriteria();
-		String subscriptionId = getId(theActiveSubscription);
+		String subscriptionId = theActiveSubscription.getId();
 		String resourceType = theResourceId.getResourceType();
 
 		// see if the criteria matches the created object

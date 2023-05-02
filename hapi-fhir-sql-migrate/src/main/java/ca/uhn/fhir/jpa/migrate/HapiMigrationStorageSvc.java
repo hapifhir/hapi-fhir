@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
@@ -31,7 +30,7 @@ import java.util.Set;
 
 public class HapiMigrationStorageSvc {
 	public static final String UNKNOWN_VERSION = "unknown";
-	private static final String LOCK_TYPE = "hapi-fhir-lock";
+	public static final String LOCK_TYPE = "hapi-fhir-lock";
 
 	private final HapiMigrationDao myHapiMigrationDao;
 

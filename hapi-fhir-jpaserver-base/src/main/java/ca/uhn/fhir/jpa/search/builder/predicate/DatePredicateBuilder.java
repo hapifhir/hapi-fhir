@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -49,7 +48,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private final DbColumn myColumnValueLowDateOrdinal;
 	private final DbColumn myColumnValueHighDateOrdinal;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	/**
 	 * Constructor
@@ -64,8 +63,8 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 	}
 
 	@VisibleForTesting
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	public Condition createPredicateDateWithoutIdentityPredicate(IQueryParameterType theParam,
@@ -109,10 +108,10 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 		Comparable<?> genericUpperBound;
 
 		/*
-		 * If all present search parameters are of DAY precision, and {@link ca.uhn.fhir.jpa.model.entity.ModelConfig#getUseOrdinalDatesForDayPrecisionSearches()} is true,
+		 * If all present search parameters are of DAY precision, and {@link ca.uhn.fhir.jpa.model.entity.StorageSettings#getUseOrdinalDatesForDayPrecisionSearches()} is true,
 		 * then we attempt to use the ordinal field for date comparisons instead of the date field.
 		 */
-		boolean isOrdinalComparison = isNullOrDatePrecision(lowerBound) && isNullOrDatePrecision(upperBound) && myDaoConfig.getModelConfig().getUseOrdinalDatesForDayPrecisionSearches();
+		boolean isOrdinalComparison = isNullOrDatePrecision(lowerBound) && isNullOrDatePrecision(upperBound) && myStorageSettings.getUseOrdinalDatesForDayPrecisionSearches();
 
 		Condition lt;
 		Condition gt;
@@ -144,12 +143,12 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 			// use lower bound first
 			if (lowerBoundInstant != null) {
 				lb = this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericLowerBound);
-				if (myDaoConfig.isAccountForDateIndexNulls()) {
+				if (myStorageSettings.isAccountForDateIndexNulls()) {
 					lb = ComboCondition.or(lb, this.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericLowerBound));
 				}
 			} else if (upperBoundInstant != null) {
 				ub = this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
-				if (myDaoConfig.isAccountForDateIndexNulls()) {
+				if (myStorageSettings.isAccountForDateIndexNulls()) {
 					ub = ComboCondition.or(ub, this.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound));
 				}
 			} else {
@@ -159,12 +158,12 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 			// use upper bound first, e.g value between 6 and 10
 			if (upperBoundInstant != null) {
 				ub = this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericUpperBound);
-				if (myDaoConfig.isAccountForDateIndexNulls()) {
+				if (myStorageSettings.isAccountForDateIndexNulls()) {
 					ub = ComboCondition.or(ub, this.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericUpperBound));
 				}
 			} else if (lowerBoundInstant != null) {
 				lb = this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
-				if (myDaoConfig.isAccountForDateIndexNulls()) {
+				if (myStorageSettings.isAccountForDateIndexNulls()) {
 					lb = ComboCondition.or(lb, this.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound));
 				}
 			} else {

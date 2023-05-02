@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4601
+title: "The InteractionBlockingInterceptor did not have support for the interactions
+ 'search' and 'history' despite them being declared in the code system. This has been fixed."

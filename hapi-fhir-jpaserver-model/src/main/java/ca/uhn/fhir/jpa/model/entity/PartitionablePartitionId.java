@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -118,4 +118,14 @@ public class PartitionablePartitionId implements Cloneable {
 			return RequestPartitionId.defaultPartition();
 		}
 	}
+
+	@Nonnull
+	public static PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId, @Nonnull PartitionSettings thePartitionSettings) {
+		Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
+		if (partitionId == null) {
+			partitionId = thePartitionSettings.getDefaultPartitionId();
+		}
+		return new PartitionablePartitionId(partitionId, theRequestPartitionId.getPartitionDate());
+	}
+
 }

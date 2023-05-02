@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -32,7 +31,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -114,7 +113,7 @@ public class ResourceLinkPredicateBuilder
 	private final boolean myReversed;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -195,7 +194,7 @@ public class ResourceLinkPredicateBuilder
 					IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
 
 					if (dt.hasBaseUrl()) {
-						if (myDaoConfig.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
+						if (myStorageSettings.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
 							dt = dt.toUnqualified();
 							targetIds.add(dt);
 						} else {
@@ -282,8 +281,8 @@ public class ResourceLinkPredicateBuilder
 		return QueryParameterUtils.toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
 	}
 
-	public Condition createPredicateSourcePaths(String theResourceName, String theParamName, List<String> theQualifiers) {
-		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, theQualifiers);
+	public Condition createPredicateSourcePaths(String theResourceName, String theParamName) {
+		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, Collections.emptyList());
 		return createPredicateSourcePaths(pathsToMatch);
 	}
 
@@ -627,71 +626,17 @@ public class ResourceLinkPredicateBuilder
 			type.setValueAsQueryToken(getFhirContext(), theParamName, qualifier, resourceId);
 			chainValue = type;
 		} else {
-			chainValue = toParameterType(param, qualifier, resourceId);
+			chainValue = myQueryStack.toParameterType(param, qualifier, resourceId);
 		}
 
 		return chainValue;
 	}
-
-	private IQueryParameterType toParameterType(RuntimeSearchParam theParam) {
-		IQueryParameterType qp;
-		switch (theParam.getParamType()) {
-			case DATE:
-				qp = new DateParam();
-				break;
-			case NUMBER:
-				qp = new NumberParam();
-				break;
-			case QUANTITY:
-				qp = new QuantityParam();
-				break;
-			case STRING:
-				qp = new StringParam();
-				break;
-			case TOKEN:
-				qp = new TokenParam();
-				break;
-			case COMPOSITE:
-				List<RuntimeSearchParam> compositeOf = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
-				if (compositeOf.size() != 2) {
-					throw new InternalErrorException(Msg.code(1247) + "Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
-				}
-				IQueryParameterType leftParam = toParameterType(compositeOf.get(0));
-				IQueryParameterType rightParam = toParameterType(compositeOf.get(1));
-				qp = new CompositeParam<>(leftParam, rightParam);
-				break;
-			case REFERENCE:
-				qp = new ReferenceParam();
-				break;
-			case SPECIAL:
-				if ("Location.position".equals(theParam.getPath())) {
-					qp = new SpecialParam();
-					break;
-				}
-				throw new InternalErrorException(Msg.code(1248) + "Don't know how to convert param type: " + theParam.getParamType());
-			case URI:
-				qp = new UriParam();
-				break;
-			case HAS:
-			default:
-				throw new InternalErrorException(Msg.code(1249) + "Don't know how to convert param type: " + theParam.getParamType());
-		}
-		return qp;
-	}
-
 
 	@Nonnull
 	private InvalidRequestException newInvalidTargetTypeForChainException(String theResourceName, String theParamName, String theTypeValue) {
 		String searchParamName = theResourceName + ":" + theParamName;
 		String msg = getFhirContext().getLocalizer().getMessage(ResourceLinkPredicateBuilder.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
 		return new InvalidRequestException(msg);
-	}
-
-	private IQueryParameterType toParameterType(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
-		IQueryParameterType qp = toParameterType(theParam);
-
-		qp.setValueAsQueryToken(getFhirContext(), theParam.getName(), theQualifier, theValueAsQueryToken);
-		return qp;
 	}
 
 	@Nonnull

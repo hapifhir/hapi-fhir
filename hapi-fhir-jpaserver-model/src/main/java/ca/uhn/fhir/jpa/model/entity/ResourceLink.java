@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -46,9 +45,11 @@ import java.util.Date;
 
 @Entity
 @Table(name = "HFJ_RES_LINK", indexes = {
-	@Index(name = "IDX_RL_TPATHRES", columnList = "SRC_PATH,TARGET_RESOURCE_ID"),
+	// We need to join both ways, so index from src->tgt and from tgt->src.
+	// From src->tgt, rows are usually written all together as part of ingestion - keep the index small, and read blocks as needed.
 	@Index(name = "IDX_RL_SRC", columnList = "SRC_RESOURCE_ID"),
-	@Index(name = "IDX_RL_DEST", columnList = "TARGET_RESOURCE_ID")
+	// But from tgt->src, include all the match columns. Targets will usually be randomly distributed - each row in separate block.
+	@Index(name = "IDX_RL_TGT_v2", columnList = "TARGET_RESOURCE_ID, SRC_PATH, SRC_RESOURCE_ID, TARGET_RESOURCE_TYPE,PARTITION_ID")
 })
 public class ResourceLink extends BaseResourceIndex {
 
@@ -98,6 +99,9 @@ public class ResourceLink extends BaseResourceIndex {
 	@Transient
 	private transient String myTargetResourceId;
 
+	/**
+	 * Constructor
+	 */
 	public ResourceLink() {
 		super();
 	}
@@ -209,7 +213,7 @@ public class ResourceLink extends BaseResourceIndex {
 		// Must have set an url like http://example.org/something
 		// We treat 'something' as the resource type because of fix for #659. Prior to #659 fix, 'something' was
 		// treated as the id and 'example.org' was treated as the resource type
-		// TODO: log a warning?
+		// Maybe log a warning?
 //		}
 
 		myTargetResourceType = theTargetResourceUrl.getResourceType();
@@ -290,6 +294,28 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public ResourceTable getTargetResource() {
 		return myTargetResource;
+	}
+
+	/**
+	 * Creates a clone of this resourcelink which doesn't contain the internal PID
+	 * of the target resource.
+	 */
+	public ResourceLink cloneWithoutTargetPid() {
+		ResourceLink retVal = new ResourceLink();
+		retVal.mySourceResource = mySourceResource;
+		retVal.mySourceResourcePid = mySourceResource.getId();
+		retVal.mySourceResourceType = mySourceResource.getResourceType();
+		retVal.mySourcePath = mySourcePath;
+		retVal.myUpdated = myUpdated;
+		retVal.myTargetResourceType = myTargetResourceType;
+		if (myTargetResourceId != null) {
+			retVal.myTargetResourceId = myTargetResourceId;
+		} else if (myTargetResource != null) {
+			retVal.myTargetResourceId = myTargetResource.getIdDt().getIdPart();
+		}
+		retVal.myTargetResourceUrl = myTargetResourceUrl;
+		retVal.myTargetResourceVersion = myTargetResourceVersion;
+		return retVal;
 	}
 
 	public static ResourceLink forAbsoluteReference(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {

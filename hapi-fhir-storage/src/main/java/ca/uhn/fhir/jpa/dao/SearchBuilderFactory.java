@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,8 +17,8 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,11 +29,9 @@ public class SearchBuilderFactory<T extends IResourcePersistentId<?>> {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	public ISearchBuilder<T> newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
-		return (ISearchBuilder<T>) myApplicationContext.getBean(ISearchBuilder.SEARCH_BUILDER_BEAN_NAME, theDao, theResourceName, theResourceType, myDaoConfig);
+		return (ISearchBuilder<T>) myApplicationContext.getBean(ISearchBuilder.SEARCH_BUILDER_BEAN_NAME, theDao, theResourceName, theResourceType);
 	}
 
 }

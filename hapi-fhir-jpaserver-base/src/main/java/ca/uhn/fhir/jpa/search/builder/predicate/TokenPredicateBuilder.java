@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
@@ -32,14 +31,13 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
@@ -67,9 +65,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -88,11 +83,9 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
 	@Autowired
-	private ModelConfig myModelConfig;
-	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	/**
 	 * Constructor
@@ -181,7 +174,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			if (modifier == TokenParamModifier.IN || modifier == TokenParamModifier.NOT_IN) {
 				if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
 					ValueSetExpansionOptions valueSetExpansionOptions = new ValueSetExpansionOptions();
-					valueSetExpansionOptions.setCount(myDaoConfig.getMaximumExpansionSize());
+					valueSetExpansionOptions.setCount(myStorageSettings.getMaximumExpansionSize());
 					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), valueSetExpansionOptions, code);
 
 					codes.addAll(extractValueSetCodes(expanded.getValueSet()));
@@ -200,7 +193,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				validateHaveSystemAndCodeForToken(paramName, code, system);
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
 			} else if (modifier == TokenParamModifier.OF_TYPE) {
-				if (!myModelConfig.isIndexIdentifierOfType()) {
+				if (!myStorageSettings.isIndexIdentifierOfType()) {
 					throw new MethodNotAllowedException(Msg.code(2012) + "The :of-type modifier is not enabled on this server");
 				}
 				if (isBlank(system) || isBlank(code)) {
@@ -270,7 +263,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			BaseRuntimeElementCompositeDefinition<?> expansionDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(expansion.getClass());
 			BaseRuntimeChildDefinition containsChild = expansionDef.getChildByName("contains");
 			List<IBase> contains = containsChild.getAccessor().getValues(expansion);
-				
+
 			BaseRuntimeChildDefinition.IAccessor systemAccessor = null;
 			BaseRuntimeChildDefinition.IAccessor codeAccessor = null;
 			for (IBase nextContains : contains) {
@@ -282,13 +275,13 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				}
 				String system = systemAccessor
 					.getFirstValueOrNull(nextContains)
-					.map(t->(IPrimitiveType<?>)t)
-					.map(t->t.getValueAsString())
+					.map(t -> (IPrimitiveType<?>) t)
+					.map(t -> t.getValueAsString())
 					.orElse(null);
 				String code = codeAccessor
 					.getFirstValueOrNull(nextContains)
-					.map(t->(IPrimitiveType<?>)t)
-					.map(t->t.getValueAsString())
+					.map(t -> (IPrimitiveType<?>) t)
+					.map(t -> t.getValueAsString())
 					.orElse(null);
 				if (isNotBlank(system) && isNotBlank(code)) {
 					retVal.add(new FhirVersionIndependentConcept(system, code));

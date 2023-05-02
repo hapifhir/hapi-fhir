@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.delete;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,13 +17,14 @@ package ca.uhn.fhir.jpa.delete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.delete;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -61,7 +60,7 @@ public class DeleteConflictService {
 	@Autowired
 	DeleteConflictFinderService myDeleteConflictFinderService;
 	@Autowired
-	DaoConfig myDaoConfig;
+	JpaStorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -75,7 +74,7 @@ public class DeleteConflictService {
 	}
 
 	private DeleteConflictOutcome handleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, List<ResourceLink> theResultList, TransactionDetails theTransactionDetails) {
-		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete() && !theForValidate) {
+		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete() && !theForValidate) {
 			ourLog.debug("Deleting {} resource dependencies which can no longer be satisfied", theResultList.size());
 			myResourceLinkDao.deleteAll(theResultList);
 			return null;
@@ -128,7 +127,7 @@ public class DeleteConflictService {
 			int shouldRetryCount = Math.min(outcome.getShouldRetryCount(), MAX_RETRY_ATTEMPTS);
 			if (!(retryCount < shouldRetryCount)) break;
 			newConflicts = new DeleteConflictList(newConflicts);
-			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, myDaoConfig.getMaximumDeleteConflictQueryCount(), theTransactionDetails);
+			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, myStorageSettings.getMaximumDeleteConflictQueryCount(), theTransactionDetails);
 			++retryCount;
 		}
 		theDeleteConflicts.addAll(newConflicts);

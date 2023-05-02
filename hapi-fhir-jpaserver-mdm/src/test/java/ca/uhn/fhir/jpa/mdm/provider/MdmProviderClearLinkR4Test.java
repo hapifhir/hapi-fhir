@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -35,6 +36,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	protected IAnyResource myPractitionerGoldenResource;
 	protected StringType myPractitionerGoldenResourceId;
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
@@ -76,7 +78,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		try {
 			myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
 			fail();
-		} catch (ResourceGoneException e) {
+		} catch (ResourceNotFoundException e) {
 			// Expected exception
 		}
 
@@ -180,7 +182,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		try {
 			myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 			fail();
-		} catch (ResourceGoneException e) {
+		} catch (ResourceNotFoundException e) {
 		}
 	}
 

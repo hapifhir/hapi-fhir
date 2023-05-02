@@ -1,9 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
@@ -59,17 +58,17 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
-		myModelConfig.setIndexOnContainedResources(false);
-		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
+		myStorageSettings.setIndexOnContainedResources(false);
+		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
 	}
 
 	@BeforeEach
@@ -78,16 +77,16 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myModelConfig.setIndexOnContainedResources(true);
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setIndexOnContainedResources(true);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test
 	public void testContainedDisabled() throws Exception {
-		myModelConfig.setIndexOnContainedResources(false);
+		myStorageSettings.setIndexOnContainedResources(false);
 
 		String uri = myServerBase + "/Observation?subject.name=Smith&_contained=true";
 		try (CloseableHttpResponse response = ourHttpClient.execute(new HttpGet(uri))) {
@@ -989,7 +988,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 	}
 
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
+	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
 

@@ -1,18 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import com.google.common.annotations.VisibleForTesting;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.CodeType;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -32,8 +17,28 @@ import java.util.stream.Collectors;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
+
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import com.google.common.annotations.VisibleForTesting;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Enumeration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoSearchParameter<T> {
+
+	private final AtomicBoolean myCacheReloadTriggered = new AtomicBoolean(false);
 
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
@@ -42,11 +47,31 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 	private SearchParameterDaoValidator mySearchParameterDaoValidator;
 
 	protected void reindexAffectedResources(T theResource, RequestDetails theRequestDetails) {
+
+		/*
+		 * After we commit, flush the search parameter cache. This only helps on the
+		 * local server (ie in a cluster the other servers won't be flushed) but
+		 * the cache is short anyhow, and  flushing locally is better than nothing.
+		 * Many use cases where you would create a search parameter and immediately
+		 * try to use it tend to be on single-server setups anyhow, e.g. unit tests
+		 */
+		if (!shouldSkipReindex(theRequestDetails)) {
+			if (!myCacheReloadTriggered.getAndSet(true)) {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						myCacheReloadTriggered.set(false);
+						mySearchParamRegistry.forceRefresh();
+					}
+				});
+			}
+		}
+
 		// N.B. Don't do this on the canonicalized version
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
 
 		org.hl7.fhir.r5.model.SearchParameter searchParameter = myVersionCanonicalizer.searchParameterToCanonical(theResource);
-		List<String> base = theResource != null ? searchParameter.getBase().stream().map(CodeType::getCode).collect(Collectors.toList()) : null;
+		List<String> base = theResource != null ? searchParameter.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList()) : null;
 		requestReindexForRelatedResources(reindex, base, theRequestDetails);
 	}
 

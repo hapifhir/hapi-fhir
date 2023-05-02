@@ -569,6 +569,14 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		assertFields(MdmLink::getEidMatch, theExpectedValues);
 	}
 
+	protected void assertLinksMatchScore(Double... theExpectedValues) {
+		assertFields(MdmLink::getScore, theExpectedValues);
+	}
+
+	protected void assertLinksMatchVector(Long... theExpectedValues) {
+		assertFields(MdmLink::getVector, theExpectedValues);
+	}
+
 	public SearchParameterMap buildGoldenResourceSearchParameterMap() {
 		SearchParameterMap spMap = new SearchParameterMap();
 		spMap.setLoadSynchronous(true);
@@ -618,5 +626,35 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		retval.setResourceType("Patient");
 		retval.setRestOperation(MdmTransactionContext.OperationType.UPDATE_LINK);
 		return retval;
+	}
+
+	protected MdmLink createGoldenPatientAndLinkToSourcePatient(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		Patient patient = createPatient();
+
+		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
+		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
+		mdmLink.setMatchResult(theMdmMatchResultEnum);
+		mdmLink.setCreated(new Date());
+		mdmLink.setUpdated(new Date());
+		mdmLink.setGoldenResourcePersistenceId(JpaPid.fromId(thePatientPid));
+		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
+		return myMdmLinkDao.save(mdmLink);
+	}
+
+	protected MdmLink createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String theVersion, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource) {
+		final Patient goldenPatient = createPatient();
+		final Patient sourcePatient = createPatient();
+
+		final MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
+		mdmLink.setLinkSource(theMdmLinkSourceEnum);
+		mdmLink.setMatchResult(theMdmMatchResultEnum);
+		mdmLink.setCreated(theCreateTime);
+		mdmLink.setUpdated(theUpdateTime);
+		mdmLink.setVersion(theVersion);
+		mdmLink.setGoldenResourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient)));
+		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient)));
+		mdmLink.setHadToCreateNewGoldenResource(theLinkCreatedNewResource);
+
+		return myMdmLinkDao.save(mdmLink);
 	}
 }

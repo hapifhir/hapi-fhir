@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,9 +17,12 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages;
 
 public interface IPackageInstallerSvc {
 
 	PackageInstallOutcomeJson install(PackageInstallationSpec theSpec);
+
+	PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theSpec);
 
 }

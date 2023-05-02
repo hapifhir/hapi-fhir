@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
@@ -33,11 +32,12 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
@@ -48,7 +48,6 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,6 +64,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	private final MessageHandler myReceiverHandler;
 	private final JobQuerySvc myJobQuerySvc;
 	private final JobParameterJsonValidator myJobParameterJsonValidator;
+	private final IHapiTransactionService myTransactionService;
 
 	/**
 	 * Constructor
@@ -74,7 +74,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 									  @Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 									  @Nonnull WorkChunkProcessor theExecutorSvc,
-									  @Nonnull IJobMaintenanceService theJobMaintenanceService) {
+									  @Nonnull IJobMaintenanceService theJobMaintenanceService,
+									  @Nonnull IHapiTransactionService theTransactionService) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
@@ -82,16 +83,14 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myWorkChannelReceiver = theWorkChannelReceiver;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 
-		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender, theExecutorSvc, theJobMaintenanceService);
+		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender, theExecutorSvc, theJobMaintenanceService, theTransactionService);
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 		myJobParameterJsonValidator = new JobParameterJsonValidator();
+		myTransactionService = theTransactionService;
 	}
 
 	@Override
 	public Batch2JobStartResponse startInstance(JobInstanceStartRequest theStartRequest) {
-		JobDefinition<?> jobDefinition = myJobDefinitionRegistry
-			.getLatestJobDefinition(theStartRequest.getJobDefinitionId()).orElseThrow(() -> new IllegalArgumentException(Msg.code(2063) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
-
 		String paramsString = theStartRequest.getParameters();
 		if (isBlank(paramsString)) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
@@ -103,12 +102,12 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 0, 1000);
 			if (!existing.isEmpty()) {
 				// we'll look for completed ones first... otherwise, take any of the others
-				Collections.sort(existing, (o1, o2) -> -(o1.getStatus().ordinal() - o2.getStatus().ordinal()));
+				existing.sort((o1, o2) -> -(o1.getStatus().ordinal() - o2.getStatus().ordinal()));
 
-				JobInstance first = existing.stream().findFirst().get();
+				JobInstance first = existing.stream().findFirst().orElseThrow();
 
 				Batch2JobStartResponse response = new Batch2JobStartResponse();
-				response.setJobId(first.getInstanceId());
+				response.setInstanceId(first.getInstanceId());
 				response.setUsesCachedResult(true);
 
 				ourLog.info("Reusing cached {} job with status {} and id {}", first.getJobDefinitionId(), first.getStatus(), first.getInstanceId());
@@ -117,24 +116,21 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			}
 		}
 
+		JobDefinition<?> jobDefinition = myJobDefinitionRegistry
+			.getLatestJobDefinition(theStartRequest.getJobDefinitionId()).orElseThrow(() -> new IllegalArgumentException(Msg.code(2063) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
+
 		myJobParameterJsonValidator.validateJobParameters(theStartRequest, jobDefinition);
 
-		JobInstance instance = JobInstance.fromJobDefinition(jobDefinition);
-		instance.setParameters(theStartRequest.getParameters());
-		instance.setStatus(StatusEnum.QUEUED);
 
-		String instanceId = myJobPersistence.storeNewInstance(instance);
-		ourLog.info("Stored new {} job {} with status {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus());
-		ourLog.debug("Job parameters: {}", instance.getParameters());
+		IJobPersistence.CreateResult instanceAndFirstChunk =
+			myTransactionService.withSystemRequest().execute(() ->
+				myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
 
-		BatchWorkChunk batchWorkChunk = BatchWorkChunk.firstChunk(jobDefinition, instanceId);
-		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
-
-		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceId, chunkId);
+		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceAndFirstChunk.jobInstanceId, instanceAndFirstChunk.workChunkId);
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setJobId(instanceId);
+		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);
 		return response;
 	}
 
@@ -180,6 +176,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		return myJobQuerySvc.fetchAllInstances(theFetchRequest);
 	}
 
+	// wipmb For 6.8 - Clarify this interface. We currently return a JobOperationResultJson, and don't throw ResourceNotFoundException
 	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		return myJobPersistence.cancelInstance(theInstanceId);

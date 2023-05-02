@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.svc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -32,7 +31,9 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
@@ -44,7 +45,6 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -125,9 +125,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext, RequestDetails theRequestDetails)
-	{
-		RequestPartitionId theReadPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
+	public Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext, RequestDetails theRequestDetails) {
+		RequestPartitionId theReadPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
 		Page<MdmLinkJson> resultPage;
 		if (theReadPartitionId.hasPartitionIds()) {
 			theMdmQuerySearchParameters.setPartitionIds(theReadPartitionId.getPartitionIds());
@@ -136,6 +135,11 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		validateMdmQueryPermissions(theReadPartitionId, resultPage.getContent(), theRequestDetails);
 
 		return resultPage;
+	}
+
+	@Override
+	public List<MdmLinkWithRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails) {
+		return myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters);
 	}
 
 	@Override
@@ -166,12 +170,12 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Override
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails, String theRequestResourceType) {
 		Page<MdmLinkJson> resultPage;
-		RequestPartitionId readPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
+		RequestPartitionId readPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
 
-		if (readPartitionId.isAllPartitions()){
-			resultPage =  myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, null, theRequestResourceType);
+		if (readPartitionId.isAllPartitions()) {
+			resultPage = myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, null, theRequestResourceType);
 		} else {
-			resultPage =  myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, readPartitionId.getPartitionIds(), theRequestResourceType);
+			resultPage = myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, readPartitionId.getPartitionIds(), theRequestResourceType);
 		}
 
 		validateMdmQueryPermissions(readPartitionId, resultPage.getContent(), theRequestDetails);
@@ -205,19 +209,19 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	public IBaseParameters submitMdmClearJob(@Nonnull List<String> theResourceNames, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
 		MdmClearJobParameters params = new MdmClearJobParameters();
 		params.setResourceNames(theResourceNames);
-		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().longValue() > 0) {
+		if (theBatchSize != null && theBatchSize.getValue() != null && theBatchSize.getValue().longValue() > 0) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 
-		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
-		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, details);
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_MDM_CLEAR);
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
 		params.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(MdmClearAppCtx.JOB_MDM_CLEAR);
 		request.setParameters(params);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-		String id = response.getJobId();
+		String id = response.getInstanceId();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
@@ -226,10 +230,10 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 
 	@Override
-	public IBaseParameters submitMdmSubmitJob(List<String> theUrls,  IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
+	public IBaseParameters submitMdmSubmitJob(List<String> theUrls, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
 		MdmSubmitJobParameters params = new MdmSubmitJobParameters();
 
-		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().longValue() > 0) {
+		if (theBatchSize != null && theBatchSize.getValue() != null && theBatchSize.getValue().longValue() > 0) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 		params.setRequestPartitionId(RequestPartitionId.allPartitions());
@@ -241,7 +245,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		request.setJobDefinitionId(MdmSubmitAppCtx.MDM_SUBMIT_JOB);
 
 		Batch2JobStartResponse batch2JobStartResponse = myJobCoordinator.startInstance(request);
-		String id = batch2JobStartResponse.getJobId();
+		String id = batch2JobStartResponse.getInstanceId();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
@@ -256,12 +260,12 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		myIMdmLinkUpdaterSvc.notDuplicateGoldenResource(goldenResource, target, theMdmTransactionContext);
 	}
 
-	private void validateMdmQueryPermissions(RequestPartitionId theRequestPartitionId, List<MdmLinkJson> theMdmLinkJsonList, RequestDetails theRequestDetails){
+	private void validateMdmQueryPermissions(RequestPartitionId theRequestPartitionId, List<MdmLinkJson> theMdmLinkJsonList, RequestDetails theRequestDetails) {
 		Set<String> seenResourceTypes = new HashSet<>();
-		for (MdmLinkJson mdmLinkJson : theMdmLinkJsonList){
+		for (MdmLinkJson mdmLinkJson : theMdmLinkJsonList) {
 			IdDt idDt = new IdDt(mdmLinkJson.getSourceId());
 
-			if (!seenResourceTypes.contains(idDt.getResourceType())){
+			if (!seenResourceTypes.contains(idDt.getResourceType())) {
 				myRequestPartitionHelperSvc.validateHasPartitionPermissions(theRequestDetails, idDt.getResourceType(), theRequestPartitionId);
 				seenResourceTypes.add(idDt.getResourceType());
 			}

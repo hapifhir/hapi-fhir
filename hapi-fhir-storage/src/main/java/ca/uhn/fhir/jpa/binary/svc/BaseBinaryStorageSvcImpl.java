@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.binary.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.binary.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.svc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
@@ -93,6 +92,14 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			b.append(CHARS.charAt(nextInt % CHARS.length()));
 		}
 		return b.toString();
+	}
+
+	/**
+	 * Default implementation is to return true for any Blob ID.
+	 */
+	@Override
+	public boolean isValidBlobId(String theNewBlobId) {
+		return true;
 	}
 
 	@Override

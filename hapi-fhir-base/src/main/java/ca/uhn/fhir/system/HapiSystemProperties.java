@@ -1,5 +1,3 @@
-package ca.uhn.fhir.system;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.system;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.system;
 
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -142,7 +141,7 @@ public final class HapiSystemProperties {
 	}
 
 	/**
-	 * This property sets {@link DaoConfig#setStatusBasedReindexingDisabled(Boolean)} to true when the system starts up.
+	 * This property sets {@link JpaStorageSettings#setStatusBasedReindexingDisabled(Boolean)} to true when the system starts up.
 	 */
 	public static void enableStatusBasedReindex() {
 		System.clearProperty(DISABLE_STATUS_BASED_REINDEX);

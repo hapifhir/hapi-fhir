@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.svc.candidate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.dao.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
@@ -39,15 +38,15 @@ public class LastNOperation {
 	public static final String OBSERVATION_RES_TYPE = "Observation";
 	private final SearchSession mySession;
 	private final FhirContext myFhirContext;
-	private final ModelConfig myModelConfig;
+	private final StorageSettings myStorageSettings;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final ExtendedHSearchSearchBuilder myExtendedHSearchSearchBuilder = new ExtendedHSearchSearchBuilder();
 
-	public LastNOperation(SearchSession theSession, FhirContext theFhirContext, ModelConfig theModelConfig,
+	public LastNOperation(SearchSession theSession, FhirContext theFhirContext, StorageSettings theStorageSettings,
 			ISearchParamRegistry theSearchParamRegistry) {
 		mySession = theSession;
 		myFhirContext = theFhirContext;
-		myModelConfig = theModelConfig;
+		myStorageSettings = theStorageSettings;
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
@@ -61,7 +60,7 @@ public class LastNOperation {
 			.where(f -> f.bool(b -> {
 				// Must match observation type
 				b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
-				ExtendedHSearchClauseBuilder builder = new ExtendedHSearchClauseBuilder(myFhirContext, myModelConfig, b, f);
+				ExtendedHSearchClauseBuilder builder = new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, b, f);
 				myExtendedHSearchSearchBuilder.addAndConsumeAdvancedQueryClauses(builder, OBSERVATION_RES_TYPE, theParams.clone(), mySearchParamRegistry);
 			}))
 			.aggregation(observationsByCodeKey, f -> f.fromJson(lastNAggregation.toAggregation()))

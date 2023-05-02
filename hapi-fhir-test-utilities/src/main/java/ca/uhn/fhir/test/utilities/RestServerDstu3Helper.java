@@ -1,5 +1,3 @@
-package ca.uhn.fhir.test.utilities;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.test.utilities;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -66,7 +65,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			try {
 				myRestServer.initialize();
 			} catch (ServletException e) {
-				throw new RuntimeException(Msg.code(2112)+"Failed to initialize server", e);
+				throw new RuntimeException(Msg.code(2252)+"Failed to initialize server", e);
 			}
 		}
 	}
@@ -294,7 +293,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			@Override
 			public MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 				if (myFailNextPut) {
-					throw new PreconditionFailedException(Msg.code(2113)+"Failed update operation");
+					throw new PreconditionFailedException(Msg.code(2251)+"Failed update operation");
 				}
 				return super.update(theResource, theConditional, theRequestDetails);
 			}

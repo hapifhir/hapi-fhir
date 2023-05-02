@@ -1,5 +1,3 @@
-package ca.uhn.fhir.test.utilities.jpa;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.test.utilities.jpa;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities.jpa;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
@@ -366,6 +365,9 @@ public class JpaModelScannerAndVerifier {
 		}
 		if (ourReservedWords.contains(theColumnName)) {
 			throw new IllegalArgumentException(Msg.code(1631) + "Column name is a reserved word: " + theColumnName + " found on " + theElement);
+		}
+		if (theColumnName.startsWith("_")) {
+			throw new IllegalArgumentException(Msg.code(2272) + "Column name "+ theColumnName +" starts with an '_' (underscore). This is not permitted for oracle field names. Found on " + theElement);
 		}
 	}
 

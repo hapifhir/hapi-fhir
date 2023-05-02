@@ -20,12 +20,12 @@ Clients may sometimes post resources to your server that contain absolute resour
 
 By default, the server will reject this reference, as only local references are permitted by the server. This can be changed however.
 
-If you want the server to recognize that this URL is actually a local reference (i.e. because the server will be deployed to the base URL `http://example.com/fhir/`) you can configure the server to recognize this URL via the following DaoConfig setting:
+If you want the server to recognize that this URL is actually a local reference (i.e. because the server will be deployed to the base URL `http://example.com/fhir/`) you can configure the server to recognize this URL via the following JpaStorageSettings setting:
 
 ```java
 @Bean
-public DaoConfig daoConfig() {
-	DaoConfig retVal = new DaoConfig();
+public JpaStorageSettings storageSettings() {
+   JpaStorageSettings retVal = new JpaStorageSettings();
 	// ... other config ...
 	retVal.getTreatBaseUrlsAsLocal().add("http://example.com/fhir/");
 	return retVal;
@@ -36,8 +36,8 @@ On the other hand, if you want the server to be configurable to allow remote ref
 
 ```java
 @Bean
-public DaoConfig daoConfig() {
-	DaoConfig retVal = new DaoConfig();
+public JpaStorageSettings storageSettings() {
+   JpaStorageSettings retVal = new JpaStorageSettings();
 	// Allow external references
 	retVal.setAllowExternalReferences(true);
 	
@@ -59,19 +59,19 @@ etc. For example, you might refer to the ValueSet `http://hl7.org/fhir/ValueSet/
 resources. In this case, you are not necessarily telling the server that this is a real address that it should resolve,
 but rather that this is an identifier for a ValueSet where `ValueSet.url` has the given URI/URL.
 
-HAPI can be configured to treat certain URI/URL patterns as logical by using the DaoConfig#setTreatReferencesAsLogical
+HAPI can be configured to treat certain URI/URL patterns as logical by using the JpaStorageSettings#setTreatReferencesAsLogical
 property (
-see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setTreatReferencesAsLogical(java.util.Set)))
+see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setTreatReferencesAsLogical(java.util.Set)))
 .
 
 For example:
 
 ```java
 // Treat specific URL as logical
-myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/ValueSet/cats-and-dogs");
+myStorageSettings.getTreatReferencesAsLogical().add("http://mysystem.com/ValueSet/cats-and-dogs");
 
 // Treat all references with given prefix as logical
-myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/mysystem-vs-*");
+myStorageSettings.getTreatReferencesAsLogical().add("http://mysystem.com/mysystem-vs-*");
 ```
 
 ## Referential Integrity
@@ -88,8 +88,8 @@ Referential integrity can be configured on two levels: `write` and `delete`.
 #### JPA Server
 ```java
 @Bean
-public DaoConfig daoConfig() {
-	DaoConfig retVal = new DaoConfig();
+public JpaStorageSettings storageSettings() {
+   JpaStorageSettings retVal = new JpaStorageSettings();
 	// ... other config ...
 	retVal.setEnforceReferentialIntegrityOnWrite(true);
 	retVal.setEnforceReferentialIntegrityOnDelete(true);
@@ -116,7 +116,7 @@ Under many normal scenarios this is a n acceptable performance tradeoff, but in 
 You can change the global cache using the following setting:
 
 ```java
-myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 ```
 
 ### Disable Cache at the Request Level
@@ -168,5 +168,14 @@ X-Retry-On-Version-Conflict: retry; max-retries=100
 
 Delete with expunge submits a job to delete and expunge the requested resources. This is done in batches. If the DELETE
 ?_expunge=true syntax is used to trigger the delete expunge, then the batch size will be determined by the value
-of [Expunge Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getExpungeBatchSize())
+of [Expunge Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#getExpungeBatchSize())
 property.
+
+# Disabling Non Resource DB History
+
+This setting controls whether MdmLink and any other non-resource (ex: Patient is a FHIR resource, MdmLink is not) DB history is enabled.  Presently, this only affects the history for MDM links, but the functionality may be extended to other domains.
+
+Clients may want to disable this setting for performance reasons as it populates a new set of database tables when enabled.
+
+Setting this property explicitly to false disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryEnabled())
+

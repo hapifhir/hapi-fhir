@@ -3,8 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
@@ -33,11 +32,13 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 	protected List<String> myMessages = new ArrayList<>();
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setUniqueIndexesEnabled(true);
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
+		myStorageSettings.setSchedulingDisabled(true);
+		myStorageSettings.setUniqueIndexesEnabled(true);
 
 		myInterceptorBroadcaster = mock(IInterceptorBroadcaster.class);
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(myInterceptorBroadcaster);
@@ -64,11 +65,11 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() throws Exception {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
-		myDaoConfig.setUniqueIndexesCheckedBeforeSave(new DaoConfig().isUniqueIndexesCheckedBeforeSave());
-		myDaoConfig.setSchedulingDisabled(new DaoConfig().isSchedulingDisabled());
-		myDaoConfig.setUniqueIndexesEnabled(new DaoConfig().isUniqueIndexesEnabled());
-		myDaoConfig.setReindexThreadCount(new DaoConfig().getReindexThreadCount());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new JpaStorageSettings().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(new JpaStorageSettings().isUniqueIndexesCheckedBeforeSave());
+		myStorageSettings.setSchedulingDisabled(new JpaStorageSettings().isSchedulingDisabled());
+		myStorageSettings.setUniqueIndexesEnabled(new JpaStorageSettings().isUniqueIndexesEnabled());
+		myStorageSettings.setReindexThreadCount(new JpaStorageSettings().getReindexThreadCount());
 
 		ResourceReindexingSvcImpl svc = SpringObjectCaster.getTargetObject(myResourceReindexingSvc, ResourceReindexingSvcImpl.class);
 		svc.initExecutor();

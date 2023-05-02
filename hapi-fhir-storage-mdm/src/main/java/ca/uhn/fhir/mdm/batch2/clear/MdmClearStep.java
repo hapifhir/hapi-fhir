@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.batch2.clear;
-
 /*-
  * #%L
  * hapi-fhir-storage-mdm
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.batch2.clear;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.batch2.clear;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -31,6 +30,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
@@ -120,6 +120,8 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			DeleteConflictList conflicts = new DeleteConflictList();
 			dao.deletePidList(ProviderConstants.OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);
 			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, conflicts);
+
+			dao.expunge(persistentIds, myRequestDetails);
 
 			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
 
