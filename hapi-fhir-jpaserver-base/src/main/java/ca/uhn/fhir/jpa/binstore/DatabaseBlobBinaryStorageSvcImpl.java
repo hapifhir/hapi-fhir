@@ -56,6 +56,11 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	private IBinaryStorageEntityDao myBinaryStorageEntityDao;
 
 	@Override
+	public void breakTheApi() {
+
+	}
+
+	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
 

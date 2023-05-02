@@ -86,6 +86,12 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		return !StringUtils.containsAny(theNewBlobId, '\\', '/', '|', '.');
 
 	}
+
+	@Override
+	public void breakTheApi() {
+
+	}
+
 	@Override
 	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
 		String id = super.provideIdForNewBlob(theBlobIdOrNull);

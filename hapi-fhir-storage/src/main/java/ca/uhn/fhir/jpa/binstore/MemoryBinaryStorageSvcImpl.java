@@ -51,6 +51,11 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 	}
 
 	@Override
+	public void breakTheApi() {
+
+	}
+
+	@Override
 	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
 		String id = super.provideIdForNewBlob(theBlobIdOrNull);
 		String key = toKey(theResourceId, id);

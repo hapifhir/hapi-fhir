@@ -42,6 +42,11 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
+	public void breakTheApi() {
+
+	}
+
+	@Override
 	public void setMaximumBinarySize(long theMaximumBinarySize) {
 		// ignore
 	}
