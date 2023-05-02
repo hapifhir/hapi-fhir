@@ -54,8 +54,7 @@ public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 	 */
 	@ParameterizedTest
 	@ValueSource(booleans = {
-		true,
-		false
+		true, false
 	})
 	public void testSearch(boolean theUseCacheBoolean) {
 		for (int i = 0; i < 100; i++) {
