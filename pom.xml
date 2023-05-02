@@ -868,6 +868,11 @@
 			<name>zachdoctolib</name>
 			<organization>Doctolib</organization>
 		</developer>
+		<developer>
+			<id>alparodev</id>
+			<name>Aleksej Parovysnik</name>
+			<organization>Doctolib</organization>
+		</developer>
 	</developers>
 
 	<licenses>
