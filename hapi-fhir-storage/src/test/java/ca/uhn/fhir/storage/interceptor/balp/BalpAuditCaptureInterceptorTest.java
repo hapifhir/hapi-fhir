@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -198,7 +199,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			String value = resourceId.withServerBase(serverBaseUrl, resourceName).getValue();
 			// Trying to catch an intermittent
 			if (value.startsWith("http:/P")) {
-				fail("Invalid ID " + value + " - " + resourceId + " - " + serverBaseUrl + " - " + resourceName);
+				throw new InternalErrorException("Invalid ID " + value + " - " + resourceId + " - " + serverBaseUrl + " - " + resourceName);
 			}
 			return value;
 		});
