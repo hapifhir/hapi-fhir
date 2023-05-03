@@ -5,6 +5,8 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -19,6 +21,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -95,6 +98,23 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		}
 	}
 
+
+	@Test
+	public void testTagDefinitionUniqueness() {
+		for (int i = 0; i < 5; i++) {
+			TagDefinition td = new TagDefinition();
+			td.setSystem("zoop");
+			td.setTagType(TagTypeEnum.TAG);
+			td.setCode("boop");
+			td.setDisplay("woop" + i);
+			td.setVersion("v1.0");
+			td.setUserSelected(false);
+			myTagDefinitionDao.save(td);
+		}
+		List<TagDefinition> all = myTagDefinitionDao.findAll();
+		assertThat(all, hasSize(1));
+
+	}
 
 	@Test
 	public void testCreateAndUpdateWithoutRequest() {

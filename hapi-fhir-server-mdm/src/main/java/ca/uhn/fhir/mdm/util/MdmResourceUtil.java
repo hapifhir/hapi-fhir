@@ -126,7 +126,8 @@ public final class MdmResourceUtil {
 			tag.setSystem(theSystem);
 			tag.setCode(theCode);
 			tag.setDisplay(theDisplay);
-
+			tag.setUserSelected(false);
+			tag.setVersion("1");
 		}
 		return theGoldenResource;
 	}
