@@ -474,13 +474,13 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		ourLog.info(">>> Deleting {}", subscription2.getId());
 		deleteSubscription(subscription2);
 
-		Observation observationTemp3 = sendObservationExpectDelivery();
+		IdType observationTemp3Id = sendObservationExpectDelivery().getIdElement().toUnqualifiedVersionless();
 
 		// Should see only one subscription notification
 		awaitUntilReceivedTransactionCount(4);
 
 		// Now update the observation to have OBS_CODE2
-		Observation observation3 = myClient.read().resource(Observation.class).withId(observationTemp3.getId()).execute();
+		Observation observation3 = myClient.read().resource(Observation.class).withId(observationTemp3Id).execute();
 		setCode(observation3, OBS_CODE2);
 		updateResource(observation3, true);
 
@@ -488,7 +488,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		// is configured to match if either the old version matches or the new version matches
 		awaitUntilReceivedTransactionCount(5);
 
-		Observation observation3a = myClient.read().resource(Observation.class).withId(observationTemp3.getId()).execute();
+		Observation observation3a = myClient.read().resource(Observation.class).withId(observationTemp3Id).execute();
 
 		// Now update it back to OBS_CODE again
 		setCode(observation3a, OBS_CODE);
