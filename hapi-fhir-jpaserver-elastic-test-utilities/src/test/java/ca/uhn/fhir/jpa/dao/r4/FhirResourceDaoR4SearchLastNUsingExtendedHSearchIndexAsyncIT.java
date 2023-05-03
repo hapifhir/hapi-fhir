@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,13 +15,13 @@ public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexAsyncIT extend
 
 	@BeforeEach
 	public void enableAdvancedHSearchIndexing() {
-		myDaoConfig.setLastNEnabled(true);
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setLastNEnabled(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 
 	@AfterEach
 	public void disableAdvancedHSearchIndex() {
-		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
+		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
 	}
 
 }

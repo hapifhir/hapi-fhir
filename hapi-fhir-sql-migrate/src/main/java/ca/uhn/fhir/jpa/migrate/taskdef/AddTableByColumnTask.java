@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +17,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -35,8 +35,15 @@ public class AddTableByColumnTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddTableByColumnTask.class);
 
-	private List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
+	private final List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
 	private List<String> myPkColumns;
+	private final List<ForeignKeyContainer> myFKColumns = new ArrayList<>();
+
+	public AddTableByColumnTask() {
+		this(null, null);
+		setDryRun(true);
+		myCheckForExistingTables = false;
+	}
 
 	public AddTableByColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -57,45 +64,98 @@ public class AddTableByColumnTask extends BaseTableTask {
 		myPkColumns = thePkColumns;
 	}
 
-	@Override
-	public void doExecute() throws SQLException {
+	public void addForeignKey(ForeignKeyContainer theForeignKeyContainer) {
+		myFKColumns.add(theForeignKeyContainer);
+	}
 
-		if (JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
-			logInfo(ourLog, "Already have table named {} - No action performed", getTableName());
-			return;
-		}
+	public List<String> getPkColumns() {
+		return myPkColumns;
+	}
 
+	public String generateSQLCreateScript() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE ");
 		sb.append(getTableName());
-		sb.append(" ( ");
+		sb.append(" (");
+		if (myPrettyPrint) {
+			sb.append("\n");
+		} else {
+			sb.append(" ");
+		}
 
 		for (AddColumnTask next : myAddColumnTasks) {
 			next.setDriverType(getDriverType());
 			next.setTableName(getTableName());
 			next.validate();
 
+			if (myPrettyPrint) {
+				sb.append("\t");
+			}
+
 			sb.append(next.getColumnName());
 			sb.append(" ");
 			sb.append(next.getTypeStatement());
-			sb.append(", ");
+			sb.append(",");
+			if (myPrettyPrint) {
+				sb.append("\n");
+			} else {
+				sb.append(" ");
+			}
 		}
 
-		sb.append(" PRIMARY KEY (");
+		// primary keys
+		if (myPrettyPrint) {
+			sb.append("\t");
+		} else {
+			sb.append(" ");
+		}
+		sb.append("PRIMARY KEY (");
 		for (int i = 0; i < myPkColumns.size(); i++) {
 			if (i > 0) {
 				sb.append(", ");
 			}
 			sb.append(myPkColumns.get(i));
 		}
+
+		boolean hasForeignKeys = !myFKColumns.isEmpty();
+
+		sb.append(")");
+		if (hasForeignKeys) {
+			sb.append(",");
+		}
+		if (myPrettyPrint) {
+			sb.append("\n");
+		} else {
+			sb.append(" ");
+		}
+
+		DriverTypeEnum sqlEngine = getDriverType();
+
+		// foreign keys
+		if (!myFKColumns.isEmpty()) {
+			for (int i =0; i < myFKColumns.size(); i++) {
+				if (i > 0) {
+					sb.append(", ");
+				}
+				ForeignKeyContainer fk = myFKColumns.get(i);
+				if (myPrettyPrint) {
+					sb.append("\t");
+				}
+				sb.append(fk.generateSQL(sqlEngine, myPrettyPrint));
+				if (myPrettyPrint) {
+					sb.append("\n");
+				} else {
+					sb.append(" ");
+				}
+			}
+		}
+
 		sb.append(")");
 
-		sb.append(" ) ");
-
-		switch (getDriverType()) {
+		switch (sqlEngine) {
 			case MARIADB_10_1:
 			case MYSQL_5_7:
-				sb.append("engine=InnoDB");
+				sb.append(" engine=InnoDB");
 				break;
 			case DERBY_EMBEDDED:
 			case POSTGRES_9_4:
@@ -106,7 +166,17 @@ public class AddTableByColumnTask extends BaseTableTask {
 				break;
 		}
 
-		executeSql(getTableName(), sb.toString());
+		return sb.toString();
+	}
+
+	@Override
+	public void doExecute() throws SQLException {
+		if (myCheckForExistingTables && JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
+			logInfo(ourLog, "Already have table named {} - No action performed", getTableName());
+			return;
+		}
+
+		executeSql(getTableName(), generateSQLCreateScript());
 
 	}
 

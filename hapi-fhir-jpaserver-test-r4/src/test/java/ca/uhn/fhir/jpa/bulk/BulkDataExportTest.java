@@ -1,72 +1,74 @@
 package ca.uhn.fhir.jpa.bulk;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.LineIterator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Basic;
-import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.MedicationAdministration;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportTest.class);
-
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
 
 	@AfterEach
 	void afterEach() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+	}
+
+	@BeforeEach
+	public void beforeEach() {
+		myStorageSettings.setJobFastTrackingEnabled(false);
 	}
 
 	@Test
@@ -100,6 +102,44 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
 	}
+
+
+	@Test
+	public void testGroupBulkExportWithTypeFilter_OnTags_InlineTagMode() {
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+		mySearchParameterDao.update(createSearchParameterForInlineSecurity(), mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("PF");
+		patient.getMeta().addSecurity("http://security", "val0", null);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("PM");
+		patient.getMeta().addSecurity("http://security", "val1", null);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PF");
+		group.addMember().getEntity().setReference("Patient/PM");
+		myClient.update().resource(group).execute();
+
+		// set the export options
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setGroupId(new IdType("Group", "G"));
+		options.setFilters(Sets.newHashSet("Patient?_security=http://security|val1"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, Collections.singletonList("Patient/PM"), Collections.singletonList("Patient/PF"));
+	}
+
 
 	@Test
 	public void testGroupBulkExportNotInGroup_DoesNotShowUp() {
@@ -177,7 +217,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatientBulkExportWithSingleId() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -227,7 +267,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatientBulkExportWithMultiIds() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -467,8 +507,48 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testGroupBulkExport_QualifiedSubResourcesOfUnqualifiedPatientShouldShowUp() throws InterruptedException {
+
+		// Patient with lastUpdated before _since
+		Patient patient = new Patient();
+		patient.setId("A");
+		myClient.update().resource(patient).execute();
+
+		// Sleep for 1 sec
+		ourLog.info("Patient lastUpdated: " + InstantType.withCurrentTime().getValueAsString());
+		Thread.sleep(1000);
+
+		// LastUpdated since now
+		Date timeDate = InstantType.now().getValue();
+		ourLog.info(timeDate.toString());
+
+		// Group references to Patient/A
+		Group group = new Group();
+		group.setId("B");
+		group.addMember().getEntity().setReference("Patient/A");
+		myClient.update().resource(group).execute();
+
+		// Observation references to Patient/A
+		Observation observation = new Observation();
+		observation.setId("C");
+		observation.setSubject(new Reference("Patient/A"));
+		myClient.update().resource(observation).execute();
+
+		// Set the export options
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Group"));
+		options.setGroupId(new IdType("Group", "B"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setSince(timeDate);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		// Should get the sub-resource (Observation) even the patient hasn't been updated after the _since param
+		verifyBulkExportResults(options, List.of("Observation/C", "Group/B"), List.of("Patient/A"));
+	}
+
+	@Test
 	public void testPatientBulkExportWithReferenceToAuthor_ShouldShowUp() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -504,7 +584,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatientBulkExportWithReferenceToPerformer_ShouldShowUp() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -552,7 +632,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatientBulkExportWithResourceNotInCompartment_ShouldShowUp() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -573,18 +653,82 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, List.of("Patient/P1", deviceId), Collections.emptyList());
 	}
 
-	private void verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
+	@ParameterizedTest
+	@MethodSource("bulkExportOptionsResourceTypes")
+	public void testDeviceBulkExportWithPatientPartOfGroup(Set<String> resourceTypesForExport) {
+		final Patient patient = new Patient();
+		patient.setId("A");
+		patient.setActive(true);
+		final IIdType patientIdType = myClient.update().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		final Group group = new Group();
+		group.setId("B");
+		final Group.GroupMemberComponent groupMemberComponent = new Group.GroupMemberComponent();
+		final Reference patientReference = new Reference(patientIdType.getValue());
+		groupMemberComponent.setEntity(patientReference);
+		group.getMember().add(groupMemberComponent);
+		final IIdType groupIdType = myClient.update().resource(group).execute().getId().toUnqualifiedVersionless();
+
+		final Device device = new Device();
+		device.setId("C");
+		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		device.setPatient(patientReference);
+		final IIdType deviceIdType = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless();
+
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(resourceTypesForExport);
+		options.setGroupId(new IdType("Group", "B"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		final List<String> expectedContainedIds;
+		if (resourceTypesForExport.contains("Device")) {
+			expectedContainedIds = List.of(patientIdType.getValue(), groupIdType.getValue(), deviceIdType.getValue());
+		} else {
+			expectedContainedIds = List.of(patientIdType.getValue(), groupIdType.getValue());
+		}
+
+		verifyBulkExportResults(options, expectedContainedIds, Collections.emptyList());
+	}
+
+	@Test
+	public void testSystemBulkExport() {
+		List<String> expectedIds = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			expectedIds.add(createPatient(withActiveTrue()).getValue());
+			expectedIds.add(createObservation(withStatus("final")).getValue());
+		}
+
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Set.of("Patient", "Observation"));
+		options.setFilters(Set.of("Patient?active=true", "Patient?active=false", "Observation?status=final"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
+		assertEquals(40, finalJobInstance.getCombinedRecordsProcessed());
+	}
+
+	private JobInstance verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 
 		assertNotNull(startResponse);
+		assertFalse(startResponse.isUsesCachedResult());
 
 		// Run a scheduled pass to build the export
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		await()
+			.atMost(200, TimeUnit.SECONDS)
+			.until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getStatus() == BulkExportJobStatusEnum.COMPLETE);
+
+		await()
+			.atMost(200, TimeUnit.SECONDS)
+			.until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 
 		Set<String> foundIds = new HashSet<>();
@@ -616,14 +760,128 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				}
 
 			}
+
+			return jobInstance;
 		}
 
 		for (String containedString : theContainedList) {
-			assertThat(foundIds, hasItem(containedString));
+			assertThat("Didn't find expected ID " + containedString + " in IDS: " + foundIds, foundIds, hasItem(containedString));
 		}
 		for (String excludedString : theExcludedList) {
-			assertThat(foundIds, not(hasItem(excludedString)));
+			assertThat("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds, foundIds, not(hasItem(excludedString)));
 		}
+		return jobInstance;
+	}
+
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_NoParams() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("foo");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: foo"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_NoParamsAfterQuestionMark() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Patient?");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: Patient?"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_InvalidResourceType() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Foo?active=true");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, unknown resource type: Foo"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_UnsupportedParam() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Observation?subject.identifier=blah");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString(
+				"Chained parameters are not supported"
+			));
+
+		}
+	}
+
+	@Test
+	public void testValidateParameters_InvalidPostFetch_UnknownParam() {
+		// Setup
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Observation?foo=blah");
+
+		// Test
+		try {
+			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString("Invalid post-fetch filter URL."));
+			assertThat(e.getMessage(), containsString("Resource type Observation does not have a parameter with name: foo"));
+
+		}
+	}
+
+	@Nonnull
+	private static BulkDataExportOptions createOptionsWithPostFetchFilterUrl(String postFetchUrl) {
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Set.of("Patient"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		options.setPostFetchFilterUrls(Set.of(postFetchUrl));
+		return options;
+	}
+
+
+	private static Stream<Set<String>> bulkExportOptionsResourceTypes() {
+		return Stream.of(Set.of("Patient", "Group"), Set.of("Patient", "Group", "Device"));
 	}
 
 }

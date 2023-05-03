@@ -1,10 +1,8 @@
-package ca.uhn.fhir.parser;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -26,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildContainedResources;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
@@ -96,6 +96,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParser.HeldExtension.class);
 
 	private boolean myPrettyPrint;
+
+	private Boolean myIsSupportsFhirComment;
 
 	/**
 	 * Do not use this constructor, the recommended way to obtain a new instance of the JSON parser is to invoke
@@ -600,11 +602,13 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 							write(theEventWriter, "id", elementId);
 						}
 						if (nextComments != null && !nextComments.isEmpty()) {
-							beginArray(theEventWriter, "fhir_comments");
-							for (String next : nextComments) {
-								theEventWriter.write(next);
+							if (isSupportsFhirComment()) {
+								beginArray(theEventWriter, "fhir_comments");
+								for (String next : nextComments) {
+									theEventWriter.write(next);
+								}
+								theEventWriter.endArray();
 							}
-							theEventWriter.endArray();
 						}
 						writeExtensionsAsDirectChild(theResource, theEventWriter, theResDef, heldExts, heldModExts, theEncodeContext, theContainedResource);
 						if (inArray) {
@@ -620,6 +624,13 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				}
 			}
 		}
+	}
+
+	private boolean isSupportsFhirComment() {
+		if (myIsSupportsFhirComment == null) {
+			myIsSupportsFhirComment = isFhirVersionLessThanOrEqualTo(FhirVersionEnum.DSTU2_1);
+		}
+		return myIsSupportsFhirComment;
 	}
 
 	private boolean isMultipleCardinality(int maxCardinality) {
@@ -1190,14 +1201,16 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private void parseFhirComments(BaseJsonLikeValue theObject, ParserState<?> theState) {
-		if (theObject.isArray()) {
-			BaseJsonLikeArray comments = theObject.getAsArray();
-			for (int i = 0; i < comments.size(); i++) {
-				BaseJsonLikeValue nextComment = comments.get(i);
-				if (nextComment.isString()) {
-					String commentText = nextComment.getAsString();
-					if (commentText != null) {
-						theState.commentPre(commentText);
+		if (isSupportsFhirComment()) {
+			if (theObject.isArray()) {
+				BaseJsonLikeArray comments = theObject.getAsArray();
+				for (int i = 0; i < comments.size(); i++) {
+					BaseJsonLikeValue nextComment = comments.get(i);
+					if (nextComment.isString()) {
+						String commentText = nextComment.getAsString();
+						if (commentText != null) {
+							theState.commentPre(commentText);
+						}
 					}
 				}
 			}
@@ -1323,20 +1336,22 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private void writeCommentsPreAndPost(IBase theNextValue, BaseJsonLikeWriter theEventWriter) throws IOException {
 		if (theNextValue.hasFormatComment()) {
-			beginArray(theEventWriter, "fhir_comments");
-			List<String> pre = theNextValue.getFormatCommentsPre();
-			if (pre.isEmpty() == false) {
-				for (String next : pre) {
-					theEventWriter.write(next);
+			if (isSupportsFhirComment()) {
+				beginArray(theEventWriter, "fhir_comments");
+				List<String> pre = theNextValue.getFormatCommentsPre();
+				if (pre.isEmpty() == false) {
+					for (String next : pre) {
+						theEventWriter.write(next);
+					}
 				}
-			}
-			List<String> post = theNextValue.getFormatCommentsPost();
-			if (post.isEmpty() == false) {
-				for (String next : post) {
-					theEventWriter.write(next);
+				List<String> post = theNextValue.getFormatCommentsPost();
+				if (post.isEmpty() == false) {
+					for (String next : post) {
+						theEventWriter.write(next);
+					}
 				}
+				theEventWriter.endArray();
 			}
-			theEventWriter.endArray();
 		}
 	}
 

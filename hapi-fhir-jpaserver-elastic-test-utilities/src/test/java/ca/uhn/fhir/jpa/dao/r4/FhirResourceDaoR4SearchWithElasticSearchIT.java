@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
@@ -18,10 +18,8 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -36,6 +34,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -152,8 +151,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	private static final String SPACE = "%20";
 
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
 	protected EntityManager myEntityManager;
@@ -215,14 +212,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
 
-
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
 
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@Override
@@ -247,16 +243,16 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	@BeforeEach
 	public void enableContainsAndLucene() {
-		myDaoConfig.setAllowContainsSearches(true);
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setAllowContainsSearches(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 
 	@AfterEach
 	public void restoreContains() {
-		DaoConfig defaultConfig = new DaoConfig();
-		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
-		myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
+		JpaStorageSettings defaultConfig = new JpaStorageSettings();
+		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+		myStorageSettings.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
 	}
 
 	@Test
@@ -309,7 +305,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			obs2.setSubject(new Reference(patId.toString()));
 			obs2.setEncounter(new Reference(encId.toString()));
 			obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.debug("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			//Search by chain
@@ -368,7 +364,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			obs2.setStatus(Observation.ObservationStatus.FINAL);
 			obs2.setValue(new Quantity(81));
 			id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.debug("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			Observation obs2b = new Observation();
@@ -376,7 +372,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			obs2b.setStatus(Observation.ObservationStatus.FINAL);
 			obs2b.setValue(new Quantity(81));
 			id2b = myObservationDao.create(obs2b, mySrd).getId().toUnqualifiedVersionless();
-			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.debug("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			Observation obs3 = new Observation();
@@ -385,7 +381,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			obs3.setStatus(Observation.ObservationStatus.FINAL);
 			obs3.setValue(new Quantity(81));
 			id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
-			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.debug("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			// search just code
@@ -433,7 +429,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			obs2.setStatus(Observation.ObservationStatus.FINAL);
 			obs2.setValue(new Quantity(81));
 			id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.debug("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			// don't look in the narrative when only searching code.
@@ -710,7 +706,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		IIdType id1 = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 
 		// set it after creating resource, so search doesn't find it in the index
-		myDaoConfig.setStoreResourceInHSearchIndex(true);
+		myStorageSettings.setStoreResourceInHSearchIndex(true);
 
 		myCaptureQueriesListener.clear();
 
@@ -722,8 +718,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "JPA search for IDs and for resources");
 
 		// restore changed property
-		DaoConfig defaultConfig = new DaoConfig();
-		myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
+		JpaStorageSettings defaultConfig = new JpaStorageSettings();
+		myStorageSettings.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
 	}
 
 	@Test
@@ -804,7 +800,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		ValueSet vs = loadResource(myFhirCtx, ValueSet.class, "/r4/expand-multi-vs-all.json");
 		ValueSet expanded = myValueSetDao.expand(vs, null);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 
 		// All codes
 		List<String> codes = expanded
@@ -828,7 +824,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		ValueSet expanded = myValueSetDao.expand(vs, null);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 
 		// All codes
 		List<String> codes = expanded
@@ -1185,15 +1181,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		@BeforeEach
 		public void enableContains() {
 			// we don't support chained or contained yet, but turn it on to test we don't blow up.
-			myDaoConfig.getModelConfig().setIndexOnContainedResources(true);
-			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(true);
+			myStorageSettings.setIndexOnContainedResources(true);
+			myStorageSettings.setIndexOnContainedResourcesRecursively(true);
 		}
 
 		@AfterEach
 		public void restoreContains() {
-			ModelConfig defaultModelConfig = new ModelConfig();
-			myDaoConfig.getModelConfig().setIndexOnContainedResources(defaultModelConfig.isIndexOnContainedResources());
-			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(defaultModelConfig.isIndexOnContainedResourcesRecursively());
+			myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
+			myStorageSettings.setIndexOnContainedResourcesRecursively(new JpaStorageSettings().isIndexOnContainedResourcesRecursively());
 		}
 
 		/**
@@ -1241,12 +1236,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInHSearchIndex(true);
+			myStorageSettings.setStoreResourceInHSearchIndex(true);
 		}
 
 		@AfterEach
 		public void resetResourceStorage() {
-			myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
+			myStorageSettings.setStoreResourceInHSearchIndex(new JpaStorageSettings().isStoreResourceInHSearchIndex());
 		}
 
 
@@ -1396,7 +1391,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Nested
 	class QuantityAndNormalizedQuantitySearch extends QuantitySearchParameterTestCases {
 		QuantityAndNormalizedQuantitySearch() {
-			super(myTestDataBuilder.getTestDataBuilderSupport(), myTestDaoSearch, myDaoConfig);
+			super(myTestDataBuilder.getTestDataBuilderSupport(), myTestDaoSearch, myStorageSettings);
 		}
 	}
 
@@ -1405,12 +1400,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInHSearchIndex(true);
+			myStorageSettings.setStoreResourceInHSearchIndex(true);
 		}
 
 		@AfterEach
 		public void resetResourceStorage() {
-			myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
+			myStorageSettings.setStoreResourceInHSearchIndex(new JpaStorageSettings().isStoreResourceInHSearchIndex());
 		}
 
 		@Test
@@ -1539,7 +1534,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInHSearchIndex(true);
+			myStorageSettings.setStoreResourceInHSearchIndex(true);
 
 			myOldObsId = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCodeOld"),
@@ -1552,7 +1547,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@AfterEach
 		public void resetResourceStorage() {
-			myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
+			myStorageSettings.setStoreResourceInHSearchIndex(new JpaStorageSettings().isStoreResourceInHSearchIndex());
 		}
 
 		@Test
@@ -1653,7 +1648,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInHSearchIndex(true);
+			myStorageSettings.setStoreResourceInHSearchIndex(true);
 		}
 
 
@@ -1709,27 +1704,27 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		void setUp() {
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+			myStorageSettings.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@BeforeEach
 		public void enableContainsAndLucene() {
-			myDaoConfig.setAllowContainsSearches(true);
-			myDaoConfig.setAdvancedHSearchIndexing(true);
-			myDaoConfig.setStoreResourceInHSearchIndex(true);
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+			myStorageSettings.setAllowContainsSearches(true);
+			myStorageSettings.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setStoreResourceInHSearchIndex(true);
+			myStorageSettings.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@AfterEach
 		public void restoreContains() {
-			DaoConfig defaultConfig = new DaoConfig();
-			myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
-			myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
-				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel());
+			JpaStorageSettings defaultConfig = new JpaStorageSettings();
+			myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+			myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+			myStorageSettings.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
+			myStorageSettings.setNormalizedQuantitySearchLevel(
+				defaultConfig.getNormalizedQuantitySearchLevel());
 		}
 
 		@Test
@@ -2141,21 +2136,21 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		public void enableContainsAndLucene() {
-			myDaoConfig.setAllowContainsSearches(true);
-			myDaoConfig.setAdvancedHSearchIndexing(true);
-			myDaoConfig.setStoreResourceInHSearchIndex(true);
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+			myStorageSettings.setAllowContainsSearches(true);
+			myStorageSettings.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setStoreResourceInHSearchIndex(true);
+			myStorageSettings.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@AfterEach
 		public void restoreContains() {
-			DaoConfig defaultConfig = new DaoConfig();
-			myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
-			myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
-				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel());
+			JpaStorageSettings defaultConfig = new JpaStorageSettings();
+			myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+			myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+			myStorageSettings.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
+			myStorageSettings.setNormalizedQuantitySearchLevel(
+				defaultConfig.getNormalizedQuantitySearchLevel());
 		}
 
 		@Test
@@ -2280,13 +2275,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		public void setup() {
-			myDaoConfig.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setAdvancedHSearchIndexing(true);
 		}
 
 		@AfterEach
 		public void tearDown() {
-			DaoConfig defaultConfig = new DaoConfig();
-			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+			JpaStorageSettings defaultConfig = new JpaStorageSettings();
+			myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		}
 
 		@Test
@@ -2299,7 +2294,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 			myCaptureQueriesListener.clear();
 			assertFindId("when exact", obsId, "/Observation?subject=" + patId.getVersionIdPartAsLong());
-			assertEquals(myDaoConfig.isAdvancedHSearchIndexing() ? 1 : 2,
+			assertEquals(myStorageSettings.isAdvancedHSearchIndexing() ? 1 : 2,
 				myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 		}
 	}

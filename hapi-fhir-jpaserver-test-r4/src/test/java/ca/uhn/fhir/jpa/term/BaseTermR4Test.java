@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
@@ -27,16 +27,18 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 	Long myExtensionalCsIdOnResourceTable;
 	Long myExtensionalVsIdOnResourceTable;
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setAllowExternalReferences(true);
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setAllowExternalReferences(true);
 	}
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
-		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
 	}
 
 	IIdType createCodeSystem() {
@@ -143,7 +145,7 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalCsIdOnResourceTable = myCodeSystemDao.readEntity(myExtensionalCsId, null).getId();
+		myExtensionalCsIdOnResourceTable = (Long) myCodeSystemDao.readEntity(myExtensionalCsId, null).getPersistentId().getId();
 	}
 
 	void loadAndPersistValueSet(HttpVerb theVerb) throws IOException {
@@ -180,7 +182,7 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = myValueSetDao.readEntity(myExtensionalVsId, null).getId();
+		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId();
 	}
 
 }

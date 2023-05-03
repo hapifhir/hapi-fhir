@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
@@ -32,6 +31,12 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
 
+	public AddColumnTask() {
+		this(null, null);
+		setDryRun(true);
+		myCheckForExistingTables = false;
+	}
+
 	public AddColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
@@ -44,10 +49,12 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 
 	@Override
 	public void doExecute() throws SQLException {
-		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
-		if (columnNames.contains(getColumnName())) {
-			logInfo(ourLog, "Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
-			return;
+		if (myCheckForExistingTables) {
+			Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
+			if (columnNames.contains(getColumnName())) {
+				logInfo(ourLog, "Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
+				return;
+			}
 		}
 
 		String typeStatement = getTypeStatement();
@@ -82,7 +89,11 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 		if (isNullable()) {
 			nullable = "";
 		}
-		return type + " " + nullable;
+		if (myPrettyPrint) {
+			nullable = nullable.trim();
+		}
+		String space = isNullable() ? "" : " ";
+		return type + space + nullable;
 	}
 
 }

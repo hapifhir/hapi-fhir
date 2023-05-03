@@ -1,10 +1,8 @@
-package ca.uhn.fhir.test.utilities.server;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,21 @@ package ca.uhn.fhir.test.utilities.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -45,12 +48,12 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	private FhirContext myFhirContext;
 	private List<Object> myProviders = new ArrayList<>();
 	private FhirVersionEnum myFhirVersion;
-	private IGenericClient myFhirClient;
 	private RestfulServer myServlet;
 	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
 	private Map<String, Object> myRunningServerUserData = new HashMap<>();
 	private ServerValidationModeEnum myServerValidationMode = ServerValidationModeEnum.NEVER;
 	private IPagingProvider myPagingProvider;
+
 	/**
 	 * Constructor
 	 */
@@ -83,7 +86,6 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 		myFhirContext.getRestfulClientFactory().setSocketTimeout((int) (500 * DateUtils.MILLIS_PER_SECOND));
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(myServerValidationMode);
-		myFhirClient = myFhirContext.newRestfulGenericClient(getBaseUrl());
 	}
 
 	@Override
@@ -110,7 +112,6 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		if (!isRunning()) {
 			return;
 		}
-		myFhirClient = null;
 		myRunningServerUserData.clear();
 		myPagingProvider = null;
 		myServlet = null;
@@ -123,8 +124,11 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		}
 	}
 
+	/**
+	 * Creates a new client for each callof this method
+	 */
 	public IGenericClient getFhirClient() {
-		return myFhirClient;
+		return myFhirContext.newRestfulGenericClient(getBaseUrl());
 	}
 
 	public FhirContext getFhirContext() {
@@ -209,5 +213,9 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 	public RestfulServerExtension registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor) {
 		return withServer(t -> t.getInterceptorService().registerAnonymousInterceptor(thePointcut, theInterceptor));
+	}
+
+	public RestfulServerExtension withDefaultResponseEncoding(EncodingEnum theEncodingEnum) {
+		return withServer(t -> t.setDefaultResponseEncoding(theEncodingEnum));
 	}
 }

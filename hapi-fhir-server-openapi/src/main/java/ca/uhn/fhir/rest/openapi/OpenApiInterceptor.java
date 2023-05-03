@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.openapi;
-
 /*-
  * #%L
  * hapi-fhir-server-openapi
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.openapi;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.openapi;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -77,6 +76,9 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.OperationDefinition.OperationDefinitionParameterComponent;
+import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.r4.model.codesystems.DataTypes;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.cache.AlwaysValidCacheEntryValidity;
@@ -98,6 +100,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -569,21 +572,8 @@ public class OpenApiInterceptor {
 
 			// Search
 			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.SEARCHTYPE)) {
-				Operation operation = getPathItem(paths, "/" + resourceType, PathItem.HttpMethod.GET);
-				operation.addTagsItem(resourceType);
-				operation.setDescription("This is a search type");
-				operation.setSummary("search-type: Search for " + resourceType + " instances");
-				addFhirResourceResponse(ctx, openApi, operation, null);
-
-				for (CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSearchParam : nextResource.getSearchParam()) {
-					Parameter parametersItem = new Parameter();
-					operation.addParametersItem(parametersItem);
-
-					parametersItem.setName(nextSearchParam.getName());
-					parametersItem.setIn("query");
-					parametersItem.setDescription(nextSearchParam.getDocumentation());
-					parametersItem.setStyle(Parameter.StyleEnum.SIMPLE);
-				}
+				addSearchOperation(openApi, getPathItem(paths, "/" + resourceType, PathItem.HttpMethod.GET), ctx, resourceType, nextResource);
+				addSearchOperation(openApi, getPathItem(paths, "/" + resourceType + "/_search", PathItem.HttpMethod.GET), ctx, resourceType, nextResource);
 			}
 
 			// Resource-level Operations
@@ -594,6 +584,24 @@ public class OpenApiInterceptor {
 		}
 
 		return openApi;
+	}
+
+	protected void addSearchOperation(final OpenAPI openApi, final Operation operation, final FhirContext ctx,
+			final String resourceType, final CapabilityStatement.CapabilityStatementRestResourceComponent nextResource) {
+		operation.addTagsItem(resourceType);
+		operation.setDescription("This is a search type");
+		operation.setSummary("search-type: Search for " + resourceType + " instances");
+		addFhirResourceResponse(ctx, openApi, operation, null);
+
+		for (final CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSearchParam : nextResource.getSearchParam()) {
+			final Parameter parametersItem = new Parameter();
+			operation.addParametersItem(parametersItem);
+
+			parametersItem.setName(nextSearchParam.getName());
+			parametersItem.setIn("query");
+			parametersItem.setDescription(nextSearchParam.getDocumentation());
+			parametersItem.setStyle(Parameter.StyleEnum.SIMPLE);
+		}
 	}
 
 	private Supplier<IBaseResource> patchExampleSupplier() {
@@ -650,8 +658,15 @@ public class OpenApiInterceptor {
 			}
 
 			OperationDefinition operationDefinition = toCanonicalVersion(operationDefinitionNonCanonical);
+			final boolean postOnly = operationDefinition.getAffectsState()
+					|| operationDefinition.getParameter().stream()
+					.filter(p -> p.getUse().equals(OperationParameterUse.IN))
+					.anyMatch(p -> {
+						final boolean required = p.getMin() > 0;
+						return required && !isPrimitive(p);
+					});
 
-			if (!operationDefinition.getAffectsState()) {
+			if (!postOnly) {
 
 				// GET form for non-state-affecting operations
 				if (theResourceType != null) {
@@ -671,28 +686,55 @@ public class OpenApiInterceptor {
 					}
 				}
 
-			} else {
-
-				// POST form for all operations
-				if (theResourceType != null) {
-					if (operationDefinition.getType()) {
-						Operation operation = getPathItem(thePaths, "/" + theResourceType + "/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
-						populateOperation(theFhirContext, theOpenApi, theResourceType, operationDefinition, operation, false);
-					}
-					if (operationDefinition.getInstance()) {
-						Operation operation = getPathItem(thePaths, "/" + theResourceType + "/{id}/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
-						addResourceIdParameter(operation);
-						populateOperation(theFhirContext, theOpenApi, theResourceType, operationDefinition, operation, false);
-					}
-				} else {
-					if (operationDefinition.getSystem()) {
-						Operation operation = getPathItem(thePaths, "/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
-						populateOperation(theFhirContext, theOpenApi, null, operationDefinition, operation, false);
-					}
-				}
-
 			}
+
+			// POST form for all operations
+			if (theResourceType != null) {
+				if (operationDefinition.getType()) {
+					Operation operation = getPathItem(thePaths, "/" + theResourceType + "/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
+					populateOperation(theFhirContext, theOpenApi, theResourceType, operationDefinition, operation, false);
+				}
+				if (operationDefinition.getInstance()) {
+					Operation operation = getPathItem(thePaths, "/" + theResourceType + "/{id}/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
+					addResourceIdParameter(operation);
+					populateOperation(theFhirContext, theOpenApi, theResourceType, operationDefinition, operation, false);
+				}
+			} else {
+				if (operationDefinition.getSystem()) {
+					Operation operation = getPathItem(thePaths, "/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
+					populateOperation(theFhirContext, theOpenApi, null, operationDefinition, operation, false);
+				}
+			}
+
 		}
+	}
+
+	private static List<String> primitiveTypes = Arrays.asList(
+			DataTypes.BOOLEAN.toCode(),
+			DataTypes.INTEGER.toCode(),
+			DataTypes.STRING.toCode(),
+			DataTypes.DECIMAL.toCode(),
+			DataTypes.URI.toCode(),
+			DataTypes.URL.toCode(),
+			DataTypes.CANONICAL.toCode(),
+			DataTypes.REFERENCE.toCode(),
+			DataTypes.BASE64BINARY.toCode(),
+			DataTypes.INSTANT.toCode(),
+			DataTypes.DATE.toCode(),
+			DataTypes.DATETIME.toCode(),
+			DataTypes.TIME.toCode(),
+			DataTypes.CODE.toCode(),
+			DataTypes.CODING.toCode(),
+			DataTypes.OID.toCode(),
+			DataTypes.ID.toCode(),
+			DataTypes.MARKDOWN.toCode(),
+			DataTypes.UNSIGNEDINT.toCode(),
+			DataTypes.POSITIVEINT.toCode(),
+			DataTypes.UUID.toCode()
+			);
+
+	private static boolean isPrimitive(OperationDefinitionParameterComponent parameter) {
+		return primitiveTypes.contains(parameter.getType());
 	}
 
 	private void populateOperation(FhirContext theFhirContext, OpenAPI theOpenApi, String theResourceType, OperationDefinition theOperationDefinition, Operation theOperation, boolean theGet) {
@@ -704,10 +746,15 @@ public class OpenApiInterceptor {
 		theOperation.setSummary(theOperationDefinition.getTitle());
 		theOperation.setDescription(theOperationDefinition.getDescription());
 		addFhirResourceResponse(theFhirContext, theOpenApi, theOperation, null);
-
 		if (theGet) {
 
 			for (OperationDefinition.OperationDefinitionParameterComponent nextParameter : theOperationDefinition.getParameter()) {
+				if ("0".equals(nextParameter.getMax()) || !nextParameter.getUse().equals(OperationParameterUse.IN)) {
+					continue;
+				}
+				if (!isPrimitive(nextParameter) && nextParameter.getMin() == 0) {
+					continue;
+				}
 				Parameter parametersItem = new Parameter();
 				theOperation.addParametersItem(parametersItem);
 
@@ -733,6 +780,9 @@ public class OpenApiInterceptor {
 
 			Parameters exampleRequestBody = new Parameters();
 			for (OperationDefinition.OperationDefinitionParameterComponent nextSearchParam : theOperationDefinition.getParameter()) {
+				if ("0".equals(nextSearchParam.getMax()) || !nextSearchParam.getUse().equals(OperationParameterUse.IN)) {
+					continue;
+				}
 				Parameters.ParametersParameterComponent param = exampleRequestBody.addParameter();
 				param.setName(nextSearchParam.getName());
 				String paramType = nextSearchParam.getType();

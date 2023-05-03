@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -37,6 +36,7 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -70,6 +70,11 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "END_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myEndTime;
+
+	@Version
+	@Column(name = "UPDATE_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myUpdateTime;
 
 	@Column(name = "DEFINITION_ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
 	private String myDefinitionId;
@@ -190,6 +195,14 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myEndTime = theEndTime;
 	}
 
+	public void setUpdateTime(Date theTime) {
+		myUpdateTime = theTime;
+	}
+
+	public Date getUpdateTime() {
+		return myUpdateTime;
+	}
+
 	public String getId() {
 		return myId;
 	}
@@ -289,6 +302,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 			.append("createTime", myCreateTime)
 			.append("startTime", myStartTime)
 			.append("endTime", myEndTime)
+			.append("updateTime", myUpdateTime)
 			.append("status", myStatus)
 			.append("cancelled", myCancelled)
 			.append("combinedRecordsProcessed", myCombinedRecordsProcessed)

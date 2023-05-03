@@ -1,9 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
@@ -59,17 +58,17 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
-		myModelConfig.setIndexOnContainedResources(false);
-		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
+		myStorageSettings.setIndexOnContainedResources(false);
+		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
 	}
 
 	@BeforeEach
@@ -78,16 +77,16 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myModelConfig.setIndexOnContainedResources(true);
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setIndexOnContainedResources(true);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test
 	public void testContainedDisabled() throws Exception {
-		myModelConfig.setIndexOnContainedResources(false);
+		myStorageSettings.setIndexOnContainedResources(false);
 
 		String uri = myServerBase + "/Observation?subject.name=Smith&_contained=true";
 		try (CloseableHttpResponse response = ourHttpClient.execute(new HttpGet(uri))) {
@@ -126,7 +125,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -141,7 +140,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -156,7 +155,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 
@@ -209,7 +208,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -225,7 +224,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -241,7 +240,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		//-- Search by date default op
@@ -313,13 +312,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			imp.getContained().add(risk);
 			imp.getInvestigationFirstRep().getItemFirstRep().setReference("#risk1");
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(imp));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(imp));
 
 			cid1 = myClinicalImpressionDao.create(imp, mySrd).getId().toUnqualifiedVersionless();
 
 			ClinicalImpression createdImp = myClinicalImpressionDao.read(cid1);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdImp));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdImp));
 		}
 
 		{
@@ -344,13 +343,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			imp.getContained().add(risk);
 			imp.getInvestigationFirstRep().getItemFirstRep().setReference("#risk1");
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(imp));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(imp));
 
 			IIdType cid2 = myClinicalImpressionDao.create(imp, mySrd).getId().toUnqualifiedVersionless();
 
 			ClinicalImpression createdImp = myClinicalImpressionDao.read(cid2);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdImp));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdImp));
 		}
 
 		{
@@ -375,13 +374,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			imp.getContained().add(risk);
 			imp.getInvestigationFirstRep().getItemFirstRep().setReference("#risk1");
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(imp));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(imp));
 
 			IIdType cid3 = myClinicalImpressionDao.create(imp, mySrd).getId().toUnqualifiedVersionless();
 
 			ClinicalImpression createdImp = myClinicalImpressionDao.read(cid3);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdImp));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdImp));
 		}
 
 		//-- Search by number
@@ -438,13 +437,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			encounter.addReasonReference().setReference("#obs1");
 			encounter.getContained().add(obs);
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 			eid1 = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 			Encounter createdEncounter = myEncounterDao.read(eid1);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		}
 
 
@@ -469,13 +468,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			encounter.addReasonReference().setReference("#obs1");
 			encounter.getContained().add(obs);
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 			IIdType eid2 = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 			Encounter createdEncounter = myEncounterDao.read(eid2);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		}
 
 		{
@@ -499,13 +498,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			encounter.addReasonReference().setReference("#obs1");
 			encounter.getContained().add(obs);
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 			IIdType eid3 = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 			Encounter createdEncounter = myEncounterDao.read(eid3);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		}
 
 		//-- Search by quantity
@@ -549,13 +548,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			encounter.addReasonReference().setReference("#obs1");
 			encounter.getContained().add(obs);
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 			eid1 = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 			Encounter createdEncounter = myEncounterDao.read(eid1);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		}
 
 
@@ -580,13 +579,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			encounter.addReasonReference().setReference("#obs1");
 			encounter.getContained().add(obs);
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 			IIdType eid2 = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 			Encounter createdEncounter = myEncounterDao.read(eid2);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		}
 
 		{
@@ -610,13 +609,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			encounter.addReasonReference().setReference("#obs1");
 			encounter.getContained().add(obs);
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 			IIdType eid3 = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 			Encounter createdEncounter = myEncounterDao.read(eid3);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		}
 
 		//-- Search by code
@@ -653,13 +652,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			encounter.addReasonReference().setReference("#obs1");
 			encounter.getContained().add(obs);
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 			IIdType eid1 = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 			Encounter createdEncounter = myEncounterDao.read(eid1);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		}
 
 
@@ -684,13 +683,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			encounter.addReasonReference().setReference("#obs1");
 			encounter.getContained().add(obs);
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 			eid2 = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 			Encounter createdEncounter = myEncounterDao.read(eid2);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		}
 
 		{
@@ -714,13 +713,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			encounter.addReasonReference().setReference("#obs1");
 			encounter.getContained().add(obs);
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 			IIdType eid3 = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 			Encounter createdEncounter = myEncounterDao.read(eid3);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		}
 
 		//-- Search by composite
@@ -767,11 +766,11 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 			Observation createdObs = myObservationDao.read(oid1);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		}
 
 		{
@@ -796,7 +795,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -821,7 +820,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		//-- Search by uri
@@ -863,7 +862,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			logAllStringIndexes("subject.family");
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 			Observation createdObs = myObservationDao.read(oid1);
 
@@ -898,7 +897,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			logAllStringIndexes("subject.family");
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 
@@ -914,7 +913,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 
@@ -959,14 +958,14 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			obs.getContained().add(p2);
 			obs.getSubject().setReference("#patient2");
 
-			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 			// -- update
 			oid1 = myObservationDao.update(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			Observation updatedObs = myObservationDao.read(oid1);
 
-			ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedObs));
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedObs));
 		}
 
 		//-- No Obs with Patient Smith
@@ -989,7 +988,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 	}
 
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
+	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
 

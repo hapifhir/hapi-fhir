@@ -7,7 +7,7 @@ This is required to support the `_content`, or `_text` search parameters.
 
 Additional indexing is implemented for simple search parameters of type token, string, and reference.
 These implement the basic search, as well as several modifiers:
-This **experimental** feature is enabled via the `setAdvancedHSearchIndexing()` property of DaoConfig.
+This **experimental** feature is enabled via the `setAdvancedHSearchIndexing()` property of JpaStorageSettings.
 
 ## Search Parameter Support
 
@@ -103,4 +103,15 @@ search index.  This allows some queries to return results without using the rela
 Note: This does not support the $meta-add or $meta-delete operations. Full reindexing is required 
 when this option is enabled after resources have been indexed.
 
-This **experimental** feature is enabled via the `setStoreResourceInHSearchIndex()` option of DaoConfig.
+This **experimental** feature is enabled via the `setStoreResourceInHSearchIndex()` option of JpaStorageSettings.
+
+# Synchronous Writes
+
+ElasticSearch writes are asynchronous by default. This means that when writing to an ElasticSearch instance (independent of HAPI FHIR), the data you write will not be available to subsequent reads for a short period of time while the indexes synchronize.
+
+ElasticSearch states that this behaviour leads to better overall performance and throughput on the system.
+
+This can cause issues, particularly in unit tests where data is being examined shortly after it is written. 
+
+You can force synchronous writing to them in HAPI FHIR JPA by setting the Hibernate Search [synchronization strategy](https://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/#mapper-orm-indexing-automatic-synchronization). This setting is internally setting the ElasticSearch [refresh=wait_for](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-refresh.html) option. Be warned that this will have a negative impact on overall performance. THE HAPI FHIR TEAM has not tried to quantify this impact but the ElasticSearch docs seem to make a fairly big deal about it.
+

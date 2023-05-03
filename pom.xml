@@ -2,11 +2,13 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+	<!-- the version info -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.3.4-SNAPSHOT</version>
+	<version>6.7.0-SNAPSHOT</version>
+
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -89,22 +91,25 @@
 		<module>hapi-fhir-structures-r4</module>
 		<module>hapi-fhir-validation-resources-r4</module>
 		<module>hapi-fhir-structures-r4b</module>
+		<module>hapi-fhir-validation-resources-r4b</module>
 		<module>hapi-fhir-structures-r5</module>
 		<module>hapi-fhir-validation-resources-r5</module>
 		<module>hapi-fhir-jpa</module>
 		<module>hapi-fhir-serviceloaders</module>
 		<module>hapi-fhir-storage</module>
 		<module>hapi-fhir-storage-batch2</module>
+		<module>hapi-fhir-storage-batch2-test-utilities</module>
 		<module>hapi-fhir-storage-batch2-jobs</module>
+		<module>hapi-fhir-storage-cr</module>
 		<module>hapi-fhir-storage-mdm</module>
 		<module>hapi-fhir-storage-test-utilities</module>
-		<module>hapi-fhir-jpaserver-cql</module>
 		<module>hapi-fhir-jpaserver-model</module>
 		<module>hapi-fhir-jpaserver-searchparam</module>
 		<module>hapi-fhir-jpaserver-subscription</module>
 		<module>hapi-fhir-jaxrsserver-base</module>
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-sql-migrate</module>
+		<module>hapi-fhir-jpaserver-ips</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
 		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
@@ -117,7 +122,7 @@
 		<module>tests/hapi-fhir-base-test-mindeps-server</module>
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
-	</modules>
+    </modules>
 
 	<dependencies>
 		<dependency>
@@ -138,6 +143,12 @@
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.npathai</groupId>
+			<artifactId>hamcrest-optional</artifactId>
+			<version>2.0.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -837,6 +848,31 @@
 		<developer>
 			<id>granadacoder</id>
 		</developer>
+		<developer>
+			<id>ivagulin</id>
+		</developer>
+		<developer>
+			<id>jddamore</id>
+			<name>John D'Amore</name>
+			<organization>More Informatics</organization>
+		</developer>
+		<developer>
+			<id>JorisHeadease</id>
+		</developer>
+		<developer>
+			<id>delopst</id>
+			<name>Primož Delopst</name>
+		</developer>
+		<developer>
+			<id>Zach Smith</id>
+			<name>zachdoctolib</name>
+			<organization>Doctolib</organization>
+		</developer>
+		<developer>
+			<id>alparodev</id>
+			<name>Aleksej Parovysnik</name>
+			<organization>Doctolib</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -846,116 +882,124 @@
 		</license>
 	</licenses>
 
-    <properties>
+	<properties>
+		<fhir_core_version>6.0.1</fhir_core_version>
+		<ucum_version>1.0.3</ucum_version>
+		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
-		 <fhir_core_version>5.6.84</fhir_core_version>
-        <ucum_version>1.0.3</ucum_version>
+		<ucum_version>1.0.3</ucum_version>
 
-        <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
+		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
+		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
-        <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
+		<!-- For site-deploy -->
+		<siteMainDirectory>${user.home}/sites/hapi-fhir</siteMainDirectory>
+		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
 
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- Dependency Versions -->
+		<activation_api_version>1.2.0</activation_api_version>
+		<apache_karaf_version>4.2.5</apache_karaf_version>
+		<aries_spifly_version>1.2</aries_spifly_version>
+		<caffeine_version>3.1.1</caffeine_version>
+		<checkstyle_version>10.6.0</checkstyle_version>
+		<maven_checkstyle_version>3.2.0</maven_checkstyle_version>
+		<maven_changes_version>2.12.1</maven_changes_version>
+		<commons_codec_version>1.15</commons_codec_version>
+		<commons_compress_version>1.21</commons_compress_version>
+		<commons_text_version>1.10.0</commons_text_version>
+		<commons_io_version>2.11.0</commons_io_version>
+		<commons_lang3_version>3.12.0</commons_lang3_version>
+		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
+		<derby_version>10.14.2.0</derby_version>
+		<error_prone_core_version>2.10.0</error_prone_core_version>
+		<mockito_version>4.8.1</mockito_version>
+		<nullaway_version>0.7.9</nullaway_version>
+		<guava_version>31.0.1-jre</guava_version>
+		<gson_version>2.8.9</gson_version>
+		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
+		<jaxb_api_version>2.3.1</jaxb_api_version>
+		<jaxb_core_version>2.3.0.1</jaxb_core_version>
+		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
+		<jena_version>4.2.0</jena_version>
+		<jersey_version>3.0.3</jersey_version>
+        <jetty_version>10.0.13</jetty_version>
+		<jsr305_version>3.0.2</jsr305_version>
+		<junit_version>5.9.1</junit_version>
+		<flexmark_version>0.50.40</flexmark_version>
+		<flyway_version>9.4.0</flyway_version>
+		<hibernate_version>5.6.12.Final</hibernate_version>
+		<hibernate_search_version>6.1.6.Final</hibernate_search_version>
+		<logback_version>1.4.4</logback_version>
+	 	<!-- Update lucene version when you update hibernate-search version -->
+		<lucene_version>8.11.1</lucene_version>
+		<hamcrest_version>2.2</hamcrest_version>
+		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
+		<httpcore_version>4.4.13</httpcore_version>
+		<httpclient_version>4.5.13</httpclient_version>
+		<jackson_version>2.14.1</jackson_version>
+		<jackson_databind_version>2.14.1</jackson_databind_version>
+		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
+		<maven_license_plugin_version>1.8</maven_license_plugin_version>
+		<okhttp_version>4.10.0</okhttp_version>
+		<poi_version>4.1.2</poi_version>
+		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
+		<resteasy_version>5.0.2.Final</resteasy_version>
+		<ph_schematron_version>5.6.5</ph_schematron_version>
+		<ph_commons_version>9.5.4</ph_commons_version>
+		<plexus_compiler_api_version>2.9.0</plexus_compiler_api_version>
+		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
+		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
+		<swagger_version>2.1.12</swagger_version>
+		<slf4j_version>2.0.3</slf4j_version>
+		<log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
+		<spring_version>5.3.23</spring_version>
+		<spring_data_bom_version>2021.2.2</spring_data_bom_version>
+		<spring_batch_version>4.3.3</spring_batch_version>
+		<spring_boot_version>2.7.5</spring_boot_version>
+		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
-        <!-- For site-deploy -->
-        <siteMainDirectory>${user.home}/sites/hapi-fhir</siteMainDirectory>
-        <scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
+		<stax2_api_version>3.1.4</stax2_api_version>
+		<testcontainers_version>1.17.1</testcontainers_version>
+		<thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
+		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
-        <!-- Dependency Versions -->
-        <activation_api_version>1.2.0</activation_api_version>
-        <apache_karaf_version>4.2.5</apache_karaf_version>
-        <aries_spifly_version>1.2</aries_spifly_version>
-        <caffeine_version>3.1.1</caffeine_version>
-        <checkstyle_version>10.4</checkstyle_version>
-        <commons_codec_version>1.15</commons_codec_version>
-        <commons_compress_version>1.21</commons_compress_version>
-        <commons_text_version>1.10.0</commons_text_version>
-        <commons_io_version>2.11.0</commons_io_version>
-        <commons_lang3_version>3.12.0</commons_lang3_version>
-        <com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
-        <cql_version>1.5.0</cql_version>
-        <derby_version>10.14.2.0</derby_version>
-        <!--<derby_version>10.15.1.3</derby_version>-->
-        <error_prone_core_version>2.10.0</error_prone_core_version>
-        <mockito_version>4.8.1</mockito_version>
-        <nullaway_version>0.7.9</nullaway_version>
-        <guava_version>31.0.1-jre</guava_version>
-        <gson_version>2.8.9</gson_version>
-        <jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
-        <jaxb_api_version>2.3.1</jaxb_api_version>
-        <jaxb_core_version>2.3.0.1</jaxb_core_version>
-        <jaxb_runtime_version>3.0.0</jaxb_runtime_version>
-        <jena_version>4.2.0</jena_version>
-        <jersey_version>3.0.3</jersey_version>
-        <jetty_version>10.0.12</jetty_version>
-        <jsr305_version>3.0.2</jsr305_version>
-        <junit_version>5.9.1</junit_version>
-        <flexmark_version>0.50.40</flexmark_version>
-        <flyway_version>9.4.0</flyway_version>
-        <hibernate_version>5.6.12.Final</hibernate_version>
-        <hibernate_search_version>6.1.6.Final</hibernate_search_version>
-       <logback_version>1.4.4</logback_version>
-		 <!-- Update lucene version when you update hibernate-search version -->
-        <lucene_version>8.11.1</lucene_version>
-        <hamcrest_version>2.2</hamcrest_version>
-        <hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
-        <httpcore_version>4.4.13</httpcore_version>
-        <httpclient_version>4.5.13</httpclient_version>
-        <jackson_version>2.14.1</jackson_version>
-        <jackson_databind_version>2.14.1</jackson_databind_version>
-        <maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
-        <maven_license_plugin_version>1.8</maven_license_plugin_version>
-        <okhttp_version>4.10.0</okhttp_version>
-        <poi_version>4.1.2</poi_version>
-        <poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
-        <resteasy_version>5.0.2.Final</resteasy_version>
-        <ph_schematron_version>5.6.5</ph_schematron_version>
-        <ph_commons_version>9.5.4</ph_commons_version>
-        <plexus_compiler_api_version>2.9.0</plexus_compiler_api_version>
-        <servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
-        <servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-        <swagger_version>2.1.12</swagger_version>
-        <slf4j_version>2.0.3</slf4j_version>
-        <log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
-        <spring_version>5.3.23</spring_version>
-		  <spring_data_bom_version>2021.2.2</spring_data_bom_version>
-		  <spring_batch_version>4.3.3</spring_batch_version>
-        <spring_boot_version>2.7.5</spring_boot_version>
-		 <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
+		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
+		<slf4j_target_version>1.6.0</slf4j_target_version>
 
-		 <stax2_api_version>3.1.4</stax2_api_version>
-		 <testcontainers_version>1.17.1</testcontainers_version>
-		 <thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
-		 <woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 
-		 <!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
-		 <slf4j_target_version>1.6.0</slf4j_target_version>
+		<elastic_apm_version>1.28.4</elastic_apm_version>
+		<!-- CQL Support -->
+		<clinical-reasoning.version>3.0.0-SNAPSHOT</clinical-reasoning.version>
 
-		 <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		 <ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
+		<!-- Site properties -->
+		<fontawesomeVersion>5.4.1</fontawesomeVersion>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.release>11</maven.compiler.release>
+		<maven.compiler.testSource>17</maven.compiler.testSource>
+		<maven.compiler.testTarget>17</maven.compiler.testTarget>
+		<maven.compiler.testRelease>17</maven.compiler.testRelease>
 
-		 <elastic_apm_version>1.28.4</elastic_apm_version>
-		 <!-- CQL Support -->
-		 <cql-engine.version>1.5.1</cql-engine.version>
-		 <cql-evaluator.version>1.2.0</cql-evaluator.version>
-		 <cqframework.version>1.5.2</cqframework.version>
-
-		 <!-- Site properties -->
-		 <fontawesomeVersion>5.4.1</fontawesomeVersion>
-		 <maven.compiler.source>11</maven.compiler.source>
-		 <maven.compiler.target>11</maven.compiler.target>
-		 <maven.compiler.release>11</maven.compiler.release>
-		 <maven.compiler.testSource>17</maven.compiler.testSource>
-		 <maven.compiler.testTarget>17</maven.compiler.testTarget>
-		 <maven.compiler.testRelease>17</maven.compiler.testRelease>
-
-		 <!-- Jacoco -->
-		 <argLine></argLine>
+		<!-- Jacoco -->
+		<argLine></argLine>
 	 </properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.utilities</artifactId>
+				<version>${fhir_core_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-net</groupId>
+						<artifactId>commons-net</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-bom</artifactId>
@@ -1027,6 +1071,11 @@
 				<groupId>com.github.ben-manes.caffeine</groupId>
 				<artifactId>caffeine</artifactId>
 				<version>${caffeine_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+				<artifactId>owasp-java-html-sanitizer</artifactId>
+				<version>20211018.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.graphql-java</groupId>
@@ -1257,6 +1306,11 @@
 				<version>${jaxb_api_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-impl</artifactId>
+				<version>${jaxb_api_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>${gson_version}</version>
@@ -1311,9 +1365,9 @@
 				<version>${swagger_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-				<version>8.0.31</version>
+				<groupId>com.mysql</groupId>
+				<artifactId>mysql-connector-j</artifactId>
+				<version>8.0.32</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
@@ -1412,12 +1466,27 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>fluent-hc</artifactId>
+				<version>${httpclient_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient-android</artifactId>
 				<version>4.3.5.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-osgi</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-nio</artifactId>
 				<version>${httpcore_version}</version>
 			</dependency>
 			<dependency>
@@ -1693,6 +1762,17 @@
 				<version>${hamcrest_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.exparity</groupId>
+				<artifactId>hamcrest-date</artifactId>
+				<version>2.0.8</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>*</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
 				<version>${hibernate_version}</version>
@@ -1734,6 +1814,16 @@
 						<artifactId>jboss-transaction-api_1.2_spec</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-envers</artifactId>
+				<version>${hibernate_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-envers</artifactId>
+				<version>${spring_boot_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
@@ -1849,7 +1939,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.5.0</version>
+				<version>42.5.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -2090,30 +2180,20 @@
 				<artifactId>system-stubs-jupiter</artifactId>
 				<version>2.0.1</version>
 			</dependency>
+			<!-- dependencies required for Android -->
+			<dependency>
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+				<version>2.12.2</version>
+				<scope>provided</scope>
+				<optional>true</optional>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.2.0</version>
-					<dependencies>
-						<dependency>
-							<groupId>com.puppycrawl.tools</groupId>
-							<artifactId>checkstyle</artifactId>
-							<version>${checkstyle_version}</version>
-						</dependency>
-                        <dependency>
-                            <groupId>ca.uhn.hapi.fhir</groupId>
-                            <artifactId>hapi-fhir-checkstyle</artifactId>
-									<!-- Remember to bump this when you upgrade the version -->
-                            <version>6.3.4-SNAPSHOT</version>
-                        </dependency>
-					</dependencies>
-				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
@@ -2131,8 +2211,8 @@
 				</plugin>
 				<plugin>
 					<groupId>de.jpdigital</groupId>
-					<artifactId>hibernate54-ddl-maven-plugin</artifactId>
-					<version>2.3.0</version>
+					<artifactId>hibernate56-ddl-maven-plugin</artifactId>
+					<version>2.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2165,8 +2245,6 @@
 						<meminitial>500m</meminitial>
 						<maxmem>2000m</maxmem>
 					</configuration>
-					<dependencies>
-					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2229,14 +2307,13 @@
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-						<forkCount>1.0C</forkCount>
 						<trimStackTrace>true</trimStackTrace>
 					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>3.2.3</version>
+					<version>3.3.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -2280,6 +2357,11 @@
 					<version>${jetty_version}</version>
 				</plugin>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-changes-plugin</artifactId>
+					<version>${maven_changes_version}</version>
+				</plugin>
+				<plugin>
 					<groupId>org.eluder.coveralls</groupId>
 					<artifactId>coveralls-maven-plugin</artifactId>
 					<version>4.3.0</version>
@@ -2291,7 +2373,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.8</version>
+					<version>0.8.9</version>
 					<configuration>
 						<excludes>
 							<exclude>ca/uhn/fhir/model/dstu2/**/*.class</exclude>
@@ -2351,47 +2433,6 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
-								<!--
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											build-helper-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.9.1,)
-										</versionRange>
-										<goals>
-											<goal>add-source</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-compiler-plugin
-										</artifactId>
-										<versionRange>
-											[3.3,)
-										</versionRange>
-										<goals>
-											<goal>compile</goal>
-											<goal>testCompile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								 -->
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -2400,6 +2441,27 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
 					<version>2.5.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>animal-sniffer-maven-plugin</artifactId>
+					<version>1.22</version>
+					<configuration>
+						<signature>
+							<groupId>net.sf.androidscents.signature</groupId>
+							<artifactId>android-api-level-26</artifactId>
+							<version>8.0.0_r2</version>
+						</signature>
+					</configuration>
+					<executions>
+						<execution>
+							<id>check-android-26-compliance</id>
+							<phase>test</phase>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -2432,6 +2494,7 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<inherited>false</inherited>
 				<executions>
@@ -2460,6 +2523,9 @@
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-jpaserver-ips">
+									<fileset dir="hapi-fhir-jpaserver-ips/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver-mdm">
 									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>
@@ -2716,7 +2782,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
-				<version>2.12.1</version>
+				<version>${maven_changes_version}</version>
 				<inherited>false</inherited>
 				<reportSets>
 					<reportSet>
@@ -2761,20 +2827,7 @@
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>3.0.0</version>
 				<inherited>false</inherited>
-				<!--
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>team</report>
-							<report>issue-management</report>
-							<report>license</report>
-							<report>scm</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-				-->
 			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> <version>1.1</version> </plugin> -->
 		</plugins>
 	</reporting>
 
@@ -2849,22 +2902,23 @@
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-checkstyle-plugin</artifactId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
 						<executions>
 							<execution>
-								<id>validate</id>
-								<phase>generate-sources</phase>
-								<configuration>
-									<!--suppress UnresolvedMavenProperty -->
-									<configLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle_config_nofixmes.xml</configLocation>
-									<inputEncoding>UTF-8</inputEncoding>
-									<consoleOutput>true</consoleOutput>
-									<failOnViolation>true</failOnViolation>
-									<failsOnError>false</failsOnError>
-								</configuration>
-								<goals>
-									<goal>check</goal>
-								</goals>
+								<id>delete-module-cache-file</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<version>${maven_checkstyle_version}</version>
+						<executions>
+							<execution>
+								<id>hapi-single-module-checkstyle</id>
+								<phase>none</phase>
 							</execution>
 						</executions>
 					</plugin>
@@ -2878,9 +2932,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<forkCount>1</forkCount>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
@@ -2892,9 +2943,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<forkCount>2</forkCount>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
@@ -2967,33 +3015,18 @@
 				</plugins>
 			</build>
 		</profile>
-		<profile>
-			<id>LGTM</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-enforcer-plugin</artifactId>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 
 		<!--
 		This profile is basically here to work around an IJ bug where the
 		<testSource> tag is ignored in IJ's compiler. See:
 		https://youtrack.jetbrains.com/issue/IDEA-85478
+		IntelliJ 2023.1 now supports this, so we removed the activation.
+		But if you want to run an older IntelliJ, activate the old-intellij profile in the Maven tab.
 		-->
 		<profile>
-			<id>ide</id>
+			<id>old-intellij</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
-				<property>
-					<name>idea.maven.embedder.version</name>
-				</property>
 			</activation>
 			<build>
 				<plugins>

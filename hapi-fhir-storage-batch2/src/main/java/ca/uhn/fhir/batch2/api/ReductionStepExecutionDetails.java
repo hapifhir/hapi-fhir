@@ -1,17 +1,8 @@
-package ca.uhn.fhir.batch2.api;
-
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.IModelJson;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +17,14 @@ import javax.annotation.Nullable;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.api;
+
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IModelJson;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * This class is used for Reduction Step for Batch2 Jobs.

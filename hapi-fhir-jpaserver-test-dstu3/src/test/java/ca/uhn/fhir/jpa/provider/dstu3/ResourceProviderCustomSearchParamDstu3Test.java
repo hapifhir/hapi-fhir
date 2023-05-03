@@ -5,7 +5,7 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
@@ -61,7 +61,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void after() throws Exception {
 		super.after();
 
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new StorageSettings().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new StorageSettings().isDefaultSearchParamsCanBeOverridden());
 		mySearchParamRegistry.forceRefresh();
 	}
 
@@ -106,7 +106,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 	@Test
 	public void testConformanceOverrideAllowed() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 
 		CapabilityStatement conformance = myClient
 				.fetchConformance()
@@ -265,7 +265,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		eyeColourSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		eyeColourSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
 		myClient
 				.create()
@@ -279,7 +279,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		p1.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("blue"));
 		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
 
 		Patient p2 = new Patient();
 		p2.setActive(true);
@@ -293,7 +293,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 				.returnBundle(Bundle.class)
 				.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(foundResources, contains(p1id.getValue()));

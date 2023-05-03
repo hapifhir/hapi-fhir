@@ -113,9 +113,32 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
                 The number of links to be returned in a page. 
             </td>
         </tr>
+        <tr>
+            <td>_sort</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                The sort specification (see sort note below). 
+            </td>
+        </tr>
+        <tr>
+            <td>resourceType</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                The resource type (e.g. Patient) 
+            </td>
+        </tr>
     </tbody>
 </table>
 
+Sort note: sort is specified by adding one or more comma-separated MdmLink property names prefixed by '-' (minus sign) to indicate descending order. 
+
+### Sort specification example
+
+```url
+http://example.com/$mdm-query-links?_sort=-myScore,myCreated
+```
 ### Example
 
 Use an HTTP GET like `http://example.com/$mdm-query-links?matchResult=POSSIBLE_MATCH` or an HTTP POST to the following URL to invoke this operation:
@@ -187,6 +210,162 @@ This operation returns a `Parameters` resource that looks like the following:
 }
 ```
 
+## Link History
+
+Use the `$mdm-link-history` operation to request a list of historical entries for a given set of `goldenResourceId`s or `sourceResourceId`s.  Either parameter is optional but **at least one** must be provided.
+
+MDM link history is made possible by a back-end configuration that enables saving the historical entries to a new audit table in the database.  This feature is enabled by default.  Some clients may wish to leave this feature disabled in order to save disk space.
+
+Setting this property explicitly to false disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryEnabled())
+
+This operation takes the following parameters:
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cardinality</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>goldenResourceId</td>
+            <td>String</td>
+            <td>0..*</td>
+            <td>
+                The id of the Golden Resource (e.g. Golden Patient Resource).
+            </td>
+        </tr>
+        <tr>
+            <td>resourceId</td>
+            <td>String</td>
+            <td>0..*</td>
+            <td>
+                The id of the source resource (e.g. Patient resource).
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+This operation returns a `Parameters` resource that looks like the following, in the example case where an MdmLink was updated from MATCH to NO_MATCH, with the MDM revisions sorted in *descending* order:
+
+If there are any duplication between results returned by a combination of golden resource IDs and source IDs, they will be included only once.  So, for example, if there is one historical MDM link for golden resource 123 and source resource 456, and both of these identifiers are in the query, only a single historical entry will be returned.
+
+### Example Use
+
+```url
+http://example.com/$mdm-link-history?goldenResourceId=1553&sourceResourceId=1552
+```
+
+```json
+{
+    "resourceType": "Parameters",
+    "parameter": [
+        {
+            "name": "historical link",
+            "part": [
+                {
+                    "name": "goldenResourceId",
+                    "valueString": "Patient/1553"
+                },
+                {
+                    "name": "revisionTimestamp",
+                    "valueString": "2023-03-16 15:14:39.17"
+                },
+                {
+                    "name": "sourceResourceId",
+                    "valueString": "Patient/1552"
+                },
+                {
+                    "name": "matchResult",
+                    "valueString": "NO_MATCH"
+                },
+                {
+                    "name": "score",
+                    "valueDecimal": 1
+                },
+                {
+                    "name": "linkSource",
+                    "valueString": "MANUAL"
+                },
+                {
+                    "name": "eidMatch",
+                    "valueBoolean": false
+                },
+                {
+                    "name": "hadToCreateNewResource",
+                    "valueBoolean": true
+                },
+                {
+                    "name": "score",
+                    "valueDecimal": 1
+                },
+                {
+                    "name": "linkCreated",
+                    "valueDecimal": 1678994017461
+                },
+                {
+                    "name": "linkUpdated",
+                    "valueDecimal": 1678994079155
+                }
+            ]
+        },
+        {
+            "name": "historical link",
+            "part": [
+                {
+                    "name": "goldenResourceId",
+                    "valueString": "Patient/1553"
+                },
+                {
+                    "name": "revisionTimestamp",
+                    "valueString": "2023-03-16 15:13:37.469"
+                },
+                {
+                    "name": "sourceResourceId",
+                    "valueString": "Patient/1552"
+                },
+                {
+                    "name": "matchResult",
+                    "valueString": "MATCH"
+                },
+                {
+                    "name": "score",
+                    "valueDecimal": 1
+                },
+                {
+                    "name": "linkSource",
+                    "valueString": "AUTO"
+                },
+                {
+                    "name": "eidMatch",
+                    "valueBoolean": false
+                },
+                {
+                    "name": "hadToCreateNewResource",
+                    "valueBoolean": true
+                },
+                {
+                    "name": "score",
+                    "valueDecimal": 1
+                },
+                {
+                    "name": "linkCreated",
+                    "valueDecimal": 1678994017461
+                },
+                {
+                    "name": "linkUpdated",
+                    "valueDecimal": 1678994017461
+                }
+            ]
+        }
+    ]
+}
+```
+
 ## Query Duplicate Golden Resources
 
 Use the `$mdm-duplicate-golden-resources` operation to request a list of duplicate Golden Resources. 
@@ -217,7 +396,7 @@ The following is a table of the request parameters supported by this GET operati
             <td>int</td>
             <td>0..1</td>
             <td>
-                the offset to begin returning records at.
+                The offset to begin returning records at.
             </td>
         </tr>
         <tr>
@@ -226,6 +405,14 @@ The following is a table of the request parameters supported by this GET operati
             <td>0..1</td>
             <td>
                 The number of links to be returned in a page. 
+            </td>
+        </tr>
+        <tr>
+            <td>resourceType</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                The resource type (e.g. Patient) 
             </td>
         </tr>
     </tbody>
@@ -677,7 +864,7 @@ This operation takes two optional Parameters.
             <td>0..1</td>
             <td>
                 The number of links that should be deleted at a time.  If omitted, then the batch size will be determined by the value
-of [Reindex Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getReindexBatchSize())
+of [Reindex Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/StorageConfig.html#getReindexBatchSize())
 property.
             </td>
         </tr>

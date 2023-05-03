@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.util.ILockable;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -14,6 +15,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,18 +31,20 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This class is an implementation of {@link IValidationSupport} which may be pre-populated
  * with a collection of validation resources to be used by the validator.
  */
-public class PrePopulatedValidationSupport extends BaseStaticResourceValidationSupport implements IValidationSupport {
+public class PrePopulatedValidationSupport extends BaseStaticResourceValidationSupport implements IValidationSupport, ILockable {
 
 	private final Map<String, IBaseResource> myCodeSystems;
 	private final Map<String, IBaseResource> myStructureDefinitions;
+	private final Map<String, IBaseResource> mySearchParameters;
 	private final Map<String, IBaseResource> myValueSets;
 	private final Map<String, byte[]> myBinaries;
+	private boolean myLocked;
 
 	/**
 	 * Constructor
 	 */
 	public PrePopulatedValidationSupport(FhirContext theContext) {
-		this(theContext, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+		this(theContext, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
 	}
 
 	/**
@@ -58,7 +62,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 		Map<String, IBaseResource> theStructureDefinitions,
 		Map<String, IBaseResource> theValueSets,
 		Map<String, IBaseResource> theCodeSystems) {
-		this(theFhirContext, theStructureDefinitions, theValueSets, theCodeSystems, new HashMap<>());
+		this(theFhirContext, theStructureDefinitions, theValueSets, theCodeSystems, new HashMap<>(), new HashMap<>());
 	}
 
 	/**
@@ -78,23 +82,31 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 		Map<String, IBaseResource> theStructureDefinitions,
 		Map<String, IBaseResource> theValueSets,
 		Map<String, IBaseResource> theCodeSystems,
+		Map<String, IBaseResource> theSearchParameters,
 		Map<String, byte[]> theBinaries) {
 		super(theFhirContext);
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		Validate.notNull(theStructureDefinitions, "theStructureDefinitions must not be null");
 		Validate.notNull(theValueSets, "theValueSets must not be null");
 		Validate.notNull(theCodeSystems, "theCodeSystems must not be null");
+		Validate.notNull(theSearchParameters, "theSearchParameters must not be null");
 		Validate.notNull(theBinaries, "theBinaries must not be null");
 		myStructureDefinitions = theStructureDefinitions;
 		myValueSets = theValueSets;
 		myCodeSystems = theCodeSystems;
+		mySearchParameters = theSearchParameters;
 		myBinaries = theBinaries;
 	}
 
 	public void addBinary(byte[] theBinary, String theBinaryKey) {
+		validateNotLocked();
 		Validate.notNull(theBinary, "theBinaryKey must not be null");
 		Validate.notNull(theBinary, "the" + theBinaryKey + " must not be null");
 		myBinaries.put(theBinaryKey, theBinary);
+	}
+
+	private synchronized void validateNotLocked() {
+		Validate.isTrue(myLocked == false, "Can not add to validation support, module is locked");
 	}
 
 	/**
@@ -112,6 +124,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * </p>
 	 */
 	public void addCodeSystem(IBaseResource theCodeSystem) {
+		validateNotLocked();
 		Set<String> urls = processResourceAndReturnUrls(theCodeSystem, "CodeSystem");
 		addToMap(theCodeSystem, myCodeSystems, urls);
 	}
@@ -162,8 +175,15 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * </p>
 	 */
 	public void addStructureDefinition(IBaseResource theStructureDefinition) {
+		validateNotLocked();
 		Set<String> url = processResourceAndReturnUrls(theStructureDefinition, "StructureDefinition");
 		addToMap(theStructureDefinition, myStructureDefinitions, url);
+	}
+
+	public void addSearchParameter(IBaseResource theSearchParameter) {
+		validateNotLocked();
+		Set<String> url = processResourceAndReturnUrls(theSearchParameter, "SearchParameter");
+		addToMap(theSearchParameter, mySearchParameters, url);
 	}
 
 	private <T extends IBaseResource> void addToMap(T theResource, Map<String, T> theMap, Collection<String> theUrls) {
@@ -198,6 +218,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * </p>
 	 */
 	public void addValueSet(IBaseResource theValueSet) {
+		validateNotLocked();
 		Set<String> urls = processResourceAndReturnUrls(theValueSet, "ValueSet");
 		addToMap(theValueSet, myValueSets, urls);
 	}
@@ -209,9 +230,13 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * @since 5.5.0
 	 */
 	public void addResource(@Nonnull IBaseResource theResource) {
+		validateNotLocked();
 		Validate.notNull(theResource, "theResource must not be null");
 
 		switch (getFhirContext().getResourceType(theResource)) {
+			case "SearchParameter":
+				addSearchParameter(theResource);
+				break;
 			case "StructureDefinition":
 				addStructureDefinition(theResource);
 				break;
@@ -231,6 +256,12 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 		retVal.addAll(myStructureDefinitions.values());
 		retVal.addAll(myValueSets.values());
 		return retVal;
+	}
+
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllSearchParameters() {
+		return toList(mySearchParameters);
 	}
 
 	@Override
@@ -264,5 +295,21 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		return myValueSets.containsKey(theValueSetUrl);
+	}
+
+	/**
+	 * Returns a count of all known resources
+	 */
+	public int countAll() {
+		return myBinaries.size() +
+			myCodeSystems.size() +
+			myStructureDefinitions.size() +
+			myValueSets.size();
+	}
+
+
+	@Override
+	public synchronized void lock() {
+		myLocked = true;
 	}
 }

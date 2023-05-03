@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -48,7 +47,7 @@ public class Batch2SupportConfig {
 	}
 
 	@Bean
-	DeleteExpungeSqlBuilder deleteExpungeSqlBuilder(ResourceTableFKProvider theResourceTableFKProvider, DaoConfig theDaoConfig, IIdHelperService theIdHelper, IResourceLinkDao theResourceLinkDao) {
-		return new DeleteExpungeSqlBuilder(theResourceTableFKProvider, theDaoConfig, theIdHelper, theResourceLinkDao);
+	DeleteExpungeSqlBuilder deleteExpungeSqlBuilder(ResourceTableFKProvider theResourceTableFKProvider, JpaStorageSettings theStorageSettings, IIdHelperService theIdHelper, IResourceLinkDao theResourceLinkDao) {
+		return new DeleteExpungeSqlBuilder(theResourceTableFKProvider, theStorageSettings, theIdHelper, theResourceLinkDao);
 	}
 }

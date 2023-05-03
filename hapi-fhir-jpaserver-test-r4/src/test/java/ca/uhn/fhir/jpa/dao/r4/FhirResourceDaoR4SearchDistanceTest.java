@@ -1,10 +1,17 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +25,7 @@ import static org.hamcrest.Matchers.contains;
 public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Autowired
@@ -40,6 +47,66 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));
+	}
+
+	@Test
+	public void testNearSearchDistanceChained() {
+		Location location = new Location();
+		double latitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
+		double longitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		location.setPosition(position);
+
+		IIdType id = myLocationDao.create(location).getId();
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.addLocation(new Reference(id));
+		IIdType affId = myOrganizationAffiliationDao.create(aff).getId();
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl("OrganizationAffiliation?location." + Location.SP_NEAR + "=" + latitude + "|" + longitude, myFhirContext.getResourceDefinition("OrganizationAffiliation"));
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(myOrganizationAffiliationDao.search(map));
+		assertThat(ids, contains(affId.toUnqualifiedVersionless().toString()));
+	}
+
+	@Test
+	public void testNearSearchDistanceOnSpecialParameterChained() {
+		//Given a special SP exists
+		SearchParameter parameter = new SearchParameter();
+		parameter.setId("location-postalcode-near");
+		parameter.setName("arbitrary-name");
+		parameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		parameter.setCode("postalcode-near");
+		parameter.addBase("Location");
+		parameter.setType(Enumerations.SearchParamType.SPECIAL);
+		parameter.setExpression("Location.address.postalCode");
+		mySearchParameterDao.update(parameter, new SystemRequestDetails());
+		mySearchParamRegistry.forceRefresh();
+
+		//And given an OrganizationAffiliation->Location reference
+		Location location = new Location();
+		location.getAddress().setPostalCode("60108");
+		IIdType locId = myLocationDao.create(location).getId();
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.addLocation(new Reference(locId));
+		IIdType affId = myOrganizationAffiliationDao.create(aff).getId();
+
+		{
+			//When: We search on the location
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl("Location?postalcode-near=60108", myFhirContext.getResourceDefinition("Location"));
+			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
+			//Then: it should find the location
+			assertThat(ids, contains(locId.toUnqualifiedVersionless().toString()));
+		}
+
+		{
+			//When: We search on the OrganizationAffiliation via its location in a chain
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl("OrganizationAffiliation?location.postalcode-near=60108", myFhirContext.getResourceDefinition("OrganizationAffiliation"));
+			List<String> ids = toUnqualifiedVersionlessIdValues(myOrganizationAffiliationDao.search(map));
+
+			//Then: It should find the OrganizationAffiliation
+			assertThat(ids, contains(affId.toUnqualifiedVersionless().toString()));
+		}
 	}
 
 	@Test

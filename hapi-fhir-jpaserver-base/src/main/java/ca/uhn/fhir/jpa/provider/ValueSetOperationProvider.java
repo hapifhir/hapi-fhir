@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.provider;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
@@ -26,7 +25,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.config.JpaConfig;
@@ -39,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -61,8 +61,6 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	protected IValidationSupport myValidationSupport;
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
@@ -70,24 +68,13 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
 
-	public void setValidationSupport(IValidationSupport theValidationSupport) {
-		myValidationSupport = theValidationSupport;
-	}
-
-	public void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
-	}
-
-	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
 	}
 
-	public void setTermReadSvc(ITermReadSvc theTermReadSvc) {
-		myTermReadSvc = theTermReadSvc;
-	}
-
-	public void setValidationSupportChain(ValidationSupportChain theValidationSupportChain) {
-		myValidationSupportChain = theValidationSupportChain;
+	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
 	}
 
 	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true, typeName = "ValueSet")
@@ -200,8 +187,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	}
 
 
-	public static ValueSetExpansionOptions createValueSetExpansionOptions(DaoConfig theDaoConfig, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<Boolean> theIncludeHierarchy, IPrimitiveType<String> theFilter, IPrimitiveType<String> theDisplayLanguage) {
-		int offset = theDaoConfig.getPreExpandValueSetsDefaultOffset();
+	public static ValueSetExpansionOptions createValueSetExpansionOptions(JpaStorageSettings theStorageSettings, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<Boolean> theIncludeHierarchy, IPrimitiveType<String> theFilter, IPrimitiveType<String> theDisplayLanguage) {
+		int offset = theStorageSettings.getPreExpandValueSetsDefaultOffset();
 		if (theOffset != null && theOffset.hasValue()) {
 			if (theOffset.getValue() >= 0) {
 				offset = theOffset.getValue();
@@ -210,7 +197,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			}
 		}
 
-		int count = theDaoConfig.getPreExpandValueSetsDefaultCount();
+		int count = theStorageSettings.getPreExpandValueSetsDefaultCount();
 		if (theCount != null && theCount.hasValue()) {
 			if (theCount.getValue() >= 0) {
 				count = theCount.getValue();
@@ -218,7 +205,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 				throw new InvalidRequestException(Msg.code(1136) + "count parameter for $expand operation must be >= 0 when specified. count: " + theCount.getValue());
 			}
 		}
-		int countMax = theDaoConfig.getPreExpandValueSetsMaxCount();
+		int countMax = theStorageSettings.getPreExpandValueSetsMaxCount();
 		if (count > countMax) {
 			ourLog.warn("count parameter for $expand operation of {} exceeds maximum value of {}; using maximum value.", count, countMax);
 			count = countMax;

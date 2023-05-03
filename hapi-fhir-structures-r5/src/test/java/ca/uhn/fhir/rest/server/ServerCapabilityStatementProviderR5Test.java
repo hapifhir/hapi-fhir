@@ -41,6 +41,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent;
@@ -54,6 +55,7 @@ import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.DiagnosticReport;
 import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.IdType;
@@ -328,7 +330,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		{
 			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
-			ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
+			ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
@@ -343,7 +345,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		{
 			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-validate"), createRequestDetails(rs));
 			validate(opDef);
-			ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
+			ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("validate", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
@@ -648,7 +650,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		ValidationResult result = myCtx.newValidator().validateWithResult(conformance);
 		assertTrue(result.isSuccessful(), result.getMessages().toString());
@@ -666,7 +668,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
 		CapabilityStatementRestResourceOperationComponent operationComponent = restComponent.getOperation().get(0);
@@ -676,7 +678,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		assertThat(operationReference, not(nullValue()));
 
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
 		assertThat("The operation name should be the description, if a description is set", operationDefinition.getName(), equalTo("TestQuery"));
@@ -711,7 +713,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		CapabilityStatementRestResourceComponent resource = conformance.getRestFirstRep().getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException());
 		CapabilityStatementRestResourceOperationComponent operationComponent = resource.getOperation().get(0);
@@ -719,11 +721,11 @@ public class ServerCapabilityStatementProviderR5Test {
 		assertThat(operationReference, not(nullValue()));
 
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), equalTo("TestQuery"));
 		String patientResourceName = "Patient";
-		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue(), is(patientResourceName));
+		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue().toCode(), is(patientResourceName));
 		assertThat(operationDefinition.getSystem(), is(false));
 		assertThat(operationDefinition.getType(), is(true));
 		assertThat(operationDefinition.getInstance(), is(false));
@@ -779,7 +781,7 @@ public class ServerCapabilityStatementProviderR5Test {
         rs.init(createServletConfig());
 
         CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-        ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+        ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
         List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
         CapabilityStatementRestResourceComponent patientResource = resources.stream()
@@ -804,9 +806,9 @@ public class ServerCapabilityStatementProviderR5Test {
 		return retVal;
 	}
 
-	private Set<String> toStrings(List<CodeType> theType) {
+	private Set<String> toStrings(List<? extends IPrimitiveType> theType) {
 		HashSet<String> retVal = new HashSet<String>();
-		for (CodeType next : theType) {
+		for (IPrimitiveType next : theType) {
 			retVal.add(next.getValueAsString());
 		}
 		return retVal;

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -27,19 +26,13 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Keys in this map refer to <b>resource metadata keys</b>, which are keys used to access information about specific resource instances that live outside of the resource body. Typically, these are
@@ -65,23 +58,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 
-	// TODO: JA - Replace all of the various other get/put methods in subclasses with just using the two that are here
-	public T get(IBaseResource theResource) {
-		if (theResource instanceof IAnyResource) {
-			return (T) theResource.getUserData(name());
-		} else {
-			return (T) ((IResource)theResource).getResourceMetadata().get(this);
-		}
-	}
-
-	public void put(IBaseResource theResource, T theValue) {
-		if (theResource instanceof IAnyResource) {
-			theResource.setUserData(name(), theValue);
-		} else {
-			((IResource)theResource).getResourceMetadata().put(this, theValue);
-		}
-	}
-
 	/**
 	 * If present and populated with a date/time (as an instance of {@link InstantDt}), this value is an indication that the resource is in the deleted state. This key is only used in a limited number
 	 * of scenarios, such as POSTing transaction bundles to a server, or returning resource history.
@@ -89,21 +65,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeyEnum<IPrimitiveType<Date>> DELETED_AT = new ResourceMetadataKeyEnum<>("DELETED_AT") {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public IPrimitiveType<Date> get(IResource theResource) {
-			return (IPrimitiveType<Date>) theResource.getResourceMetadata().get(this);
-		}
-
-		@Override
-		public void put(IResource theResource, IPrimitiveType<Date> theObject) {
-			theResource.getResourceMetadata().put(this, theObject);
-		}
-
+	public static final ResourceMetadataKeyEnum<IPrimitiveType<Date>> DELETED_AT = new ResourceMetadataKeyEnum<>("DELETED_AT", IPrimitiveType.class) {
 	};
-
 	/**
 	 * If present and populated with a {@link BundleEntrySearchModeEnum}, contains the "bundle entry search mode", which is the value of the status field in the Bundle entry containing this resource.
 	 * The value for this key corresponds to field <code>Bundle.entry.search.mode</code>. This value can be set to provide a status value of "include" for included resources being returned by a
@@ -115,28 +78,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>{@link BundleEntrySearchModeEnum}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeySupportingAnyResource<BundleEntrySearchModeEnum, String> ENTRY_SEARCH_MODE = new ResourceMetadataKeySupportingAnyResource<BundleEntrySearchModeEnum, String>("ENTRY_SEARCH_MODE") {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public BundleEntrySearchModeEnum get(IResource theResource) {
-			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_SEARCH_MODE, BundleEntrySearchModeEnum.class, BundleEntrySearchModeEnum.VALUESET_BINDER);
-		}
-
-		@Override
-		public String get(IAnyResource theResource) {
-			return (String) theResource.getUserData(ENTRY_SEARCH_MODE.name());
-		}
-
-		@Override
-		public void put(IResource theResource, BundleEntrySearchModeEnum theObject) {
-			theResource.getResourceMetadata().put(ENTRY_SEARCH_MODE, theObject);
-		}
-
-		@Override
-		public void put(IAnyResource theResource, String theObject) {
-			theResource.setUserData(ENTRY_SEARCH_MODE.name(), theObject);
-		}
+	public static final ResourceMetadataKeyEnum<BundleEntrySearchModeEnum> ENTRY_SEARCH_MODE = new ResourceMetadataKeyEnum<>("ENTRY_SEARCH_MODE", BundleEntrySearchModeEnum.class) {
 	};
 	/**
 	 * If present and populated with a {@link BundleEntryTransactionMethodEnum}, contains the "bundle entry transaction operation", which is the value of the status field in the Bundle entry
@@ -150,33 +92,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>{@link BundleEntryTransactionMethodEnum}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeySupportingAnyResource<BundleEntryTransactionMethodEnum, String> ENTRY_TRANSACTION_METHOD = new ResourceMetadataKeySupportingAnyResource<BundleEntryTransactionMethodEnum, String>(
-		"ENTRY_TRANSACTION_OPERATION") {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public BundleEntryTransactionMethodEnum get(IResource theResource) {
-			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_TRANSACTION_METHOD, BundleEntryTransactionMethodEnum.class,
-				BundleEntryTransactionMethodEnum.VALUESET_BINDER);
-		}
-
-		@Override
-		public String get(IAnyResource theResource) {
-			return (String) theResource.getUserData(ENTRY_TRANSACTION_METHOD.name());
-		}
-
-		@Override
-		public void put(IResource theResource, BundleEntryTransactionMethodEnum theObject) {
-			theResource.getResourceMetadata().put(ENTRY_TRANSACTION_METHOD, theObject);
-		}
-
-		@Override
-		public void put(IAnyResource theResource, String theObject) {
-			theResource.setUserData(ENTRY_TRANSACTION_METHOD.name(), theObject);
-		}
-
+	public static final ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum> ENTRY_TRANSACTION_METHOD = new ResourceMetadataKeyEnum<>("ENTRY_TRANSACTION_OPERATION", BundleEntryTransactionMethodEnum.class) {
 	};
-
 	/**
 	 * The value for this key represents a {@link List} of profile IDs that this resource claims to conform to.
 	 * <p>
@@ -184,18 +101,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>List&lt;IdDt&gt;</b>. Note that the returned list is <i>unmodifiable</i>, so you need to create a new list and call <code>put</code> to change its value.
 	 * </p>
 	 */
-	public static final ResourceMetadataKeyEnum<List<IdDt>> PROFILES = new ResourceMetadataKeyEnum<List<IdDt>>("PROFILES") {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public List<IdDt> get(IResource theResource) {
-			return getIdListFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PROFILES);
-		}
-
-		@Override
-		public void put(IResource theResource, List<IdDt> theObject) {
-			theResource.getResourceMetadata().put(PROFILES, theObject);
-		}
+	public static final ResourceMetadataKeyEnum<List<IdDt>> PROFILES = new ResourceMetadataKeyEnum<>("PROFILES", List.class) {
 	};
 	/**
 	 * The value for this key is the bundle entry <b>Published</b> time. This is defined by FHIR as "Time resource copied into the feed", which is generally best left to the current time.
@@ -208,37 +114,9 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 *
 	 * @see InstantDt
 	 */
-	public static final ResourceMetadataKeyEnum<InstantDt> PUBLISHED = new ResourceMetadataKeyEnum<InstantDt>("PUBLISHED") {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public InstantDt get(IResource theResource) {
-			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PUBLISHED);
-		}
-
-		@Override
-		public void put(IResource theResource, InstantDt theObject) {
-			theResource.getResourceMetadata().put(PUBLISHED, theObject);
-		}
+	public static final ResourceMetadataKeyEnum<InstantDt> PUBLISHED = new ResourceMetadataKeyEnum<>("PUBLISHED", InstantDt.class) {
 	};
-	public static final ResourceMetadataKeyEnum<List<BaseCodingDt>> SECURITY_LABELS = new ResourceMetadataKeyEnum<List<BaseCodingDt>>("SECURITY_LABELS") {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public List<BaseCodingDt> get(IResource resource) {
-			Object obj = resource.getResourceMetadata().get(SECURITY_LABELS);
-			if (obj == null) {
-				return null;
-			}
-			//noinspection unchecked
-			return (List<BaseCodingDt>) obj;
-		}
-
-		@Override
-		public void put(IResource iResource, List<BaseCodingDt> labels) {
-			iResource.getResourceMetadata().put(SECURITY_LABELS, labels);
-		}
-
+	public static final ResourceMetadataKeyEnum<List<BaseCodingDt>> SECURITY_LABELS = new ResourceMetadataKeyEnum<>("SECURITY_LABELS", List.class) {
 	};
 	/**
 	 * The value for this key is the list of tags associated with this resource
@@ -248,23 +126,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 *
 	 * @see TagList
 	 */
-	public static final ResourceMetadataKeyEnum<TagList> TAG_LIST = new ResourceMetadataKeyEnum<TagList>("TAG_LIST") {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public TagList get(IResource theResource) {
-			Object retValObj = theResource.getResourceMetadata().get(TAG_LIST);
-			if (retValObj == null) {
-				return null;
-			} else {
-				return (TagList) retValObj;
-			}
-		}
-
-		@Override
-		public void put(IResource theResource, TagList theObject) {
-			theResource.getResourceMetadata().put(TAG_LIST, theObject);
-		}
+	public static final ResourceMetadataKeyEnum<TagList> TAG_LIST = new ResourceMetadataKeyEnum<>("TAG_LIST", TagList.class) {
 	};
 	/**
 	 * The value for this key is the bundle entry <b>Updated</b> time. This is defined by FHIR as "Last Updated for resource". This value is also used for populating the "Last-Modified" header in the
@@ -275,18 +137,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 *
 	 * @see InstantDt
 	 */
-	public static final ResourceMetadataKeyEnum<InstantDt> UPDATED = new ResourceMetadataKeyEnum<InstantDt>("UPDATED") {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public InstantDt get(IResource theResource) {
-			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), UPDATED);
-		}
-
-		@Override
-		public void put(IResource theResource, InstantDt theObject) {
-			theResource.getResourceMetadata().put(UPDATED, theObject);
-		}
+	public static final ResourceMetadataKeyEnum<InstantDt> UPDATED = new ResourceMetadataKeyEnum<>("UPDATED", InstantDt.class) {
 	};
 	/**
 	 * The value for this key is the version ID of the resource object.
@@ -297,18 +148,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getVersionIdPart()} method
 	 */
 	@Deprecated
-	public static final ResourceMetadataKeyEnum<String> VERSION = new ResourceMetadataKeyEnum<String>("VERSION") {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public String get(IResource theResource) {
-			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), VERSION);
-		}
-
-		@Override
-		public void put(IResource theResource, String theObject) {
-			theResource.getResourceMetadata().put(VERSION, theObject);
-		}
+	public static final ResourceMetadataKeyEnum<String> VERSION = new ResourceMetadataKeyEnum<>("VERSION", String.class) {
 	};
 	/**
 	 * The value for this key is the version ID of the resource object.
@@ -319,24 +159,48 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getVersionIdPart()} method
 	 */
 	@Deprecated
-	public static final ResourceMetadataKeyEnum<IdDt> VERSION_ID = new ResourceMetadataKeyEnum<IdDt>("VERSION_ID") {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public IdDt get(IResource theResource) {
-			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata());
-		}
-
-		@Override
-		public void put(IResource theResource, IdDt theObject) {
-			theResource.getResourceMetadata().put(VERSION_ID, theObject);
-		}
+	public static final ResourceMetadataKeyEnum<IdDt> VERSION_ID = new ResourceMetadataKeyEnum<>("VERSION_ID", IdDt.class) {
 	};
 	private static final long serialVersionUID = 1L;
 	private final String myValue;
+	private final Class<?> myType;
 
-	public ResourceMetadataKeyEnum(String theValue) {
+	public ResourceMetadataKeyEnum(String theValue, Class<?> theType) {
 		myValue = theValue;
+		myType = theType;
+	}
+
+	// TODO: JA - Replace all of the various other get/put methods in subclasses with just using the two that are here
+	public T get(IBaseResource theResource) {
+		Object retVal;
+		if (theResource instanceof IAnyResource) {
+			retVal = theResource.getUserData(name());
+		} else {
+			retVal = ((IResource) theResource).getResourceMetadata().get(this);
+		}
+
+		if (retVal != null && !myType.isAssignableFrom(retVal.getClass())) {
+			throw new InternalErrorException(Msg.code(1890) + "Found an object of type '" + retVal.getClass().getCanonicalName()
+				+ "' in resource metadata for key " + this.name() + " - Expected "
+				+ myType.getCanonicalName());
+		}
+
+		//noinspection unchecked
+		return (T) retVal;
+	}
+
+	public void put(IBaseResource theResource, T theValue) {
+		if (theValue != null && !myType.isAssignableFrom(theValue.getClass())) {
+			throw new InternalErrorException(Msg.code(1891) + "Can not put object of type '" + theValue.getClass().getCanonicalName()
+				+ "' in resource metadata for key " + this.name() + " - Expected "
+				+ myType.getCanonicalName());
+		}
+
+		if (theResource instanceof IAnyResource) {
+			theResource.setUserData(name(), theValue);
+		} else {
+			((IResource) theResource).getResourceMetadata().put(this, theValue);
+		}
 	}
 
 	@Override
@@ -349,14 +213,9 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 			return false;
 		ResourceMetadataKeyEnum<?> other = (ResourceMetadataKeyEnum<?>) obj;
 		if (myValue == null) {
-			if (other.myValue != null)
-				return false;
-		} else if (!myValue.equals(other.myValue))
-			return false;
-		return true;
+			return other.myValue == null;
+		} else return myValue.equals(other.myValue);
 	}
-
-	public abstract T get(IResource theResource);
 
 	@Override
 	public int hashCode() {
@@ -370,138 +229,9 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		return myValue;
 	}
 
-	public abstract void put(IResource theResource, T theObject);
-
-	public static abstract class ResourceMetadataKeySupportingAnyResource<T, T2> extends ResourceMetadataKeyEnum<T> {
-
-		private static final long serialVersionUID = 1L;
-
-		public ResourceMetadataKeySupportingAnyResource(String theValue) {
-			super(theValue);
-		}
-
-		public abstract T2 get(IAnyResource theResource);
-
-		public abstract void put(IAnyResource theResource, T2 theObject);
-
-	}
-
 	public static final class ExtensionResourceMetadataKey extends ResourceMetadataKeyEnum<ExtensionDt> {
 		public ExtensionResourceMetadataKey(String theUrl) {
-			super(theUrl);
-		}
-
-		@Override
-		public ExtensionDt get(IResource theResource) {
-			Object retValObj = theResource.getResourceMetadata().get(this);
-			if (retValObj == null) {
-				return null;
-			} else if (retValObj instanceof ExtensionDt) {
-				return (ExtensionDt) retValObj;
-			}
-			throw new InternalErrorException(Msg.code(1890) + "Found an object of type '" + retValObj.getClass().getCanonicalName()
-				+ "' in resource metadata for key " + this.name() + " - Expected "
-				+ ExtensionDt.class.getCanonicalName());
-		}
-
-		@Override
-		public void put(IResource theResource, ExtensionDt theObject) {
-			theResource.getResourceMetadata().put(this, theObject);
+			super(theUrl, ExtensionDt.class);
 		}
 	}
-
-
-	@SuppressWarnings("unchecked")
-	private static <T extends Enum<?>> T getEnumFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<T> theKey, Class<T> theEnumType,
-																								IValueSetEnumBinder<T> theBinder) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (theEnumType.equals(retValObj.getClass())) {
-			return (T) retValObj;
-		} else if (retValObj instanceof String) {
-			return theBinder.fromCodeString((String) retValObj);
-		}
-		throw new InternalErrorException(Msg.code(1891) + "Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
-			+ InstantDt.class.getCanonicalName());
-	}
-
-	private static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata) {
-		return toId(ResourceMetadataKeyEnum.VERSION_ID, theResourceMetadata.get(ResourceMetadataKeyEnum.VERSION_ID));
-	}
-
-	private static List<IdDt> getIdListFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<?> theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof List) {
-			List<?> retValList = (List<?>) retValObj;
-			for (Object next : retValList) {
-				if (!(next instanceof IdDt)) {
-					List<IdDt> retVal = new ArrayList<IdDt>();
-					for (Object nextVal : retValList) {
-						retVal.add(toId(theKey, nextVal));
-					}
-					return Collections.unmodifiableList(retVal);
-				}
-			}
-			@SuppressWarnings("unchecked")
-			List<IdDt> retVal = (List<IdDt>) retValList;
-			return Collections.unmodifiableList(retVal);
-		} else {
-			return Collections.singletonList(toId(theKey, retValObj));
-		}
-	}
-
-	private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<InstantDt> theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof Date) {
-			return new InstantDt((Date) retValObj);
-		} else if (retValObj instanceof InstantDt) {
-			if (((InstantDt) retValObj).isEmpty()) {
-				return null;
-			}
-			return (InstantDt) retValObj;
-		}
-		throw new InternalErrorException(Msg.code(1892) + "Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
-			+ InstantDt.class.getCanonicalName());
-	}
-
-	private static String getStringFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<String> theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof String) {
-			if (StringUtils.isBlank(((String) retValObj))) {
-				return null;
-			}
-			return (String) retValObj;
-		}
-		throw new InternalErrorException(Msg.code(1893) + "Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
-			+ String.class.getCanonicalName());
-	}
-
-	private static IdDt toId(ResourceMetadataKeyEnum<?> theKey, Object retValObj) {
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof String) {
-			if (isNotBlank((String) retValObj)) {
-				return new IdDt((String) retValObj);
-			}
-			return null;
-		} else if (retValObj instanceof IdDt) {
-			if (((IdDt) retValObj).isEmpty()) {
-				return null;
-			}
-			return (IdDt) retValObj;
-		} else if (retValObj instanceof Number) {
-			return new IdDt(retValObj.toString());
-		}
-		throw new InternalErrorException(Msg.code(1894) + "Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
-			+ IdDt.class.getCanonicalName());
-	}
-
-
 }

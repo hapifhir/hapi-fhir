@@ -72,10 +72,10 @@ public class PartitionManagementProviderTest {
 
 	@Test
 	public void testCreatePartition() {
-		when(myPartitionConfigSvc.createPartition(any())).thenAnswer(createAnswer());
+		when(myPartitionConfigSvc.createPartition(any(), any())).thenAnswer(createAnswer());
 
 		Parameters input = createInputPartition();
-		ourLog.info("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters response = myClient
 			.operation()
@@ -85,8 +85,8 @@ public class PartitionManagementProviderTest {
 			.encodedXml()
 			.execute();
 
-		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		verify(myPartitionConfigSvc, times(1)).createPartition(any());
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		verify(myPartitionConfigSvc, times(1)).createPartition(any(), any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
 		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
@@ -117,7 +117,7 @@ public class PartitionManagementProviderTest {
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
-		verify(myPartitionConfigSvc, times(0)).createPartition(any());
+		verify(myPartitionConfigSvc, times(0)).createPartition(any(), any());
 	}
 
 	@Test
@@ -137,7 +137,7 @@ public class PartitionManagementProviderTest {
 			.encodedXml()
 			.execute();
 
-		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).getPartitionById(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
@@ -168,7 +168,7 @@ public class PartitionManagementProviderTest {
 		when(myPartitionConfigSvc.updatePartition(any())).thenAnswer(createAnswer());
 
 		Parameters input = createInputPartition();
-		ourLog.info("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters response = myClient
 			.operation()
@@ -178,7 +178,7 @@ public class PartitionManagementProviderTest {
 			.encodedXml()
 			.execute();
 
-		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).updatePartition(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
@@ -201,14 +201,14 @@ public class PartitionManagementProviderTest {
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
-		verify(myPartitionConfigSvc, times(0)).createPartition(any());
+		verify(myPartitionConfigSvc, times(0)).createPartition(any(), any());
 	}
 
 	@Test
 	public void testDeletePartition() {
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123));
-		ourLog.info("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters response = myClient
 			.operation()
@@ -218,7 +218,7 @@ public class PartitionManagementProviderTest {
 			.encodedXml()
 			.execute();
 
-		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).deletePartition(eq(123));
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 	}
@@ -237,7 +237,7 @@ public class PartitionManagementProviderTest {
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
-		verify(myPartitionConfigSvc, times(0)).createPartition(any());
+		verify(myPartitionConfigSvc, times(0)).createPartition(any(), any());
 	}
 
 	@Test
@@ -266,7 +266,7 @@ public class PartitionManagementProviderTest {
 			.encodedXml()
 			.execute();
 
-		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).listPartitions();
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 

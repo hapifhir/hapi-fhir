@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.BaseIterator;
@@ -16,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,9 +31,8 @@ public class BaseSearchSvc {
 	protected int myExpectedNumberOfSearchBuildersCreated = 2;
 	@Mock
 	protected SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
-
-	@Mock
-	protected PlatformTransactionManager myTxManager;
+	@Spy
+	protected HapiTransactionService myTransactionService = new MockHapiTransactionService();
 	@Mock
 	protected SearchBuilder mySearchBuilder;
 
@@ -47,7 +46,7 @@ public class BaseSearchSvc {
 	protected BeanFactory myBeanFactory;
 
 	@Spy
-	protected DaoConfig myDaoConfig = new DaoConfig();
+	protected JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
 	protected static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 

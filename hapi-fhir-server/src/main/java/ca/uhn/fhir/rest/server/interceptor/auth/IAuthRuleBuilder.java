@@ -1,12 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +17,9 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
+
+import java.util.List;
 
 /**
  * Used by {@link AuthorizationInterceptor} in order to allow user code to define authorization

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.bulk.export.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -47,7 +46,12 @@ public class BulkExportHelperService {
 	@Autowired
 	private FhirContext myContext;
 
-	public List<SearchParameterMap> createSearchParameterMapsForResourceType(RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams) {
+	/**
+	 * Given the parameters, create the search parameter map based on type filters and the _since parameter.
+	 *
+	 * The input boolean theConsiderSince determines whether to consider the lastUpdated date in the search parameter map.
+	 */
+	public List<SearchParameterMap> createSearchParameterMapsForResourceType(RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderSince) {
 		String resourceType = theDef.getName();
 		List<String> typeFilters = theParams.getFilters();
 		List<SearchParameterMap> spMaps = null;
@@ -63,7 +67,9 @@ public class BulkExportHelperService {
 		//None of the _typeFilters applied to the current resource type, so just make a simple one.
 		if (spMaps.isEmpty()) {
 			SearchParameterMap defaultMap = new SearchParameterMap();
-			enhanceSearchParameterMapWithCommonParameters(defaultMap, theParams.getStartDate());
+			if (theConsiderSince) {
+				enhanceSearchParameterMapWithCommonParameters(defaultMap, theParams.getStartDate());
+			}
 			spMaps = Collections.singletonList(defaultMap);
 		}
 

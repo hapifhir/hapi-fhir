@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
@@ -85,7 +86,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(30, mySearchResultDao.count());
 		});
 
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem();
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
 		runInTransaction(()->{
 			// We should delete up to 10, but 3 don't get deleted since they have too many results to delete in one pass
 			assertEquals(13, mySearchDao.count());
@@ -94,7 +95,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(15, mySearchResultDao.count());
 		});
 
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem();
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
 		runInTransaction(()->{
 			// Once again we attempt to delete 10, but the first 3 don't get deleted and still remain
 			// (total is 6 because 3 weren't deleted, and they blocked another 3 that might have been)
@@ -103,7 +104,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(0, mySearchResultDao.count());
 		});
 
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem();
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
 		runInTransaction(()->{
 			assertEquals(0, mySearchDao.count());
 			assertEquals(0, mySearchDao.countDeleted());

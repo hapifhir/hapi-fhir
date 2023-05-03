@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.expunge;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,12 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
@@ -120,7 +119,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	@Autowired
 	private ISearchParamPresentDao mySearchParamPresentDao;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 	@Autowired
@@ -316,7 +315,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		if (resource == null || resource.isParamsComboTokensNonUniquePresent()) {
 			myResourceIndexedComboTokensNonUniqueDao.deleteByResourceId(theResourceLongId);
 		}
-		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
+		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
 			mySearchParamPresentDao.deleteByResourceId(theResourceLongId);
 		}
 		if (resource == null || resource.isHasLinks()) {

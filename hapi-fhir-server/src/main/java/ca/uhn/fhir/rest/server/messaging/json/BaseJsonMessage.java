@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.messaging.json;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,19 @@ package ca.uhn.fhir.rest.server.messaging.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.messaging.json;
 
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
 import javax.annotation.Nullable;
+
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
@@ -53,16 +56,44 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	}
 
 	public HapiMessageHeaders getHapiHeaders() {
+		if (isNull(myHeaders)) {
+			setDefaultRetryHeaders();
+		}
 		return myHeaders;
 	}
-
 
 	public void setHeaders(HapiMessageHeaders theHeaders) {
 		myHeaders = theHeaders;
 	}
 
+	@Deprecated
 	@Nullable
-    public String getMessageKeyOrNull() {
+	public String getMessageKeyOrNull() {
+		return getMessageKey();
+	}
+
+	@Nullable
+   public String getMessageKey() {
 		return null;
     }
+
+	/**
+	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns null.
+	 *
+	 * @return the message key value or default
+	 */
+	@Nullable
+	public String getMessageKeyOrDefault() {
+		return defaultString(getMessageKey(), getMessageKeyDefaultValue());
+	}
+
+	/**
+	 * Provides a fallback value when the value returned by {@link #getMessageKey()} is null.
+	 *
+	 * @return null by default
+	 */
+	@Nullable
+	protected String getMessageKeyDefaultValue(){
+		return null;
+	}
 }

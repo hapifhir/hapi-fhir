@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.impl;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.impl;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.impl;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -29,7 +28,6 @@ import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -136,7 +134,6 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -1512,9 +1509,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			IBaseResource response = myWrap.invokeClient(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
 
 			MethodOutcome retVal = new MethodOutcome();
-			retVal.setResource(response);
+			if (response instanceof IBaseOperationOutcome) {
+				retVal.setOperationOutcome((IBaseOperationOutcome) response);
+			} else {
+				retVal.setResource(response);
+			}
 			retVal.setCreatedUsingStatusCode(theResponseStatusCode);
-			retVal.setStatusCode(theResponseStatusCode);
+			retVal.setResponseStatusCode(theResponseStatusCode);
 			retVal.setResponseHeaders(theHeaders);
 			return retVal;
 		}
@@ -2206,28 +2207,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Validate.notNull(theResources, "theResources must not be null");
 
 			for (IBaseResource next : theResources) {
-				String entryMethod = null;
-				if (next instanceof IResource) {
-					BundleEntryTransactionMethodEnum entryMethodEnum = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IResource) next);
-					if (entryMethodEnum != null) {
-						entryMethod = entryMethodEnum.getCode();
-					}
-				} else {
-					entryMethod = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IAnyResource) next);
-				}
+				BundleEntryTransactionMethodEnum entryMethod = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(next);
 
-				if (isBlank(entryMethod)) {
+				if (entryMethod == null) {
 					if (isBlank(next.getIdElement().getValue())) {
-						entryMethod = "POST";
+						entryMethod = BundleEntryTransactionMethodEnum.POST;
 					} else {
-						entryMethod = "PUT";
+						entryMethod = BundleEntryTransactionMethodEnum.PUT;
 					}
-					if (next instanceof IResource) {
-						ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put((IResource) next, BundleEntryTransactionMethodEnum.valueOf(entryMethod));
-					} else {
-						ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put((IAnyResource) next, entryMethod);
-					}
-
+					ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(next, entryMethod);
 				}
 
 			}
@@ -2305,7 +2293,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
 
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			Map<String, List<String>> params = new HashMap<>();
 			return invoke(params, binding, invocation);
 
 		}
@@ -2362,11 +2350,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public MethodOutcome execute() {
 			BaseHttpClientInvocation invocation = ValidateMethodBindingDstu2Plus.createValidateInvocation(myContext, myResource);
-			ResourceResponseHandler<BaseOperationOutcome> handler = new ResourceResponseHandler<BaseOperationOutcome>(null, null);
-			IBaseOperationOutcome outcome = invoke(null, handler, invocation);
-			MethodOutcome retVal = new MethodOutcome();
-			retVal.setOperationOutcome(outcome);
-			return retVal;
+			ResourceResponseHandler<BaseOperationOutcome> handler = new ResourceResponseHandler<>(null, null);
+			MethodOutcomeResponseHandler methodHandler = new MethodOutcomeResponseHandler(handler);
+			return invoke(null, methodHandler, invocation);
 		}
 
 		@Override
@@ -2486,7 +2472,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private static void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
 		if (!params.containsKey(parameterName)) {
-			params.put(parameterName, new ArrayList<String>());
+			params.put(parameterName, new ArrayList<>());
 		}
 		params.get(parameterName).add(parameterValue);
 	}

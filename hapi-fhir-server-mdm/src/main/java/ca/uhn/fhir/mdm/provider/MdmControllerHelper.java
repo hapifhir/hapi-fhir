@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,11 @@ package ca.uhn.fhir.mdm.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
@@ -137,7 +137,13 @@ public class MdmControllerHelper {
 	 * Helper method which will return a bundle of all Matches and Possible Matches.
 	 */
 	public IBaseBundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType, RequestDetails theRequestDetails) {
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, theResourceType, null);
+		RequestPartitionId requestPartitionId;
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(theResourceType, null, null);
+		if (myMdmSettings.getSearchAllPartitionForMatch()){
+			requestPartitionId = RequestPartitionId.allPartitions();
+		} else {
+			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+		}
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId);
 		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
 

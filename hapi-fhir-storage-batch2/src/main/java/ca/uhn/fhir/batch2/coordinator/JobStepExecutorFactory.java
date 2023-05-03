@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -35,18 +34,21 @@ public class JobStepExecutorFactory {
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobStepExecutorSvc;
 	private final IJobMaintenanceService myJobMaintenanceService;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
 	public JobStepExecutorFactory(@Nonnull IJobPersistence theJobPersistence,
 											@Nonnull BatchJobSender theBatchJobSender,
 											@Nonnull WorkChunkProcessor theExecutorSvc,
-											@Nonnull IJobMaintenanceService theJobMaintenanceService) {
+											@Nonnull IJobMaintenanceService theJobMaintenanceService,
+											@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myJobStepExecutorSvc = theExecutorSvc;
 		myJobMaintenanceService = theJobMaintenanceService;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
-	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutor<PT,IT,OT> newJobStepExecutor(@Nonnull JobInstance theInstance, @Nonnull WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
-		return new JobStepExecutor<>(myJobPersistence, myBatchJobSender, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc, myJobMaintenanceService);
+	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutor<PT,IT,OT> newJobStepExecutor(@Nonnull JobInstance theInstance, WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
+		return new JobStepExecutor<>(myJobPersistence, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc, myJobMaintenanceService, myJobDefinitionRegistry);
 	}
 }

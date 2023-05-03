@@ -1,0 +1,4 @@
+---
+type: change
+issue: 4610
+title: "Bulk export operations have been enhanced to be fully partition aware."

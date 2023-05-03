@@ -1,16 +1,18 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.server.TransactionCapturingProviderExtension;
 import ca.uhn.fhir.util.BundleUtil;
+import com.apicatalog.jsonld.StringUtils;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -74,12 +76,12 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		}
 		mySubscriptionIds.clear();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
 		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
@@ -127,18 +129,24 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		if (theExtension != null) {
 			subscription.getChannel().addExtension(theExtension);
 		}
-
-		MethodOutcome methodOutcome;
 		if (id != null) {
 			subscription.setId(id);
-			methodOutcome = myClient.update().resource(subscription).execute();
-		} else {
-			methodOutcome = myClient.create().resource(subscription).execute();
 		}
-		subscription.setId(methodOutcome.getId().getIdPart());
-		mySubscriptionIds.add(methodOutcome.getId());
 
+		subscription = postOrPutSubscription(subscription);
 		return subscription;
+	}
+
+	protected Subscription postOrPutSubscription(IBaseResource theSubscription) {
+		MethodOutcome methodOutcome;
+		if (theSubscription.getIdElement().isEmpty()) {
+			 methodOutcome = myClient.create().resource(theSubscription).execute();
+		} else {
+			 methodOutcome =  myClient.update().resource(theSubscription).execute();
+		}
+		theSubscription.setId(methodOutcome.getId().getIdPart());
+		mySubscriptionIds.add(methodOutcome.getId());
+		return (Subscription) theSubscription;
 	}
 
 	protected Subscription newSubscription(String theCriteria, String thePayload) {
@@ -166,11 +174,21 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 
 	protected Observation sendObservation(String theCode, String theSystem) {
+		return sendObservation(theCode, theSystem, null, null);
+	}
+
+	protected Observation sendObservation(String theCode, String theSystem, String theSource, String theRequestId) {
 		Observation observation = createBaseObservation(theCode, theSystem);
+		if (StringUtils.isNotBlank(theSource)) {
+			observation.getMeta().setSource(theSource);
+		}
 
-		IIdType id = myObservationDao.create(observation).getId();
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		if (StringUtils.isNotBlank(theRequestId)) {
+			systemRequestDetails.setRequestId(theRequestId);
+		}
+		IIdType id = myObservationDao.create(observation, systemRequestDetails).getId();
 		observation.setId(id);
-
 		return observation;
 	}
 

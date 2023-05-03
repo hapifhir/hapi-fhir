@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -60,6 +59,7 @@ import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.IoUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlPathTokenizer;
@@ -84,6 +84,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -200,7 +201,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * @since 5.5.0
 	 */
-	protected ConformanceMethodBinding getServerConformanceMethod() {
+	public ConformanceMethodBinding getServerConformanceMethod() {
 		return myServerConformanceMethod;
 	}
 
@@ -1166,16 +1167,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * This is basically the end of processing for a successful request, since the
 			 * method binding replies to the client and closes the response.
 			 */
-			try (Closeable outputStreamOrWriter = (Closeable) resourceMethod.invokeServer(this, requestDetails)) {
+			resourceMethod.invokeServer(this, requestDetails);
 
-				// Invoke interceptors
-				HookParams hookParams = new HookParams();
-				hookParams.add(RequestDetails.class, requestDetails);
-				hookParams.add(ServletRequestDetails.class, requestDetails);
-				myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY, hookParams);
-
-				ourLog.trace("Done writing to stream: {}", outputStreamOrWriter);
-			}
+			// Invoke interceptors
+			HookParams hookParams = new HookParams();
+			hookParams.add(RequestDetails.class, requestDetails);
+			hookParams.add(ServletRequestDetails.class, requestDetails);
+			myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY, hookParams);
 
 		} catch (NotModifiedException | AuthenticationException e) {
 

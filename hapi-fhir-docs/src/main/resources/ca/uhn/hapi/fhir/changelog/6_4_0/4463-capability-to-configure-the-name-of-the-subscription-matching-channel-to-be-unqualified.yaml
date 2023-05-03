@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4463
+jira: SMILE-4770
+title: "Providing the capability to specify that the name of the subscription matching channel should be unqualified at creation time."

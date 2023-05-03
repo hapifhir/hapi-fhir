@@ -6,11 +6,13 @@ import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -32,6 +34,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -69,12 +73,12 @@ public class ReindexProviderTest {
 
 		when(myJobCoordinator.startInstance(any()))
 			.thenReturn(createJobStartResponse());
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.allPartitions());
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 	}
 
 	private Batch2JobStartResponse createJobStartResponse() {
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setJobId(TEST_JOB_ID);
+		response.setInstanceId(TEST_JOB_ID);
 		return response;
 	}
 
@@ -92,7 +96,7 @@ public class ReindexProviderTest {
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, url);
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		PartitionedUrl partitionedUrl = new PartitionedUrl();
 		partitionedUrl.setUrl(url);
@@ -111,7 +115,7 @@ public class ReindexProviderTest {
 
 		// Verify
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 		assertEquals(TEST_JOB_ID, jobId.getValue());
 
@@ -119,17 +123,21 @@ public class ReindexProviderTest {
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
 		assertThat(params.getPartitionedUrls(), hasSize(1));
 		assertEquals(url, params.getPartitionedUrls().get(0).getUrl());
+		// Default values
+		assertEquals(ReindexParameters.ReindexSearchParametersEnum.ALL, params.getReindexSearchParameters());
+		assertTrue(params.getOptimisticLock());
+		assertEquals(ReindexParameters.OptimizeStorageModeEnum.NONE, params.getOptimizeStorage());
 	}
 
 	@Test
 	public void testReindex_NoUrl() {
 		// setup
 		Parameters input = new Parameters();
-		int batchSize = 2401;
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_EVERYTHING, new BooleanType(true));
+		input.addParameter(ReindexJobParameters.REINDEX_SEARCH_PARAMETERS, new CodeType("none"));
+		input.addParameter(ReindexJobParameters.OPTIMISTIC_LOCK, new BooleanType(false));
+		input.addParameter(ReindexJobParameters.OPTIMIZE_STORAGE, new CodeType("current_version"));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// Execute
 
@@ -138,18 +146,22 @@ public class ReindexProviderTest {
 			.operation()
 			.onServer()
 			.named(ProviderConstants.OPERATION_REINDEX)
-			.withNoParameters(Parameters.class)
+			.withParameters(input)
 			.execute();
 
 		// Verify
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 		assertEquals(TEST_JOB_ID, jobId.getValue());
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
 		assertThat(params.getPartitionedUrls(), empty());
+		// Non-default values
+		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
+		assertFalse(params.getOptimisticLock());
+		assertEquals(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION, params.getOptimizeStorage());
 
 	}
 }

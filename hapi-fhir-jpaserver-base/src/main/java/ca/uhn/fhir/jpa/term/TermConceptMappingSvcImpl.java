@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
@@ -227,6 +226,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				termConceptMapGroup.setSourceVersion(group.getSourceVersion());
 				termConceptMapGroup.setTarget(groupTarget);
 				termConceptMapGroup.setTargetVersion(group.getTargetVersion());
+				termConceptMap.getConceptMapGroups().add(termConceptMapGroup);
 				termConceptMapGroup = myConceptMapGroupDao.save(termConceptMapGroup);
 
 				if (group.hasElement()) {
@@ -239,6 +239,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 						termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
 						termConceptMapGroupElement.setCode(element.getCode());
 						termConceptMapGroupElement.setDisplay(element.getDisplay());
+						termConceptMapGroup.getConceptMapGroupElements().add(termConceptMapGroupElement);
 						termConceptMapGroupElement = myConceptMapGroupElementDao.save(termConceptMapGroupElement);
 
 						if (element.hasTarget()) {
@@ -252,6 +253,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 								termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
 								termConceptMapGroupElementTarget.setDisplay(elementTarget.getDisplay());
 								termConceptMapGroupElementTarget.setEquivalence(elementTarget.getEquivalence());
+								termConceptMapGroupElement.getConceptMapGroupElementTargets().add(termConceptMapGroupElementTarget);
 								myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
 
 								if (++codesSaved % 250 == 0) {

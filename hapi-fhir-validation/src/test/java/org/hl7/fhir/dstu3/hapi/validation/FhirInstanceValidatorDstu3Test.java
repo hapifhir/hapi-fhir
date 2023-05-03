@@ -100,7 +100,7 @@ import static org.mockito.Mockito.when;
 public class FhirInstanceValidatorDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu3Test.class);
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static IValidationSupport myDefaultValidationSupport = ourCtx.getValidationSupport();
 	@RegisterExtension
 	public LoggingExtension myLoggingExtension = new LoggingExtension();
@@ -674,6 +674,9 @@ public class FhirInstanceValidatorDstu3Test {
 					} else if (t.getMessage().contains("The markdown contains content that appears to be an embedded")) {
 						// Some DSTU3 structures contain URLs with <> around them
 						return false;
+					} else if (t.getMessage().startsWith("value should not start or finish with whitespace") && t.getMessage().endsWith("\\u00a0'")) {
+						// Some DSTU3 messages end with a unicode Non-breaking space character
+						return false;
 					} else {
 						return true;
 					}
@@ -985,7 +988,7 @@ public class FhirInstanceValidatorDstu3Test {
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\"><name><given/></name></Patient>";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output.toOperationOutcome()));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output.toOperationOutcome()));
 		assertEquals(3, output.getMessages().size(), output.toString());
 		assertThat(output.getMessages().get(0).getMessage(), containsString("Element must have some content"));
 		assertThat(output.getMessages().get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
@@ -1169,7 +1172,7 @@ public class FhirInstanceValidatorDstu3Test {
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().setText("No code here!");
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.getMessages().size(), 0);

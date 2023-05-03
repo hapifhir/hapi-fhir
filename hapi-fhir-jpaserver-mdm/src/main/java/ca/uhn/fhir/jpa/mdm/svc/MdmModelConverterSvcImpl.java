@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.svc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,13 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
@@ -50,4 +51,10 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 		return retVal;
 	}
 
+	@Override
+	public MdmLinkWithRevisionJson toJson(MdmLinkWithRevision<? extends IMdmLink<?>> theMdmLinkRevision) {
+		final MdmLinkJson mdmLinkJson = toJson(theMdmLinkRevision.getMdmLink());
+
+		return new MdmLinkWithRevisionJson(mdmLinkJson, theMdmLinkRevision.getEnversRevision().getRevisionNumber(), theMdmLinkRevision.getEnversRevision().getRevisionTimestamp());
+	}
 }

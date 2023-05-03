@@ -11,7 +11,9 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
+import ca.uhn.fhir.rest.server.util.NarrativeUtil;
 import ca.uhn.fhir.to.model.HomeRequest;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.apache.commons.io.IOUtils;
@@ -21,8 +23,10 @@ import org.apache.http.Header;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -266,7 +270,7 @@ public class BaseController {
 		FhirVersionEnum version = theRequest.getFhirVersion(myConfig);
 		VersionCanonicalizer retVal = myCanonicalizers.get(version);
 		if (retVal == null) {
-			retVal = new VersionCanonicalizer(version);
+			retVal = new VersionCanonicalizer(version.newContext());
 			myCanonicalizers.put(version, retVal);
 		}
 		return retVal;
@@ -373,21 +377,36 @@ public class BaseController {
 
 	private String parseNarrative(HomeRequest theRequest, EncodingEnum theCtEnum, String theResultBody) {
 		try {
-			IBaseResource par = theCtEnum.newParser(getContext(theRequest)).parseResource(theResultBody);
-			String retVal;
-			if (par instanceof IResource) {
-				IResource resource = (IResource) par;
-				retVal = resource.getText().getDiv().getValueAsString();
-			} else if (par instanceof IDomainResource) {
-				retVal = ((IDomainResource) par).getText().getDivAsString();
-			} else {
-				retVal = null;
-			}
-			return StringUtils.defaultString(retVal);
+			FhirContext context = getContext(theRequest);
+			IBaseResource result = theCtEnum.newParser(context).parseResource(theResultBody);
+			return parseNarrative(context, result);
 		} catch (Exception e) {
 			ourLog.error("Failed to parse resource", e);
 			return "";
 		}
+	}
+
+	private String parseNarrative(FhirContext theContext, IBaseResource theResult) throws Exception {
+		String retVal = null;
+		if (theResult instanceof IResource) {
+			IResource resource = (IResource) theResult;
+			retVal = resource.getText().getDiv().getValueAsString();
+		} else if (theResult instanceof IDomainResource) {
+			retVal = ((IDomainResource) theResult).getText().getDivAsString();
+		} else if (theResult instanceof IBaseBundle) {
+			// If this is a document, we'll pull the narrative from the Composition
+			IBaseBundle bundle = (IBaseBundle) theResult;
+			if ("document".equals(BundleUtil.getBundleType(theContext, bundle))) {
+				IBaseResource firstResource = theContext.newTerser().getSingleValueOrNull(bundle, "Bundle.entry.resource", IBaseResource.class);
+				if (firstResource != null && "Composition".equals(theContext.getResourceType(firstResource))) {
+					IBaseXhtml html = theContext.newTerser().getSingleValueOrNull(firstResource, "text.div", IBaseXhtml.class);
+					if (html != null) {
+						retVal = html.getValueAsString();
+					}
+				}
+			}
+		}
+		return StringUtils.defaultString(retVal);
 	}
 
 	protected String preProcessMessageBody(String theBody) {
@@ -462,24 +481,27 @@ public class BaseController {
 				switch (ctEnum) {
 					case JSON:
 						if (theResultType == ResultType.RESOURCE) {
-							narrativeString = parseNarrative(theRequest, ctEnum, resultBody);
 							resultDescription.append("JSON resource");
 						} else if (theResultType == ResultType.BUNDLE) {
 							resultDescription.append("JSON bundle");
 							riBundle = context.newJsonParser().parseResource(resultBody);
+						} else if (theResultType == ResultType.PARAMETERS) {
+							resultDescription.append("JSON parameters");
 						}
 						break;
 					case XML:
 					default:
 						if (theResultType == ResultType.RESOURCE) {
-							narrativeString = parseNarrative(theRequest, ctEnum, resultBody);
 							resultDescription.append("XML resource");
 						} else if (theResultType == ResultType.BUNDLE) {
 							resultDescription.append("XML bundle");
 							riBundle = context.newXmlParser().parseResource(resultBody);
+						} else if (theResultType == ResultType.PARAMETERS) {
+							resultDescription.append("XML parameters");
 						}
 						break;
 				}
+				narrativeString = parseNarrative(theRequest, ctEnum, resultBody);
 			}
 
 			resultDescription.append(" (").append(defaultString(resultBody).length() + " bytes)");
@@ -505,8 +527,11 @@ public class BaseController {
 			theModelMap.put("resultBodyIsLong", resultBodyText.length() > 1000);
 			theModelMap.put("requestHeaders", requestHeaders);
 			theModelMap.put("responseHeaders", responseHeaders);
-			theModelMap.put("narrative", narrativeString);
+			theModelMap.put("narrative", NarrativeUtil.sanitize(narrativeString));
 			theModelMap.put("latencyMs", theLatency);
+
+			theModelMap.put("config", myConfig);
+			theModelMap.put("serverId", theRequest.getServerId());
 
 		} catch (Exception e) {
 			ourLog.error("Failure during processing", e);
@@ -528,7 +553,7 @@ public class BaseController {
 	}
 
 	protected enum ResultType {
-		BUNDLE, NONE, RESOURCE, TAGLIST
+		BUNDLE, NONE, RESOURCE, TAGLIST, PARAMETERS
 	}
 
 	public static class CaptureInterceptor implements IClientInterceptor {

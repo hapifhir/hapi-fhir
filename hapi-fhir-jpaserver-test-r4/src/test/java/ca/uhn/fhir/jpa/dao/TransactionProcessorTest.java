@@ -3,16 +3,16 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -37,17 +37,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -58,6 +54,8 @@ public class TransactionProcessorTest {
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
 	@MockBean
+	private DaoRegistry myDaoRegistry;
+	@MockBean
 	private EntityManagerFactory myEntityManagerFactory;
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private EntityManager myEntityManager;
@@ -65,10 +63,6 @@ public class TransactionProcessorTest {
 	private PlatformTransactionManager myPlatformTransactionManager;
 	@MockBean
 	private MatchResourceUrlService myMatchResourceUrlService;
-	@MockBean
-	private HapiTransactionService myHapiTransactionService;
-	@MockBean
-	private ModelConfig myModelConfig;
 	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
@@ -90,13 +84,7 @@ public class TransactionProcessorTest {
 
 	@BeforeEach
 	public void before() {
-		when(myHapiTransactionService.execute(any(), any(), any())).thenAnswer(t -> {
-			TransactionCallback<?> callback = t.getArgument(2, TransactionCallback.class);
-			return callback.doInTransaction(mock(TransactionStatus.class));
-		});
-
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
-
 		when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
 	}
 
@@ -124,6 +112,7 @@ public class TransactionProcessorTest {
 		}
 	}
 
+
 	@Configuration
 	@Import(ThreadPoolFactoryConfig.class)
 	public static class MyConfig {
@@ -139,6 +128,11 @@ public class TransactionProcessorTest {
 		}
 
 		@Bean
+		public JpaStorageSettings storageSettings() {
+			return new JpaStorageSettings();
+		}
+
+		@Bean
 		public TransactionProcessor transactionProcessor() {
 			return new TransactionProcessor();
 		}
@@ -149,13 +143,13 @@ public class TransactionProcessorTest {
 		}
 
 		@Bean
-		public DaoConfig daoConfig() {
-			return new DaoConfig();
+		public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
+			return new TransactionProcessorVersionAdapterR4();
 		}
 
 		@Bean
-		public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
-			return new TransactionProcessorVersionAdapterR4();
+		public IHapiTransactionService hapiTransactionService() {
+			return new NonTransactionalHapiTransactionService();
 		}
 
 	}

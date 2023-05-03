@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -47,7 +46,7 @@ import java.util.Date;
 @Entity
 @Immutable
 @Subselect("SELECT h.pid               as pid,            " +
-	"               h.res_id            as res_id,         " +
+	"               r.res_id            as res_id,         " +
 	"               h.res_type          as res_type,       " +
 	"               h.res_version       as res_version,    " + // FHIR version
 	"               h.res_ver           as res_ver,        " + // resource version

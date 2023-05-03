@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.rules.matcher;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
@@ -35,7 +34,7 @@ public class NicknameMatcher implements IMdmStringMatcher {
 		try {
 			myNicknameSvc = new NicknameSvc();
 		} catch (IOException e) {
-			throw new ConfigurationException(Msg.code(2078) + "Unable to load nicknames", e);
+			throw new ConfigurationException(Msg.code(2234) + "Unable to load nicknames", e);
 		}
 	}
 

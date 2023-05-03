@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.binary.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.binary.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.svc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
@@ -35,6 +34,11 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	@Override
 	public long getMaximumBinarySize() {
 		return 0;
+	}
+
+	@Override
+	public boolean isValidBlobId(String theNewBlobId) {
+		return true;
 	}
 
 	@Override

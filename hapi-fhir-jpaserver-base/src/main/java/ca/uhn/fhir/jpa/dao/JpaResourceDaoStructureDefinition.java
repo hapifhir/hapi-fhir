@@ -1,17 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
-
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +17,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
+
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class JpaResourceDaoStructureDefinition<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoStructureDefinition<T> {
 

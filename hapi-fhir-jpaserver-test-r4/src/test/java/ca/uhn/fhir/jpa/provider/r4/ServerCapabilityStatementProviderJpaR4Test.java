@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -89,7 +89,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@Test
 	public void testNoDuplicateResourceOperationNames() {
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 		for (CapabilityStatement.CapabilityStatementRestResourceComponent next : cs.getRestFirstRep().getResource()) {
 			List<String> opNames = next
 				.getOperation()
@@ -105,7 +105,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@Test
 	public void testNoDuplicateSystemOperationNames() {
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 		List<String> systemOpNames = cs
 			.getRestFirstRep()
 			.getOperation()
@@ -160,7 +160,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
+		myStorageSettings.setFilterParameterEnabled(new JpaStorageSettings().isFilterParameterEnabled());
 	}
 
 
@@ -326,7 +326,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 	@Test
 	public void testFilterProperlyReported() {
-		myDaoConfig.setFilterParameterEnabled(false);
+		myStorageSettings.setFilterParameterEnabled(false);
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 		assertThat(findSearchParams(cs, "Patient", Constants.PARAM_FILTER), hasSize(0));
 	}

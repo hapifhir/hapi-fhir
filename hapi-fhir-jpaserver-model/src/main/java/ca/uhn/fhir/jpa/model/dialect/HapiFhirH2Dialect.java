@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.dialect;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,33 @@ package ca.uhn.fhir.jpa.model.dialect;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.dialect;
 
 import org.hibernate.dialect.H2Dialect;
+
+import java.sql.Types;
 
 /**
  * HAPI FHIR dialect for H2 database
  */
 public class HapiFhirH2Dialect extends H2Dialect {
+
+	/**
+	 * Constructor
+	 */
+	public HapiFhirH2Dialect() {
+		super();
+
+		/*
+		 * These mappings are already defined in the super() constructor, but they
+		 * will only happen if the dialect can connect to the database and
+		 * determine that it's a recent enough version of H2 to support this. This
+		 * means that the Maven plugin that does schema generation doesn't add it.
+		 * So this dialect forces the use of the right defs.
+		 */
+		registerColumnType(Types.LONGVARCHAR, "character varying");
+		registerColumnType(Types.BINARY, "binary($l)");
+	}
 
 	/**
 	 * Workaround until this bug is fixed:

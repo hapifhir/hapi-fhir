@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.rest.api.server;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -13,6 +32,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,26 +49,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-
-/*
- * #%L
- * HAPI FHIR - Server Framework
- * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 public abstract class RequestDetails {
 
@@ -91,7 +91,7 @@ public abstract class RequestDetails {
 	/**
 	 * Copy constructor
 	 */
-	public RequestDetails(ServletRequestDetails theRequestDetails) {
+	public RequestDetails(RequestDetails theRequestDetails) {
 		myInterceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 		myRequestStopwatch = theRequestDetails.getRequestStopwatch();
 		myTenantId = theRequestDetails.getTenantId();
@@ -196,6 +196,7 @@ public abstract class RequestDetails {
 	 * @param theOperationType The operation type to find the conditional URL for
 	 * @return Returns the <b>conditional URL</b> if this request has one, or <code>null</code> otherwise
 	 */
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	public String getConditionalUrl(RestOperationTypeEnum theOperationType) {
 		if (myFixedConditionalUrl != null) {
 			return myFixedConditionalUrl;
@@ -313,7 +314,7 @@ public abstract class RequestDetails {
 			myParameters = myParameters
 				.entrySet()
 				.stream()
-				.collect(Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry) t).getKey()), t -> (String[]) ((Map.Entry) t).getValue()));
+				.collect(Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry<?, ?>) t).getKey()), t -> (String[]) ((Map.Entry<?, ?>) t).getValue()));
 		}
 	}
 
@@ -401,10 +402,24 @@ public abstract class RequestDetails {
 	 */
 	public abstract String getServerBaseForRequest();
 
+	/**
+	 * Gets the tenant ID associated with the request. Note that the tenant ID
+	 * and the partition ID are not the same thing - Depending on the specific
+	 * partition interceptors in use, the tenant ID might be used internally
+	 * to derive the partition ID or it might not. Do not assume that it will
+	 * be used for this purpose.
+	 */
 	public String getTenantId() {
 		return myTenantId;
 	}
 
+	/**
+	 * Sets the tenant ID associated with the request. Note that the tenant ID
+	 * and the partition ID are not the same thing - Depending on the specific
+	 * partition interceptors in use, the tenant ID might be used internally
+	 * to derive the partition ID or it might not. Do not assume that it will
+	 * be used for this purpose.
+	 */
 	public void setTenantId(String theTenantId) {
 		myTenantId = theTenantId;
 	}
@@ -419,11 +434,7 @@ public abstract class RequestDetails {
 							myUnqualifiedToQualifiedNames = new HashMap<>();
 						}
 						String unqualified = next.substring(0, i);
-						List<String> list = myUnqualifiedToQualifiedNames.get(unqualified);
-						if (list == null) {
-							list = new ArrayList<>(4);
-							myUnqualifiedToQualifiedNames.put(unqualified, list);
-						}
+						List<String> list = myUnqualifiedToQualifiedNames.computeIfAbsent(unqualified, k -> new ArrayList<>(4));
 						list.add(next);
 						break;
 					}
@@ -445,9 +456,10 @@ public abstract class RequestDetails {
 	 * <p>
 	 * A new map is created for each individual request that is handled by the server,
 	 * so this map can be used (for example) to pass authorization details from an interceptor
-	 * to the resource providers, or from an interceptor's {@link IServerInterceptor#incomingRequestPreHandled(RestOperationTypeEnum, ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails)}
-	 * method to the {@link IServerInterceptor#outgoingResponse(RequestDetails, org.hl7.fhir.instance.model.api.IBaseResource, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}
-	 * method.
+	 * to the resource providers, or for example to pass data from a hook method
+	 * on the {@link ca.uhn.fhir.interceptor.api.Pointcut#SERVER_INCOMING_REQUEST_POST_PROCESSED}
+	 * to a later hook method on the {@link ca.uhn.fhir.interceptor.api.Pointcut#SERVER_OUTGOING_RESPONSE}
+	 * pointcut.
 	 * </p>
 	 */
 	public Map<Object, Object> getUserData() {
@@ -544,7 +556,6 @@ public abstract class RequestDetails {
 	public void setRewriteHistory(boolean theRewriteHistory) {
 		myRewriteHistory = theRewriteHistory;
 	}
-
 
 	public int getMaxRetries() {
 		return myMaxRetries;

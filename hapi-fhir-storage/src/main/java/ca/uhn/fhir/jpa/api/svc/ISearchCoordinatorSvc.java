@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -36,7 +35,7 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 
 	void cancelAllActiveSearches();
 
-	List<T> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails);
+	List<T> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 
 	IBundleProvider registerSearch(IFhirResourceDao<?> theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 
@@ -44,6 +43,6 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
 	 * the total is known. Will return empty otherwise
 	 */
-	Optional<Integer> getSearchTotal(String theUuid);
+	Optional<Integer> getSearchTotal(String theUuid, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 
 }

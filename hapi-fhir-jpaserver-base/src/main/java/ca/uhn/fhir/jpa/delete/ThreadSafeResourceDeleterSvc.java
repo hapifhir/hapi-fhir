@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.delete;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.delete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.delete;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -42,42 +42,32 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Used by {@link CascadingDeleteInterceptor} to handle {@link DeleteConflictList}s in a thead-safe way.
- *
+ * <p>
  * Specifically, this class spawns an inner transaction for each {@link DeleteConflictList}.  This class is meant to handle any potential delete collisions (ex {@link ResourceGoneException} or {@link ResourceVersionConflictException}.  In the former case, we swallow the Exception in the inner transaction then continue.  In the latter case, we retry according to the RETRY_BACKOFF_PERIOD and RETRY_MAX_ATTEMPTS before giving up.
  */
 public class ThreadSafeResourceDeleterSvc {
 
-	private static final String REQ_DET_KEY_IN_NEW_TRANSACTION = ThreadSafeResourceDeleterSvc.class.getName() + "REQ_DET_KEY_IN_NEW_TRANSACTION";
-
 	public static final long RETRY_BACKOFF_PERIOD = 100L;
 	public static final int RETRY_MAX_ATTEMPTS = 4;
-
+	private static final String REQ_DET_KEY_IN_NEW_TRANSACTION = ThreadSafeResourceDeleterSvc.class.getName() + "REQ_DET_KEY_IN_NEW_TRANSACTION";
 	private static final Logger ourLog = LoggerFactory.getLogger(ThreadSafeResourceDeleterSvc.class);
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
-	private final TransactionTemplate myTxTemplateRequired;
-	private final TransactionTemplate myTxTemplateRequiresNew;
 
 	private final RetryTemplate myRetryTemplate = getRetryTemplate();
+	private final IHapiTransactionService myTransactionService;
 
-	public ThreadSafeResourceDeleterSvc(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, PlatformTransactionManager thePlatformTransactionManager) {
+	public ThreadSafeResourceDeleterSvc(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, IHapiTransactionService theTransactionService) {
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
-
-		myTxTemplateRequired = new TransactionTemplate(thePlatformTransactionManager);
-		myTxTemplateRequired.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-
-		myTxTemplateRequiresNew = new TransactionTemplate(thePlatformTransactionManager);
-		myTxTemplateRequiresNew.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		myTransactionService = theTransactionService;
 	}
 
 	/**
@@ -121,12 +111,19 @@ public class ThreadSafeResourceDeleterSvc {
 
 				// Avoid nesting multiple new transactions deep. This can easily cause
 				// thread pools to get exhausted.
+				Propagation propagation;
 				if (theRequest == null || previousNewTransactionValue != null) {
-					myTxTemplateRequired.execute(s -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
+					propagation = Propagation.REQUIRED;
 				} else {
 					theRequest.getUserData().put(REQ_DET_KEY_IN_NEW_TRANSACTION, REQ_DET_KEY_IN_NEW_TRANSACTION);
-					myTxTemplateRequiresNew.execute(s -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
+					propagation = Propagation.REQUIRES_NEW;
 				}
+
+				myTransactionService
+					.withRequest(theRequest)
+					.withTransactionDetails(theTransactionDetails)
+					.withPropagation(propagation)
+					.execute(() -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
 
 				return 1;
 			} catch (ResourceGoneException exception) {

@@ -1,12 +1,8 @@
-package ca.uhn.fhir.rest.server.method;
-
-import ca.uhn.fhir.i18n.Msg;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +17,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.method;
+
+import ca.uhn.fhir.i18n.Msg;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
@@ -33,7 +33,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -41,6 +40,7 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
@@ -60,15 +60,19 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		super.addParametersForServerRequest(theRequest, theParams);
 	}
 
-	public static IIdType applyETagAsVersion(RequestDetails theRequest, IIdType id) {
+	public static IIdType applyETagAsVersion(RequestDetails theRequest, IIdType theId) {
 		String ifMatchValue = theRequest.getHeader(Constants.HEADER_IF_MATCH);
-		if (isNotBlank(ifMatchValue)) {
-			ifMatchValue = ParameterUtil.parseETagValue(ifMatchValue);
-			if (id != null && id.hasVersionIdPart() == false) {
-				id = id.withVersion(ifMatchValue);
+		return applyETagAsVersion(ifMatchValue, theId);
+	}
+
+	public static IIdType applyETagAsVersion(String theIfMatchValue, IIdType theId) {
+		if (isNotBlank(theIfMatchValue)) {
+			theIfMatchValue = ParameterUtil.parseETagValue(theIfMatchValue);
+			if (theId != null && theId.hasVersionIdPart() == false) {
+				theId = theId.withVersion(theIfMatchValue);
 			}
 		}
-		return id;
+		return theId;
 	}
 
 	@Override

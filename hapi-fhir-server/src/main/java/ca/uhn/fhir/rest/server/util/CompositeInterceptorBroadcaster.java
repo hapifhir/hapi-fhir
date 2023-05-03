@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.util;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -52,6 +51,7 @@ public class CompositeInterceptorBroadcaster {
 		return newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails).callHooksAndReturnObject(thePointcut, theParams);
 	}
 
+	// TODO: JA - Refactor to make thePointcut the last argument in order to be consistent with thr other methods here
 	public static boolean hasHooks(Pointcut thePointcut, IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails) {
 		return newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails).hasHooks(thePointcut);
 	}

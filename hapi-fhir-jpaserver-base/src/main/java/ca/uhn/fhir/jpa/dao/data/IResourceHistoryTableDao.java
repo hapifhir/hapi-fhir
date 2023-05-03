@@ -1,20 +1,8 @@
-package ca.uhn.fhir.jpa.dao.data;
-
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +17,17 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
+
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, Long>, IHapiFhirJpaRepository {
 
@@ -39,12 +38,14 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :resId ORDER BY t.myResourceVersion ASC")
 	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") Long theId);
 
-
 	@Query("SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :id AND t.myResourceVersion = :version")
 	ResourceHistoryTable findForIdAndVersionAndFetchProvenance(@Param("id") long theId, @Param("version") long theVersion);
 
 	@Query("SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion != :dontWantVersion")
 	Slice<Long> findForResourceId(Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
+
+	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion != :dontWantVersion")
+	Slice<ResourceHistoryTable> findForResourceIdAndReturnEntities(Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query("" +
 		"SELECT v.myId FROM ResourceHistoryTable v " +
@@ -65,6 +66,13 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 		"LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) " +
 		"WHERE v.myResourceVersion != t.myVersion")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage);
+
+	/**
+	 * Sets the inline text and clears the LOB copy of the text
+	 */
+	@Modifying
+	@Query("UPDATE ResourceHistoryTable as t SET t.myResource = null, t.myResourceTextVc = :text WHERE t.myId = :pid")
+	void setResourceTextVcForVersion(@Param("pid") Long id, @Param("text") String resourceText);
 
 	@Modifying
 	@Query("UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceId = :id AND r.myResourceVersion = :oldVersion")

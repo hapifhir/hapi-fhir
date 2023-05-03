@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -40,24 +39,19 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.packages.loader.NpmPackageData;
+import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
-import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.collections4.comparators.ReverseComparator;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -65,6 +59,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.npm.PackageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,11 +84,7 @@ import javax.persistence.criteria.Root;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -131,8 +122,42 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired
+	private PackageLoaderSvc myPackageLoaderSvc;
+
 	@Autowired(required = false)//It is possible that some implementers will not create such a bean.
 	private IBinaryStorageSvc myBinaryStorageSvc;
+
+	@Override
+	public void addPackageServer(@Nonnull PackageServer thePackageServer) {
+		assert myPackageLoaderSvc != null;
+		myPackageLoaderSvc.addPackageServer(thePackageServer);
+	}
+
+	@Override
+	public String getPackageId(String theS) throws IOException {
+		return myPackageLoaderSvc.getPackageId(theS);
+	}
+
+	@Override
+	public void setSilent(boolean silent) {
+		myPackageLoaderSvc.setSilent(silent);
+	}
+
+	@Override
+	public String getPackageUrl(String theS) throws IOException {
+		return myPackageLoaderSvc.getPackageUrl(theS);
+	}
+
+	@Override
+	public List<PackageServer> getPackageServers() {
+		return myPackageLoaderSvc.getPackageServers();
+	}
+
+	@Override
+	protected BasePackageCacheManager.InputStreamWithSrc loadFromPackageServer(String id, String version) {
+		throw new UnsupportedOperationException(Msg.code(2220) + "Use PackageLoaderSvc for loading packages.");
+	}
 
 	@Override
 	@Transactional
@@ -221,22 +246,19 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		return myDaoRegistry.getResourceDao("Binary");
 	}
 
-	@Override
-	public NpmPackage addPackageToCache(String thePackageId, String thePackageVersionId, InputStream thePackageTgzInputStream, String theSourceDesc) throws IOException {
-		Validate.notBlank(thePackageId, "thePackageId must not be null");
-		Validate.notBlank(thePackageVersionId, "thePackageVersionId must not be null");
-		Validate.notNull(thePackageTgzInputStream, "thePackageTgzInputStream must not be null");
+	private NpmPackage addPackageToCacheInternal(
+		NpmPackageData thePackageData
+	) {
+		NpmPackage npmPackage = thePackageData.getPackage();
+		String packageId = thePackageData.getPackageId();
+		String initialPackageVersionId = thePackageData.getPackageVersionId();
+		byte[] bytes = thePackageData.getBytes();
 
-		byte[] bytes = IOUtils.toByteArray(thePackageTgzInputStream);
-
-		ourLog.info("Parsing package .tar.gz ({} bytes) from {}", bytes.length, theSourceDesc);
-
-		NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(bytes));
-		if (!npmPackage.id().equalsIgnoreCase(thePackageId)) {
-			throw new InvalidRequestException(Msg.code(1297) + "Package ID " + npmPackage.id() + " doesn't match expected: " + thePackageId);
+		if (!npmPackage.id().equalsIgnoreCase(packageId)) {
+			throw new InvalidRequestException(Msg.code(1297) + "Package ID " + npmPackage.id() + " doesn't match expected: " + packageId);
 		}
-		if (!PackageVersionComparator.isEquivalent(thePackageVersionId, npmPackage.version())) {
-			throw new InvalidRequestException(Msg.code(1298) + "Package ID " + npmPackage.version() + " doesn't match expected: " + thePackageVersionId);
+		if (!PackageVersionComparator.isEquivalent(initialPackageVersionId, npmPackage.version())) {
+			throw new InvalidRequestException(Msg.code(1298) + "Package ID " + npmPackage.version() + " doesn't match expected: " + initialPackageVersionId);
 		}
 
 		String packageVersionId = npmPackage.version();
@@ -249,19 +271,18 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		IBaseBinary binary = createPackageBinary(bytes);
 
 		return newTxTemplate().execute(tx -> {
-
 			ResourceTable persistedPackage = createResourceBinary(binary);
-			NpmPackageEntity pkg = myPackageDao.findByPackageId(thePackageId).orElseGet(() -> createPackage(npmPackage));
-			NpmPackageVersionEntity packageVersion = myPackageVersionDao.findByPackageIdAndVersion(thePackageId, packageVersionId).orElse(null);
+			NpmPackageEntity pkg = myPackageDao.findByPackageId(packageId).orElseGet(() -> createPackage(npmPackage));
+			NpmPackageVersionEntity packageVersion = myPackageVersionDao.findByPackageIdAndVersion(packageId, packageVersionId).orElse(null);
 			if (packageVersion != null) {
 				NpmPackage existingPackage = loadPackageFromCacheOnly(packageVersion.getPackageId(), packageVersion.getVersionId());
-				String msg = "Package version already exists in local storage, no action taken: " + thePackageId + "#" + packageVersionId;
+				String msg = "Package version already exists in local storage, no action taken: " + packageId + "#" + packageVersionId;
 				getProcessingMessages(existingPackage).add(msg);
 				ourLog.info(msg);
 				return existingPackage;
 			}
 
-			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(thePackageId, packageVersionId);
+			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(packageId, packageVersionId);
 			String packageDesc = null;
 			if (npmPackage.description() != null) {
 				if (npmPackage.description().length() > NpmPackageVersionEntity.PACKAGE_DESC_LENGTH) {
@@ -271,16 +292,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				}
 			}
 			if (currentVersion) {
-				getProcessingMessages(npmPackage).add("Marking package " + thePackageId + "#" + thePackageVersionId + " as current version");
+				getProcessingMessages(npmPackage).add("Marking package " + packageId + "#" + initialPackageVersionId + " as current version");
 				pkg.setCurrentVersionId(packageVersionId);
 				pkg.setDescription(packageDesc);
 				myPackageDao.save(pkg);
 			} else {
-				getProcessingMessages(npmPackage).add("Package " + thePackageId + "#" + thePackageVersionId + " is not the newest version");
+				getProcessingMessages(npmPackage).add("Package " + packageId + "#" + initialPackageVersionId + " is not the newest version");
 			}
 
 			packageVersion = new NpmPackageVersionEntity();
-			packageVersion.setPackageId(thePackageId);
+			packageVersion.setPackageId(packageId);
 			packageVersion.setVersionId(packageVersionId);
 			packageVersion.setPackage(pkg);
 			packageVersion.setPackageBinary(persistedPackage);
@@ -353,7 +374,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					String resType = packageContext.getResourceType(resource);
 					String msg = "Indexing " + resType + " Resource[" + dirName + '/' + nextFile + "] with URL: " + defaultString(url) + "|" + defaultString(version);
 					getProcessingMessages(npmPackage).add(msg);
-					ourLog.info("Package[{}#{}] " + msg, thePackageId, packageVersionId);
+					ourLog.info("Package[{}#{}] " + msg, packageId, packageVersionId);
 				}
 			}
 
@@ -361,7 +382,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			return npmPackage;
 		});
+	}
 
+	@Override
+	public NpmPackage addPackageToCache(String thePackageId, String thePackageVersionId, InputStream thePackageTgzInputStream, String theSourceDesc) throws IOException {
+		NpmPackageData npmData = myPackageLoaderSvc.createNpmPackageDataFromData(thePackageId, thePackageVersionId, theSourceDesc, thePackageTgzInputStream);
+
+		return addPackageToCacheInternal(npmData);
 	}
 
 	private ResourceTable createResourceBinary(IBaseBinary theResourceBinary) {
@@ -426,24 +453,29 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional
 	public NpmPackage loadPackage(String thePackageId, String thePackageVersion) throws FHIRException, IOException {
+		// check package cache
 		NpmPackage cachedPackage = loadPackageFromCacheOnly(thePackageId, thePackageVersion);
 		if (cachedPackage != null) {
 			return cachedPackage;
 		}
 
-		InputStreamWithSrc pkg = super.loadFromPackageServer(thePackageId, thePackageVersion);
-		if (pkg == null) {
-			throw new ResourceNotFoundException(Msg.code(1301) + "Unable to locate package " + thePackageId + "#" + thePackageVersion);
-		}
+		// otherwise we have to load it from packageloader
+		NpmPackageData pkgData = myPackageLoaderSvc.fetchPackageFromPackageSpec(thePackageId, thePackageVersion);
 
 		try {
-			NpmPackage retVal = addPackageToCache(thePackageId, thePackageVersion == null ? pkg.version : thePackageVersion, pkg.stream, pkg.url);
-			getProcessingMessages(retVal).add(0, "Package fetched from server at: " + pkg.url);
+			// and add it to the cache
+			NpmPackage retVal = addPackageToCacheInternal(pkgData);
+			getProcessingMessages(retVal)
+				.add(0, "Package fetched from server at: " + pkgData.getPackage().url());
 			return retVal;
 		} finally {
-			pkg.stream.close();
+			pkgData.getInputStream().close();
 		}
+	}
 
+	@Override
+	public NpmPackage loadPackage(String theS) throws FHIRException, IOException {
+		return loadPackage(theS, null);
 	}
 
 	private TransactionTemplate newTxTemplate() {
@@ -458,7 +490,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		String sourceDescription = "Embedded content";
 		if (isNotBlank(theInstallationSpec.getPackageUrl())) {
-			byte[] contents = loadPackageUrlContents(theInstallationSpec.getPackageUrl());
+			byte[] contents = myPackageLoaderSvc.loadPackageUrlContents(theInstallationSpec.getPackageUrl());
 			theInstallationSpec.setPackageContents(contents);
 			sourceDescription = theInstallationSpec.getPackageUrl();
 		}
@@ -474,33 +506,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				throw new InternalErrorException(Msg.code(1302) + e);
 			}
 		});
-	}
-
-	protected byte[] loadPackageUrlContents(String thePackageUrl) {
-		if (thePackageUrl.startsWith("classpath:")) {
-			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:" .length()));
-		} else if (thePackageUrl.startsWith("file:")) {
-			try {
-				byte[] bytes = Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
-				return bytes;
-			} catch (IOException | URISyntaxException e) {
-				throw new InternalErrorException(Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
-			}
-		} else {
-			HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
-			try (CloseableHttpResponse request = HttpClientBuilder
-				.create()
-				.setConnectionManager(connManager)
-				.build()
-				.execute(new HttpGet(thePackageUrl))) {
-				if (request.getStatusLine().getStatusCode() != 200) {
-					throw new ResourceNotFoundException(Msg.code(1303) + "Received HTTP " + request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
-				}
-				return IOUtils.toByteArray(request.getEntity().getContent());
-			} catch (IOException e) {
-				throw new InternalErrorException(Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
-			}
-		}
 	}
 
 	@Override

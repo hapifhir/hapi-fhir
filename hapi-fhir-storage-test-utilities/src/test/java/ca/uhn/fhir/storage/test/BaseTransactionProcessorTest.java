@@ -4,7 +4,7 @@ package ca.uhn.fhir.storage.test;
  * #%L
  * hapi-fhir-storage-test-utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BaseTransactionProcessorTest {
 
@@ -100,6 +101,13 @@ public class BaseTransactionProcessorTest {
 		String input = "Patient?foo=Patient/123";
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, input);
 		assertEquals(input, outcome);
+	}
+
+	@Test
+	void testUnqualifiedMatchUrlStart_RegexPatternMatches() {
+		String matchUrl = "patient-first-identifier=MRN%7C123456789";
+		boolean matchResult = BaseTransactionProcessor.UNQUALIFIED_MATCH_URL_START.matcher(matchUrl).find();
+		assertTrue(matchResult, "Failed to find a Regex match using Url '" + matchUrl + "'");
 	}
 
 }

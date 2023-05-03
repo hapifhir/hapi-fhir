@@ -45,6 +45,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	private final ThreadPoolExecutor myBackgroundExecutor;
 	private final Map<Object, Object> myNonExpiringCache;
 	private final Cache<String, Object> myExpandValueSetCache;
+	private final boolean myIsEnabledValidationForCodingsLogicalAnd;
 
 	/**
 	 * Constructor with default timeouts
@@ -52,7 +53,15 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	 * @param theWrap The validation support module to wrap
 	 */
 	public CachingValidationSupport(IValidationSupport theWrap) {
-		this(theWrap, CacheTimeouts.defaultValues());
+		this(theWrap, CacheTimeouts.defaultValues(), false);
+	}
+
+	public CachingValidationSupport(IValidationSupport theWrap, boolean theIsEnabledValidationForCodingsLogicalAnd) {
+		this(theWrap, CacheTimeouts.defaultValues(), theIsEnabledValidationForCodingsLogicalAnd);
+	}
+
+	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts) {
+		this(theWrap, theCacheTimeouts, false);
 	}
 
 	/**
@@ -61,7 +70,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	 * @param theWrap          The validation support module to wrap
 	 * @param theCacheTimeouts The timeouts to use
 	 */
-	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts) {
+	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts, boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		super(theWrap.getFhirContext(), theWrap);
 		myExpandValueSetCache = CacheFactory.build(theCacheTimeouts.getExpandValueSetMillis(), 100);
 		myValidateCodeCache = CacheFactory.build(theCacheTimeouts.getValidateCodeMillis(), 5000);
@@ -85,6 +94,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 			threadFactory,
 			new ThreadPoolExecutor.DiscardPolicy());
 
+		myIsEnabledValidationForCodingsLogicalAnd = theIsEnabledValidationForCodingsLogicalAnd;
 	}
 
 	@Override
@@ -97,6 +107,13 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		String key = "fetchAllStructureDefinitions";
 		return loadFromCacheWithAsyncRefresh(myCache, key, t -> super.fetchAllStructureDefinitions());
+	}
+
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllSearchParameters() {
+		String key = "fetchAllSearchParameters";
+		return loadFromCacheWithAsyncRefresh(myCache, key, t -> super.fetchAllSearchParameters());
 	}
 
 	@Override
@@ -313,5 +330,9 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 				.setValidateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
 				.setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);
 		}
+	}
+
+	public boolean isEnabledValidationForCodingsLogicalAnd() {
+		return myIsEnabledValidationForCodingsLogicalAnd;
 	}
 }

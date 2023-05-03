@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
@@ -73,6 +72,16 @@ public abstract class BaseTask {
 	private boolean myNoColumnShrink;
 	private boolean myFailureAllowed;
 	private boolean myRunDuringSchemaInitialization;
+	/**
+	 * Whether or not to check for existing tables
+	 * before generating SQL
+	 */
+	protected boolean myCheckForExistingTables = true;
+
+	/**
+	 * Whether or not to generate the SQL in a 'readable format'
+	 */
+	protected boolean myPrettyPrint = false;
 
 	protected BaseTask(String theProductVersion, String theSchemaVersion) {
 		myProductVersion = theProductVersion;
@@ -81,6 +90,10 @@ public abstract class BaseTask {
 
 	public boolean isRunDuringSchemaInitialization() {
 		return myRunDuringSchemaInitialization;
+	}
+
+	public void setPrettyPrint(boolean thePrettyPrint) {
+		myPrettyPrint = thePrettyPrint;
 	}
 
 	/**

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
@@ -30,7 +29,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -50,7 +49,6 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -70,7 +68,6 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -95,6 +92,7 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -127,6 +125,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
+import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -162,14 +162,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final HibernatePropertiesProvider myDialectProvider;
-	private final ModelConfig myModelConfig;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final PartitionSettings myPartitionSettings;
 	private final DaoRegistry myDaoRegistry;
 	private final IResourceSearchViewDao myResourceSearchViewDao;
 	private final FhirContext myContext;
 	private final IIdHelperService<JpaPid> myIdHelperService;
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	private final IDao myCallingDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -195,11 +194,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public SearchBuilder(
 		IDao theDao,
 		String theResourceName,
-		DaoConfig theDaoConfig,
+		JpaStorageSettings theStorageSettings,
 		HapiFhirLocalContainerEntityManagerFactoryBean theEntityManagerFactory,
 		SqlObjectFactory theSqlBuilderFactory,
 		HibernatePropertiesProvider theDialectProvider,
-		ModelConfig theModelConfig,
 		ISearchParamRegistry theSearchParamRegistry,
 		PartitionSettings thePartitionSettings,
 		IInterceptorBroadcaster theInterceptorBroadcaster,
@@ -213,12 +211,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myCallingDao = theDao;
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 
 		myEntityManagerFactory = theEntityManagerFactory;
 		mySqlBuilderFactory = theSqlBuilderFactory;
 		myDialectProvider = theDialectProvider;
-		myModelConfig = theModelConfig;
 		mySearchParamRegistry = theSearchParamRegistry;
 		myPartitionSettings = thePartitionSettings;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
@@ -281,7 +278,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * parameters all have no modifiers.
 	 */
 	private boolean isCompositeUniqueSpCandidate() {
-		return myDaoConfig.isUniqueIndexesEnabled() &&
+		return myStorageSettings.isUniqueIndexesEnabled() &&
 			myParams.getEverythingMode() == null &&
 			myParams.isAllParametersHaveNoModifier();
 	}
@@ -376,7 +373,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
 			}
 
-			// todo MB extract this and move to FullText svc
 			// can we skip the database entirely and return the pid list from here?
 			boolean canSkipDatabase =
 				// if we processed an AND clause, and it returned nothing, then nothing can match.
@@ -429,7 +425,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			failIfUsed(Constants.PARAM_CONTENT);
 		}
 
-		// TODO MB someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we can.
+		// someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we can.
 		return fulltextEnabled && myParams != null &&
 			myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE &&
 			myFulltextSearchSvc.supportsSomeOf(myParams);
@@ -443,7 +439,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private List<JpaPid> executeLastNAgainstIndex(Integer theMaximumResults) {
 		// Can we use our hibernate search generated index on resource to support lastN?:
-		if (myDaoConfig.isAdvancedHSearchIndexing()) {
+		if (myStorageSettings.isAdvancedHSearchIndexing()) {
 			if (myFulltextSearchSvc == null) {
 				throw new InvalidRequestException(Msg.code(2027) + "LastN operation is not enabled on this service, can not process this request");
 			}
@@ -530,8 +526,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCountOnlyFlag, RequestDetails theRequest, List<Long> thePidList) {
 		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
-		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
-		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
+		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
+		QueryStack queryStack3 = new QueryStack(theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
 		if (theParams.keySet().size() > 1 || theParams.getSort() != null || theParams.keySet().contains(Constants.PARAM_HAS) || isPotentiallyContainedReferenceParameterExistsAtRoot(theParams)) {
 			List<RuntimeSearchParam> activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
@@ -555,7 +551,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
 				// nothing linked to them. So we do one additional query to make sure we catch those too.
-				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
+				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(myContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
 				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
 				String sql = allTargetsSql.getSql();
 				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
@@ -650,7 +646,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (sort != null) {
 			assert !theCountOnlyFlag;
 
-			createSort(queryStack3, sort);
+			createSort(queryStack3, sort, theParams);
 		}
 
 
@@ -697,7 +693,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private boolean isPotentiallyContainedReferenceParameterExistsAtRoot(SearchParameterMap theParams) {
-		return myModelConfig.isIndexOnContainedResources() && theParams.values().stream()
+		return myStorageSettings.isIndexOnContainedResources() && theParams.values().stream()
 			.flatMap(Collection::stream)
 			.flatMap(Collection::stream)
 			.anyMatch(t -> t instanceof ReferenceParam);
@@ -737,7 +733,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void createSort(QueryStack theQueryStack, SortSpec theSort) {
+	private void createSort(QueryStack theQueryStack, SortSpec theSort, SearchParameterMap theParams) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
 			return;
 		}
@@ -754,41 +750,111 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		} else {
 
-			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
+			RuntimeSearchParam param = null;
+
+			/*
+			 * If we have a sort like _sort=subject.name and we  have an
+			 * uplifted refchain for that combination we can do it more efficiently
+			 * by using the index associated with the uplifted refchain. In this case,
+			 * we need to find the actual target search parameter (corresponding
+			 * to "name" in this example) so that we know what datatype it is.
+			 */
+			String paramName = theSort.getParamName();
+			if (myStorageSettings.isIndexOnUpliftedRefchains()) {
+				String[] chains = StringUtils.split(paramName, '.');
+				if (chains.length == 2) {
+
+					// Given: Encounter?_sort=Patient:subject.name
+					String referenceParam = chains[0]; // subject
+					String referenceParamTargetType = null; // Patient
+					String targetParam = chains[1]; // name
+
+					int colonIdx = referenceParam.indexOf(':');
+					if (colonIdx > -1) {
+						referenceParamTargetType = referenceParam.substring(0, colonIdx);
+						referenceParam = referenceParam.substring(colonIdx + 1);
+					}
+					RuntimeSearchParam outerParam = mySearchParamRegistry.getActiveSearchParam(myResourceName, referenceParam);
+					if (outerParam == null) {
+						throwInvalidRequestExceptionForUnknownSortParameter(myResourceName, referenceParam);
+					}
+
+					if (outerParam.hasUpliftRefchain(targetParam)) {
+						for (String nextTargetType : outerParam.getTargets()) {
+							if (referenceParamTargetType != null && !referenceParamTargetType.equals(nextTargetType)) {
+								continue;
+							}
+							RuntimeSearchParam innerParam = mySearchParamRegistry.getActiveSearchParam(nextTargetType, targetParam);
+							if (innerParam != null) {
+								param = innerParam;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			int colonIdx = paramName.indexOf(':');
+			String referenceTargetType = null;
+			if (colonIdx > -1) {
+				referenceTargetType = paramName.substring(0, colonIdx);
+				paramName = paramName.substring(colonIdx + 1);
+			}
+
+			int dotIdx = paramName.indexOf('.');
+			String chainName = null;
+			if (param == null && dotIdx > -1) {
+				chainName = paramName.substring(dotIdx + 1);
+				paramName = paramName.substring(0, dotIdx);
+				if (chainName.contains(".")) {
+					String msg = myContext
+						.getLocalizer()
+						.getMessageSanitized(BaseStorageDao.class, "invalidSortParameterTooManyChains", paramName + "." + chainName);
+					throw new InvalidRequestException(Msg.code(2286) + msg);
+				}
+			}
+
 			if (param == null) {
-				String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
-				throw new InvalidRequestException(Msg.code(1194) + msg);
+				param = mySearchParamRegistry.getActiveSearchParam(myResourceName, paramName);
+			}
+
+			if (param == null) {
+				throwInvalidRequestExceptionForUnknownSortParameter(getResourceName(), paramName);
+			}
+
+			if (isNotBlank(chainName) && param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
+				throw new InvalidRequestException(Msg.code(2285) + "Invalid chain, " + paramName + " is not a reference SearchParameter");
 			}
 
 			switch (param.getParamType()) {
 				case STRING:
-					theQueryStack.addSortOnString(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnString(myResourceName, paramName, ascending);
 					break;
 				case DATE:
-					theQueryStack.addSortOnDate(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnDate(myResourceName, paramName, ascending);
 					break;
 				case REFERENCE:
-					theQueryStack.addSortOnResourceLink(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnResourceLink(myResourceName, referenceTargetType, paramName, chainName, ascending);
 					break;
 				case TOKEN:
-					theQueryStack.addSortOnToken(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnToken(myResourceName, paramName, ascending);
 					break;
 				case NUMBER:
-					theQueryStack.addSortOnNumber(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnNumber(myResourceName, paramName, ascending);
 					break;
 				case URI:
-					theQueryStack.addSortOnUri(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnUri(myResourceName, paramName, ascending);
 					break;
 				case QUANTITY:
-					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnQuantity(myResourceName, paramName, ascending);
 					break;
 				case COMPOSITE:
 					List<RuntimeSearchParam> compositeList = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, param);
 					if (compositeList == null) {
-						throw new InvalidRequestException(Msg.code(1195) + "The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
+						throw new InvalidRequestException(Msg.code(1195) + "The composite _sort parameter " + paramName + " is not defined by the resource " + myResourceName);
 					}
 					if (compositeList.size() != 2) {
-						throw new InvalidRequestException(Msg.code(1196) + "The composite _sort parameter " + theSort.getParamName()
+						throw new InvalidRequestException(Msg.code(1196) + "The composite _sort parameter " + paramName
 							+ " must have 2 composite types declared in parameter annotation, found "
 							+ compositeList.size());
 					}
@@ -800,16 +866,28 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 					break;
 				case SPECIAL:
+					if (LOCATION_POSITION.equals(param.getPath())) {
+						theQueryStack.addSortOnCoordsNear(paramName, ascending, theParams);
+						break;
+					}
+					throw new InvalidRequestException(Msg.code(2306) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + paramName);
+
 				case HAS:
 				default:
-					throw new InvalidRequestException(Msg.code(1197) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
+					throw new InvalidRequestException(Msg.code(1197) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + paramName);
 			}
 
 		}
 
 		// Recurse
-		createSort(theQueryStack, theSort.getChain());
+		createSort(theQueryStack, theSort.getChain(), theParams);
 
+	}
+
+	private void throwInvalidRequestExceptionForUnknownSortParameter(String theResourceName, String theParamName) {
+		Collection<String> validSearchParameterNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName);
+		String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theParamName, theResourceName, validSearchParameterNames);
+		throw new InvalidRequestException(Msg.code(1194) + msg);
 	}
 
 	private void createCompositeSort(QueryStack theQueryStack, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending) {
@@ -844,7 +922,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		Map<Long, Long> resourcePidToVersion = null;
 		for (JpaPid next : thePids) {
-			if (next.getVersion() != null && myModelConfig.isRespectVersionsForSearchIncludes()) {
+			if (next.getVersion() != null && myStorageSettings.isRespectVersionsForSearchIncludes()) {
 				if (resourcePidToVersion == null) {
 					resourcePidToVersion = new HashMap<>();
 				}
@@ -884,7 +962,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				resourceId.setVersion(version);
 				if (version != null && !version.equals(next.getVersion())) {
 					IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
-					next = dao.readEntity(next.getIdDt().withVersion(Long.toString(version)), null);
+					next = (IBaseResourceEntity) dao.readEntity(next.getIdDt().withVersion(Long.toString(version)), null);
 				}
 			}
 
@@ -903,18 +981,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 
-			if (resource instanceof IResource) {
-				if (theIncludedPids.contains(resourceId)) {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.INCLUDE);
-				} else {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.MATCH);
-				}
+			if (theIncludedPids.contains(resourceId)) {
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.INCLUDE);
 			} else {
-				if (theIncludedPids.contains(resourceId)) {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.INCLUDE.getCode());
-				} else {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.MATCH.getCode());
-				}
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.MATCH);
 			}
 
 			theResourceListToPopulate.set(index, resource);
@@ -1008,8 +1078,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 */
 	private boolean isLoadingFromElasticSearchSupported(Collection<JpaPid> thePids) {
 		// is storage enabled?
-		return myDaoConfig.isStoreResourceInHSearchIndex() &&
-			myDaoConfig.isAdvancedHSearchIndexing() &&
+		return myStorageSettings.isStoreResourceInHSearchIndex() &&
+			myStorageSettings.isAdvancedHSearchIndexing() &&
 			// we don't support history
 			thePids.stream().noneMatch(p -> p.getVersion() != null) &&
 			// skip the complexity for metadata in dstu2
@@ -1019,7 +1089,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private List<IBaseResource> loadResourcesFromElasticSearch(Collection<JpaPid> thePids) {
 		// Do we use the fulltextsvc via hibernate-search to load resources or be backwards compatible with older ES only impl
 		// to handle lastN?
-		if (myDaoConfig.isAdvancedHSearchIndexing() && myDaoConfig.isStoreResourceInHSearchIndex()) {
+		if (myStorageSettings.isAdvancedHSearchIndexing() && myStorageSettings.isStoreResourceInHSearchIndex()) {
 			List<Long> pidList = thePids.stream().map(pid -> (pid).getId()).collect(Collectors.toList());
 
 			List<IBaseResource> resources = myFulltextSearchSvc.getResources(pidList);
@@ -1050,7 +1120,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		String findPidFieldName = theReverseMode ? MY_SOURCE_RESOURCE_PID : MY_TARGET_RESOURCE_PID;
 		String findResourceTypeFieldName = theReverseMode ? MY_SOURCE_RESOURCE_TYPE : MY_TARGET_RESOURCE_TYPE;
 		String findVersionFieldName = null;
-		if (!theReverseMode && myModelConfig.isRespectVersionsForSearchIncludes()) {
+		if (!theReverseMode && myStorageSettings.isRespectVersionsForSearchIncludes()) {
 			findVersionFieldName = MY_TARGET_RESOURCE_VERSION;
 		}
 
@@ -1109,6 +1179,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						sqlBuilder.append(" AND r.mySourceResourceType = :want_resource_type");
 					} else {
 						wantResourceType = null;
+					}
+					// When calling $everything on a Patient instance, we don't want to recurse into new Patient resources
+					// (e.g. via Provenance, List, or Group) when in an $everything operation
+					if (myParams != null && myParams.getEverythingMode() == SearchParameterMap.EverythingModeEnum.PATIENT_INSTANCE) {
+						sqlBuilder.append(" AND r.myTargetResourceType != 'Patient'");
+						sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
 					}
 
 					String sql = sqlBuilder.toString();
@@ -1576,7 +1652,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						} else if (myParams.getOffset() != null && myParams.getCount() != null) {
 							myMaxResultsToFetch = myParams.getCount();
 						} else {
-							myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
+							myMaxResultsToFetch = myStorageSettings.getFetchSizeDefaultMaximum();
 						}
 					}
 

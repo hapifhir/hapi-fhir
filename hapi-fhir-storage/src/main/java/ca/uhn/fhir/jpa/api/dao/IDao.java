@@ -1,19 +1,8 @@
-package ca.uhn.fhir.jpa.api.dao;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceTag;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.util.Collection;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +17,9 @@ import java.util.Collection;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
+
+import ca.uhn.fhir.context.FhirContext;
 
 /**
  * Note that this interface is not considered a stable interface. While it is possible to build applications

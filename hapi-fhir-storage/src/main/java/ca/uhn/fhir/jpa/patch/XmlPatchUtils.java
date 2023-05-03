@@ -1,23 +1,8 @@
-package ca.uhn.fhir.jpa.patch;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.github.dnault.xmlpatch.Patcher;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import static ca.uhn.fhir.util.StringUtil.toUtf8String;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +17,20 @@ import static ca.uhn.fhir.util.StringUtil.toUtf8String;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.patch;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.github.dnault.xmlpatch.Patcher;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 
 public class XmlPatchUtils {
 

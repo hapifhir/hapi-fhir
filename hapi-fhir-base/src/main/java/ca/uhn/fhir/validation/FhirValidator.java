@@ -1,10 +1,8 @@
-package ca.uhn.fhir.validation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -167,7 +166,7 @@ public class FhirValidator {
 	 */
 	public synchronized FhirValidator registerValidatorModule(IValidatorModule theValidator) {
 		Validate.notNull(theValidator, "theValidator must not be null");
-		ArrayList<IValidatorModule> newValidators = new ArrayList<IValidatorModule>(myValidators.size() + 1);
+		ArrayList<IValidatorModule> newValidators = new ArrayList<>(myValidators.size() + 1);
 		newValidators.addAll(myValidators);
 		newValidators.add(theValidator);
 
@@ -333,7 +332,7 @@ public class FhirValidator {
 				retval.addAll(messages);
 			}
 		} catch (InterruptedException | ExecutionException exp) {
-			throw new InternalErrorException(Msg.code(1975) + exp);
+			throw new InternalErrorException(Msg.code(2246) + exp);
 		}
 		return retval;
 	}

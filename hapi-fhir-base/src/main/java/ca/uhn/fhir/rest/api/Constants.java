@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -307,8 +306,17 @@ public class Constants {
 	public static final String PARAMQUALIFIER_TOKEN_NOT_IN = ":not-in";
 	public static final String PARAMQUALIFIER_TOKEN_ABOVE = ":above";
 	public static final String PARAMQUALIFIER_TOKEN_BELOW = ":below";
+	/**
+	 * The number of characters in a UUID (36)
+ 	 */
+	public static final int UUID_LENGTH = 36;
 
-	static {
+	/**
+	 * Application configuration key used to enable or disable Hibernate Envers.
+	 */
+	public static final String HIBERNATE_INTEGRATION_ENVERS_ENABLED = "hibernate.integration.envers.enabled";
+
+    static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
 		CHARSET_US_ASCII = StandardCharsets.ISO_8859_1;
 

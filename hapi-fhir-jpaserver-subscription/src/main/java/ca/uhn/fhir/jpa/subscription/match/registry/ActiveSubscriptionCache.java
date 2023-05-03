@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.registry;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,21 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 class ActiveSubscriptionCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscriptionCache.class);
@@ -77,5 +83,24 @@ class ActiveSubscriptionCache {
 			}
 		}
 		return retval;
+	}
+
+	/**
+	 * R4B and R5 only
+	 * @param theTopic
+	 * @return a list of all subscriptions that are subscribed to the given topic
+	 */
+	public List<ActiveSubscription> getTopicSubscriptionsForTopic(String theTopic) {
+		assert !isBlank(theTopic);
+		return getAll().stream()
+			.filter(as -> as.getSubscription().isTopicSubscription())
+			.filter(as -> theTopic.equals(as.getSubscription().getTopic()))
+			.collect(Collectors.toList());
+	}
+
+	public List<ActiveSubscription> getAllNonTopicSubscriptions() {
+		return getAll().stream()
+			.filter(as -> !as.getSubscription().isTopicSubscription())
+			.collect(Collectors.toList());
 	}
 }

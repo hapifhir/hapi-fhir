@@ -26,6 +26,7 @@ import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.profilemodel.PEBuilder;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
@@ -41,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -121,7 +124,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types) throws FileNotFoundException, IOException, FHIRException {
 		throw new UnsupportedOperationException(Msg.code(653));
 	}
 
@@ -162,18 +165,28 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public IWorkerContextManager.IPackageLoadingTracker getPackageTracker() {
-		throw new UnsupportedOperationException(Msg.code(2108));
+		throw new UnsupportedOperationException(Msg.code(2235));
 	}
 
 	@Override
 	public IWorkerContext setPackageTracker(
 		IWorkerContextManager.IPackageLoadingTracker packageTracker) {
-		throw new UnsupportedOperationException(Msg.code(2114));
+		throw new UnsupportedOperationException(Msg.code(2266));
+	}
+
+	@Override
+	public String getSpecUrl() {
+			return "";
+	}
+
+	@Override
+	public PEBuilder getProfiledElementBuilder(PEBuilder.PEElementPropertiesPolicy thePEElementPropertiesPolicy, boolean theB) {
+		throw new UnsupportedOperationException(Msg.code(2264));
 	}
 
 	@Override
 	public PackageInformation getPackageForUrl(String s) {
-		throw new UnsupportedOperationException(Msg.code(2109));
+		throw new UnsupportedOperationException(Msg.code(2236));
 	}
 
 	@Override
@@ -231,15 +244,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			if (isNotBlank(code)) {
 				retVal = new ValidationResult(theSystem, new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent()
 					.setCode(code)
-					.setDisplay(display));
+					.setDisplay(display),
+					null);
 			} else if (isNotBlank(issueSeverity)) {
-				retVal = new ValidationResult(ValidationMessage.IssueSeverity.fromCode(issueSeverity), message, ValueSetExpander.TerminologyServiceErrorClass.UNKNOWN);
+				retVal = new ValidationResult(ValidationMessage.IssueSeverity.fromCode(issueSeverity), message, ValueSetExpander.TerminologyServiceErrorClass.UNKNOWN, null);
 			}
 
 		}
 
 		if (retVal == null) {
-			retVal = new ValidationResult(ValidationMessage.IssueSeverity.ERROR, "Validation failed");
+			retVal = new ValidationResult(ValidationMessage.IssueSeverity.ERROR, "Validation failed", null);
 		}
 
 		return retVal;
@@ -317,6 +331,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String system) {
+		return null;
+	}
+
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String system, String version) {
+		return null;
+	}
+
+	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri) {
 
 		if (isBlank(uri)) {
@@ -354,6 +378,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return fetchResource(class_, uri);
 	}
 
+	@Override
 	public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri, Resource sourceOfReference) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(2214));
 	}
@@ -371,6 +396,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public StructureDefinition fetchTypeDefinition(String typeName) {
 		return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+	}
+
+	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String n) {
+		throw new UnsupportedOperationException(Msg.code(2329));
 	}
 
 	@Override
@@ -410,7 +440,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public Map<String, NamingSystem> getNSUrlMap() {
-		throw new UnsupportedOperationException(Msg.code(2111));
+		throw new UnsupportedOperationException(Msg.code(2265));
 	}
 
 	@Override
@@ -523,14 +553,23 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.CodeableConcept code, org.hl7.fhir.r5.model.ValueSet theVs) {
+		List<ValidationResult> validationResultsOk = new ArrayList<>();
 		for (Coding next : code.getCoding()) {
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
-				return retVal;
+				if (myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
+					validationResultsOk.add(retVal);
+				} else {
+					return retVal;
+				}
 			}
 		}
 
-		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null);
+		if (code.getCoding().size() > 0 && validationResultsOk.size() == code.getCoding().size()) {
+			return validationResultsOk.get(0);
+		}
+
+		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, null);
 	}
 
 	public void invalidateCaches() {

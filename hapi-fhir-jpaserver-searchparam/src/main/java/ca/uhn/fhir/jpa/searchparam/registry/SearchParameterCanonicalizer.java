@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.searchparam.registry;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
@@ -28,35 +27,20 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.DatatypeUtil;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.util.PhoneticEncoderUtil;
+import ca.uhn.fhir.util.*;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.SearchParameter;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @Service
 public class SearchParameterCanonicalizer {
@@ -69,6 +53,16 @@ public class SearchParameterCanonicalizer {
 		myFhirContext = theFhirContext;
 	}
 
+	private static Collection<String> toStrings(Collection<? extends IPrimitiveType<String>> theBase) {
+		HashSet<String> retVal = new HashSet<>();
+		for (IPrimitiveType<String> next : theBase) {
+			if (isNotBlank(next.getValueAsString())) {
+				retVal.add(next.getValueAsString());
+			}
+		}
+		return retVal;
+	}
+
 	public RuntimeSearchParam canonicalizeSearchParameter(IBaseResource theSearchParameter) {
 		RuntimeSearchParam retVal;
 		switch (myFhirContext.getVersion().getVersion()) {
@@ -79,6 +73,7 @@ public class SearchParameterCanonicalizer {
 				retVal = canonicalizeSearchParameterDstu3((org.hl7.fhir.dstu3.model.SearchParameter) theSearchParameter);
 				break;
 			case R4:
+			case R4B:
 			case R5:
 				retVal = canonicalizeSearchParameterR4Plus(theSearchParameter);
 				break;
@@ -265,7 +260,23 @@ public class SearchParameterCanonicalizer {
 		String name = terser.getSinglePrimitiveValueOrNull(theNextSp, "code");
 		String description = terser.getSinglePrimitiveValueOrNull(theNextSp, "description");
 		String path = terser.getSinglePrimitiveValueOrNull(theNextSp, "expression");
-		List<String> base = terser.getValues(theNextSp, "base", IPrimitiveType.class).stream().map(t -> t.getValueAsString()).collect(Collectors.toList());
+
+		List<String> base = terser
+			.getValues(theNextSp, "base", IPrimitiveType.class)
+			.stream()
+			.map(IPrimitiveType::getValueAsString)
+			.collect(Collectors.toList());
+		if (theNextSp instanceof IBaseHasExtensions) {
+			((IBaseHasExtensions) theNextSp)
+				.getExtension()
+				.stream()
+				.filter(t -> HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE.equals(t.getUrl()))
+				.filter(t -> t.getValue() instanceof IPrimitiveType)
+				.map(t -> ((IPrimitiveType<?>) t.getValue()))
+				.map(IPrimitiveType::getValueAsString)
+				.filter(StringUtils::isNotBlank)
+				.forEach(base::add);
+		}
 
 		RestSearchParameterTypeEnum paramType = null;
 		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
@@ -313,7 +324,23 @@ public class SearchParameterCanonicalizer {
 				break;
 		}
 		Set<String> providesMembershipInCompartments = Collections.emptySet();
-		Set<String> targets = terser.getValues(theNextSp, "target", IPrimitiveType.class).stream().map(t -> t.getValueAsString()).collect(Collectors.toSet());
+
+		Set<String> targets = terser
+			.getValues(theNextSp, "target", IPrimitiveType.class)
+			.stream()
+			.map(IPrimitiveType::getValueAsString)
+			.collect(Collectors.toSet());
+		if (theNextSp instanceof IBaseHasExtensions) {
+			((IBaseHasExtensions) theNextSp)
+				.getExtension()
+				.stream()
+				.filter(t -> HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE.equals(t.getUrl()))
+				.filter(t -> t.getValue() instanceof IPrimitiveType)
+				.map(t -> ((IPrimitiveType<?>) t.getValue()))
+				.map(IPrimitiveType::getValueAsString)
+				.filter(StringUtils::isNotBlank)
+				.forEach(targets::add);
+		}
 
 		if (isBlank(name) || isBlank(path) || paramType == null) {
 			if ("_text".equals(name) || "_content".equals(name)) {
@@ -355,22 +382,32 @@ public class SearchParameterCanonicalizer {
 		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
 	}
 
-
 	/**
 	 * Extracts any extensions from the resource and populates an extension field in the
 	 */
 	protected void extractExtensions(IBaseResource theSearchParamResource, RuntimeSearchParam theRuntimeSearchParam) {
 		if (theSearchParamResource instanceof IBaseHasExtensions) {
-			List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) theSearchParamResource).getExtension();
-			for (IBaseExtension<?, ?> next : extensions) {
+			List<? extends IBaseExtension<? extends IBaseExtension, ?>> extensions = (List<? extends IBaseExtension<? extends IBaseExtension, ?>>) ((IBaseHasExtensions) theSearchParamResource).getExtension();
+			for (IBaseExtension<? extends IBaseExtension, ?> next : extensions) {
 				String nextUrl = next.getUrl();
 				if (isNotBlank(nextUrl)) {
 					theRuntimeSearchParam.addExtension(nextUrl, next);
 					if (HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER.equals(nextUrl)) {
 						setEncoder(theRuntimeSearchParam, next.getValue());
+					} else if (HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN.equals(nextUrl)) {
+						addUpliftRefchain(theRuntimeSearchParam, next);
 					}
 				}
 			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addUpliftRefchain(RuntimeSearchParam theRuntimeSearchParam, IBaseExtension<? extends IBaseExtension, ?> theExtension) {
+		String code = ExtensionUtil.extractChildPrimitiveExtensionValue(theExtension, HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE);
+		String elementName = ExtensionUtil.extractChildPrimitiveExtensionValue(theExtension, HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME);
+		if (isNotBlank(code)) {
+			theRuntimeSearchParam.addUpliftRefchain(code, elementName);
 		}
 	}
 
@@ -384,21 +421,10 @@ public class SearchParameterCanonicalizer {
 			IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(stringValue);
 			if (encoder != null) {
 				theRuntimeSearchParam.setPhoneticEncoder(encoder);
-			}
-			else {
+			} else {
 				ourLog.error("Invalid PhoneticEncoderEnum value '" + stringValue + "'");
 			}
 		}
-	}
-
-	private static Collection<String> toStrings(Collection<? extends IPrimitiveType<String>> theBase) {
-		HashSet<String> retVal = new HashSet<>();
-		for (IPrimitiveType<String> next : theBase) {
-			if (isNotBlank(next.getValueAsString())) {
-				retVal.add(next.getValueAsString());
-			}
-		}
-		return retVal;
 	}
 
 

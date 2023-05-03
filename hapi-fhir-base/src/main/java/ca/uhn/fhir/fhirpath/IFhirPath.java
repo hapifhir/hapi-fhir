@@ -1,10 +1,8 @@
-package ca.uhn.fhir.fhirpath;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,11 @@ package ca.uhn.fhir.fhirpath;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.fhirpath;
 
 import org.hl7.fhir.instance.model.api.IBase;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,4 +52,15 @@ public interface IFhirPath {
 	 * Parses the expression and throws an exception if it can not parse correctly
 	 */
 	void parse(String theExpression) throws Exception;
+
+
+	/**
+	 * This method can be used optionally to supply an evaluation context for the
+	 * FHIRPath evaluator instance. The context can be used to supply data needed by
+	 * specific functions, e.g. allowing the <code>resolve()</code> function to
+	 * fetch referenced resources.
+	 *
+	 * @since 6.4.0
+	 */
+	void setEvaluationContext(@Nonnull IFhirPathEvaluationContext theEvaluationContext);
 }

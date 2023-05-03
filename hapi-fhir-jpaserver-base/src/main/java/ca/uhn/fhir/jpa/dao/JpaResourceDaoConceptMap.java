@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
@@ -55,7 +54,9 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (!retVal.isUnchangedInCurrentOperation()) {
+		boolean entityWasSaved = !retVal.isUnchangedInCurrentOperation();
+		boolean shouldProcessUpdate = entityWasSaved && thePerformIndexing;
+		if (shouldProcessUpdate) {
 			if (retVal.getDeleted() == null) {
 				ConceptMap conceptMap = myVersionCanonicalizer.conceptMapToCanonical(theResource);
 				myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal, conceptMap);

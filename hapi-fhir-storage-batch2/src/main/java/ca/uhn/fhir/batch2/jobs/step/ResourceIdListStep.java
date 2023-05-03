@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.step;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.step;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.step;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -32,7 +31,8 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
-import ca.uhn.fhir.jpa.batch.log.Logs;
+import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -85,6 +85,11 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			}
 
 			ourLog.info("Found {} IDs from {} to {}", nextChunk.size(), nextStart, nextChunk.getLastDate());
+			if (nextChunk.size() < 10 && HapiSystemProperties.isTestModeEnabled()) {
+				// TODO: I've added this in order to troubleshoot MultitenantBatchOperationR4Test
+				// which is failing intermittently. If that stops, makes sense to remove this
+				ourLog.info(" * PIDS: {}", nextChunk);
+			}
 
 			for (TypedResourcePid typedResourcePid : nextChunk.getTypedResourcePids()) {
 				TypedPidJson nextId = new TypedPidJson(typedResourcePid);

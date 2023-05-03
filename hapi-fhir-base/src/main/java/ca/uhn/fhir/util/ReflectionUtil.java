@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,17 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -245,16 +247,26 @@ public class ReflectionUtil {
 	@SuppressWarnings("unchecked")
 	public static <T> T newInstanceOrReturnNull(String theClassName, Class<T> theType, Class<?>[] theArgTypes, Object[] theArgs) {
 		try {
-			Class<?> clazz = Class.forName(theClassName);
-			if (!theType.isAssignableFrom(clazz)) {
-				throw new ConfigurationException(Msg.code(1787) + theClassName + " is not assignable to " + theType);
-			}
-			return (T) clazz.getConstructor(theArgTypes).newInstance(theArgs);
+			return newInstance(theClassName, theType, theArgTypes, theArgs);
 		} catch (ConfigurationException e) {
 			throw e;
 		} catch (Exception e) {
 			ourLog.info("Failed to instantiate {}: {}", theClassName, e.toString());
 			return null;
+		}
+	}
+
+	@Nonnull
+	public static <T> T newInstance(String theClassName, Class<T> theType, Class<?>[] theArgTypes, Object[] theArgs) {
+		try {
+			Class<?> clazz = Class.forName(theClassName);
+			if (!theType.isAssignableFrom(clazz)) {
+				throw new ConfigurationException(Msg.code(1787) + theClassName + " is not assignable to " + theType);
+			}
+			return (T) clazz.getConstructor(theArgTypes).newInstance(theArgs);
+		} catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
+					InvocationTargetException e) {
+			throw new InternalErrorException(Msg.code(2330) + e.getMessage(), e);
 		}
 	}
 

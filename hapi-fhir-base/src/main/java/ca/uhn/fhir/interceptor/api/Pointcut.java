@@ -1,10 +1,8 @@
-package ca.uhn.fhir.interceptor.api;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.interceptor.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.api;
 
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -628,6 +627,13 @@ public enum Pointcut implements IPointcut {
 	 * This method is called after all processing is completed for a request, but only if the
 	 * request completes normally (i.e. no exception is thrown).
 	 * <p>
+	 * This pointcut is called after the response has completely finished, meaning that the HTTP respsonse to the client
+	 * may or may not have already completely been returned to the client by the time this pointcut is invoked. Use caution
+	 * if you have timing-dependent logic, since there is no guarantee about whether the client will have already moved on
+	 * by the time your method is invoked. If you need a guarantee that your method is invoked before returning to the
+	 * client, consider using {@link #SERVER_OUTGOING_RESPONSE} instead.
+	 * </p>
+	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
@@ -1025,6 +1031,43 @@ public enum Pointcut implements IPointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource"
 	),
 
+	/**
+	 * <b>Subscription Topic Hook:</b>
+	 * Invoked whenever a persisted resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) is about to be checked for whether any subscription topics
+	 * were triggered as a result of the operation.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - Hooks may modify this parameter. This will affect the checking process.</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
+	 * returns <code>false</code>, processing will be aborted.
+	 * </p>
+	 */
+	SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+
+
+	/**
+	 * <b>Subscription Topic Hook:</b>
+	 * Invoked whenever a persisted resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) has been checked for whether any subscription topics
+	 * were triggered as a result of the operation.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1245,7 +1288,8 @@ public enum Pointcut implements IPointcut {
 	 * <ul>
 	 * <li>
 	 * ca.uhn.fhir.rest.server.util.ICachedSearchDetails - Contains the details of the search that
-	 * is being created and initialized
+	 * is being created and initialized. Interceptors may use this parameter to modify aspects of the search
+	 * before it is stored and executed.
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
@@ -1264,6 +1308,9 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.jpa.searchparam.SearchParameterMap - Contains the details of the search being checked. This can be modified.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.RequestPartitionId - The partition associated with the request (or {@literal null} if the server is not partitioned)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1273,7 +1320,8 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap"
+		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId"
 	),
 
 	/**
@@ -1898,6 +1946,8 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks must return an instance of <code>ca.uhn.fhir.interceptor.model.RequestPartitionId</code>.
 	 * </p>
+	 *
+	 * @see #STORAGE_PARTITION_IDENTIFY_ANY For an alternative that is not read/write specific
 	 */
 	STORAGE_PARTITION_IDENTIFY_CREATE(
 		// Return type
@@ -1910,8 +1960,11 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked before FHIR read/access operation (e.g. <b>read/vread</b>, <b>search</b>, <b>history</b>, etc.) operation to request the
-	 * identification of the partition ID to be associated with the resource(s) being searched for, read, etc.
+	 * Invoked before any FHIR read/access/extended operation (e.g. <b>read/vread</b>, <b>search</b>, <b>history</b>,
+	 * <b>$reindex</b>, etc.) operation to request the identification of the partition ID to be associated with
+	 * the resource(s) being searched for, read, etc. Essentially any operations in the JPA server that are not
+	 * creating a resource will use this pointcut. Creates will use {@link #STORAGE_PARTITION_IDENTIFY_CREATE}.
+	 *
 	 * <p>
 	 * This hook will only be called if
 	 * partitioning is enabled in the JPA server.
@@ -1938,6 +1991,8 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks must return an instance of <code>ca.uhn.fhir.interceptor.model.RequestPartitionId</code>.
 	 * </p>
+	 *
+	 * @see #STORAGE_PARTITION_IDENTIFY_ANY For an alternative that is not read/write specific
 	 */
 	STORAGE_PARTITION_IDENTIFY_READ(
 		// Return type
@@ -1947,6 +2002,95 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails"
 	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before FHIR operations to request the identification of the partition ID to be associated with the
+	 * request being made.
+	 * <p>
+	 * This hook is an alternative to {@link #STORAGE_PARTITION_IDENTIFY_READ} and {@link #STORAGE_PARTITION_IDENTIFY_CREATE}
+	 * and can be used in cases where a partition interceptor does not need knowledge of the specific resources being
+	 * accessed/read/written in order to determine the appropriate partition.
+	 * </p>
+	 * <p>
+	 * This hook will only be called if
+	 * partitioning is enabled in the JPA server.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks must return an instance of <code>ca.uhn.fhir.interceptor.model.RequestPartitionId</code>.
+	 * </p>
+	 *
+	 * @see #STORAGE_PARTITION_IDENTIFY_READ
+	 * @see #STORAGE_PARTITION_IDENTIFY_CREATE
+	 */
+	STORAGE_PARTITION_IDENTIFY_ANY(
+		// Return type
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		// Params
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked when a partition has been created, typically meaning the <code>$partition-management-create-partition</code>
+	 * operation has been invoked.
+	 * <p>
+	 * This hook will only be called if
+	 * partitioning is enabled in the JPA server.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.RequestPartitionId - The partition ID that was selected
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks must return void.
+	 * </p>
+	 */
+	STORAGE_PARTITION_CREATED(
+		// Return type
+		void.class,
+		// Params
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -2099,6 +2243,30 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage",
 		"ca.uhn.fhir.rest.server.TransactionLogMessages",
 		"ca.uhn.fhir.mdm.api.MdmLinkEvent"),
+
+
+	/**
+	 * <b>JPA Hook:</b>
+	 * This hook is invoked when a cross-partition reference is about to be
+	 * stored in the database.
+	 * <p>
+	 * <b>This is an experimental API - It may change in the future, use with caution.</b>
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * {@literal ca.uhn.fhir.jpa.searchparam.extractor.CrossPartitionReferenceDetails} - Contains details about the
+	 * cross partition reference.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	JPA_RESOLVE_CROSS_PARTITION_REFERENCE("ca.uhn.fhir.jpa.model.cross.IResourceLookup",
+		"ca.uhn.fhir.jpa.searchparam.extractor.CrossPartitionReferenceDetails"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2524,6 +2692,33 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.util.SqlQueryList"
 	),
+
+	/**
+	 * <b> Binary Blob Prefix Assigning Hook:</b>
+	 * <p>
+	 * Immediately before a binary blob is stored to its eventual data sink, this hook is called.
+	 * This hook allows implementers to provide a prefix to the binary blob's ID.
+	 * This is helpful in cases where you want to identify this blob for later retrieval outside of HAPI-FHIR. Note that allowable characters will depend on the specific storage sink being used.
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated.
+	 * </li>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseBinary - The binary resource that is about to be stored.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>String</code>, which represents the full prefix to be applied to the blob.
+	 * </p>
+	 */
+	STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX(String.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"org.hl7.fhir.instance.model.api.IBaseResource"
+	),
+
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.reindex;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.reindex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -32,7 +31,7 @@ import ca.uhn.fhir.jpa.api.pid.MixedResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
@@ -51,6 +50,7 @@ import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
@@ -99,8 +99,9 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		List<IResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
 		Date lastDate = null;
-		if (ids.size() > 0) {
-			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
+		if (isNotEmpty(ids)) {
+			IResourcePersistentId lastResourcePersistentId = ids.get(ids.size() - 1);
+			lastDate = dao.readByPid(lastResourcePersistentId, true).getMeta().getLastUpdated();
 		}
 
 		return new HomogeneousResourcePidList(resourceType, ids, lastDate);

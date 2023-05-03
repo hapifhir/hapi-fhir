@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.services;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,14 @@ package ca.uhn.fhir.batch2.jobs.services;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.services;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
+import ca.uhn.fhir.batch2.jobs.export.BulkExportUtil;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
@@ -33,7 +32,6 @@ import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import org.slf4j.Logger;
@@ -72,7 +70,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	public Batch2JobInfo getJobInfo(String theJobId) {
 		JobInstance instance = myJobCoordinator.getInstance(theJobId);
 		if (instance == null) {
-			throw new ResourceNotFoundException(Msg.code(2102) + " : " + theJobId);
+			throw new ResourceNotFoundException(Msg.code(2240) + " : " + theJobId);
 		}
 		return fromJobInstanceToBatch2JobInfo(instance);
 	}
@@ -97,29 +95,21 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	private Batch2JobInfo fromJobInstanceToBatch2JobInfo(@Nonnull JobInstance theInstance) {
 		Batch2JobInfo info = new Batch2JobInfo();
 		info.setJobId(theInstance.getInstanceId());
-		info.setStatus(fromBatchStatus(theInstance.getStatus()));
+		// should convert this to a more generic enum for all batch2 (which is what it seems like)
+		// or use the status enum only (combine with bulk export enum)
+		// on the Batch2JobInfo
+		info.setStatus(BulkExportUtil.fromBatchStatus(theInstance.getStatus()));
 		info.setCancelled(theInstance.isCancelled());
 		info.setStartTime(theInstance.getStartTime());
 		info.setEndTime(theInstance.getEndTime());
 		info.setReport(theInstance.getReport());
 		info.setErrorMsg(theInstance.getErrorMessage());
-		return info;
-	}
-
-	public static BulkExportJobStatusEnum fromBatchStatus(StatusEnum status) {
-		switch (status) {
-			case QUEUED:
-				return BulkExportJobStatusEnum.SUBMITTED;
-			case COMPLETED :
-				return BulkExportJobStatusEnum.COMPLETE;
-			case IN_PROGRESS:
-				return BulkExportJobStatusEnum.BUILDING;
-			case FAILED:
-			case CANCELLED:
-			case ERRORED:
-			default:
-				return BulkExportJobStatusEnum.ERROR;
+		if ( Batch2JobDefinitionConstants.BULK_EXPORT.equals(theInstance.getJobDefinitionId())) {
+			BulkExportJobParameters parameters = theInstance.getParameters(BulkExportJobParameters.class);
+			info.setRequestPartitionId(parameters.getPartitionId());
 		}
+
+		return info;
 	}
 
 	private Batch2JobStartResponse startBatch2BulkExportJob(BulkExportParameters theParameters) {

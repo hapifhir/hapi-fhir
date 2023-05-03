@@ -3,8 +3,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
@@ -81,8 +80,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
-	private ISchedulerService mySchedulerService;
-	@Autowired
 	private IInterceptorService myInterceptorService;
 
 	@AfterEach
@@ -94,12 +91,12 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		}
 		mySubscriptionIds.clear();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?_lastUpdated=lt3000").execute();
 		myClient.delete().resourceConditionalByUrl("Observation?_lastUpdated=lt3000").execute();
 		ourLog.info("Done deleting all subscriptions");
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 
@@ -107,7 +104,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		svc.cancelAll();
 		svc.setMaxSubmitPerPass(null);
 
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
 	@BeforeEach
@@ -125,8 +122,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		ourCreatedPatients.clear();
 		ourUpdatedPatients.clear();
 		ourContentTypes.clear();
-
-		mySchedulerService.logStatusForUnitTest();
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
@@ -209,7 +204,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@Test
 	public void testTriggerUsingMultipleSearches() throws Exception {
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(13, 22, 100));
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(13, 22, 100));
 
 		String payload = "application/fhir+json";
 		IdType sub1id = createSubscription("Observation?", payload, ourListenerServerBase).getIdElement();
@@ -310,7 +305,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@Test
 	public void testTriggerUsingOrSeparatedList_SingleString() throws Exception {
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(13, 22, 100));
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(13, 22, 100));
 
 		String payload = "application/fhir+json";
 		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();

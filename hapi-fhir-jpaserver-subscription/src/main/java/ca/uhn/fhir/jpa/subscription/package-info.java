@@ -1,20 +1,8 @@
-/**
- * Module to support Subscriptions
- * <p>
- * Subscriptions are partition aware
- * <p>
- * The functionalities of this module follows the HL7 spec on Subscriptions:
- * http://hl7.org/fhir/subscription.html
- * <p>
- * Activated by {@link ca.uhn.fhir.jpa.model.config.PartitionSettings#setPartitioningEnabled(boolean)}
- */
-package ca.uhn.fhir.jpa.subscription;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,3 +17,15 @@ package ca.uhn.fhir.jpa.subscription;
  * limitations under the License.
  * #L%
  */
+/**
+ * Module to support Subscriptions
+ * <p>
+ * Subscriptions are partition aware
+ * <p>
+ * The functionalities of this module follows the HL7 spec on Subscriptions:
+ * http://hl7.org/fhir/subscription.html
+ * <p>
+ * Activated by {@link ca.uhn.fhir.jpa.model.config.PartitionSettings#setPartitioningEnabled(boolean)}
+ */
+package ca.uhn.fhir.jpa.subscription;
+

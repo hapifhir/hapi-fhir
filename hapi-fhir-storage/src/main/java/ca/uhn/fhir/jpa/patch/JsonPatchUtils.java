@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.patch;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.patch;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -33,7 +32,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.intellij.lang.annotations.Language;
 
 import java.io.IOException;
 
@@ -41,7 +39,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class JsonPatchUtils {
 
-	public static <T extends IBaseResource> T apply(FhirContext theCtx, T theResourceToUpdate, @Language("JSON") String thePatchBody) {
+	public static <T extends IBaseResource> T apply(FhirContext theCtx, T theResourceToUpdate, String thePatchBody) {
 		// Parse the patch
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION, false);

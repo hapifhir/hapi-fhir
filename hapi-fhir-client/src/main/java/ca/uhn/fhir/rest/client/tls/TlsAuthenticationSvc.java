@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.tls;
-
 /*-
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.tls;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.tls;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.BaseStoreInfo;
@@ -112,7 +111,7 @@ public class TlsAuthenticationSvc {
 	public static X509TrustManager createTrustManager(Optional<TrustStoreInfo> theTrustStoreInfo) {
 		try {
 			TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-			if (theTrustStoreInfo.isEmpty()) {
+			if (!theTrustStoreInfo.isPresent()) {
 				trustManagerFactory.init((KeyStore) null); // Load Trust Manager Factory with default Java truststore
 			}
 			else {

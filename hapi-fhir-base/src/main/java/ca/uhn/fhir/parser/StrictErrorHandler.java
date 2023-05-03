@@ -1,16 +1,8 @@
-package ca.uhn.fhir.parser;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
-import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
-import ca.uhn.fhir.util.UrlUtil;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +17,13 @@ import ca.uhn.fhir.util.UrlUtil;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
+import ca.uhn.fhir.util.UrlUtil;
 
 /**
  * Parser error handler which throws a {@link DataFormatException} any time an

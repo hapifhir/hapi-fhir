@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -129,6 +128,18 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
+		calculateHashes();
+	}
+
+	/**
+	 * Constructor
+	 */
+	public ResourceIndexedSearchParamToken(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, boolean theMissing) {
+		super();
+		setPartitionSettings(thePartitionSettings);
+		setResourceType(theResourceType);
+		setParamName(theParamName);
+		setMissing(theMissing);
 		calculateHashes();
 	}
 

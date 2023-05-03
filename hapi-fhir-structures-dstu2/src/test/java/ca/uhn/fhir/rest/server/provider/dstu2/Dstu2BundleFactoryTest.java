@@ -120,7 +120,7 @@ public class Dstu2BundleFactoryTest {
 	public void whenAChainedResourceIsIncludedAndItsParentIsAlsoIncluded_bundle_shouldContainTheChainedResource() throws Exception {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(DiagnosticReport.INCLUDE_RESULT.getValue(), Observation.INCLUDE_SPECIMEN.getValue()));
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		
 		assertEquals(3, bundle.getEntry().size());
 		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));

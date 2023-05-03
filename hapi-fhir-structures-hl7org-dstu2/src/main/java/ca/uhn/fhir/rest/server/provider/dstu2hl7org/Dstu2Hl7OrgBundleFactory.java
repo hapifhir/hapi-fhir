@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.provider.dstu2hl7org;
-
 /*
  * #%L
  * HAPI FHIR Structures - HL7.org DSTU2
@@ -19,11 +17,14 @@ package ca.uhn.fhir.rest.server.provider.dstu2hl7org;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.provider.dstu2hl7org;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.Constants;
@@ -135,14 +136,14 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
       BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
       Resource nextAsResource = (Resource) next;
       IIdType id = populateBundleEntryFullUrl(next, entry);
-      String httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
+      BundleEntryTransactionMethodEnum httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
       if (httpVerb != null) {
-        entry.getRequest().getMethodElement().setValueAsString(httpVerb);
+        entry.getRequest().getMethodElement().setValueAsString(httpVerb.name());
         if (id != null) {
           entry.getRequest().setUrl(id.getValue());
         }
       }
-      if ("DELETE".equals(httpVerb)) {
+      if (BundleEntryTransactionMethodEnum.DELETE.equals(httpVerb)) {
         entry.setResource(null);
       }
 
@@ -166,9 +167,9 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
       }
 
       // Populate Bundle.entry.search
-      String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
+      BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
       if (searchMode != null) {
-        entry.getSearch().getModeElement().setValueAsString(searchMode);
+        entry.getSearch().getModeElement().setValueAsString(searchMode.getCode());
       }
 
     }

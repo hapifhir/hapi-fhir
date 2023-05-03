@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.util;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -65,6 +64,8 @@ public class GoldenResourceHelper {
 	private EIDHelper myEIDHelper;
 	@Autowired
 	private IMdmSurvivorshipService myMdmSurvivorshipService;
+	@Autowired
+	private MdmPartitionHelper myMdmPartitionHelper;
 
 	private final FhirContext myFhirContext;
 
@@ -102,7 +103,7 @@ public class GoldenResourceHelper {
 		MdmResourceUtil.setGoldenResource(newGoldenResource);
 
 		// add the partition id to the new resource
-		newGoldenResource.setUserData(Constants.RESOURCE_PARTITION_ID, theIncomingResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		newGoldenResource.setUserData(Constants.RESOURCE_PARTITION_ID, myMdmPartitionHelper.getRequestPartitionIdForNewGoldenResources(theIncomingResource));
 
 		return (T) newGoldenResource;
 	}

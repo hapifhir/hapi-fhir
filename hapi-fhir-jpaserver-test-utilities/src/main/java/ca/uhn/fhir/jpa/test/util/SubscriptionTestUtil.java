@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.test.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.test.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.util;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
@@ -39,7 +38,7 @@ public class SubscriptionTestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionTestUtil.class);
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
@@ -72,22 +71,27 @@ public class SubscriptionTestUtil {
 	}
 
 	public void registerEmailInterceptor() {
-		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
+		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerRestHookInterceptor() {
-		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		mySubscriptionSubmitInterceptorLoader.start();
+	}
+
+	public void registerMessageInterceptor() {
+		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerWebSocketInterceptor() {
-		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
+		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void unregisterSubscriptionInterceptor() {
-		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
+		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
 		mySubscriptionSubmitInterceptorLoader.unregisterInterceptorsForUnitTest();
 	}
 

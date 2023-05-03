@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -59,26 +78,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.substring;
-
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 public class FhirTerser {
 
@@ -197,7 +196,8 @@ public class FhirTerser {
 
 		for (BaseRuntimeChildDefinition nextChild : children)
 			for (IBase nextValue : nextChild.getAccessor().getValues(theSource)) {
-				String elementName = nextChild.getChildNameByDatatype(nextValue.getClass());
+				Class<? extends IBase> valueType = nextValue.getClass();
+				String elementName = nextChild.getChildNameByDatatype(valueType);
 				BaseRuntimeChildDefinition targetChild = targetDef.getChildByName(elementName);
 				if (targetChild == null) {
 					if (theIgnoreMissingFields) {
@@ -206,10 +206,24 @@ public class FhirTerser {
 					throw new DataFormatException(Msg.code(1789) + "Type " + theTarget.getClass().getName() + " does not have a child with name " + elementName);
 				}
 
-				BaseRuntimeElementDefinition<?> element = myContext.getElementDefinition(nextValue.getClass());
+				BaseRuntimeElementDefinition<?> element = myContext.getElementDefinition(valueType);
 				Object instanceConstructorArg = targetChild.getInstanceConstructorArguments();
 				IBase target;
-				if (instanceConstructorArg != null) {
+				if (element == null && BaseContainedDt.class.isAssignableFrom(valueType)) {
+					/*
+					 * This is a hack for DSTU2 - The way we did contained resources in
+					 * the DSTU2 model was weird, since the element isn't actually a FHIR type.
+					 * This is fixed in DSTU3+ so this hack only applies there.
+					 */
+					BaseContainedDt containedTarget = (BaseContainedDt) ReflectionUtil.newInstance(valueType);
+					BaseContainedDt containedSource = (BaseContainedDt) nextValue;
+					for (IResource next : containedSource.getContainedResources()) {
+						List containedResources = containedTarget.getContainedResources();
+						containedResources.add(next);
+					}
+					targetChild.getMutator().addValue(theTarget, containedTarget);
+					continue;
+				} else if (instanceConstructorArg != null) {
 					target = element.newInstance(instanceConstructorArg);
 				} else {
 					target = element.newInstance();

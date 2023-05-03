@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.channel.subscription;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -84,6 +83,7 @@ public class SubscriptionChannelFactory {
 		ChannelProducerSettings config = new ChannelProducerSettings();
 		if (theOptions != null) {
 			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+			config.setQualifyChannelName(theOptions.isQualifyChannelName());
 		}
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		return config;
@@ -93,6 +93,7 @@ public class SubscriptionChannelFactory {
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		if (theOptions != null) {
+			config.setQualifyChannelName(theOptions.isQualifyChannelName());
 			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
 		}
 		return config;

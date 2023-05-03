@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -118,9 +117,24 @@ public class ClasspathUtil {
 		return loadResource(theClasspath, streamTransform);
 	}
 
+	/**
+	 * Load a classpath resource, throw an {@link InternalErrorException} if not found
+	 *
+	 * @since 6.4.0
+	 */
+	@Nonnull
+	public static <T extends IBaseResource> T loadCompressedResource(FhirContext theCtx, Class<T> theType, String theClasspath) {
+		String resource = loadCompressedResource(theClasspath);
+		return parseResource(theCtx, theType, resource);
+	}
+
 	@Nonnull
 	public static <T extends IBaseResource> T loadResource(FhirContext theCtx, Class<T> theType, String theClasspath) {
 		String raw = loadResource(theClasspath);
+		return parseResource(theCtx, theType, raw);
+	}
+
+	private static <T extends IBaseResource> T parseResource(FhirContext theCtx, Class<T> theType, String raw) {
 		return EncodingEnum.detectEncodingNoDefault(raw).newParser(theCtx).parseResource(theType, raw);
 	}
 

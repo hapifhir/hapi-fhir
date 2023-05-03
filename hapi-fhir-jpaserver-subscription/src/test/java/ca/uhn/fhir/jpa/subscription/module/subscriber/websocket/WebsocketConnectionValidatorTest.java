@@ -2,16 +2,13 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber.websocket;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
@@ -21,6 +18,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,8 +60,6 @@ public class WebsocketConnectionValidatorTest {
 	IInterceptorBroadcaster myInterceptorBroadcaster;
 	@MockBean
 	InMemoryResourceMatcher myInMemoryResourceMatcher;
-	@MockBean
-	ISchedulerService mySchedulerService;
 	@MockBean
 	SubscriptionRegistry mySubscriptionRegistry;
 	@MockBean
@@ -116,18 +112,13 @@ public class WebsocketConnectionValidatorTest {
 	public static class SpringConfig extends SubscriptionProcessorConfig {
 
 		@Bean
-		public DaoConfig daoConfig() {
-			return new DaoConfig();
+		public JpaStorageSettings storageSettings() {
+			return new JpaStorageSettings();
 		}
 
 		@Bean
 		public PartitionSettings partitionSettings() {
 			return new PartitionSettings();
-		}
-
-		@Bean
-		public ModelConfig modelConfig() {
-			return new ModelConfig();
 		}
 
 		@Bean

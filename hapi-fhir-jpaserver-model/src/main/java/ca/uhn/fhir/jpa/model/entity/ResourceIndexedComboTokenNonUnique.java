@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -111,15 +110,17 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 
 		ResourceIndexedComboTokenNonUnique that = (ResourceIndexedComboTokenNonUnique) theO;
 
-		return new EqualsBuilder()
-			.append(myResource, that.myResource)
-			.append(myHashComplete, that.myHashComplete)
-			.isEquals();
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(myIndexString, that.myIndexString);
+		return b.isEquals();
 	}
 
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
-		throw new IllegalStateException(Msg.code(1528));
+		ResourceIndexedComboTokenNonUnique source = (ResourceIndexedComboTokenNonUnique) theSource;
+		myPartitionSettings = source.myPartitionSettings;
+		myHashComplete = source.myHashComplete;
+		myIndexString = source.myIndexString;
 	}
 
 	@Override
@@ -152,8 +153,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(myResource)
-			.append(myHashComplete)
+			.append(myIndexString)
 			.toHashCode();
 	}
 
@@ -165,6 +165,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		myPartitionSettings = thePartitionSettings;
 	}
 
+	@Override
 	public ResourceTable getResource() {
 		return myResource;
 	}

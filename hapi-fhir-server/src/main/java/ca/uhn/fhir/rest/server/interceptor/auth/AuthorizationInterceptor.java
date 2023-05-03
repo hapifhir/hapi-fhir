@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -33,6 +32,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -52,9 +52,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -136,9 +140,12 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			theRequestDetails.getUserData().put(myRequestRuleListKey, rules);
 		}
 		Set<AuthorizationFlagsEnum> flags = getFlags();
-		ourLog.trace("Applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={} ", rules.size(), theOperation,
-			((theInputResource != null) && (theInputResource.getIdElement() != null)) ? theInputResource.getIdElement().getResourceType() : "",
-			((theOutputResource != null) && (theOutputResource.getIdElement() != null)) ? theOutputResource.getIdElement().getResourceType() : "");
+
+		ourLog.trace("Applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ",
+			rules.size(),
+			getPointcutNameOrEmpty(thePointcut),
+			getResourceTypeOrEmpty(theInputResource),
+			getResourceTypeOrEmpty(theOutputResource));
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
@@ -556,6 +563,28 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			return b.build();
 		}
 
+	}
+
+	private Object getPointcutNameOrEmpty(Pointcut thePointcut) {
+		return nonNull(thePointcut) ? thePointcut.name() : EMPTY;
+	}
+
+	private String getResourceTypeOrEmpty(IBaseResource theResource){
+		String retVal = StringUtils.EMPTY;
+
+		if(isNull(theResource)){
+			return retVal;
+		}
+
+		if(isNull(theResource.getIdElement())){
+			return retVal;
+		}
+
+		if(isNull(theResource.getIdElement().getResourceType())){
+			return retVal;
+		}
+
+		return theResource.getIdElement().getResourceType();
 	}
 
 }

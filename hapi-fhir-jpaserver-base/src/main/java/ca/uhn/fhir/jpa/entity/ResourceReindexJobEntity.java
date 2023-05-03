@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,13 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.r4.model.InstantType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -149,8 +149,8 @@ public class ResourceReindexJobEntity implements Serializable {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("id", myId)
 			.append("resourceType", myResourceType)
-			.append("thresholdLow", myThresholdLow)
-			.append("thresholdHigh", myThresholdHigh);
+			.append("thresholdLow", new InstantType(myThresholdLow))
+			.append("thresholdHigh", new InstantType(myThresholdHigh));
 		if (myDeleted) {
 			b.append("deleted", myDeleted);
 		}

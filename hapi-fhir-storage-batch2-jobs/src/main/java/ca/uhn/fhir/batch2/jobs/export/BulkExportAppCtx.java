@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.export;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.export;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
@@ -35,6 +34,8 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class BulkExportAppCtx {
+
+	public static final String WRITE_TO_BINARIES = "write-to-binaries";
 
 	@Bean
 	public JobDefinition bulkExportJobDefinition() {
@@ -63,7 +64,7 @@ public class BulkExportAppCtx {
 		)
 		// write binaries and save to db
 		.addIntermediateStep(
-			"write-to-binaries",
+			WRITE_TO_BINARIES,
 			"Writes the expanded resources to the binaries and saves",
 			BulkExportBinaryFileId.class,
 			writeBinaryStep()

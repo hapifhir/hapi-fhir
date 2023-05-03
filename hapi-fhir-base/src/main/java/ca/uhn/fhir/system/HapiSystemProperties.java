@@ -1,10 +1,8 @@
-package ca.uhn.fhir.system;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.system;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.system;
 
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -110,6 +109,9 @@ public final class HapiSystemProperties {
 	public static void enableUnitTestMode() {
 		System.setProperty(UNIT_TEST_MODE, Boolean.TRUE.toString());
 	}
+	public static void disableUnitTestMode() {
+		System.setProperty(UNIT_TEST_MODE, Boolean.FALSE.toString());
+	}
 
 	public static boolean isUnitTestModeEnabled() {
 		return Boolean.parseBoolean(System.getProperty(UNIT_TEST_MODE));
@@ -139,7 +141,7 @@ public final class HapiSystemProperties {
 	}
 
 	/**
-	 * This property sets {@link DaoConfig#setStatusBasedReindexingDisabled(Boolean)} to true when the system starts up.
+	 * This property sets {@link JpaStorageSettings#setStatusBasedReindexingDisabled(Boolean)} to true when the system starts up.
 	 */
 	public static void enableStatusBasedReindex() {
 		System.clearProperty(DISABLE_STATUS_BASED_REINDEX);

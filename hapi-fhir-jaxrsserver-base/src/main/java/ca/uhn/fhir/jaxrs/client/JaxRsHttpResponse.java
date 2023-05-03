@@ -1,12 +1,8 @@
-package ca.uhn.fhir.jaxrs.client;
-
-import java.io.*;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +17,9 @@ import java.io.*;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jaxrs.client;
+
+import java.io.*;
 
 import java.util.List;
 import java.util.Map;

@@ -1,10 +1,8 @@
-package org.hl7.fhir.instance.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,15 @@ package org.hl7.fhir.instance.model.api;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
 
 import java.util.List;
 
+/**
+ * @param <T> The actual concrete type of the extension
+ * @param <D> Note that this type param is not used anywhere - It is kept only to avoid making a breaking change
+ */
+//public interface IBaseExtension<T extends IBaseExtension<T, D>, D> extends ICompositeType {
 public interface IBaseExtension<T, D> extends ICompositeType {
 
 	List<T> getExtension();

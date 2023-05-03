@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.binary.api;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.binary.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.api;
 
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -37,6 +36,16 @@ public interface IBinaryStorageSvc {
 	long getMaximumBinarySize();
 
 	/**
+	 * Given a blob ID, return true if it is valid for the underlying storage mechanism, false otherwise.
+	 *
+	 * @param theNewBlobId the blob ID to validate
+	 * @return true if the blob ID is valid, false otherwise.
+	 */
+   default boolean isValidBlobId(String theNewBlobId) {
+		return true;//default method here as we don't want to break existing implementations
+	}
+
+   /**
 	 * Sets the maximum number of bytes that can be stored in a single binary
 	 * file by this service. The default is {@link Long#MAX_VALUE}
 	 *

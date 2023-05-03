@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.api.server.bulk;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,21 @@ package ca.uhn.fhir.rest.api.server.bulk;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server.bulk;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
+// TODO: JA in next ticket - We have 3 more or less identical classes representing
+// bulk data job parameters: BulkDataExportOptions, BulkExportJobParameters, and BulkExportParameters
+// They don't seem to serve any distinct purpose so they should be collapsed into 1
 public class BulkDataExportOptions {
-	public BulkDataExportOptions() {
 
-	}
 
 	public enum ExportStyle {
 		PATIENT,
@@ -40,10 +43,13 @@ public class BulkDataExportOptions {
 	private Set<String> myResourceTypes;
 	private Date mySince;
 	private Set<String> myFilters;
+	private Set<String> myPostFetchFilterUrls;
 	private ExportStyle myExportStyle;
 	private boolean myExpandMdm;
 	private IIdType myGroupId;
 	private Set<IIdType> myPatientIds;
+
+	private String myExportIdentifier;
 
 	public void setOutputFormat(String theOutputFormat) {
 		myOutputFormat = theOutputFormat;
@@ -73,7 +79,11 @@ public class BulkDataExportOptions {
 		return myOutputFormat;
 	}
 
+	@Nonnull
 	public Set<String> getResourceTypes() {
+		if (myResourceTypes == null) {
+			myResourceTypes = Set.of();
+		}
 		return myResourceTypes;
 	}
 
@@ -81,8 +91,24 @@ public class BulkDataExportOptions {
 		return mySince;
 	}
 
+	@Nonnull
 	public Set<String> getFilters() {
+		if (myFilters == null) {
+			myFilters = Set.of();
+		}
 		return myFilters;
+	}
+
+	@Nonnull
+	public Set<String> getPostFetchFilterUrls() {
+		if (myPostFetchFilterUrls == null) {
+			myPostFetchFilterUrls = Set.of();
+		}
+		return myPostFetchFilterUrls;
+	}
+
+	public void setPostFetchFilterUrls(Set<String> thePostFetchFilterUrls) {
+		myPostFetchFilterUrls = thePostFetchFilterUrls;
 	}
 
 	public boolean isExpandMdm() {
@@ -107,5 +133,13 @@ public class BulkDataExportOptions {
 
 	public void setPatientIds(Set<IIdType> thePatientIds) {
 		myPatientIds = thePatientIds;
+	}
+
+	public String getExportIdentifier() {
+		return myExportIdentifier;
+	}
+
+	public void setExportIdentifier(String theExportIdentifier) {
+		myExportIdentifier = theExportIdentifier;
 	}
 }

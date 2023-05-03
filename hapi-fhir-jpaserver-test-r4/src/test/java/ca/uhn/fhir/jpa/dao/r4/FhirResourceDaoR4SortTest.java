@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -35,7 +35,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public final void after() {
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 	}
 
 	@Test
@@ -216,7 +216,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSortOnSparselyPopulatedFields() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		IIdType pid1, pid2, pid3, pid4, pid5, pid6;
 		{
@@ -264,7 +264,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSortOnSparselyPopulatedSearchParameter() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		Patient pCA = new Patient();
 		pCA.setId("CA");
@@ -326,7 +326,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSortWithChainedSearch() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		Patient pCA = new Patient();
 		pCA.setId("CA");

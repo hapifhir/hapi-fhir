@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,14 @@ package ca.uhn.fhir.mdm.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
@@ -116,8 +115,6 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		if (theOldResource != null) {
 			forbidIfMdmManagedTagIsPresent(theOldResource);
 			forbidModifyingMdmTag(theUpdatedResource, theOldResource);
-		} else {
-			ourLog.warn("Null theOldResource for {} {}", theUpdatedResource == null ? "null updated resource" : theUpdatedResource.getIdElement(), theRequestDetails);
 		}
 
 		if (myMdmSettings.isPreventEidUpdates()) {

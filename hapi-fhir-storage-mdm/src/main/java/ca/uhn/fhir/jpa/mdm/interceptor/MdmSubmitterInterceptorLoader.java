@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.interceptor;
-
 /*-
  * #%L
- * HAPI FHIR JPA Server - Master Data Management
+ * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
@@ -39,7 +38,7 @@ public class MdmSubmitterInterceptorLoader {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 	@Autowired
-	DaoConfig myDaoConfig;
+	JpaStorageSettings myStorageSettings;
 	@Autowired
 	private IMdmStorageInterceptor myIMdmStorageInterceptor;
 	@Autowired
@@ -50,12 +49,12 @@ public class MdmSubmitterInterceptorLoader {
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 
 	@PostConstruct
-	public void start() {
+	public void loadInterceptors() {
 		if (!myMdmSettings.isEnabled()) {
 			return;
 		}
 
-		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
+		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 		myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
 		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
 		ourLog.info("MDM interceptor registered");

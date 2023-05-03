@@ -16,8 +16,10 @@ public class FhirResourceDaoCustomTypeR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCustomTypeR4Test.class);
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myFhirContext.setDefaultTypeForProfile(CustomObservationR4.PROFILE, CustomObservationR4.class);
 	}
 	

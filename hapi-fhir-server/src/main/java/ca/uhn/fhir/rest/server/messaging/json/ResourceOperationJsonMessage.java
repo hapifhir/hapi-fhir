@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.messaging.json;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.messaging.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -71,7 +70,13 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 
 	@Nullable
 	@Override
-	public String getMessageKeyOrNull() {
-		return myPayload.getMessageKeyOrNull();
+	public String getMessageKey() {
+		return myPayload.getMessageKey();
+	}
+
+	@Nullable
+	@Override
+	public String getMessageKeyOrDefault() {
+		return myPayload.getMessageKeyOrDefault();
 	}
 }

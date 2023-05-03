@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,11 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -130,7 +130,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		return (List<IBaseResource>) myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));
+		return (List<IBaseResource>) myList.subList(Math.min(theFromIndex, myList.size()), Math.min(theToIndex, myList.size()));
 	}
 
 	@Override
@@ -168,4 +168,10 @@ public class SimpleBundleProvider implements IBundleProvider {
 		return mySize;
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("mySize", mySize)
+			.toString();
+	}
 }

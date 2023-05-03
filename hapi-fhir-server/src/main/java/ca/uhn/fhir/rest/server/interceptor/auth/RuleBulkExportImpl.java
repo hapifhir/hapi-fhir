@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -32,6 +31,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class RuleBulkExportImpl extends BaseRule {
@@ -60,8 +61,8 @@ public class RuleBulkExportImpl extends BaseRule {
 			return null;
 		}
 
-		if (myResourceTypes != null && !myResourceTypes.isEmpty()) {
-			if (options.getResourceTypes() == null) {
+		if (isNotEmpty(myResourceTypes)) {
+			if (isEmpty(options.getResourceTypes())) {
 				return null;
 			}
 			for (String next : options.getResourceTypes()) {

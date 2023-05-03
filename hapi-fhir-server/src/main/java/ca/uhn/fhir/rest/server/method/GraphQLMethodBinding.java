@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.method;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -167,7 +166,7 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 		}
 
 		// Write the response
-		Writer writer = theRequest.getResponse().getResponseWriter(statusCode, statusMessage, contentType, charset, respondGzip);
+		Writer writer = theRequest.getResponse().getResponseWriter(statusCode, contentType, charset, respondGzip);
 		writer.write(responseString);
 		writer.close();
 

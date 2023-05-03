@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.apache.commons.text.RandomStringGenerator;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,12 +33,12 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 	@AfterEach
 	public final void after() {
 		when(mySrd.getRequestId()).thenReturn(null);
-		myDaoConfig.setStoreMetaSourceInformation(new DaoConfig().getStoreMetaSourceInformation());
+		myStorageSettings.setStoreMetaSourceInformation(new JpaStorageSettings().getStoreMetaSourceInformation());
 	}
 
 	@BeforeEach
 	public void before() {
-		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
+		myStorageSettings.setStoreMetaSourceInformation(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
 	}
 
 	@Test
@@ -80,6 +81,30 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testSearchSource_whenSameSourceForMultipleResourceTypes_willMatchSearchResourceTypeOnly(){
+		String sourceUrn = "urn:source:0";
+		String requestId = "a_request_id";
+
+		when(mySrd.getRequestId()).thenReturn(requestId);
+		Patient patient = new Patient();
+		patient.getMeta().setSource(sourceUrn);
+		patient.setActive(true);
+		IIdType ptId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.getMeta().setSource(sourceUrn);
+		myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Constants.PARAM_SOURCE, new TokenParam("urn:source:0"));
+		IBundleProvider result = myPatientDao.search(params);
+
+		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(ptId.getValue()));
+
+	}
 
 	@Test
 	public void testSearchWithOr() {
@@ -184,7 +209,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSourceDisabled() {
-		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.NONE);
+		myStorageSettings.setStoreMetaSourceInformation(JpaStorageSettings.StoreMetaSourceInformationEnum.NONE);
 		when(mySrd.getRequestId()).thenReturn("0000000000000000");
 
 		Patient pt0 = new Patient();

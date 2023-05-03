@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -217,7 +216,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		ourLog.info("Beginning upload - This may take a while...");
 
 		if (ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) {
-			ourLog.info("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
+			ourLog.debug("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
 		}
 
 		IBaseParameters response;
@@ -237,7 +236,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 
 		ourLog.info("Upload complete!");
-		ourLog.info("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
 	private void addFileToRequestBundle(IBaseParameters theInputParameters, String theFileName, byte[] theBytes) {

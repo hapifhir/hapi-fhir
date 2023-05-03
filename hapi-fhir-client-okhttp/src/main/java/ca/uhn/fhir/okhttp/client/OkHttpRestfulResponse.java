@@ -1,21 +1,8 @@
-package ca.uhn.fhir.okhttp.client;
-
-import ca.uhn.fhir.i18n.Msg;
-import java.io.*;
-import java.util.List;
-import java.util.Map;
-
-import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
-import ca.uhn.fhir.util.StopWatch;
-import org.apache.commons.io.IOUtils;
-
-import ca.uhn.fhir.rest.api.Constants;
-
 /*
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +17,18 @@ import ca.uhn.fhir.rest.api.Constants;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.okhttp.client;
+
+import ca.uhn.fhir.i18n.Msg;
+import java.io.*;
+import java.util.List;
+import java.util.Map;
+
+import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
+import org.apache.commons.io.IOUtils;
+
+import ca.uhn.fhir.rest.api.Constants;
 
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;

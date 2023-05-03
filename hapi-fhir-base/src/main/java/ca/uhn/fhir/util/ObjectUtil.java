@@ -1,16 +1,8 @@
-package ca.uhn.fhir.util;
-
-import ca.uhn.fhir.i18n.Msg;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Objects;
-import java.util.Optional;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +17,13 @@ import java.util.Optional;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
+
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class ObjectUtil {
 

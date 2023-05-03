@@ -1,16 +1,8 @@
-package ca.uhn.fhir.okhttp.client;
-
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 /*
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +17,13 @@ import java.util.concurrent.TimeUnit;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.okhttp.client;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;

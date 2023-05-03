@@ -1,24 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.broker;
-
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.log.Logs;
-import com.google.common.annotations.VisibleForTesting;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +17,40 @@ import javax.annotation.PreDestroy;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.broker;
+
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.log.Logs;
+import com.google.common.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PreDestroy;
 
 @Service
 public class MdmQueueConsumerLoader {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	@Autowired
-	private MdmMessageHandler myMdmMessageHandler;
-	@Autowired
-	private IChannelFactory myChannelFactory;
-	@Autowired
-	private IMdmSettings myMdmSettings;
+	private final IChannelFactory myChannelFactory;
+	private final IMdmSettings myMdmSettings;
+	private final MdmMessageHandler myMdmMessageHandler;
 
 	protected IChannelReceiver myMdmChannel;
 
-	@PostConstruct
-	public void startListeningToMdmChannel() {
+	public MdmQueueConsumerLoader(IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
+		myChannelFactory = theChannelFactory;
+		myMdmSettings = theMdmSettings;
+		myMdmMessageHandler = theMdmMessageHandler;
+
+		startListeningToMdmChannel();
+	}
+
+
+	private void startListeningToMdmChannel() {
 		if (myMdmChannel == null) {
 			ChannelConsumerSettings config = new ChannelConsumerSettings();
 			

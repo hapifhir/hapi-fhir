@@ -2,13 +2,14 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -91,6 +92,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private final List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
+	@Autowired(required = false)
+	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
@@ -101,12 +104,12 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 		mySubscriptionIds.clear();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
 		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 		myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
@@ -186,6 +189,12 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
+	public void testSubscriptionTopicRegistryBean() {
+		// This bean should not exist in DSTU3
+		assertNull(mySubscriptionTopicRegistry);
+	}
+
+	@Test
 	public void testDatabaseStrategyMeta() throws InterruptedException {
 		String databaseCriteria = "Observation?code=17861-6&context.type=IHD";
 		Subscription subscription = createSubscription(databaseCriteria, null, ourNotificationListenerServer);
@@ -198,7 +207,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testMemoryStrategyMeta() throws InterruptedException {
 		String inMemoryCriteria = "Observation?code=17861-6";
 		Subscription subscription = createSubscription(inMemoryCriteria, null, ourNotificationListenerServer);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
 		List<Coding> tag = subscription.getMeta().getTag();
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());

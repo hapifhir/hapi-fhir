@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
@@ -1927,5 +1926,12 @@ public class XmlUtil {
 		}
 		transformer.transform(new DOMSource(theElement), new StreamResult(buffer));
 		return buffer.toString();
+	}
+
+	/**
+	 * FOR UNIT TESTS ONLY - Used to reset OutputFactory for test cases that customize OutputFactory
+	 */
+	public static void resetOutputFactoryForTest() {
+		ourOutputFactory = null;
 	}
 }

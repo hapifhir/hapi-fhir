@@ -1,10 +1,8 @@
-package ca.uhn.fhir.storage.test;
-
 /*-
  * #%L
  * hapi-fhir-storage-test-utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.storage.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.storage.test;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.conformance.DateSearchTestCase;

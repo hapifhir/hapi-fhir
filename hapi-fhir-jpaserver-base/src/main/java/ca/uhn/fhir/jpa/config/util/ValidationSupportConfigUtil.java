@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.config.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.config.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config.util;
 
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
@@ -27,10 +26,14 @@ public final class ValidationSupportConfigUtil {
 	private ValidationSupportConfigUtil() {}
 
 	public static CachingValidationSupport newCachingValidationSupport(JpaValidationSupportChain theJpaValidationSupportChain) {
+		return newCachingValidationSupport(theJpaValidationSupportChain, false);
+	}
+
+	public static CachingValidationSupport newCachingValidationSupport(JpaValidationSupportChain theJpaValidationSupportChain, boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		// Short timeout for code translation because TermConceptMappingSvcImpl has its own caching
 		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts.defaultValues()
 			.setTranslateCodeMillis(1000);
 
-		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts);
+		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts, theIsEnabledValidationForCodingsLogicalAnd);
 	}
 }

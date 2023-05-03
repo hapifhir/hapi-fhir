@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -59,11 +58,20 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 
 	@Override
 	@Nullable
-	public String getMessageKeyOrNull() {
+	public String getMessageKey() {
 		if (myPayload == null) {
 			return null;
 		}
-		return myPayload.getMessageKeyOrNull();
+		return myPayload.getMessageKey();
+	}
+
+	@Override
+	@Nullable
+	public String getMessageKeyOrDefault() {
+		if (myPayload == null) {
+			return null;
+		}
+		return myPayload.getMessageKeyOrDefault();
 	}
 
 	@Override

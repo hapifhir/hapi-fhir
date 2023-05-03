@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.rp.dstu3.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.PatientResourceProvider;
@@ -64,7 +64,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myDaoConfig.setMaximumSearchResultCountInTransaction(new DaoConfig().getMaximumSearchResultCountInTransaction());
+		myStorageSettings.setMaximumSearchResultCountInTransaction(new JpaStorageSettings().getMaximumSearchResultCountInTransaction());
 	}
 
 	@BeforeEach
@@ -148,10 +148,10 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			.setMethod(HTTPVerb.GET)
 			.setUrl("Patient?_count=5&_sort=_id");
 		
-		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
+		myStorageSettings.setMaximumSearchResultCountInTransaction(100);
 		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -174,7 +174,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			.setUrl("Patient?_count=5&_sort=name");
 		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -221,7 +221,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			.getRequest().setUrl(pid1.getValue()).setMethod(HTTPVerb.PUT);
 
 		Bundle bundle = ourClient.transaction().withBundle(input).execute();
-		ourLog.info("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		//Validate over all bundle response entry contents.
 		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.TRANSACTIONRESPONSE)));
@@ -251,10 +251,10 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			.setMethod(HTTPVerb.GET)
 			.setUrl("Patient?_count=5&_sort=_id");
 		
-		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
+		myStorageSettings.setMaximumSearchResultCountInTransaction(100);
 		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -277,7 +277,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			.setUrl("Patient?_count=5&_sort=name");
 		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -312,7 +312,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		}
 		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		assertEquals(30, output.getEntry().size());
 		for (int i = 0; i < 30; i++) {
@@ -335,7 +335,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			.setUrl("/Patient?_id="+patientId.getIdPart());
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 		assertThat(output.getEntryFirstRep().getResponse().getStatus(), startsWith("200"));
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		List<String> actualIds = toIds(respBundle);

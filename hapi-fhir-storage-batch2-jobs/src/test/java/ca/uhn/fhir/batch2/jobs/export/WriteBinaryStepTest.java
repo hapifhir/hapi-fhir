@@ -6,14 +6,16 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
-import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -25,6 +27,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -97,21 +101,32 @@ public class WriteBinaryStepTest {
 	}
 
 	private StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> createInput(ExpandedResourcesList theData,
-                                                                                             JobInstance theInstance) {
+                                                                                             JobInstance theInstance,
+																														  	boolean thePartitioned) {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setStartDate(new Date());
+		parameters.setSince(new Date());
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
-		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input = new StepExecutionDetails<>(
+		parameters.setPartitionId(getPartitionId(thePartitioned));
+		return new StepExecutionDetails<>(
 			parameters,
 			theData,
 			theInstance,
 			"1"
 		);
-		return input;
 	}
 
-	@Test
-	public void run_validInputNoErrors_succeeds() {
+	private RequestPartitionId getPartitionId(boolean thePartitioned) {
+		if (thePartitioned) {
+			return RequestPartitionId.fromPartitionName("Partition-A");
+		} else {
+			return RequestPartitionId.defaultPartition();
+		}
+	}
+
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void run_validInputNoErrors_succeeds(boolean thePartitioned) {
 		// setup
 		ExpandedResourcesList expandedResources = new ExpandedResourcesList();
 		JobInstance instance = new JobInstance();
@@ -121,7 +136,7 @@ public class WriteBinaryStepTest {
 		expandedResources.setResourceType("Patient");
 		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
 		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
-		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input = createInput(expandedResources, instance);
+		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input = createInput(expandedResources, instance, thePartitioned);
 		IIdType binaryId = new IdType("Binary/123");
 		DaoMethodOutcome methodOutcome = new DaoMethodOutcome();
 		methodOutcome.setId(binaryId);
@@ -139,8 +154,9 @@ public class WriteBinaryStepTest {
 		assertEquals(new RunOutcome(stringified.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
 
 		ArgumentCaptor<IBaseBinary> binaryCaptor = ArgumentCaptor.forClass(IBaseBinary.class);
+		ArgumentCaptor<SystemRequestDetails> binaryDaoCreateRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(binaryDao)
-			.create(binaryCaptor.capture(), any(RequestDetails.class));
+			.create(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 		String outputString = new String(binaryCaptor.getValue().getContent());
 		// post-pending a \n (as this is what the binary does)
 		String expected = String.join("\n", stringified) + "\n";
@@ -149,6 +165,9 @@ public class WriteBinaryStepTest {
 			outputString,
 			outputString + " != " + expected
 		);
+		if (thePartitioned) {
+			assertEquals(getPartitionId(thePartitioned), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
+		}
 
 		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
 		verify(sink)
@@ -168,7 +187,7 @@ public class WriteBinaryStepTest {
 		expandedResources.setResourceType("Patient");
 		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
 		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
-		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input = createInput(expandedResources, instance);
+		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input = createInput(expandedResources, instance, false);
 
 		ourLog.setLevel(Level.ERROR);
 

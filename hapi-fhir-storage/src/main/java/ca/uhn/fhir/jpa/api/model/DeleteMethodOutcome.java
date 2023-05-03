@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.model;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.api.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.model;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
@@ -32,7 +31,7 @@ import java.util.List;
  */
 public class DeleteMethodOutcome extends MethodOutcome {
 
-	private List<ResourceTable> myDeletedEntities;
+	private List<? extends IBasePersistedResource> myDeletedEntities;
 	@Deprecated
 	private long myExpungedResourcesCount;
 	@Deprecated
@@ -45,21 +44,21 @@ public class DeleteMethodOutcome extends MethodOutcome {
 		super(theBaseOperationOutcome);
 	}
 
-	public List<ResourceTable> getDeletedEntities() {
+	public List<? extends IBasePersistedResource> getDeletedEntities() {
 		return myDeletedEntities;
 	}
 
 	/**
-	 * Use {@link ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter#ENTITY_TOTAL_UPDATED_OR_DELETED}
+	 * Use {@literal ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter#ENTITY_TOTAL_UPDATED_OR_DELETED}
 	 */
 	@Deprecated
-	public DeleteMethodOutcome setDeletedEntities(List<ResourceTable> theDeletedEntities) {
+	public DeleteMethodOutcome setDeletedEntities(List<? extends IBasePersistedResource> theDeletedEntities) {
 		myDeletedEntities = theDeletedEntities;
 		return this;
 	}
 
 	/**
-	 * Use {@link  ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener#RESOURCE_TOTAL_PROCESSED}
+	 * Use {@literal ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener#RESOURCE_TOTAL_PROCESSED}
 	 */
 	@Deprecated
 	public long getExpungedResourcesCount() {

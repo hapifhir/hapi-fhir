@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,21 @@ package ca.uhn.fhir.batch2.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.config;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.ReductionStepExecutorServiceImpl;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -68,28 +71,40 @@ public abstract class BaseBatch2Config {
 	public IJobCoordinator batch2JobCoordinator(JobDefinitionRegistry theJobDefinitionRegistry,
 															  BatchJobSender theBatchJobSender,
 															  WorkChunkProcessor theExecutor,
-															  IJobMaintenanceService theJobMaintenanceService) {
+															  IJobMaintenanceService theJobMaintenanceService,
+															  IHapiTransactionService theTransactionService) {
 		return new JobCoordinatorImpl(
 			theBatchJobSender,
 			batch2ProcessingChannelReceiver(myChannelFactory),
 			myPersistence,
 			theJobDefinitionRegistry,
 			theExecutor,
-			theJobMaintenanceService);
+			theJobMaintenanceService,
+			theTransactionService);
+	}
+
+	@Bean
+	public IReductionStepExecutorService reductionStepExecutorService(IJobPersistence theJobPersistence,
+																							IHapiTransactionService theTransactionService,
+																							JobDefinitionRegistry theJobDefinitionRegistry) {
+		return new ReductionStepExecutorServiceImpl(theJobPersistence, theTransactionService, theJobDefinitionRegistry);
 	}
 
 	@Bean
 	public IJobMaintenanceService batch2JobMaintenanceService(ISchedulerService theSchedulerService,
 																				 JobDefinitionRegistry theJobDefinitionRegistry,
+																				 JpaStorageSettings theStorageSettings,
 																				 BatchJobSender theBatchJobSender,
-																				 WorkChunkProcessor theExecutor
+																				 WorkChunkProcessor theExecutor,
+																				 IReductionStepExecutorService theReductionStepExecutorService
 	) {
 		return new JobMaintenanceServiceImpl(theSchedulerService,
 			myPersistence,
+			theStorageSettings,
 			theJobDefinitionRegistry,
 			theBatchJobSender,
-			theExecutor
-		);
+			theExecutor,
+			theReductionStepExecutorService);
 	}
 
 	@Bean

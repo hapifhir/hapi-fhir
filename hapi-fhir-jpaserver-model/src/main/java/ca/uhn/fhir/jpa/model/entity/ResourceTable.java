@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +17,22 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Session;
 import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.GeneratorType;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
@@ -63,7 +61,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -77,16 +74,18 @@ import java.util.stream.Collectors;
 
 @Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
-@Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
+@Table(name = ResourceTable.HFJ_RESOURCE, uniqueConstraints = {}, indexes = {
 	// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
-	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
+	@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
 	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
 })
 @NamedEntityGraph(name = "Resource.noJoins")
-public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
+public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final long serialVersionUID = 1L;
+	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
+	public static final String RES_TYPE = "RES_TYPE";
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
@@ -113,7 +112,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private boolean myHasLinks;
 
 	@Id
-	@SequenceGenerator(name = "SEQ_RESOURCE_ID", sequenceName = "SEQ_RESOURCE_ID")
+	@GenericGenerator(name = "SEQ_RESOURCE_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
 	@GenericField(projectable = Projectable.YES)
@@ -262,7 +261,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinksAsTarget;
 
-	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = false)
+	@Column(name = RES_TYPE, length = RESTYPE_LEN, nullable = false)
 	@FullTextField
 	@OptimisticLock(excluded = true)
 	private String myResourceType;
@@ -295,6 +294,15 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	// Make sure the generator doesn't bump the history version.
 	@OptimisticLock(excluded = true)
 	private String myFhirId;
+
+	/**
+	 * Is there a corresponding row in {@link ResourceSearchUrlEntity} for
+	 * this row.
+	 * TODO: Added in 6.6.0 - Should make this a primitive boolean at some point
+	 */
+	@OptimisticLock(excluded = true)
+	@Column(name = "SEARCH_URL_PRESENT", nullable = true)
+	private Boolean mySearchUrlPresent = false;
 
 	/**
 	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
@@ -590,7 +598,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	public void setParamsComboTokensNonUniquePresent(boolean theParamsComboTokensNonUniquePresent) {
-		myParamsComboStringUniquePresent = theParamsComboTokensNonUniquePresent;
+		myParamsComboTokensNonUniquePresent = theParamsComboTokensNonUniquePresent;
 	}
 
 	public boolean isParamsCoordsPopulated() {
@@ -692,6 +700,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myNarrativeText = theNarrativeText;
 	}
 
+	public boolean isSearchUrlPresent() {
+		return Boolean.TRUE.equals(mySearchUrlPresent);
+	}
+
+	public void setSearchUrlPresent(boolean theSearchUrlPresent) {
+		mySearchUrlPresent = theSearchUrlPresent;
+	}
+
 	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
 		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
@@ -768,7 +784,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	@Override
-	public IResourcePersistentId getPersistentId() {
+	public JpaPid getPersistentId() {
 		return JpaPid.fromId(getId());
 	}
 
@@ -799,7 +815,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
-		if (getTransientForcedId() != null) {
+		if (myFhirId != null) {
+			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
 			retVal.setValue(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else if (getForcedId() == null) {

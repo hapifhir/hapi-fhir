@@ -4,7 +4,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
+import com.helger.commons.lang.StackTraceHelper;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -26,6 +27,7 @@ import javax.servlet.ServletException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -67,10 +69,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			});
 		}
 
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
-		myDaoConfig.setMassIngestionMode(new DaoConfig().isMassIngestionMode());
-		myDaoConfig.setMatchUrlCacheEnabled(new DaoConfig().getMatchUrlCache());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
+		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
 	}
 
 	@BeforeEach
@@ -78,9 +80,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
-		myDaoConfig.setUniqueIndexesEnabled(true);
+		myStorageSettings.setUniqueIndexesEnabled(true);
 
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 
 		myPartitionDate = LocalDate.of(2020, Month.JANUARY, 14);
 		myPartitionDate2 = LocalDate.of(2020, Month.FEBRUARY, 15);
@@ -90,12 +92,12 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionInterceptor = new MyReadWriteInterceptor();
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_3));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(4).setName(PARTITION_4));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_3), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(4).setName(PARTITION_4), null);
 
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		// Ensure the partition names are resolved
 		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_1, PARTITION_2, PARTITION_3, PARTITION_4));
@@ -105,10 +107,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 	protected void createUniqueCompositeSp() {
 		addCreateDefaultPartition();
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addReadDefaultPartition(); // one for search param validation
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate");
 		sp.setType(Enumerations.SearchParamType.DATE);
@@ -119,9 +118,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParameterDao.update(sp, mySrd);
 
 		addCreateDefaultPartition();
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate-unique");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
@@ -205,12 +201,30 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 		public void addReadPartition(RequestPartitionId theRequestPartitionId) {
 			myReadRequestPartitionIds.add(theRequestPartitionId);
+			ourLog.info("Adding partition {} for read (not have {})", theRequestPartitionId, myReadRequestPartitionIds.size());
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 		public RequestPartitionId partitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+
+			// Just to be nice, figure out the first line in the stack that isn't a part of the
+			// partitioning or interceptor infrastructure, just so it's obvious who is asking
+			// for a partition ID
+			String stack;
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				stack = StackTraceHelper.getStackAsString(e);
+				stack = Arrays.stream(stack.split("\\n"))
+					.filter(t->t.contains("ca.uhn.fhir"))
+					.filter(t->!t.toLowerCase().contains("interceptor"))
+					.filter(t->!t.toLowerCase().contains("partitionhelper"))
+					.findFirst()
+					.orElse("UNKNOWN");
+			}
+
 			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
-			ourLog.info("Returning partition for read: {}", retVal);
+			ourLog.info("Returning partition {} for read at: {}", retVal, stack);
 			return retVal;
 		}
 

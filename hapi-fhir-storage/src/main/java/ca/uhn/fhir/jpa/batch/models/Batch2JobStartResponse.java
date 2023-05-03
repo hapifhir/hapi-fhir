@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.batch.models;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,14 @@ package ca.uhn.fhir.jpa.batch.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.batch.models;
 
 public class Batch2JobStartResponse {
 
 	/**
-	 * The job id
+	 * The job instance id
 	 */
-	private String myJobId;
+	private String myInstanceId;
 
 	/**
 	 * True if an existing job is being used instead
@@ -34,12 +33,12 @@ public class Batch2JobStartResponse {
 	 */
 	private boolean myUsesCachedResult;
 
-	public String getJobId() {
-		return myJobId;
+	public String getInstanceId() {
+		return myInstanceId;
 	}
 
-	public void setJobId(String theJobId) {
-		myJobId = theJobId;
+	public void setInstanceId(String theInstanceId) {
+		myInstanceId = theInstanceId;
 	}
 
 	public boolean isUsesCachedResult() {

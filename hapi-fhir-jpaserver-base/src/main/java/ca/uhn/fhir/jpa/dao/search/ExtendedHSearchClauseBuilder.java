@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,12 @@ package ca.uhn.fhir.jpa.dao.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
@@ -97,15 +96,15 @@ public class ExtendedHSearchClauseBuilder {
 
 	final FhirContext myFhirContext;
 	public final BooleanPredicateClausesStep<?> myRootClause;
-	public final ModelConfig myModelConfig;
+	public final StorageSettings myStorageSettings;
 	final PathContext myRootContext;
 
 	final List<TemporalPrecisionEnum> ordinalSearchPrecisions = Arrays.asList(TemporalPrecisionEnum.YEAR, TemporalPrecisionEnum.MONTH, TemporalPrecisionEnum.DAY);
 
-	public ExtendedHSearchClauseBuilder(FhirContext myFhirContext, ModelConfig theModelConfig,
+	public ExtendedHSearchClauseBuilder(FhirContext myFhirContext, StorageSettings theStorageSettings,
 													BooleanPredicateClausesStep<?> theRootClause, SearchPredicateFactory thePredicateFactory) {
 		this.myFhirContext = myFhirContext;
-		this.myModelConfig = theModelConfig;
+		this.myStorageSettings = theStorageSettings;
 		this.myRootClause = theRootClause;
 		myRootContext = PathContext.buildRootContext(theRootClause, thePredicateFactory);
 	}
@@ -452,7 +451,7 @@ public class ExtendedHSearchClauseBuilder {
 			booleanStep.minimumShouldMatchNumber(1);
 			return booleanStep;
 		}
-		throw new IllegalArgumentException(Msg.code(2025) + "Date search param does not support prefix of type: " + prefix);
+		throw new IllegalArgumentException(Msg.code(2255) + "Date search param does not support prefix of type: " + prefix);
 	}
 
 	private PredicateFinalStep generateDateInstantSearchTerms(DateParam theDateParam, PathContext theSpContext) {
@@ -496,7 +495,7 @@ public class ExtendedHSearchClauseBuilder {
 			return ((SearchPredicateFactory) theSpContext).range().field(lowerInstantField).atMost(upperBoundAsInstant);
 		}
 
-		throw new IllegalArgumentException(Msg.code(2026) + "Date search param does not support prefix of type: " + prefix);
+		throw new IllegalArgumentException(Msg.code(2256) + "Date search param does not support prefix of type: " + prefix);
 	}
 
 
@@ -534,7 +533,7 @@ public class ExtendedHSearchClauseBuilder {
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
 		String quantityElement = joinPath(thePathContext.getContextPath(), INDEX_TYPE_QUANTITY);
 
-		if (myModelConfig.getNormalizedQuantitySearchLevel() == NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
+		if (myStorageSettings.getNormalizedQuantitySearchLevel() == NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
 			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
 			if (canonicalQty != null) {
 				String valueFieldPath = joinPath(quantityElement, QTY_VALUE_NORM);
@@ -738,7 +737,6 @@ public class ExtendedHSearchClauseBuilder {
 					subMatch = buildNumericClause(value, componentContext);
 					break;
 				case REFERENCE:
-				// wipmb Can we use reference in composite?
 
 				default:
 					break;

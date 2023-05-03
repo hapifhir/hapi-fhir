@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,12 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.helger.commons.io.file.FileHelper;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -43,6 +43,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.fusesource.jansi.Ansi.ansi;
@@ -63,6 +64,7 @@ public abstract class BaseApp {
 		ourLog = LoggerFactory.getLogger(App.class);
 	}
 
+	private Consumer<BaseApp> myStartupHook = noop->{};
 	private MyShutdownHook myShutdownHook;
 	private boolean myShutdownHookHasNotRun;
 
@@ -174,7 +176,6 @@ public abstract class BaseApp {
 
 	protected List<BaseCommand> provideCommands() {
 		ArrayList<BaseCommand> commands = new ArrayList<>();
-		commands.add(new RunServerCommand());
 		commands.add(new ExampleDataUploader());
 		commands.add(new ValidateCommand());
 		commands.add(new ValidationDataUploader());
@@ -183,6 +184,7 @@ public abstract class BaseApp {
 		commands.add(new ExportConceptMapToCsvCommand());
 		commands.add(new ImportCsvToConceptMapCommand());
 		commands.add(new HapiFlywayMigrateDatabaseCommand());
+		commands.add(new HapiClearMigrationLockCommand());
 		commands.add(new CreatePackageCommand());
 		commands.add(new BulkImportCommand());
 		commands.add(new ReindexTerminologyCommand());
@@ -255,6 +257,8 @@ public abstract class BaseApp {
 				LogbackUtil.loggingConfigOnDebug();
 				ourDebugMode = true;
 			}
+
+			myStartupHook.accept(this);
 
 			// Actually execute the command
 			command.run(parsedOptions);
@@ -331,6 +335,8 @@ public abstract class BaseApp {
 
 	private void exitDueToException(Throwable e) {
 		if (HapiSystemProperties.isTestModeEnabled()) {
+			ourLog.error("In test-mode - block exit with error status.");
+			ourLog.error("FAILURE: {}", e.getMessage());
 			if (e instanceof CommandFailureException) {
 				throw (CommandFailureException) e;
 			}
@@ -356,6 +362,11 @@ public abstract class BaseApp {
 			System.err.println(provideProductName() + " requires Java 1.8+ to run (detected " + specVersion + ")");
 			System.exit(1);
 		}
+	}
+
+	@VisibleForTesting
+	public void setStartupHook(Consumer<BaseApp> theStartupHook) {
+		myStartupHook = theStartupHook;
 	}
 
 	private class MyShutdownHook extends Thread {

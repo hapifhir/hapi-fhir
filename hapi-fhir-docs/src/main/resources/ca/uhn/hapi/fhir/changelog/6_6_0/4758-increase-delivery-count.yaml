@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4758
+title: "The JPA server REST-HOOK subscription delivery client had a hardcoded connection pool
+   limit of 20 outgoing connections. This has been increased to 1000, since subscriptions
+   themselves and their delivery channels already act as a rate-limiting step."

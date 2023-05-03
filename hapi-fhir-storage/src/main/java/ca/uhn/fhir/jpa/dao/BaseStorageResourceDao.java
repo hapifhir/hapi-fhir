@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -116,6 +115,12 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		}
 
 		IBaseResource resourceToUpdate = getStorageResourceParser().toResource(entityToUpdate, false);
+		if (resourceToUpdate == null) {
+			// If this is null, we are presumably in a FHIR transaction bundle with both a create and a patch on the same
+			// resource. This is weird but not impossible.
+			resourceToUpdate = theTransactionDetails.getResolvedResource(resourceId);
+		}
+
 		IBaseResource destination;
 		switch (thePatchType) {
 			case JSON_PATCH:
@@ -165,7 +170,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		}
 
 		IBaseResource oldResource;
-		if (getConfig().isMassIngestionMode()) {
+		if (getStorageSettings().isMassIngestionMode()) {
 			oldResource = null;
 		} else {
 			oldResource = getStorageResourceParser().toResource(theEntity, false);
@@ -216,8 +221,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	}
 
 	protected DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theRequest) {
-		if (!getConfig().canDeleteExpunge()) {
-			throw new MethodNotAllowedException(Msg.code(963) + "_expunge is not enabled on this server: " + getConfig().cannotDeleteExpungeReason());
+		if (!getStorageSettings().canDeleteExpunge()) {
+			throw new MethodNotAllowedException(Msg.code(963) + "_expunge is not enabled on this server: " + getStorageSettings().cannotDeleteExpungeReason());
 		}
 
 		if (theUrl.contains(Constants.PARAMETER_CASCADE_DELETE) || (theRequest.getHeader(Constants.HEADER_CASCADE) != null && theRequest.getHeader(Constants.HEADER_CASCADE).equals(Constants.CASCADE_DELETE))) {
@@ -226,7 +231,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
 		try {
-			String jobId = getDeleteExpungeJobSubmitter().submitJob(getConfig().getExpungeBatchSize(), urlsToDeleteExpunge, theRequest);
+			String jobId = getDeleteExpungeJobSubmitter().submitJob(getStorageSettings().getExpungeBatchSize(), urlsToDeleteExpunge, theRequest);
 			return new DeleteMethodOutcome(createInfoOperationOutcome("Delete job submitted with id " + jobId));
 		} catch (InvalidRequestException e) {
 			throw new InvalidRequestException(Msg.code(965) + "Invalid Delete Expunge Request: " + e.getMessage(), e);

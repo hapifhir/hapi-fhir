@@ -55,7 +55,7 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
 
       Conformance resp = ourCtx.newXmlParser().parseResource(Conformance.class, response);
 
-      ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+      ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
       assertEquals(1, resp.getRest().get(0).getOperation().size());
       assertEquals("$myoperation", resp.getRest().get(0).getOperation().get(0).getName());

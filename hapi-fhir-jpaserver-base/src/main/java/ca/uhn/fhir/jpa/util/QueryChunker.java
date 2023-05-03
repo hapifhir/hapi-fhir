@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.util.TaskChunker;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,24 +33,10 @@ import java.util.function.Consumer;
  * if it's lots of IDs. I suppose maybe we should be doing this as a join anyhow
  * but this should work too. Sigh.
  */
-public class QueryChunker<T> {
+public class QueryChunker<T> extends TaskChunker<T> {
 
 	public void chunk(Collection<T> theInput, Consumer<List<T>> theBatchConsumer) {
 		chunk(theInput, SearchBuilder.getMaximumPageSize(), theBatchConsumer);
 	}
 
-	public void chunk(Collection<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
-		List<T> input;
-		if (theInput instanceof List) {
-			input = (List<T>) theInput;
-		} else {
-			input = new ArrayList<>(theInput);
-		}
-		for (int i = 0; i < input.size(); i += theChunkSize) {
-			int to = i + theChunkSize;
-			to = Math.min(to, input.size());
-			List<T> batch = input.subList(i, to);
-			theBatchConsumer.accept(batch);
-		}
-	}
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.delete.batch2;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.delete.batch2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.delete.batch2;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
@@ -44,13 +43,13 @@ public class DeleteExpungeSqlBuilder {
 	public static final String THREAD_PREFIX = "delete-expunge";
 	
 	private final ResourceTableFKProvider myResourceTableFKProvider;
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	private final IIdHelperService myIdHelper;
 	private final IResourceLinkDao myResourceLinkDao;
 
-	public DeleteExpungeSqlBuilder(ResourceTableFKProvider theResourceTableFKProvider, DaoConfig theDaoConfig, IIdHelperService theIdHelper, IResourceLinkDao theResourceLinkDao) {
+	public DeleteExpungeSqlBuilder(ResourceTableFKProvider theResourceTableFKProvider, JpaStorageSettings theStorageSettings, IIdHelperService theIdHelper, IResourceLinkDao theResourceLinkDao) {
 		myResourceTableFKProvider = theResourceTableFKProvider;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 		myIdHelper = theIdHelper;
 		myResourceLinkDao = theResourceLinkDao;
 	}
@@ -78,7 +77,7 @@ public class DeleteExpungeSqlBuilder {
 	}
 
 	public void validateOkToDeleteAndExpunge(List<Long> thePids) {
-		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
+		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete()) {
 			ourLog.info("Referential integrity on delete disabled.  Skipping referential integrity check.");
 			return;
 		}

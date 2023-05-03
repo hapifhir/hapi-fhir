@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -21,6 +23,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.DelegatingConsentService;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -43,6 +46,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
@@ -54,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,6 +70,7 @@ import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
@@ -96,7 +102,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	public void after() throws Exception {
 		super.after();
 		Validate.notNull(myConsentInterceptor);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(myConsentInterceptor);
 		myServer.getRestfulServer().unregisterProvider(myGraphQlProvider);
 	}
@@ -105,10 +111,35 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 		myServer.getRestfulServer().registerProvider(myGraphQlProvider);
 	}
 
+	@Test
+	public void testConsentServiceWhichReadsDoesNotThrowNpe() {
+		myStorageSettings.setAllowAutoInflateBinaries(true);
+		IConsentService consentService = new ReadingBackResourcesConsentSvc(myDaoRegistry);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
+
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		for (int i = 0; i <10 ;i++) {
+			Observation o = new Observation();
+			o.setId("obs-" + i);
+			builder.addTransactionUpdateEntry(o);
+		}
+		for (int i = 0; i <10 ;i++) {
+			Observation o = new Observation();
+			o.setIdentifier(Lists.newArrayList(new Identifier().setSystem("http://foo").setValue("bar")));
+			builder.addTransactionCreateEntry(o);
+		}
+
+		Bundle execute = (Bundle) myClient.transaction().withBundle(builder.getBundle()).execute();
+		assertThat(execute.getEntry().size(), is(equalTo(20)));
+
+		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
+	}
 	@Test
 	public void testSearchAndBlockSomeWithReject() {
 		create50Observations();
@@ -807,6 +838,42 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 	}
 
+	private static class ReadingBackResourcesConsentSvc implements  IConsentService {
+		private final DaoRegistry myDaoRegistry;
+
+		public ReadingBackResourcesConsentSvc(DaoRegistry theDaoRegistry)   {
+			myDaoRegistry = theDaoRegistry;
+		}
+		@Override
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
+
+		}
+
+		@Override
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			String fhirType = theResource.fhirType();
+			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(fhirType);
+			String currentTransactionName = TransactionSynchronizationManager.getCurrentTransactionName();
+			dao.read(theResource.getIdElement());
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			// nothing
+		}
+
+		@Override
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+			// nothing
+		}
+	}
 	private static class ConsentSvcCantSeeOddNumbered implements IConsentService {
 
 		@Override

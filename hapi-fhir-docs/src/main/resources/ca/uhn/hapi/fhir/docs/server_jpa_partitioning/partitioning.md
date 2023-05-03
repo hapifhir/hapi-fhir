@@ -57,7 +57,7 @@ This fact can have security implications:
   in use in another partition.
 
 * In a server using the default configuration of
-  SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum))
+  SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.JpaStorageSettings.IdStrategyEnum))
   a client may be able to infer the IDs of resources in other partitions based on the ID they were assigned.
 
 These considerations can be addressed by using UUID Server ID Strategy, and disallowing client-assigned IDs.  
@@ -81,7 +81,7 @@ The criteria for determining the partition will depend on your use case. For exa
 
 ## Identify Partition for Read (Optional)
 
-A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ) pointcut must be registered, and this hook method will be invoked every time a resource is created in order to determine the partition to assign the resource to.
+A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ) pointcut must be registered, and this hook method will be invoked every time a resource is read in order to determine the partition to read the resource from.
 
 As of HAPI FHIR 5.3.0, the *Identify Partition for Read* hook method may return multiple partition names or IDs. If more than one partition is identified, the server will search in all identified partitions.  
 
@@ -167,8 +167,6 @@ None of the limitations listed here are considered permanent. Over time the HAPI
 
 * **Cross-partition History Operations are not supported**: It is not possible to perform a `_history` operation that spans all partitions (`_history` does work when applied to a single partition however). 
    
-* **Bulk Operations are not partition aware**: Bulk export operations will export data across all partitions.
-
 * **Package Operations are not partition aware**: Package operations will only create, update and query resources in the default partition.
 
 * **Advanced Elasticsearch indexing is not partition optimized**: The results are correctly partitioned, but the extended indexing is not optimized to account for partitions. 

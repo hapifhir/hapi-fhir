@@ -1,25 +1,38 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.ClinicalUseDefinition;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Composition;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.ObservationDefinition;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.PractitionerRole;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.SearchParameter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Date;
@@ -27,12 +40,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR5SearchNoFtTest.class);
+
+	@AfterEach
+	public void after() {
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+	}
 
 	@Test
 	public void testHasWithTargetReference() {
@@ -197,4 +217,122 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		assertThat(outcome, Matchers.contains(id));
 
 	}
+
+
+	@Test
+	public void testIndexAddressDistrict() {
+		// Setup
+		Patient p = new Patient();
+		p.addAddress()
+			.setDistrict("DISTRICT123");
+		String id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		logAllStringIndexes();
+
+		// Test
+		SearchParameterMap params = SearchParameterMap
+			.newSynchronous(Patient.SP_ADDRESS, new StringParam("DISTRICT123"));
+		IBundleProvider outcome = myPatientDao.search(params, mySrd);
+
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(outcome), Matchers.contains(id));
+
+	}
+
+
+	/**
+	 * Index for
+	 *   [base]/Bundle?composition.patient.identifier=foo
+	 */
+	@ParameterizedTest
+	@CsvSource({"urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b", "Patient/ABC"})
+	public void testCreateAndSearchForFullyChainedSearchParameter(String thePatientId) {
+		// Setup 1
+
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Bundle-composition-patient-identifier");
+		sp.setCode("composition.patient.identifier");
+		sp.setName("composition.patient.identifier");
+		sp.setUrl("http://example.org/SearchParameter/Bundle-composition-patient-identifier");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Bundle.entry[0].resource.as(Composition).subject.resolve().as(Patient).identifier");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.BUNDLE);
+		ourLog.info("SP: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		// Test 1
+
+		Composition composition = new Composition();
+		composition.addSubject().setReference(thePatientId);
+
+		Patient patient = new Patient();
+		patient.setId(new IdType(thePatientId));
+		patient.addIdentifier().setSystem("http://foo").setValue("bar");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+		bundle.addEntry().setResource(patient);
+
+		myBundleDao.create(bundle, mySrd);
+
+		Bundle bundle2 = new Bundle();
+		bundle2.setType(Bundle.BundleType.DOCUMENT);
+		myBundleDao.create(bundle2, mySrd);
+
+		// Verify 1
+		runInTransaction(() -> {
+			logAllTokenIndexes();
+
+			List<String> params = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"composition.patient.identifier http://foo|bar"
+			));
+		});
+
+		// Test 2
+		IBundleProvider outcome;
+
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
+		outcome = myBundleDao.search(map, mySrd);
+		assertEquals(1, outcome.size());
+
+		map = SearchParameterMap
+			.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
+		outcome = myBundleDao.search(map, mySrd);
+		assertEquals(1, outcome.size());
+	}
+
+    @Test
+    public void testHasWithNonExistentReferenceField() {
+        String targetResource = "Encounter";
+        String referenceFieldName = "non_existent_reference";
+        String parameterValue = "123";
+        HasParam hasParam = new HasParam(targetResource, referenceFieldName, Constants.PARAM_ID, parameterValue);
+
+        HasAndListParam hasAnd = new HasAndListParam();
+        hasAnd.addValue(new HasOrListParam().add(hasParam));
+        SearchParameterMap params = SearchParameterMap.newSynchronous();
+        params.add(Constants.PARAM_HAS, hasAnd);
+
+        try {
+            myObservationDao.search(params, new SystemRequestDetails());
+            fail();
+        } catch (InvalidRequestException e) {
+            assertEquals("HAPI-2305: Reference field does not exist: " + referenceFieldName, e.getMessage());
+        }
+    }
+
+
 }

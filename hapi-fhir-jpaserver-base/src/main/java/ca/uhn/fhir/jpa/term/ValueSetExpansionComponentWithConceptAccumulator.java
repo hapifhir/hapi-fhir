@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
@@ -250,7 +249,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			ValueSet.ValueSetExpansionContainsComponent nextContains = this.getContains().get(i);
 
 			String directParentPidsString = myConceptToSourceDirectParentPids.get(nextContains);
-			if (isNotBlank(directParentPidsString)) {
+			if (isNotBlank(directParentPidsString) && !directParentPidsString.equals("NONE")) {
 				List<Long> directParentPids = Arrays.stream(directParentPidsString.split(" ")).map(t -> Long.parseLong(t)).collect(Collectors.toList());
 
 				boolean firstMatch = false;

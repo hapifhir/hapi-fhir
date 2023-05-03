@@ -1619,7 +1619,7 @@ public class XmlParserDstu3Test {
 		child.setValue(new StringType("CHILD_VALUE"));
 
 		// Lenient error handler
-		IParser parser = ourCtx.newXmlParser();
+		IParser parser = ourCtx.newXmlParser().setParserErrorHandler(new LenientErrorHandler(false).disableAllErrors());
 		String output = parser.encodeResourceToString(p);
 		ourLog.info("Output: {}", output);
 		assertThat(output, containsString("http://root"));
@@ -2502,25 +2502,10 @@ public class XmlParserDstu3Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
-		assertThat(encoded, stringContainsInOrder(
-			"\"identifier\": [",
-			"{",
-			"\"fhir_comments\":",
-			"[",
-			"\"identifier comment 1\"",
-			",",
-			"\"identifier comment 2\"",
-			"]",
-			"\"use\": \"usual\",",
-			"\"_use\": {",
-			"\"fhir_comments\":",
-			"[",
-			"\"use comment 1\"",
-			",",
-			"\"use comment 2\"",
-			"]",
-			"},",
-			"\"type\""));
+		assertThat(encoded, not(containsString("use comment 1")));
+		assertThat(encoded, not(containsString("use comment 2")));
+		assertThat(encoded, not(containsString("identifier comment 1")));
+		assertThat(encoded, not(containsString("identifier comment 2")));
 
 		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
@@ -2599,29 +2584,13 @@ public class XmlParserDstu3Test {
 		output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(pat);
 		ourLog.info(output);
 
-		assertThat(output, stringContainsInOrder("{",
-			"  \"resourceType\": \"Patient\",",
-			"  \"id\": \"someid\",",
-			"  \"_id\": {",
-			"    \"fhir_comments\": [ \" comment 1 \" ]",
-			"  },",
-			"  \"extension\": [ {",
-			"    \"fhir_comments\": [ \" comment 2 \", \" comment 7 \" ],",
-			"    \"url\": \"urn:patientext:att\",",
-			"    \"valueAttachment\": {",
-			"      \"fhir_comments\": [ \" comment 3 \", \" comment 6 \" ],",
-			"      \"contentType\": \"aaaa\",",
-			"      \"_contentType\": {",
-			"        \"fhir_comments\": [ \" comment 4 \" ]",
-			"      },",
-			"      \"data\": \"AAAA\",",
-			"      \"_data\": {",
-			"        \"fhir_comments\": [ \" comment 5 \" ]",
-			"      }",
-			"    }",
-			"  } ]",
-			"}"));
-
+		assertThat(output, not(containsString("comment 1")));
+		assertThat(output, not(containsString("comment 2")));
+		assertThat(output, not(containsString("comment 3")));
+		assertThat(output, not(containsString("comment 4")));
+		assertThat(output, not(containsString("comment 5")));
+		assertThat(output, not(containsString("comment 6")));
+		assertThat(output, not(containsString("comment 6")));
 	}
 
 	@Test
@@ -2849,7 +2818,7 @@ public class XmlParserDstu3Test {
 		assertEquals("#2179414-cm", ((Reference) ext.getValue()).getReference());
 		assertEquals(ConceptMap.class, ((Reference) ext.getValue()).getResource().getClass());
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
 
 		assertThat(output, containsString("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset"));
 

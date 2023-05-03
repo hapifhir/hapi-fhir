@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +17,9 @@ package ca.uhn.fhir.jpa.api.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.model;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 
 import java.util.Date;
@@ -46,6 +46,8 @@ public class Batch2JobInfo {
 
 	// the output report (stringified json of whatever the reduction step outputs)
 	private String myReport;
+
+	private RequestPartitionId myRequestPartitionId;
 
 	public String getJobId() {
 		return myJobId;
@@ -101,5 +103,13 @@ public class Batch2JobInfo {
 
 	public void setErrorMsg(String theErrorMsg) {
 		myErrorMsg = theErrorMsg;
+	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
+	}
+
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+		myRequestPartitionId = theRequestPartitionId;
 	}
 }

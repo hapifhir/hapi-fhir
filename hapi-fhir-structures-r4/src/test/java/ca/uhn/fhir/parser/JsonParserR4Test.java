@@ -25,6 +25,9 @@ import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.hl7.fhir.r4.model.MedicationRequest;
@@ -69,6 +72,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -469,7 +473,6 @@ public class JsonParserR4Test extends BaseTest {
 
 	}
 
-
 	@Test
 	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions() {
 
@@ -481,14 +484,15 @@ public class JsonParserR4Test extends BaseTest {
 		child.setUrl("http://child");
 		child.setValue(new StringType("CHILD_VALUE"));
 
+		// According to issue4129, all error handlers should reject malformed resources
 		// Lenient error handler
 		IParser parser = ourCtx.newJsonParser();
-		String output = parser.encodeResourceToString(p);
-		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("http://root"));
-		assertThat(output, containsString("ROOT_VALUE"));
-		assertThat(output, containsString("http://child"));
-		assertThat(output, containsString("CHILD_VALUE"));
+		try {
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
+		}
 
 		// Strict error handler
 		try {
@@ -499,6 +503,30 @@ public class JsonParserR4Test extends BaseTest {
 			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
+	}
+
+	@Test
+	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions_withDisableAllErrorsShouldSucceed() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setUrl("http://root");
+		root.setValue(new StringType("ROOT_VALUE"));
+		Extension child = root.addExtension();
+		child.setUrl("http://child");
+		child.setValue(new StringType("CHILD_VALUE"));
+
+		// Lenient error handler - should parse successfully with no error
+		LenientErrorHandler errorHandler = new LenientErrorHandler(true).disableAllErrors();
+		IParser parser = ourCtx.newJsonParser().setParserErrorHandler(errorHandler);
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("http://root"));
+		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output, containsString("http://child"));
+		assertThat(output, containsString("CHILD_VALUE"));
+		assertEquals(false, errorHandler.isErrorOnInvalidExtension());
+		assertEquals(false, errorHandler.isErrorOnInvalidValue());
 	}
 
 	@Test
@@ -1099,6 +1127,28 @@ public class JsonParserR4Test extends BaseTest {
 
 	}
 
+	@Test
+	public void testPreCommentsToFhirComments() {
+		final Patient patient = new Patient();
+
+		final Identifier identifier = new Identifier();
+		identifier.setValue("myId");
+		identifier.getFormatCommentsPre().add("This is a comment");
+		patient.getIdentifier().add(identifier);
+
+		final HumanName humanName1 = new HumanName();
+		humanName1.addGiven("given1");
+		humanName1.getFormatCommentsPre().add("This is another comment");
+		patient.getName().add(humanName1);
+
+		final HumanName humanName2 = new HumanName();
+		humanName2.addGiven("given1");
+		humanName2.getFormatCommentsPre().add("This is yet another comment");
+		patient.getName().add(humanName2);
+
+		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(patientString, is(not(containsString("fhir_comment"))));
+	}
 
 	@DatatypeDef(
 		name = "UnknownPrimitiveType"

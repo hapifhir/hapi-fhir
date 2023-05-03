@@ -4,14 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir-bom</artifactId>
-	<version>6.3.4-SNAPSHOT</version>
+	<version>6.7.0-SNAPSHOT</version>
+
 	<packaging>pom</packaging>
 	<name>HAPI FHIR BOM</name>
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.3.4-SNAPSHOT</version>
+		<version>6.7.0-SNAPSHOT</version>
+
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -75,6 +77,11 @@
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-jpaserver-elastic-test-utilities</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-ips</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -154,6 +161,11 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-storage-cr</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-storage-mdm</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -225,6 +237,11 @@
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-validation-resources-r4</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-validation-resources-r4b</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

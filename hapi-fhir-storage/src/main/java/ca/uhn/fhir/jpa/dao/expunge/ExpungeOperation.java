@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.expunge;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,12 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.expunge;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.slf4j.Logger;
@@ -45,13 +45,15 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	@Autowired
 	private IResourceExpungeService myExpungeDaoService;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	private final String myResourceName;
 	private final IResourcePersistentId myResourceId;
 	private final ExpungeOptions myExpungeOptions;
 	private final RequestDetails myRequestDetails;
 	private final AtomicInteger myRemainingCount;
+	@Autowired
+	private HapiTransactionService myTxService;
 
 	public ExpungeOperation(String theResourceName, IResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		myResourceName = theResourceName;
@@ -116,7 +118,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private PartitionRunner getPartitionRunner() {
-		return new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
+		return new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myStorageSettings.getExpungeBatchSize(), myStorageSettings.getExpungeThreadCount(), myTxService, myRequestDetails);
 	}
 
 	private void deleteCurrentVersionsOfDeletedResources(List<IResourcePersistentId> theResourceIds) {

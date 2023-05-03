@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +17,9 @@ package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
 
+import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class SearchParamSubmitInterceptorLoader {
 	private IInterceptorService myInterceptorRegistry;
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
-	@Order
+	@Order(IHapiBootOrder.REGISTER_INTERCEPTORS)
 	public void start() {
 		ourLog.info("Registering SearchParamValidatingInterceptor interceptor");
 		myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);

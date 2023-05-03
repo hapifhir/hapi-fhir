@@ -6,12 +6,14 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.delete.job.ReindexTestHelper;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
@@ -27,10 +29,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -43,28 +48,30 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setDeleteExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
 
-		myReindexParameterCache = myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange();
-		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
+		myReindexParameterCache = myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+
+		HapiSystemProperties.enableUnitTestMode();
 	}
 
 	@BeforeEach
 	public void disableAdvanceIndexing() {
 		// advanced indexing doesn't support partitions
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 	}
 
 
 	@AfterEach
 	@Override
 	public void after() throws Exception {
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
-		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(myReindexParameterCache);
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setDeleteExpungeEnabled(new JpaStorageSettings().isDeleteExpungeEnabled());
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(myReindexParameterCache);
 		super.after();
 	}
 
@@ -97,7 +104,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.withParameters(input)
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 		myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -151,16 +158,29 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.named(ProviderConstants.OPERATION_REINDEX)
 			.withParameters(input)
 			.execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
+		logAllTokenIndexes();
+
+
 		// validate
+		runInTransaction(()->{
+			long indexedSps = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t->t.getParamName().equals("alleleName"))
+				.count();
+			assertEquals(1, indexedSps, ()->"Token indexes:\n * " + myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t->t.getParamName().equals("alleleName")).map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
+		});
+
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
@@ -175,14 +195,25 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.named(ProviderConstants.OPERATION_REINDEX)
 			.withParameters(input)
 			.execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
+		logAllTokenIndexes();
+
+		runInTransaction(()->{
+			long indexedSps = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t->t.getParamName().equals("alleleName"))
+				.count();
+			assertEquals(3, indexedSps, ()->"Resources:\n * " + myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
 
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 	}
 
 	@Test
@@ -197,6 +228,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		IIdType obsCancelledB = doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED));
 
 		reindexTestHelper.createAlleleSearchParameter();
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
 
 		// The searchparam value is on the observation, but it hasn't been indexed yet
 		myTenantClientInterceptor.setTenantId(TENANT_A);
@@ -208,7 +240,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, "Observation?status=final");
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// Reindex Tenant A by query url 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
@@ -218,16 +250,18 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.named(ProviderConstants.OPERATION_REINDEX)
 			.withParameters(input)
 			.execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
 		// validate
+		logAllTokenIndexes();
+
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));

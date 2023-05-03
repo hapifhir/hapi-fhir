@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -203,10 +202,22 @@ public class InteractionBlockingInterceptor {
 
 			String resourceName = theSpec.substring(0, colonIdx);
 			String interactionName = theSpec.substring(colonIdx + 1);
-			RestOperationTypeEnum interaction = RestOperationTypeEnum.forCode(interactionName);
-			Validate.notNull(interaction, "Unknown interaction %s in spec %s", interactionName, theSpec);
-			addAllowedInteraction(resourceName, interaction);
+			if (interactionName.equals("search")) {
+				interactionName = "search-type";
+				validateInteraction(interactionName, theSpec, resourceName);
+			} else if (interactionName.equals("history")) {
+				validateInteraction("history-instance", theSpec, resourceName);
+				validateInteraction("history-type", theSpec, resourceName);
+			} else {
+				validateInteraction(interactionName, theSpec, resourceName);
+			}
 			return this;
+		}
+
+		private void validateInteraction(String theInteractionName, String theSpec, String theResourceName) {
+			RestOperationTypeEnum interaction = RestOperationTypeEnum.forCode(theInteractionName);
+			Validate.notNull(interaction, "Unknown interaction %s in spec %s", theInteractionName, theSpec);
+			addAllowedInteraction(theResourceName, interaction);
 		}
 
 		/**

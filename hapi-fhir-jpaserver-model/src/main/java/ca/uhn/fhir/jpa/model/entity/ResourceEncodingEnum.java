@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,11 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
-/**
- * @see ResourceHistoryTable#ENCODING_COL_LENGTH
- */
 public enum ResourceEncodingEnum {
 
 	/*
@@ -47,7 +43,13 @@ public enum ResourceEncodingEnum {
 	/**
 	 * Resource was deleted - No contents expected
 	 */
-	DEL;
+	DEL,
+
+	/**
+	 * Externally stored resource - Resource text is a reference to an external storage location,
+	 * which will be stored in {@link ResourceHistoryTable#getResourceTextVc()}
+	 */
+	ESR;
 
 	public IParser newParser(FhirContext theContext) {
 		return theContext.newJsonParser();

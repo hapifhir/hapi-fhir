@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
@@ -51,8 +51,8 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
-		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+		myStorageSettings.setMaximumExpansionSize(new JpaStorageSettings().getMaximumExpansionSize());
 	}
 
 
@@ -380,7 +380,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeableConceptWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -421,7 +421,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeAndSystemWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -500,7 +500,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
-		myDaoConfig.setMaximumExpansionSize(50);
+		myStorageSettings.setMaximumExpansionSize(50);
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
@@ -568,11 +568,53 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(outcome.isOk());
 
 		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/vaccinecode"), new ValueSetExpansionOptions(), mySrd);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
+	}
+
+	/** See #4449 */
+	@Test
+	public void testExpandValueSet_PreExpandedWithHierarchyNoHibernateSearch() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("icd10cm");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://hl7.org/fhir/sid/icd-10-cm");
+		cs.setVersion("2021");
+
+		CodeSystem.ConceptDefinitionComponent parent = cs.addConcept()
+			.setCode("A00")
+			.setDisplay("Cholera");
+		parent.addConcept()
+			.setCode("A00.0")
+			.setDisplay("Cholera due to Vibrio cholerae 01, biovar cholerae");
+		parent.addConcept()
+			.setCode("A00.1")
+			.setDisplay("Cholera due to Vibrio cholerae 01, biovar eltor");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("icd10cm-valueset");
+		vs.setUrl("http://hl7.org/fhir/ValueSet/icd-10-cm");
+		vs.setVersion("2021");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem("http://hl7.org/fhir/sid/icd-10-cm");
+		vsInclude.setVersion("2021");
+		myValueSetDao.update(vs, mySrd);
+
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
+		options.setIncludeHierarchy(true);
+		ValueSet valueSet = myValueSetDao.expand(vs, options);
+
+		assertNotNull(valueSet);
+		assertEquals(1, valueSet.getExpansion().getContains().size());
+		assertEquals(2, valueSet.getExpansion().getContains().get(0).getContains().size());
 	}
 
 
 }
-
-

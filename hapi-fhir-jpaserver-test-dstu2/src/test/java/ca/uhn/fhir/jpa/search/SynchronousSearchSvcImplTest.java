@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.TransactionStatus;
 
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class SynchronousSearchSvcImplTest extends BaseSearchSvc{
+public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 	@InjectMocks
 	private SynchronousSearchSvcImpl mySynchronousSearchSvc;
@@ -44,7 +43,6 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc{
 	@Test
 	public void testSynchronousSearch() {
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
-		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 
 		SearchParameterMap params = new SearchParameterMap();
 
@@ -88,8 +86,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc{
 	@Test
 	public void testSynchronousSearchUpTo() {
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
-		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
-		when(myDaoConfig.getDefaultTotalMode()).thenReturn(null);
+		when(myStorageSettings.getDefaultTotalMode()).thenReturn(null);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(100);

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.util;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,16 @@ package ca.uhn.fhir.jpa.model.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.util;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.fhir.ucum.Decimal;
 import org.fhir.ucum.Pair;
 import org.fhir.ucum.UcumEssenceService;
@@ -173,4 +174,16 @@ public class UcumServiceUtil {
             return null;
         }
     }
+
+	public static double convert(double theDistanceKm, String theSourceUnits, String theTargetUnits) {
+		init();
+		try {
+			Decimal distance = new Decimal(Double.toString(theDistanceKm));
+			Decimal output = myUcumEssenceService.convert(distance, theSourceUnits, theTargetUnits);
+			String decimal = output.asDecimal();
+			return Double.parseDouble(decimal);
+		} catch (UcumException e) {
+			throw new InvalidRequestException(Msg.code(2309) + e.getMessage());
+		}
+	}
 }

@@ -1,15 +1,8 @@
-/**
- * Collection of fhir standard behaviour tests.
- *
- * These require binding into specific contexts (JPA Spring test, full server IT, etc.)
- */
-package ca.uhn.fhir.jpa.conformance;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,3 +17,10 @@ package ca.uhn.fhir.jpa.conformance;
  * limitations under the License.
  * #L%
  */
+/**
+ * Collection of fhir standard behaviour tests.
+ *
+ * These require binding into specific contexts (JPA Spring test, full server IT, etc.)
+ */
+package ca.uhn.fhir.jpa.conformance;
+

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.system;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.system;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.system;
 
 public final class HapiTestSystemProperties {
 	private static final String MASS_INGESTION_MODE = "mass_ingestion_mode";
@@ -43,7 +42,7 @@ public final class HapiTestSystemProperties {
 	}
 
 	/**
-	 * Creates a DaoConfig with setMassIngestionMode(true) at test app context startup time
+	 * Creates a JpaStorageSettings with setMassIngestionMode(true) at test app context startup time
 	 */
 	public static void enableMassIngestionMode() {
 		System.setProperty(MASS_INGESTION_MODE, "true");

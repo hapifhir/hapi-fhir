@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -34,9 +34,9 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@AfterEach
 	public void afterDisableExpunge() {
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 	}
 
 	private void assertExpunged(IIdType theId) {
@@ -113,8 +113,8 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@BeforeEach
 	public void beforeEnableExpunge() {
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	private IFhirResourceDao<?> getDao(IIdType theId) {
@@ -149,7 +149,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
 			.setValue(new BooleanType(true));
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters output = myClient
 			.operation()
@@ -177,7 +177,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeDisabled() {
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 
 		Parameters input = new Parameters();
 		input.addParameter()
@@ -222,7 +222,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING)
 			.setValue(new BooleanType(true));
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters output = myClient
 			.operation()
@@ -261,7 +261,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
 			.setValue(new BooleanType(true));
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters output = myClient
 			.operation()
@@ -307,7 +307,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
 			.setValue(new BooleanType(true));
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters output = myClient
 			.operation()
@@ -338,7 +338,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void testExpungeSucceedsWithIncomingReferences_ReferentialIntegrityDisabled() {
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 
 		Organization org = new Organization();
 		org.setActive(true);

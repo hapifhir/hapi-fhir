@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,9 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
+
+import java.util.Set;
 
 public class HapiExtensions {
 
@@ -139,6 +140,25 @@ public class HapiExtensions {
 	 * This entension allows subscriptions to be marked as cross partition and with correct settings, listen to incoming resources from all partitions.
 	 */
 	public static final String EXTENSION_SUBSCRIPTION_CROSS_PARTITION = "https://smilecdr.com/fhir/ns/StructureDefinition/subscription-cross-partition";
+
+	/**
+	 * This extension is used for "uplifted refchains" on search parameters. See the
+	 * HAPI FHIR documentation for an explanation of how these work.
+	 */
+	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN = "https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain";
+	/**
+	 * This extension is used for "uplifted refchains" on search parameters. See the
+	 * HAPI FHIR documentation for an explanation of how these work.
+	 */
+	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE = "code";
+	/**
+	 * This extension is used for "uplifted refchains" on search parameters. See the
+	 * HAPI FHIR documentation for an explanation of how these work.
+	 */
+	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME = "element-name";
+
+	public static final String EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE = "http://hl7.org/fhir/tools/CustomBaseResource";
+	public static final String EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE = "http://hl7.org/fhir/tools/CustomTargetResource";
 
 	/**
 	 * Non instantiable
