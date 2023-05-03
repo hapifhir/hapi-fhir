@@ -136,6 +136,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -394,7 +395,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		MemoryCacheService.TagDefinitionCacheKey key = toTagDefinitionMemoryCacheKey(theTagType, theScheme, theTerm, theVersion, theUserSelected);
 
 		TagDefinition retVal = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, key);
-
 		if (retVal == null) {
 			HashMap<MemoryCacheService.TagDefinitionCacheKey, TagDefinition> resolvedTagDefinitions = theTransactionDetails
 				.getOrCreateUserData(HapiTransactionService.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS, HashMap::new);
@@ -425,6 +425,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 													 String theVersion, Boolean theUserSelected) {
 
 		TypedQuery<TagDefinition> q = buildTagQuery(theTagType, theScheme, theTerm, theVersion, theUserSelected);
+		//FIXME MB: this is new.
+		q.setMaxResults(1);
 
 		TransactionTemplate template = new TransactionTemplate(myTransactionManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
