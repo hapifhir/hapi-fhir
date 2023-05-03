@@ -106,7 +106,7 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 			return;
 		}
 
-		SubscriptionTopic subscriptionTopic = SubscriptionTopicCanonicalizer.canonicalize(myFhirContext, payloadResource);
+		SubscriptionTopic subscriptionTopic = SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, payloadResource);
 		if (subscriptionTopic.getStatus() == Enumerations.PublicationStatus.ACTIVE) {
 			mySubscriptionTopicRegistry.register(subscriptionTopic);
 		} else {

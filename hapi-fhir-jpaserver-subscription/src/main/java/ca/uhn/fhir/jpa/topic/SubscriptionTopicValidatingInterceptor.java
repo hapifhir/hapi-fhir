@@ -69,7 +69,7 @@ public class SubscriptionTopicValidatingInterceptor {
 			return;
 		}
 
-		SubscriptionTopic subscriptionTopic = SubscriptionTopicCanonicalizer.canonicalize(myFhirContext, theSubscription);
+		SubscriptionTopic subscriptionTopic = SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theSubscription);
 
 		boolean finished = false;
 		if (subscriptionTopic.getStatus() == null) {

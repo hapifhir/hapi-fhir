@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -476,11 +475,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertReceivedTransactionCount(4);
 
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation3.setCode(codeableConcept);
-		Coding coding = codeableConcept.addCoding();
-		coding.setCode(OBS_CODE + "111");
-		coding.setSystem("SNOMED-CT");
+		setCode(observation3, OBS_CODE + "111");
 		updateResource(observation3, false);
 
 		// Should see no subscription notification
@@ -488,11 +483,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
-		CodeableConcept codeableConcept1 = new CodeableConcept();
-		observation3a.setCode(codeableConcept1);
-		Coding coding1 = codeableConcept1.addCoding();
-		coding1.setCode(OBS_CODE);
-		coding1.setSystem("SNOMED-CT");
+		setCode(observation3a, OBS_CODE);
 		updateResource(observation3a, true);
 
 		// Should see only one subscription notification
@@ -503,6 +494,14 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertFalse(observation2.getId().isEmpty());
 	}
 
+	private static void setCode(Observation observation3a, String obsCode) {
+		CodeableConcept codeableConcept1 = new CodeableConcept();
+		observation3a.setCode(codeableConcept1);
+		Coding coding1 = codeableConcept1.addCoding();
+		coding1.setCode(obsCode);
+		coding1.setSystem("SNOMED-CT");
+	}
+
 	private void deleteSubscription(Subscription subscription2) throws InterruptedException {
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
@@ -510,7 +509,12 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	}
 
 	private void assertReceivedTransactionCount(int theExpected) {
-		if (getSystemProviderCount() != theExpected) {
+		if (getSystemProviderCount() == theExpected) {
+			String list = getReceivedObservations().stream()
+				.map(t -> t.getIdElement().toUnqualifiedVersionless().getValue() + " " + t.getCode().getCodingFirstRep().getCode())
+				.collect(Collectors.joining(", "));
+			ourLog.info("Received {} transactions as expected: {}", theExpected, list);
+		} else {
 			String list = getReceivedObservations().stream()
 				.map(t -> t.getIdElement().toUnqualifiedVersionless().getValue() + " " + t.getCode().getCodingFirstRep().getCode())
 				.collect(Collectors.joining(", "));
