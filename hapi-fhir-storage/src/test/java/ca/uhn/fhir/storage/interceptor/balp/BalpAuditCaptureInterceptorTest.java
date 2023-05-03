@@ -157,7 +157,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_1_PATIENT))
 			.map(t -> t.getWhat().getReference())
 			.toList();
-		assertThat(Arrays.asList(theResourceIds).toString(), Arrays.asList(theResourceIds), containsInAnyOrder(patients.toArray(EMPTY_STRING_ARRAY)));
+		assertThat(patients.toString(), patients, containsInAnyOrder(theResourceIds));
 	}
 
 	@BeforeAll
