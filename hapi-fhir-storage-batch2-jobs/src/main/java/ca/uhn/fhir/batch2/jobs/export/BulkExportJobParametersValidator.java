@@ -52,7 +52,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
-	@Autowired
+	@Autowired(required = false)
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Nullable
@@ -79,7 +79,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		// validate the exportId
 		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
 
-			if (!myBinaryStorageSvc.isValidBlobId(theParameters.getExportIdentifier())) {
+			if (myBinaryStorageSvc != null && !myBinaryStorageSvc.isValidBlobId(theParameters.getExportIdentifier())) {
 				errorMsgs.add("Export ID does not conform to the current blob storage implementation's limitations.");
 			}
 		}
