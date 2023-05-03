@@ -26,11 +26,11 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -40,7 +40,7 @@ import java.util.Set;
 
 
 public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicLoader.class);
+	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 
 	@Autowired
 	private FhirContext myFhirContext;

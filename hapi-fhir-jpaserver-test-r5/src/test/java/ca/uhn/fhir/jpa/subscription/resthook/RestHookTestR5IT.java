@@ -44,6 +44,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -273,7 +274,6 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 	@NotNull
 	private Subscription createTopicSubscription() throws InterruptedException {
-		// WIP STR5 will likely require matching TopicSubscription
 		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 
 		return postSubscription(subscription);
@@ -444,11 +444,11 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE2);
 		waitForRegisteredSubscriptionTopicCount(2);
 
+		// Subscribe to OBS_CODE topic
 		Subscription subscription1 = createTopicSubscription();
-		// WIP STR5 will likely require matching TopicSubscription
-		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE2, Constants.CT_FHIR_JSON_NEW);
 
-		Subscription subscription2 = postSubscription(subscription);
+		// Subscribe to OBS_CODE2 topic
+		Subscription subscription2 = postSubscription(newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE2, Constants.CT_FHIR_JSON_NEW));
 		waitForActivatedSubscriptionCount(2);
 
 		Observation sentObservation1 = sendObservationExpectDelivery();
@@ -458,6 +458,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		Assertions.assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
 
+		// Update the OBS_CODE2 subscription to subscribe to OBS_CODE
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setTopic(subscription1.getTopic());
@@ -465,8 +466,11 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		Observation observation2 = sendObservationExpectDelivery();
 
+		// Should see two subscription notifications since both now point to OBS_CODE2
 		assertReceivedTransactionCount(3);
 
+		// Delete the second subscription
+		ourLog.info(">>> Deleting {}", subscription2.getId());
 		deleteSubscription(subscription2);
 
 		Observation observationTemp3 = sendObservationExpectDelivery();
@@ -474,22 +478,24 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		// Should see only one subscription notification
 		assertReceivedTransactionCount(4);
 
+		// Now update the observation to have OBS_CODE2
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		setCode(observation3, OBS_CODE + "111");
-		updateResource(observation3, false);
+		updateResource(observation3, true);
 
 		// Should see no subscription notification
-		assertReceivedTransactionCount(4);
+		assertReceivedTransactionCount(5);
 
 		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
+		// Now update it back to OBS_CODE again
 		setCode(observation3a, OBS_CODE);
 		updateResource(observation3a, true);
 
-		// Should see only one subscription notification
-		assertReceivedTransactionCount(5);
+		// Should see exactly one subscription notification
+		assertReceivedTransactionCount(6);
 
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertNotEquals(subscription1.getId(), subscription2.getId());
 		assertFalse(sentObservation1.getId().isEmpty());
 		assertFalse(observation2.getId().isEmpty());
 	}

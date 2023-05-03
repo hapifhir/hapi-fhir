@@ -19,14 +19,15 @@
  */
 package org.hl7.fhir.instance.model.api;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.Include;
 
 /**
  * For now, this is a simple marker interface indicating that a class is a resource type. 
@@ -57,5 +58,10 @@ public interface IBaseResource extends IBase, IElement {
 	IBaseResource setId(IIdType theId);
 
 	FhirVersionEnum getStructureFhirVersionEnum();
+
+	// TODO KHS replace usages of ResourceMetadataKeyEnum.DELETED_AT.get( with this helper method
+	default boolean isDeleted() {
+		return ResourceMetadataKeyEnum.DELETED_AT.get(this) != null;
+	}
 
 }
