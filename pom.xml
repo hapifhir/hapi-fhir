@@ -873,6 +873,11 @@
 			<name>Aleksej Parovysnik</name>
 			<organization>Doctolib</organization>
 		</developer>
+		<developer>
+			<id>doumdoum</id>
+			<name>Dominique Villard</name>
+			<organization>Doctolib</organization>
+		</developer>
 	</developers>
 
 	<licenses>
