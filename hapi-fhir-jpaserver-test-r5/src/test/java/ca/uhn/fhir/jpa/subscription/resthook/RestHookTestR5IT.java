@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -481,10 +480,11 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(OBS_CODE + "111");
 		coding.setSystem("SNOMED-CT");
-		updateResource(observation3, false);
+		updateResource(observation3, true);
 
-		// Should see no subscription notification
-		assertReceivedTransactionCount(4);
+		// Should see one subscription notification even though the new version doesn't match, the old version still does and our subscription topic
+		// is configured to match if either the old version matches or the new version matches
+		assertReceivedTransactionCount(5);
 
 		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
@@ -496,7 +496,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		updateResource(observation3a, true);
 
 		// Should see only one subscription notification
-		assertReceivedTransactionCount(5);
+		assertReceivedTransactionCount(6);
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
 		assertFalse(sentObservation1.getId().isEmpty());
