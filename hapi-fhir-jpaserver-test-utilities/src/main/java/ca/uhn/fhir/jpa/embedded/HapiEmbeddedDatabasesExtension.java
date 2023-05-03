@@ -30,8 +30,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
     private final Set<JpaEmbeddedDatabase> myEmbeddedDatabases = new HashSet<>();

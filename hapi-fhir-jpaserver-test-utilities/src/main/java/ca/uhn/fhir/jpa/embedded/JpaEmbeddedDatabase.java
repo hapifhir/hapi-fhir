@@ -31,6 +31,7 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.nio.file.Files;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +55,7 @@ public abstract class JpaEmbeddedDatabase {
 	private String myUrl;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private JdbcTemplate myJdbcTemplate;
+    private Connection myConnection;
 
 	public abstract void stop();
     public abstract void disableConstraints();
@@ -67,7 +69,12 @@ public abstract class JpaEmbeddedDatabase {
 		myUrl = theUrl;
 		myConnectionProperties = theDriverType.newConnectionProperties(theUrl, theUsername, thePassword);
 		myJdbcTemplate = myConnectionProperties.newJdbcTemplate();
-	}
+        try {
+            myConnection = myConnectionProperties.getDataSource().getConnection();
+        } catch (SQLException theE) {
+            throw new RuntimeException(theE);
+        }
+    }
 
     public DriverTypeEnum getDriverType() {
         return myDriverType;
@@ -127,8 +134,7 @@ public abstract class JpaEmbeddedDatabase {
 
     public void executeSqlAsBatch(List<String> theStatements){
         try {
-            Connection connection = getDataSource().getConnection();
-            Statement statement = connection.createStatement();
+            Statement statement = myConnection.createStatement();
             for (String sql : theStatements){
                 if (!StringUtils.isBlank(sql)){
                     statement.addBatch(sql);

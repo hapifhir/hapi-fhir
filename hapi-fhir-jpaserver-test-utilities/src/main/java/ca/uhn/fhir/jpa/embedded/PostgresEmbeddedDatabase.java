@@ -51,12 +51,20 @@ public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 
     @Override
     public void disableConstraints() {
-        getJdbcTemplate().execute("set session_replication_role to replica");
+        List<String> sql = new ArrayList<>();
+        for(String tableName : getAllTableNames()){
+            sql.add(String.format("ALTER TABLE \"%s\" DISABLE TRIGGER ALL", tableName));
+        }
+        executeSqlAsBatch(sql);
     }
 
     @Override
     public void enableConstraints() {
-        getJdbcTemplate().execute("set session_replication_role to default");
+        List<String> sql = new ArrayList<>();
+        for(String tableName : getAllTableNames()){
+            sql.add(String.format("ALTER TABLE \"%s\" ENABLE TRIGGER ALL", tableName));
+        }
+        executeSqlAsBatch(sql);
     }
 
     @Override
@@ -67,9 +75,7 @@ public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private void dropTables() {
         List<String> sql = new ArrayList<>();
-		List<Map<String, Object>> tableResult = getJdbcTemplate().queryForList("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
-		for(Map<String, Object> result : tableResult){
-			String tableName = result.get("table_name").toString();
+		for(String tableName : getAllTableNames()){
 			sql.add(String.format("DROP TABLE \"%s\" CASCADE", tableName));
 		}
         executeSqlAsBatch(sql);
@@ -84,4 +90,14 @@ public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 		}
         executeSqlAsBatch(sql);
 	}
+
+    private List<String> getAllTableNames(){
+        List<String> allTableNames = new ArrayList<>();
+        List<Map<String, Object>> queryResults = query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+        for(Map<String, Object> row : queryResults) {
+            String tableName = row.get("table_name").toString();
+            allTableNames.add(tableName);
+        }
+        return allTableNames;
+    }
 }
