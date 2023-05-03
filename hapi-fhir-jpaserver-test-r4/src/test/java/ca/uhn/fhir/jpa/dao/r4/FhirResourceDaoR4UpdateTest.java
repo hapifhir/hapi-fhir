@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -99,18 +100,27 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTagCollision() {
+		TagDefinition def = new TagDefinition();
+		def.setTagType(TagTypeEnum.TAG);
+		def.setSystem("system");
+		def.setCode("coding");
+		def.setDisplay("display");
+		def.setUserSelected(null);
+
+
 		Patient p = new Patient();
 		p.getMeta().addTag("system", "coding", "display");
-		p.getMeta().addTag("system2", "coding2", "display2");
-		p.getMeta().addTag("system3", "coding3", "display3");
+
+		myMemoryCacheService.invalidateAllCaches();
+		myPatientDao.create(p, new SystemRequestDetails());
+		//inject conflicting.
+		myTagDefinitionDao.saveAndFlush(def);
+		myMemoryCacheService.invalidateAllCaches();
 
 		myPatientDao.create(p, new SystemRequestDetails());
-		myPatientDao.create(p, new SystemRequestDetails());
-		myPatientDao.create(p, new SystemRequestDetails());
-		myPatientDao.create(p, new SystemRequestDetails());
-		List<TagDefinition> all = myTagDefinitionDao.findAll();
-		assertThat(all, hasSize(3));
+		myMemoryCacheService.invalidateAllCaches();
 
+		myPatientDao.create(p, new SystemRequestDetails());
 
 	}
 

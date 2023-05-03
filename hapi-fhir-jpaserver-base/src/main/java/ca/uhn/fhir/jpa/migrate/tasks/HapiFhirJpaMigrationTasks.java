@@ -149,8 +149,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 
 		{  //We added this constraint when userSelected and Version were added. It is no longer necessary.
-			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
-			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
+//			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+//			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
 		}
 
 	}
