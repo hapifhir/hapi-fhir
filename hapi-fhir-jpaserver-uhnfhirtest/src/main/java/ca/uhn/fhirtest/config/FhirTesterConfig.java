@@ -52,6 +52,21 @@ public class FhirTesterConfig {
 			.withSearchResultRowOperation("$summary", id -> "Patient".equals(id.getResourceType()))
 
 			.addServer()
+			.withId("home_r5")
+			.withFhirVersion(FhirVersionEnum.R5)
+			.withBaseUrl("http://hapi.fhir.org/baseR5")
+			.withName("HAPI Test Server (R5 FHIR)")
+			.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
+			.withSearchResultRowOperation("$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
+			.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
+
+			.addServer()
+			.withId("home_audit")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withBaseUrl("http://hapi.fhir.org/baseAudit")
+			.withName("HAPI Test Server (R4 Audit)")
+
+			.addServer()
 			.withId("home_r4b")
 			.withFhirVersion(FhirVersionEnum.R4B)
 			.withBaseUrl("http://hapi.fhir.org/baseR4B")
@@ -75,15 +90,6 @@ public class FhirTesterConfig {
 			.withBaseUrl("http://hapi.fhir.org/baseDstu2")
 			.withName("HAPI Test Server (DSTU2 FHIR)")
 			.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
-			.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
-
-			.addServer()
-			.withId("home_r5")
-			.withFhirVersion(FhirVersionEnum.R5)
-			.withBaseUrl("http://hapi.fhir.org/baseR5")
-			.withName("HAPI Test Server (R5 FHIR)")
-			.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
-			.withSearchResultRowOperation("$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
 			.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
 
 			// Non-HAPI servers follow

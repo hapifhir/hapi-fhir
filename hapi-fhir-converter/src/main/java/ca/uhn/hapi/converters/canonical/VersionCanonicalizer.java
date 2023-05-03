@@ -50,6 +50,7 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -271,6 +272,10 @@ public class VersionCanonicalizer {
 		return myStrategy.codeSystemToValidatorCanonical(theResource);
 	}
 
+	public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+		return myStrategy.auditEventFromCanonical(theResource);
+	}
+
 	@Nonnull
 	private List<String> extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(IBaseResource theSearchParameter, String theChildName) {
 
@@ -326,6 +331,10 @@ public class VersionCanonicalizer {
 		org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource);
 
 		IBaseResource searchParameterFromCanonical(SearchParameter theResource);
+	
+
+		 IBaseResource auditEventFromCanonical(AuditEvent theResource);
+	 
 
 		IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource);
 	}
@@ -479,6 +488,12 @@ public class VersionCanonicalizer {
 		}
 
 		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			Resource hl7Org = VersionConvertorFactory_10_40.convertResource(theResource, ADVISOR_10_40);
+			return reencodeFromHl7Org(hl7Org);
+		}
+
+		@Override
 		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
 			Resource resource = VersionConvertorFactory_10_50.convertResource(theResource, ADVISOR_10_50);
 			return reencodeFromHl7Org(resource);
@@ -589,6 +604,11 @@ public class VersionCanonicalizer {
 		}
 
 		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return VersionConvertorFactory_14_40.convertResource(theResource, ADVISOR_14_40);
+		}
+
+		@Override
 		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
 			return (IBaseConformance) VersionConvertorFactory_14_50.convertResource(theResource, ADVISOR_14_50);
 		}
@@ -677,6 +697,11 @@ public class VersionCanonicalizer {
 		}
 
 		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return VersionConvertorFactory_30_40.convertResource(theResource, ADVISOR_30_40);
+		}
+
+		@Override
 		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
 			return (IBaseConformance) VersionConvertorFactory_30_50.convertResource(theResource, ADVISOR_30_50);
 		}
@@ -761,6 +786,11 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
 			return VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
+		}
+
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return theResource;
 		}
 
 		@Override
@@ -860,6 +890,12 @@ public class VersionCanonicalizer {
 		}
 
 		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			org.hl7.fhir.r5.model.AuditEvent r5 = (org.hl7.fhir.r5.model.AuditEvent) VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
+			return VersionConvertorFactory_43_50.convertResource(r5, ADVISOR_43_50);
+		}
+
+		@Override
 		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
 			return (IBaseConformance) VersionConvertorFactory_43_50.convertResource(theResource, ADVISOR_43_50);
 		}
@@ -946,6 +982,11 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
 			return theResource;
+		}
+
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
 		}
 
 		@Override
