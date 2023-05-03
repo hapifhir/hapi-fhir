@@ -39,6 +39,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -85,7 +86,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		Observation sentObservation = sendObservationExpectDelivery();
 
 		// Should see 1 subscription notification
-		assertReceivedTransactionCount(1);
+		awaitUntilReceivedTransactionCount(1);
 
 		Observation obs = assertBundleAndGetObservation(subscription, sentObservation);
 		assertEquals(Enumerations.ObservationStatus.FINAL, obs.getStatus());
@@ -112,7 +113,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		sentObservation = myObservationDao.read(sentObservation.getIdElement().toUnqualifiedVersionless(), mySrd);
 
 		// Should see 1 subscription notification
-		assertReceivedTransactionCount(1);
+		awaitUntilReceivedTransactionCount(1);
 
 		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
 
@@ -132,7 +133,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		sentObservation = myObservationDao.read(sentObservation.getIdElement().toUnqualifiedVersionless(), mySrd);
 
 		// Should see a second subscription notification
-		assertReceivedTransactionCount(2);
+		awaitUntilReceivedTransactionCount(2);
 
 		receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
 
