@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -189,7 +190,18 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		when(myContextServices.getAgentClientWho(any())).thenReturn(new Reference().setIdentifier(new Identifier().setSystem("http://clients").setValue("123")));
 		when(myContextServices.getAgentUserWho(any())).thenReturn(new Reference().setIdentifier(new Identifier().setSystem("http://users").setValue("abc")));
-		when(myContextServices.massageResourceIdForStorage(any(), any(), any())).thenCallRealMethod();
+		when(myContextServices.massageResourceIdForStorage(any(), any(), any())).thenAnswer(t->{
+			RequestDetails rd = t.getArgument(0, RequestDetails.class);
+			IIdType resourceId = t.getArgument(2, IIdType.class);
+			String serverBaseUrl = rd.getServerBaseForRequest();
+			String resourceName = resourceId.getResourceType();
+			String value = resourceId.withServerBase(serverBaseUrl, resourceName).getValue();
+			// Trying to catch an intermittent
+			if (value.startsWith("http:/P")) {
+				fail("Invalid ID " + value + " - " + resourceId + " - " + serverBaseUrl + " - " + resourceName);
+			}
+			return value;
+		});
 		when(myContextServices.getNetworkAddressType(any())).thenCallRealMethod();
 
 		mySvc = new BalpAuditCaptureInterceptor(myAuditEventSink, myContextServices);
