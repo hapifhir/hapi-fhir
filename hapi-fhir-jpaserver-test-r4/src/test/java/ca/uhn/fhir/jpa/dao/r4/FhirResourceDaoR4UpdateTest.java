@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -93,6 +94,24 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("It can also happen when a request disables the Upsert Existence Check."));
 		}
+	}
+
+
+	@Test
+	public void testTagCollision() {
+		Patient p = new Patient();
+		p.getMeta().addTag("system", "coding", "display");
+		p.getMeta().addTag("system2", "coding2", "display2");
+		p.getMeta().addTag("system3", "coding3", "display3");
+
+		myPatientDao.create(p, new SystemRequestDetails());
+		myPatientDao.create(p, new SystemRequestDetails());
+		myPatientDao.create(p, new SystemRequestDetails());
+		myPatientDao.create(p, new SystemRequestDetails());
+		List<TagDefinition> all = myTagDefinitionDao.findAll();
+		assertThat(all, hasSize(3));
+
+
 	}
 
 

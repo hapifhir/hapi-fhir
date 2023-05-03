@@ -109,8 +109,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 			// Update indexing
 			tagDefTable.dropIndex("20230209.3", "IDX_TAGDEF_TYPESYSCODE");
-
 			tagDefTable.dropIndex("20230209.4", "IDX_TAGDEF_TYPESYSCODEVERUS");
+
 			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
 			addTagDefConstraint.put(DriverTypeEnum.H2_EMBEDDED, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
 			addTagDefConstraint.put(DriverTypeEnum.MARIADB_10_1, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
@@ -146,6 +146,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		resSearchUrlTable.addIndex("20230227.2", "IDX_RESSEARCHURL_RES").unique(false).withColumns("RES_ID");
 		resSearchUrlTable.addIndex("20230227.3", "IDX_RESSEARCHURL_TIME").unique(false).withColumns("CREATED_TIME");
+
+
+		{  //We added this constraint when userSelected and Version were added. It is no longer necessary.
+			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
+		}
 
 	}
 

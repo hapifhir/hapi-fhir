@@ -49,6 +49,7 @@ import java.util.Collection;
 	indexes = {
 		@Index(name = "IDX_TAG_DEF_TP_CD_SYS", columnList = "TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_ID"),
 	},
+	//FIXME GGG Drop this constraint
 	uniqueConstraints = {
 		@UniqueConstraint(name = "IDX_TAGDEF_TYPESYSCODEVERUS",
 			columnNames = {"TAG_TYPE", "TAG_SYSTEM", "TAG_CODE", "TAG_VERSION", "TAG_USER_SELECTED"})
