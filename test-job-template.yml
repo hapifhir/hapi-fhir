@@ -58,7 +58,7 @@ jobs:
                   JAVA_HOME_11_X64: /usr/java/openjdk-17
                inputs:
                   mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
-                  goals: 'clean test jacoco:report -pl ${{ p.module }}'
+                  goals: 'clean verify jacoco:report -pl ${{ p.module }}'
                   # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
                   options: '-P JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
                   # These are JVM options (and don't show up in the build logs)
