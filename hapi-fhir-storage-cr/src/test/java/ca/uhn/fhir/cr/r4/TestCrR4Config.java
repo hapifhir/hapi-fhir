@@ -10,6 +10,7 @@ import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
 import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseOperationsProvider;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
@@ -20,10 +21,9 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(TestCrConfig.class)
 public class TestCrR4Config {
-
 	@Bean
-	IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory() {
-		return r -> new ActivityDefinitionProcessor(r);
+	IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory(EvaluationSettings theEvaluationSettings) {
+		return r -> new ActivityDefinitionProcessor(r, theEvaluationSettings);
 	}
 
 	@Bean
@@ -32,8 +32,8 @@ public class TestCrR4Config {
 	}
 
 	@Bean
-	IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory() {
-		return r -> new PlanDefinitionProcessor(r);
+	IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory(EvaluationSettings theEvaluationSettings) {
+		return r -> new PlanDefinitionProcessor(r, theEvaluationSettings);
 	}
 
 	@Bean

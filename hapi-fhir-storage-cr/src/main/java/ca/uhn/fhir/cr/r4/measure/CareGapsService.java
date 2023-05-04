@@ -537,4 +537,9 @@ public class CareGapsService implements IDaoRegistryUser {
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;
 	}
+
+	public CrProperties getCrProperties() {
+		return myCrProperties;
+	}
+
 }
