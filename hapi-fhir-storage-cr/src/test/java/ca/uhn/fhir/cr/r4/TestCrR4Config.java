@@ -10,6 +10,7 @@ import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
 import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseOperationsProvider;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
@@ -20,10 +21,14 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(TestCrConfig.class)
 public class TestCrR4Config {
+	@Bean
+	EvaluationSettings r4EvaluationSettings() {
+		return new EvaluationSettings();
+	}
 
 	@Bean
 	IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory() {
-		return r -> new ActivityDefinitionProcessor(r);
+		return r -> new ActivityDefinitionProcessor(r, r4EvaluationSettings());
 	}
 
 	@Bean
