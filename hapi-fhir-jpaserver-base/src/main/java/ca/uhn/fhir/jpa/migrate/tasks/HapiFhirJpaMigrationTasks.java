@@ -95,6 +95,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init620();
 		init640();
 		init660();
+		init680();
+	}
+
+	protected void init680() {
+		Builder version = forVersion(VersionEnum.V6_8_0);
+
+		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+		tagDefTable.dropIndex("20230209.4", "IDX_TAGDEF_TYPESYSCODEVERUS");
+
 	}
 
 	protected void init660() {
