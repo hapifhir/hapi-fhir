@@ -63,6 +63,7 @@ import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
 import org.slf4j.Logger;
@@ -81,13 +82,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
-@Import(AdapterConfiguration.class)
+
 @Configuration
-public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
+@Import({AdapterConfiguration.class, BaseRepositoryConfig.class})
+public abstract class BaseClinicalReasoningConfig {
 
 	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
 
+   @Bean
+	EvaluationSettings evaluationSettings(CqlOptions theCqlOptions, Map<ModelIdentifier, Model> theGlobalModelCache, Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> theGlobalLibraryCache) {
+		var evaluationSettings = new EvaluationSettings();
+		evaluationSettings.setCqlOptions(theCqlOptions);
+		evaluationSettings.setModelCache(theGlobalModelCache);
+		evaluationSettings.setLibraryCache(theGlobalLibraryCache);
 
+		return evaluationSettings;
+	}
 	@Bean
 	CrProviderFactory cqlProviderFactory() {
 		return new CrProviderFactory();
@@ -223,15 +233,7 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 				lcp.add(new FhirLibrarySourceProvider());
 			}
 
-			return new CacheAwareLibraryLoaderDecorator(
-				new TranslatingLibraryLoader(theModelManager, lcp, theCqlTranslatorOptions, null), theGlobalLibraryCache) {
-				// TODO: This is due to a bug with the ELM annotations which prevent options
-				// from matching the way they should
-				@Override
-				public boolean translatorOptionsMatch(org.cqframework.cql.elm.execution.Library library) {
-					return true;
-				}
-			};
+			return new TranslatingLibraryLoader(theModelManager, lcp, theCqlTranslatorOptions, theGlobalLibraryCache);
 		};
 	}
 
@@ -290,7 +292,7 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 		return new LibraryVersionSelector(theAdapterFactory);
 	}
 
-	@Bean(name = "cqlExecutor")
+	@Bean
 	public Executor cqlExecutor() {
 		CqlForkJoinWorkerThreadFactory factory = new CqlForkJoinWorkerThreadFactory();
 		ForkJoinPool myCommonPool = new ForkJoinPool(Math.min(32767, Runtime.getRuntime().availableProcessors()),

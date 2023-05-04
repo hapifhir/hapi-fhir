@@ -22,13 +22,8 @@ import org.springframework.context.annotation.Import;
 @Import(TestCrConfig.class)
 public class TestCrR4Config {
 	@Bean
-	EvaluationSettings r4EvaluationSettings() {
-		return new EvaluationSettings();
-	}
-
-	@Bean
-	IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory() {
-		return r -> new ActivityDefinitionProcessor(r, r4EvaluationSettings());
+	IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory(EvaluationSettings theEvaluationSettings) {
+		return r -> new ActivityDefinitionProcessor(r, theEvaluationSettings);
 	}
 
 	@Bean
@@ -37,8 +32,8 @@ public class TestCrR4Config {
 	}
 
 	@Bean
-	IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory() {
-		return r -> new PlanDefinitionProcessor(r);
+	IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory(EvaluationSettings theEvaluationSettings) {
+		return r -> new PlanDefinitionProcessor(r, theEvaluationSettings);
 	}
 
 	@Bean
