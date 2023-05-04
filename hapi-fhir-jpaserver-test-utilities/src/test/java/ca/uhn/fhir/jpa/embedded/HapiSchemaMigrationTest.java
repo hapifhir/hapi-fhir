@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class HapiSchemaMigrationTest {
@@ -45,10 +47,14 @@ public class HapiSchemaMigrationTest {
 		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
-		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.EMPTY_SET).getAllTasks(VersionEnum.values());
+		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
 		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(theDriverType);
-		schemaMigrator.createMigrationTableIfRequired();
+		assertTrue(schemaMigrator.createMigrationTableIfRequired());
 		schemaMigrator.migrate();
+
+		// Subsequent calls should not create the migration table
+		assertFalse(schemaMigrator.createMigrationTableIfRequired());
+		assertFalse(schemaMigrator.createMigrationTableIfRequired());
 	}
 }
