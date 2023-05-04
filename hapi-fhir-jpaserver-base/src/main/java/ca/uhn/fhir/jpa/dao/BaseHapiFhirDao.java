@@ -248,6 +248,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private PlatformTransactionManager myTransactionManager;
 	@Autowired
 	protected IJpaStorageResourceParser myJpaStorageResourceParser;
+	protected final CodingSpy myCodingSpy = new CodingSpy();
 
 	@VisibleForTesting
 	public void setSearchParamPresenceSvc(ISearchParamPresenceSvc theSearchParamPresenceSvc) {
@@ -280,7 +281,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (tagList != null) {
 			for (Tag next : tagList) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(),
-					next.getLabel(), next.getVersion(), next.getUserSelected());
+					next.getLabel(), next.getVersion(), myCodingSpy.getBooleanObject(next));
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -320,7 +321,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (tagList != null) {
 			for (IBaseCoding next : tagList) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(),
-					next.getDisplay(), next.getVersion(), next.getUserSelected());
+					next.getDisplay(), next.getVersion(), myCodingSpy.getBooleanObject(next));
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -332,7 +333,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IBaseCoding> securityLabels = theResource.getMeta().getSecurity();
 		if (securityLabels != null) {
 			for (IBaseCoding next : securityLabels) {
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay(), null, null);
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay(), next.getVersion(),  myCodingSpy.getBooleanObject(next));
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -381,6 +382,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	/**
 	 * <code>null</code> will only be returned if the scheme and tag are both blank
+	 * fixme fix all callers
 	 */
 	protected TagDefinition getTagOrNull(TransactionDetails theTransactionDetails, TagTypeEnum theTagType, String theScheme,
 													 String theTerm, String theLabel, String theVersion, Boolean theUserSelected) {
@@ -523,9 +525,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			? builder.isNull(from.get("myVersion"))
 			: builder.equal(from.get("myVersion"), theVersion));
 
-		predicates.add( isNull(theUserSelected) || isFalse(theUserSelected)
-			? builder.isFalse(from.get("myUserSelected"))
-			: builder.isTrue(from.get("myUserSelected")));
+		predicates.add( isNull(theUserSelected)
+			? builder.isNull(from.get("myUserSelected"))
+			: builder.equal(from.get("myUserSelected"), theUserSelected));
 
 		cq.where(predicates.toArray(new Predicate[0]));
 		return myEntityManager.createQuery(cq);

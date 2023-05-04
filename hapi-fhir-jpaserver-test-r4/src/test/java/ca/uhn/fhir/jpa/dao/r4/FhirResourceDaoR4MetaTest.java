@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
+import ch.qos.logback.classic.Level;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +39,13 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -97,10 +102,12 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		patient = (Patient) bundle.getEntryFirstRep().getResource();
 		assertTrue(patient.getActive());
-		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());
-		assertEquals("22", patient.getMeta().getVersionId());
-		assertEquals("http://foo", patient.getMeta().getProfile().get(0).getValue());
-		assertEquals("hello", patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString());
+		Meta readMeta = patient.getMeta();
+		assertEquals(1, readMeta.getExtensionsByUrl("http://foo").size());
+		assertEquals("22", readMeta.getVersionId());
+		assertEquals("http://foo", readMeta.getProfile().get(0).getValue());
+		assertEquals("hello", readMeta.getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString());
+
 	}
 
 	/**
@@ -153,6 +160,32 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertEquals("bar", patient2.getMeta().getSecurityFirstRep().getCode());
 	}
 
+	/**
+	 * Make sure round-trips with tags don't add a userSelected property.
+	 * wipmb tag userSelected test
+	 * Verify https://github.com/hapifhir/hapi-fhir/issues/4819
+	 */
+	@Test
+	void testAddTag_userSelectedStaysNull() {
+	    // given
+		Patient patient1 = new Patient();
+		patient1.getMeta().addTag().setSystem("http://foo").setCode("bar");
+		patient1.setActive(true);
+		IIdType pid1 = myPatientDao.create(patient1).getId();
+
+		// when
+		var patientReadback = myPatientDao.read(pid1);
+		((ch.qos.logback.classic.Logger)ourLog).setLevel(Level.DEBUG);
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patientReadback));
+		System.out.println(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patientReadback));
+
+		// then
+		var tag = patientReadback.getMeta().getTag().get(0);
+		assertNotNull(tag);
+		assertNull(tag.getUserSelectedElement().asStringValue());
+	}
+
+
 	@Nested
 	public class TestTagWithVersionAndUserSelected {
 
@@ -204,6 +237,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 				.setSystem(expectedSystem1)
 				.setCode(expectedCode1)
 				.setDisplay(expectedDisplay1);
+			assertNull(newTag.getUserSelectedElement().asStringValue());
 			assertFalse(newTag.getUserSelected());
 			newTag.setVersion(expectedVersion1)
 				.setUserSelected(expectedUserSelected1);

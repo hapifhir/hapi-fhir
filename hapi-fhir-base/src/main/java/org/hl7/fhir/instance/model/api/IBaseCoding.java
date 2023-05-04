@@ -28,6 +28,7 @@ public interface IBaseCoding extends IBase {
 
 	String getSystem();
 
+	// fixme review all callers
 	boolean getUserSelected();
 
 	String getVersion();
@@ -40,6 +41,7 @@ public interface IBaseCoding extends IBase {
 
 	IBaseCoding setVersion(String theVersion);
 
+	// fixme review all callers
 	IBaseCoding setUserSelected(boolean theUserSelected);
 
 

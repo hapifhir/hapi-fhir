@@ -73,6 +73,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.cleanProvenanceSourceUri;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -432,7 +433,10 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 						tag.setCode(next.getTag().getCode());
 						tag.setDisplay(next.getTag().getDisplay());
 						tag.setVersion(next.getTag().getVersion());
-						tag.setUserSelected(next.getTag().getUserSelected());
+						Boolean userSelected = next.getTag().getUserSelected();
+						if (nonNull(userSelected)) {
+							tag.setUserSelected(userSelected);
+						}
 						break;
 				}
 			}
