@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
@@ -38,10 +39,10 @@ public class CodingSpy {
 			if (o instanceof Boolean) {
 				return (Boolean) o;
 			}
-			throw new RuntimeException("unsupported type :" + theValue.getClass().getName());
+			throw new RuntimeException(Msg.code(2342) + "unsupported type :" + theValue.getClass().getName());
 		} catch (IllegalAccessException theException) {
 			// should never happen - all Coding models have this field.
-			throw new RuntimeException(theException);
+			throw new RuntimeException(Msg.code(2343) + "illegal access during reflection", theException);
 		}
 	}
 
