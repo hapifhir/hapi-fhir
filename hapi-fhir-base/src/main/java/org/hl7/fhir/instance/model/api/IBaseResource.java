@@ -59,9 +59,10 @@ public interface IBaseResource extends IBase, IElement {
 
 	FhirVersionEnum getStructureFhirVersionEnum();
 
-	// TODO KHS replace usages of ResourceMetadataKeyEnum.DELETED_AT.get( with this helper method
+	/**
+	 * @return <code>true</code> if this resource has been deleted
+	 */
 	default boolean isDeleted() {
 		return ResourceMetadataKeyEnum.DELETED_AT.get(this) != null;
 	}
-
 }
