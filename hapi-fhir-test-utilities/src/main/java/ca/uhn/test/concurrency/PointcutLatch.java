@@ -48,25 +48,40 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private static final FhirObjectPrinter ourFhirObjectToStringMapper = new FhirObjectPrinter();
 
 	private final String myName;
+	private final IPointcut myPointcut;
+	private final boolean myStrict;
 	private final AtomicLong myLastInvoke = new AtomicLong();
 	private final AtomicReference<CountDownLatch> myCountdownLatch = new AtomicReference<>();
 	private final AtomicReference<String> myCountdownLatchSetStacktrace = new AtomicReference<>();
 	private final AtomicReference<List<String>> myFailures = new AtomicReference<>();
 	private final AtomicReference<List<HookParams>> myCalledWith = new AtomicReference<>();
-	private final IPointcut myPointcut;
 	private int myDefaultTimeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
 	private int myInitialCount;
 	private boolean myExactMatch;
+	private AtomicReference<List<PointcutLatchException>> myExceptions = new AtomicReference<>();
 
 	public PointcutLatch(IPointcut thePointcut) {
 		this.myName = thePointcut.name();
 		myPointcut = thePointcut;
+		myStrict = true;
 	}
 
+	public PointcutLatch(IPointcut thePointcut, boolean theStrict) {
+		this.myName = thePointcut.name();
+		myPointcut = thePointcut;
+		myStrict = theStrict;
+	}
 
 	public PointcutLatch(String theName) {
 		this.myName = theName;
 		myPointcut = null;
+		myStrict = true;
+	}
+
+	public PointcutLatch(String theName, boolean theStrict) {
+		this.myName = theName;
+		myPointcut = null;
+		myStrict = theStrict;
 	}
 
 	public void runWithExpectedCount(int theExpectedCount, Runnable r) throws InterruptedException {
@@ -114,6 +129,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	private void createLatch(int theCount) {
 		myFailures.set(Collections.synchronizedList(new ArrayList<>()));
+		myExceptions.set(Collections.synchronizedList(new ArrayList<>()));
 		myCalledWith.set(Collections.synchronizedList(new ArrayList<>()));
 		myCountdownLatch.set(new CountDownLatch(theCount));
 		try {
@@ -128,8 +144,14 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		if (myFailures.get() != null) {
 			myFailures.get().add(failure);
 		} else {
-			throw new PointcutLatchException(Msg.code(1482) + "trying to set failure on latch that hasn't been created: " + failure);
+			throwNewPointcutLatchException(1482, "trying to set failure on latch that hasn't been created: " + failure, null);
 		}
+	}
+
+	private void throwNewPointcutLatchException(int theMsgCode, String theMessage, HookParams theHookParams) {
+		PointcutLatchException pointcutLatchException = new PointcutLatchException(Msg.code(theMsgCode) + theMessage, theHookParams);
+		myExceptions.get().add(pointcutLatchException);
+		throw pointcutLatchException;
 	}
 
 	private String getName() {
@@ -174,6 +196,13 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	public void clear() {
 		myCountdownLatch.set(null);
 		myCountdownLatchSetStacktrace.set(null);
+		if (myStrict && myExceptions.get() != null) {
+			List<PointcutLatchException> list = myExceptions.get();
+			if (list.size() > 0) {
+				PointcutLatchException firstException = list.get(0);
+				throw new AssertionError(Msg.code(2342) + getName() + " had " + list.size() + " exceptions.  Throwing first one.", firstException);
+			}
+		}
 	}
 
 	private String toCalledWithString() {
@@ -197,7 +226,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		CountDownLatch latch = myCountdownLatch.get();
 		if (myExactMatch) {
 			if (latch == null) {
-				throw new PointcutLatchException(Msg.code(1485) + "invoke() for " + myName + " called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived with args: " + theArgs, theArgs);
+				throwNewPointcutLatchException(1485, "invoke() for " + myName + " called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived with args: " + theArgs, theArgs);
 			} else if (latch.getCount() <= 0) {
 				addFailure("invoke() called when countdown was zero.");
 			}
