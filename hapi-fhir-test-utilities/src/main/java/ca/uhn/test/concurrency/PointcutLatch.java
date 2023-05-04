@@ -66,6 +66,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		myStrict = true;
 	}
 
+	// TODO KHS remove this method once all tests pass
 	public PointcutLatch(IPointcut thePointcut, boolean theStrict) {
 		this.myName = thePointcut.name();
 		myPointcut = thePointcut;
@@ -78,6 +79,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		myStrict = true;
 	}
 
+	// TODO KHS remove this method once all tests pass
 	public PointcutLatch(String theName, boolean theStrict) {
 		this.myName = theName;
 		myPointcut = null;
