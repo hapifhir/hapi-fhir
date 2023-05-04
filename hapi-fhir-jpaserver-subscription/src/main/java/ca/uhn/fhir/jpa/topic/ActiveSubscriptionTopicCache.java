@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ActiveSubscriptionTopicCache {
-	// We canonicalizeTopic on R5 SubscriptionTopic and convert back to R4B when necessary
+	// We canonicalize on R5 SubscriptionTopic and convert back to R4B when necessary
 	private final Map<String, SubscriptionTopic> myCache = new ConcurrentHashMap<>();
 
 	public int size() {
