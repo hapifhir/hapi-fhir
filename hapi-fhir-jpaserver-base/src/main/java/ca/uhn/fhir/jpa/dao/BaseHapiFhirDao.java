@@ -819,12 +819,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// Update the resource to contain the old tags
 		allTagsOld.forEach(tag -> {
-			theResource.getMeta()
+			IBaseCoding iBaseCoding = theResource.getMeta()
 				.addTag()
 				.setCode(tag.getTag().getCode())
 				.setSystem(tag.getTag().getSystem())
-				.setVersion(tag.getTag().getVersion())
-				.setUserSelected(tag.getTag().getUserSelected());
+				.setVersion(tag.getTag().getVersion());
+				if (tag.getTag().getUserSelected() != null) {
+					iBaseCoding.setUserSelected(tag.getTag().getUserSelected());
+				}
 		});
 
 		theEntity.setHasTags(!allTagsNew.isEmpty());
