@@ -221,11 +221,9 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 		return this;
 	}
 
-	// fixme review all callers
 	@Override
 	public boolean getUserSelected() { return myUserSelected != null && myUserSelected; }
 
-	// fixme review all callers
 	@Override
 	public IBaseCoding setUserSelected(boolean theUserSelected) {
 		myUserSelected = theUserSelected;

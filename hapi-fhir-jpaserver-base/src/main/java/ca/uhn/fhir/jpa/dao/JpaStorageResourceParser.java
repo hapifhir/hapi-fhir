@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.model.api.IResource;
@@ -349,19 +350,25 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				List<IBaseCoding> securityLabels = new ArrayList<>();
 				List<IdDt> profiles = new ArrayList<>();
 				for (BaseTag next : theTagList) {
-					switch (next.getTag().getTagType()) {
+					TagDefinition nextTag = next.getTag();
+					switch (nextTag.getTagType()) {
 						case PROFILE:
-							profiles.add(new IdDt(next.getTag().getCode()));
+							profiles.add(new IdDt(nextTag.getCode()));
 							break;
 						case SECURITY_LABEL:
 							IBaseCoding secLabel = (IBaseCoding) myContext.getVersion().newCodingDt();
-							secLabel.setSystem(next.getTag().getSystem());
-							secLabel.setCode(next.getTag().getCode());
-							secLabel.setDisplay(next.getTag().getDisplay());
+							secLabel.setSystem(nextTag.getSystem());
+							secLabel.setCode(nextTag.getCode());
+							secLabel.setDisplay(nextTag.getDisplay());
 							securityLabels.add(secLabel);
 							break;
 						case TAG:
-							tagList.add(new Tag(next.getTag().getSystem(), next.getTag().getCode(), next.getTag().getDisplay()));
+							Tag e = new Tag(nextTag.getSystem(), nextTag.getCode(), nextTag.getDisplay());
+							e.setVersion(nextTag.getVersion());
+							if (nextTag.getUserSelected() != null) {
+								e.setUserSelected(nextTag.getUserSelected());
+							}
+							tagList.add(e);
 							break;
 					}
 				}

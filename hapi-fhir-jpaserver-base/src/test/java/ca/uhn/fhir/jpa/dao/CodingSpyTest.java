@@ -22,7 +22,22 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class CodingSpyTest {
 
+	/**
+	 * Ensure we can read the default null value of userSelected on Coding
+	 */
 
+	@ParameterizedTest
+	@MethodSource("getCases")
+	void canReadValueUserSelected(IBaseCoding theObject, Boolean theValue)  {
+		IBaseCoding value = theObject.setSystem("http://example.com").setCode("value");
+		if (theValue != null) {
+			theObject.setUserSelected(theValue);
+		}
+
+		Boolean result = new CodingSpy().getBooleanObject(theObject);
+
+		assertEquals(theValue, result);
+	}
 
 	@Test
 	void canReadNullUserSelected()  {
@@ -55,18 +70,6 @@ class CodingSpyTest {
 		}
 	}
 
-	@ParameterizedTest
-	@MethodSource("getCases")
-	void canReadValueUserSelected(IBaseCoding theObject, Boolean theValue)  {
-		IBaseCoding value = theObject.setSystem("http://example.com").setCode("value");
-		if (theValue != null) {
-			theObject.setUserSelected(theValue);
-		}
-
-		Boolean result = new CodingSpy().getBooleanObject(theObject);
-
-		assertEquals(theValue, result);
-	}
 
 	@Test
 	void booleanNulls() {

@@ -382,7 +382,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	/**
 	 * <code>null</code> will only be returned if the scheme and tag are both blank
-	 * fixme fix all callers
 	 */
 	protected TagDefinition getTagOrNull(TransactionDetails theTransactionDetails, TagTypeEnum theTagType, String theScheme,
 													 String theTerm, String theLabel, String theVersion, Boolean theUserSelected) {
@@ -423,7 +422,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 													 String theVersion, Boolean theUserSelected) {
 
 		TypedQuery<TagDefinition> q = buildTagQuery(theTagType, theScheme, theTerm, theVersion, theUserSelected);
-		//FIXME MB: this is new.
+		//wipmb: this is new.
 		q.setMaxResults(1);
 
 		TransactionTemplate template = new TransactionTemplate(myTransactionManager);

@@ -783,6 +783,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						writeOptionalTagWithTextNode(theEventWriter, "system", tag.getScheme());
 						writeOptionalTagWithTextNode(theEventWriter, "code", tag.getTerm());
 						writeOptionalTagWithTextNode(theEventWriter, "display", tag.getLabel());
+						// wipmb should we be writing the new properties here?  There must be another path.
 						theEventWriter.endObject();
 					}
 					theEventWriter.endArray();
