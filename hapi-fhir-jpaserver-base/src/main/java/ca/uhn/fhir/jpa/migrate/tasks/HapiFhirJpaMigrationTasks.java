@@ -199,6 +199,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			stringTable.addForeignKey("20230303.6", "FK_SPIDXSTR_RESOURCE")
 				.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 
+		{  //We added this constraint when userSelected and Version were added. It is no longer necessary.
+			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
 		}
 
 		final String revColumnName = "REV";

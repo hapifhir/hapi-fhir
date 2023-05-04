@@ -157,14 +157,16 @@ public class TagDefinition implements Serializable {
 		}
 	}
 
+	/**
+	 * Warning - this is nullable, while IBaseCoding getUserSelected isn't.
+	 * wipmb maybe rename?
+	 */
 	public Boolean getUserSelected() {
-		// TODO: LD: this is not ideal as we are implicitly assuming null is false.
-		//  Ideally we should fix IBaseCoding to return wrapper Boolean but that will involve another core/hapi release
-		return myUserSelected != null ? myUserSelected : false;
+		return myUserSelected;
 	}
 
 	public void setUserSelected(Boolean theUserSelected) {
-		myUserSelected = theUserSelected != null && theUserSelected;
+		myUserSelected = theUserSelected;
 	}
 
 

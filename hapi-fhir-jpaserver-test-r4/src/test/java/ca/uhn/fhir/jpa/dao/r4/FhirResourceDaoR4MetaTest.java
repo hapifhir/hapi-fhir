@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
+import ch.qos.logback.classic.Level;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -41,6 +42,8 @@ import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -153,6 +156,30 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertEquals("bar", patient2.getMeta().getSecurityFirstRep().getCode());
 	}
 
+	/**
+	 * Make sure round-trips with tags don't add a userSelected property.
+	 * wipmb tag userSelected test
+	 * Verify https://github.com/hapifhir/hapi-fhir/issues/4819
+	 */
+	@Test
+	void testAddTag_userSelectedStaysNull() {
+	    // given
+		Patient patient1 = new Patient();
+		patient1.getMeta().addTag().setSystem("http://foo").setCode("bar");
+		patient1.setActive(true);
+		IIdType pid1 = myPatientDao.create(patient1).getId();
+
+		// when
+		var patientReadback = myPatientDao.read(pid1);
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patientReadback));
+
+		// then
+		var tag = patientReadback.getMeta().getTag().get(0);
+		assertNotNull(tag);
+		assertNull(tag.getUserSelectedElement().asStringValue());
+	}
+
+
 	@Nested
 	public class TestTagWithVersionAndUserSelected {
 
@@ -204,6 +231,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 				.setSystem(expectedSystem1)
 				.setCode(expectedCode1)
 				.setDisplay(expectedDisplay1);
+			assertNull(newTag.getUserSelectedElement().asStringValue());
 			assertFalse(newTag.getUserSelected());
 			newTag.setVersion(expectedVersion1)
 				.setUserSelected(expectedUserSelected1);
