@@ -401,7 +401,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription modifiedSubscription = subscription.copy();
 		// the original partition info was the request info, but we need the actual storage partition.
 		modifiedSubscription.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
-		when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any())).thenReturn(modifiedSubscription);
+		when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any(), eq(true))).thenReturn(modifiedSubscription);
 	}
 
 	@Nested
