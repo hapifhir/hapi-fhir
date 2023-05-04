@@ -33,25 +33,20 @@ import ca.uhn.fhir.cr.common.HapiTerminologyProvider;
 import ca.uhn.fhir.cr.common.IDataProviderFactory;
 import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibraryLoaderFactory;
-import ca.uhn.fhir.cr.common.ILibraryManagerFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
@@ -61,7 +56,6 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
-import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
@@ -153,7 +147,7 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 	@Scope("prototype")
 	public ModelManager modelManager(
 		Map<ModelIdentifier, Model> theGlobalModelCache) {
-		return new CacheAwareModelManager(theGlobalModelCache);
+		return new ModelManager(theGlobalModelCache);
 	}
 
 	@Bean
@@ -234,7 +228,7 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 				// TODO: This is due to a bug with the ELM annotations which prevent options
 				// from matching the way they should
 				@Override
-				protected Boolean translatorOptionsMatch(org.cqframework.cql.elm.execution.Library library) {
+				public boolean translatorOptionsMatch(org.cqframework.cql.elm.execution.Library library) {
 					return true;
 				}
 			};

@@ -962,7 +962,7 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-SNAPSHOT</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE2-SNAPSHOT</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>

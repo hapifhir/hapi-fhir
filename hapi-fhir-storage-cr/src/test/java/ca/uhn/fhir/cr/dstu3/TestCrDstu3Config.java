@@ -23,7 +23,6 @@ import ca.uhn.fhir.cr.config.CrProviderLoader;
 import ca.uhn.fhir.cr.config.PreExpandedValidationSupportLoader;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -40,14 +39,12 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
-import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
@@ -152,7 +149,7 @@ public class TestCrDstu3Config {
 	@Bean
 	public ModelManager modelManager(
 		Map<ModelIdentifier, Model> theGlobalModelCache) {
-		return new CacheAwareModelManager(theGlobalModelCache);
+		return new ModelManager(theGlobalModelCache);
 	}
 
 	@Bean
@@ -244,7 +241,7 @@ public class TestCrDstu3Config {
 				// TODO: This is due to a bug with the ELM annotations which prevent options
 				// from matching the way they should
 				@Override
-				protected Boolean translatorOptionsMatch(org.cqframework.cql.elm.execution.Library library) {
+				public boolean translatorOptionsMatch(org.cqframework.cql.elm.execution.Library library) {
 					return true;
 				}
 			};
