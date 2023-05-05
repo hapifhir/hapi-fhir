@@ -24,20 +24,19 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEm
 import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.MessageHandler;
 
 import java.util.Optional;
 
 public class SubscriptionDeliveryHandlerFactory {
+
+	protected ApplicationContext myApplicationContext;
+
 	private IEmailSender myEmailSender;
 
-	@Autowired
-	private ApplicationContext myApplicationContext;
-
-	@Autowired
-	public SubscriptionDeliveryHandlerFactory(IEmailSender theEmailSender) {
+	public SubscriptionDeliveryHandlerFactory(ApplicationContext theApplicationContext, IEmailSender theEmailSender) {
+		myApplicationContext = theApplicationContext;
 		myEmailSender = theEmailSender;
 	}
 
@@ -65,7 +64,4 @@ public class SubscriptionDeliveryHandlerFactory {
 		}
 	}
 
-	public void setEmailSender(IEmailSender theEmailSender) {
-		myEmailSender = theEmailSender;
-	}
 }
