@@ -44,6 +44,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import software.amazon.awssdk.utils.StringUtils;
 
+import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -328,6 +329,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			linkTable.addForeignKey("20230424.5", "FK_RESLINK_TARGET")
 				.toColumn("TARGET_RESOURCE_ID").references("HFJ_RESOURCE", "RES_ID");
 		}
+
+		{
+			version.onTable("MPI_LINK")
+				.addIndex("20230504.1", "IDX_EMPI_GR_TGT")
+				.unique(false)
+				.withColumns("GOLDEN_RESOURCE_PID", "TARGET_PID");
+		}
+
 	}
 
 	protected void init640() {
