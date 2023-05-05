@@ -59,6 +59,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private int myInitialCount;
 	private boolean myExactMatch;
 	private AtomicReference<List<PointcutLatchException>> myExceptions = new AtomicReference<>();
+	private final List<PointcutLatchException> myOutsideExceptions = new ArrayList<>();
 
 	public PointcutLatch(IPointcut thePointcut) {
 		this.myName = thePointcut.name();
@@ -152,7 +153,11 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	private void throwNewPointcutLatchException(int theMsgCode, String theMessage, HookParams theHookParams) {
 		PointcutLatchException pointcutLatchException = new PointcutLatchException(Msg.code(theMsgCode) + theMessage, theHookParams);
-		myExceptions.get().add(pointcutLatchException);
+		if (myExceptions.get() != null) {
+			myExceptions.get().add(pointcutLatchException);
+		} else {
+			myOutsideExceptions.add(pointcutLatchException);
+		}
 		throw pointcutLatchException;
 	}
 
@@ -198,12 +203,29 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	public void clear() {
 		myCountdownLatch.set(null);
 		myCountdownLatchSetStacktrace.set(null);
-		if (myStrict && myExceptions.get() != null) {
-			List<PointcutLatchException> list = myExceptions.get();
-			if (list.size() > 0) {
-				PointcutLatchException firstException = list.get(0);
-				throw new AssertionError(Msg.code(2344) + getName() + " had " + list.size() + " exceptions.  Throwing first one.", firstException);
-			}
+		checkExceptions();
+		myExceptions.set(null);
+		myOutsideExceptions.clear();
+	}
+
+	private void checkExceptions() {
+		if (!myStrict) {
+			return;
+		}
+
+		PointcutLatchException firstException = null;
+		int size = 0;
+
+		List<PointcutLatchException> exceptionList = myExceptions.get();
+		if (exceptionList != null && exceptionList.size() > 0) {
+			firstException = exceptionList.get(0);
+			size = exceptionList.size();
+		} else if (myOutsideExceptions.size() > 0) {
+			firstException = myOutsideExceptions.get(0);
+			size = myOutsideExceptions.size();
+		}
+		if (firstException != null) {
+			throw new AssertionError(Msg.code(2344) + getName() + " had " + size + " exceptions.  Throwing first one.", firstException);
 		}
 	}
 
@@ -224,7 +246,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	@Override
 	public void invoke(IPointcut thePointcut, HookParams theArgs) {
 		myLastInvoke.set(System.currentTimeMillis());
-		
+
 		CountDownLatch latch = myCountdownLatch.get();
 		if (myExactMatch) {
 			if (latch == null) {
