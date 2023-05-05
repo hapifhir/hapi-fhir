@@ -46,7 +46,7 @@ import java.util.Collection;
 @Table(
 	name = "HFJ_TAG_DEF",
 	indexes = {
-		@Index(name = "IDX_TAG_DEF_TP_CD_SYS", columnList = "TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_ID"),
+		@Index(name = "IDX_TAG_DEF_TP_CD_SYS", columnList = "TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_ID, TAG_VERSION, TAG_USER_SELECTED"),
 	}
 )
 public class TagDefinition implements Serializable {
