@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -34,12 +35,17 @@ public class HapiSchemaMigrationTest {
 	@AfterEach
 	public void afterEach(){
         myEmbeddedServersExtension.clearDatabases();
+        HapiSystemProperties.enableUnitTestMode();
 	}
 
 	@ParameterizedTest
 	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
 	public void testMigration(DriverTypeEnum theDriverType){
-		ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
+        // ensure all migrations are run
+        HapiSystemProperties.disableUnitTestMode();
+        ourLog.info("isUnitTestModeEnabled: {}", HapiSystemProperties.isUnitTestModeEnabled());
+
+        ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
 
         JpaEmbeddedDatabase embeddedDatabase = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
         embeddedDatabase.initializeDatabaseForVersion(FIRST_TESTED_VERSION);
