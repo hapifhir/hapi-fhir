@@ -202,7 +202,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 			List<PointcutLatchException> list = myExceptions.get();
 			if (list.size() > 0) {
 				PointcutLatchException firstException = list.get(0);
-				throw new AssertionError(Msg.code(2342) + getName() + " had " + list.size() + " exceptions.  Throwing first one.", firstException);
+				throw new AssertionError(Msg.code(2344) + getName() + " had " + list.size() + " exceptions.  Throwing first one.", firstException);
 			}
 		}
 	}
