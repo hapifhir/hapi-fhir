@@ -928,7 +928,8 @@
 		<junit_version>5.9.1</junit_version>
 		<flexmark_version>0.50.40</flexmark_version>
 		<flyway_version>9.4.0</flyway_version>
-		<hibernate_version>5.6.15.Final</hibernate_version>
+		<!-- FIXME: bump to 5.6.15 -->
+		<hibernate_version>5.6.12.Final</hibernate_version>
 		<hibernate_search_version>6.1.6.Final</hibernate_search_version>
 		<logback_version>1.4.4</logback_version>
 	 	<!-- Update lucene version when you update hibernate-search version -->

@@ -483,11 +483,14 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/3"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/2"));
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
+		logAllResources();
+		logAllResourceVersions();
+
 		actual = myPatientDao.read(resourceId, mySrd);
-		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		assertEquals("2", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 
@@ -497,11 +500,11 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/5"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/3"));
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		actual = myPatientDao.read(resourceId, mySrd);
-		assertEquals("5", actual.getIdElement().getVersionIdPart());
+		assertEquals("3", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 	}
