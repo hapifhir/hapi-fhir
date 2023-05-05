@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscr
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,5 +103,10 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 
 	public void setEmailSender(IEmailSender theEmailSender) {
 		myEmailSender = theEmailSender;
+	}
+
+	@VisibleForTesting
+	public IEmailSender getEmailSender(){
+		return myEmailSender;
 	}
 }
