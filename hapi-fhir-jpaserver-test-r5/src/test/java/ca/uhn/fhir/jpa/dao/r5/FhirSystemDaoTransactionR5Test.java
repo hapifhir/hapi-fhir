@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
@@ -12,14 +13,19 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.Reference;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import javax.persistence.Id;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
@@ -30,6 +36,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		myStorageSettings.setIndexMissingFields(defaults.getIndexMissingFields());
 		myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
 		myStorageSettings.setDeleteEnabled(defaults.isDeleteEnabled());
+		myStorageSettings.setInlineResourceTextBelowSize(defaults.getInlineResourceTextBelowSize());
 	}
 
 
@@ -432,6 +439,74 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertTrue(createdPatient.getActive());
 
 		assertEquals(2, output.getEntry().size());
+	}
+
+
+	@Test
+	public void testTransactionWithConditionalDeleteAndConditionalUpdateOnSameCondition() throws Exception {
+		myStorageSettings.setInlineResourceTextBelowSize(10000);
+
+		Callable<Bundle> inputSupplier = ()->{
+			// Build a new bundle each time we need it
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionDeleteConditionalEntry("Patient?identifier=http://foo|bar");
+
+			Patient patient = new Patient();
+			patient.setId("Patient/P");
+			patient.getMeta().addTag("http://tag", "tag-code", "tag-display");
+			patient.addIdentifier().setSystem("http://foo").setValue("bar");
+			bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://foo|bar");
+			return bb.getBundleTyped();
+		};
+		Bundle outcome;
+		Patient actual;
+
+		// First pass (resource doesn't already exist)
+
+		outcome = mySystemDao.transaction(mySrd, inputSupplier.call());
+		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+
+		IdType resourceId = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		actual = myPatientDao.read(resourceId, mySrd);
+		assertEquals("1", actual.getIdElement().getVersionIdPart());
+		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
+		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
+
+		// Second pass (resource already exists)
+
+		myCaptureQueriesListener.clear();
+		outcome = mySystemDao.transaction(mySrd, inputSupplier.call());
+		myCaptureQueriesListener.logUpdateQueries();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/2"));
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+
+		logAllResources();
+		logAllResourceVersions();
+
+		actual = myPatientDao.read(resourceId, mySrd);
+		assertEquals("2", actual.getIdElement().getVersionIdPart());
+		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
+		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
+
+		// Third pass (resource already exists)
+
+		outcome = mySystemDao.transaction(mySrd, inputSupplier.call());
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/3"));
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+
+		actual = myPatientDao.read(resourceId, mySrd);
+		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
+		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 	}
 
 
