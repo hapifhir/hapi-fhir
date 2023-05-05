@@ -98,7 +98,9 @@ public class SchemaMigrator {
 	private HapiMigrator newMigrator() {
 		HapiMigrator migrator;
 		migrator = new HapiMigrator(myMigrationTableName, myDataSource, myDriverType);
+        ourLog.info("Task Size Before: {}", myMigrationTasks.size());
 		migrator.addTasks(myMigrationTasks);
+        ourLog.info("Task Size After: {}", migrator.getTaskListSize());
 		migrator.setCallbacks(myCallbacks);
 		return migrator;
 	}
