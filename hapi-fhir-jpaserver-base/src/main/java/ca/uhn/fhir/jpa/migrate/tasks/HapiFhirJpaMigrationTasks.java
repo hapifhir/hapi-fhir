@@ -95,6 +95,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init620();
 		init640();
 		init660();
+		init680();
+	}
+
+	protected void init680() {
+		Builder version = forVersion(VersionEnum.V6_8_0);
+
+		// HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
+		Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
+		resourceTable
+			.addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
+			.unique(false)
+			.online(true)
+			.withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
 	}
 
 	protected void init660() {
