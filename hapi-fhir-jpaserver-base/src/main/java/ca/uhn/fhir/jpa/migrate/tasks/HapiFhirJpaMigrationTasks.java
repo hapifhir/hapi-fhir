@@ -101,6 +101,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init680() {
 		Builder version = forVersion(VersionEnum.V6_8_0);
 
+      // HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
+    Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
+    resourceTable
+      .addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
+      .unique(false)
+      .online(true)
+      .withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
+    
 		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
 		tagDefTable.dropIndex("20230505.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
 
@@ -110,6 +118,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.online(false)
 			.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID", "TAG_VERSION", "TAG_USER_SELECTED");
+
+
 
 	}
 
