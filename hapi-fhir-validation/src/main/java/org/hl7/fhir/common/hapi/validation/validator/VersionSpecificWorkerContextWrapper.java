@@ -239,10 +239,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		if (theResult != null) {
 			String code = theResult.getCode();
 			String display = theResult.getDisplay();
+			String version = theResult.getCodeSystemVersion();
 			String issueSeverity = theResult.getSeverityCode();
 			String message = theResult.getMessage();
 			if (isNotBlank(code)) {
-				retVal = new ValidationResult(theSystem, new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent()
+				retVal = new ValidationResult(theSystem, version, new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent()
 					.setCode(code)
 					.setDisplay(display),
 					null);
