@@ -40,6 +40,19 @@ create sequence SEQ_VALUESET_C_DSGNTN_PID start with 1 increment by 50;
 create sequence SEQ_VALUESET_CONCEPT_PID start with 1 increment by 50;
 create sequence SEQ_VALUESET_PID start with 1 increment by 50;
 
+    CREATE TABLE "FLY_HFJ_MIGRATION" (
+        "installed_rank" int NOT NULL,
+        "version" varchar(50),
+        "description" varchar(200) NOT NULL,
+        "type" varchar(20) NOT NULL,
+        "script" varchar(1000) NOT NULL,
+        "checksum" int,
+        "installed_by" varchar(100) NOT NULL,
+        "installed_on" datetime2 NOT NULL,
+        "execution_time" int NOT NULL,
+        "success" bit NOT NULL
+    );
+
     create table HFJ_BINARY_STORAGE_BLOB (
        BLOB_ID varchar(200) not null,
         BLOB_DATA varbinary(MAX) not null,

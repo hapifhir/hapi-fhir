@@ -48,7 +48,15 @@ public class HapiSchemaMigrationTest {
 		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(embeddedDatabase.getDataSource(), theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
-        MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.EMPTY_SET).getAllTasks(VersionEnum.values());
+        VersionEnum[] allVersions = VersionEnum.values();
+
+        int fromVersion = FIRST_TESTED_VERSION.ordinal() - 1;
+        VersionEnum from = allVersions[fromVersion];
+
+        int lastVersion = allVersions.length - 1;
+        VersionEnum to = allVersions[lastVersion];
+
+        MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.EMPTY_SET).getTaskList(from, to);
 		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, embeddedDatabase.getDataSource(), new Properties(), migrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(theDriverType);
 		schemaMigrator.createMigrationTableIfRequired();
