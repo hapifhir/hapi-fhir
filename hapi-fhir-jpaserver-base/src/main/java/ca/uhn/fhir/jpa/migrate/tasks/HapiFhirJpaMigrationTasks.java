@@ -101,13 +101,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init680() {
 		Builder version = forVersion(VersionEnum.V6_8_0);
 
-		// HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
-		Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
-		resourceTable
-			.addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
+      // HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
+    Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
+    resourceTable
+      .addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
+      .unique(false)
+      .online(true)
+      .withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
+    
+		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+		tagDefTable.dropIndex("20230505.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
+
+		tagDefTable.dropIndex("20230505.2", "IDX_TAG_DEF_TP_CD_SYS");
+		tagDefTable
+			.addIndex("20230505.3", "IDX_TAG_DEF_TP_CD_SYS")
 			.unique(false)
-			.online(true)
-			.withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
+			.online(false)
+			.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID", "TAG_VERSION", "TAG_USER_SELECTED");
+
+
+
 	}
 
 	protected void init660() {
@@ -362,7 +375,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(true)
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		{  //We added this constraint when userSelected and Version were added. It is no longer necessary.
+			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
+		}
 	}
+
 
 	private void init620() {
 		Builder version = forVersion(VersionEnum.V6_2_0);

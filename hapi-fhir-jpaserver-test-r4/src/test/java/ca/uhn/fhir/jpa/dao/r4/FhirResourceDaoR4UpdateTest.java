@@ -5,6 +5,8 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -93,6 +95,33 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("It can also happen when a request disables the Upsert Existence Check."));
 		}
+	}
+
+
+	@Test
+	public void testTagCollision() {
+		TagDefinition def = new TagDefinition();
+		def.setTagType(TagTypeEnum.TAG);
+		def.setSystem("system");
+		def.setCode("coding");
+		def.setDisplay("display");
+		def.setUserSelected(null);
+
+
+		Patient p = new Patient();
+		p.getMeta().addTag("system", "coding", "display");
+
+		myMemoryCacheService.invalidateAllCaches();
+		myPatientDao.create(p, new SystemRequestDetails());
+		//inject conflicting.
+		myTagDefinitionDao.saveAndFlush(def);
+		myMemoryCacheService.invalidateAllCaches();
+
+		myPatientDao.create(p, new SystemRequestDetails());
+		myMemoryCacheService.invalidateAllCaches();
+
+		myPatientDao.create(p, new SystemRequestDetails());
+
 	}
 
 
