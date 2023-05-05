@@ -19,7 +19,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -387,7 +386,7 @@ public class FhirPatchApplyR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		//Given: We create a patch request to add a new active status
+		//Given: We create a patch request to add a new active statuts
 		BooleanType theValue = new BooleanType(false);
 		Parameters patch = new Parameters();
 		patch.addParameter(createPatchAddOperation("Patient", "active", theValue));
@@ -396,37 +395,6 @@ public class FhirPatchApplyR4Test {
 		svc.apply(patient, patch);
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		//TODO THIS SHOULD THROW AN EXCEPTION. you cannot `add` to a field that is already set.
-	}
-
-	@Test
-	public void testAddExtensionWithChoiceType() {
-		FhirPatch svc = new FhirPatch(ourCtx);
-		Patient patient = new Patient();
-
-		Parameters patch = new Parameters();
-		Parameters.ParametersParameterComponent addOperation = createPatchAddOperation("Patient", "extension", null);
-		addOperation
-			.addPart()
-			.setName("value")
-			.addPart(
-				new Parameters.ParametersParameterComponent()
-					.setName("url")
-					.setValue(new UriType("http://foo/fhir/extension/foo"))
-			)
-			.addPart(
-				new Parameters.ParametersParameterComponent()
-					.setName("value")
-					.setValue(new StringType("foo"))
-			);
-		patch.addParameter(addOperation);
-
-		svc.apply(patient, patch);
-		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-
-		//Then: it adds the new extension correctly.
-		assertThat(patient.getExtension(), hasSize(1));
-		assertThat(patient.getExtension().get(0).getUrl(), is(equalTo("http://foo/fhir/extension/foo")));
-		assertThat(patient.getExtension().get(0).getValueAsPrimitive().getValueAsString(), is(equalTo("foo")));
 	}
 
 	private Parameters.ParametersParameterComponent createPatchAddOperation(String thePath, String theName, Type theValue) {

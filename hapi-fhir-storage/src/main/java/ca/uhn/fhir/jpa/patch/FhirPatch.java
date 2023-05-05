@@ -225,10 +225,6 @@ public class FhirPatch {
 								if (value.isPresent()) {
 
 									BaseRuntimeChildDefinition partChildDef = childElement.getChildByName(name);
-									if (partChildDef == null) {
-										name = name + "[x]";
-										partChildDef = childElement.getChildByName(name);
-									}
 									partChildDef.getMutator().addValue(newValue, value.get());
 
 								}

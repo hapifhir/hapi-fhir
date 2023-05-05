@@ -271,7 +271,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				}
 			}
 			if (offset != null && offset > 0) {
-				int start = Math.max(0, offset - pageSize);
+				int start = Math.max(0, theOffset - pageSize);
 				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), start, pageSize, theRequest.getParameters()));
 			}
 		} else if (isNotBlank(theResult.getCurrentPageId())) {
