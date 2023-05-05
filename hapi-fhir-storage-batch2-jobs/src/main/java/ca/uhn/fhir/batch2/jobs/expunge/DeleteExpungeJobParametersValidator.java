@@ -20,7 +20,9 @@
 package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
+import ca.uhn.fhir.util.ValidateUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,6 +38,10 @@ public class DeleteExpungeJobParametersValidator implements IJobParametersValida
 	@Nullable
 	@Override
 	public List<String> validate(@Nonnull DeleteExpungeJobParameters theParameters) {
+		for (PartitionedUrl partitionedUrl : theParameters.getPartitionedUrls()) {
+			String url = partitionedUrl.getUrl();
+			ValidateUtil.isTrueOrThrowInvalidRequest(url.matches("[a-zA-Z]+\\?.*"), "Delete expunge URLs must be in the format [resourceType]?[parameters]");
+		}
 		return myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
 	}
 }
