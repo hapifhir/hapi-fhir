@@ -30,14 +30,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
-import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.StopWatch;
@@ -111,19 +111,21 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			ourLog.info("Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 			StopWatch sw = new StopWatch();
 
+			MdmStorageInterceptor.setLinksDeletedBeforehand();
 			myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(persistentIds);
+			ourLog.trace("Deleted {} mdm links in {}", persistentIds.size(), StopWatch.formatMillis(sw.getMillis()));
 
 			// We know the list is not empty, and that all resource types are the same, so just use the first one
 			String resourceName  = myData.getResourceType(0);
-			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceName);
+			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceName);
 
 			DeleteConflictList conflicts = new DeleteConflictList();
 			dao.deletePidList(ProviderConstants.OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);
 			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, conflicts);
+			ourLog.trace("Deleted {} golden resources in {}", persistentIds.size(), StopWatch.formatMillis(sw.getMillis()));
 
-			dao.expunge(persistentIds, myRequestDetails);
-
-			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
+			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]",
+				persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
 
 			if (ourClearCompletionCallbackForUnitTest != null) {
 				ourClearCompletionCallbackForUnitTest.run();
