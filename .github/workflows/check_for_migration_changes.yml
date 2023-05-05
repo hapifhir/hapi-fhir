@@ -34,8 +34,9 @@ jobs:
           files: |
             hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/migrate/tasks/HapiFhirJpaMigrationTasks.java
 
-      - name: Run step the migrations file changed
+      - name: Add migration reviewers if migration files changed
         if: steps.migrations-changed.outputs.any_changed == 'true'
-        run: |
-          echo "One or more Java Entity file(s) or any file in the static folder but not in the doc folder has changed."
-          echo "List all the files that have changed: ${{ steps.migrations-changed.outputs.all_changed_files }}"
+        uses: madrapps/add-reviewers@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          reviewers: michaelabuckley,jamesagnew

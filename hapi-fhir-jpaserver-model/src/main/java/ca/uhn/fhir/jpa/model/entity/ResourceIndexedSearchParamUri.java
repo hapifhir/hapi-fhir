@@ -71,7 +71,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 
 
 
-
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_URI", sequenceName = "SEQ_SPIDX_URI")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")
