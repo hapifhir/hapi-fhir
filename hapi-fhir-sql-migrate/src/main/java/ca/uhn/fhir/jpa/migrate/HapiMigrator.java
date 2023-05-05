@@ -185,7 +185,6 @@ public class HapiMigrator {
 	}
 
 	public void addTasks(Iterable<BaseTask> theMigrationTasks) {
-        ourLog.info("isUnitTestModeEnabled: {}", HapiSystemProperties.isUnitTestModeEnabled());
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
 			// Tests only need to initialize the schemas. No need to run all the migrations for every test.
 			for (BaseTask task : theMigrationTasks) {
@@ -211,11 +210,6 @@ public class HapiMigrator {
 	public void removeAllTasksForUnitTest() {
 		myTaskList.clear();
 	}
-
-    // TODO REMOVE
-    public int getTaskListSize(){
-        return myTaskList.size();
-    }
 
 	public void createMigrationTableIfRequired() {
 		myHapiMigrationStorageSvc.createMigrationTableIfRequired();
