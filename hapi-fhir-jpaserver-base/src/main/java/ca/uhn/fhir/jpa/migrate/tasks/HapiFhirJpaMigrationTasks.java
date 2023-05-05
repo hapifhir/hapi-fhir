@@ -104,7 +104,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
 		Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
 		resourceTable
-			.addIndex("20230502.1", "IDX_RESID_UPDATED")
+			.addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
 			.unique(false)
 			.online(true)
 			.withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
