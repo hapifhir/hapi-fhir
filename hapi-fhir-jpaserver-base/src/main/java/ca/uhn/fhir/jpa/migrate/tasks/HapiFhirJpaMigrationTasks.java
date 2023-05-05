@@ -95,11 +95,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init620();
 		init640();
 		init660();
-		init670();
+		init680();
 	}
 
-	protected void init670() {
-		Builder version = forVersion(VersionEnum.V6_7_0);
+	protected void init680() {
+		Builder version = forVersion(VersionEnum.V6_8_0);
 
 		// HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
 		Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
