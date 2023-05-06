@@ -70,7 +70,6 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
@@ -201,9 +200,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private UrlPartitioner myUrlPartitioner;
-
 	@Autowired
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
+	@Autowired
+	private IFhirSystemDao<?, ?> mySystemDao;
 
 	public static <T extends IBaseResource> T invokeStoragePreShowResources(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, T retVal) {
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, theInterceptorBroadcaster, theRequest)) {
@@ -745,9 +745,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	@Autowired
-	private IFhirSystemDao<?,?> mySystemDao;
-
 	@Nonnull
 	@Override
 	public <P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
@@ -757,7 +754,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		List<IResourcePersistentId<?>> resolvedIds = theResourceIds
 			.stream()
-			.map(t->(IResourcePersistentId<?>)t)
+			.map(t -> (IResourcePersistentId<?>) t)
 			.collect(Collectors.toList());
 		mySystemDao.preFetchResources(resolvedIds, false);
 
@@ -851,10 +848,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			boolean hasTag = false;
 			for (BaseTag next : new ArrayList<>(theEntity.getTags())) {
 				if (Objects.equals(next.getTag().getTagType(), nextDef.getTagType()) &&
-						Objects.equals(next.getTag().getSystem(), nextDef.getSystem()) &&
-						Objects.equals(next.getTag().getCode(), nextDef.getCode()) &&
-						Objects.equals(next.getTag().getVersion(), nextDef.getVersion()) &&
-						Objects.equals(next.getTag().getUserSelected(), nextDef.getUserSelected())) {
+					Objects.equals(next.getTag().getSystem(), nextDef.getSystem()) &&
+					Objects.equals(next.getTag().getCode(), nextDef.getCode()) &&
+					Objects.equals(next.getTag().getVersion(), nextDef.getVersion()) &&
+					Objects.equals(next.getTag().getUserSelected(), nextDef.getUserSelected())) {
 					hasTag = true;
 					break;
 				}
@@ -1392,7 +1389,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			reindexOptimizeStorageHistoryEntity(entity, historyEntity);
 			if (theOptimizeStorageMode == ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS) {
 				int pageSize = 100;
-				for (int page = 0; ((long)page * pageSize) < entity.getVersion(); page++) {
+				for (int page = 0; ((long) page * pageSize) < entity.getVersion(); page++) {
 					Slice<ResourceHistoryTable> historyEntities = myResourceHistoryTableDao.findForResourceIdAndReturnEntities(PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
 					for (ResourceHistoryTable next : historyEntities) {
 						reindexOptimizeStorageHistoryEntity(entity, next);
