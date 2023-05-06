@@ -725,8 +725,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			retVal = new ResourceHistoryTable();
 			myNewVersionEntity = retVal;
 		} else {
-			// FIXME: can we drop this
-			createVersionTags = false; // Tags should already be set
+			// Tags should already be set
+			createVersionTags = false;
 		}
 
 		retVal.setResourceId(myId);

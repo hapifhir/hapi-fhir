@@ -751,7 +751,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?active=true", new SystemRequestDetails());
 
 		// Validate
-		assertEquals(31, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(13, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(10, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(10, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(30, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
@@ -3303,13 +3303,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test
-	public void testMassIngestionMode_TransactionWithChanges_2() throws IOException {
+	public void testMassIngestionMode_TransactionWithChanges_NonVersionedTags() throws IOException {
 		myStorageSettings.setDeleteEnabled(false);
 		myStorageSettings.setMatchUrlCacheEnabled(true);
 		myStorageSettings.setMassIngestionMode(true);
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myStorageSettings.setRespectVersionsForSearchIncludes(true);
-		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 		myStorageSettings.setAutoVersionReferenceAtPaths("ExplanationOfBenefit.patient", "ExplanationOfBenefit.insurance.coverage");
 
 		// Pre-cache tag definitions
