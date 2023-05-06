@@ -553,7 +553,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 
 
-			if (!extensions.isEmpty() || !modifierExtensions.isEmpty() || !comments.isEmpty()) {
+			if (!extensions.isEmpty() || !modifierExtensions.isEmpty() || (!comments.isEmpty() && isSupportsFhirComment())) {
 				if (inArray) {
 					// If this is a repeatable field, the extensions go in an array too
 					beginArray(theEventWriter, '_' + currentChildName);
