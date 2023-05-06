@@ -75,6 +75,7 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.cleanProvenanceSourceUri;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaStorageResourceParser implements IJpaStorageResourceParser {
