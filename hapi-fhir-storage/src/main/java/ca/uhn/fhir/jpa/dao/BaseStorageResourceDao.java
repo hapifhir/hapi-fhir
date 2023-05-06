@@ -231,7 +231,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
 		try {
-			String jobId = getDeleteExpungeJobSubmitter().submitJob(getStorageSettings().getExpungeBatchSize(), urlsToDeleteExpunge, theRequest);
+			// FIXME: instead of hardcoding false, could this be set by the caller
+			String jobId = getDeleteExpungeJobSubmitter().submitJob(getStorageSettings().getExpungeBatchSize(), urlsToDeleteExpunge, false, theRequest);
 			return new DeleteMethodOutcome(createInfoOperationOutcome("Delete job submitted with id " + jobId));
 		} catch (InvalidRequestException e) {
 			throw new InvalidRequestException(Msg.code(965) + "Invalid Delete Expunge Request: " + e.getMessage(), e);

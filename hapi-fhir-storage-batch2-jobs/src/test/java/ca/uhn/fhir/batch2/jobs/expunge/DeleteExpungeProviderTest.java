@@ -1,80 +1,87 @@
 package ca.uhn.fhir.batch2.jobs.expunge;
 
-import ca.uhn.fhir.batch2.jobs.BaseR4ServerTest;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-public class DeleteExpungeProviderTest extends BaseR4ServerTest {
+@ExtendWith(MockitoExtension.class)
+public class DeleteExpungeProviderTest {
 	public static final String TEST_JOB_ID = "test-job-id";
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeProviderTest.class);
 
-	private Parameters myReturnParameters;
-	private MyDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter = new MyDeleteExpungeJobSubmitter();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+
+	@RegisterExtension
+	public static RestfulServerExtension myServer = new RestfulServerExtension(ourCtx);
+
+	@Mock
+	private IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter;
+	private DeleteExpungeProvider myProvider;
 
 	@BeforeEach
-	public void reset() {
-		myReturnParameters = new Parameters();
-		myReturnParameters.addParameter("success", true);
+	public void beforeEach() {
+		myProvider = new DeleteExpungeProvider(ourCtx, myDeleteExpungeJobSubmitter);
+		myServer.registerProvider(myProvider);
+	}
+
+	@AfterEach
+	public void afterEach() {
+		myServer.unregisterProvider(myProvider);
 	}
 
 	@Test
-	public void testDeleteExpunge() throws Exception {
+	public void testDeleteExpunge() {
 		// setup
 		Parameters input = new Parameters();
 		String url1 = "Observation?status=active";
 		String url2 = "Patient?active=false";
-		Integer batchSize = 2401;
+		int batchSize = 2401;
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url1);
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url2);
+		input.addParameter(ProviderConstants.OPERATION_DELETE_CASCADE, new BooleanType(true));
 		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
 
-		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		when(myDeleteExpungeJobSubmitter.submitJob(any(), any(), anyBoolean(), any())).thenReturn(TEST_JOB_ID);
 
-		DeleteExpungeProvider provider = new DeleteExpungeProvider(myCtx, myDeleteExpungeJobSubmitter);
-		startServer(provider);
-
-		Parameters response = myClient
+		// Test
+		Parameters response = myServer
+			.getFhirClient()
 			.operation()
 			.onServer()
 			.named(ProviderConstants.OPERATION_DELETE_EXPUNGE)
 			.withParameters(input)
 			.execute();
 
-		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		// Verify
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertEquals(TEST_JOB_ID, BatchHelperR4.jobIdFromBatch2Parameters(response));
-		assertThat(myDeleteExpungeJobSubmitter.calledWithUrls, hasSize(2));
-		assertEquals(url1, myDeleteExpungeJobSubmitter.calledWithUrls.get(0));
-		assertEquals(url2, myDeleteExpungeJobSubmitter.calledWithUrls.get(1));
-		assertEquals(batchSize, myDeleteExpungeJobSubmitter.calledWithBatchSize);
-		assertNotNull(myDeleteExpungeJobSubmitter.calledWithRequestDetails);
+
+		verify(myDeleteExpungeJobSubmitter, times(1)).submitJob(
+			eq(2401),
+			eq(List.of(url1, url2)),
+			eq(true),
+			any()
+		);
 	}
 
-	private class MyDeleteExpungeJobSubmitter implements IDeleteExpungeJobSubmitter {
-		Integer calledWithBatchSize;
-		List<String> calledWithUrls;
-		RequestDetails calledWithRequestDetails;
-
-		@Override
-		public String submitJob(Integer theBatchSize, List<String> theUrlsToProcess, RequestDetails theRequest) {
-			calledWithBatchSize = theBatchSize;
-			calledWithUrls = theUrlsToProcess;
-			calledWithRequestDetails = theRequest;
-			return TEST_JOB_ID;
-		}
-	}
 }

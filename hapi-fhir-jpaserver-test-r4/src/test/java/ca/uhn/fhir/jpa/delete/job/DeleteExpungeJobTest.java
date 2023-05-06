@@ -111,6 +111,33 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testCascade() {
+		IIdType p1 = createPatient(withActiveTrue());
+		IIdType o1 = createObservation(withSubject(p1));
+		IIdType p2 = createPatient(withActiveTrue());
+		IIdType o2 = createObservation(withSubject(p2));
+
+		// validate precondition
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+
+		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
+		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
+		jobParameters.setCascade(true);
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setParameters(jobParameters);
+		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
+
+		// execute
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+
+		// Validate
+		JobInstance failure = myBatch2JobHelper.awaitJobFailure(startResponse);
+		assertThat(failure.getErrorMessage(), containsString("Unable to delete " + p1.getValue() + " because " + o1.getValue() + " refers to it"));
+	}
+
+	@Test
 	public void testInvalidParams_NoSearchParams() {
 		// Setup
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();

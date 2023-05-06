@@ -66,7 +66,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
-	public String submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequestDetails) {
+	public String submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, boolean theCascade, RequestDetails theRequestDetails) {
 		if (theBatchSize == null) {
 			theBatchSize = myStorageSettings.getExpungeBatchSize();
 		}

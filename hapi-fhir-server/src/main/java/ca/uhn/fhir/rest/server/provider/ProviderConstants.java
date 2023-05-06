@@ -161,6 +161,10 @@ public class ProviderConstants {
 	 * Number of resources to delete at a time for the $delete-expunge operation
 	 */
 	public static final String OPERATION_DELETE_BATCH_SIZE = "batchSize";
+	/**
+	 * Should we cascade the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_CASCADE = "cascade";
 
 	/**
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
