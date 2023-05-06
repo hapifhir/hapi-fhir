@@ -53,7 +53,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
-import static org.apache.commons.lang3.StringUtils.trim;
 
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection", "java:S1192"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
@@ -94,6 +93,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init610();
 		init620();
 		init640();
+		init640_after_20230126();
 		init660();
 		init680();
 	}
@@ -103,6 +103,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
       // HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
     Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
+
     resourceTable
       .addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
       .unique(false)
@@ -375,7 +376,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(true)
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+	}
 
+	protected void init640_after_20230126() {
+		Builder version = forVersion(VersionEnum.V6_3_0);
 		{  //We added this constraint when userSelected and Version were added. It is no longer necessary.
 			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
 			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
