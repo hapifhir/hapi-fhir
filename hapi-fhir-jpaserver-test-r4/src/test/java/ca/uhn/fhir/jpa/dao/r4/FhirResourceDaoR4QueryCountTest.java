@@ -1863,7 +1863,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Search for IDs and Search for tag definition
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(26, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(29, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
@@ -2937,7 +2938,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(17, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(6606, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(6607, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countCommits());
