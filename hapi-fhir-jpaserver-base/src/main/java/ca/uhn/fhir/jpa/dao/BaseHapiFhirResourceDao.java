@@ -349,40 +349,48 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(Msg.code(958) + msg);
 			} else if (match.size() == 1) {
 				JpaPid pid = match.iterator().next();
+				if (theTransactionDetails.getDeletedResourceIds().contains(pid)) {
+					// If the resource matching the given match URL has already been
+					// deleted within this transaction, then it's ok to create a
+					// new one. We can un-resolve the previous match URL too in the
+					// transaction details since we'll resolve it to the new resource
+					// ID below
+					myMatchResourceUrlService.unresolveMatchUrl(theTransactionDetails, getResourceName(), theMatchUrl);
+				} else {
+					Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = () -> {
+						return myTxTemplate.execute(tx -> {
+							ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
+							IBaseResource resource = myJpaStorageResourceParser.toResource(foundEntity, false);
+							theResource.setId(resource.getIdElement().getValue());
+							return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
+						});
+					};
 
-				Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = () -> {
-					return myTxTemplate.execute(tx -> {
-						ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
-						IBaseResource resource = myJpaStorageResourceParser.toResource(foundEntity, false);
-						theResource.setId(resource.getIdElement().getValue());
-						return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
-					});
-				};
-
-				Supplier<IIdType> idSupplier = () -> {
-					return myTxTemplate.execute(tx -> {
-						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
-						if (!retVal.hasVersionIdPart()) {
-							Long version = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
-							if (version == null) {
-								version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
+					Supplier<IIdType> idSupplier = () -> {
+						return myTxTemplate.execute(tx -> {
+							IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
+							if (!retVal.hasVersionIdPart()) {
+								Long version = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
+								if (version == null) {
+									version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
+									if (version != null) {
+										myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId(), version);
+									}
+								}
 								if (version != null) {
-									myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId(), version);
+									retVal = myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
 								}
 							}
-							if (version != null) {
-								retVal = myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
-							}
-						}
-						return retVal;
-					});
-				};
+							return retVal;
+						});
+					};
 
-				DaoMethodOutcome outcome = toMethodOutcomeLazy(theRequest, pid, entitySupplier, idSupplier).setCreated(false).setNop(true);
-				StorageResponseCodeEnum responseCode = StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH;
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalWithMatch", w.getMillisAndRestart(), UrlUtil.sanitizeUrlPart(theMatchUrl));
-				outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
-				return outcome;
+					DaoMethodOutcome outcome = toMethodOutcomeLazy(theRequest, pid, entitySupplier, idSupplier).setCreated(false).setNop(true);
+					StorageResponseCodeEnum responseCode = StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH;
+					String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalWithMatch", w.getMillisAndRestart(), UrlUtil.sanitizeUrlPart(theMatchUrl));
+					outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
+					return outcome;
+				}
 			}
 		}
 
@@ -617,12 +625,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceVersionConflictException(Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
 		}
 
+		JpaPid persistentId = JpaPid.fromId(entity.getResourceId());
+		theTransactionDetails.addDeletedResourceId(persistentId);
+
 		// Don't delete again if it's already deleted
 		if (isDeleted(entity)) {
 			DaoMethodOutcome outcome = createMethodOutcomeForResourceId(entity.getIdDt().getValue(), MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED, StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED);
 
 			// used to exist, so we'll set the persistent id
-			outcome.setPersistentId(JpaPid.fromId(entity.getResourceId()));
+			outcome.setPersistentId(persistentId);
 			outcome.setEntity(entity);
 
 			return outcome;
@@ -692,20 +703,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * transaction processors
 	 */
 	@Override
-	public DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList deleteConflicts, RequestDetails theRequestDetails) {
+	public DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList deleteConflicts, @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails) {
 		validateDeleteEnabled();
-		TransactionDetails transactionDetails = new TransactionDetails();
 
-		return myTransactionService.execute(theRequestDetails, transactionDetails, tx -> doDeleteByUrl(theUrl, deleteConflicts, theRequestDetails));
+		return myTransactionService.execute(theRequestDetails, theTransactionDetails, tx -> doDeleteByUrl(theUrl, deleteConflicts, theTransactionDetails, theRequestDetails));
 	}
 
 	@Nonnull
-	private DeleteMethodOutcome doDeleteByUrl(String theUrl, DeleteConflictList deleteConflicts, RequestDetails theRequest) {
+	private DeleteMethodOutcome doDeleteByUrl(String theUrl, DeleteConflictList deleteConflicts, TransactionDetails theTransactionDetails, RequestDetails theRequestDetails) {
 		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(theUrl);
 		SearchParameterMap paramMap = resourceSearch.getSearchParameterMap();
 		paramMap.setLoadSynchronous(true);
 
-		Set<JpaPid> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequest, null);
+		Set<JpaPid> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequestDetails, null);
 
 		if (resourceIds.size() > 1) {
 			if (!getStorageSettings().isAllowMultipleDelete()) {
@@ -713,7 +723,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
+		return deletePidList(theUrl, resourceIds, deleteConflicts, theTransactionDetails, theRequestDetails);
 	}
 
 	@Override
@@ -736,12 +746,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Nonnull
 	@Override
-	public <P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
+	public <P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
 		for (P pid : theResourceIds) {
 			JpaPid jpaPid = (JpaPid) pid;
+			// FIXME: we should do a batch fetch here
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, jpaPid.getId());
 			deletedResources.add(entity);
 
@@ -790,6 +801,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		ourLog.debug("Processed delete on {} (matched {} resource(s)) in {}ms", theUrl, deletedResources.size(), w.getMillis());
+
+		for (P next : theResourceIds) {
+			theTransactionDetails.addDeletedResourceId(next);
+		}
 
 		DeleteMethodOutcome retVal = new DeleteMethodOutcome();
 		retVal.setDeletedEntities(deletedResources);

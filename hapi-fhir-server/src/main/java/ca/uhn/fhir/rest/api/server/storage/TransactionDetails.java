@@ -33,13 +33,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -62,6 +56,7 @@ public class TransactionDetails {
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
+	private Set<IResourcePersistentId> myDeletedResourceIds = Collections.emptySet();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
@@ -112,6 +107,25 @@ public class TransactionDetails {
 		if (!myRollbackUndoActions.isEmpty()) {
 			myRollbackUndoActions.clear();
 		}
+	}
+
+	/**
+	 * @since 6.8.0
+	 */
+	public void addDeletedResourceId(@Nonnull IResourcePersistentId theResourceId) {
+		Validate.notNull(theResourceId, "theResourceId must not be null");
+		if (myDeletedResourceIds.isEmpty()) {
+			myDeletedResourceIds = new HashSet<>();
+		}
+		myDeletedResourceIds.add(theResourceId);
+	}
+
+	/**
+	 * @since 6.8.0
+	 */
+	@Nonnull
+	public Set<IResourcePersistentId> getDeletedResourceIds() {
+		return Collections.unmodifiableSet(myDeletedResourceIds);
 	}
 
 	/**
@@ -222,6 +236,15 @@ public class TransactionDetails {
 		}
 		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
 	}
+
+	/**
+	 * @since 6.8.0
+	 * @see #addResolvedMatchUrl(FhirContext, String, IResourcePersistentId)
+	 */
+	public void removeResolvedMatchUrl(String theMatchUrl) {
+		myResolvedMatchUrls.remove(theMatchUrl);
+	}
+
 
 	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		if (myResolvedMatchUrls.containsKey(theConditionalUrl) && myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
@@ -359,12 +382,12 @@ public class TransactionDetails {
 		return !myResolvedResourceIds.isEmpty();
 	}
 
-	public void setFhirTransaction(boolean theFhirTransaction) {
-		myFhirTransaction = theFhirTransaction;
-	}
-
 	public boolean isFhirTransaction() {
 		return myFhirTransaction;
+	}
+
+	public void setFhirTransaction(boolean theFhirTransaction) {
+		myFhirTransaction = theFhirTransaction;
 	}
 
 }

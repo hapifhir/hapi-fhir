@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.BundleBuilder;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
@@ -18,15 +19,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import javax.persistence.Id;
+import javax.annotation.Nonnull;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
@@ -442,28 +445,18 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 	}
 
 
+	/**
+	 * If a conditional delete and conditional update are both used on the same condition,
+	 * the update should win.
+	 */
 	@Test
-	public void testTransactionWithConditionalDeleteAndConditionalUpdateOnSameCondition() throws Exception {
-		myStorageSettings.setInlineResourceTextBelowSize(10000);
-
-		Callable<Bundle> inputSupplier = ()->{
-			// Build a new bundle each time we need it
-			BundleBuilder bb = new BundleBuilder(myFhirContext);
-			bb.addTransactionDeleteConditionalEntry("Patient?identifier=http://foo|bar");
-
-			Patient patient = new Patient();
-			patient.setId("Patient/P");
-			patient.getMeta().addTag("http://tag", "tag-code", "tag-display");
-			patient.addIdentifier().setSystem("http://foo").setValue("bar");
-			bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://foo|bar");
-			return bb.getBundleTyped();
-		};
+	public void testConditionalDeleteAndConditionalUpdateOnSameResource() {
 		Bundle outcome;
 		Patient actual;
 
 		// First pass (resource doesn't already exist)
 
-		outcome = mySystemDao.transaction(mySrd, inputSupplier.call());
+		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
@@ -478,7 +471,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		// Second pass (resource already exists)
 
 		myCaptureQueriesListener.clear();
-		outcome = mySystemDao.transaction(mySrd, inputSupplier.call());
+		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
 		myCaptureQueriesListener.logUpdateQueries();
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
@@ -496,7 +489,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		// Third pass (resource already exists)
 
-		outcome = mySystemDao.transaction(mySrd, inputSupplier.call());
+		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
@@ -509,6 +502,190 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 	}
 
+
+	@Test
+	public void testConditionalDeleteAndConditionalUpdateOnSameResource_MultipleMatchesAlreadyExist() {
+
+		// Setup
+
+		myPatientDao.create(createPatientWithIdentifierAndTag(), mySrd);
+		myPatientDao.create(createPatientWithIdentifierAndTag(), mySrd);
+
+		// Test
+
+		try {
+			mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
+			fail();
+		} catch (PreconditionFailedException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
+
+		}
+	}
+
+	/**
+	 * If a conditional delete and conditional update are both used on the same condition,
+	 * the update should win.
+	 */
+	@Test
+	public void testConditionalDeleteAndConditionalCreateOnSameResource() {
+		Bundle outcome;
+		Patient actual;
+
+		// First pass (resource doesn't already exist)
+
+		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
+		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+
+		IdType resourceId = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		actual = myPatientDao.read(resourceId, mySrd);
+		assertEquals("1", actual.getIdElement().getVersionIdPart());
+		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
+		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
+
+		// Second pass (resource already exists)
+
+		myCaptureQueriesListener.clear();
+		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
+		myCaptureQueriesListener.logUpdateQueries();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+
+		logAllResources();
+		logAllResourceVersions();
+
+		IdType resourceId2 = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertNotEquals(resourceId.getIdPart(), resourceId2.getIdPart());
+		actual = myPatientDao.read(resourceId2, mySrd);
+		assertEquals("1", actual.getIdElement().getVersionIdPart());
+		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
+		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
+
+		// Third pass (resource already exists)
+
+		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+
+		IdType resourceId3 = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertNotEquals(resourceId2.getIdPart(), resourceId3.getIdPart());
+		actual = myPatientDao.read(resourceId3, mySrd);
+		assertEquals("1", actual.getIdElement().getVersionIdPart());
+		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
+		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
+	}
+
+	/**
+	 * There's not much point to deleting and updating the same resource in a
+	 * transaction, but let's make sure we at least don't end up in a bad state
+	 */
+	@Test
+	public void testDeleteAndUpdateOnSameResource() {
+
+		Bundle outcome;
+		Patient actual;
+
+		// First pass (resource doesn't already exist)
+
+		outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
+		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals("Patient/P/_history/1", outcome.getEntry().get(1).getResponse().getLocation());
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+
+		IdType resourceId = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		actual = myPatientDao.read(resourceId, mySrd);
+		assertEquals("1", actual.getIdElement().getVersionIdPart());
+		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
+		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
+
+		// Second pass (resource already exists)
+
+		myCaptureQueriesListener.clear();
+		outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
+		myCaptureQueriesListener.logUpdateQueries();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("Patient/P/_history/2", outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals("Patient/P/_history/2", outcome.getEntry().get(1).getResponse().getLocation());
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+
+		logAllResources();
+		logAllResourceVersions();
+
+		actual = myPatientDao.read(resourceId, mySrd);
+		assertEquals("2", actual.getIdElement().getVersionIdPart());
+		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
+		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
+
+		// Third pass (resource already exists)
+
+		outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("Patient/P/_history/3", outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals("Patient/P/_history/3", outcome.getEntry().get(1).getResponse().getLocation());
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+
+		actual = myPatientDao.read(resourceId, mySrd);
+		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
+		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
+
+
+	}
+
+
+	@Nonnull
+	private static Bundle createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(FhirContext theFhirContext) {
+		// Build a new bundle each time we need it
+		BundleBuilder bb = new BundleBuilder(theFhirContext);
+		bb.addTransactionDeleteConditionalEntry("Patient?identifier=http://foo|bar");
+
+		Patient patient = createPatientWithIdentifierAndTag();
+		bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://foo|bar");
+		return bb.getBundleTyped();
+	}
+
+	@Nonnull
+	private static Bundle createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(FhirContext theFhirContext) {
+		// Build a new bundle each time we need it
+		BundleBuilder bb = new BundleBuilder(theFhirContext);
+		bb.addTransactionDeleteConditionalEntry("Patient?identifier=http://foo|bar");
+
+		Patient patient = createPatientWithIdentifierAndTag();
+		patient.setId((String)null);
+		bb.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://foo|bar");
+		return bb.getBundleTyped();
+	}
+
+	@Nonnull
+	private static Bundle createBundleWithDeleteAndUpdateOnSameResource(FhirContext theFhirContext) {
+		// Build a new bundle each time we need it
+		BundleBuilder bb = new BundleBuilder(theFhirContext);
+		bb.addTransactionDeleteEntry(new IdType("Patient/P"));
+		bb.addTransactionUpdateEntry(createPatientWithIdentifierAndTag());
+		return bb.getBundleTyped();
+	}
+
+	@Nonnull
+	private static Patient createPatientWithIdentifierAndTag() {
+		Patient patient = new Patient();
+		patient.setId("Patient/P");
+		patient.getMeta().addTag("http://tag", "tag-code", "tag-display");
+		patient.addIdentifier().setSystem("http://foo").setValue("bar");
+		return patient;
+	}
 
 
 }

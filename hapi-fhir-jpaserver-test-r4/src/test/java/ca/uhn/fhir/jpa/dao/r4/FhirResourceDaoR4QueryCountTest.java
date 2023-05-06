@@ -2,7 +2,10 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
 import ca.uhn.fhir.context.FhirContext;
@@ -10,12 +13,12 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -98,8 +101,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -137,26 +138,28 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@Autowired
 	private ReindexStep myReindexStep;
+	@Autowired
+	private DeleteExpungeStep myDeleteExpungeStep;
 
 	@AfterEach
 	public void afterResetDao() {
-		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
-		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().isMatchUrlCacheEnabled());
-		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
-		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
-		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
-		myStorageSettings.setRespectVersionsForSearchIncludes(new JpaStorageSettings().isRespectVersionsForSearchIncludes());
-		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
-		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
+		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
+		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
+		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
+		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().isMatchUrlCacheEnabled());
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
+		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
+		myStorageSettings.setRespectVersionsForSearchIncludes(new JpaStorageSettings().isRespectVersionsForSearchIncludes());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
-		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
-		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
 
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 	}
 
@@ -418,7 +421,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
-
 	/**
 	 * See the class javadoc before changing the counts in this test!
 	 */
@@ -452,7 +454,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
-
 	/**
 	 * See the class javadoc before changing the counts in this test!
 	 */
@@ -477,7 +478,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
-
 
 	/**
 	 * See the class javadoc before changing the counts in this test!
@@ -533,7 +533,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getCommitCount());
 	}
 
-
 	/**
 	 * See the class javadoc before changing the counts in this test!
 	 */
@@ -558,7 +557,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
-
 
 	/**
 	 * See the class javadoc before changing the counts in this test!
@@ -650,7 +648,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
-
 	/**
 	 * See the class javadoc before changing the counts in this test!
 	 */
@@ -739,6 +736,57 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
+
+	@Test
+	public void testDeleteMultiple() {
+		for (int i = 0; i < 10; i++) {
+			createPatient(withId("PT" + i), withActiveTrue(), withIdentifier("http://foo", "id" + i), withFamily("Family" + i));
+		}
+
+		myStorageSettings.setAllowMultipleDelete(true);
+
+		// Test
+
+		myCaptureQueriesListener.clear();
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?active=true", new SystemRequestDetails());
+
+		// Validate
+		assertEquals(31, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(10, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(10, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(30, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(10, outcome.getDeletedEntities().size());
+	}
+
+	@Test
+	public void testDeleteExpungeStep() {
+		// Setup
+		for (int i = 0; i < 10; i++) {
+			createPatient(withId("PT" + i), withActiveTrue(), withIdentifier("http://foo", "id" + i), withFamily("Family" + i));
+		}
+		List<TypedPidJson> pids = runInTransaction(() -> myForcedIdDao
+			.findAll()
+			.stream()
+			.map(t -> new TypedPidJson(t.getResourceType(), Long.toString(t.getResourceId())))
+			.collect(Collectors.toList()));
+
+		runInTransaction(()-> assertEquals(10, myResourceTableDao.count()));
+
+		IJobDataSink<VoidModel> sink = mock(IJobDataSink.class);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(new ResourceIdListWorkChunkJson(pids), sink, "instance-id", "chunk-id");
+
+		// Verify
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(10, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(30, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(10, outcome.getRecordsProcessed());
+		runInTransaction(()-> assertEquals(0, myResourceTableDao.count()));
+	}
+
 
 	/**
 	 * See the class javadoc before changing the counts in this test!
@@ -1810,7 +1858,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Search for IDs and Search for tag definition
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(29, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(26, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2885,7 +2933,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(17, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(6607, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(6606, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countCommits());
@@ -3188,7 +3236,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(30, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(27, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
