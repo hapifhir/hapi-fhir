@@ -245,6 +245,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
+
+	protected final CodingSpy myCodingSpy = new CodingSpy();
+
 	@Autowired
 	protected IJpaStorageResourceParser myJpaStorageResourceParser;
 
@@ -279,7 +282,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (tagList != null) {
 			for (Tag next : tagList) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(),
-					next.getLabel(), next.getVersion(), next.getUserSelected());
+					next.getLabel(), next.getVersion(), myCodingSpy.getBooleanObject(next));
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -319,7 +322,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (tagList != null) {
 			for (IBaseCoding next : tagList) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(),
-					next.getDisplay(), next.getVersion(), next.getUserSelected());
+					next.getDisplay(), next.getVersion(), myCodingSpy.getBooleanObject(next));
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -331,7 +334,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IBaseCoding> securityLabels = theResource.getMeta().getSecurity();
 		if (securityLabels != null) {
 			for (IBaseCoding next : securityLabels) {
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay(), null, null);
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay(), next.getVersion(),  myCodingSpy.getBooleanObject(next));
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -390,7 +393,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		MemoryCacheService.TagDefinitionCacheKey key = toTagDefinitionMemoryCacheKey(theTagType, theScheme, theTerm, theVersion, theUserSelected);
 
 		TagDefinition retVal = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, key);
-
 		if (retVal == null) {
 			HashMap<MemoryCacheService.TagDefinitionCacheKey, TagDefinition> resolvedTagDefinitions = theTransactionDetails
 				.getOrCreateUserData(HapiTransactionService.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS, HashMap::new);
@@ -421,6 +423,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 													 String theVersion, Boolean theUserSelected) {
 
 		TypedQuery<TagDefinition> q = buildTagQuery(theTagType, theScheme, theTerm, theVersion, theUserSelected);
+		q.setMaxResults(1);
 
 		TransactionTemplate template = new TransactionTemplate(myTransactionManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -462,7 +465,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 								"Tag read/write failed: "
 									+ ex.getMessage() + ". "
 									+ "This is not a failure on its own, "
-									+ "but could be useful information in the result of an actual failure."
+									+ "but could be useful information in the result of an actual failure.", ex
 							);
 							throwables.add(ex);
 						}
@@ -521,9 +524,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			? builder.isNull(from.get("myVersion"))
 			: builder.equal(from.get("myVersion"), theVersion));
 
-		predicates.add( isNull(theUserSelected) || isFalse(theUserSelected)
-			? builder.isFalse(from.get("myUserSelected"))
-			: builder.isTrue(from.get("myUserSelected")));
+		predicates.add( isNull(theUserSelected)
+			? builder.isNull(from.get("myUserSelected"))
+			: builder.equal(from.get("myUserSelected"), theUserSelected));
 
 		cq.where(predicates.toArray(new Predicate[0]));
 		return myEntityManager.createQuery(cq);
@@ -552,7 +555,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	/**
-	 * Returns true if the resource has changed (either the contents or the tags)
+	 * Returns {@literal true} if the resource has changed (either the contents or the tags)
 	 */
 	protected EncodedResource populateResourceIntoEntity(TransactionDetails theTransactionDetails, RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, boolean thePerformIndexing) {
 		if (theEntity.getResourceType() == null) {
@@ -792,6 +795,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 			}
 
+		});
+
+		// Update the resource to contain the old tags
+		allTagsOld.forEach(tag -> {
+			IBaseCoding iBaseCoding = theResource.getMeta()
+				.addTag()
+				.setCode(tag.getTag().getCode())
+				.setSystem(tag.getTag().getSystem())
+				.setVersion(tag.getTag().getVersion());
+				if (tag.getTag().getUserSelected() != null) {
+					iBaseCoding.setUserSelected(tag.getTag().getUserSelected());
+				}
 		});
 
 		theEntity.setHasTags(!allTagsNew.isEmpty());

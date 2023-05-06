@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.tasks;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,8 +17,11 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.tasks;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
+import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
@@ -37,8 +38,11 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
+import software.amazon.awssdk.utils.StringUtils;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -49,7 +53,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
+
+@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection", "java:S1192"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
@@ -87,12 +92,50 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init600(); // 20211102 -
 		init610();
 		init620();
-		init630();
 		init640();
+		init640_after_20230126();
+		init660();
+		init680();
 	}
 
-	protected void init640() {
+	protected void init680() {
+		Builder version = forVersion(VersionEnum.V6_8_0);
+
+      // HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
+    Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
+    resourceTable
+      .addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
+      .unique(false)
+      .online(true)
+      .withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
+
+		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+		tagDefTable.dropIndex("20230505.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
+
+		tagDefTable.dropIndex("20230505.2", "IDX_TAG_DEF_TP_CD_SYS");
+		tagDefTable
+			.addIndex("20230505.3", "IDX_TAG_DEF_TP_CD_SYS")
+			.unique(false)
+			.online(false)
+			.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID", "TAG_VERSION", "TAG_USER_SELECTED");
+
+
+
+	}
+
+	protected void init660() {
 		Builder version = forVersion(VersionEnum.V6_6_0);
+
+		// fix Postgres clob types - that stupid oid driver problem is still there
+		// BT2_JOB_INSTANCE.PARAMS_JSON_LOB
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.1", "PARAMS_JSON_LOB");
+		// BT2_JOB_INSTANCE.REPORT
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.2", "REPORT");
+		// BT2_WORK_CHUNK.CHUNK_DATA
+		version.onTable("BT2_WORK_CHUNK")
+			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
 
 		{
 			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
@@ -120,6 +163,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			addTagDefConstraint.put(DriverTypeEnum.POSTGRES_9_4, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
 			version.executeRawSql("20230209.5", addTagDefConstraint);
 		}
+
 		version
 			.onTable(Search.HFJ_SEARCH)
 			.addColumn("20230215.1", "SEARCH_UUID")
@@ -137,20 +181,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(ColumnTypeEnum.STRING, 36);
 
 
-		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1", "HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
+		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1","HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
 
-		resSearchUrlTable.addColumn("RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
-		resSearchUrlTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		resSearchUrlTable.addColumn( "RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
+		resSearchUrlTable.addColumn( "RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
 
-		resSearchUrlTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		resSearchUrlTable.addColumn( "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 
 		resSearchUrlTable.addIndex("20230227.2", "IDX_RESSEARCHURL_RES").unique(false).withColumns("RES_ID");
 		resSearchUrlTable.addIndex("20230227.3", "IDX_RESSEARCHURL_TIME").unique(false).withColumns("CREATED_TIME");
 
-	}
+		}
 
 
-	protected void init630() {
+	protected void init640() {
 		Builder version = forVersion(VersionEnum.V6_3_0);
 
 		// start forced_id inline migration
@@ -170,6 +214,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 	}
+
+	protected void init640_after_20230126() {
+		Builder version = forVersion(VersionEnum.V6_3_0);
+		{  //We added this constraint when userSelected and Version were added. It is no longer necessary.
+			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
+		}
+	}
+
 
 	private void init620() {
 		Builder version = forVersion(VersionEnum.V6_2_0);
