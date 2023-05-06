@@ -375,11 +375,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(true)
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
-
-		{  //We added this constraint when userSelected and Version were added. It is no longer necessary.
-			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
-			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
-		}
 	}
 
 
