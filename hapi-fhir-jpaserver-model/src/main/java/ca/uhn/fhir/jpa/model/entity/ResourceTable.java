@@ -724,6 +724,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		if (retVal == null) {
 			retVal = new ResourceHistoryTable();
 			myNewVersionEntity = retVal;
+		} else {
+			// FIXME: can we drop this
 			createVersionTags = false; // Tags should already be set
 		}
 

@@ -762,7 +762,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	public void testDeleteExpungeStep() {
 		// Setup
 		for (int i = 0; i < 10; i++) {
-			createPatient(withId("PT" + i), withActiveTrue(), withIdentifier("http://foo", "id" + i), withFamily("Family" + i));
+			createPatient(
+				withId("PT" + i),
+				withActiveTrue(),
+				withIdentifier("http://foo", "id" + i),
+				withFamily("Family" + i),
+				withTag("http://foo", "blah"));
 		}
 		List<TypedPidJson> pids = runInTransaction(() -> myForcedIdDao
 			.findAll()
@@ -781,8 +786,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Verify
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(10, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(30, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(29, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(10, outcome.getRecordsProcessed());
 		runInTransaction(()-> assertEquals(0, myResourceTableDao.count()));
 	}
@@ -1859,7 +1864,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(26, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
@@ -3233,12 +3237,16 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			return (Bundle) bb.getBundle();
 		};
 
+		// Pass 1
+
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(27, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(30, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Pass 2
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
@@ -3248,7 +3256,45 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(7, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
-		why is the count wrong
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		IdType patientId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+		assertEquals("2", patientId.getVersionIdPart());
+
+		Patient patient = myPatientDao.read(patientId, mySrd);
+		assertEquals(1, patient.getMeta().getProfile().size());
+		assertEquals("http://foo", patient.getMeta().getProfile().get(0).getValue());
+		assertEquals("SMITH", patient.getNameFirstRep().getFamily());
+		patient = myPatientDao.read(patientId.withVersion("1"), mySrd);
+		assertEquals(1, patient.getMeta().getProfile().size());
+		assertEquals("http://foo", patient.getMeta().getProfile().get(0).getValue());
+		assertEquals("SMITH", patient.getNameFirstRep().getFamily());
+
+		// Pass 3
+
+		myCaptureQueriesListener.clear();
+		outcome = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
+		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(6, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		patientId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+		assertEquals("3", patientId.getVersionIdPart());
+
+		patient = myPatientDao.read(patientId, mySrd);
+		assertEquals(1, patient.getMeta().getProfile().size());
+		assertEquals("http://foo", patient.getMeta().getProfile().get(0).getValue());
+		assertEquals("SMITH", patient.getNameFirstRep().getFamily());
+		patient = myPatientDao.read(patientId.withVersion("2"), mySrd);
+		assertEquals(1, patient.getMeta().getProfile().size());
+		assertEquals("http://foo", patient.getMeta().getProfile().get(0).getValue());
+		assertEquals("SMITH", patient.getNameFirstRep().getFamily());
+		patient = myPatientDao.read(patientId.withVersion("1"), mySrd);
+		assertEquals(1, patient.getMeta().getProfile().size());
+		assertEquals("http://foo", patient.getMeta().getProfile().get(0).getValue());
+		assertEquals("SMITH", patient.getNameFirstRep().getFamily());
 	}
 
 
