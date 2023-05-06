@@ -110,7 +110,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
 		tagDefTable.dropIndex("20230505.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
 
-		tagDefTable.dropIndex("20230505.2", "IDX_TAG_DEF_TP_CD_SYS"se);
+		tagDefTable.dropIndex("20230505.2", "IDX_TAG_DEF_TP_CD_SYS");
 		tagDefTable
 			.addIndex("20230505.3", "IDX_TAG_DEF_TP_CD_SYS")
 			.unique(false)
