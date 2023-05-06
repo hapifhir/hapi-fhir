@@ -53,7 +53,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
+
+@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection", "java:S1192"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
@@ -92,6 +93,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init610();
 		init620();
 		init640();
+		init640_after_20230126();
 		init660();
 		init680();
 	}
@@ -211,7 +213,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(true)
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+	}
 
+	protected void init640_after_20230126() {
+		Builder version = forVersion(VersionEnum.V6_3_0);
 		{  //We added this constraint when userSelected and Version were added. It is no longer necessary.
 			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
 			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
