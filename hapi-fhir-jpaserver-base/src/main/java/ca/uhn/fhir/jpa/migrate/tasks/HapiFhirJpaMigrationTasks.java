@@ -110,7 +110,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
 		tagDefTable.dropIndex("20230505.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
 
-		tagDefTable.dropIndex("20230505.2", "IDX_TAG_DEF_TP_CD_SYS");
+		tagDefTable.dropIndex("20230505.2", "IDX_TAG_DEF_TP_CD_SYS"se);
 		tagDefTable
 			.addIndex("20230505.3", "IDX_TAG_DEF_TP_CD_SYS")
 			.unique(false)
@@ -191,50 +191,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		}
 
-		version.onTable("HFJ_SPIDX_COORDS")
-			.dropIndex("20230325.1", "IDX_SP_COORDS_HASH");
-		version.onTable("HFJ_SPIDX_COORDS")
-			.addIndex("20230325.2", "IDX_SP_COORDS_HASH_V2")
-			.unique(false)
-			.online(true)
-			.withColumns("HASH_IDENTITY", "SP_LATITUDE", "SP_LONGITUDE", "RES_ID", "PARTITION_ID");
-
-
-		// Postgres tuning.
-		String postgresTuningStatementsAll = ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql");
-		List<String> postgresTuningStatements = Arrays
-			.stream(postgresTuningStatementsAll.split("\\n"))
-			.map(org.apache.commons.lang3.StringUtils::trim)
-			.filter(StringUtils::isNotBlank)
-			.filter(t -> !t.startsWith("--"))
-			.collect(Collectors.toList());
-		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, postgresTuningStatements));
-
-		// Use an unlimited length text column for RES_TEXT_VC
-		version
-			.onTable("HFJ_RES_VER")
-			.modifyColumn("20230421.1", "RES_TEXT_VC")
-			.nullable()
-			.failureAllowed()
-			.withType(ColumnTypeEnum.TEXT);
-
-		{
-			// add hash_norm to res_id to speed up joins on a second string.
-			Builder.BuilderWithTableName linkTable = version.onTable("HFJ_RES_LINK");
-			linkTable
-				.addIndex("20230424.1", "IDX_RL_TGT_v2")
-				.unique(false)
-				.online(true)
-				.withColumns("TARGET_RESOURCE_ID", "SRC_PATH", "SRC_RESOURCE_ID", "TARGET_RESOURCE_TYPE","PARTITION_ID");
-
-			// drop and recreate FK_SPIDXSTR_RESOURCE since it will be useing the old IDX_SP_STRING_RESID
-			linkTable.dropForeignKey("20230424.2", "FK_RESLINK_TARGET", "HFJ_RESOURCE");
-			linkTable.dropIndexOnline("20230424.3", "IDX_RL_TPATHRES");
-			linkTable.dropIndexOnline("20230424.4", "IDX_RL_DEST");
-			linkTable.addForeignKey("20230424.5", "FK_RESLINK_TARGET")
-				.toColumn("TARGET_RESOURCE_ID").references("HFJ_RESOURCE", "RES_ID");
-		}
-	}
 
 	protected void init640() {
 		Builder version = forVersion(VersionEnum.V6_3_0);

@@ -248,10 +248,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	protected final CodingSpy myCodingSpy = new CodingSpy();
 
-	@VisibleForTesting
-	public void setExternallyStoredResourceServiceRegistryForUnitTest(ExternallyStoredResourceServiceRegistry theExternallyStoredResourceServiceRegistry) {
-		myExternallyStoredResourceServiceRegistry = theExternallyStoredResourceServiceRegistry;
-	}
 	@Autowired
 	protected IJpaStorageResourceParser myJpaStorageResourceParser;
 
