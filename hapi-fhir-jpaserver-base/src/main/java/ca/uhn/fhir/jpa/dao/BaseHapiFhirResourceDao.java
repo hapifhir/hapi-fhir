@@ -265,12 +265,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 */
 	@Override
 	public DaoMethodOutcome create(final T theResource) {
-		return create(theResource, null, true, new TransactionDetails(), null);
+		return create(theResource, null, true, null, new TransactionDetails());
 	}
 
 	@Override
 	public DaoMethodOutcome create(final T theResource, RequestDetails theRequestDetails) {
-		return create(theResource, null, true, new TransactionDetails(), theRequestDetails);
+		return create(theResource, null, true, theRequestDetails, new TransactionDetails());
 	}
 
 	/**
@@ -283,11 +283,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome create(final T theResource, String theIfNoneExist, RequestDetails theRequestDetails) {
-		return create(theResource, theIfNoneExist, true, new TransactionDetails(), theRequestDetails);
+		return create(theResource, theIfNoneExist, true, theRequestDetails, new TransactionDetails());
 	}
 
 	@Override
-	public DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails) {
+	public DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails) {
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequestDetails, theResource, getResourceName());
 		return myTransactionService
 			.withRequest(theRequestDetails)
@@ -694,7 +694,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequest);
+			DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequest, transactionDetails);
 			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 			return outcome;
 		});
@@ -705,7 +705,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * transaction processors
 	 */
 	@Override
-	public DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList deleteConflicts, @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails) {
+	public DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList deleteConflicts, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails) {
 		validateDeleteEnabled();
 
 		return myTransactionService.execute(theRequestDetails, theTransactionDetails, tx -> doDeleteByUrl(theUrl, deleteConflicts, theTransactionDetails, theRequestDetails));
@@ -725,7 +725,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		return deletePidList(theUrl, resourceIds, deleteConflicts, theTransactionDetails, theRequestDetails);
+		return deletePidList(theUrl, resourceIds, deleteConflicts, theRequestDetails, theTransactionDetails);
 	}
 
 	@Override
@@ -747,7 +747,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Nonnull
 	@Override
-	public <P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
+	public <P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
@@ -770,18 +770,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// Notify IServerOperationInterceptors about pre-action call
 			HookParams hooks = new HookParams()
 				.add(IBaseResource.class, resourceToDelete)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(TransactionDetails.class, transactionDetails);
-			doCallHooks(transactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
+			doCallHooks(transactionDetails, theRequestDetails, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
 
-			myDeleteConflictService.validateOkToDelete(theDeleteConflicts, entity, false, theRequest, transactionDetails);
+			myDeleteConflictService.validateOkToDelete(theDeleteConflicts, entity, false, theRequestDetails, transactionDetails);
 
 			// Perform delete
 
-			preDelete(resourceToDelete, entity, theRequest);
+			preDelete(resourceToDelete, entity, theRequestDetails);
 
-			updateEntityForDelete(theRequest, transactionDetails, entity);
+			updateEntityForDelete(theRequestDetails, transactionDetails, entity);
 			resourceToDelete.setId(entity.getIdDt());
 
 			// Notify JPA interceptors
@@ -790,11 +790,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				public void beforeCommit(boolean readOnly) {
 					HookParams hookParams = new HookParams()
 						.add(IBaseResource.class, resourceToDelete)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest)
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 						.add(TransactionDetails.class, transactionDetails)
 						.add(InterceptorInvocationTimingEnum.class, transactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED));
-					doCallHooks(transactionDetails, theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
+					doCallHooks(transactionDetails, theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 				}
 			});
 		}

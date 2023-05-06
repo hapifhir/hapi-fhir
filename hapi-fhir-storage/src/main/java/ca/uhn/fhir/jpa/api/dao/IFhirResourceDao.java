@@ -85,7 +85,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                           won't be indexed and searches won't work.
 	 * @param theRequestDetails  The request details including permissions and partitioning information
 	 */
-	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails);
+	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails);
 
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
 
@@ -111,18 +111,10 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
-	 */
-	default DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails) {
-		return deleteByUrl(theUrl, theDeleteConflictsListToPopulate, new TransactionDetails(), theRequestDetails);
-	}
-
-	/**
-	 * This method does not throw an exception if there are delete conflicts, but populates them
-	 * in the provided list
 	 *
 	 * @since 6.8.0
 	 */
-	DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList theDeleteConflictsListToPopulate, @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails);
+	DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
@@ -130,10 +122,10 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	DeleteMethodOutcome deleteByUrl(String theString, RequestDetails theRequestDetails);
 
 	/**
-	 * @deprecated Deprecated in 6.8.0 - Use and implement {@link #deletePidList(String, Collection, DeleteConflictList, TransactionDetails, RequestDetails)}
+	 * @deprecated Deprecated in 6.8.0 - Use and implement {@link #deletePidList(String, Collection, DeleteConflictList, RequestDetails, TransactionDetails)}
 	 */
 	default <P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
-		return deletePidList(theUrl, theResourceIds, theDeleteConflicts, new TransactionDetails(), theRequest);
+		return deletePidList(theUrl, theResourceIds, theDeleteConflicts, theRequest, new TransactionDetails());
 	}
 
 	/**
@@ -151,7 +143,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @return response back to the client
 	 * @since 6.8.0
 	 */
-	<P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, TransactionDetails theTransactionDetails, RequestDetails theRequestDetails);
+	<P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
 	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
 

@@ -963,7 +963,7 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						// create individual resource
-						outcome = resourceDao.create(res, matchUrl, false, theTransactionDetails, theRequest);
+						outcome = resourceDao.create(res, matchUrl, false, theRequest, theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						res.setId(outcome.getId());
 
@@ -1001,7 +1001,7 @@ public abstract class BaseTransactionProcessor {
 						} else {
 							String matchUrl = parts.getResourceType() + '?' + parts.getParams();
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theTransactionDetails, theRequest);
+							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequest, theTransactionDetails);
 							setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, deleteOutcome.getId());
 							List<? extends IBasePersistedResource> allDeleted = deleteOutcome.getDeletedEntities();
 							for (IBasePersistedResource deleted : allDeleted) {
