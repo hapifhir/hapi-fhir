@@ -3241,12 +3241,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(7, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		why is the count wrong
 	}
 
 
@@ -3260,7 +3262,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setMassIngestionMode(true);
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myStorageSettings.setRespectVersionsForSearchIncludes(true);
-		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
+		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myStorageSettings.setAutoVersionReferenceAtPaths("ExplanationOfBenefit.patient", "ExplanationOfBenefit.insurance.coverage");
 
 		// Pre-cache tag definitions
