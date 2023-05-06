@@ -760,7 +760,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		for (P pid : theResourceIds) {
 			JpaPid jpaPid = (JpaPid) pid;
-			// FIXME: we should do a batch fetch here
+
+			// This shouldn't actually need to hit the DB because we pre-fetch above
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, jpaPid.getId());
 			deletedResources.add(entity);
 
