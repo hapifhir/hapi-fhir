@@ -33,25 +33,20 @@ import ca.uhn.fhir.cr.common.HapiTerminologyProvider;
 import ca.uhn.fhir.cr.common.IDataProviderFactory;
 import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibraryLoaderFactory;
-import ca.uhn.fhir.cr.common.ILibraryManagerFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
@@ -61,7 +56,6 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
-import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
@@ -69,6 +63,7 @@ import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
 import org.slf4j.Logger;
@@ -87,13 +82,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
-@Import(AdapterConfiguration.class)
+
 @Configuration
-public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
+@Import({AdapterConfiguration.class, BaseRepositoryConfig.class})
+public abstract class BaseClinicalReasoningConfig {
 
 	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
 
+   @Bean
+	EvaluationSettings evaluationSettings(CqlOptions theCqlOptions, Map<ModelIdentifier, Model> theGlobalModelCache, Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> theGlobalLibraryCache) {
+		var evaluationSettings = new EvaluationSettings();
+		evaluationSettings.setCqlOptions(theCqlOptions);
+		evaluationSettings.setModelCache(theGlobalModelCache);
+		evaluationSettings.setLibraryCache(theGlobalLibraryCache);
 
+		return evaluationSettings;
+	}
 	@Bean
 	CrProviderFactory cqlProviderFactory() {
 		return new CrProviderFactory();
@@ -153,7 +157,7 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 	@Scope("prototype")
 	public ModelManager modelManager(
 		Map<ModelIdentifier, Model> theGlobalModelCache) {
-		return new CacheAwareModelManager(theGlobalModelCache);
+		return new ModelManager(theGlobalModelCache);
 	}
 
 	@Bean
@@ -229,15 +233,7 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 				lcp.add(new FhirLibrarySourceProvider());
 			}
 
-			return new CacheAwareLibraryLoaderDecorator(
-				new TranslatingLibraryLoader(theModelManager, lcp, theCqlTranslatorOptions, null), theGlobalLibraryCache) {
-				// TODO: This is due to a bug with the ELM annotations which prevent options
-				// from matching the way they should
-				@Override
-				protected Boolean translatorOptionsMatch(org.cqframework.cql.elm.execution.Library library) {
-					return true;
-				}
-			};
+			return new TranslatingLibraryLoader(theModelManager, lcp, theCqlTranslatorOptions, theGlobalLibraryCache);
 		};
 	}
 
@@ -296,7 +292,7 @@ public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 		return new LibraryVersionSelector(theAdapterFactory);
 	}
 
-	@Bean(name = "cqlExecutor")
+	@Bean
 	public Executor cqlExecutor() {
 		CqlForkJoinWorkerThreadFactory factory = new CqlForkJoinWorkerThreadFactory();
 		ForkJoinPool myCommonPool = new ForkJoinPool(Math.min(32767, Runtime.getRuntime().availableProcessors()),
