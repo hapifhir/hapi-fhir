@@ -774,7 +774,9 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setExpression("Observation.extension('Observation#accessType')");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		mySearchParameterDao.create(sp);
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
 		mySearchParamRegistry.forceRefresh();
 		createSubscriptionTopicWithCriteria(criteria);
 		waitForRegisteredSubscriptionTopicCount(1);
