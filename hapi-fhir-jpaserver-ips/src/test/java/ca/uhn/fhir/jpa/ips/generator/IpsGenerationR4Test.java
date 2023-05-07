@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.ips.generator;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
@@ -9,11 +12,15 @@ import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Parameters;
@@ -27,16 +34,25 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@ContextConfiguration(classes = {IpsGenerationTest.IpsConfig.class})
-public class IpsGenerationTest extends BaseResourceProviderR4Test {
+/**
+ * This test uses a complete R4 JPA server as a backend and wires the
+ * {@link IpsOperationProvider} into the REST server to test the end-to-end
+ * IPS generation flow.
+ */
+@ContextConfiguration(classes = {IpsGenerationR4Test.IpsConfig.class})
+public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 	@Autowired
 	private IpsOperationProvider myIpsOperationProvider;
@@ -74,13 +90,16 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		validateDocument(outcome);
+		validateDocument(output);
 		assertEquals(117, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
 		assertThat(patientId, matchesPattern("urn:uuid:.*"));
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
 		assertEquals(patientId, medicationStatement.getSubject().getReference());
 		assertNull(medicationStatement.getInformationSource().getReference());
+
+		List<String> sectionTitles = extractSectionTitles(output);
+		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results"));
 	}
 
 	@Test
@@ -106,19 +125,46 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		validateDocument(outcome);
+		validateDocument(output);
 		assertEquals(7, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
 		assertThat(patientId, matchesPattern("urn:uuid:.*"));
 		assertEquals(patientId, findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
 		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
+
+		List<String> sectionTitles = extractSectionTitles(output);
+		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List"));
+	}
+
+	@Nonnull
+	private static List<String> extractSectionTitles(Bundle outcome) {
+		Composition composition = (Composition) outcome.getEntry().get(0).getResource();
+		List<String> sectionTitles = composition
+			.getSection()
+			.stream()
+			.map(Composition.SectionComponent::getTitle)
+			.toList();
+		return sectionTitles;
 	}
 
 	private void validateDocument(Bundle theOutcome) {
 		FhirValidator validator = myFhirContext.newValidator();
-		validator.registerValidatorModule(new FhirInstanceValidator(myFhirContext));
+		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myFhirContext);
+		instanceValidator.setValidationSupport(new ValidationSupportChain(new IpsTerminologySvc(), myFhirContext.getValidationSupport()));
+		validator.registerValidatorModule(instanceValidator);
 		ValidationResult validation = validator.validateWithResult(theOutcome);
 		assertTrue(validation.isSuccessful(), () -> myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validation.toOperationOutcome()));
+
+		// Make sure that all refs have been replaced with UUIDs
+		List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(theOutcome);
+		for (IBaseResource next : myFhirContext.newTerser().getAllEmbeddedResources(theOutcome, true)) {
+			references.addAll(myFhirContext.newTerser().getAllResourceReferences(next));
+		}
+		for (ResourceReferenceInfo next : references) {
+			if (!next.getResourceReference().getReferenceElement().getValue().startsWith("urn:uuid:")) {
+				fail(next.getName());
+			}
+		}
 	}
 
 	@Configuration
@@ -159,4 +205,51 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 		return (T) resources.get(index);
 	}
 
+	/**
+	 * This is a little fake terminology server that hardcodes the IPS terminology
+	 * needed to validate these documents. This way we don't need to depend on a huge
+	 * package.
+	 */
+	private class IpsTerminologySvc implements IValidationSupport {
+		@Override
+		public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+			return true;
+		}
+
+		@Nullable
+		@Override
+		public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+			if ("http://loinc.org".equals(theCodeSystem)) {
+				if ("60591-5".equals(theCode)) {
+					return new CodeValidationResult().setCode(theCode);
+				}
+			}
+			if ("http://snomed.info/sct".equals(theCodeSystem)) {
+				if ("14657009".equals(theCode) || "255604002".equals(theCode)) {
+					return new CodeValidationResult().setCode(theCode);
+				}
+			}
+			return null;
+		}
+
+		@Nullable
+		@Override
+		public IBaseResource fetchCodeSystem(String theSystem) {
+			if ("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips".equals(theSystem)) {
+				CodeSystem cs = new CodeSystem();
+				cs.setUrl("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips");
+				cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+				cs.addConcept().setCode("no-allergy-info");
+				cs.addConcept().setCode("no-medication-info");
+				cs.addConcept().setCode("no-known-allergies");
+				return cs;
+			}
+			return null;
+		}
+
+		@Override
+		public FhirContext getFhirContext() {
+			return myFhirContext;
+		}
+	}
 }
