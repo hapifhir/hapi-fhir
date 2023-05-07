@@ -469,6 +469,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		awaitUntilReceivedTransactionCount(3);
 
 		deleteSubscription(subscription2);
+		waitForActivatedSubscriptionCount(1);
 
 		Observation observationTemp3 = sendObservationExpectDelivery();
 
