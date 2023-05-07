@@ -50,9 +50,6 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 	@BeforeEach
 	public void beforeEach() {
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED, myTransactionProcessedLatch);
-//		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, myTransactionProcessedLatch);
-//		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, myTransactionProcessedLatch);
-//		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, myTransactionProcessedLatch);
 	}
 
 	@AfterEach
