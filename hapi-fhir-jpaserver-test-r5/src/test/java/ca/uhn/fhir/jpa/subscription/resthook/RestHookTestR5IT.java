@@ -93,8 +93,13 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	}
 
 	@NotNull
+	private Observation sendObservationExpectDelivery(int theCount) throws InterruptedException {
+		return sendObservation(OBS_CODE, "SNOMED-CT", true, theCount);
+	}
+
+	@NotNull
 	private Observation sendObservationExpectDelivery() throws InterruptedException {
-		return sendObservation(OBS_CODE, "SNOMED-CT", true);
+		return sendObservation(OBS_CODE, "SNOMED-CT", true, 1);
 	}
 
 	@Test
@@ -441,10 +446,12 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
+		ourLog.info(">>>1 Creating topics");
 		createObservationSubscriptionTopic(OBS_CODE);
 		createObservationSubscriptionTopic(OBS_CODE2);
 		waitForRegisteredSubscriptionTopicCount(2);
 
+		ourLog.info(">>>2 Creating subscriptions");
 		Subscription subscription1 = createTopicSubscription();
 		// WIP STR5 will likely require matching TopicSubscription
 		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE2, Constants.CT_FHIR_JSON_NEW);
@@ -452,6 +459,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		Subscription subscription2 = postSubscription(subscription);
 		waitForActivatedSubscriptionCount(2);
 
+		ourLog.info(">>>3 Send obs");
 		Observation sentObservation1 = sendObservationExpectDelivery();
 		awaitUntilReceivedTransactionCount(1);
 		Observation receivedObs = assertBundleAndGetObservation(subscription1, sentObservation1);
@@ -462,15 +470,19 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setTopic(subscription1.getTopic());
+		ourLog.info(">>>4 Update sub");
 		updateResource(subscriptionTemp, false);
 
-		Observation observation2 = sendObservationExpectDelivery();
+		ourLog.info(">>>5 Send obs");
+		Observation observation2 = sendObservationExpectDelivery(2);
 
 		awaitUntilReceivedTransactionCount(3);
 
+		ourLog.info(">>>6 Delete sub");
 		deleteSubscription(subscription2);
 		waitForActivatedSubscriptionCount(1);
 
+		ourLog.info(">>>7 Send obs");
 		Observation observationTemp3 = sendObservationExpectDelivery();
 
 		// Should see only one subscription notification
@@ -482,6 +494,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(OBS_CODE + "111");
 		coding.setSystem("SNOMED-CT");
+		ourLog.info(">>>8 Send obs");
 		updateResource(observation3, true);
 
 		// Should see one subscription notification even though the new version doesn't match, the old version still does and our subscription topic
@@ -495,6 +508,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(OBS_CODE);
 		coding1.setSystem("SNOMED-CT");
+		ourLog.info(">>>9 Send obs");
 		updateResource(observation3a, true);
 
 		// Should see only one subscription notification
@@ -843,8 +857,11 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		return retval;
 	}
 
-
 	private Observation sendObservation(String theCode, String theSystem, boolean theExpectDelivery) throws InterruptedException {
+		return sendObservation(theCode, theSystem, theExpectDelivery, 1);
+	}
+
+	private Observation sendObservation(String theCode, String theSystem, boolean theExpectDelivery, int theCount) throws InterruptedException {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
@@ -855,7 +872,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		observation.setStatus(Enumerations.ObservationStatus.FINAL);
 
-		IIdType id = createResource(observation, theExpectDelivery);
+		IIdType id = createResource(observation, theExpectDelivery, theCount);
 		observation.setId(id);
 
 		return observation;

@@ -201,11 +201,15 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		ourCountHolder = myCountHolder;
 	}
 
-	// WIP STR5 consolidate with lambda
 	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
+		return createResource(theResource, theExpectDelivery, 1);
+	}
+
+	// WIP STR5 consolidate with lambda
+	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery, int theCount) throws InterruptedException {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		if (theExpectDelivery) {
-			mySubscriptionDeliveredLatch.setExpectedCount(1);
+			mySubscriptionDeliveredLatch.setExpectedCount(theCount);
 		}
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		IIdType id = dao.create(theResource, mySrd).getId();
