@@ -210,7 +210,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 						String originalResourceId = nextCandidate.getIdElement().toUnqualifiedVersionless().getValue();
 
 						// Check if we already have this resource included so that we don't
-						// addResourceToBundle it twice
+						// include it twice
 						IBaseResource previouslyExistingResource = theGlobalResourcesToInclude.getResourceByOriginalId(originalResourceId);
 						if (previouslyExistingResource != null) {
 							BundleEntrySearchModeEnum candidateSearchEntryMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate);
