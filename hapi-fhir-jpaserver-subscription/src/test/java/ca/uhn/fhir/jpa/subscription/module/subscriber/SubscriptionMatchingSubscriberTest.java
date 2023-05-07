@@ -76,7 +76,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(2, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(1);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
 		assertEquals(1, ourContentTypes.size());
@@ -99,7 +101,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(2, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(1);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
 		assertEquals(1, ourContentTypes.size());
@@ -117,7 +121,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		assertEquals(1, mySubscriptionRegistry.size());
 		ourObservationListener.setExpectedCount(1);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendResource(observation);
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
 		assertEquals(1, ourContentTypes.size());
@@ -141,7 +147,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		mySubscriptionAfterDelivery.setExpectedCount(1);
 		ourObservationListener.setExpectedCount(0);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.clear();
 		mySubscriptionAfterDelivery.awaitExpected();
 
@@ -168,7 +176,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(3, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(2);
+		mySubscriptionResourceMatched.setExpectedCount(2);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
 		assertEquals(2, ourContentTypes.size());
