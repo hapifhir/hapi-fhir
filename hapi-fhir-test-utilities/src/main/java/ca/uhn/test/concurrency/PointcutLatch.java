@@ -179,15 +179,12 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 			.toString();
 	}
 
-	public Object getLatchInvocationParameter() {
-		return getLatchInvocationParameter(myPointcutLatchSession.get().getCalledWith());
-	}
-
 	public void setStrict(Boolean theStrict) {
 		myStrict = theStrict;
 	}
 
 	@SuppressWarnings("unchecked")
+	// TODO KHS delete this method
 	public <T> T getLatchInvocationParameterOfType(Class<T> theType) {
 		List<HookParams> hookParamsList = myPointcutLatchSession.get().getCalledWith();
 		Validate.notNull(hookParamsList);
