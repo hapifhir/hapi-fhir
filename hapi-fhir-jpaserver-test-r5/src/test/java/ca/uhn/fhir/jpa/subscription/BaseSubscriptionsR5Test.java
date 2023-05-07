@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -223,8 +224,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		DaoMethodOutcome retval = dao.update(theResource, mySrd);
 
-		mySubscriptionTopicsCheckedLatch.awaitExpected();
-		ResourceModifiedMessage lastMessage = mySubscriptionTopicsCheckedLatch.getLatchInvocationParameterOfType(ResourceModifiedMessage.class);
+		List<HookParams> hookParams = mySubscriptionTopicsCheckedLatch.awaitExpected();
+		ResourceModifiedMessage lastMessage = PointcutLatch.getInvocationParameterOfType(hookParams, ResourceModifiedMessage.class);
 		assertEquals(theResource.getIdElement().toVersionless().toString(), lastMessage.getPayloadId());
 
 		if (theExpectDelivery) {

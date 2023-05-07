@@ -183,21 +183,6 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		myStrict = theStrict;
 	}
 
-	@SuppressWarnings("unchecked")
-	// TODO KHS delete this method.
-	// use getInvocationParameterOfType instead
-	@Deprecated
-	public <T> T getLatchInvocationParameterOfType(Class<T> theType) {
-		List<HookParams> hookParamsList = myPointcutLatchSession.get().getCalledWith();
-		Validate.notNull(hookParamsList);
-		Validate.isTrue(hookParamsList.size() == 1, "Expected Pointcut to be invoked 1 time");
-		HookParams hookParams = hookParamsList.get(0);
-		ListMultimap<Class<?>, Object> paramsForType = hookParams.getParamsForType();
-		List<Object> objects = paramsForType.get(theType);
-		Validate.isTrue(objects.size() == 1);
-		return (T) objects.get(0);
-	}
-
 	public static <T> T getInvocationParameterOfType(List<HookParams> theHookParams, Class<T> theType) {
 		Validate.notNull(theHookParams);
 		Validate.isTrue(theHookParams.size() == 1, "Expected Pointcut to be invoked 1 time");
