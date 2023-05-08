@@ -99,8 +99,6 @@ public class FhirPatch {
 		for (IBase nextOp : opParameters) {
 			String type = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, PARAMETER_TYPE);
 			String path = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, PARAMETER_PATH);
-			Optional<IBase> valuePart = ParametersUtil.getParameterPart(myContext, nextOp, PARAMETER_VALUE);
-			Optional<IBase> valuePartValue = ParametersUtil.getParameterPartValue(myContext, nextOp, PARAMETER_VALUE);
 
 			type = defaultString(type);
 			path = defaultString(path);
@@ -175,22 +173,11 @@ public class FhirPatch {
 			List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 			for (IBase next : paths) {
 
-				BaseRuntimeElementDefinition<?> elementDef = myContext.getElementDefinition(next.getClass());
-
-				String childName = elementName;
-				BaseRuntimeChildDefinition childDef = elementDef.getChildByName(childName);
-				BaseRuntimeElementDefinition<?> childElement;
-				if (childDef == null) {
-					childName = elementName + "[x]";
-					childDef = elementDef.getChildByName(childName);
-					childElement = childDef.getChildByName(childDef.getValidChildNames().iterator().next());
-				} else {
-					childElement = childDef.getChildByName(childName);
-				}
+				ChildDefinition childDefinition = findChildDefinition(next, elementName);
 
 				if (OPERATION_MOVE.equals(type)) {
 
-					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
+					List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
 					if (removeIndex == null || removeIndex >= existingValues.size()) {
 						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
 						throw new InvalidRequestException(Msg.code(1268) + msg);
@@ -203,90 +190,120 @@ public class FhirPatch {
 					}
 					existingValues.add(insertIndex, newValue);
 
-					childDef.getMutator().setValue(next, null);
+					childDefinition.getChildDef().getMutator().setValue(next, null);
 					for (IBase nextNewValue : existingValues) {
-						childDef.getMutator().addValue(next, nextNewValue);
+						childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
 					}
 
 					continue;
 				} else if (OPERATION_DELETE.equals(type)) {
-					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
+					List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
 					List<IBase> elementsToRemove = myContext.newFhirPath().evaluate(theResource, path, IBase.class);
 					existingValues.removeAll(elementsToRemove);
 
-					childDef.getMutator().setValue(next, null);
+					childDefinition.getChildDef().getMutator().setValue(next, null);
 					for (IBase nextNewValue : existingValues) {
-						childDef.getMutator().addValue(next, nextNewValue);
+						childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
 					}
 
 					continue;
 				}
 
-				IBase newValue;
-				if (valuePartValue.isPresent()) {
-					newValue = valuePartValue.get();
-				} else {
-					newValue = childElement.newInstance();
-
-					if (valuePart.isPresent()) {
-						List<IBase> valuePartParts = myContext.newTerser().getValues(valuePart.get(), "part");
-						for (IBase nextValuePartPart : valuePartParts) {
-
-							String name = myContext.newTerser().getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class).map(t -> t.getValueAsString()).orElse(null);
-							if (isNotBlank(name)) {
-
-								Optional<IBase> value = myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
-								if (value.isPresent()) {
-
-									BaseRuntimeChildDefinition partChildDef = childElement.getChildByName(name);
-									if (partChildDef == null) {
-										name = name + "[x]";
-										partChildDef = childElement.getChildByName(name);
-									}
-									partChildDef.getMutator().addValue(newValue, value.get());
-
-								}
-
-							}
-
-						}
-					}
-
-				}
-
-				if (IBaseEnumeration.class.isAssignableFrom(childElement.getImplementingClass()) || XhtmlNode.class.isAssignableFrom(childElement.getImplementingClass())) {
-					// If the compositeElementDef is an IBaseEnumeration, we will use the actual compositeElementDef definition to build one, since
-					// it needs the right factory object passed to its constructor
-					IPrimitiveType<?> newValueInstance = (IPrimitiveType<?>) childElement.newInstance();
-					newValueInstance.setValueAsString(((IPrimitiveType<?>) newValue).getValueAsString());
-					childDef.getMutator().setValue(next, newValueInstance);
-					newValue = newValueInstance;
-				}
+				IBase newValue = getNewValue(nextOp, next, childDefinition);
 
 				if (OPERATION_INSERT.equals(type)) {
 
-					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
+					List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
 					if (insertIndex == null || insertIndex > existingValues.size()) {
 						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
 						throw new InvalidRequestException(Msg.code(1270) + msg);
 					}
 					existingValues.add(insertIndex, newValue);
 
-					childDef.getMutator().setValue(next, null);
+					childDefinition.getChildDef().getMutator().setValue(next, null);
 					for (IBase nextNewValue : existingValues) {
-						childDef.getMutator().addValue(next, nextNewValue);
+						childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
 					}
 
 				} else if (OPERATION_ADD.equals(type)) {
-					childDef.getMutator().addValue(next, newValue);
+					childDefinition.getChildDef().getMutator().addValue(next, newValue);
 				} else if (OPERATION_REPLACE.equals(type)) {
-					childDef.getMutator().setValue(next, newValue);
+					childDefinition.getChildDef().getMutator().setValue(next, newValue);
 				}
 			}
 
 
 		}
 
+	}
+
+	private ChildDefinition findChildDefinition(IBase theContainingElement, String theElementName) {
+		BaseRuntimeElementDefinition<?> elementDef = myContext.getElementDefinition(theContainingElement.getClass());
+
+		String childName = theElementName;
+		BaseRuntimeChildDefinition childDef = elementDef.getChildByName(childName);
+		BaseRuntimeElementDefinition<?> childElement;
+		if (childDef == null) {
+			childName = theElementName + "[x]";
+			childDef = elementDef.getChildByName(childName);
+			childElement = childDef.getChildByName(childDef.getValidChildNames().iterator().next());
+		} else {
+			childElement = childDef.getChildByName(childName);
+		}
+
+		return new ChildDefinition(childDef, childElement);
+	}
+
+	private IBase getNewValue(IBase theParameters, IBase next, ChildDefinition theChildDefinition) {
+		Optional<IBase> valuePart = ParametersUtil.getParameterPart(myContext, theParameters, PARAMETER_VALUE);
+		Optional<IBase> valuePartValue = ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
+
+		IBase newValue;
+		if (valuePartValue.isPresent()) {
+			newValue = valuePartValue.get();
+		} else {
+			newValue = theChildDefinition.getChildElement().newInstance();
+
+			if (valuePart.isPresent()) {
+				IBase theValueElement = valuePart.get();
+				populateNewValue(theChildDefinition, newValue, theValueElement);
+			}
+
+		}
+
+		if (IBaseEnumeration.class.isAssignableFrom(theChildDefinition.getChildElement().getImplementingClass()) || XhtmlNode.class.isAssignableFrom(theChildDefinition.getChildElement().getImplementingClass())) {
+			// If the compositeElementDef is an IBaseEnumeration, we will use the actual compositeElementDef definition to build one, since
+			// it needs the right factory object passed to its constructor
+			IPrimitiveType<?> newValueInstance = (IPrimitiveType<?>) theChildDefinition.getChildElement().newInstance();
+			newValueInstance.setValueAsString(((IPrimitiveType<?>) newValue).getValueAsString());
+			theChildDefinition.getChildDef().getMutator().setValue(next, newValueInstance);
+			newValue = newValueInstance;
+		}
+		return newValue;
+	}
+
+	private void populateNewValue(ChildDefinition theChildDefinition, IBase newValue, IBase theValueElement) {
+		List<IBase> valuePartParts = myContext.newTerser().getValues(theValueElement, "part");
+		for (IBase nextValuePartPart : valuePartParts) {
+
+			String name = myContext.newTerser().getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class).map(t -> t.getValueAsString()).orElse(null);
+			if (isNotBlank(name)) {
+
+				Optional<IBase> value = myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
+				if (value.isPresent()) {
+
+					BaseRuntimeChildDefinition partChildDef = theChildDefinition.getChildElement().getChildByName(name);
+					if (partChildDef == null) {
+						name = name + "[x]";
+						partChildDef = theChildDefinition.getChildElement().getChildByName(name);
+					}
+					partChildDef.getMutator().addValue(newValue, value.get());
+
+				}
+
+			}
+
+		}
 	}
 
 	private void doDelete(IBaseResource theResource, String thePath) {
@@ -503,5 +520,23 @@ public class FhirPatch {
 			return ((IIdType) theOldPrimitive).getIdPart();
 		}
 		return theOldPrimitive.getValueAsString();
+	}
+
+	private static class ChildDefinition {
+		private final BaseRuntimeChildDefinition myChildDef;
+		private final BaseRuntimeElementDefinition<?> myChildElement;
+
+		public ChildDefinition(BaseRuntimeChildDefinition theChildDef, BaseRuntimeElementDefinition<?> theChildElement) {
+			this.myChildDef = theChildDef;
+			this.myChildElement = theChildElement;
+		}
+
+		public BaseRuntimeChildDefinition getChildDef() {
+			return myChildDef;
+		}
+
+		public BaseRuntimeElementDefinition<?> getChildElement() {
+			return myChildElement;
+		}
 	}
 }
