@@ -20,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.function.Supplier;
 
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.when;
@@ -107,5 +108,12 @@ public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCall
 
 	public PointcutLatch getAfterMdmLatch() {
 		return myAfterMdmLatch;
+	}
+
+	public <T> T executeWithLatch(Supplier<T> theSupplier) throws InterruptedException {
+		myAfterMdmLatch.setExpectedCount(1);
+		T retval = theSupplier.get();
+		myAfterMdmLatch.awaitExpected();
+		return retval;
 	}
 }
