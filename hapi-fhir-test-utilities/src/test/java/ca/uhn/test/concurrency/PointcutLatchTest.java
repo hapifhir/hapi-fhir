@@ -88,7 +88,7 @@ class PointcutLatchTest {
 			invoke();
 			fail();
 		} catch (PointcutLatchException e) {
-			assertThat(e.getMessage(), startsWith(TEST_LATCH_NAME + ": HAPI-1485: invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived with args:"));
+			assertThat(e.getMessage(), startsWith(TEST_LATCH_NAME + ": HAPI-1485: invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke()."));
 		}
 		// Don't blow up in the clear() called by @AfterEach
 		myPointcutLatch.setStrict(false);
@@ -122,7 +122,7 @@ class PointcutLatchTest {
 			future.get();
 		} catch (ExecutionException e) {
 			// This is the exception thrown on the invocation thread
-			assertThat(e.getMessage(), startsWith("ca.uhn.test.concurrency.PointcutLatchException: " + TEST_LATCH_NAME + ": HAPI-1485: invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived with args: "));
+			assertThat(e.getMessage(), startsWith("ca.uhn.test.concurrency.PointcutLatchException: " + TEST_LATCH_NAME + ": HAPI-1485: invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke()."));
 		}
 		try {
 			myPointcutLatch.clear();
