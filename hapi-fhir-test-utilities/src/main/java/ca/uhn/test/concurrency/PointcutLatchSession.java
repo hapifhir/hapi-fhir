@@ -2,6 +2,7 @@ package ca.uhn.test.concurrency;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,11 +12,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class PointcutLatchSession {
 	private static final Logger ourLog = LoggerFactory.getLogger(PointcutLatchSession.class);
-	private static final FhirObjectPrinter ourFhirObjectToStringMapper = new FhirObjectPrinter();
 
 	private final List<String> myFailures = Collections.synchronizedList(new ArrayList<>());
 	private final List<HookParams> myCalledWith = Collections.synchronizedList(new ArrayList<>());
@@ -57,21 +56,10 @@ public class PointcutLatchSession {
 				error += " ERROR: ";
 			}
 			error += String.join("\n", failures);
-			error += "\nLatch called with values: " + toCalledWithString();
+			error += "\nLatch called with values:\n" + StringUtils.join(myCalledWith, "\n");
 			throw new AssertionError(Msg.code(1484) + error);
 		}
 		return myCalledWith;
-	}
-
-	private String toCalledWithString() {
-		// Defend against ConcurrentModificationException
-		List<HookParams> calledWith = new ArrayList<>(myCalledWith);
-		if (calledWith.isEmpty()) {
-			return "[]";
-		}
-		String retVal = "[ ";
-		retVal += calledWith.stream().flatMap(hookParams -> hookParams.values().stream()).map(ourFhirObjectToStringMapper).collect(Collectors.joining(", "));
-		return retVal + " ]";
 	}
 
 	void invoke(HookParams theArgs) {
@@ -82,13 +70,9 @@ public class PointcutLatchSession {
 		}
 
 		myCalledWith.add(theArgs);
-		ourLog.debug("Called {} {} with {}", myName, myCountdownLatch, hookParamsToString(theArgs));
+		ourLog.debug("Called {} {} with {}", myName, myCountdownLatch, theArgs);
 
 		myCountdownLatch.countDown();
-	}
-
-	static String hookParamsToString(HookParams hookParams) {
-		return hookParams.values().stream().map(ourFhirObjectToStringMapper).collect(Collectors.joining(", "));
 	}
 
 	List<HookParams> getCalledWith() {
