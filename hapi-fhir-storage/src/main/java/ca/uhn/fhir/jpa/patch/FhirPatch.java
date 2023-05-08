@@ -108,24 +108,8 @@ public class FhirPatch {
 			Integer removeIndex = null;
 			Integer insertIndex = null;
 			if (OPERATION_DELETE.equals(type)) {
-				if (path.endsWith(")")) {
-					// This is probably a filter, so we're probably dealing with a list
-					int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
-					int lastDotIndex = path.lastIndexOf('.', filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
-					int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex-1);
-					containingPath = path.substring(0, secondLastDotIndex);
-					elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);
-				} else if (path.endsWith("]")) {
-					// This is almost definitely a list
-					int openBracketIndex = path.lastIndexOf('[');
-					int lastDotIndex = path.lastIndexOf('.', openBracketIndex);
-					containingPath = path.substring(0, lastDotIndex);
-					elementName = path.substring(lastDotIndex + 1, openBracketIndex);
-				} else {
-					doDelete(theResource, path);
-					continue;
-				}
-
+				handleDeleteOperation(theResource, nextOp);
+				continue;
 			} else if (OPERATION_ADD.equals(type)) {
 				handleAddOperation(theResource, nextOp);
 				continue;
@@ -136,16 +120,8 @@ public class FhirPatch {
 				elementName = path.substring(lastDot + 1);
 
 			} else if (OPERATION_INSERT.equals(type)) {
-
-				int lastDot = path.lastIndexOf(".");
-				containingPath = path.substring(0, lastDot);
-				elementName = path.substring(lastDot + 1);
-				insertIndex = ParametersUtil
-					.getParameterPartValue(myContext, nextOp, PARAMETER_INDEX)
-					.map(t -> (IPrimitiveType<Integer>) t)
-					.map(t -> t.getValue())
-					.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
-
+				handleInsertOperation(theResource, nextOp);
+				continue;
 			} else if (OPERATION_MOVE.equals(type)) {
 
 				int lastDot = path.lastIndexOf(".");
@@ -194,36 +170,11 @@ public class FhirPatch {
 					}
 
 					continue;
-				} else if (OPERATION_DELETE.equals(type)) {
-					List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
-					List<IBase> elementsToRemove = myContext.newFhirPath().evaluate(theResource, path, IBase.class);
-					existingValues.removeAll(elementsToRemove);
-
-					childDefinition.getChildDef().getMutator().setValue(next, null);
-					for (IBase nextNewValue : existingValues) {
-						childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
-					}
-
-					continue;
 				}
 
 				IBase newValue = getNewValue(nextOp, next, childDefinition);
 
-				if (OPERATION_INSERT.equals(type)) {
-
-					List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
-					if (insertIndex == null || insertIndex > existingValues.size()) {
-						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
-						throw new InvalidRequestException(Msg.code(1270) + msg);
-					}
-					existingValues.add(insertIndex, newValue);
-
-					childDefinition.getChildDef().getMutator().setValue(next, null);
-					for (IBase nextNewValue : existingValues) {
-						childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
-					}
-
-				} else if (OPERATION_REPLACE.equals(type)) {
+				if (OPERATION_REPLACE.equals(type)) {
 					childDefinition.getChildDef().getMutator().setValue(next, newValue);
 				}
 			}
@@ -247,6 +198,85 @@ public class FhirPatch {
 			IBase newValue = getNewValue(theParameters, next, childDefinition);
 
 			childDefinition.getChildDef().getMutator().addValue(next, newValue);
+		}
+	}
+
+	private void handleInsertOperation(IBaseResource theResource, IBase theParameters) {
+
+		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
+
+		path = defaultString(path);
+
+		int lastDot = path.lastIndexOf(".");
+		String containingPath = path.substring(0, lastDot);
+		String elementName = path.substring(lastDot + 1);
+		Integer insertIndex = ParametersUtil
+			.getParameterPartValue(myContext, theParameters, PARAMETER_INDEX)
+			.map(t -> (IPrimitiveType<Integer>) t)
+			.map(IPrimitiveType::getValue)
+			.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
+
+		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		for (IBase next : paths) {
+
+			ChildDefinition childDefinition = findChildDefinition(next, elementName);
+
+			IBase newValue = getNewValue(theParameters, next, childDefinition);
+
+			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
+			if (insertIndex == null || insertIndex > existingValues.size()) {
+				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
+				throw new InvalidRequestException(Msg.code(1270) + msg);
+			}
+			existingValues.add(insertIndex, newValue);
+
+			childDefinition.getChildDef().getMutator().setValue(next, null);
+			for (IBase nextNewValue : existingValues) {
+				childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
+			}
+		}
+	}
+
+	private void handleDeleteOperation(IBaseResource theResource, IBase theParameters) {
+
+		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
+
+		path = defaultString(path);
+
+		String containingPath;
+		String elementName;
+
+		if (path.endsWith(")")) {
+			// This is probably a filter, so we're probably dealing with a list
+			int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
+			int lastDotIndex = path.lastIndexOf('.', filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
+			int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex-1);
+			containingPath = path.substring(0, secondLastDotIndex);
+			elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);
+		} else if (path.endsWith("]")) {
+			// This is almost definitely a list
+			int openBracketIndex = path.lastIndexOf('[');
+			int lastDotIndex = path.lastIndexOf('.', openBracketIndex);
+			containingPath = path.substring(0, lastDotIndex);
+			elementName = path.substring(lastDotIndex + 1, openBracketIndex);
+		} else {
+			doDelete(theResource, path);
+			return;
+		}
+
+		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		for (IBase next : paths) {
+
+			ChildDefinition childDefinition = findChildDefinition(next, elementName);
+
+			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
+			List<IBase> elementsToRemove = myContext.newFhirPath().evaluate(theResource, path, IBase.class);
+			existingValues.removeAll(elementsToRemove);
+
+			childDefinition.getChildDef().getMutator().setValue(next, null);
+			for (IBase nextNewValue : existingValues) {
+				childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
+			}
 		}
 	}
 
