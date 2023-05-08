@@ -136,16 +136,13 @@ public class FhirPatch {
 	private void handleInsertOperation(IBaseResource theResource, IBase theParameters) {
 
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
-
 		path = defaultString(path);
 
 		int lastDot = path.lastIndexOf(".");
 		String containingPath = path.substring(0, lastDot);
 		String elementName = path.substring(lastDot + 1);
 		Integer insertIndex = ParametersUtil
-			.getParameterPartValue(myContext, theParameters, PARAMETER_INDEX)
-			.map(t -> (IPrimitiveType<Integer>) t)
-			.map(IPrimitiveType::getValue)
+			.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_INDEX)
 			.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
 
 		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
@@ -172,7 +169,6 @@ public class FhirPatch {
 	private void handleDeleteOperation(IBaseResource theResource, IBase theParameters) {
 
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
-
 		path = defaultString(path);
 
 		String containingPath;
@@ -192,23 +188,30 @@ public class FhirPatch {
 			containingPath = path.substring(0, lastDotIndex);
 			elementName = path.substring(lastDotIndex + 1, openBracketIndex);
 		} else {
-			doDelete(theResource, path);
-			return;
+			containingPath = path;
+			elementName = null;
 		}
 
 		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 		for (IBase next : paths) {
-
-			ChildDefinition childDefinition = findChildDefinition(next, elementName);
-
-			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
-			List<IBase> elementsToRemove = myContext.newFhirPath().evaluate(theResource, path, IBase.class);
-			existingValues.removeAll(elementsToRemove);
-
-			childDefinition.getChildDef().getMutator().setValue(next, null);
-			for (IBase nextNewValue : existingValues) {
-				childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
+			if (elementName == null) {
+				deleteSingleElement(next);
+			} else {
+				deleteFromList(theResource, next, elementName, path);
 			}
+		}
+	}
+
+	private void deleteFromList(IBaseResource theResource, IBase theContainingElement, String theListElementName, String theElementToDeletePath) {
+		ChildDefinition childDefinition = findChildDefinition(theContainingElement, theListElementName);
+
+		List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(theContainingElement));
+		List<IBase> elementsToRemove = myContext.newFhirPath().evaluate(theResource, theElementToDeletePath, IBase.class);
+		existingValues.removeAll(elementsToRemove);
+
+		childDefinition.getChildDef().getMutator().setValue(theContainingElement, null);
+		for (IBase nextNewValue : existingValues) {
+			childDefinition.getChildDef().getMutator().addValue(theContainingElement, nextNewValue);
 		}
 	}
 
@@ -239,15 +242,11 @@ public class FhirPatch {
 		String containingPath = path.substring(0, lastDot);
 		String elementName = path.substring(lastDot + 1);
 		Integer insertIndex = ParametersUtil
-			.getParameterPartValue(myContext, theParameters, PARAMETER_DESTINATION)
-			.map(t -> (IPrimitiveType<Integer>) t)
-			.map(IPrimitiveType::getValue)
-			.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
+			.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_DESTINATION)
+			.orElseThrow(() -> new InvalidRequestException("No index supplied for move operation"));
 		Integer removeIndex = ParametersUtil
-			.getParameterPartValue(myContext, theParameters, PARAMETER_SOURCE)
-			.map(t -> (IPrimitiveType<Integer>) t)
-			.map(IPrimitiveType::getValue)
-			.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
+			.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_SOURCE)
+			.orElseThrow(() -> new InvalidRequestException("No index supplied for move operation"));
 
 		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 		for (IBase next : paths) {
@@ -323,7 +322,7 @@ public class FhirPatch {
 		List<IBase> valuePartParts = myContext.newTerser().getValues(theValueElement, "part");
 		for (IBase nextValuePartPart : valuePartParts) {
 
-			String name = myContext.newTerser().getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class).map(t -> t.getValueAsString()).orElse(null);
+			String name = myContext.newTerser().getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class).map(IPrimitiveType::getValueAsString).orElse(null);
 			if (isNotBlank(name)) {
 
 				Optional<IBase> value = myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
@@ -343,26 +342,23 @@ public class FhirPatch {
 		}
 	}
 
-	private void doDelete(IBaseResource theResource, String thePath) {
-		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, thePath, IBase.class);
-		for (IBase next : paths) {
-			myContext.newTerser().visit(next, new IModelVisitor2() {
-				@Override
-				public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-					if (theElement instanceof IPrimitiveType) {
-						((IPrimitiveType<?>) theElement).setValueAsString(null);
-					}
-					return true;
+	private void deleteSingleElement(IBase theElementToDelete) {
+		myContext.newTerser().visit(theElementToDelete, new IModelVisitor2() {
+			@Override
+			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				if (theElement instanceof IPrimitiveType) {
+					((IPrimitiveType<?>) theElement).setValueAsString(null);
 				}
+				return true;
+			}
 
-				@Override
-				public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-					theNextExt.setUrl(null);
-					theNextExt.setValue(null);
-					return true;
-				}
-			});
-		}
+			@Override
+			public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				theNextExt.setUrl(null);
+				theNextExt.setValue(null);
+				return true;
+			}
+		});
 	}
 
 	public IBaseParameters diff(@Nullable IBaseResource theOldValue, @Nonnull IBaseResource theNewValue) {
@@ -537,19 +533,21 @@ public class FhirPatch {
 	}
 
 	private IBase massageValueForDiff(IBase theNewValue) {
+		IBase massagedValue = theNewValue;
+
 		// XHTML content is dealt with by putting it in a string
 		if (theNewValue instanceof XhtmlNode) {
 			String xhtmlString = ((XhtmlNode) theNewValue).getValueAsString();
-			theNewValue = myContext.getElementDefinition("string").newInstance(xhtmlString);
+			massagedValue = myContext.getElementDefinition("string").newInstance(xhtmlString);
 		}
 
 		// IIdType can hold a fully qualified ID, but we just want the ID part to show up in diffs
 		if (theNewValue instanceof IIdType) {
 			String idPart = ((IIdType) theNewValue).getIdPart();
-			theNewValue = myContext.getElementDefinition("id").newInstance(idPart);
+			massagedValue = myContext.getElementDefinition("id").newInstance(idPart);
 		}
 
-		return theNewValue;
+		return massagedValue;
 	}
 
 	private String toValue(IPrimitiveType<?> theOldPrimitive) {

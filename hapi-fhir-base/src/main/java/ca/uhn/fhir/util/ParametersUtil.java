@@ -129,6 +129,12 @@ public class ParametersUtil {
 		return getParameterPartValue(theCtx, theParameter, theParameterName).map(t -> (IPrimitiveType<?>) t).map(t -> t.getValueAsString()).orElse(null);
 	}
 
+	public static Optional<Integer> getParameterPartValueAsInteger(FhirContext theCtx, IBase theParameter, String theParameterName) {
+		return getParameterPartValue(theCtx, theParameter, theParameterName)
+			.map(t -> (IPrimitiveType<Integer>) t)
+			.map(IPrimitiveType::getValue);
+	}
+
 	private static <T> List<T> extractNamedParameters(FhirContext theCtx, IBaseParameters theParameters, String theParameterName, Function<IPrimitiveType<?>, T> theMapper) {
 		List<T> retVal = new ArrayList<>();
 
