@@ -200,4 +200,5 @@ public abstract class BaseRestServerHelper {
 	}
 
 	protected abstract void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy);
+
 }

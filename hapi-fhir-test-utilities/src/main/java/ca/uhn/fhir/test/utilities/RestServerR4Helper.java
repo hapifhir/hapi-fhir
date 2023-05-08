@@ -252,6 +252,10 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		myRestServer.setServerAddressStrategy(theServerAddressStrategy);
 	}
 
+	public void executeWithLatch(Runnable theRunnable) throws InterruptedException {
+		myRestServer.executeWithLatch(theRunnable);
+	}
+
 	private static class MyRestfulServer extends RestfulServer {
 		private final List<String> myRequestUrls = Collections.synchronizedList(new ArrayList<>());
 		private final List<String> myRequestVerbs = Collections.synchronizedList(new ArrayList<>());
@@ -269,6 +273,12 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 		public RestServerDstu3Helper.MyPlainProvider getPlainProvider() {
 			return myPlainProvider;
+		}
+
+		public void executeWithLatch(Runnable theRunnable) throws InterruptedException {
+			myPlainProvider.setExpectedCount(1);
+			theRunnable.run();
+			myPlainProvider.awaitExpected();
 		}
 
 		public void setFailNextPut(boolean theFailNextPut) {

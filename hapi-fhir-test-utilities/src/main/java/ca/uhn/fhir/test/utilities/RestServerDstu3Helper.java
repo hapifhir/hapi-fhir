@@ -20,7 +20,6 @@
 package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -50,6 +49,7 @@ import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class RestServerDstu3Helper extends BaseRestServerHelper implements IPointcutLatch, BeforeEachCallback, AfterEachCallback {
 	protected final MyRestfulServer myRestServer;
@@ -61,11 +61,11 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	public RestServerDstu3Helper(boolean theInitialize) {
 		super(FhirContext.forDstu3());
 		myRestServer = new MyRestfulServer(myFhirContext);
-		if(theInitialize){
+		if (theInitialize) {
 			try {
 				myRestServer.initialize();
 			} catch (ServletException e) {
-				throw new RuntimeException(Msg.code(2252)+"Failed to initialize server", e);
+				throw new RuntimeException(Msg.code(2252) + "Failed to initialize server", e);
 			}
 		}
 	}
@@ -218,6 +218,13 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			return myPlainProvider;
 		}
 
+		public <T> T executeWithLatch(Supplier<T> theSupplier) throws InterruptedException {
+			myPlainProvider.setExpectedCount(1);
+			T retval = theSupplier.get();
+			myPlainProvider.awaitExpected();
+			return retval;
+		}
+
 		public void setFailNextPut(boolean theFailNextPut) {
 			myFailNextPut = theFailNextPut;
 		}
@@ -293,11 +300,12 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			@Override
 			public MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 				if (myFailNextPut) {
-					throw new PreconditionFailedException(Msg.code(2251)+"Failed update operation");
+					throw new PreconditionFailedException(Msg.code(2251) + "Failed update operation");
 				}
 				return super.update(theResource, theConditional, theRequestDetails);
 			}
 		}
+
 	}
 
 	@Override
