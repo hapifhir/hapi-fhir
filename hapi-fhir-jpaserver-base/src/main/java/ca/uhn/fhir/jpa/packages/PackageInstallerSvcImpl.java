@@ -19,11 +19,7 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -32,6 +28,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
@@ -58,8 +55,6 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -90,7 +85,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
-	private PlatformTransactionManager myTxManager;
+	private IHapiTransactionService myTxService;
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
 	@Autowired
@@ -128,9 +123,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-    public PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theInstallationSpec) {
-        return myPackageCacheManager.uninstallPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
-    }
+	@Override
+	public PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theInstallationSpec) {
+		return myPackageCacheManager.uninstallPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+	}
 
 	/**
 	 * Loads and installs an IG from a file on disk or the Simplifier repo using
@@ -152,12 +148,15 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (enabled) {
 			try {
 
-				boolean exists = new TransactionTemplate(myTxManager).execute(tx -> {
-					Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(theInstallationSpec.getName(), theInstallationSpec.getVersion());
-					return existing.isPresent();
-				});
+				boolean exists = myTxService
+					.withSystemRequest()
+					.withRequestPartitionId(RequestPartitionId.defaultPartition())
+					.execute(() -> {
+						Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+						return existing.isPresent();
+					});
 				if (exists) {
-						ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
+					ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
 				}
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
@@ -336,19 +335,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					ourLog.info("Skipping update of existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
 				}
 			}
-		}
-		else{
+		} else {
 			ourLog.warn("Failed to upload resource of type {} with ID {} - Error: Resource failed validation", theResource.fhirType(), theResource.getIdElement().getValue());
 		}
 	}
 
 	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails requestDetails = newSystemRequestDetails();
-			return theDao.search(theMap, requestDetails);
-		} else {
-			return theDao.search(theMap);
-		}
+		return theDao.search(theMap, newSystemRequestDetails());
 	}
 
 	@Nonnull
