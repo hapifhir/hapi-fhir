@@ -6,8 +6,8 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
-import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -104,7 +104,7 @@ public class WriteBinaryStepTest {
                                                                                              JobInstance theInstance,
 																														  	boolean thePartitioned) {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setStartDate(new Date());
+		parameters.setSince(new Date());
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		parameters.setPartitionId(getPartitionId(thePartitioned));
 		return new StepExecutionDetails<>(

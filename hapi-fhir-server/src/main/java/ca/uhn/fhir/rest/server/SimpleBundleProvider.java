@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -167,4 +168,10 @@ public class SimpleBundleProvider implements IBundleProvider {
 		return mySize;
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("mySize", mySize)
+			.toString();
+	}
 }

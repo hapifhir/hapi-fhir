@@ -43,13 +43,13 @@ public class BulkExportUtil {
 				return BulkExportJobStatusEnum.SUBMITTED;
 			case COMPLETED :
 				return BulkExportJobStatusEnum.COMPLETE;
+			case ERRORED:
 			case IN_PROGRESS:
 				return BulkExportJobStatusEnum.BUILDING;
 			default:
 				ourLog.warn("Unrecognized status {}; treating as FAILED/CANCELLED/ERRORED", status.name());
 			case FAILED:
 			case CANCELLED:
-			case ERRORED:
 				return BulkExportJobStatusEnum.ERROR;
 		}
 	}

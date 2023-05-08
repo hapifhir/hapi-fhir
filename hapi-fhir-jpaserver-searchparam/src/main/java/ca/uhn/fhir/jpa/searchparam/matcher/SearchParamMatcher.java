@@ -38,8 +38,7 @@ public class SearchParamMatcher {
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, RequestDetails theRequest) {
-		ResourceIndexedSearchParams resourceIndexedSearchParams = myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, theRequest);
-		return myInMemoryResourceMatcher.match(theCriteria, theResource, resourceIndexedSearchParams);
+		return myInMemoryResourceMatcher.match(theCriteria, theResource, null, theRequest);
 	}
 
 	public InMemoryMatchResult match(SearchParameterMap theSearchParameterMap, IBaseResource theResource) {

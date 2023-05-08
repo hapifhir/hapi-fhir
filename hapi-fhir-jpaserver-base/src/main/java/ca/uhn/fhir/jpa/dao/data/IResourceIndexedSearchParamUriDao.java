@@ -19,14 +19,13 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Collection;
-
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import java.util.Collection;
 
 public interface IResourceIndexedSearchParamUriDao extends JpaRepository<ResourceIndexedSearchParamUri, Long>, IHapiFhirJpaRepository {
 	

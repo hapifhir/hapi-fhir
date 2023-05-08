@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,9 @@ public class BulkExportJobParametersValidatorTest {
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
+
+	@Mock
+	private IBinaryStorageSvc myIBinaryStorageSvc;
 
 	@InjectMocks
 	private BulkExportJobParametersValidator myValidator;
@@ -55,6 +60,38 @@ public class BulkExportJobParametersValidatorTest {
 		assertTrue(result.isEmpty());
 	}
 
+
+	@Test
+	public void validate_exportId_illegal_characters() {
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setExportIdentifier("exportId&&&");
+		// when
+		when(myDaoRegistry.isResourceTypeSupported(anyString()))
+			.thenReturn(true);
+		when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(false);
+		List<String> errors = myValidator.validate(parameters);
+
+		// verify
+		assertNotNull(errors);
+		assertEquals(1, errors.size());
+		assertEquals(errors.get(0), "Export ID does not conform to the current blob storage implementation's limitations.");
+	}
+
+	@Test
+	public void validate_exportId_legal_characters() {
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setExportIdentifier("HELLO!/WORLD/");
+		// when
+		when(myDaoRegistry.isResourceTypeSupported(anyString()))
+			.thenReturn(true);
+
+		when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(true);
+		List<String> errors = myValidator.validate(parameters);
+
+		// verify
+		assertNotNull(errors);
+		assertEquals(0, errors.size());
+	}
 	@Test
 	public void validate_validParametersForPatient_returnsEmptyList() {
 		// setup

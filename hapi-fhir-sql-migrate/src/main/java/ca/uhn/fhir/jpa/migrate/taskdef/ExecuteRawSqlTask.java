@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.trim;
+
 public class ExecuteRawSqlTask extends BaseTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ExecuteRawSqlTask.class);
@@ -48,7 +50,13 @@ public class ExecuteRawSqlTask extends BaseTask {
 		Validate.notBlank(theSql);
 
 		List<String> list = myDriverToSqls.computeIfAbsent(theDriverType, t -> new ArrayList<>());
-		list.add(theSql);
+		String sql = trim(theSql);
+
+		// Trim the semicolon at the end if one is present
+		while (sql.endsWith(";")) {
+			sql = sql.substring(0, sql.length() - 1);
+		}
+		list.add(sql);
 
 		return this;
 	}

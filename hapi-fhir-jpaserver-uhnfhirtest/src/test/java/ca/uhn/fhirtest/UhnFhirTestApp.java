@@ -45,6 +45,7 @@ public class UhnFhirTestApp {
 		System.setProperty("fhir.baseurl.r4", base.replace("Dstu2", "R4"));
 		System.setProperty("fhir.baseurl.r4b", base.replace("Dstu2", "R4B"));
 		System.setProperty("fhir.baseurl.r5", base.replace("Dstu2", "R5"));
+		System.setProperty("fhir.baseurl.audit", base.replace("Dstu2", "Audit"));
 		System.setProperty("fhir.baseurl.tdl2", base.replace("baseDstu2", "testDataLibraryDstu2"));
 		System.setProperty("fhir.baseurl.tdl3", base.replace("baseDstu2", "testDataLibraryStu3"));
 		System.setProperty("fhir.tdlpass", "aa,bb");

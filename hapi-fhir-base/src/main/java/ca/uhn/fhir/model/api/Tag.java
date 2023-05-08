@@ -19,14 +19,13 @@
  */
 package ca.uhn.fhir.model.api;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.net.URI;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+
+import java.net.URI;
+import java.util.Objects;
 
 /**
  * A single tag
@@ -60,7 +59,7 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 	private String myScheme;
 	private String myTerm;
 	private String myVersion;
-	private boolean myUserSelected;
+	private Boolean myUserSelected;
 
 	public Tag() {
 	}
@@ -116,37 +115,22 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 		if (getClass() != obj.getClass())
 			return false;
 		Tag other = (Tag) obj;
-		if (myScheme == null) {
-			if (other.myScheme != null)
-				return false;
-		} else if (!myScheme.equals(other.myScheme))
-			return false;
-		if (myTerm == null) {
-			if (other.myTerm != null)
-				return false;
-		} else if (!myTerm.equals(other.myTerm))
-			return false;
 
-		if (myVersion == null) {
-			if (other.getVersion() != null)
-				return false;
-		} else if (!myVersion.equals(other.getVersion()))
-			return false;
-
-		if (myUserSelected != other.getUserSelected())
-			return false;
-
-		return true;
+		return
+			Objects.equals(myScheme, other.myScheme) &&
+			Objects.equals(myTerm, other.myTerm) &&
+			Objects.equals(myVersion, other.myVersion) &&
+			Objects.equals(myUserSelected, other.myUserSelected);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((myScheme == null) ? 0 : myScheme.hashCode());
-		result = prime * result + ((myTerm == null) ? 0 : myTerm.hashCode());
-		result = prime * result + ((myVersion == null) ? 0 : myVersion.hashCode());
-		result = prime * result + Boolean.hashCode(myUserSelected);
+		result = prime * result + Objects.hashCode(myScheme);
+		result = prime * result + Objects.hashCode(myTerm);
+		result = prime * result + Objects.hashCode(myVersion);
+		result = prime * result + Objects.hashCode(myUserSelected);
 		return result;
 	}
 
@@ -236,12 +220,18 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 	}
 
 	@Override
-	public boolean getUserSelected() { return myUserSelected; }
+	public boolean getUserSelected() { return myUserSelected != null && myUserSelected; }
+
+	public Boolean getUserSelectedBoolean() { return myUserSelected; }
 
 	@Override
 	public IBaseCoding setUserSelected(boolean theUserSelected) {
 		myUserSelected = theUserSelected;
 		return this;
+	}
+
+	public void setUserSelectedBoolean(Boolean theUserSelected) {
+		myUserSelected = theUserSelected;
 	}
 
 }

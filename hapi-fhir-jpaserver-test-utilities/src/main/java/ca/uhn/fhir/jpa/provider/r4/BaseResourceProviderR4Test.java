@@ -87,7 +87,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	protected static Server ourServer;
 	protected static JpaCapabilityStatementProvider ourCapabilityStatementProvider;
-	private static DatabaseBackedPagingProvider ourPagingProvider;
+	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	protected IGenericClient myClient;
 	@Autowired

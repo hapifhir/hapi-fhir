@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
-import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.collections4.ListUtils;
@@ -52,8 +51,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.Query;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -64,6 +63,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -89,7 +89,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
 	public String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());
@@ -102,6 +101,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setStatus(WorkChunkStatusEnum.QUEUED);
+		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
+		ourLog.trace("Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
 		myWorkChunkRepository.save(entity);
 		return entity.getId();
 	}
@@ -109,13 +110,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<WorkChunk> onWorkChunkDequeue(String theChunkId) {
-		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, List.of(WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.ERRORED, WorkChunkStatusEnum.IN_PROGRESS));
+		// NOTE: Ideally, IN_PROGRESS wouldn't be allowed here.  On chunk failure, we probably shouldn't be allowed.  But how does re-run happen if k8s kills a processor mid run?
+		List<WorkChunkStatusEnum> priorStates = List.of(WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.ERRORED, WorkChunkStatusEnum.IN_PROGRESS);
+		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, priorStates);
 		if (rowsModified == 0) {
 			ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
 			return Optional.empty();
 		} else {
 			Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-			return chunk.map(t -> toChunk(t, true));
+			return chunk.map(this::toChunk);
 		}
 	}
 
@@ -229,8 +232,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return myJobInstanceRepository.findAll(pageRequest).stream().map(this::toInstance).collect(Collectors.toList());
 	}
 
-	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity, boolean theIncludeData) {
-		return JobInstanceUtil.fromEntityToWorkChunk(theEntity, theIncludeData);
+	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity) {
+		return JobInstanceUtil.fromEntityToWorkChunk(theEntity);
 	}
 
 	private JobInstance toInstance(Batch2JobInstanceEntity theEntity) {
@@ -252,7 +255,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				"where myId = :chunkId and myErrorCount > :maxCount");
 		query.setParameter("chunkId", chunkId);
 		query.setParameter("failed", WorkChunkStatusEnum.FAILED);
-		query.setParameter("maxCount", theParameters.getMaxRetries());
+		query.setParameter("maxCount", MAX_CHUNK_ERROR_COUNT);
 		int failChangeCount = query.executeUpdate();
 
 		if (failChangeCount > 0) {
@@ -289,7 +292,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional
 	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMessage) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
@@ -305,25 +307,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(theInstanceId);
-		if (!instance.isPresent()) {
+		if (instance.isEmpty()) {
 			return false;
 		}
 		if (instance.get().getStatus().isEnded()) {
 			return false;
 		}
-		List<WorkChunkStatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
-		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
-		return statusesForStep.stream().noneMatch(WorkChunkStatusEnum::isIncomplete) && statusesForStep.stream().anyMatch(status -> status == WorkChunkStatusEnum.COMPLETED);
-	}
+		Set<WorkChunkStatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
 
-	/**
-	 * Note: Not @Transactional because {@link #fetchChunks(String, boolean, int, int, Consumer)} starts a transaction
-	 */
-	@Override
-	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
-		ArrayList<WorkChunk> chunks = new ArrayList<>();
-		fetchChunks(theInstanceId, false, thePageSize, thePageIndex, chunks::add);
-		return chunks;
+		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
+		return statusesForStep.isEmpty() || statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
 	}
 
 	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
@@ -331,9 +324,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			.withSystemRequest()
 			.withPropagation(Propagation.REQUIRES_NEW)
 			.execute(() -> {
-				List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+				List<Batch2WorkChunkEntity> chunks;
+				if (theIncludeData) {
+					chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+				} else {
+					chunks = myWorkChunkRepository.fetchChunksNoData(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+				}
 				for (Batch2WorkChunkEntity chunk : chunks) {
-					theConsumer.accept(toChunk(chunk, theIncludeData));
+					theConsumer.accept(toChunk(chunk));
 				}
 			});
 	}
@@ -361,45 +359,29 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.MANDATORY)
 	public Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId) {
-		return myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId).map(entity -> toChunk(entity, true));
+		return myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId).map(this::toChunk);
 	}
 
-	/**
-	 * Update the stored instance
-	 *
-	 * @param theInstance The instance - Must contain an ID
-	 * @return true if the status changed
-	 */
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean updateInstance(JobInstance theInstance) {
-		// Separate updating the status so we have atomic information about whether the status is changing
-		int recordsChangedByStatusUpdate = myJobInstanceRepository.updateInstanceStatus(theInstance.getInstanceId(), theInstance.getStatus());
+	public boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier) {
+		Batch2JobInstanceEntity instanceEntity = myEntityManager.find(Batch2JobInstanceEntity.class, theInstanceId, LockModeType.PESSIMISTIC_WRITE);
+		if (null == instanceEntity) {
+			ourLog.error("No instance found with Id {}", theInstanceId);
+			return false;
+		}
+		// convert to JobInstance for public api
+		JobInstance jobInstance = JobInstanceUtil.fromEntityToInstance(instanceEntity);
 
-		Optional<Batch2JobInstanceEntity> instanceOpt = myJobInstanceRepository.findById(theInstance.getInstanceId());
-		Batch2JobInstanceEntity instanceEntity = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));
+		// run the modification callback
+		boolean wasModified = theModifier.doUpdate(jobInstance);
 
-		instanceEntity.setStartTime(theInstance.getStartTime());
-		instanceEntity.setEndTime(theInstance.getEndTime());
-		instanceEntity.setStatus(theInstance.getStatus());
-		instanceEntity.setCancelled(theInstance.isCancelled());
-		instanceEntity.setFastTracking(theInstance.isFastTracking());
-		instanceEntity.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
-		instanceEntity.setCombinedRecordsProcessedPerSecond(theInstance.getCombinedRecordsProcessedPerSecond());
-		instanceEntity.setTotalElapsedMillis(theInstance.getTotalElapsedMillis());
-		instanceEntity.setWorkChunksPurged(theInstance.isWorkChunksPurged());
-		instanceEntity.setProgress(theInstance.getProgress());
-		instanceEntity.setErrorMessage(theInstance.getErrorMessage());
-		instanceEntity.setErrorCount(theInstance.getErrorCount());
-		instanceEntity.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
-		instanceEntity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
-		instanceEntity.setReport(theInstance.getReport());
+		if (wasModified) {
+			// copy fields back for flush.
+			JobInstanceUtil.fromInstanceToEntity(jobInstance, instanceEntity);
+		}
 
-		myJobInstanceRepository.save(instanceEntity);
-
-		return recordsChangedByStatusUpdate > 0;
+		return wasModified;
 	}
 
 	@Override
@@ -414,22 +396,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId) {
 		ourLog.info("Deleting all chunks for instance ID: {}", theInstanceId);
-		myJobInstanceRepository.updateWorkChunksPurgedTrue(theInstanceId);
-		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
+		int updateCount = myJobInstanceRepository.updateWorkChunksPurgedTrue(theInstanceId);
+		int deleteCount = myWorkChunkRepository.deleteAllForInstance(theInstanceId);
+		ourLog.debug("Purged {} chunks, and updated {} instance.", deleteCount, updateCount);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean markInstanceAsCompleted(String theInstanceId) {
-		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
-		return recordsChanged > 0;
-	}
-
-	@Override
-	public boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
-		int recordsChanged =	myTransactionService
-			.withSystemRequest()
-			.execute(()->myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum));
+	public boolean markInstanceAsStatusWhenStatusIn(String theInstanceId, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates) {
+		int recordsChanged = myJobInstanceRepository.updateInstanceStatusIfIn(theInstanceId, theStatusEnum, thePriorStates);
+		ourLog.debug("Update job {} to status {} if in status {}: {}", theInstanceId, theStatusEnum, thePriorStates, recordsChanged>0);
 		return recordsChanged > 0;
 	}
 
@@ -439,32 +414,20 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
 		String operationString = "Cancel job instance " + theInstanceId;
 
+		// wipmb For 6.8 - This is too detailed to be down here - this should be up at the api layer.
+		// Replace with boolean result or ResourceNotFound exception.  Build the message up at the ui.
+		String messagePrefix = "Job instance <" + theInstanceId + ">";
 		if (recordsChanged > 0) {
-			return JobOperationResultJson.newSuccess(operationString, "Job instance <" + theInstanceId + "> successfully cancelled.");
+			return JobOperationResultJson.newSuccess(operationString, messagePrefix + " successfully cancelled.");
 		} else {
 			Optional<JobInstance> instance = fetchInstance(theInstanceId);
 			if (instance.isPresent()) {
-				return JobOperationResultJson.newFailure(operationString, "Job instance <" + theInstanceId + "> was already cancelled.  Nothing to do.");
+				return JobOperationResultJson.newFailure(operationString, messagePrefix + " was already cancelled.  Nothing to do.");
 			} else {
-				return JobOperationResultJson.newFailure(operationString, "Job instance <" + theInstanceId + "> not found.");
+				return JobOperationResultJson.newFailure(operationString, messagePrefix + " not found.");
 			}
 		}
 	}
 
-
-	@Override
-	public void processCancelRequests() {
-		myTransactionService
-			.withSystemRequest()
-			.execute(()->{
-				Query query = myEntityManager.createQuery(
-					"UPDATE Batch2JobInstanceEntity b " +
-						"set myStatus = ca.uhn.fhir.batch2.model.StatusEnum.CANCELLED " +
-						"where myCancelled = true " +
-						"AND myStatus IN (:states)");
-				query.setParameter("states", StatusEnum.CANCELLED.getPriorStates());
-				query.executeUpdate();
-			});
-	}
 
 }

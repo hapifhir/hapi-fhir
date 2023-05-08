@@ -42,8 +42,6 @@ stages:
                      module: hapi-fhir-checkstyle
                   -  name: hapi_fhir_cli_api
                      module: hapi-fhir-cli/hapi-fhir-cli-api
-                  -  name: hapi_fhir_cli_jpaserver
-                     module: hapi-fhir-cli/hapi-fhir-cli-jpaserver
                   -  name: hapi_fhir_client
                      module: hapi-fhir-client
                   -  name: hapi_fhir_client_okhttp

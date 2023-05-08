@@ -173,10 +173,14 @@ The following example shows how to register this interceptor within a HAPI FHIR 
 
 HAPI FHIR includes an interceptor which can be used to implement CORS support on your server. See [Server CORS Documentation](/docs/security/cors.html#cors_interceptor) for information on how to use this interceptor.
 
+# Security: Audit
+
+HAPI FHIR provides an interceptor that can be used to automatically generate and record AuditEvent resources based on user/client actions on the server. See [BALP Interceptor](../security/balp_interceptor.html) for more information.
+
 
 # Security: Authorization
 
-HAPI FHIR provides a powerful interceptor that can be used to implement user- and system-level authorization rules that are aware of FHIR semantics. See [Authorization](/docs/security/authorization_interceptor.html) for more information.
+HAPI FHIR provides an interceptor that can be used to implement user- and system-level authorization rules that are aware of FHIR semantics. See [Authorization](/docs/security/authorization_interceptor.html) for more information.
 
 
 # Security: Consent

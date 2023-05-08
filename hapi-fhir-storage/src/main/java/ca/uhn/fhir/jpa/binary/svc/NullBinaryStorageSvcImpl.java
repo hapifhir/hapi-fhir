@@ -37,6 +37,11 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
+	public boolean isValidBlobId(String theNewBlobId) {
+		return true;
+	}
+
+	@Override
 	public void setMaximumBinarySize(long theMaximumBinarySize) {
 		// ignore
 	}

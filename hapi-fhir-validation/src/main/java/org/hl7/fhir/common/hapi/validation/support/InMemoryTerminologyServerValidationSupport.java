@@ -24,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import javax.annotation.Nonnull;
@@ -660,7 +661,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			String failureMessage = null;
 			FailureType failureType = FailureType.OTHER;
 
-			if (includeOrExcludeSystemResource == null || includeOrExcludeSystemResource.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			if (includeOrExcludeSystemResource == null || includeOrExcludeSystemResource.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT) {
 
 				if (theWantCode != null) {
 					if (theValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(theValidationSupportContext, includeOrExcludeConceptSystemUrl)) {
@@ -741,7 +742,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				throw new ExpansionCouldNotBeCompletedInternallyException(Msg.code(702) + failureMessage, failureType);
 			}
 
-			if (includeOrExcludeSystemResource != null && includeOrExcludeSystemResource.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			if (includeOrExcludeSystemResource != null && includeOrExcludeSystemResource.getContent() != Enumerations.CodeSystemContentMode.NOTPRESENT) {
 				addCodes(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion, includeOrExcludeSystemResource.getConcept(), nextCodeList, wantCodes);
 			}
 
@@ -870,7 +871,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		if (includeOrExcludeSystemResource == null) {
 			failureMessage = "Unable to expand ValueSet because CodeSystem could not be found: " + loadedCodeSystemUrl;
 		} else {
-			assert includeOrExcludeSystemResource.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT;
+			assert includeOrExcludeSystemResource.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT;
 			failureMessage = "Unable to expand ValueSet because CodeSystem has CodeSystem.content=not-present but contents were not found: " + loadedCodeSystemUrl;
 		}
 		return failureMessage;

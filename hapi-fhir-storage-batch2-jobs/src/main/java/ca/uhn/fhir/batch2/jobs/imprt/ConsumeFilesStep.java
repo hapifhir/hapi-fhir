@@ -33,10 +33,10 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -96,18 +96,23 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 
 		ourLog.info("Bulk loading {} resources from source {}", resources.size(), sourceName);
 
-		storeResources(resources);
+		storeResources(resources, theStepExecutionDetails.getParameters().getPartitionId());
 
 		return new RunOutcome(resources.size());
 	}
 
-	public void storeResources(List<IBaseResource> resources) {
-		RequestDetails requestDetails = new SystemRequestDetails();
+	public void storeResources(List<IBaseResource> resources, RequestPartitionId thePartitionId) {
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		if (thePartitionId == null) {
+			requestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		} else {
+			requestDetails.setRequestPartitionId(thePartitionId);
+		}
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(requestDetails, transactionDetails, tx -> storeResourcesInsideTransaction(resources, requestDetails, transactionDetails));
 	}
 
-	private Void storeResourcesInsideTransaction(List<IBaseResource> theResources, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
+	private Void storeResourcesInsideTransaction(List<IBaseResource> theResources, SystemRequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		Map<IIdType, IBaseResource> ids = new HashMap<>();
 		for (IBaseResource next : theResources) {
 			if (!next.getIdElement().hasIdPart()) {
@@ -122,7 +127,7 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 		}
 
 		List<IIdType> idsList = new ArrayList<>(ids.keySet());
-		List<IResourcePersistentId> resolvedIds = myIdHelperService.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), idsList, true);
+		List<IResourcePersistentId> resolvedIds = myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestDetails.getRequestPartitionId(), idsList, true);
 		for (IResourcePersistentId next : resolvedIds) {
 			IIdType resId = next.getAssociatedResourceId();
 			theTransactionDetails.addResolvedResourceId(resId, next);
@@ -132,7 +137,7 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 			theTransactionDetails.addResolvedResourceId(next, null);
 		}
 
-		mySystemDao.preFetchResources(resolvedIds);
+		mySystemDao.preFetchResources(resolvedIds, true);
 
 		for (IBaseResource next : theResources) {
 			updateResource(theRequestDetails, theTransactionDetails, next);

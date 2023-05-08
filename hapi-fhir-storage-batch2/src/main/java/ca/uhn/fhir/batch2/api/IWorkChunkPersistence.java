@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.batch2.api;
 
-import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Iterator;
 import java.util.List;
@@ -33,7 +34,13 @@ import java.util.stream.Stream;
 
 /**
  * Work Chunk api, implementing the WorkChunk state machine.
- * Test specification is in {@link ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest}
+ * Test specification is in {@link ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest}.
+ * Note on transaction boundaries:  these are messy - some methods expect an existing transaction and are
+ * marked with {@code @Transactional(propagation = Propagation.MANDATORY)}, some will create a tx as needed
+ * and are marked {@code @Transactional(propagation = Propagation.REQUIRED)}, and some run in a NEW transaction
+ * and are not marked on the interface, but on the implementors instead.  We had a bug where interface
+ * methods marked {@code @Transactional(propagation = Propagation.REQUIRES_NEW)} were starting two (2!)
+ * transactions because of our synchronized wrapper.
  *
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
@@ -53,35 +60,19 @@ public interface IWorkChunkPersistence {
 	 * @param theBatchWorkChunk the batch work chunk to be stored
 	 * @return a globally unique identifier for this chunk.
 	 */
-	default String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
-		// back-compat for one minor version
-		return storeWorkChunk(theBatchWorkChunk);
-	}
-	// wipmb for deletion
-	@Deprecated(since="6.5.6")
-	default String storeWorkChunk(BatchWorkChunk theBatchWorkChunk) {
-		// dead code in 6.5.7
-		return null;
-	}
+	@Transactional(propagation = Propagation.REQUIRED)
+	String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk);
 
 	/**
 	 * On arrival at a worker.
 	 * The second state event, as the worker starts processing.
 	 * Transition to {@link WorkChunkStatusEnum#IN_PROGRESS} if unless not in QUEUED or ERRORRED state.
 	 *
-	 * @param theChunkId The ID from {@link #onWorkChunkCreate(BatchWorkChunk theBatchWorkChunk)}
+	 * @param theChunkId The ID from {@link #onWorkChunkCreate}
 	 * @return The WorkChunk or empty if no chunk exists, or not in a runnable state (QUEUED or ERRORRED)
 	 */
-	default Optional<WorkChunk> onWorkChunkDequeue(String theChunkId) {
-		// back-compat for one minor version
-		return fetchWorkChunkSetStartTimeAndMarkInProgress(theChunkId);
-	}
-	// wipmb for deletion
-	@Deprecated(since="6.5.6")
-	default Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
-		// dead code
-		return null;
-	}
+	@Transactional(propagation = Propagation.REQUIRED)
+	Optional<WorkChunk> onWorkChunkDequeue(String theChunkId);
 
 	/**
 	 * A retryable error.
@@ -91,17 +82,8 @@ public interface IWorkChunkPersistence {
 	 * @param theParameters - the error message and max retry count.
 	 * @return - the new status - ERRORED or ERRORED, depending on retry count
 	 */
-	default WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters) {
-		// back-compat for one minor version
-		return workChunkErrorEvent(theParameters);
-	}
-
-	// wipmb for deletion
-	@Deprecated(since="6.5.6")
-	default WorkChunkStatusEnum workChunkErrorEvent(WorkChunkErrorEvent theParameters) {
-		// dead code in 6.5.7
-		return null;
-	}
+	// on impl - @Transactional(propagation = Propagation.REQUIRES_NEW)
+	WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters);
 
 	/**
 	 * An unrecoverable error.
@@ -109,17 +91,8 @@ public interface IWorkChunkPersistence {
 	 *
 	 * @param theChunkId The chunk ID
 	 */
-	default void onWorkChunkFailed(String theChunkId, String theErrorMessage) {
-		// back-compat for one minor version
-		markWorkChunkAsFailed(theChunkId, theErrorMessage);
-	}
-
-
-	// wipmb for deletion
-	@Deprecated(since="6.5.6")
-	default void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
-		// dead code in 6.5.7
-	}
+	@Transactional(propagation = Propagation.REQUIRED)
+	void onWorkChunkFailed(String theChunkId, String theErrorMessage);
 
 
 	/**
@@ -128,15 +101,8 @@ public interface IWorkChunkPersistence {
 	 *
 	 * @param theEvent with record and error count
 	 */
-	default void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		// back-compat for one minor version
-		workChunkCompletionEvent(theEvent);
-	}
-	// wipmb for deletion
-	@Deprecated(since="6.5.6")
-	default void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent) {
-		// dead code in 6.5.7
-	}
+	@Transactional(propagation = Propagation.REQUIRED)
+	void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent);
 
 	/**
 	 * Marks all work chunks with the provided status and erases the data
@@ -146,25 +112,15 @@ public interface IWorkChunkPersistence {
 	 * @param theStatus     - the status to mark
 	 * @param theErrorMsg   - error message (if status warrants it)
 	 */
+	@Transactional(propagation = Propagation.MANDATORY)
 	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMsg);
-
-
-	/**
-	 * Fetches all chunks for a given instance, without loading the data
-	 *
-	 * @param theInstanceId The instance ID
-	 * @param thePageSize   The page size
-	 * @param thePageIndex  The page index
-	 */
-	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
-
 
 	/**
 	 * Fetch all chunks for a given instance.
-	 *
 	 * @param theInstanceId - instance id
-	 * @param theWithData   - whether or not to include the data
+	 * @param theWithData - whether to include the data - not needed for stats collection
 	 * @return - an iterator for fetching work chunks
+	 * wipmb replace with a stream and a consumer in 6.8
 	 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
@@ -174,6 +130,7 @@ public interface IWorkChunkPersistence {
 	 *
 	 * @return - a stream for fetching work chunks
 	 */
+	@Transactional(propagation = Propagation.MANDATORY, readOnly = true)
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
 	/**

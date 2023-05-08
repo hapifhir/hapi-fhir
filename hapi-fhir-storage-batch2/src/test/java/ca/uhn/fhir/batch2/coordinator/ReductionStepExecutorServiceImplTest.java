@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +38,8 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.StepOutputDa
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.TestJobParameters;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.createWorkChunk;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.getTestJobInstance;
+import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
+import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -64,7 +67,7 @@ public class ReductionStepExecutorServiceImplTest {
 //	@Mock
 //	private JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> myCurrentStep;
 	private ReductionStepExecutorServiceImpl mySvc;
-	private JobDefinitionRegistry myJobDefinitionRegistry = new JobDefinitionRegistry();
+	private final JobDefinitionRegistry myJobDefinitionRegistry = new JobDefinitionRegistry();
 
 	@BeforeEach
 	public void before() {
@@ -89,7 +92,7 @@ public class ReductionStepExecutorServiceImplTest {
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
 		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(jobInstance));
-		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
+		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(StatusEnum.IN_PROGRESS, StatusEnum.ERRORED))).thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.stream());
 		when(myReductionStepWorker.consume(any(ChunkExecutionDetails.class)))
@@ -142,7 +145,7 @@ public class ReductionStepExecutorServiceImplTest {
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
 		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(jobInstance));
-		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
+		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(IN_PROGRESS, ERRORED))).thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.stream());
 		when(myReductionStepWorker.consume(any(ChunkExecutionDetails.class)))
@@ -193,7 +196,7 @@ public class ReductionStepExecutorServiceImplTest {
 		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(jobInstance));
 		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID))).thenReturn(chunks.stream());
-		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
+		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(StatusEnum.IN_PROGRESS, StatusEnum.ERRORED))).thenReturn(true);
 		doThrow(new RuntimeException("This is an error")).when(myReductionStepWorker).consume(any(ChunkExecutionDetails.class));
 
 		// test

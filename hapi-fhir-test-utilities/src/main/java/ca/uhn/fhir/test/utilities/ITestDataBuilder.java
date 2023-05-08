@@ -236,10 +236,10 @@ public interface ITestDataBuilder {
 		}
 	}
 
-	default IBaseResource buildResource(String theResourceType, Consumer<IBaseResource>... theModifiers) {
+	default <T extends IBaseResource> T buildResource(String theResourceType, Consumer<IBaseResource>... theModifiers) {
 		IBaseResource resource = getFhirContext().getResourceDefinition(theResourceType).newInstance();
 		applyElementModifiers(resource, theModifiers);
-		return resource;
+		return (T) resource;
 	}
 
 

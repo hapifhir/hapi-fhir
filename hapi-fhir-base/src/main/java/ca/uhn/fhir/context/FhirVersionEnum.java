@@ -128,25 +128,21 @@ public enum FhirVersionEnum {
 		return myIsRi;
 	}
 
+	/**
+	 * Creates a new FhirContext for this FHIR version
+	 */
 	public FhirContext newContext() {
-		switch (this) {
-			case DSTU2:
-				return FhirContext.forDstu2();
-			case DSTU2_HL7ORG:
-				return FhirContext.forDstu2Hl7Org();
-			case DSTU2_1:
-				return FhirContext.forDstu2_1();
-			case DSTU3:
-				return FhirContext.forDstu3();
-			case R4:
-				return FhirContext.forR4();
-			case R4B:
-				return FhirContext.forR4B();
-			case R5:
-				return FhirContext.forR5();
-		}
-		throw new IllegalStateException(Msg.code(1711) + "Unknown version: " + this); // should not happen
+		return new FhirContext(this);
 	}
+
+	/**
+	 * Creates a new FhirContext for this FHIR version, or returns a previously created one if one exists. This
+	 * method uses {@link FhirContext#forCached(FhirVersionEnum)} to return a cached instance.
+	 */
+	public FhirContext newContextCached() {
+		return FhirContext.forCached(this);
+	}
+
 
 	private interface IVersionProvider {
 		String provideVersion();

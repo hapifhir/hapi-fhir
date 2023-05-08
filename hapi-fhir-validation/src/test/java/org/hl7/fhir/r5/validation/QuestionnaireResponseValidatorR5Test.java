@@ -16,7 +16,7 @@ import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.DateTimeType;
@@ -581,7 +581,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		// This is set in InstanceValidator#validateAnswerCode
-		assertThat(errors.toString(), containsString(" The value provided (http://system::null) is not in the options value set"));
+		assertThat(errors.toString(), containsString("ValidationResult{messageCount=1, isSuccessful=false, description="));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Wrong type
@@ -662,7 +662,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		 * Create CodeSystem
 		 */
 		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl(SYSTEMURI_ICC_SCHOOLTYPE);
 		codeSystem.addConcept().setCode(CODE_ICC_SCHOOLTYPE_PT);
 

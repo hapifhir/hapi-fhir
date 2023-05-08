@@ -37,12 +37,11 @@ public class BulkExportUtils {
 	public static BulkExportParameters createBulkExportJobParametersFromExportOptions(BulkDataExportOptions theOptions) {
 		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
 
-		parameters.setStartDate(theOptions.getSince());
+		parameters.setSince(theOptions.getSince());
 		parameters.setOutputFormat(theOptions.getOutputFormat());
 		parameters.setExportStyle(theOptions.getExportStyle());
-		if (CollectionUtils.isNotEmpty(theOptions.getFilters())) {
-			parameters.setFilters(new ArrayList<>(theOptions.getFilters()));
-		}
+		parameters.setFilters(new ArrayList<>(theOptions.getFilters()));
+		parameters.setPostFetchFilterUrls(new ArrayList<>(theOptions.getPostFetchFilterUrls()));
 		if (theOptions.getGroupId() != null) {
 			parameters.setGroupId(theOptions.getGroupId().getValue());
 		}
@@ -54,6 +53,7 @@ public class BulkExportUtils {
 		}
 		parameters.setExpandMdm(theOptions.isExpandMdm());
 		parameters.setUseExistingJobsFirst(true);
+		parameters.setExportIdentifier(theOptions.getExportIdentifier());
 
 		return parameters;
 	}
