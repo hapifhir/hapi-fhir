@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketConnectionValidator;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketValidationResponse;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
@@ -139,6 +140,10 @@ public class WebsocketConnectionValidatorTest {
 		@Bean
 		public IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
 			return mock(IResourceChangeListenerRegistry.class, RETURNS_DEEP_STUBS);
+		}
+		@Bean
+		public IEmailSender emailSender(){
+			return mock(IEmailSender.class);
 		}
 
 	}
