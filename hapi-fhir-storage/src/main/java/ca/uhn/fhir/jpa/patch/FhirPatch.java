@@ -127,10 +127,8 @@ public class FhirPatch {
 				}
 
 			} else if (OPERATION_ADD.equals(type)) {
-
-				containingPath = path;
-				elementName = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, PARAMETER_NAME);
-
+				handleAddOperation(theResource, nextOp);
+				continue;
 			} else if (OPERATION_REPLACE.equals(type)) {
 
 				int lastDot = path.lastIndexOf(".");
@@ -225,8 +223,6 @@ public class FhirPatch {
 						childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
 					}
 
-				} else if (OPERATION_ADD.equals(type)) {
-					childDefinition.getChildDef().getMutator().addValue(next, newValue);
 				} else if (OPERATION_REPLACE.equals(type)) {
 					childDefinition.getChildDef().getMutator().setValue(next, newValue);
 				}
@@ -235,6 +231,23 @@ public class FhirPatch {
 
 		}
 
+	}
+
+	private void handleAddOperation(IBaseResource theResource, IBase theParameters) {
+
+		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
+		String elementName = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_NAME);
+
+		String containingPath = defaultString(path);
+
+		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		for (IBase next : paths) {
+			ChildDefinition childDefinition = findChildDefinition(next, elementName);
+
+			IBase newValue = getNewValue(theParameters, next, childDefinition);
+
+			childDefinition.getChildDef().getMutator().addValue(next, newValue);
+		}
 	}
 
 	private ChildDefinition findChildDefinition(IBase theContainingElement, String theElementName) {
