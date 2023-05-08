@@ -98,78 +98,22 @@ public class FhirPatch {
 		List<IBase> opParameters = ParametersUtil.getNamedParameters(myContext, thePatch, PARAMETER_OPERATION);
 		for (IBase nextOp : opParameters) {
 			String type = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, PARAMETER_TYPE);
-			String path = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, PARAMETER_PATH);
-
 			type = defaultString(type);
-			path = defaultString(path);
 
-			String containingPath;
-			String elementName;
-			Integer removeIndex = null;
-			Integer insertIndex = null;
 			if (OPERATION_DELETE.equals(type)) {
 				handleDeleteOperation(theResource, nextOp);
-				continue;
 			} else if (OPERATION_ADD.equals(type)) {
 				handleAddOperation(theResource, nextOp);
-				continue;
 			} else if (OPERATION_REPLACE.equals(type)) {
 				handleReplaceOperation(theResource, nextOp);
-				continue;
 			} else if (OPERATION_INSERT.equals(type)) {
 				handleInsertOperation(theResource, nextOp);
-				continue;
 			} else if (OPERATION_MOVE.equals(type)) {
-
-				int lastDot = path.lastIndexOf(".");
-				containingPath = path.substring(0, lastDot);
-				elementName = path.substring(lastDot + 1);
-				insertIndex = ParametersUtil
-					.getParameterPartValue(myContext, nextOp, PARAMETER_DESTINATION)
-					.map(t -> (IPrimitiveType<Integer>) t)
-					.map(t -> t.getValue())
-					.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
-				removeIndex = ParametersUtil
-					.getParameterPartValue(myContext, nextOp, PARAMETER_SOURCE)
-					.map(t -> (IPrimitiveType<Integer>) t)
-					.map(t -> t.getValue())
-					.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
-
+				handleMoveOperation(theResource, nextOp);
 			} else {
-
 				throw new InvalidRequestException(Msg.code(1267) + "Unknown patch operation type: " + type);
-
 			}
-
-			List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
-			for (IBase next : paths) {
-
-				ChildDefinition childDefinition = findChildDefinition(next, elementName);
-
-				List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
-				if (removeIndex == null || removeIndex >= existingValues.size()) {
-					String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
-					throw new InvalidRequestException(Msg.code(1268) + msg);
-				}
-				IBase newValue = existingValues.remove(removeIndex.intValue());
-
-				if (insertIndex == null || insertIndex > existingValues.size()) {
-					String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveDestinationIndex", insertIndex, path, existingValues.size());
-					throw new InvalidRequestException(Msg.code(1269) + msg);
-				}
-				existingValues.add(insertIndex, newValue);
-
-				childDefinition.getChildDef().getMutator().setValue(next, null);
-				for (IBase nextNewValue : existingValues) {
-					childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
-				}
-
-
-			}
-
-
 		}
-
 	}
 
 	private void handleAddOperation(IBaseResource theResource, IBase theParameters) {
@@ -284,6 +228,49 @@ public class FhirPatch {
 			IBase newValue = getNewValue(theParameters, next, childDefinition);
 
 			childDefinition.getChildDef().getMutator().setValue(next, newValue);
+		}
+	}
+
+	private void handleMoveOperation(IBaseResource theResource, IBase theParameters) {
+		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
+		path = defaultString(path);
+
+		int lastDot = path.lastIndexOf(".");
+		String containingPath = path.substring(0, lastDot);
+		String elementName = path.substring(lastDot + 1);
+		Integer insertIndex = ParametersUtil
+			.getParameterPartValue(myContext, theParameters, PARAMETER_DESTINATION)
+			.map(t -> (IPrimitiveType<Integer>) t)
+			.map(IPrimitiveType::getValue)
+			.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
+		Integer removeIndex = ParametersUtil
+			.getParameterPartValue(myContext, theParameters, PARAMETER_SOURCE)
+			.map(t -> (IPrimitiveType<Integer>) t)
+			.map(IPrimitiveType::getValue)
+			.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
+
+		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		for (IBase next : paths) {
+
+			ChildDefinition childDefinition = findChildDefinition(next, elementName);
+
+			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
+			if (removeIndex == null || removeIndex >= existingValues.size()) {
+				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
+				throw new InvalidRequestException(Msg.code(1268) + msg);
+			}
+			IBase newValue = existingValues.remove(removeIndex.intValue());
+
+			if (insertIndex == null || insertIndex > existingValues.size()) {
+				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveDestinationIndex", insertIndex, path, existingValues.size());
+				throw new InvalidRequestException(Msg.code(1269) + msg);
+			}
+			existingValues.add(insertIndex, newValue);
+
+			childDefinition.getChildDef().getMutator().setValue(next, null);
+			for (IBase nextNewValue : existingValues) {
+				childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
+			}
 		}
 	}
 
