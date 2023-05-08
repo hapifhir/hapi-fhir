@@ -114,11 +114,8 @@ public class FhirPatch {
 				handleAddOperation(theResource, nextOp);
 				continue;
 			} else if (OPERATION_REPLACE.equals(type)) {
-
-				int lastDot = path.lastIndexOf(".");
-				containingPath = path.substring(0, lastDot);
-				elementName = path.substring(lastDot + 1);
-
+				handleReplaceOperation(theResource, nextOp);
+				continue;
 			} else if (OPERATION_INSERT.equals(type)) {
 				handleInsertOperation(theResource, nextOp);
 				continue;
@@ -149,34 +146,25 @@ public class FhirPatch {
 
 				ChildDefinition childDefinition = findChildDefinition(next, elementName);
 
-				if (OPERATION_MOVE.equals(type)) {
+				List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
+				if (removeIndex == null || removeIndex >= existingValues.size()) {
+					String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
+					throw new InvalidRequestException(Msg.code(1268) + msg);
+				}
+				IBase newValue = existingValues.remove(removeIndex.intValue());
 
-					List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
-					if (removeIndex == null || removeIndex >= existingValues.size()) {
-						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
-						throw new InvalidRequestException(Msg.code(1268) + msg);
-					}
-					IBase newValue = existingValues.remove(removeIndex.intValue());
+				if (insertIndex == null || insertIndex > existingValues.size()) {
+					String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveDestinationIndex", insertIndex, path, existingValues.size());
+					throw new InvalidRequestException(Msg.code(1269) + msg);
+				}
+				existingValues.add(insertIndex, newValue);
 
-					if (insertIndex == null || insertIndex > existingValues.size()) {
-						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveDestinationIndex", insertIndex, path, existingValues.size());
-						throw new InvalidRequestException(Msg.code(1269) + msg);
-					}
-					existingValues.add(insertIndex, newValue);
-
-					childDefinition.getChildDef().getMutator().setValue(next, null);
-					for (IBase nextNewValue : existingValues) {
-						childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
-					}
-
-					continue;
+				childDefinition.getChildDef().getMutator().setValue(next, null);
+				for (IBase nextNewValue : existingValues) {
+					childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
 				}
 
-				IBase newValue = getNewValue(nextOp, next, childDefinition);
 
-				if (OPERATION_REPLACE.equals(type)) {
-					childDefinition.getChildDef().getMutator().setValue(next, newValue);
-				}
 			}
 
 
@@ -277,6 +265,25 @@ public class FhirPatch {
 			for (IBase nextNewValue : existingValues) {
 				childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
 			}
+		}
+	}
+
+	private void handleReplaceOperation(IBaseResource theResource, IBase theParameters) {
+		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
+		path = defaultString(path);
+
+		int lastDot = path.lastIndexOf(".");
+		String containingPath = path.substring(0, lastDot);
+		String elementName = path.substring(lastDot + 1);
+
+		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		for (IBase next : paths) {
+
+			ChildDefinition childDefinition = findChildDefinition(next, elementName);
+
+			IBase newValue = getNewValue(theParameters, next, childDefinition);
+
+			childDefinition.getChildDef().getMutator().setValue(next, newValue);
 		}
 	}
 
