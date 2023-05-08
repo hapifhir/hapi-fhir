@@ -206,13 +206,6 @@
 			<artifactId>awaitility</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<!-- Needed for loading messages during tests -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-tinder-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
