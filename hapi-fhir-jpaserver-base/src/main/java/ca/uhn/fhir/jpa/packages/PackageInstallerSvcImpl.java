@@ -19,7 +19,11 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -148,13 +152,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (enabled) {
 			try {
 
-				boolean exists = myTxService
-					.withSystemRequest()
-					.withRequestPartitionId(RequestPartitionId.defaultPartition())
-					.execute(() -> {
-						Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(theInstallationSpec.getName(), theInstallationSpec.getVersion());
-						return existing.isPresent();
-					});
+				boolean exists = myTxService.withSystemRequest().withRequestPartitionId(RequestPartitionId.defaultPartition()).execute(() -> {
+					Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+					return existing.isPresent();
+				});
 				if (exists) {
 					ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
 				}
@@ -266,8 +267,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					}
 
 				} catch (IOException e) {
-					throw new ImplementationGuideInstallationException(Msg.code(1287) + String.format(
-						"Cannot resolve dependency %s#%s", id, ver), e);
+					throw new ImplementationGuideInstallationException(Msg.code(1287) + String.format("Cannot resolve dependency %s#%s", id, ver), e);
 				}
 			}
 		}
@@ -277,8 +277,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * Asserts if package FHIR version is compatible with current FHIR version
 	 * by using semantic versioning rules.
 	 */
-	protected void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
-		throws ImplementationGuideInstallationException {
+	protected void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion) throws ImplementationGuideInstallationException {
 
 		FhirVersionEnum fhirVersionEnum = FhirVersionEnum.forVersionString(fhirVersion);
 		FhirVersionEnum currentFhirVersionEnum = FhirVersionEnum.forVersionString(currentFhirVersion);
@@ -289,9 +288,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			compatible = true;
 		}
 		if (!compatible) {
-			throw new ImplementationGuideInstallationException(Msg.code(1288) + String.format(
-				"Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)",
-				currentFhirVersion, fhirVersion));
+			throw new ImplementationGuideInstallationException(Msg.code(1288) + String.format("Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)", currentFhirVersion, fhirVersion));
 		}
 	}
 
@@ -346,9 +343,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Nonnull
 	private SystemRequestDetails newSystemRequestDetails() {
-		return
-			new SystemRequestDetails()
-				.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition());
 	}
 
 	private void createResource(IFhirResourceDao theDao, IBaseResource theResource) {
@@ -393,8 +388,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		if (!isValidResourceStatusForPackageUpload(theResource)) {
-			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.",
-				theResource.fhirType(), theResource.getIdElement().getValue());
+			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.", theResource.fhirType(), theResource.getIdElement().getValue());
 			return false;
 		}
 
@@ -451,8 +445,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		try {
 			return validationSupport.generateSnapshot(new ValidationSupportContext(validationSupport), sd, null, null, null);
 		} catch (Exception e) {
-			throw new ImplementationGuideInstallationException(Msg.code(1290) + String.format(
-				"Failure when generating snapshot of StructureDefinition: %s", sd.getIdElement()), e);
+			throw new ImplementationGuideInstallationException(Msg.code(1290) + String.format("Failure when generating snapshot of StructureDefinition: %s", sd.getIdElement()), e);
 		}
 	}
 
