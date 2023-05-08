@@ -53,6 +53,20 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirPatch {
 
+	public static final String OPERATION_ADD = "add";
+	public static final String OPERATION_DELETE = "delete";
+	public static final String OPERATION_INSERT = "insert";
+	public static final String OPERATION_MOVE = "move";
+	public static final String OPERATION_REPLACE = "replace";
+	public static final String PARAMETER_DESTINATION = "destination";
+	public static final String PARAMETER_INDEX = "index";
+	public static final String PARAMETER_NAME = "name";
+	public static final String PARAMETER_OPERATION = "operation";
+	public static final String PARAMETER_PATH = "path";
+	public static final String PARAMETER_SOURCE = "source";
+	public static final String PARAMETER_TYPE = "type";
+	public static final String PARAMETER_VALUE = "value";
+
 	private final FhirContext myContext;
 	private boolean myIncludePreviousValueInDiff;
 	private Set<EncodeContextPath> myIgnorePaths = Collections.emptySet();
@@ -81,12 +95,12 @@ public class FhirPatch {
 
 	public void apply(IBaseResource theResource, IBaseResource thePatch) {
 
-		List<IBase> opParameters = ParametersUtil.getNamedParameters(myContext, thePatch, "operation");
+		List<IBase> opParameters = ParametersUtil.getNamedParameters(myContext, thePatch, PARAMETER_OPERATION);
 		for (IBase nextOp : opParameters) {
-			String type = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, "type");
-			String path = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, "path");
-			Optional<IBase> valuePart = ParametersUtil.getParameterPart(myContext, nextOp, "value");
-			Optional<IBase> valuePartValue = ParametersUtil.getParameterPartValue(myContext, nextOp, "value");
+			String type = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, PARAMETER_TYPE);
+			String path = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, PARAMETER_PATH);
+			Optional<IBase> valuePart = ParametersUtil.getParameterPart(myContext, nextOp, PARAMETER_VALUE);
+			Optional<IBase> valuePartValue = ParametersUtil.getParameterPartValue(myContext, nextOp, PARAMETER_VALUE);
 
 			type = defaultString(type);
 			path = defaultString(path);
@@ -95,7 +109,7 @@ public class FhirPatch {
 			String elementName;
 			Integer removeIndex = null;
 			Integer insertIndex = null;
-			if ("delete".equals(type)) {
+			if (OPERATION_DELETE.equals(type)) {
 				if (path.endsWith(")")) {
 					// This is probably a filter, so we're probably dealing with a list
 					int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
@@ -114,40 +128,40 @@ public class FhirPatch {
 					continue;
 				}
 
-			} else if ("add".equals(type)) {
+			} else if (OPERATION_ADD.equals(type)) {
 
 				containingPath = path;
-				elementName = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, "name");
+				elementName = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, PARAMETER_NAME);
 
-			} else if ("replace".equals(type)) {
+			} else if (OPERATION_REPLACE.equals(type)) {
 
 				int lastDot = path.lastIndexOf(".");
 				containingPath = path.substring(0, lastDot);
 				elementName = path.substring(lastDot + 1);
 
-			} else if ("insert".equals(type)) {
+			} else if (OPERATION_INSERT.equals(type)) {
 
 				int lastDot = path.lastIndexOf(".");
 				containingPath = path.substring(0, lastDot);
 				elementName = path.substring(lastDot + 1);
 				insertIndex = ParametersUtil
-					.getParameterPartValue(myContext, nextOp, "index")
+					.getParameterPartValue(myContext, nextOp, PARAMETER_INDEX)
 					.map(t -> (IPrimitiveType<Integer>) t)
 					.map(t -> t.getValue())
 					.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
 
-			} else if ("move".equals(type)) {
+			} else if (OPERATION_MOVE.equals(type)) {
 
 				int lastDot = path.lastIndexOf(".");
 				containingPath = path.substring(0, lastDot);
 				elementName = path.substring(lastDot + 1);
 				insertIndex = ParametersUtil
-					.getParameterPartValue(myContext, nextOp, "destination")
+					.getParameterPartValue(myContext, nextOp, PARAMETER_DESTINATION)
 					.map(t -> (IPrimitiveType<Integer>) t)
 					.map(t -> t.getValue())
 					.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
 				removeIndex = ParametersUtil
-					.getParameterPartValue(myContext, nextOp, "source")
+					.getParameterPartValue(myContext, nextOp, PARAMETER_SOURCE)
 					.map(t -> (IPrimitiveType<Integer>) t)
 					.map(t -> t.getValue())
 					.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
@@ -174,7 +188,7 @@ public class FhirPatch {
 					childElement = childDef.getChildByName(childName);
 				}
 
-				if ("move".equals(type)) {
+				if (OPERATION_MOVE.equals(type)) {
 
 					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
 					if (removeIndex == null || removeIndex >= existingValues.size()) {
@@ -195,7 +209,7 @@ public class FhirPatch {
 					}
 
 					continue;
-				} else if ("delete".equals(type)) {
+				} else if (OPERATION_DELETE.equals(type)) {
 					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
 					List<IBase> elementsToRemove = myContext.newFhirPath().evaluate(theResource, path, IBase.class);
 					existingValues.removeAll(elementsToRemove);
@@ -218,7 +232,7 @@ public class FhirPatch {
 						List<IBase> valuePartParts = myContext.newTerser().getValues(valuePart.get(), "part");
 						for (IBase nextValuePartPart : valuePartParts) {
 
-							String name = myContext.newTerser().getSingleValue(nextValuePartPart, "name", IPrimitiveType.class).map(t -> t.getValueAsString()).orElse(null);
+							String name = myContext.newTerser().getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class).map(t -> t.getValueAsString()).orElse(null);
 							if (isNotBlank(name)) {
 
 								Optional<IBase> value = myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
@@ -249,7 +263,7 @@ public class FhirPatch {
 					newValue = newValueInstance;
 				}
 
-				if ("insert".equals(type)) {
+				if (OPERATION_INSERT.equals(type)) {
 
 					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
 					if (insertIndex == null || insertIndex > existingValues.size()) {
@@ -263,9 +277,9 @@ public class FhirPatch {
 						childDef.getMutator().addValue(next, nextNewValue);
 					}
 
-				} else if ("add".equals(type)) {
+				} else if (OPERATION_ADD.equals(type)) {
 					childDef.getMutator().addValue(next, newValue);
-				} else if ("replace".equals(type)) {
+				} else if (OPERATION_REPLACE.equals(type)) {
 					childDef.getMutator().setValue(next, newValue);
 				}
 			}
@@ -303,10 +317,10 @@ public class FhirPatch {
 
 		if (theOldValue == null) {
 
-			IBase operation = ParametersUtil.addParameterToParameters(myContext, retVal, "operation");
-			ParametersUtil.addPartCode(myContext, operation, "type", "insert");
-			ParametersUtil.addPartString(myContext, operation, "path", newValueTypeName);
-			ParametersUtil.addPart(myContext, operation, "value", theNewValue);
+			IBase operation = ParametersUtil.addParameterToParameters(myContext, retVal, PARAMETER_OPERATION);
+			ParametersUtil.addPartCode(myContext, operation, PARAMETER_TYPE, OPERATION_INSERT);
+			ParametersUtil.addPartString(myContext, operation, PARAMETER_PATH, newValueTypeName);
+			ParametersUtil.addPart(myContext, operation, PARAMETER_VALUE, theNewValue);
 
 		} else {
 
@@ -339,9 +353,9 @@ public class FhirPatch {
 		BaseRuntimeElementDefinition<?> sourceDef = myContext.getElementDefinition(theOldField.getClass());
 		BaseRuntimeElementDefinition<?> targetDef = myContext.getElementDefinition(theNewField.getClass());
 		if (!sourceDef.getName().equals(targetDef.getName())) {
-			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
-			ParametersUtil.addPartCode(myContext, operation, "type", "replace");
-			ParametersUtil.addPartString(myContext, operation, "path", theTargetPath);
+			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, PARAMETER_OPERATION);
+			ParametersUtil.addPartCode(myContext, operation, PARAMETER_TYPE, OPERATION_REPLACE);
+			ParametersUtil.addPartString(myContext, operation, PARAMETER_PATH, theTargetPath);
 			addValueToDiff(operation, theOldField, theNewField);
 		} else {
 			if (theOldField instanceof IPrimitiveType) {
@@ -350,9 +364,9 @@ public class FhirPatch {
 				String oldValueAsString = toValue(oldPrimitive);
 				String newValueAsString = toValue(newPrimitive);
 				if (!Objects.equals(oldValueAsString, newValueAsString)) {
-					IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
-					ParametersUtil.addPartCode(myContext, operation, "type", "replace");
-					ParametersUtil.addPartString(myContext, operation, "path", theTargetPath);
+					IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, PARAMETER_OPERATION);
+					ParametersUtil.addPartCode(myContext, operation, PARAMETER_TYPE, OPERATION_REPLACE);
+					ParametersUtil.addPartString(myContext, operation, PARAMETER_PATH, theTargetPath);
 					addValueToDiff(operation, oldPrimitive, newPrimitive);
 				}
 			}
@@ -405,9 +419,9 @@ public class FhirPatch {
 
 		// Find deleted items
 		while (sourceIndex < sourceValues.size()) {
-			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
-			ParametersUtil.addPartCode(myContext, operation, "type", "delete");
-			ParametersUtil.addPartString(myContext, operation, "path", theTargetPath + "." + elementName + (repeatable ? "[" + targetIndex + "]" : ""));
+			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, PARAMETER_OPERATION);
+			ParametersUtil.addPartCode(myContext, operation, PARAMETER_TYPE, OPERATION_DELETE);
+			ParametersUtil.addPartString(myContext, operation, PARAMETER_PATH, theTargetPath + "." + elementName + (repeatable ? "[" + targetIndex + "]" : ""));
 
 			sourceIndex++;
 			targetIndex++;
@@ -417,10 +431,10 @@ public class FhirPatch {
 	}
 
 	private void addInsertItems(IBaseParameters theDiff, List<? extends IBase> theTargetValues, int theTargetIndex, String thePath, BaseRuntimeChildDefinition theChildDefinition) {
-		IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
-		ParametersUtil.addPartCode(myContext, operation, "type", "insert");
-		ParametersUtil.addPartString(myContext, operation, "path", thePath);
-		ParametersUtil.addPartInteger(myContext, operation, "index", theTargetIndex);
+		IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, PARAMETER_OPERATION);
+		ParametersUtil.addPartCode(myContext, operation, PARAMETER_TYPE, OPERATION_INSERT);
+		ParametersUtil.addPartString(myContext, operation, PARAMETER_PATH, thePath);
+		ParametersUtil.addPartInteger(myContext, operation, PARAMETER_INDEX, theTargetIndex);
 
 		IBase value = theTargetValues.get(theTargetIndex);
 		BaseRuntimeElementDefinition<?> valueDef = myContext.getElementDefinition(value.getClass());
@@ -432,7 +446,7 @@ public class FhirPatch {
 		 * childen in instead.
 		 */
 		if (valueDef.isStandardType()) {
-			ParametersUtil.addPart(myContext, operation, "value", value);
+			ParametersUtil.addPart(myContext, operation, PARAMETER_VALUE, value);
 		} else {
 			for (BaseRuntimeChildDefinition nextChild : valueDef.getChildren()) {
 				List<IBase> childValues = nextChild.getAccessor().getValues(value);
@@ -454,7 +468,7 @@ public class FhirPatch {
 		}
 
 		IBase newValue = massageValueForDiff(theNewValue);
-		ParametersUtil.addPart(myContext, theOperationPart, "value", newValue);
+		ParametersUtil.addPart(myContext, theOperationPart, PARAMETER_VALUE, newValue);
 	}
 
 	private boolean pathIsIgnored(EncodeContextPath theSourceEncodeContext) {
