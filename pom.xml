@@ -873,6 +873,16 @@
 			<name>Aleksej Parovysnik</name>
 			<organization>Doctolib</organization>
 		</developer>
+		<developer>
+			<id>doumdoum</id>
+			<name>Dominique Villard</name>
+			<organization>Doctolib</organization>
+		</developer>
+		<developer>
+			<id>boereck</id>
+			<name>Max Bureck</name>
+			<organization>Fraunhofer FOKUS</organization>
+		</developer>
 	</developers>
 
 	<licenses>
