@@ -69,6 +69,10 @@ class JobQuerySvc {
 		return myJobPersistence.fetchJobInstances(theFetchRequest);
 	}
 
+	public Page<JobInstance> fetchAllInstancesByJobStatus(JobInstanceFetchRequest theFetchRequest, String theJobStatus) {
+		return myJobPersistence.fetchAllInstancesByJobStatus(theFetchRequest, theJobStatus);
+	}
+
 	public List<JobInstance> fetchRecentInstances(int theCount, int theStart) {
 		return massageInstancesForUserAccess(myJobPersistence.fetchRecentInstances(theCount, theStart));
 	}

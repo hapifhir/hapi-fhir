@@ -41,6 +41,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -56,6 +57,7 @@ import javax.persistence.Query;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -161,6 +163,25 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, CREATE_TIME);
 		return toInstanceList(myJobInstanceRepository.findInstancesByJobDefinitionId(theJobDefinitionId, pageRequest));
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public Page<JobInstance> fetchAllInstancesByJobStatus(JobInstanceFetchRequest theRequest, String theJobStatus) {
+		PageRequest pageRequest = PageRequest.of(
+			theRequest.getPageStart(),
+			theRequest.getBatchSize(),
+			theRequest.getSort()
+		);
+
+		if (Objects.equals(theJobStatus, "")) {
+			return fetchJobInstances(theRequest);
+		}
+
+		StatusEnum status = StatusEnum.valueOf(theJobStatus);
+		List<JobInstance> jobs = toInstanceList(myJobInstanceRepository.findInstancesByJobStatus(status, pageRequest));
+		Integer jobsOfStatus = myJobInstanceRepository.findTotalJobsOfStatus(status);
+		return new PageImpl<>(jobs, pageRequest, jobsOfStatus);
 	}
 
 	@Override

@@ -66,6 +66,10 @@ public interface IJobCoordinator {
 
 	List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart);
 
+	default Page<JobInstance> fetchAllJobInstancesByJobStatus(JobInstanceFetchRequest theFetchRequest, String theStatus) {
+		return this.fetchAllJobInstances(theFetchRequest);
+	}
+
 	/**
 	 * Fetches all job instances tht meet the FetchRequest criteria
 	 * @param theFetchRequest - fetch request
