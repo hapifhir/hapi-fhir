@@ -38,7 +38,7 @@ public abstract class BaseFhirVersionParameterizedTest {
 	@RegisterExtension
 	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newInitialized();
 	@RegisterExtension
-	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
+	public final RestServerDstu3Helper myRestServerDstu3Helper = RestServerDstu3Helper.newInitialized();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 

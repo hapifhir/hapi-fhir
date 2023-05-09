@@ -55,12 +55,12 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	protected final MyRestfulServer myRestServer;
 
 	public RestServerDstu3Helper() {
-		this(false);
+		this(false, false);
 	}
 
-	public RestServerDstu3Helper(boolean theInitialize) {
+	private RestServerDstu3Helper(boolean theInitialize, boolean theUseTransactionLatch) {
 		super(FhirContext.forDstu3());
-		myRestServer = new MyRestfulServer(myFhirContext);
+		myRestServer = new MyRestfulServer(myFhirContext, theUseTransactionLatch);
 		if (theInitialize) {
 			try {
 				myRestServer.initialize();
@@ -68,6 +68,14 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 				throw new RuntimeException(Msg.code(2252) + "Failed to initialize server", e);
 			}
 		}
+	}
+
+	public static RestServerDstu3Helper newInitialized() {
+		return new RestServerDstu3Helper(true, false);
+	}
+
+	public static RestServerDstu3Helper newWithTransactionLatch() {
+		return new RestServerDstu3Helper(false, true);
 	}
 
 	@Override
@@ -228,9 +236,9 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 		private MyPlainProvider myPlainProvider;
 		private final boolean myUseTransactionLatch;
 
-		public MyRestfulServer(FhirContext theFhirContext) {
+		public MyRestfulServer(FhirContext theFhirContext, boolean theUseTransactionLatch) {
 			super(theFhirContext);
-			myUseTransactionLatch = false;
+			myUseTransactionLatch = theUseTransactionLatch;
 		}
 
 		public MyPlainProvider getPlainProvider() {
