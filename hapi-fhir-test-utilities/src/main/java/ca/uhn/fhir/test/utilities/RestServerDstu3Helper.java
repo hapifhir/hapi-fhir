@@ -58,9 +58,9 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 		this(false, false);
 	}
 
-	private RestServerDstu3Helper(boolean theInitialize, boolean theUseTransactionLatch) {
+	private RestServerDstu3Helper(boolean theInitialize, boolean theTransactionLatchEnabled) {
 		super(FhirContext.forDstu3());
-		myRestServer = new MyRestfulServer(myFhirContext, theUseTransactionLatch);
+		myRestServer = new MyRestfulServer(myFhirContext, theTransactionLatchEnabled);
 		if (theInitialize) {
 			try {
 				myRestServer.initialize();
@@ -182,16 +182,15 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	public static class MyPlainProvider implements IPointcutLatch {
 		private final PointcutLatch myPointcutLatch = new PointcutLatch("Transaction Counting Provider");
 		private final List<IBaseBundle> myTransactions = Collections.synchronizedList(new ArrayList<>());
-		private final boolean myUseLatch;
+		private boolean myTransactionLatchEnabled;
 
-		public MyPlainProvider(boolean theUseLatch) {
-			this.myUseLatch = theUseLatch;
+		public MyPlainProvider(boolean theTransactionLatchEnabled) {
+			this.myTransactionLatchEnabled = theTransactionLatchEnabled;
 		}
-
 
 		@Transaction
 		public synchronized IBaseBundle transaction(@TransactionParam IBaseBundle theBundle) {
-			if (myUseLatch) {
+			if (myTransactionLatchEnabled) {
 				myPointcutLatch.call(theBundle);
 			}
 			myTransactions.add(theBundle);
@@ -200,7 +199,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 
 		@Override
 		public void clear() {
-			if (!myUseLatch) {
+			if (!myTransactionLatchEnabled) {
 				throw new IllegalStateException("Can't call clear() on a provider that doesn't use a latch");
 			}
 			myPointcutLatch.clear();
@@ -208,7 +207,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 
 		@Override
 		public void setExpectedCount(int theCount) {
-			if (!myUseLatch) {
+			if (!myTransactionLatchEnabled) {
 				throw new IllegalStateException("Can't call clear() on a provider that doesn't use a latch");
 			}
 			myPointcutLatch.setExpectedCount(theCount);
@@ -216,7 +215,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 
 		@Override
 		public List<HookParams> awaitExpected() throws InterruptedException {
-			if (!myUseLatch) {
+			if (!myTransactionLatchEnabled) {
 				throw new IllegalStateException("Can't call clear() on a provider that doesn't use a latch");
 			}
 			return myPointcutLatch.awaitExpected();
@@ -224,6 +223,10 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 
 		public List<IBaseBundle> getTransactions() {
 			return Collections.unmodifiableList(new ArrayList<>(myTransactions));
+		}
+
+		public void setTransactionLatchEnabled(boolean theTransactionLatchEnabled) {
+			this.myTransactionLatchEnabled = theTransactionLatchEnabled;
 		}
 	}
 
@@ -234,19 +237,15 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
 		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
 		private MyPlainProvider myPlainProvider;
-		private final boolean myUseTransactionLatch;
+		private final boolean myInitialTransactionLatchEnabled;
 
-		public MyRestfulServer(FhirContext theFhirContext, boolean theUseTransactionLatch) {
+		public MyRestfulServer(FhirContext theFhirContext, boolean theInitialTransactionLatchEnabled) {
 			super(theFhirContext);
-			myUseTransactionLatch = theUseTransactionLatch;
+			myInitialTransactionLatchEnabled = theInitialTransactionLatchEnabled;
 		}
 
 		public MyPlainProvider getPlainProvider() {
 			return myPlainProvider;
-		}
-
-		protected boolean isUseTransactionLatch() {
-			return myUseTransactionLatch;
 		}
 
 		public <T> T executeWithLatch(Supplier<T> theSupplier) throws InterruptedException {
@@ -310,7 +309,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			myConceptMapResourceProvider = new MyHashMapResourceProvider(fhirContext, ConceptMap.class);
 			registerProvider(myConceptMapResourceProvider);
 
-			myPlainProvider = new MyPlainProvider(isUseTransactionLatch());
+			myPlainProvider = new MyPlainProvider(myInitialTransactionLatchEnabled);
 			registerProvider(myPlainProvider);
 		}
 

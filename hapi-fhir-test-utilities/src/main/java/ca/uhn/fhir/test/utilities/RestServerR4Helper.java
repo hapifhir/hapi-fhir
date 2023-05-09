@@ -64,9 +64,9 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		this(false, false);
 	}
 
-	private RestServerR4Helper(boolean theInitialize, boolean theUseTransactionLatch) {
+	private RestServerR4Helper(boolean theInitialize, boolean theTransactionLatchEnabled) {
 		super(FhirContext.forR4Cached());
-		myRestServer = new MyRestfulServer(myFhirContext, theUseTransactionLatch);
+		myRestServer = new MyRestfulServer(myFhirContext, theTransactionLatchEnabled);
 		if (theInitialize) {
 			try {
 				myRestServer.initialize();
@@ -264,6 +264,10 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		myRestServer.executeWithLatch(theRunnable);
 	}
 
+	public void enableTransactionLatch(boolean theTransactionLatchEnabled) {
+		myRestServer.setTransactionLatchEnabled(theTransactionLatchEnabled);
+	}
+
 	private static class MyRestfulServer extends RestfulServer {
 		private final List<String> myRequestUrls = Collections.synchronizedList(new ArrayList<>());
 		private final List<String> myRequestVerbs = Collections.synchronizedList(new ArrayList<>());
@@ -274,24 +278,25 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
 		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
 		private RestServerDstu3Helper.MyPlainProvider myPlainProvider;
-		private final boolean myUseTransactionLatch;
 
-		public MyRestfulServer(FhirContext theFhirContext, boolean theUseTransactionLatch) {
+		private final boolean myInitialTransactionLatchEnabled;
+
+		public MyRestfulServer(FhirContext theFhirContext, boolean theInitialTransactionLatchEnabled) {
 			super(theFhirContext);
-			myUseTransactionLatch = theUseTransactionLatch;
+			myInitialTransactionLatchEnabled = theInitialTransactionLatchEnabled;
 		}
 
 		public RestServerDstu3Helper.MyPlainProvider getPlainProvider() {
 			return myPlainProvider;
 		}
-		protected boolean isUseTransactionLatch() {
-			return myUseTransactionLatch;
+		protected boolean isTransactionLatchEnabled() {
+			return myInitialTransactionLatchEnabled;
 		}
-
+		public void setTransactionLatchEnabled(boolean theTransactionLatchEnabled) {
+			getPlainProvider().setTransactionLatchEnabled(theTransactionLatchEnabled);
+		}
+		
 		public void executeWithLatch(Runnable theRunnable) throws InterruptedException {
-			if (!isUseTransactionLatch()) {
-				throw new IllegalStateException("Transaction latch is not enabled on this " + getClass().getSimpleName() + " instance");
-			}
 			myPlainProvider.setExpectedCount(1);
 			theRunnable.run();
 			myPlainProvider.awaitExpected();
@@ -308,7 +313,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 					provider.clearCounts();
 				}
 			}
-			if (isUseTransactionLatch()) {
+			if (isTransactionLatchEnabled()) {
 				myPlainProvider.clear();
 			}
 			myRequestUrls.clear();
@@ -392,7 +397,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			myConceptMapResourceProvider = new MyHashMapResourceProvider(fhirContext, ConceptMap.class);
 			registerProvider(myConceptMapResourceProvider);
 
-			myPlainProvider = new RestServerDstu3Helper.MyPlainProvider(isUseTransactionLatch());
+			myPlainProvider = new RestServerDstu3Helper.MyPlainProvider(isTransactionLatchEnabled());
 			registerProvider(myPlainProvider);
 
 			setPagingProvider(new FifoMemoryPagingProvider(20));
