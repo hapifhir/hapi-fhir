@@ -132,6 +132,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	@Override
 	public void clear() {
+		ourLog.debug("Clearing latch {}", getName());
 		checkExceptions();
 		myPointcutLatchSession.set(null);
 		myUnexpectedInvocations.clear();

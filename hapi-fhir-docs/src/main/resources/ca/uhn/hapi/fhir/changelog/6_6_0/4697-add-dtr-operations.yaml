@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4697
+title: "Added DSTU3 and R4 support for the DaVinci Documentation Templates and Rules (DTR) Questionnaire/$questionnaire-package operation.
+This operation allows a Questionnaire to be packaged as a Bundle with all the supporting resources that may be required for its use such as ValueSets and Libraries.
+This operation is used in context of prior authorization."

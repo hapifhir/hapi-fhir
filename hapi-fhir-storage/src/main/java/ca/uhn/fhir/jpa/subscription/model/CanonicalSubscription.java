@@ -338,10 +338,10 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
+		ToStringBuilder stringBuilder = new ToStringBuilder(this)
 			.append("myIdElement", myIdElement)
 			.append("myStatus", myStatus)
-			.append("myCriteriaString", myCriteriaString)
+			.append("myCriteriaString", myCriteriaString);
 //			.append("myEndpointUrl", myEndpointUrl)
 //			.append("myPayloadString", myPayloadString)
 //			.append("myHeaders", myHeaders)
@@ -350,7 +350,13 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 //			.append("myEmailDetails", myEmailDetails)
 //			.append("myRestHookDetails", myRestHookDetails)
 //			.append("myChannelExtensions", myChannelExtensions)
-			.toString();
+		if (isTopicSubscription()) {
+			stringBuilder.append("topic", myTopicSubscription.getTopic());
+		} else {
+			stringBuilder.append("criteriaString", myCriteriaString);
+		}
+
+		return stringBuilder.toString();
 	}
 
 	public void setTopicSubscription(boolean theTopicSubscription) {

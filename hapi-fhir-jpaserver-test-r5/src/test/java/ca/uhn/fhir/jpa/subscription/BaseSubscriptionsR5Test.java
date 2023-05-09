@@ -87,13 +87,13 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	protected final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
 	protected final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 
-
 	@Override
 	@BeforeEach
 	protected void before() throws Exception {
 		super.before();
 		mySubscriptionTopicDao = myDaoRegistry.getResourceDao(SubscriptionTopic.class);
 		mySubscriptionTestUtil.registerRestHookInterceptor();
+		mySubscriptionTestUtil.registerSubscriptionLoggingInterceptor();
 		ourListenerRestServer.unregisterProvider(mySystemProvider);
 		ourListenerRestServer.registerProvider(ourTestSystemProvider);
 
@@ -139,6 +139,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		mySubscriptionTestUtil.unregisterSubscriptionLoggingInterceptor();
+
 		ourListenerRestServer.unregisterProvider(ourTestSystemProvider);
 		ourListenerRestServer.registerProvider(mySystemProvider);
 		mySubscriptionTopicsCheckedLatch.clear();
