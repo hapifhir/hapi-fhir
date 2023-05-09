@@ -234,7 +234,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 						ExceptionUtils.indexOfThrowable(e, DataIntegrityViolationException.class) != -1 ||
 						ExceptionUtils.indexOfThrowable(e, ConstraintViolationException.class) != -1 ||
 						ExceptionUtils.indexOfThrowable(e, ObjectOptimisticLockingFailureException.class) != -1)) {
-						ourLog.error("Unexpected transaction exception. Will not be retried.", e);
+						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
 						throw e;
 					} else {
 

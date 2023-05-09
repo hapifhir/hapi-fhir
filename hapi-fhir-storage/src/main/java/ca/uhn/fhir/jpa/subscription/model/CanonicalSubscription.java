@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
@@ -338,19 +339,24 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myIdElement", myIdElement)
-			.append("myStatus", myStatus)
-			.append("myCriteriaString", myCriteriaString)
-			.append("myEndpointUrl", myEndpointUrl)
-			.append("myPayloadString", myPayloadString)
+		ToStringBuilder stringBuilder = new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+			.append("idElement", myIdElement);
+//			.append("status", myStatus)
+//			.append("endpointUrl", myEndpointUrl)
+//			.append("payloadString", myPayloadString)
 //			.append("myHeaders", myHeaders)
-			.append("myChannelType", myChannelType)
+//			.append("channelType", myChannelType);
 //			.append("myTrigger", myTrigger)
 //			.append("myEmailDetails", myEmailDetails)
 //			.append("myRestHookDetails", myRestHookDetails)
 //			.append("myChannelExtensions", myChannelExtensions)
-			.toString();
+		if (isTopicSubscription()) {
+			stringBuilder.append("topic", myTopicSubscription.getTopic());
+		} else {
+			stringBuilder.append("criteriaString", myCriteriaString);
+		}
+
+		return stringBuilder.toString();
 	}
 
 	public void setTopicSubscription(boolean theTopicSubscription) {
