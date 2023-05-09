@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -50,7 +49,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -64,7 +62,6 @@ import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Age;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
@@ -102,7 +99,6 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Quantity.QuantityComparator;
@@ -1422,7 +1418,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(4 + initialHistory, history.size().intValue());
 		List<IBaseResource> resources = history.getResources(0, 4);
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(resources.get(0)));
+		assertTrue(resources.get(0).isDeleted());
 
 		try {
 			myPatientDao.delete(id2, mySrd);
@@ -1597,10 +1593,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 1).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 1).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(1, 2).get(0)));
-
+		assertTrue(history.getResources(0, 1).get(0).isDeleted());
+		assertFalse(history.getResources(1, 2).get(0).isDeleted());
 	}
 
 	@Test
@@ -2077,13 +2071,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertEquals(id.withVersion("2"), entries.get(1).getIdElement());
 		assertEquals(id.withVersion("1"), entries.get(2).getIdElement());
 
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(0)));
+		assertFalse(entries.get(0).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.PUT, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(0)));
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(1)));
+		assertTrue(entries.get(1).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.DELETE, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(1)));
 
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(2)));
+		assertFalse(entries.get(2).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.POST, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(2)));
 	}
 

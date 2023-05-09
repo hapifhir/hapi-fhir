@@ -69,6 +69,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	@FullTextField
 	public String myUri;
 
+
+
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_URI", sequenceName = "SEQ_SPIDX_URI")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")

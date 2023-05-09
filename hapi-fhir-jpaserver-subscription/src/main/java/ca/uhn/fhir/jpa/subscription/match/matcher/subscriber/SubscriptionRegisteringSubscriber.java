@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -93,17 +92,15 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 		// - in order to store partition id in the userdata of the resource for partitioned subscriptions
 		// - in case we're processing out of order and a create-then-delete has been processed backwards (or vice versa)
 
-		IBaseResource payloadResource;
 		IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
-		try {
-			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
-			RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
-			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails);
-			if (payloadResource == null) {
-				// Only for unit test
-				payloadResource = payload.getPayload(myFhirContext);
-			}
-		} catch (ResourceGoneException e) {
+		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+		RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
+		IBaseResource payloadResource = subscriptionDao.read(payloadId, systemRequestDetails, true);
+		if (payloadResource == null) {
+			// Only for unit test
+			payloadResource = payload.getPayload(myFhirContext);
+		}
+		if (payloadResource.isDeleted()) {
 			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
 			return;
 		}
