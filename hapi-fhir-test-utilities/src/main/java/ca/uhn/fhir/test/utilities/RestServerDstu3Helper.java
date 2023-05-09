@@ -174,26 +174,43 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	public static class MyPlainProvider implements IPointcutLatch {
 		private final PointcutLatch myPointcutLatch = new PointcutLatch("Transaction Counting Provider");
 		private final List<IBaseBundle> myTransactions = Collections.synchronizedList(new ArrayList<>());
+		private final boolean myUseLatch;
+
+		public MyPlainProvider(boolean theUseLatch) {
+			this.myUseLatch = theUseLatch;
+		}
+
 
 		@Transaction
 		public synchronized IBaseBundle transaction(@TransactionParam IBaseBundle theBundle) {
-			myPointcutLatch.call(theBundle);
+			if (myUseLatch) {
+				myPointcutLatch.call(theBundle);
+			}
 			myTransactions.add(theBundle);
 			return theBundle;
 		}
 
 		@Override
 		public void clear() {
+			if (!myUseLatch) {
+				throw new IllegalStateException("Can't call clear() on a provider that doesn't use a latch");
+			}
 			myPointcutLatch.clear();
 		}
 
 		@Override
 		public void setExpectedCount(int theCount) {
+			if (!myUseLatch) {
+				throw new IllegalStateException("Can't call clear() on a provider that doesn't use a latch");
+			}
 			myPointcutLatch.setExpectedCount(theCount);
 		}
 
 		@Override
 		public List<HookParams> awaitExpected() throws InterruptedException {
+			if (!myUseLatch) {
+				throw new IllegalStateException("Can't call clear() on a provider that doesn't use a latch");
+			}
 			return myPointcutLatch.awaitExpected();
 		}
 
@@ -209,13 +226,19 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
 		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
 		private MyPlainProvider myPlainProvider;
+		private final boolean myUseTransactionLatch;
 
 		public MyRestfulServer(FhirContext theFhirContext) {
 			super(theFhirContext);
+			myUseTransactionLatch = false;
 		}
 
 		public MyPlainProvider getPlainProvider() {
 			return myPlainProvider;
+		}
+
+		protected boolean isUseTransactionLatch() {
+			return myUseTransactionLatch;
 		}
 
 		public <T> T executeWithLatch(Supplier<T> theSupplier) throws InterruptedException {
@@ -279,7 +302,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			myConceptMapResourceProvider = new MyHashMapResourceProvider(fhirContext, ConceptMap.class);
 			registerProvider(myConceptMapResourceProvider);
 
-			myPlainProvider = new MyPlainProvider();
+			myPlainProvider = new MyPlainProvider(isUseTransactionLatch());
 			registerProvider(myPlainProvider);
 		}
 
