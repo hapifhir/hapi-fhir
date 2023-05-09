@@ -127,7 +127,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("mySubscription", mySubscription.getIdElementString())
+			.append("mySubscription", mySubscription == null ? "null" : mySubscription.getIdElementString())
 			// it isn't safe to log payloads
 			.append("myPayloadString", "[Not Logged]")
 			.append("myPayload", myPayloadDecoded)
