@@ -231,4 +231,8 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		ourLinksDeletedBeforehand.set(Boolean.TRUE);
 	}
 
+	public static void resetLinksDeletedBeforehand() {
+		ourLinksDeletedBeforehand.remove();
+	}
+
 }
