@@ -126,7 +126,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
-import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -1557,6 +1556,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return myResourceName;
 	}
 
+	/**
+	 * IncludesIterator, used to recursively fetch resources from the provided list of PIDs
+	 */
 	public class IncludesIterator extends BaseIterator<JpaPid> implements Iterator<JpaPid> {
 
 		private final RequestDetails myRequest;
@@ -1604,6 +1606,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	}
 
+	/**
+	 * Basic Query iterator, used to fetch the results of a query.
+	 */
 	private final class QueryIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
 
 		private final SearchRuntimeDetails mySearchRuntimeDetails;
@@ -1627,8 +1632,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			myOffset = myParams.getOffset();
 			myRequest = theRequest;
 
-			// Includes are processed inline for $everything query when we don't have a '_type' specified
-			if (myParams.getEverythingMode() != null && !myParams.containsKey(Constants.PARAM_TYPE)) {
+			// everything requires fetching recursively all related resources
+			if (myParams.getEverythingMode() != null) {
 				myFetchIncludesForEverythingOperation = true;
 			}
 
@@ -1638,7 +1643,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		private void fetchNext() {
-
 			try {
 				if (myHaveRawSqlHooks) {
 					CurrentThreadCaptureQueriesListener.startCapturing();
@@ -1656,6 +1660,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 					}
 
+					// assigns the results iterator
 					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 
 					if (myAlsoIncludePids == null) {
@@ -1663,9 +1668,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					}
 				}
 
+
 				if (myNext == null) {
-
-
 					for (Iterator<JpaPid> myPreResultsIterator = myAlsoIncludePids.iterator(); myPreResultsIterator.hasNext(); ) {
 						JpaPid next = myPreResultsIterator.next();
 						if (next != null)
@@ -1724,6 +1728,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					}
 
 					if (myNext == null) {
+						// if we got here, it means the current PjaPid has already been processed
+						// and we will decide (here) if we need to fetch related resources recursively
 						if (myFetchIncludesForEverythingOperation) {
 							myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
 							myFetchIncludesForEverythingOperation = false;
@@ -1750,6 +1756,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
 
 			} finally {
+				// search finished - fire hooks
 				if (myHaveRawSqlHooks) {
 					SqlQueryList capturedQueries = CurrentThreadCaptureQueriesListener.getCurrentQueueAndStopCapturing();
 					HookParams params = new HookParams()
