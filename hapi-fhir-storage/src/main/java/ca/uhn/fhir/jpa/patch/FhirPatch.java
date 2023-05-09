@@ -96,20 +96,20 @@ public class FhirPatch {
 	public void apply(IBaseResource theResource, IBaseResource thePatch) {
 
 		List<IBase> opParameters = ParametersUtil.getNamedParameters(myContext, thePatch, PARAMETER_OPERATION);
-		for (IBase nextOp : opParameters) {
-			String type = ParametersUtil.getParameterPartValueAsString(myContext, nextOp, PARAMETER_TYPE);
+		for (IBase nextOperation : opParameters) {
+			String type = ParametersUtil.getParameterPartValueAsString(myContext, nextOperation, PARAMETER_TYPE);
 			type = defaultString(type);
 
 			if (OPERATION_DELETE.equals(type)) {
-				handleDeleteOperation(theResource, nextOp);
+				handleDeleteOperation(theResource, nextOperation);
 			} else if (OPERATION_ADD.equals(type)) {
-				handleAddOperation(theResource, nextOp);
+				handleAddOperation(theResource, nextOperation);
 			} else if (OPERATION_REPLACE.equals(type)) {
-				handleReplaceOperation(theResource, nextOp);
+				handleReplaceOperation(theResource, nextOperation);
 			} else if (OPERATION_INSERT.equals(type)) {
-				handleInsertOperation(theResource, nextOp);
+				handleInsertOperation(theResource, nextOperation);
 			} else if (OPERATION_MOVE.equals(type)) {
-				handleMoveOperation(theResource, nextOp);
+				handleMoveOperation(theResource, nextOperation);
 			} else {
 				throw new InvalidRequestException(Msg.code(1267) + "Unknown patch operation type: " + type);
 			}
@@ -123,13 +123,13 @@ public class FhirPatch {
 
 		String containingPath = defaultString(path);
 
-		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
-		for (IBase next : paths) {
-			ChildDefinition childDefinition = findChildDefinition(next, elementName);
+		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		for (IBase nextElement : containingElements) {
+			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
-			IBase newValue = getNewValue(theParameters, next, childDefinition);
+			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
 
-			childDefinition.getChildDef().getMutator().addValue(next, newValue);
+			childDefinition.getChildDef().getMutator().addValue(nextElement, newValue);
 		}
 	}
 
@@ -145,23 +145,23 @@ public class FhirPatch {
 			.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_INDEX)
 			.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
 
-		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
-		for (IBase next : paths) {
+		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		for (IBase nextElement : containingElements) {
 
-			ChildDefinition childDefinition = findChildDefinition(next, elementName);
+			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
-			IBase newValue = getNewValue(theParameters, next, childDefinition);
+			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
 
-			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
+			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(nextElement));
 			if (insertIndex == null || insertIndex > existingValues.size()) {
 				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
 				throw new InvalidRequestException(Msg.code(1270) + msg);
 			}
 			existingValues.add(insertIndex, newValue);
 
-			childDefinition.getChildDef().getMutator().setValue(next, null);
+			childDefinition.getChildDef().getMutator().setValue(nextElement, null);
 			for (IBase nextNewValue : existingValues) {
-				childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
+				childDefinition.getChildDef().getMutator().addValue(nextElement, nextNewValue);
 			}
 		}
 	}
@@ -192,12 +192,12 @@ public class FhirPatch {
 			elementName = null;
 		}
 
-		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
-		for (IBase next : paths) {
+		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		for (IBase nextElement : containingElements) {
 			if (elementName == null) {
-				deleteSingleElement(next);
+				deleteSingleElement(nextElement);
 			} else {
-				deleteFromList(theResource, next, elementName, path);
+				deleteFromList(theResource, nextElement, elementName, path);
 			}
 		}
 	}
@@ -223,14 +223,14 @@ public class FhirPatch {
 		String containingPath = path.substring(0, lastDot);
 		String elementName = path.substring(lastDot + 1);
 
-		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
-		for (IBase next : paths) {
+		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		for (IBase nextElement : containingElements) {
 
-			ChildDefinition childDefinition = findChildDefinition(next, elementName);
+			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
-			IBase newValue = getNewValue(theParameters, next, childDefinition);
+			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
 
-			childDefinition.getChildDef().getMutator().setValue(next, newValue);
+			childDefinition.getChildDef().getMutator().setValue(nextElement, newValue);
 		}
 	}
 
@@ -248,12 +248,12 @@ public class FhirPatch {
 			.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_SOURCE)
 			.orElseThrow(() -> new InvalidRequestException("No index supplied for move operation"));
 
-		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
-		for (IBase next : paths) {
+		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		for (IBase nextElement : containingElements) {
 
-			ChildDefinition childDefinition = findChildDefinition(next, elementName);
+			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
-			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(next));
+			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(nextElement));
 			if (removeIndex == null || removeIndex >= existingValues.size()) {
 				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
 				throw new InvalidRequestException(Msg.code(1268) + msg);
@@ -266,9 +266,9 @@ public class FhirPatch {
 			}
 			existingValues.add(insertIndex, newValue);
 
-			childDefinition.getChildDef().getMutator().setValue(next, null);
+			childDefinition.getChildDef().getMutator().setValue(nextElement, null);
 			for (IBase nextNewValue : existingValues) {
-				childDefinition.getChildDef().getMutator().addValue(next, nextNewValue);
+				childDefinition.getChildDef().getMutator().addValue(nextElement, nextNewValue);
 			}
 		}
 	}
@@ -290,7 +290,7 @@ public class FhirPatch {
 		return new ChildDefinition(childDef, childElement);
 	}
 
-	private IBase getNewValue(IBase theParameters, IBase next, ChildDefinition theChildDefinition) {
+	private IBase getNewValue(IBase theParameters, IBase theElement, ChildDefinition theChildDefinition) {
 		Optional<IBase> valuePart = ParametersUtil.getParameterPart(myContext, theParameters, PARAMETER_VALUE);
 		Optional<IBase> valuePartValue = ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
 
@@ -318,13 +318,13 @@ public class FhirPatch {
 				newValueInstance = (IPrimitiveType<?>) theChildDefinition.getChildElement().newInstance();
 			}
 			newValueInstance.setValueAsString(((IPrimitiveType<?>) newValue).getValueAsString());
-			theChildDefinition.getChildDef().getMutator().setValue(next, newValueInstance);
+			theChildDefinition.getChildDef().getMutator().setValue(theElement, newValueInstance);
 			newValue = newValueInstance;
 		}
 		return newValue;
 	}
 
-	private void populateNewValue(ChildDefinition theChildDefinition, IBase newValue, IBase theValueElement) {
+	private void populateNewValue(ChildDefinition theChildDefinition, IBase theNewValue, IBase theValueElement) {
 		List<IBase> valuePartParts = myContext.newTerser().getValues(theValueElement, "part");
 		for (IBase nextValuePartPart : valuePartParts) {
 
@@ -339,7 +339,7 @@ public class FhirPatch {
 						name = name + "[x]";
 						partChildDef = theChildDefinition.getChildElement().getChildByName(name);
 					}
-					partChildDef.getMutator().addValue(newValue, value.get());
+					partChildDef.getMutator().addValue(theNewValue, value.get());
 
 				}
 
