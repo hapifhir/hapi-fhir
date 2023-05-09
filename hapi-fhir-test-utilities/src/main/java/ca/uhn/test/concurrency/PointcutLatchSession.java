@@ -56,7 +56,7 @@ public class PointcutLatchSession {
 				error += " ERROR: ";
 			}
 			error += String.join("\n", failures);
-			error += "\nLatch called with values:\n" + StringUtils.join(myCalledWith, "\n");
+			error += "\nLatch called " + myCalledWith.size() + " times with values:\n" + StringUtils.join(myCalledWith, "\n");
 			throw new AssertionError(Msg.code(1484) + error);
 		}
 		return myCalledWith;
