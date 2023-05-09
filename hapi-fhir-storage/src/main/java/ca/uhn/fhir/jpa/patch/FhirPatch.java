@@ -310,7 +310,13 @@ public class FhirPatch {
 		if (IBaseEnumeration.class.isAssignableFrom(theChildDefinition.getChildElement().getImplementingClass()) || XhtmlNode.class.isAssignableFrom(theChildDefinition.getChildElement().getImplementingClass())) {
 			// If the compositeElementDef is an IBaseEnumeration, we will use the actual compositeElementDef definition to build one, since
 			// it needs the right factory object passed to its constructor
-			IPrimitiveType<?> newValueInstance = (IPrimitiveType<?>) theChildDefinition.getChildElement().newInstance();
+			IPrimitiveType<?> newValueInstance;
+			if (theChildDefinition.getChildDef().getInstanceConstructorArguments() != null) {
+				newValueInstance = (IPrimitiveType<?>) theChildDefinition.getChildElement().newInstance(
+					theChildDefinition.getChildDef().getInstanceConstructorArguments());
+			} else {
+				newValueInstance = (IPrimitiveType<?>) theChildDefinition.getChildElement().newInstance();
+			}
 			newValueInstance.setValueAsString(((IPrimitiveType<?>) newValue).getValueAsString());
 			theChildDefinition.getChildDef().getMutator().setValue(next, newValueInstance);
 			newValue = newValueInstance;
