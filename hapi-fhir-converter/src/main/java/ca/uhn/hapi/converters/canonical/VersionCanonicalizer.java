@@ -355,7 +355,9 @@ public class VersionCanonicalizer {
 			retVal.setSystem(coding.getSystem());
 			retVal.setDisplay(coding.getDisplay());
 			retVal.setVersion(coding.getVersion());
-			retVal.setUserSelected(!coding.getUserSelectedElement().isEmpty() && coding.getUserSelected());
+			if (!coding.getUserSelectedElement().isEmpty()) {
+				retVal.setUserSelected( coding.getUserSelected() );
+			}
 
 			return retVal;
 		}
