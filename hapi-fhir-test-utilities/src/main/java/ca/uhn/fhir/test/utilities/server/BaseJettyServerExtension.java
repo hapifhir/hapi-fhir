@@ -253,6 +253,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	 * Returns the server base URL with no trailing slash
 	 */
 	public String getBaseUrl() {
+		assert myServletPath.endsWith("/*");
 		return "http://localhost:" + myPort + myContextPath + myServletPath.substring(0, myServletPath.length() - 2);
 	}
 

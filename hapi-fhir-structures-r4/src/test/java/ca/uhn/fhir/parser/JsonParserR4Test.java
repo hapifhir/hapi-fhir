@@ -42,6 +42,7 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -173,6 +174,36 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"foo\"/>@fhirabend</div></text></Patient>", encoded);
 	}
+
+
+	@Test
+	public void testDontEncodeEmptyExtensionList() {
+		String asXml = """
+			<Bundle xmlns="http://hl7.org/fhir">
+			     <entry>
+			        <resource>
+			            <Composition>
+			                <section>
+			                    <entry>
+			                        <!--  Referenz auf PractitionerRole  -->
+			                        <reference value="PractitionerRole/8f1ba38d-c4c1-4c49-ac2a-7ff0e56bc150" />
+			                    </entry>
+			                </section>
+			            </Composition>
+			        </resource>
+			    </entry>
+			</Bundle>
+			""";
+
+		ourLog.info(asXml);
+
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, asXml);
+
+		String asString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(asString);
+		assertThat(asString, not(containsString("{ }")));
+	}
+
 
 
 	@Test

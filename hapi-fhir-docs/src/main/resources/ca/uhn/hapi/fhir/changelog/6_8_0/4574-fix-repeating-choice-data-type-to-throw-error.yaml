@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4468
+title: "When parsing a FHIR resource which has multiple value[x] choice fields,  the parser does not call the IParserErrorHandler#unexpectedRepeatingElement method on the configured parser error handler. Thanks to Max Bureck for the 
+  pull request!"

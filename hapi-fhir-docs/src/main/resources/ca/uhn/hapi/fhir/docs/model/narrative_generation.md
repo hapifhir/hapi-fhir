@@ -100,7 +100,7 @@ Finally, use the [CustomThymeleafNarrativeGenerator](/hapi-fhir/apidocs/hapi-fhi
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/NarrativeGenerator.java|gen}}
 ```
 
-# Fragments Expressions in Thyemleaf Templates
+# Fragments Expressions in Thymeleaf Templates
 
 Thymeleaf has a concept called Fragments, which allow reusable template portions that can be imported anywhere you need them. It can be helpful to put these fragment definitions in their own file. For example, the following property file declares a template and a fragment:
 
@@ -121,7 +121,7 @@ And the following parent template (`narrative-with-fragment-parent.html`) import
 ```
 
 
-# FHIRPath Expressions in Thyemleaf Templates
+# FHIRPath Expressions in Thymeleaf Templates
 
 Thymeleaf templates can incorporate FHIRPath expressions using the `#fhirpath` expression object.
 

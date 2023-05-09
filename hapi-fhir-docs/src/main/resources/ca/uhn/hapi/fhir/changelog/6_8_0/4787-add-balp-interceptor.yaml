@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4787
+title: "A new interceptor called BalpAuditCaptureInterceptor has been added. This interceptor 
+  automatically generates AuditEvent resources in a HAPI FHIR server that are conformant with the
+  [IHE BasicAudit Log Patterns](https://profiles.ihe.net/ITI/BALP/) IG."

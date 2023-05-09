@@ -15,6 +15,13 @@
 	<name>HAPI FHIR Test Utilities</name>
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 
+	<properties>
+		<!-- this is a test jar, so use our test settings -->
+		<maven.compiler.source>${maven.compiler.testSource}</maven.compiler.source>
+		<maven.compiler.target>${maven.compiler.testTarget}</maven.compiler.target>
+		<maven.compiler.release>${maven.compiler.testRelease}</maven.compiler.release>
+	</properties>
+
 	<dependencies>
 
 		<dependency>

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -13,6 +14,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -153,7 +156,32 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertThat(outcome.getLink("next").getUrl(), containsString("Patient?_count=7&_offset=7&active=true"));
+		assertThat(outcome.getLink(Constants.LINK_NEXT).getUrl(), containsString("Patient?_count=7&_offset=7&active=true"));
+		assertNull(outcome.getLink(Constants.LINK_PREVIOUS));
+
+		// Second page
+
+		myCaptureQueriesListener.clear();
+		outcome = myClient
+			.loadPage()
+			.next(outcome)
+			.execute();
+		assertThat(toUnqualifiedVersionlessIdValues(outcome).toString(), toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(
+			"Patient/A7", "Patient/A8", "Patient/A9"
+		));
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("limit '7'"));
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		assertThat(outcome.getLink(Constants.LINK_NEXT).getUrl(), containsString("Patient?_count=7&_offset=14&active=true"));
+		assertThat(outcome.getLink(Constants.LINK_PREVIOUS).getUrl(), containsString("Patient?_count=7&_offset=0&active=true"));
+
 	}
 
 
