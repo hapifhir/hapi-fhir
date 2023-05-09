@@ -24,17 +24,18 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class SubscriptionTriggerMatcher {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggerMatcher.class);
+	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
+
 	private final SubscriptionTopicSupport mySubscriptionTopicSupport;
 	private final BaseResourceMessage.OperationTypeEnum myOperation;
 	private final SubscriptionTopic.SubscriptionTopicResourceTriggerComponent myTrigger;
