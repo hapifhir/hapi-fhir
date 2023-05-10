@@ -400,7 +400,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			myConceptMapResourceProvider = new MyHashMapResourceProvider(fhirContext, ConceptMap.class);
 			registerProvider(myConceptMapResourceProvider);
 
-			myPlainProvider = new RestServerDstu3Helper.MyPlainProvider(isTransactionLatchEnabled());
+			myPlainProvider = new RestServerDstu3Helper.MyPlainProvider(myInitialTransactionLatchEnabled);
 			registerProvider(myPlainProvider);
 
 			setPagingProvider(new FifoMemoryPagingProvider(20));
