@@ -20,7 +20,6 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -276,7 +275,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	void testFetchInstancesWithEmptyStatus() {
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
-		Page<JobInstance> foundInstances = mySvc.fetchAllInstancesByJobStatus(request, "");
+
+		// Test
+		request.setJobStatus("");
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 		assertThat(foundInstances.getTotalElements(), equalTo(2L));
 	}
 
@@ -284,7 +286,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	void testFetchInstanceByStatus() {
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
-		Page<JobInstance> foundInstances = mySvc.fetchAllInstancesByJobStatus(request, "COMPLETED");
+
+		// Test
+		request.setJobStatus("COMPLETED");
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 		assertThat(foundInstances.getTotalElements(), equalTo(1L));
 	}
 

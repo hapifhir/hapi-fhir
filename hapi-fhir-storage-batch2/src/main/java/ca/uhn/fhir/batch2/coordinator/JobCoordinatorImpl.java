@@ -176,11 +176,6 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		return myJobQuerySvc.fetchAllInstances(theFetchRequest);
 	}
 
-	@Override
-	public Page<JobInstance> fetchAllJobInstancesByJobStatus(JobInstanceFetchRequest theFetchRequest, String theJobStatus) {
-		return myJobQuerySvc.fetchAllInstancesByJobStatus(theFetchRequest, theJobStatus);
-	}
-
 	// wipmb For 6.8 - Clarify this interface. We currently return a JobOperationResultJson, and don't throw ResourceNotFoundException
 	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException {

@@ -167,25 +167,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public Page<JobInstance> fetchAllInstancesByJobStatus(JobInstanceFetchRequest theRequest, String theJobStatus) {
-		PageRequest pageRequest = PageRequest.of(
-			theRequest.getPageStart(),
-			theRequest.getBatchSize(),
-			theRequest.getSort()
-		);
-
-		if (Objects.equals(theJobStatus, "")) {
-			return fetchJobInstances(theRequest);
-		}
-
-		StatusEnum status = StatusEnum.valueOf(theJobStatus);
-		List<JobInstance> jobs = toInstanceList(myJobInstanceRepository.findInstancesByJobStatus(status, pageRequest));
-		Integer jobsOfStatus = myJobInstanceRepository.findTotalJobsOfStatus(status);
-		return new PageImpl<>(jobs, pageRequest, jobsOfStatus);
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
 		PageRequest pageRequest = PageRequest.of(
 			theRequest.getPageStart(),
@@ -193,9 +174,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			theRequest.getSort()
 		);
 
-		Page<Batch2JobInstanceEntity> pageOfEntities = myJobInstanceRepository.findAll(pageRequest);
+		String jobStatus = theRequest.getJobStatus();
+		if (Objects.equals(jobStatus, "")) {
+			Page<Batch2JobInstanceEntity> pageOfEntities = myJobInstanceRepository.findAll(pageRequest);
+			return pageOfEntities.map(this::toInstance);
+		}
 
-		return pageOfEntities.map(this::toInstance);
+		StatusEnum status = StatusEnum.valueOf(jobStatus);
+		List<JobInstance> jobs = toInstanceList(myJobInstanceRepository.findInstancesByJobStatus(status, pageRequest));
+		Integer jobsOfStatus = myJobInstanceRepository.findTotalJobsOfStatus(status);
+		return new PageImpl<>(jobs, pageRequest, jobsOfStatus);
 	}
 
 	private List<JobInstance> toInstanceList(List<Batch2JobInstanceEntity> theInstancesByJobDefinitionId) {

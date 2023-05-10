@@ -102,13 +102,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 
 	/**
-	 * Fetch all job instances for a given job status
-	 * @param theRequest - the job fetch request
-	 * @param theJobStatus - the job status name
-	 */
-	Page<JobInstance> fetchAllInstancesByJobStatus(JobInstanceFetchRequest theRequest, String theJobStatus);
-
-	/**
 	 * Fetches all job instances based on the JobFetchRequest
 	 * @param theRequest - the job fetch request
 	 * @return - a page of job instances
