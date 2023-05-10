@@ -1,4 +1,4 @@
-package ca.uhn.fhirtest.config;
+package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailDetails;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
