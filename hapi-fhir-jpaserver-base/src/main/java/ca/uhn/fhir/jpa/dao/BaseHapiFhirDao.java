@@ -166,7 +166,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
@@ -540,7 +539,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (theResourceId == null || theResourceId.getVersionIdPart() == null) {
 			theSavedEntity.initializeVersion();
 		} else {
-			theSavedEntity.setVersionUpdatedInCurrentTransaction(true);
+			theSavedEntity.markVersionUpdatedInCurrentTransaction();
 		}
 
 		assert theResourceId != null;
@@ -1087,7 +1086,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return entity;
 		}
 
-		entity.setVersionUpdatedInCurrentTransaction(true);
+		if (entity.getId() != null) {
+			entity.markVersionUpdatedInCurrentTransaction();
+		}
 
 		/*
 		 * Save the resource itself

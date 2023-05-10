@@ -69,6 +69,7 @@ import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -330,29 +331,31 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	/**
-	 * If we've already updated the resource within the current transaction, we don't
-	 * want to update it a second time or create a second {@link ResourceHistoryTable}
-	 * entity for this resource. This could happen if a resource was deleted and
-	 * resurrected within a single FHIR transaction bundle, which is legal to do.
-	 * We can't actually create multiple versions of a resource within a single
-	 * transaction because the resource version field {@link #myVersion} is an
-	 * optimistic lock {@link Version @Version} field, so it can only increment
-	 * by one within a single transaction.
-	 */
-	// FIXME: remove
-	public boolean isVersionUpdatedInCurrentTransaction() {
-		return myVersionUpdatedInCurrentTransaction;
-	}
-
-	/**
 	 * Setting this flag is an indication that we're making changes and the version number will
 	 * be incremented in the current transaction. When this is set, calls to {@link #getVersion()}
 	 * will be incremented by one.
 	 * This flag is cleared in {@link #postPersist()} since at that time the new version number
 	 * should be reflected.
 	 */
-	public void setVersionUpdatedInCurrentTransaction(boolean theVersionUpdatedInCurrentTransaction) {
-		this.myVersionUpdatedInCurrentTransaction = theVersionUpdatedInCurrentTransaction;
+	public void markVersionUpdatedInCurrentTransaction() {
+		if (!myVersionUpdatedInCurrentTransaction) {
+			/*
+			 * Note that modifying this number doesn't actually directly affect what
+			 * gets stored in the database since this is a @Version field and the
+			 * value is therefore managed by Hibernate. So in other words, if the
+			 * row in the database is updated, it doesn't matter what we set
+			 * this field to, hibernate will increment it by one. However, we still
+			 * increment it for two reasons:
+			 * 1. The value gets used for the version attribute in the ResourceHistoryTable
+			 *    entity we create for each new version.
+			 * 2. For updates to existing resources, there may actually not be any other
+			 *    changes to this entity so incrementing this is a signal to
+			 *    Hibernate that something changed and we need to force an entity
+			 *    update.
+			 */
+			myVersion++;
+			this.myVersionUpdatedInCurrentTransaction = true;
+		}
 	}
 
 	@PostPersist
@@ -571,9 +574,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Override
 	public long getVersion() {
-		if (myVersionUpdatedInCurrentTransaction) {
-			return myVersion + 1;
-		}
 		return myVersion;
 	}
 
@@ -746,8 +746,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	/**
 	 * This method creates a new history entity, or might reuse the current one if we've
-	 * already created one in the current transaction. See {@link #isVersionUpdatedInCurrentTransaction()}
-	 * for an explanation of why.
+	 * already created one in the current transaction. This is because we can only increment
+	 * the version once in a DB transaction (since hibernate manages that number) so creating
+	 * multiple {@link ResourceHistoryTable} entities will result in a constraint error.
 	 */
 	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
 		boolean createVersionTags = theCreateVersionTags;
