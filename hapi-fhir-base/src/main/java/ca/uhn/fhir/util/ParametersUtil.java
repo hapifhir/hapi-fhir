@@ -131,8 +131,11 @@ public class ParametersUtil {
 
 	public static Optional<Integer> getParameterPartValueAsInteger(FhirContext theCtx, IBase theParameter, String theParameterName) {
 		return getParameterPartValue(theCtx, theParameter, theParameterName)
-			.map(t -> (IPrimitiveType<Integer>) t)
-			.map(IPrimitiveType::getValue);
+			.filter(t -> IPrimitiveType.class.isAssignableFrom(t.getClass()))
+			.map(t -> (IPrimitiveType<?>) t)
+			.map(IPrimitiveType::getValue)
+			.filter(t -> Integer.class.isAssignableFrom(t.getClass()))
+			.map(t -> (Integer) t);
 	}
 
 	private static <T> List<T> extractNamedParameters(FhirContext theCtx, IBaseParameters theParameters, String theParameterName, Function<IPrimitiveType<?>, T> theMapper) {

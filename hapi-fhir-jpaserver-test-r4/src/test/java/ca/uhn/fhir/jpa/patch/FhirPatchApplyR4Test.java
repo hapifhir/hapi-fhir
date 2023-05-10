@@ -96,6 +96,35 @@ public class FhirPatchApplyR4Test {
 	}
 
 	@Test
+	public void testInsertToInvalidIndex_minimum() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Patient patient = new Patient();
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("insert"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.identifier"));
+		operation
+			.addPart()
+			.setName("index")
+			.setValue(new IntegerType(-1));
+
+		try {
+			svc.apply(patient, patch);
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(1270) + "Invalid insert index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testMoveFromInvalidIndex() {
 		FhirPatch svc = new FhirPatch(ourCtx);
 
@@ -125,6 +154,39 @@ public class FhirPatchApplyR4Test {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1268) + "Invalid move source index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testMoveFromInvalidIndex_minimum() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Patient patient = new Patient();
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("move"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.identifier"));
+		operation
+			.addPart()
+			.setName("source")
+			.setValue(new IntegerType(-1));
+		operation
+			.addPart()
+			.setName("destination")
+			.setValue(new IntegerType(1));
+
+		try {
+			svc.apply(patient, patch);
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(1268) + "Invalid move source index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
@@ -159,6 +221,40 @@ public class FhirPatchApplyR4Test {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1269) + "Invalid move destination index 1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testMoveToInvalidIndex_minimum() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("sys");
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("move"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.identifier"));
+		operation
+			.addPart()
+			.setName("source")
+			.setValue(new IntegerType(0));
+		operation
+			.addPart()
+			.setName("destination")
+			.setValue(new IntegerType(-1));
+
+		try {
+			svc.apply(patient, patch);
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(1269) + "Invalid move destination index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
