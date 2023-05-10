@@ -476,6 +476,7 @@ class TerserUtilTest {
 
 		TerserUtil.replaceField(ourFhirContext, "active", p1, p2);
 
+		// expect p2 to have 'active removed'
 		assertFalse(p2.hasActive());
 	}
 
