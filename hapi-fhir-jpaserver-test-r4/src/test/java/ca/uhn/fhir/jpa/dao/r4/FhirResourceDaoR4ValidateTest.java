@@ -1382,7 +1382,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testValidateUsingExternallyDefinedCodeMisMatchDisplay() {
+	public void testValidateUsingExternallyDefinedCodeMisMatchDisplay_ShouldError() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo");
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
