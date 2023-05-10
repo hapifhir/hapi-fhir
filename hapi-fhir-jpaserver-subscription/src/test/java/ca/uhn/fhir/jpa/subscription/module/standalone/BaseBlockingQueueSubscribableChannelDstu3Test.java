@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -99,8 +98,6 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
 	IInterceptorService myInterceptorRegistry;
-	@Autowired
-	private SubscriptionLoader mySubscriptionLoader;
 	@Autowired
 	private ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer;
 
