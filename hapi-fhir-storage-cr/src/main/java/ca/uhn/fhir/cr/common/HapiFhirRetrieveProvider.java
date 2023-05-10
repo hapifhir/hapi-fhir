@@ -19,10 +19,13 @@
  */
 package ca.uhn.fhir.cr.common;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.fhir.retrieve.SearchParamFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterMap;
@@ -47,17 +50,18 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
+	protected final BaseRequestPartitionHelperSvc myBaseRequestPartitionHelperSvc;
 
-
-	public HapiFhirRetrieveProvider(DaoRegistry theDaoRegistry, SearchParameterResolver theSearchParameterResolver) {
-		this(theDaoRegistry, theSearchParameterResolver, new SystemRequestDetails());
+	public HapiFhirRetrieveProvider(DaoRegistry theDaoRegistry, SearchParameterResolver theSearchParameterResolver, BaseRequestPartitionHelperSvc theBaseRequestPartitionHelperSvc) {
+		this(theDaoRegistry, theSearchParameterResolver, new SystemRequestDetails(), theBaseRequestPartitionHelperSvc);
 	}
 
-	public HapiFhirRetrieveProvider(DaoRegistry registry, SearchParameterResolver searchParameterResolver,
-											  RequestDetails requestDetails) {
+	public HapiFhirRetrieveProvider(DaoRegistry theRegistry, SearchParameterResolver searchParameterResolver,
+											  RequestDetails theRequestDetails, BaseRequestPartitionHelperSvc theBaseRequestPartitionHelperSvc) {
 		super(searchParameterResolver);
-		this.myDaoRegistry = registry;
-		this.myRequestDetails = requestDetails;
+		this.myDaoRegistry = theRegistry;
+		this.myRequestDetails = theRequestDetails;
+		this.myBaseRequestPartitionHelperSvc = theBaseRequestPartitionHelperSvc;
 	}
 
 	/**
@@ -67,7 +71,6 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 
 		private final String dataType;
 		private final List<SearchParameterMap> queries;
-
 		private final BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc;
 
 		public QueryIterable(String dataType, List<SearchParameterMap> queries, BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc) {
@@ -138,11 +141,11 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 		return new QueryIterable(dataType, queries, this::executeQuery);
 	}
 
-	protected Iterable<IBaseResource> executeQuery(String dataType, SearchParameterMap map) {
+	protected Iterable<IBaseResource> executeQuery(String theDataType, SearchParameterMap theSearchParameterMap) {
 		ca.uhn.fhir.jpa.searchparam.SearchParameterMap hapiMap = new ca.uhn.fhir.jpa.searchparam.SearchParameterMap();
 		try {
 
-			for (Map.Entry<String, List<List<IQueryParameterType>>> entry : map.entrySet()) {
+			for (Map.Entry<String, List<List<IQueryParameterType>>> entry : theSearchParameterMap.entrySet()) {
 				hapiMap.put(entry.getKey(), entry.getValue());
 
 			}
@@ -151,7 +154,13 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 			logger.warn("Error converting search parameter map", e);
 		}
 
-		return search(getClass(dataType), hapiMap, myRequestDetails);
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+
+		if(!myBaseRequestPartitionHelperSvc.isResourcePartitionable(theDataType)){
+			//if non-partitionable datatype, set to default partition
+			systemRequestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		}
+		return search(getClass(theDataType), hapiMap, systemRequestDetails);
 	}
 
 	@Override

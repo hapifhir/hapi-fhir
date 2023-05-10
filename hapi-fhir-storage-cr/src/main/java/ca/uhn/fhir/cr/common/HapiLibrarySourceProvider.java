@@ -19,8 +19,10 @@
  */
 package ca.uhn.fhir.cr.common;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -62,7 +64,12 @@ public class HapiLibrarySourceProvider
 													 LibraryContentType theLibraryContentType) {
 		String name = theLibraryIdentifier.getId();
 		String version = theLibraryIdentifier.getVersion();
-		var libraries = search(getClass("Library"), Searches.byName(name), myRequestDetails);
+
+		// needed for partitioned environment
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
+
+		var libraries = search(getClass("Library"), Searches.byName(name), systemRequestDetails);
 		var libraryList = new ArrayList<IBaseResource>();
 		for(var l:libraries){
 			libraryList.add(l);
