@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -27,7 +29,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nonnull;
@@ -45,6 +49,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -265,6 +270,42 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		List<JobInstance> foundInstances = mySvc.fetchInstancesByJobDefinitionIdAndStatus(JOB_DEFINITION_ID, statuses, 10, 0);
 		assertThat(foundInstances, hasSize(1));
 		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
+	}
+
+	@Test
+	void testFetchInstancesWithEmptyStatus() {
+		createTwoJobsDifferentStatus();
+		JobInstanceFetchRequest request = createFetchRequest();
+		Page<JobInstance> foundInstances = mySvc.fetchAllInstancesByJobStatus(request, "");
+		assertThat(foundInstances.getTotalElements(), equalTo(2L));
+	}
+
+	@Test
+	void testFetchInstanceByStatus() {
+		createTwoJobsDifferentStatus();
+		JobInstanceFetchRequest request = createFetchRequest();
+		Page<JobInstance> foundInstances = mySvc.fetchAllInstancesByJobStatus(request, "COMPLETED");
+		assertThat(foundInstances.getTotalElements(), equalTo(1L));
+	}
+
+	private JobInstanceFetchRequest createFetchRequest() {
+		JobInstanceFetchRequest request = new JobInstanceFetchRequest();
+		request.setPageStart(0);
+		request.setBatchSize(1);
+		request.setSort(Sort.by(Sort.Direction.DESC, "myCreateTime"));
+		return request;
+	}
+
+	private void createTwoJobsDifferentStatus() {
+		JobInstance instance = new JobInstance();
+		instance.setStatus(StatusEnum.QUEUED);
+		instance.setJobDefinitionId(JOB_DEFINITION_ID);
+		JobInstance instance2 = new JobInstance();
+		instance2.setStatus(StatusEnum.COMPLETED);
+		instance2.setJobDefinitionId(JOB_DEFINITION_ID + "-2");
+
+		mySvc.storeNewInstance(instance);
+		mySvc.storeNewInstance(instance2);
 	}
 
 	/**
