@@ -1,7 +1,7 @@
 ---
 type: fix
 issue: 4844
-title: "/Patient/{patienid}/$everything?_type={resource types}
+title: "/Patient/{patientid}/$everything?_type={resource types}
    would omit resources that were not directly related to the Patient
    resource (even if those resources were specified in the _type list).
    This was in conflict with /Patient/{patientid}/$everything operation,
