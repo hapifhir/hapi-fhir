@@ -230,7 +230,7 @@ HAPI implements the [$apply](http://hl7.org/fhir/uv/cpg/OperationDefinition-cpg-
 
 ## Apply
 
-The `$apply` operation applies a PlanDefinition to a given context. This implementation follows the [FHIR Specification](https://www.hl7.org/fhir/plandefinition.html#12.23.4.3) and supports the [FHIR Clinical Guidelines IG](http://hl7.org/fhir/uv/cpg/index.html)
+The `$apply` operation applies a PlanDefinition to a given context. This implementation follows the [FHIR Specification](https://www.hl7.org/fhir/plandefinition.html#12.23.4.3) and supports the [FHIR Clinical Guidelines IG](http://hl7.org/fhir/uv/cpg/index.html). In addition, an R5 version of apply is made available for R4 instances.  This will cause $apply to return a Bundle of resources instead of a CarePlan.  This can be invoked with `$r5.apply`.
 
 ### Example PlanDefinition
 
@@ -246,3 +246,17 @@ These Bundles do not include example Patient clinical data. Applying a PlanDefin
 GET http://your-server-base/fhir/PlanDefinition/opioidcds-10-patient-view/$apply?subject=Patient/patientId&encounter=Encounter/encounterId&practitioner=Practitioner/practitionerId
 ```
 
+### Additional Parameters
+
+The following additional parameters are supported for the `$apply` and `$r5.apply` operation:
+* organization - The organization in context
+* userType - The type of user initiating the request, e.g. patient, healthcare provider, or specific type of healthcare provider (physician, nurse, etc.)
+* userLanguage - Preferred language of the person using the system
+* userTaskContext - The task the system user is performing, e.g. laboratory results review, medication list review, etc. This information can be used to tailor decision support outputs, such as recommended information resources
+* setting - The current setting of the request (inpatient, outpatient, etc.)
+* settingContext - Additional detail about the setting of the request, if any
+* parameters - Any input parameters defined in libraries referenced by the PlanDefinition.
+* data - Data to be made available to the PlanDefinition evaluation.
+* dataEndpoint - An endpoint to use to access data referenced by retrieve operations in libraries referenced by the PlanDefinition.
+* contentEndpoint - An endpoint to use to access content (i.e. libraries) referenced by the PlanDefinition.
+* terminologyEndpoint - An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the PlanDefinition.
