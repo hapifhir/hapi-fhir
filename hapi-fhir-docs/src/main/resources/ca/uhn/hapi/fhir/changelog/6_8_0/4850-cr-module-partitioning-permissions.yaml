@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4832
+title: "When deploying hapi-fhir in partitioned environment, users were being blocked from reaching required resources 
+from default partition. This fix allows access to required resources (Library) for clinical reasoning operations and directs 
+non-partitionable resource requests to default partition and injects SystemRequest details along with requested partition where 
+required resources were being blocked (Patient, Coverage, etc)."
