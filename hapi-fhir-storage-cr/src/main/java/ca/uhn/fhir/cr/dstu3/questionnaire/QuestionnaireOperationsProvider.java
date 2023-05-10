@@ -150,7 +150,6 @@ public class QuestionnaireOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
 	public Bundle packageQuestionnaire(@IdParam IdType theId,
 												  @OperationParam(name = "canonical") String theCanonical,
-												  @OperationParam(name = "usePut") String theIsPut,
 												  RequestDetails theRequestDetails) {
 
 		return (Bundle) this.myDstu3QuestionnaireServiceFactory
