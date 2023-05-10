@@ -140,7 +140,7 @@ public class InstanceProgress {
 		if (getChunkCount() > 0) {
 			final int chunkCount = getChunkCount();
 			final int conditionalChunkCount = theCalledFromReducer ? (chunkCount - myIncompleteChunkCount) : chunkCount;
-			double percentComplete = (double) (myCompleteChunkCount) / (double) conditionalChunkCount;
+			final double percentComplete = (double) (myCompleteChunkCount) / (double) conditionalChunkCount;
 			theInstance.setProgress(percentComplete);
 		}
 
