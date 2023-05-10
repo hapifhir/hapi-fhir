@@ -260,3 +260,8 @@ The following additional parameters are supported for the `$apply` and `$r5.appl
 * dataEndpoint - An endpoint to use to access data referenced by retrieve operations in libraries referenced by the PlanDefinition.
 * contentEndpoint - An endpoint to use to access content (i.e. libraries) referenced by the PlanDefinition.
 * terminologyEndpoint - An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the PlanDefinition.
+
+
+## Package
+
+The `package` operation for [PlanDefinition](https://www.hl7.org/fhir/plandefinition.html) will generate a Bundle of resources that includes the PlanDefinition as well as any related resources which can then be shared. This implementation follows the [CRMI IG](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/index.html) guidance for [packaging artifacts](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html).
