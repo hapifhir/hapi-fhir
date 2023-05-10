@@ -228,6 +228,10 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 		public void setTransactionLatchEnabled(boolean theTransactionLatchEnabled) {
 			this.myTransactionLatchEnabled = theTransactionLatchEnabled;
 		}
+
+		public boolean isTransactionLatchEnabled() {
+			return myTransactionLatchEnabled;
+		}
 	}
 
 	private static class MyRestfulServer extends RestfulServer {
@@ -266,7 +270,13 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 					provider.clearCounts();
 				}
 			}
-			myPlainProvider.clear();
+			if (isTransactionLatchEnabled()) {
+				myPlainProvider.clear();
+			}
+		}
+
+		private boolean isTransactionLatchEnabled() {
+			return myPlainProvider.isTransactionLatchEnabled();
 		}
 
 		public void clearDataAndCounts() {
