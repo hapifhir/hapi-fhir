@@ -271,12 +271,15 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 				}
 			}
 			if (isTransactionLatchEnabled()) {
-				myPlainProvider.clear();
+				getPlainProvider().clear();
 			}
 		}
 
 		private boolean isTransactionLatchEnabled() {
-			return myPlainProvider.isTransactionLatchEnabled();
+			if (getPlainProvider() == null) {
+				return false;
+			}
+			return getPlainProvider().isTransactionLatchEnabled();
 		}
 
 		public void clearDataAndCounts() {

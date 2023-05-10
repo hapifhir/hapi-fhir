@@ -290,6 +290,9 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			return myPlainProvider;
 		}
 		protected boolean isTransactionLatchEnabled() {
+			if (getPlainProvider() == null) {
+				return false;
+			}
 			return getPlainProvider().isTransactionLatchEnabled();
 		}
 		public void setTransactionLatchEnabled(boolean theTransactionLatchEnabled) {
