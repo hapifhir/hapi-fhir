@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Session;
@@ -59,6 +60,7 @@ import javax.persistence.Index;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -313,7 +315,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	private transient ResourceHistoryTable myNewVersionEntity;
 	@Transient
-	private transient boolean versionUpdatedInCurrentTransaction;
+	private transient boolean myVersionUpdatedInCurrentTransaction;
 	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
 	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;
@@ -337,15 +339,25 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * optimistic lock {@link Version @Version} field, so it can only increment
 	 * by one within a single transaction.
 	 */
+	// FIXME: remove
 	public boolean isVersionUpdatedInCurrentTransaction() {
-		return versionUpdatedInCurrentTransaction;
+		return myVersionUpdatedInCurrentTransaction;
 	}
 
 	/**
-	 * @see #isVersionUpdatedInCurrentTransaction()
+	 * Setting this flag is an indication that we're making changes and the version number will
+	 * be incremented in the current transaction. When this is set, calls to {@link #getVersion()}
+	 * will be incremented by one.
+	 * This flag is cleared in {@link #postPersist()} since at that time the new version number
+	 * should be reflected.
 	 */
-	public void setVersionUpdatedInCurrentTransaction(boolean versionUpdatedInCurrentTransaction) {
-		this.versionUpdatedInCurrentTransaction = versionUpdatedInCurrentTransaction;
+	public void setVersionUpdatedInCurrentTransaction(boolean theVersionUpdatedInCurrentTransaction) {
+		this.myVersionUpdatedInCurrentTransaction = theVersionUpdatedInCurrentTransaction;
+	}
+
+	@PostPersist
+	public void postPersist() {
+		myVersionUpdatedInCurrentTransaction = false;
 	}
 
 	@Override
@@ -559,12 +571,31 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Override
 	public long getVersion() {
+		if (myVersionUpdatedInCurrentTransaction) {
+			return myVersion + 1;
+		}
 		return myVersion;
 	}
 
-	public void setVersion(long theVersion) {
+	/**
+	 * Sets the version on this entity to {@literal 1}. This should only be called
+	 * on resources that are not yet persisted. After that time the version number
+	 * is managed by hibernate.
+	 */
+	public void initializeVersion() {
+		assert myId == null;
+		myVersion = 1;
+	}
+
+	/**
+	 * Don't call this in any JPA environments, the version will be ignored
+	 * since this field is managed by hibernate
+	 */
+	@VisibleForTesting
+	public void setVersionForUnitTest(long theVersion) {
 		myVersion = theVersion;
 	}
+
 
 	@Override
 	public boolean isDeleted() {
@@ -732,7 +763,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
-		retVal.setVersion(myVersion);
+		retVal.setVersion(getVersion());
 		retVal.setTransientForcedId(getTransientForcedId());
 
 		retVal.setPublished(getPublishedDate());

@@ -1337,6 +1337,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				continue;
 			}
 
+			switch (nextSpDef.getName()) {
+				case Constants.PARAM_ID:
+				case Constants.PARAM_TEXT:
+				case Constants.PARAM_CONTENT:
+					continue;
+				case Constants.PARAM_TAG:
+				case Constants.PARAM_SECURITY:
+				case Constants.PARAM_PROFILE:
+					if (myStorageSettings instanceof JpaSto)
+			}
 			// See the method javadoc for an explanation of this
 			if (startsWith(nextSpDef.getPath(), "Resource.")) {
 				continue;

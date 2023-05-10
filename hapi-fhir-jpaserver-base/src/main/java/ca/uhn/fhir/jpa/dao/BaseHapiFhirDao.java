@@ -537,20 +537,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 
 	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
-		String newVersion;
-		long newVersionLong;
 		if (theResourceId == null || theResourceId.getVersionIdPart() == null) {
-			newVersion = "1";
-			newVersionLong = 1;
+			theSavedEntity.initializeVersion();
 		} else {
-			newVersionLong = theResourceId.getVersionIdPartAsLong() + 1;
-			newVersion = Long.toString(newVersionLong);
+			theSavedEntity.setVersionUpdatedInCurrentTransaction(true);
 		}
 
 		assert theResourceId != null;
+		String newVersion = Long.toString(theSavedEntity.getVersion());
 		IIdType newId = theResourceId.withVersion(newVersion);
 		theResource.getIdElement().setValue(newId.getValue());
-		theSavedEntity.setVersion(newVersionLong);
 	}
 
 	public boolean isLogicalReference(IIdType theId) {
@@ -1091,18 +1087,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return entity;
 		}
 
-		if (theUpdateVersion && !entity.isVersionUpdatedInCurrentTransaction()) {
-			/*
-			 * Note that we set the version here so that it has the right new value
-			 * when we copy it to the new ResourceHistoryEntity that we create, but
-			 * other than that Hibernate will ignore whatever we send in here because
-			 * the ResourceTable.myVersion field is an optimistic lock @Version
-			 * field so hibernate manages it on its own.
-			 */
-			long newVersion = entity.getVersion() + 1;
-			entity.setVersion(newVersion);
-			entity.setVersionUpdatedInCurrentTransaction(true);
-		}
+		entity.setVersionUpdatedInCurrentTransaction(true);
 
 		/*
 		 * Save the resource itself
