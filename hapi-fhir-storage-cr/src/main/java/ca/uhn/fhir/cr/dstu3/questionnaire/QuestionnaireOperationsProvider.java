@@ -143,7 +143,6 @@ public class QuestionnaireOperationsProvider {
 	 *
 	 * @param theId             The id of the Questionnaire.
 	 * @param theCanonical      The canonical identifier for the questionnaire (optionally version-specific).
-	 * @Param theIsPut			 A boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
 	 * @param theRequestDetails The details (such as tenant) of this request. Usually
 	 *                          autopopulated by HAPI.
 	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
@@ -156,16 +155,6 @@ public class QuestionnaireOperationsProvider {
 
 		return (Bundle) this.myDstu3QuestionnaireServiceFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(theId, new StringType(theCanonical), null, Boolean.parseBoolean(theIsPut));
-	}
-
-	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle packageQuestionnaire(@OperationParam(name = "canonical") String theCanonical,
-												  @OperationParam(name = "usePut") String theIsPut,
-												  RequestDetails theRequestDetails) {
-
-		return (Bundle) this.myDstu3QuestionnaireServiceFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(null, new StringType(theCanonical), null, Boolean.parseBoolean(theIsPut));
+			.packageQuestionnaire(theId, new StringType(theCanonical), null, false);
 	}
 }
