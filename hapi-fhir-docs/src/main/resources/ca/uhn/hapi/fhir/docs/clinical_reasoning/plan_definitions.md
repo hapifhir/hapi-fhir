@@ -234,7 +234,7 @@ The `$apply` operation applies a PlanDefinition to a given context. This impleme
 
 ### Example PlanDefinition
 
-Some example PlanDefinition workflows are available in the [opioid-cds-r4](https://github.com/cqframework/opioid-cds-r4) IG. Full Bundles with all the required supporting resources are available [here](https://github.com/cqframework/opioid-cds-r4/tree/master/bundles). You can download a Bundle and load it on your server as a transaction:
+Some example PlanDefinition workflows are available in the [opioid-cds-r4](https://github.com/cqframework/opioid-cds-r4) IG. Full Bundles with all the required supporting resources are available [here](https://github.com/cqframework/opioid-cds-r4/tree/1e543f781138f3d85404b7f65a92ff713519ef2c/bundles). You can download a Bundle and load it on your server as a transaction:
 
 ```bash
 POST http://your-server-base/fhir opioidcds-10-patient-view-bundle.json
@@ -249,17 +249,20 @@ GET http://your-server-base/fhir/PlanDefinition/opioidcds-10-patient-view/$apply
 ### Additional Parameters
 
 The following additional parameters are supported for the `$apply` and `$r5.apply` operation:
-* organization - The organization in context
-* userType - The type of user initiating the request, e.g. patient, healthcare provider, or specific type of healthcare provider (physician, nurse, etc.)
-* userLanguage - Preferred language of the person using the system
-* userTaskContext - The task the system user is performing, e.g. laboratory results review, medication list review, etc. This information can be used to tailor decision support outputs, such as recommended information resources
-* setting - The current setting of the request (inpatient, outpatient, etc.)
-* settingContext - Additional detail about the setting of the request, if any
-* parameters - Any input parameters defined in libraries referenced by the PlanDefinition.
-* data - Data to be made available to the PlanDefinition evaluation.
-* dataEndpoint - An endpoint to use to access data referenced by retrieve operations in libraries referenced by the PlanDefinition.
-* contentEndpoint - An endpoint to use to access content (i.e. libraries) referenced by the PlanDefinition.
-* terminologyEndpoint - An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the PlanDefinition.
+
+| Parameter | Type       | Description |
+|-----------|------------|-------------|
+| organization        | String     | The organization in context                                                                                                    |
+| userType            | String     | The type of user initiating the request, e.g. patient, healthcare provider, or specific type of healthcare provider (physician, nurse, etc.) |
+| userLanguage        | String     | Preferred language of the person using the system |
+| userTaskContext     | String     | The task the system user is performing, e.g. laboratory results review, medication list review, etc. This information can be used to tailor decision support outputs, such as recommended information resources |
+| setting             | String     | The current setting of the request (inpatient, outpatient, etc.) |
+| settingContext      | String     | Additional detail about the setting of the request, if any |
+| parameters          | Parameters | Any input parameters defined in libraries referenced by the PlanDefinition. |
+| data                | Bundle     | Data to be made available to the PlanDefinition evaluation. |
+| dataEndpoint        | Endpoint   | An endpoint to use to access data referenced by retrieve operations in libraries referenced by the PlanDefinition. |
+| contentEndpoint     | Endpoint   | An endpoint to use to access content (i.e. libraries) referenced by the PlanDefinition. |
+| terminologyEndpoint | Endpoint   | An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the PlanDefinition. |
 
 
 ## Package
