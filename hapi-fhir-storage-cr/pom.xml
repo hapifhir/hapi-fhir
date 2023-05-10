@@ -238,5 +238,37 @@
             <artifactId>poi</artifactId>
         </dependency>
     </dependencies>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>3.0.0</version>
+					<executions>
+						<execution>
+							<id>enforce-maven</id>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<configuration>
+								<rules>
+									<requireReleaseDeps>
+										<message>No Clinical Reasoning Snapshots Allowed!</message>
+										<includes>
+											<include>org.opencds.cqf:*</include>
+											<include>org.opencds.cqf.cql:*</include>
+											<include>org.opencds.cqf.fhir:*</include>
+											<include>info.cqframework:*</include>
+										</includes>
+									</requireReleaseDeps>
+								</rules>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
 </project>
