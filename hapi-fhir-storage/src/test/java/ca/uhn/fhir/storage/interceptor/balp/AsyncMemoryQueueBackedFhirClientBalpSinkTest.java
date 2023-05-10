@@ -33,6 +33,22 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 	@Order(1)
 	private HashMapResourceProviderExtension<AuditEvent> myAuditEventProvider = new HashMapResourceProviderExtension<>(myServer, AuditEvent.class);
 
+
+	@Test
+	public void testStressTest() {
+		AsyncMemoryQueueBackedFhirClientBalpSink sink = new AsyncMemoryQueueBackedFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
+		sink.start();
+
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 100; j++) {
+				sink.recordAuditEvent(new AuditEvent());
+			}
+		}
+
+		await().until(()->myAuditEventProvider.getStoredResources().size(), equalTo(1000));
+	}
+
+
 	@Test
 	public void recordAuditEvent() {
 		// Setup

@@ -40,6 +40,8 @@ import javax.persistence.Table;
 	@Index(name = "IDX_RESVERPROV_REQUESTID", columnList = "REQUEST_ID"),
 	//@Index(name = "IDX_RESVERPROV_RESID", columnList = "RES_PID")
 })
+// FIXME: create index IDX_RESVERPROV_RESID on hfj_res_ver_prov (RES_PID);
+// FIXME: create index IDX_RESVERPROV_RESVERID on hfj_res_ver_prov (RES_VER_PID);
 @Entity
 public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 

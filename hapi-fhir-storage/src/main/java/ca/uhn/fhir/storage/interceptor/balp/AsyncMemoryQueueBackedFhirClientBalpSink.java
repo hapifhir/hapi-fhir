@@ -2,6 +2,7 @@ package ca.uhn.fhir.storage.interceptor.balp;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,8 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -28,8 +30,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink implements IBalpAuditEventSink {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AsyncMemoryQueueBackedFhirClientBalpSink.class);
-	private final ArrayBlockingQueue<IBaseResource> myQueue;
 	private static final AtomicLong ourNextThreadId = new AtomicLong(0);
+	private final BlockingQueue<IBaseResource> myQueue;
 	private boolean myRunning;
 	private TransmitterThread myThread;
 
@@ -71,12 +73,18 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	 */
 	public AsyncMemoryQueueBackedFhirClientBalpSink(IGenericClient theClient) {
 		super(theClient);
-		myQueue = new ArrayBlockingQueue<>(100);
+		myQueue = new LinkedBlockingQueue<>(100);
 	}
 
 	@Override
 	protected void recordAuditEvent(IBaseResource theAuditEvent) {
-		myQueue.add(theAuditEvent);
+		try {
+			myQueue.put(theAuditEvent);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			ourLog.info("Interrupted while recording element");
+			throw new InternalErrorException(e);
+		}
 	}
 
 	@PostConstruct
@@ -118,6 +126,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 					next = myQueue.poll(10, TimeUnit.SECONDS);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
+					ourLog.info("Interrupted while accessing element");
 				}
 
 				// TODO: Currently we transmit events one by one, but a nice optimization

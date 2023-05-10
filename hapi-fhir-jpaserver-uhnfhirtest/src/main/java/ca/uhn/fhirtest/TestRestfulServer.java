@@ -74,6 +74,7 @@ public class TestRestfulServer extends RestfulServer {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestRestfulServer.class);
 
 	private AnnotationConfigWebApplicationContext myAppCtx;
+	private static final boolean ourRegisterBalpInterceptor = true;
 
 	@Override
 	public void destroy() {
@@ -122,7 +123,9 @@ public class TestRestfulServer extends RestfulServer {
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(JpaStorageSettings.class));
 				setServerConformanceProvider(confProvider);
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				if (ourRegisterBalpInterceptor) {
+					registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				}
 				break;
 			}
 			case "DSTU3": {
@@ -140,7 +143,9 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				if (ourRegisterBalpInterceptor) {
+					registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				}
 				break;
 			}
 			case "R4": {
@@ -160,7 +165,9 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				providers.add(myAppCtx.getBean(IpsOperationProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				if (ourRegisterBalpInterceptor) {
+					registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				}
 				break;
 			}
 			case "R4B": {
@@ -179,7 +186,9 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				if (ourRegisterBalpInterceptor) {
+					registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				}
 				break;
 			}
 			case "R5": {
@@ -198,7 +207,9 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				if (ourRegisterBalpInterceptor) {
+					registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				}
 				break;
 			}
 			case "AUDIT": {
@@ -333,7 +344,7 @@ public class TestRestfulServer extends RestfulServer {
 	}
 
 	/**
-	 * The public server is deployed to http://fhirtest.uhn.ca and the JEE webserver
+	 * The public server is deployed to <a href="https://hapi.fhir.org">hapi.fhir.org</a> and the JEE webserver
 	 * where this FHIR server is deployed is actually fronted by an Apache HTTPd instance,
 	 * so we use an address strategy to let the server know how it should address itself.
 	 */
