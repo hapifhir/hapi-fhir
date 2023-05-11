@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This object exists from the time setExpectedCount() is called until awaitExpected() completes.  It tracks
+ * invocations on the PointcutLatch and throws exceptions when incorrect states are detected.
+ */
 public class PointcutLatchSession {
 	private static final Logger ourLog = LoggerFactory.getLogger(PointcutLatchSession.class);
 

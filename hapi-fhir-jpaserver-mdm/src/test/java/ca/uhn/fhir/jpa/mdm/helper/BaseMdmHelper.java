@@ -110,6 +110,14 @@ public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCall
 		return myAfterMdmLatch;
 	}
 
+	/**
+	 * Expect 1 call to the MDM_AFTER_PERSISTED_RESOURCE_CHECKED pointcut when calling theSupplier.  Wait until
+	 * the mdm message arrives and this pointcut is called before returning the result of theSupplier.
+	 * @param theSupplier
+	 * @return
+	 * @param <T>
+	 * @throws InterruptedException
+	 */
 	public <T> T executeWithLatch(Supplier<T> theSupplier) throws InterruptedException {
 		myAfterMdmLatch.setExpectedCount(1);
 		T retval = theSupplier.get();
