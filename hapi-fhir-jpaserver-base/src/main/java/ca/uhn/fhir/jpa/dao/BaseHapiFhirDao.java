@@ -1412,11 +1412,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myJpaStorageResourceParser.populateResourceMetadata(entity, false, tagList, version, theResource);
 
 		boolean wasDeleted = false;
-		// NB If this if-else ever gets collapsed, make sure to account for possible null (will happen in mass-ingestion mode)
-		if (theOldResource instanceof IResource) {
-			wasDeleted = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) theOldResource) != null;
-		} else if (theOldResource instanceof IAnyResource) {
-			wasDeleted = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) theOldResource) != null;
+		if (theOldResource != null) {
+			wasDeleted = theOldResource.isDeleted();
 		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, theResource, theMatchUrl, theOperationType).setCreated(wasDeleted);

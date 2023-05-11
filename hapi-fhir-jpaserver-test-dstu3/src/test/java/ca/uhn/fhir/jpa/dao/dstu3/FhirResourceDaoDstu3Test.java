@@ -1055,7 +1055,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(4 + initialHistory, history.size().intValue());
 		List<IBaseResource> resources = history.getResources(0, 4);
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(resources.get(0)));
+		assertTrue(resources.get(0).isDeleted());
 
 		try {
 			myPatientDao.delete(id2, mySrd);
@@ -1164,10 +1164,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 1).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 1).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(1, 2).get(0)));
-
+		assertTrue(history.getResources(0, 1).get(0).isDeleted());
+		assertFalse(history.getResources(1, 2).get(0).isDeleted());
 	}
 
 	@Test
@@ -1622,13 +1620,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(id.withVersion("2"), entries.get(1).getIdElement());
 		assertEquals(id.withVersion("1"), entries.get(2).getIdElement());
 
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(0)));
+		assertFalse(entries.get(0).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.PUT, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(0)));
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(1)));
+		assertTrue(entries.get(1).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.DELETE, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(1)));
 
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(2)));
+		assertFalse(entries.get(2).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.POST, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(2)));
 	}
 
