@@ -348,7 +348,6 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 				return super.update(theResource, theConditional, theRequestDetails);
 			}
 		}
-
 	}
 
 	@Override
