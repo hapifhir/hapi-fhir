@@ -1,4 +1,4 @@
 ---
 type: fix
 issue: 4842
-title: "There was a bug with the TerserUtil would accidentally overwrite non-empty values with empty values from a source resource. This has been corrected. Thanks to @nigtrifork for the fix!"
+title: "There was a bug with the TerserUtil, where it would accidentally overwrite non-empty values with empty values from a source resource. This has been corrected. Thanks to @nigtrifork for the fix!"
