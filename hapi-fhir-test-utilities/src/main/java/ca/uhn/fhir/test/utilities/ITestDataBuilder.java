@@ -57,18 +57,18 @@ public interface ITestDataBuilder {
 	/**
 	 * Set Patient.active = true
 	 */
-	default Consumer<IBaseResource> withActiveTrue() {
+	default ICreationArgument withActiveTrue() {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "active", "boolean", "true");
 	}
 
 	/**
 	 * Set Patient.active = false
 	 */
-	default Consumer<IBaseResource> withActiveFalse() {
+	default ICreationArgument withActiveFalse() {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "active", "boolean", "false");
 	}
 
-	default Consumer<IBaseResource> withFamily(String theFamily) {
+	default ICreationArgument withFamily(String theFamily) {
 		return t -> {
 			IPrimitiveType<?> family = (IPrimitiveType<?>) getFhirContext().getElementDefinition("string").newInstance();
 			family.setValueAsString(theFamily);
@@ -84,7 +84,7 @@ public interface ITestDataBuilder {
 
 
 	/** Patient.name.given */
-	default <T extends IBaseResource>  Consumer<T> withGiven(String theName) {
+	default ICreationArgument withGiven(String theName) {
 		return withPrimitiveAttribute("name.given", theName);
 	}
 
@@ -92,35 +92,35 @@ public interface ITestDataBuilder {
 	/**
 	 * Set Patient.birthdate
 	 */
-	default Consumer<IBaseResource> withBirthdate(String theBirthdate) {
+	default ICreationArgument withBirthdate(String theBirthdate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "birthDate", "dateTime", theBirthdate);
 	}
 
 	/**
 	 * Set Observation.status
 	 */
-	default Consumer<IBaseResource> withStatus(String theStatus) {
+	default ICreationArgument withStatus(String theStatus) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "status", "code", theStatus);
 	}
 
 	/**
 	 * Set Observation.effectiveDate
 	 */
-	default Consumer<IBaseResource> withEffectiveDate(String theDate) {
+	default ICreationArgument withEffectiveDate(String theDate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "effectiveDateTime", "dateTime", theDate);
 	}
 
 	/**
 	 * Set Observation.effectiveDate
 	 */
-	default Consumer<IBaseResource> withDateTimeAt(String thePath, String theDate) {
+	default ICreationArgument withDateTimeAt(String thePath, String theDate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "dateTime", theDate);
 	}
 
 	/**
 	 * Set [Resource].identifier.system and [Resource].identifier.value
 	 */
-	default Consumer<IBaseResource> withIdentifier(String theSystem, String theValue) {
+	default ICreationArgument withIdentifier(String theSystem, String theValue) {
 		return t -> {
 			IPrimitiveType<?> system = (IPrimitiveType<?>) getFhirContext().getElementDefinition("uri").newInstance();
 			system.setValueAsString(theSystem);
@@ -141,73 +141,73 @@ public interface ITestDataBuilder {
 	/**
 	 * Set Organization.name
 	 */
-	default Consumer<IBaseResource> withName(String theStatus) {
+	default ICreationArgument withName(String theStatus) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "name", "string", theStatus);
 	}
 
-	default Consumer<IBaseResource> withId(String theId) {
+	default ICreationArgument withId(String theId) {
 		return t -> {
 			assertThat(theId, matchesPattern("[a-zA-Z0-9-]+"));
 			t.setId(theId);
 		};
 	}
 
-	default Consumer<IBaseResource> withId(IIdType theId) {
+	default ICreationArgument withId(IIdType theId) {
 		return t -> t.setId(theId.toUnqualifiedVersionless());
 	}
 
-	default Consumer<IBaseResource> withTag(String theSystem, String theCode) {
+	default ICreationArgument withTag(String theSystem, String theCode) {
 		return t -> t.getMeta().addTag().setSystem(theSystem).setCode(theCode);
 	}
 
-	default Consumer<IBaseResource> withSecurity(String theSystem, String theCode) {
+	default ICreationArgument withSecurity(String theSystem, String theCode) {
 		return t -> t.getMeta().addSecurity().setSystem(theSystem).setCode(theCode);
 	}
 
-	default Consumer<IBaseResource> withProfile(String theProfile) {
+	default ICreationArgument withProfile(String theProfile) {
 		return t -> t.getMeta().addProfile(theProfile);
 	}
 
-	default Consumer<IBaseResource> withSource(FhirContext theContext, String theSource) {
+	default ICreationArgument withSource(FhirContext theContext, String theSource) {
 		return t -> MetaUtil.setSource(theContext, t.getMeta(), theSource);
 	}
 
-	default Consumer<IBaseResource> withLastUpdated(Date theLastUpdated) {
+	default ICreationArgument withLastUpdated(Date theLastUpdated) {
 		return t -> t.getMeta().setLastUpdated(theLastUpdated);
 	}
 
-	default Consumer<IBaseResource> withLastUpdated(String theIsoDate) {
+	default ICreationArgument withLastUpdated(String theIsoDate) {
 		return t -> t.getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
 	}
 
-	default IIdType createEncounter(Consumer<IBaseResource>... theModifiers) {
+	default IIdType createEncounter(ICreationArgument... theModifiers) {
 		return createResource("Encounter", theModifiers);
 	}
 
-	default IIdType createGroup(Consumer<IBaseResource>... theModifiers) {
+	default IIdType createGroup(ICreationArgument... theModifiers) {
 		return createResource("Group", theModifiers);
 	}
 
-	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {
+	default IIdType createObservation(ICreationArgument... theModifiers) {
 		return createResource("Observation", theModifiers);
 	}
 
-	default IIdType createObservation(Collection<Consumer<IBaseResource>> theModifiers) {
-		return createResource("Observation", theModifiers.toArray(new Consumer[0]));
+	default IIdType createObservation(Collection<ICreationArgument> theModifiers) {
+		return createResource("Observation", theModifiers.toArray(new ICreationArgument[0]));
 	}
 
-	default IBaseResource buildPatient(Consumer<IBaseResource>... theModifiers) {
+	default IBaseResource buildPatient(ICreationArgument... theModifiers) {
 		return buildResource("Patient", theModifiers);
 	}
-	default IIdType createPatient(Consumer<IBaseResource>... theModifiers) {
+	default IIdType createPatient(ICreationArgument... theModifiers) {
 		return createResource("Patient", theModifiers);
 	}
 
-	default IIdType createOrganization(Consumer<IBaseResource>... theModifiers) {
+	default IIdType createOrganization(ICreationArgument... theModifiers) {
 		return createResource("Organization", theModifiers);
 	}
 
-	default IIdType createResource(String theResourceType, Consumer<IBaseResource>... theModifiers) {
+	default IIdType createResource(String theResourceType, ICreationArgument... theModifiers) {
 		IBaseResource resource = buildResource(theResourceType, theModifiers);
 
 		if (ourLog.isDebugEnabled()) {
@@ -221,7 +221,7 @@ public interface ITestDataBuilder {
 		}
 	}
 
-	default IIdType createResourceFromJson(String theJson, Consumer<IBaseResource>... theModifiers) {
+	default IIdType createResourceFromJson(String theJson, ICreationArgument... theModifiers) {
 		IBaseResource resource = getFhirContext().newJsonParser().parseResource(theJson);
 		applyElementModifiers(resource, theModifiers);
 
@@ -236,43 +236,43 @@ public interface ITestDataBuilder {
 		}
 	}
 
-	default <T extends IBaseResource> T buildResource(String theResourceType, Consumer<IBaseResource>... theModifiers) {
+	default <T extends IBaseResource> T buildResource(String theResourceType, ICreationArgument... theModifiers) {
 		IBaseResource resource = getFhirContext().getResourceDefinition(theResourceType).newInstance();
 		applyElementModifiers(resource, theModifiers);
 		return (T) resource;
 	}
 
 
-	default Consumer<IBaseResource> withSubject(@Nullable IIdType theSubject) {
+	default ICreationArgument withSubject(@Nullable IIdType theSubject) {
 		return withReference("subject", theSubject);
 	}
 
-	default Consumer<IBaseResource> withSubject(@Nullable String theSubject) {
+	default ICreationArgument withSubject(@Nullable String theSubject) {
 		return withSubject(new IdType(theSubject));
 	}
 
-	default Consumer<IBaseResource> withPatient(@Nullable IIdType theSubject) {
+	default ICreationArgument withPatient(@Nullable IIdType theSubject) {
 		return withReference("patient", theSubject);
 	}
 
-	default Consumer<IBaseResource> withPatient(@Nullable String theSubject) {
+	default ICreationArgument withPatient(@Nullable String theSubject) {
 		return withSubject(new IdType(theSubject));
 	}
 
-	default Consumer<IBaseResource> withGroupMember(@Nullable IIdType theMember) {
+	default ICreationArgument withGroupMember(@Nullable IIdType theMember) {
 		return withPrimitiveAttribute("member.entity.reference", theMember);
 	}
 
-	default Consumer<IBaseResource> withGroupMember(@Nullable String theMember) {
+	default ICreationArgument withGroupMember(@Nullable String theMember) {
 		return withGroupMember(new IdType(theMember));
 	}
 
-	default Consumer<IBaseResource> withEncounter(@Nullable String theEncounter) {
+	default ICreationArgument withEncounter(@Nullable String theEncounter) {
 		return withReference("encounter", new IdType(theEncounter));
 	}
 
 	@Nonnull
-	private Consumer<IBaseResource> withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
+	private ICreationArgument withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
 		return t -> {
 			if (theReferenceValue != null && theReferenceValue.getValue() != null) {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
@@ -284,14 +284,14 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default <T extends IBase> Consumer<T> withPrimitiveAttribute(String thePath, Object theValue) {
+	default ICreationArgument withPrimitiveAttribute(String thePath, Object theValue) {
 		return t->{
 			FhirTerser terser = getFhirContext().newTerser();
 			terser.addElement(t, thePath, ""+theValue);
 		};
 	}
 
-	default <T extends IBase, E extends IBase> Consumer<T> withElementAt(String thePath, Consumer<E>... theModifiers) {
+	default <E extends IBase> ICreationArgument withElementAt(String thePath, Consumer<E>... theModifiers) {
 		return t->{
 			FhirTerser terser = getFhirContext().newTerser();
 			E element = terser.addElement(t, thePath);
@@ -299,7 +299,7 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default <T extends IBase> Consumer<T> withQuantityAtPath(String thePath, Number theValue, String theSystem, String theCode) {
+	default ICreationArgument withQuantityAtPath(String thePath, Number theValue, String theSystem, String theCode) {
 		return withElementAt(thePath,
 			withPrimitiveAttribute("value", theValue),
 			withPrimitiveAttribute("system", theSystem),
@@ -326,19 +326,19 @@ public interface ITestDataBuilder {
 		}
 	}
 
-	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
+	default ICreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
 		return withObservationCode(theSystem, theCode, null);
 	}
 
-	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
+	default ICreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
 		return withCodingAt("code.coding", theSystem, theCode, theDisplay);
 	}
 
-	default <T extends IBase> Consumer<T> withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
+	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
 		return withCodingAt(thePath, theSystem, theValue, null);
 	}
 
-	default <T extends IBase> Consumer<T> withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue, @Nullable String theDisplay) {
+	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue, @Nullable String theDisplay) {
 		return withElementAt(thePath,
 			withPrimitiveAttribute("system", theSystem),
 			withPrimitiveAttribute("code", theValue),
@@ -346,15 +346,15 @@ public interface ITestDataBuilder {
 		);
 	}
 
-	default <T extends IBaseResource, E extends IBase> Consumer<T> withObservationComponent(Consumer<E>... theModifiers) {
+	default <E extends IBase> ICreationArgument withObservationComponent(Consumer<E>... theModifiers) {
 		return withElementAt("component", theModifiers);
 	}
 
-	default Consumer<IBaseResource> withObservationHasMember(@Nullable IIdType theHasMember) {
+	default ICreationArgument withObservationHasMember(@Nullable IIdType theHasMember) {
 		return withReference("hasMember", theHasMember);
 	}
 
-	default Consumer<IBaseResource> withOrganization(@Nullable IIdType theHasMember) {
+	default ICreationArgument withOrganization(@Nullable IIdType theHasMember) {
 		return withReference("managingOrganization", theHasMember);
 	}
 
@@ -438,4 +438,14 @@ public interface ITestDataBuilder {
 			return null;
 		}
 	}
+
+	interface ICreationArgument extends Consumer<IBaseResource> {
+		// nothing
+	}
+
+	default ICreationArgument[] asArray(ICreationArgument theIBaseResourceConsumer) {
+		return new ICreationArgument[]{theIBaseResourceConsumer};
+	}
+
+
 }

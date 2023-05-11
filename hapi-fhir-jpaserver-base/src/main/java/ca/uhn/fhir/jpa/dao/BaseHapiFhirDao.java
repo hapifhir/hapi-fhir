@@ -1338,10 +1338,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			provenance.setResourceTable(theEntity);
 			provenance.setPartitionId(theEntity.getPartitionId());
 			if (haveRequestId) {
-				provenance.setRequestId(left(requestId, Constants.REQUEST_ID_LENGTH));
+				String persistedRequestId = left(requestId, Constants.REQUEST_ID_LENGTH);
+				provenance.setRequestId(persistedRequestId);
+				historyEntry.setRequestId(persistedRequestId);
 			}
 			if (haveSource) {
-				provenance.setSourceUri(source);
+				String persistedSource = left(source, ResourceHistoryTable.SOURCE_URI_LENGTH);
+				provenance.setSourceUri(persistedSource);
+				historyEntry.setSourceUri(persistedSource);
 			}
 			if (theResource != null) {
 				MetaUtil.populateResourceSource(myFhirContext,  shouldStoreSource ? source : null, shouldStoreRequestId ? requestId : null , theResource);

@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import software.amazon.awssdk.utils.StringUtils;
@@ -120,8 +122,24 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(false)
 			.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID", "TAG_VERSION", "TAG_USER_SELECTED");
 
+		version.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20230510.1", "IDX_RESVERPROV_RES_VER_PID")
+			.unique(true)
+			.withColumns("RES_VER_PID")
+			.failureAllowed();
+		version.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20230510.2", "IDX_RESVERPROV_RES_PID")
+			.unique(false)
+			.withColumns("RES_VER_PID");
 
-
+		version.onTable(ResourceHistoryTable.HFJ_RES_VER)
+			.addColumn("20230510.4", "SOURCE_URI")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, ResourceHistoryTable.SOURCE_URI_LENGTH);
+		version.onTable(ResourceHistoryTable.HFJ_RES_VER)
+			.addColumn("20230510.4", "REQUEST_ID")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, Constants.REQUEST_ID_LENGTH);
 	}
 
 	protected void init660() {

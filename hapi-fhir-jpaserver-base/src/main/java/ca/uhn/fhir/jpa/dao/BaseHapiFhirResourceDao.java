@@ -1368,7 +1368,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (theOptimizeStorageMode == ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS) {
 				int pageSize = 100;
 				for (int page = 0; ((long)page * pageSize) < entity.getVersion(); page++) {
-					Slice<ResourceHistoryTable> historyEntities = myResourceHistoryTableDao.findForResourceIdAndReturnEntities(PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
+					Slice<ResourceHistoryTable> historyEntities = myResourceHistoryTableDao.findForResourceIdAndReturnEntitiesAndFetchProvenance(PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
 					for (ResourceHistoryTable next : historyEntities) {
 						reindexOptimizeStorageHistoryEntity(entity, next);
 					}
@@ -1386,6 +1386,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					ourLog.debug("Storing text of resource {} version {} as inline VARCHAR", entity.getResourceId(), historyEntity.getVersion());
 					myResourceHistoryTableDao.setResourceTextVcForVersion(historyEntity.getId(), resourceText);
 				}
+			}
+		}
+		if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
+			if (historyEntity.getProvenance() != null) {
+				myResourceHistoryTableDao.setRequestIdAndSourceUri(historyEntity.getId(), historyEntity.getProvenance().getRequestId(), historyEntity.getProvenance().getSourceUri());
 			}
 		}
 	}

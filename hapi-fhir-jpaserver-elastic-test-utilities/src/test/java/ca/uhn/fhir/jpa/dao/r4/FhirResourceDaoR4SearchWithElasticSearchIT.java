@@ -949,12 +949,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
-	private Consumer<IBaseResource>[] asArray(Consumer<IBaseResource> theIBaseResourceConsumer) {
-		@SuppressWarnings("unchecked")
-		Consumer<IBaseResource>[] array = (Consumer<IBaseResource>[]) new Consumer[]{theIBaseResourceConsumer};
-		return array;
-	}
-
 	private List<String> getResultIds(IBundleProvider theResult) {
 		return theResult.getAllResources().stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList());
 	}

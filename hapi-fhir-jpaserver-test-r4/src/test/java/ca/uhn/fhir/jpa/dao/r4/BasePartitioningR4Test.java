@@ -75,8 +75,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
 	}
 
+	@Override
 	@BeforeEach
-	public void before() throws ServletException {
+	public void before() throws Exception {
+		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
@@ -183,7 +185,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		when(mySrd.getRequestId()).thenReturn("REQUEST_ID");
 	}
 
-	protected Consumer<IBaseResource> withPartition(Integer thePartitionId) {
+	protected ICreationArgument withPartition(Integer thePartitionId) {
 		return t -> {
 			if (thePartitionId != null) {
 				addCreatePartition(thePartitionId, null);

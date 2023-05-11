@@ -364,7 +364,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntities(Pageable thePage, Long theId, Long theDontWantVersion) {
+		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(Pageable thePage, Long theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -385,6 +385,11 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public void setResourceTextVcForVersion(Long id, String resourceText) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setRequestIdAndSourceUri(Long theId, String theRequestId, String theSourceUri) {
 			throw new UnsupportedOperationException();
 		}
 
