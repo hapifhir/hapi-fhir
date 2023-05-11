@@ -47,6 +47,7 @@ def poll_for_pipeline_status(pipeline_id):
 
 fprint(f"Generated pipeline. [pipeline_id={pipeline_id}]")
 
+
 #Set as output of job
 with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
     print(f'pipeline_id={pipeline_id}', file=fh)
