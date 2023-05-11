@@ -70,6 +70,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	DaoMethodOutcome create(T theResource);
 
+	void breakAPi();
+
 	DaoMethodOutcome create(T theResource, RequestDetails theRequestDetails);
 
 	/**

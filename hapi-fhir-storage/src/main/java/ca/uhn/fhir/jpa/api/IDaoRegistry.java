@@ -23,4 +23,5 @@ public interface IDaoRegistry {
 
 	boolean isResourceTypeSupported(String theResourceType);
 
+
 }
