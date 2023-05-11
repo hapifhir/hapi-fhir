@@ -280,7 +280,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
 
-
 	/**
 	 * The id of the Resource.
 	 * Will contain either the client-assigned id, or the sequence value.
@@ -291,6 +290,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		length = 64,
 		// we never update this after insert, and the Generator will otherwise "dirty" the object.
 		updatable = false)
+
 	// inject the pk for server-assigned sequence ids.
 	@GeneratorType(when = GenerationTime.INSERT, type = FhirIdGenerator.class)
 	// Make sure the generator doesn't bump the history version.
@@ -311,15 +311,20 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private long myVersion;
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
+
 	@Transient
 	private transient ResourceHistoryTable myCurrentVersionEntity;
+
 	@Transient
 	private transient ResourceHistoryTable myNewVersionEntity;
+
 	@Transient
 	private transient boolean myVersionUpdatedInCurrentTransaction;
+
 	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
 	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;
+
 	@Transient
 	private volatile String myCreatedByMatchUrl;
 

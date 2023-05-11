@@ -350,42 +350,66 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(Msg.code(958) + msg);
 			} else if (match.size() == 1) {
+
+				/*
+				 * Ok, so we've found a single PID that matches the conditional URL.
+				 * That's good, there are two possibilities below.
+				 */
+
 				JpaPid pid = match.iterator().next();
 				if (theTransactionDetails.getDeletedResourceIds().contains(pid)) {
-					// If the resource matching the given match URL has already been
-					// deleted within this transaction, then it's ok to create a
-					// new one. We can un-resolve the previous match URL too in the
-					// transaction details since we'll resolve it to the new resource
-					// ID below
-					myMatchResourceUrlService.unresolveMatchUrl(theTransactionDetails, getResourceName(), theMatchUrl);
-				} else {
-					Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = () -> {
-						return myTxTemplate.execute(tx -> {
-							ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
-							IBaseResource resource = myJpaStorageResourceParser.toResource(foundEntity, false);
-							theResource.setId(resource.getIdElement().getValue());
-							return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
-						});
-					};
 
-					Supplier<IIdType> idSupplier = () -> {
-						return myTxTemplate.execute(tx -> {
-							IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
-							if (!retVal.hasVersionIdPart()) {
-								Long version = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
-								if (version == null) {
-									version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
-									if (version != null) {
-										myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId(), version);
-									}
-								}
+					/*
+					 * If the resource matching the given match URL has already been
+					 * deleted within this transaction. This is a really rare case, since
+					 * it means the client has performed a FHIR transaction with both
+					 * a delete and a create on the same conditional URL. This is rare
+					 * but allowed, and means that it's now ok to create a new one resource
+					 * matching the conditional URL since we'll be deleting any existing
+					 * index rows on the existing resource as a part of this transaction.
+					 * We can also un-resolve the previous match URL in the TransactionDetails
+					 * since we'll resolve it to the new resource ID below
+					 */
+
+					myMatchResourceUrlService.unresolveMatchUrl(theTransactionDetails, getResourceName(), theMatchUrl);
+
+				} else {
+
+					/*
+					 * This is the normal path where the conditional URL matched exactly
+					 * one resource, so we won't be creating anything but instead
+					 * just returning the existing ID. We now have a PID for the matching
+					 * resource, but we haven't loaded anything else (e.g. the forced ID
+					 * or the resource body aren't yet loaded from the DB). We're going to
+					 * return a LazyDaoOutcome with two lazy loaded providers for loading the
+					 * entity and the forced ID since we can avoid these extra SQL loads
+					 * unless we know we're actually going to use them. For example, if
+					 * the client has specified "Prefer: return=minimal" then we won't be
+					 * needing the load the body.
+					 */
+
+					Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = () -> myTxTemplate.execute(tx -> {
+						ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
+						IBaseResource resource = myJpaStorageResourceParser.toResource(foundEntity, false);
+						theResource.setId(resource.getIdElement().getValue());
+						return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
+					});
+					Supplier<IIdType> idSupplier = () -> myTxTemplate.execute(tx -> {
+						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
+						if (!retVal.hasVersionIdPart()) {
+							Long version = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
+							if (version == null) {
+								version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
 								if (version != null) {
-									retVal = myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
+									myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId(), version);
 								}
 							}
-							return retVal;
-						});
-					};
+							if (version != null) {
+								retVal = myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
+							}
+						}
+						return retVal;
+					});
 
 					DaoMethodOutcome outcome = toMethodOutcomeLazy(theRequest, pid, entitySupplier, idSupplier).setCreated(false).setNop(true);
 					StorageResponseCodeEnum responseCode = StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH;
@@ -811,9 +835,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.debug("Processed delete on {} (matched {} resource(s)) in {}ms", theUrl, deletedResources.size(), w.getMillis());
 
-		for (P next : theResourceIds) {
-			theTransactionDetails.addDeletedResourceId(next);
-		}
+		theTransactionDetails.addDeletedResourceIds(theResourceIds);
 
 		DeleteMethodOutcome retVal = new DeleteMethodOutcome();
 		retVal.setDeletedEntities(deletedResources);

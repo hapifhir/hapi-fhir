@@ -123,6 +123,15 @@ public class TransactionDetails {
 	/**
 	 * @since 6.8.0
 	 */
+	public void addDeletedResourceIds(Collection<? extends IResourcePersistentId> theResourceIds) {
+		for (IResourcePersistentId<?> next : theResourceIds) {
+			addDeletedResourceId(next);
+		}
+	}
+
+	/**
+	 * @since 6.8.0
+	 */
 	@Nonnull
 	public Set<IResourcePersistentId> getDeletedResourceIds() {
 		return Collections.unmodifiableSet(myDeletedResourceIds);
