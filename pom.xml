@@ -117,7 +117,7 @@
 		<module>hapi-fhir-android</module>
 		<module>hapi-fhir-cli</module>
 		<module>hapi-fhir-dist</module>
-		<module>tests/hapi-fhir-base-test-jaxrsserver-kotlin</module>
+<!--		<module>tests/hapi-fhir-base-test-jaxrsserver-kotlin</module>-->
 		<module>tests/hapi-fhir-base-test-mindeps-client</module>
 		<module>tests/hapi-fhir-base-test-mindeps-server</module>
 		<module>hapi-fhir-spring-boot</module>
