@@ -1,6 +1,0 @@
----
-issue: 4868
-type: fix
-title: "Paging with offsets wasn't working as expected.
-      This has been fixed.
-      "
