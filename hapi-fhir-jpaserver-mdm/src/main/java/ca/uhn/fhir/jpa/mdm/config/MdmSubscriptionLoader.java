@@ -24,16 +24,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -94,24 +93,12 @@ public class MdmSubscriptionLoader {
 	}
 
 	synchronized void updateIfNotPresent(IBaseResource theSubscription) {
-		SearchParameterMap searchParamMap = new SearchParameterMap();
-		searchParamMap.add(Subscription.SP_RES_ID, new TokenParam(theSubscription.getIdElement().getIdPart()));
-
-		// The reason we bother to search instead of reading is that reading a subscription that isn't there throws
-		// an error in the logs.  To cut down on logged errors that might confuse clients, we search first.
-		IBundleProvider bundleProvider = mySubscriptionDao.search(searchParamMap, SystemRequestDetails.forAllPartitions());
-
-		if (bundleProvider.isEmpty()) {
+		try {
+			mySubscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
+		} catch (ResourceNotFoundException | ResourceGoneException e) {
 			ourLog.info("Creating subscription " + theSubscription.getIdElement());
 			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartitions());
 		}
-
-//		try {
-//			mySubscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
-//		} catch (ResourceNotFoundException | ResourceGoneException e) {
-//			ourLog.info("Creating subscription " + theSubscription.getIdElement());
-//			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartitions());
-//		}
 	}
 
 	private org.hl7.fhir.dstu3.model.Subscription buildMdmSubscriptionDstu3(String theId, String theCriteria) {
