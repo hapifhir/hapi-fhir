@@ -441,7 +441,10 @@ public final class TerserUtil {
 	private static void replaceField(FhirTerser theTerser, IBaseResource theFrom, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition) {
 		List<IBase> fromValues = childDefinition.getAccessor().getValues(theFrom);
 		List<IBase> toValues = childDefinition.getAccessor().getValues(theTo);
-		if (fromValues != toValues) {
+
+		if (fromValues.isEmpty() && !toValues.isEmpty()) {
+			childDefinition.getMutator().setValue(theTo, null);
+		} else if (fromValues != toValues) {
 			clear(toValues);
 
 			mergeFields(theTerser, theTo, childDefinition, fromValues, toValues);
@@ -528,7 +531,6 @@ public final class TerserUtil {
 	/**
 	 * Creates a new element taking into consideration elements with choice that are not directly retrievable by element
 	 * name
-	 *
 	 *
 	 * @param theFhirTerser
 	 * @param theChildDefinition  Child to create a new instance for
