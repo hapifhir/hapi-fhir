@@ -172,6 +172,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	@Override
 	public void clear() {
+		ourLog.debug("Clearing latch {}", getName());
 		myCountdownLatch.set(null);
 		myCountdownLatchSetStacktrace.set(null);
 	}

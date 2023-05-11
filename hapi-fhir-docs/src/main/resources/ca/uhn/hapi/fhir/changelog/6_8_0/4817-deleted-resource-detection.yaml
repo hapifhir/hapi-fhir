@@ -1,0 +1,8 @@
+---
+type: change
+issue: 4817
+title: "Introduce IBaseResource.isDeleted() method and convert code to use it.
+Add subscription_topic_troubleshooting log.
+No longer rely on ResourceGoneException to detect deleted subscription. Instead use the new isDeleted() method.
+Demote unexpected exceptions in HapiTransactionService from error to debug since these exceptions are expected
+e.g. when checking if a resource has been deleted by catching a ResourceGoneException"
