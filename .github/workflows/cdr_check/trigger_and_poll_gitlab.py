@@ -13,7 +13,6 @@ comment = os.getenv("TRIGGERING_COMMENT")
 
 def fprint(message):
     print(message, flush=True)
-fprint(f"comment is {comment}")
 
 if not target_cdr_branch:
     fprint("Defaulting CDR branch to master as this is an automatic build.")
