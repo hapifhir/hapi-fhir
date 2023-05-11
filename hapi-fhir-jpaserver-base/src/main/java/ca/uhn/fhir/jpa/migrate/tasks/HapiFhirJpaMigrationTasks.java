@@ -1162,7 +1162,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V5_2_0);
 
 		Builder.BuilderWithTableName mdmLink = version.onTable("MPI_LINK");
-		mdmLink.addColumn("20201029.1", "GOLDEN_RESOURCE_PID").nullable().type(ColumnTypeEnum.LONG); // TODO ND - this is breaking migrator
+		mdmLink.addColumn("20201029.1", "GOLDEN_RESOURCE_PID").nullable().type(ColumnTypeEnum.LONG); // FIXME ND - this is breaking migrator
 		mdmLink.addColumn("20201029.2", "RULE_COUNT").nullable().type(ColumnTypeEnum.LONG);
 		mdmLink
 			.addForeignKey("20201029.3", "FK_EMPI_LINK_GOLDEN_RESOURCE")
