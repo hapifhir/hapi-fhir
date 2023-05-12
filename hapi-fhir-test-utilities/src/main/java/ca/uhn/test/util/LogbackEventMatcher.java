@@ -27,8 +27,8 @@ public class LogbackEventMatcher extends CustomTypeSafeMatcher<ILoggingEvent> {
 		this("log event", theLevel, thePartialString, theThrownMessage);
 	}
 
-	private LogbackEventMatcher(String description, @Nullable Level theLevel,
-										 @Nullable String thePartialString, @Nullable String theThrownMessage)
+	private LogbackEventMatcher(@Nonnull String description, Level theLevel,
+										 String thePartialString, String theThrownMessage)
 	{
 		super(makeDescription(description, theLevel, thePartialString, theThrownMessage));
 		myLevel = theLevel;
