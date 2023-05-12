@@ -107,6 +107,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -4111,6 +4112,41 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
 		}
 
+	}
+
+	@Test
+	public void testOrganizationOver100ReferencesFromBundleNoMultipleResourcesMatchError() throws IOException {
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+
+		// The bug involves a invalid Long equality comparison, so we need a generated organization ID much larger than 1.
+		IntStream.range(0, 150).forEach(myint -> {
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
+			myPatientDao.create(patient, mySrd);
+		});
+
+		final Organization organization = new Organization();
+		organization.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+			.setValue("9395b8cb-702c-3c5d-926e-1c3524fd6560");
+		organization.setName("PCP1401");
+		myOrganizationDao.create(organization, mySrd);
+
+		// This bundle needs to have over 100 resources, each referring to the same organization above.
+		// If there are 100 or less, then TransactionProcessor.preFetchConditionalUrls() will work off the same Long instance for the Organization JpaId
+		// and the Long == Long equality comparison will work
+		final InputStream resourceAsStream = getClass().getResourceAsStream("/bundle-refers-to-same-organization.json");
+		assertNotNull(resourceAsStream);
+		final String input = IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8);
+		final Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
+
+		try {
+			mySystemDao.transaction(mySrd, bundle);
+		} catch (PreconditionFailedException thePreconditionFailedException) {
+			if (thePreconditionFailedException.getMessage().contains(Msg.code(2207))) {
+				fail("This test has failed with HAPI-2207, exactly the condition we aim to prevent");
+			}
+			// else let the Exception bubble up
+		}
 	}
 
 	@Test
