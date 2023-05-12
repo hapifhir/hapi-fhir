@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
@@ -57,10 +58,15 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	@Autowired
 	private IBinaryStorageEntityDao myBinaryStorageEntityDao;
 
+	public DatabaseBlobBinaryStorageSvcImpl(FhirContext theFhirContext) {
+		super(theFhirContext);
+	}
+
 	@Nonnull
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
+											 InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
 
 		/*
 		 * Note on transactionality: This method used to have a propagation value of SUPPORTS and then do the actual
@@ -81,7 +87,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		Session session = (Session) myEntityManager.getDelegate();
 		LobHelper lobHelper = session.getLobHelper();
 		byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
-		String id = super.provideIdForNewBlob(theBlobIdOrNull, loadedStream, theRequestDetails);
+		String id = super.provideIdForNewBlob(theBlobIdOrNull, loadedStream, theRequestDetails, theContentType);
 		entity.setBlobId(id);
 		Blob dataBlob = lobHelper.createBlob(loadedStream);
 		entity.setBlob(dataBlob);

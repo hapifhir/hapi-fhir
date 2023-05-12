@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
@@ -59,7 +60,9 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	private final File myBasePath;
 	private final ObjectMapper myJsonSerializer;
 
-	public FilesystemBinaryStorageSvcImpl(String theBasePath) {
+	public FilesystemBinaryStorageSvcImpl(FhirContext theFhirContext, String theBasePath) {
+		super(theFhirContext);
+
 		Validate.notBlank(theBasePath);
 
 		myBasePath = new File(theBasePath);
@@ -89,7 +92,8 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	@Override
 	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
 											 InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
-		String id = super.provideIdForNewBlob(theBlobIdOrNull, null, theRequestDetails);
+
+		String id = super.provideIdForNewBlob(theBlobIdOrNull, null, theRequestDetails, theContentType);
 		File storagePath = getStoragePath(id, true);
 
 		// Write binary file

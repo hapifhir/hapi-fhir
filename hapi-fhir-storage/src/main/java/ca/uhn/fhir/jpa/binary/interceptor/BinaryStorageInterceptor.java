@@ -120,7 +120,8 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 			.stream()
 			.flatMap(t -> ((IBaseHasExtensions) t).getExtension().stream())
 			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
-			.map(t -> ((IPrimitiveType<?>) t.getValue()).getValueAsString()).toList();
+			.map(t -> ((IPrimitiveType<?>) t.getValue()).getValueAsString())
+			.collect(Collectors.toList());
 
 		for (String next : attachmentIds) {
 			myBinaryStorageSvc.expungeBlob(theResource.getIdElement(), next);

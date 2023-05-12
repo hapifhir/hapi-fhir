@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
@@ -42,24 +43,26 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
-	private ConcurrentHashMap<String, byte[]> myDataMap = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, StoredDetails> myDetailsMap = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, byte[]> myDataMap = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, StoredDetails> myDetailsMap = new ConcurrentHashMap<>();
 
 	/**
 	 * Constructor
 	 */
-	public MemoryBinaryStorageSvcImpl() {
-		super();
+	public MemoryBinaryStorageSvcImpl(FhirContext theFhirContext) {
+		super(theFhirContext);
 	}
 
 	@Nonnull
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
+											 InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
+
 		HashingInputStream hashingIs = createHashingInputStream(theInputStream);
 		CountingInputStream countingIs = createCountingInputStream(hashingIs);
 
 		byte[] bytes = IOUtils.toByteArray(countingIs);
-		String id = super.provideIdForNewBlob(theBlobIdOrNull, bytes, theRequestDetails);
+		String id = super.provideIdForNewBlob(theBlobIdOrNull, bytes, theRequestDetails, theContentType);
 		String key = toKey(theResourceId, id);
 		theInputStream.close();
 		myDataMap.put(key, bytes);
