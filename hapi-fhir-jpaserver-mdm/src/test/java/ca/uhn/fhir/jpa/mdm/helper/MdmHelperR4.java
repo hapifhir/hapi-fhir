@@ -1,15 +1,20 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
+import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
@@ -27,8 +32,8 @@ public class MdmHelperR4 extends BaseMdmHelper {
 	public OutcomeAndLogMessageWrapper createWithLatch(IBaseResource theBaseResource, boolean isExternalHttpRequest) throws InterruptedException {
 		myAfterMdmLatch.setExpectedCount(1);
 		DaoMethodOutcome daoMethodOutcome = doCreateResource(theBaseResource, isExternalHttpRequest);
-		myAfterMdmLatch.awaitExpected();
-		return new OutcomeAndLogMessageWrapper(daoMethodOutcome, myAfterMdmLatch.getLatchInvocationParameterOfType(TransactionLogMessages.class));
+		List<HookParams> hookParams = myAfterMdmLatch.awaitExpected();
+		return new OutcomeAndLogMessageWrapper(daoMethodOutcome, hookParams);
 	}
 
 	public OutcomeAndLogMessageWrapper updateWithLatch(IBaseResource theIBaseResource) throws InterruptedException {
@@ -38,8 +43,8 @@ public class MdmHelperR4 extends BaseMdmHelper {
 	public OutcomeAndLogMessageWrapper updateWithLatch(IBaseResource theIBaseResource, boolean isExternalHttpRequest) throws InterruptedException {
 		myAfterMdmLatch.setExpectedCount(1);
 		DaoMethodOutcome daoMethodOutcome = doUpdateResource(theIBaseResource, isExternalHttpRequest);
-		myAfterMdmLatch.awaitExpected();
-		return new OutcomeAndLogMessageWrapper(daoMethodOutcome, myAfterMdmLatch.getLatchInvocationParameterOfType(TransactionLogMessages.class));
+		List<HookParams> hookParams = myAfterMdmLatch.awaitExpected();
+		return new OutcomeAndLogMessageWrapper(daoMethodOutcome, hookParams);
 	}
 
 	public DaoMethodOutcome doCreateResource(IBaseResource theResource, boolean isExternalHttpRequest) {
@@ -68,12 +73,12 @@ public class MdmHelperR4 extends BaseMdmHelper {
 	 * by the MDM module.
 	 */
 	public class OutcomeAndLogMessageWrapper {
-		DaoMethodOutcome myDaoMethodOutcome;
-		TransactionLogMessages myLogMessages;
+		private final DaoMethodOutcome myDaoMethodOutcome;
+		private final List<HookParams> myHookParams;
 
-		private OutcomeAndLogMessageWrapper(DaoMethodOutcome theDaoMethodOutcome, TransactionLogMessages theTransactionLogMessages) {
+		public OutcomeAndLogMessageWrapper(DaoMethodOutcome theDaoMethodOutcome, List<HookParams> theHookParams) {
 			myDaoMethodOutcome = theDaoMethodOutcome;
-			myLogMessages = theTransactionLogMessages;
+			myHookParams = theHookParams;
 		}
 
 		public DaoMethodOutcome getDaoMethodOutcome() {
@@ -81,7 +86,19 @@ public class MdmHelperR4 extends BaseMdmHelper {
 		}
 
 		public TransactionLogMessages getLogMessages() {
-			return myLogMessages;
+			return PointcutLatch.getInvocationParameterOfType(myHookParams, TransactionLogMessages.class);
+		}
+
+		public List<HookParams> getHookParams() {
+			return myHookParams;
+		}
+
+		public MdmLinkEvent getMdmLinkEvent() {
+			return PointcutLatch.getInvocationParameterOfType(myHookParams, MdmLinkEvent.class);
+		}
+
+		public ResourceOperationMessage getResourceOperationMessage() {
+			return PointcutLatch.getInvocationParameterOfType(myHookParams, ResourceOperationMessage.class);
 		}
 	}
 
