@@ -66,7 +66,6 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	@BeforeEach
 	void beforeEach() {
 		afterPurgeDatabase();
-		//myStorageSettings.setJobFastTrackingEnabled(false);
 	}
 
 	@AfterEach
