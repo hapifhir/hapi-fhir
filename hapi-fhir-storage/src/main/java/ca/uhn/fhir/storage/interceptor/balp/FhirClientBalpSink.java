@@ -13,7 +13,7 @@ import java.util.List;
 
 public class FhirClientBalpSink implements IBalpAuditEventSink {
 
-	private final IGenericClient myClient;
+	protected final IGenericClient myClient;
 	private final VersionCanonicalizer myVersionCanonicalizer;
 
 	/**
