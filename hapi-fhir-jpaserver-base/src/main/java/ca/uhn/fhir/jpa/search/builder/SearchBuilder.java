@@ -79,6 +79,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -126,7 +127,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
-import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -1166,16 +1166,28 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					sqlBuilder.append(" FROM ResourceLink r WHERE ");
 
 					sqlBuilder.append("r.");
-					sqlBuilder.append(searchPidFieldName);
+					sqlBuilder.append(searchPidFieldName); // (rev mode) target_resource_id | source_resource_id
 					sqlBuilder.append(" IN (:target_pids)");
 
-					// Technically if the request is a qualified star (e.g. _include=Observation:*) we
-					// should always be checking the source resource type on the resource link. We don't
-					// actually index that column though by default, so in order to try and be efficient
-					// we don't actually include it for includes (but we do for revincludes). This is
-					// because for an include it doesn't really make sense to include a different
-					// resource type than the one you are searching on.
-					if (wantResourceType != null && theReverseMode) {
+					/*
+					 * We need to set the resource type in 2 cases only:
+					 * 1) we are in $everything mode
+					 * 		(where we only want to fetch specific resource types, regardless of what is
+					 * 		available to fetch)
+					 * 2) we are doing revincludes
+					 *
+					 *	Technically if the request is a qualified star (e.g. _include=Observation:*) we
+					 * should always be checking the source resource type on the resource link. We don't
+					 * actually index that column though by default, so in order to try and be efficient
+					 * we don't actually include it for includes (but we do for revincludes). This is
+					 * because for an include, it doesn't really make sense to include a different
+					 * resource type than the one you are searching on.
+					 */
+					if (wantResourceType != null
+						&& (theReverseMode || (myParams != null && myParams.getEverythingMode() != null))) {
+						// because mySourceResourceType is not part of the HFJ_RES_LINK
+						// index, this might not be the most optimal performance.
+						// but it is for an $everything operation (and maybe we should update the index)
 						sqlBuilder.append(" AND r.mySourceResourceType = :want_resource_type");
 					} else {
 						wantResourceType = null;
@@ -1220,7 +1232,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 					}
 				} else {
-
 					List<String> paths;
 
 					// Start replace
@@ -1557,6 +1568,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return myResourceName;
 	}
 
+	/**
+	 * IncludesIterator, used to recursively fetch resources from the provided list of PIDs
+	 */
 	public class IncludesIterator extends BaseIterator<JpaPid> implements Iterator<JpaPid> {
 
 		private final RequestDetails myRequest;
@@ -1574,7 +1588,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			while (myNext == null) {
 
 				if (myCurrentIterator == null) {
-					Set<Include> includes = Collections.singleton(new Include("*", true));
+					Set<Include> includes = new HashSet<>();
+					if (myParams.containsKey(Constants.PARAM_TYPE)) {
+						for (List<IQueryParameterType> typeList : myParams.get(Constants.PARAM_TYPE)) {
+							for (IQueryParameterType type : typeList) {
+								String queryString = ParameterUtil.unescape(type.getValueAsQueryToken(myContext));
+								for (String resourceType : queryString.split(",")) {
+									String rt = resourceType.trim();
+									if (isNotBlank(rt)) {
+										includes.add(new Include(rt + ":*", true));
+									}
+								}
+							}
+						}
+					}
+					if (includes.isEmpty()) {
+						includes.add(new Include("*", true));
+					}
 					Set<JpaPid> newPids = loadIncludes(myContext, myEntityManager, myCurrentPids, includes, false, getParams().getLastUpdated(), mySearchUuid, myRequest, null);
 					myCurrentIterator = newPids.iterator();
 				}
@@ -1604,6 +1634,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	}
 
+	/**
+	 * Basic Query iterator, used to fetch the results of a query.
+	 */
 	private final class QueryIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
 
 		private final SearchRuntimeDetails mySearchRuntimeDetails;
@@ -1627,8 +1660,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			myOffset = myParams.getOffset();
 			myRequest = theRequest;
 
-			// Includes are processed inline for $everything query when we don't have a '_type' specified
-			if (myParams.getEverythingMode() != null && !myParams.containsKey(Constants.PARAM_TYPE)) {
+			// everything requires fetching recursively all related resources
+			if (myParams.getEverythingMode() != null) {
 				myFetchIncludesForEverythingOperation = true;
 			}
 
@@ -1638,7 +1671,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		private void fetchNext() {
-
 			try {
 				if (myHaveRawSqlHooks) {
 					CurrentThreadCaptureQueriesListener.startCapturing();
@@ -1656,6 +1688,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 					}
 
+					// assigns the results iterator
 					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 
 					if (myAlsoIncludePids == null) {
@@ -1663,9 +1696,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					}
 				}
 
+
 				if (myNext == null) {
-
-
 					for (Iterator<JpaPid> myPreResultsIterator = myAlsoIncludePids.iterator(); myPreResultsIterator.hasNext(); ) {
 						JpaPid next = myPreResultsIterator.next();
 						if (next != null)
@@ -1724,6 +1756,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					}
 
 					if (myNext == null) {
+						// if we got here, it means the current PjaPid has already been processed
+						// and we will decide (here) if we need to fetch related resources recursively
 						if (myFetchIncludesForEverythingOperation) {
 							myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
 							myFetchIncludesForEverythingOperation = false;
@@ -1750,6 +1784,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
 
 			} finally {
+				// search finished - fire hooks
 				if (myHaveRawSqlHooks) {
 					SqlQueryList capturedQueries = CurrentThreadCaptureQueriesListener.getCurrentQueueAndStopCapturing();
 					HookParams params = new HookParams()
