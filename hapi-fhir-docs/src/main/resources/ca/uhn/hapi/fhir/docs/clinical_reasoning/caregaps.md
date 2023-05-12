@@ -10,7 +10,8 @@ A Gaps in Care Report is designed to communicate actual or perceived gaps in car
 
 The gaps in care flow is between a provider and a measurement organization’s system performing analytics.
 
-![caregapsflow.png](caregapsflow.png)<sub><sup>Sourced from [IG](http://hl7.org/fhir/us/davinci-deqm/2023Jan/gaps-in-care-reporting.html)</sup></sub>
+
+<a href="/hapi-fhir/docs/images/caregapsflow.png"><img src="/hapi-fhir/docs/images/caregapsflow.png" alt="Care Gaps Flow" style="margin-left: 15px; margin-bottom: 15px;" /></a><sub><sup>Sourced from [Implementation Guide](http://hl7.org/fhir/us/davinci-deqm/2023Jan/gaps-in-care-reporting.html)</sup></sub>
 
 The Gaps in Care Reporting uses the [DEQM Individual MeasureReport Profile](http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-indv-measurereport-deqm.html). This allows the Gaps in Care Reporting to use the same machinery as the Individual Reporting to calculate measures and represent the results of individual calculation.
 
