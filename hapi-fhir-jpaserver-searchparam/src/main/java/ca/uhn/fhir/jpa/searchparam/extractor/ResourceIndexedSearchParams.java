@@ -344,13 +344,7 @@ public final class ResourceIndexedSearchParams {
 	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(PartitionSettings thePartitionSettings, StorageSettings theStorageSettings, ResourceTable theEntity, ResourceSearchParams activeSearchParams, RestSearchParameterTypeEnum type,
 																												Collection<RT> paramCollection) {
 		for (String nextParamName : activeSearchParams.getSearchParamNames()) {
-
-			if (nextParamName == null || (nextParamName.startsWith("_") && theStorageSettings.getIndexMissingFields() == StorageSettings.IndexEnabledEnum.DISABLED)) {
-				continue;
-			}
-
-			if (theStorageSettings.getIndexMissingFields() == StorageSettings.IndexEnabledEnum.ENABLED &&
-				!(nextParamName.equalsIgnoreCase("_tag") || nextParamName.equalsIgnoreCase("_security") || nextParamName.equalsIgnoreCase("_profile"))) {
+			if (nextParamName == null) {
 				continue;
 			}
 
