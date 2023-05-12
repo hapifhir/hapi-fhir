@@ -70,8 +70,8 @@ stages:
                   #                  Put to top, but kept in order here
                   #                  -  name: hapi_fhir_jpaserver_test_utilities
                   #                     module: hapi-fhir-jpaserver-test-utilities
-                  -  name: hapi_fhir_jpaserver_uhnfhirtest
-                     module: hapi-fhir-jpaserver-uhnfhirtest
+#                  -  name: hapi_fhir_jpaserver_uhnfhirtest
+#                     module: hapi-fhir-jpaserver-uhnfhirtest
                   -  name: hapi_fhir_server
                      module: hapi-fhir-server
                   -  name: hapi_fhir_server_mdm
