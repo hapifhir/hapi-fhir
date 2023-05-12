@@ -86,7 +86,10 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		options.setExpungeEverything(true);
 		options.setExpungeDeletedResources(true);
 		options.setExpungeOldVersions(true);
+		// TODO KHS shouldn't this be 1?  Investigate why is it 2?
+		myExpungeResourceLatch.setExpectedCount(2);
 		myPatientDao.expunge(id.toUnqualifiedVersionless(), options, mySrd);
+		myExpungeResourceLatch.awaitExpected();
 		assertPatientGone(id);
 
 		// Create it a second time.

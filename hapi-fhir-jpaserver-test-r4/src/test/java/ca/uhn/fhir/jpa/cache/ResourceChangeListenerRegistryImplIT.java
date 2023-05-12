@@ -229,7 +229,9 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 
 		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
+		otherTestCallback.setInitExpectedCount(1);
 		otherCache.forceRefresh();
+		otherTestCallback.awaitInitExpected();
 		assertEquals(2, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(myMaleTestCallback);

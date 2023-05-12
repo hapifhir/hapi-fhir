@@ -39,7 +39,7 @@ public class CountingInterceptor implements ChannelInterceptor {
 
 	@Override
 	public void afterSendCompletion(Message<?> theMessage, MessageChannel theChannel, boolean theSent, Exception theException) {
-		ourLog.info("Counting another instance: {}", theMessage);
+		ourLog.info("Send complete for message: {}", theMessage);
 		if (theSent) {
 			mySent.add(theMessage.toString());
 		}
