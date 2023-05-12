@@ -95,6 +95,17 @@ public class SearchParameterCanonicalizer {
 		String name = theNextSp.getCode();
 		String description = theNextSp.getDescription();
 		String path = theNextSp.getXpath();
+
+		Collection<String> base = toStrings(Collections.singletonList(theNextSp.getBaseElement()));
+		// add extensions as base if the SP is for a custom resource type
+		List<ExtensionDt> customSPBase = theNextSp.getUndeclaredExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
+		for (ExtensionDt e : customSPBase) {
+			String eStr = e.getValueAsPrimitive().getValueAsString();
+			if (StringUtils.isNotBlank(eStr)) {
+				base.add(eStr);
+			}
+		}
+
 		RestSearchParameterTypeEnum paramType = null;
 		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
 		if (theNextSp.getTypeElement().getValueAsEnum() != null) {
@@ -140,6 +151,14 @@ public class SearchParameterCanonicalizer {
 		}
 		Set<String> providesMembershipInCompartments = Collections.emptySet();
 		Set<String> targets = DatatypeUtil.toStringSet(theNextSp.getTarget());
+		// add extensions as target if the SP is for a custom resource type
+		List<ExtensionDt> customSPTargets = theNextSp.getUndeclaredExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE);
+		for (ExtensionDt e : customSPTargets) {
+			String eStr = e.getValueAsPrimitive().getValueAsString();
+			if (StringUtils.isNotBlank(eStr)) {
+				targets.add(eStr);
+			}
+		}
 
 		if (isBlank(name) || isBlank(path)) {
 			if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
@@ -164,14 +183,24 @@ public class SearchParameterCanonicalizer {
 		}
 
 		List<RuntimeSearchParam.Component> components = Collections.emptyList();
-		Collection<? extends IPrimitiveType<String>> base = Collections.singletonList(theNextSp.getBaseElement());
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(base));
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {
 		String name = theNextSp.getCode();
 		String description = theNextSp.getDescription();
 		String path = theNextSp.getExpression();
+
+		List<String> base = new ArrayList<>(toStrings(theNextSp.getBase()));
+		// add extensions as base if the SP is for a custom resource type
+		List<Extension> customSPBase = theNextSp.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
+		for (Extension e : customSPBase){
+			String eStr = e.getValueAsPrimitive().getValueAsString();
+			if (StringUtils.isNotBlank(eStr)) {
+				base.add(eStr);
+			}
+		}
+
 		RestSearchParameterTypeEnum paramType = null;
 		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
 		if (theNextSp.getType() != null) {
@@ -222,8 +251,17 @@ public class SearchParameterCanonicalizer {
 					break;
 			}
 		}
+
 		Set<String> providesMembershipInCompartments = Collections.emptySet();
 		Set<String> targets = DatatypeUtil.toStringSet(theNextSp.getTarget());
+		// add extensions as target if the SP is for a custom resource type
+		List<Extension> customSPTargets = theNextSp.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE);
+		for (Extension e : customSPTargets) {
+			String eStr = e.getValueAsPrimitive().getValueAsString();
+			if (StringUtils.isNotBlank(eStr)) {
+				targets.add(eStr);
+			}
+		}
 
 		if (isBlank(name) || isBlank(path) || paramType == null) {
 			if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
@@ -252,7 +290,7 @@ public class SearchParameterCanonicalizer {
 			components.add(new RuntimeSearchParam.Component(next.getExpression(), next.getDefinition().getReferenceElement().toUnqualifiedVersionless().getValue()));
 		}
 
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(theNextSp.getBase()));
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterR4Plus(IBaseResource theNextSp) {
