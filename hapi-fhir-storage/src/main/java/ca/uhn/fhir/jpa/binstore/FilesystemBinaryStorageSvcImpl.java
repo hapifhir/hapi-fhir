@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
@@ -60,9 +59,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	private final File myBasePath;
 	private final ObjectMapper myJsonSerializer;
 
-	public FilesystemBinaryStorageSvcImpl(FhirContext theFhirContext, String theBasePath) {
-		super(theFhirContext);
-
+	public FilesystemBinaryStorageSvcImpl(String theBasePath) {
 		Validate.notBlank(theBasePath);
 
 		myBasePath = new File(theBasePath);

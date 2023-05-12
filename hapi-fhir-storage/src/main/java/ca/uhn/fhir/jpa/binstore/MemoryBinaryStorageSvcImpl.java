@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.binstore;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
@@ -49,8 +48,8 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 	/**
 	 * Constructor
 	 */
-	public MemoryBinaryStorageSvcImpl(FhirContext theFhirContext) {
-		super(theFhirContext);
+	public MemoryBinaryStorageSvcImpl() {
+		super();
 	}
 
 	@Nonnull

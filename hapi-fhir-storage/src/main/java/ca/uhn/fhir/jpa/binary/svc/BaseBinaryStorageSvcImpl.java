@@ -63,14 +63,13 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private long myMaximumBinarySize = DEFAULT_MAXIMUM_BINARY_SIZE;
 	private int myMinimumBinarySize;
 
-	private final FhirContext myFhirContext;
-
+	@Autowired
+	private FhirContext myFhirContext;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 
-	public BaseBinaryStorageSvcImpl(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
+	public BaseBinaryStorageSvcImpl() {
 		myRandom = new SecureRandom();
 	}
 

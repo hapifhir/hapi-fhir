@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.binstore;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
@@ -57,10 +56,6 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	private EntityManager myEntityManager;
 	@Autowired
 	private IBinaryStorageEntityDao myBinaryStorageEntityDao;
-
-	public DatabaseBlobBinaryStorageSvcImpl(FhirContext theFhirContext) {
-		super(theFhirContext);
-	}
 
 	@Nonnull
 	@Override
