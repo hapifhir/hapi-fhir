@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteStreams;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -55,9 +57,10 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	@Autowired
 	private IBinaryStorageEntityDao myBinaryStorageEntityDao;
 
+	@Nonnull
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
 
 		/*
 		 * Note on transactionality: This method used to have a propagation value of SUPPORTS and then do the actual
@@ -70,17 +73,16 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		HashingInputStream hashingInputStream = createHashingInputStream(theInputStream);
 		CountingInputStream countingInputStream = createCountingInputStream(hashingInputStream);
 
-		String id = super.provideIdForNewBlob(theBlobIdOrNull);
-
 		BinaryStorageEntity entity = new BinaryStorageEntity();
 		entity.setResourceId(theResourceId.toUnqualifiedVersionless().getValue());
-		entity.setBlobId(id);
 		entity.setBlobContentType(theContentType);
 		entity.setPublished(publishedDate);
 
 		Session session = (Session) myEntityManager.getDelegate();
 		LobHelper lobHelper = session.getLobHelper();
 		byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
+		String id = super.provideIdForNewBlob(theBlobIdOrNull, loadedStream, theRequestDetails);
+		entity.setBlobId(id);
 		Blob dataBlob = lobHelper.createBlob(loadedStream);
 		entity.setBlob(dataBlob);
 
@@ -105,7 +107,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
 
 		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
-		if (entityOpt.isPresent() == false) {
+		if (entityOpt.isEmpty()) {
 			return null;
 		}
 
@@ -121,7 +123,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	@Override
 	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
 		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
-		if (entityOpt.isPresent() == false) {
+		if (entityOpt.isEmpty()) {
 			return false;
 		}
 

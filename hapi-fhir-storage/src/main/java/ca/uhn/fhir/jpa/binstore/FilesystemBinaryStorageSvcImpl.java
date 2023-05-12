@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,8 +52,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
@@ -86,9 +85,11 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		return !StringUtils.containsAny(theNewBlobId, '\\', '/', '|', '.');
 
 	}
+	@Nonnull
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
-		String id = super.provideIdForNewBlob(theBlobIdOrNull);
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
+											 InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
+		String id = super.provideIdForNewBlob(theBlobIdOrNull, null, theRequestDetails);
 		File storagePath = getStoragePath(id, true);
 
 		// Write binary file
@@ -138,11 +139,9 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		InputStream inputStream = getInputStream(theResourceId, theBlobId);
 
 		if (inputStream != null) {
-			try {
+			try (inputStream) {
 				IOUtils.copy(inputStream, theOutputStream);
 				theOutputStream.close();
-			} finally {
-				inputStream.close();
 			}
 		}
 
@@ -232,7 +231,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		try {
 			FileUtils.forceMkdir(theBasePath);
 		} catch (IOException e) {
-			throw new ConfigurationException(Msg.code(1328) + "Unable to create path " + myBasePath + ": " + e.toString());
+			throw new ConfigurationException(Msg.code(1328) + "Unable to create path " + myBasePath + ": " + e);
 		}
 	}
 }

@@ -22,10 +22,11 @@ package ca.uhn.fhir.jpa.binary.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.io.IOException;
+import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -62,12 +63,14 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public String newBlobId() {
+	public String newBlobId(RequestDetails theRequestDetails, String theContentType) {
 		throw new UnsupportedOperationException(Msg.code(1345));
 	}
 
+	@Nonnull
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) {
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
+											 InputStream theInputStream, RequestDetails theRequestDetails) {
 		throw new UnsupportedOperationException(Msg.code(1346));
 	}
 
@@ -92,7 +95,7 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public byte[] fetchDataBlobFromBinary(IBaseBinary theResource) throws IOException {
+	public byte[] fetchDataBlobFromBinary(IBaseBinary theResource) {
 		throw new UnsupportedOperationException(Msg.code(1351));
 	}
 }

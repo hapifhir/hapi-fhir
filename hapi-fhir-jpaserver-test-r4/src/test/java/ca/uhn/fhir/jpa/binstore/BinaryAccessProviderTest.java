@@ -157,7 +157,7 @@ public class BinaryAccessProviderTest {
 	}
 
 	@Test
-	public void testBinaryAccessRead_WithoutAttachmentId_NullData() throws IOException {
+	public void testBinaryAccessRead_WithoutAttachmentId_NullData() {
 		DocumentReference docRef = new DocumentReference();
 		DocumentReference.DocumentReferenceContentComponent content = docRef.addContent();
 		content.getAttachment().setContentType("application/octet-stream");
@@ -257,7 +257,7 @@ public class BinaryAccessProviderTest {
 		when(theServletRequest.getContentLength()).thenReturn(15);
 		when(myBinaryStorageSvc.shouldStoreBlob(15, docRef.getIdElement(), "Integer")).thenReturn(true);
 		myRequestDetails.setServletRequest(theServletRequest);
-		when(myBinaryStorageSvc.storeBlob(eq(docRef.getIdElement()), isNull(), eq("Integer"), any(InputStream.class))).thenReturn(sd);
+		when(myBinaryStorageSvc.storeBlob(eq(docRef.getIdElement()), isNull(), eq("Integer"), any(InputStream.class), any(ServletRequestDetails.class))).thenReturn(sd);
 		myRequestDetails.setRequestContents(SOME_BYTES);
 
 		try {
@@ -266,7 +266,7 @@ public class BinaryAccessProviderTest {
 			assertEquals(docRef.getId(), outcome.getIdElement().getValue());
 		} catch (IOException e) {
 		}
-		verify(myBinaryStorageSvc, times(1)).storeBlob(any(), any(), any(), any());
+		verify(myBinaryStorageSvc, times(1)).storeBlob(any(), any(), any(), any(), any(ServletRequestDetails.class));
 	}
 
 	@Test

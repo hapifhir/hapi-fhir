@@ -22,11 +22,13 @@ package ca.uhn.fhir.jpa.binstore;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.hash.HashingInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -50,15 +52,15 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 		super();
 	}
 
+	@Nonnull
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
-		String id = super.provideIdForNewBlob(theBlobIdOrNull);
-		String key = toKey(theResourceId, id);
-
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
 		HashingInputStream hashingIs = createHashingInputStream(theInputStream);
 		CountingInputStream countingIs = createCountingInputStream(hashingIs);
 
 		byte[] bytes = IOUtils.toByteArray(countingIs);
+		String id = super.provideIdForNewBlob(theBlobIdOrNull, bytes, theRequestDetails);
+		String key = toKey(theResourceId, id);
 		theInputStream.close();
 		myDataMap.put(key, bytes);
 		StoredDetails storedDetails = new StoredDetails(id, countingIs.getByteCount(), theContentType, hashingIs, new Date());

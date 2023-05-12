@@ -4,7 +4,6 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.executor.BaseInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
@@ -77,9 +76,6 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	private MemoryBinaryStorageSvcImpl myStorageSvc;
 	@Autowired
 	private IBinaryStorageSvc myBinaryStorageSvc;
-
-	@Autowired
-	private BaseInterceptorService<Pointcut> myBaseInterceptorService;
 
 	@Override
 	@BeforeEach
@@ -570,7 +566,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = myClient.create().resource(dr).execute().getId().toUnqualifiedVersionless();
 
 		BinaryBlobIdInterceptor interceptor = spy(new BinaryBlobIdInterceptor());
-		myBaseInterceptorService.registerInterceptor(interceptor);
+		myInterceptorRegistry.registerInterceptor(interceptor);
 
 		try {
 			// Write using the operation
@@ -605,6 +601,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 	}
+
 	@Test
 	public void testWriteLargeBinaryToDocumentReference() throws IOException {
 		byte[] bytes = new byte[134696];

@@ -14,7 +14,7 @@ public class BaseBinaryStorageSvcImplTest {
 	@Test
 	public void testNewRandomId() {
 		MemoryBinaryStorageSvcImpl svc = new MemoryBinaryStorageSvcImpl();
-		String id = svc.newBlobId();
+		String id = svc.newBlobId(null, null);
 		ourLog.info(id);
 		assertThat(id, matchesPattern("^[a-zA-Z0-9]{100}$"));
 	}
