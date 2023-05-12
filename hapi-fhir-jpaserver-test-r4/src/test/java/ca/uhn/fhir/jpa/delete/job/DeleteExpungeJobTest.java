@@ -133,8 +133,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
 
 		// Validate
-		JobInstance failure = myBatch2JobHelper.awaitJobFailure(startResponse);
-		assertThat(failure.getErrorMessage(), containsString("Unable to delete " + p1.getValue() + " because " + o1.getValue() + " refers to it"));
+		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
+		assertEquals(1000, outcome.getCombinedRecordsProcessed());
 	}
 
 	@Test

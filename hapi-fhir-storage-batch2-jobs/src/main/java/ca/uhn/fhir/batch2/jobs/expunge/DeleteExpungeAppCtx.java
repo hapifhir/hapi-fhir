@@ -53,7 +53,7 @@ public class DeleteExpungeAppCtx {
 			.setJobDescription("Expunge resources")
 			.setJobDefinitionVersion(1)
 			.setParametersType(DeleteExpungeJobParameters.class)
-			.setParametersValidator(expungeJobParametersValidator(theBatch2DaoSvc))
+			.setParametersValidator(expungeJobParametersValidator(theBatch2DaoSvc, theDeleteExpungeSvc))
 			.gatedExecution()
 			.addFirstStep(
 				"generate-ranges",
@@ -73,8 +73,8 @@ public class DeleteExpungeAppCtx {
 	}
 
 	@Bean
-	public DeleteExpungeJobParametersValidator expungeJobParametersValidator(IBatch2DaoSvc theBatch2DaoSvc) {
-		return new DeleteExpungeJobParametersValidator(new UrlListValidator(ProviderConstants.OPERATION_EXPUNGE, theBatch2DaoSvc));
+	public DeleteExpungeJobParametersValidator expungeJobParametersValidator(IBatch2DaoSvc theBatch2DaoSvc, IDeleteExpungeSvc theDeleteExpungeSvc) {
+		return new DeleteExpungeJobParametersValidator(new UrlListValidator(ProviderConstants.OPERATION_EXPUNGE, theBatch2DaoSvc), theDeleteExpungeSvc);
 	}
 
 	@Bean

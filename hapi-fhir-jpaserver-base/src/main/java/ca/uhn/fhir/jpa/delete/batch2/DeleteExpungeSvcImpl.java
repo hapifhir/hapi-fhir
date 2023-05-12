@@ -48,8 +48,8 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	}
 
 	@Override
-	public void deleteExpunge(List<JpaPid> theJpaPids) {
-		List<String> sqlList = myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids);
+	public void deleteExpunge(List<JpaPid> theJpaPids, boolean theCascade) {
+		List<String> sqlList = myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids, theCascade);
 
 		ourLog.debug("Executing {} delete expunge sql commands", sqlList.size());
 		long totalDeleted = 0;

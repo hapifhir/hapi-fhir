@@ -20,8 +20,10 @@
 package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.batch2.jobs.parameters.IUrlListValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
+import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.util.ValidateUtil;
 
 import javax.annotation.Nonnull;
@@ -29,15 +31,22 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class DeleteExpungeJobParametersValidator implements IJobParametersValidator<DeleteExpungeJobParameters> {
-	private final UrlListValidator myUrlListValidator;
+	private final IUrlListValidator myUrlListValidator;
+	private final IDeleteExpungeSvc<?> myDeleteExpungeSvc;
 
-	public DeleteExpungeJobParametersValidator(UrlListValidator theUrlListValidator) {
+	public DeleteExpungeJobParametersValidator(IUrlListValidator theUrlListValidator, IDeleteExpungeSvc<?> theDeleteExpungeSvc) {
 		myUrlListValidator = theUrlListValidator;
+		myDeleteExpungeSvc = theDeleteExpungeSvc;
 	}
 
 	@Nullable
 	@Override
 	public List<String> validate(@Nonnull DeleteExpungeJobParameters theParameters) {
+
+		if (theParameters.isCascade() && !myDeleteExpungeSvc.isCascadeSupported()) {
+			return List.of("Cascading delete is not supported on this server");
+		}
+
 		for (PartitionedUrl partitionedUrl : theParameters.getPartitionedUrls()) {
 			String url = partitionedUrl.getUrl();
 			ValidateUtil.isTrueOrThrowInvalidRequest(url.matches("[a-zA-Z]+\\?.*"), "Delete expunge URLs must be in the format [resourceType]?[parameters]");

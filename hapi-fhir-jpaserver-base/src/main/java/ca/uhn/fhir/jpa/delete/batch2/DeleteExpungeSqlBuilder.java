@@ -34,7 +34,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DeleteExpungeSqlBuilder {
@@ -56,10 +58,10 @@ public class DeleteExpungeSqlBuilder {
 
 
 	@Nonnull
-	List<String> convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids) {
-		List<Long> pids = JpaPid.toLongList(theJpaPids);
+	List<String> convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids, boolean theCascade) {
+		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
 
-		validateOkToDeleteAndExpunge(pids);
+		validateOkToDeleteAndExpunge(pids, theCascade);
 
 		List<String> rawSql = new ArrayList<>();
 
@@ -76,7 +78,7 @@ public class DeleteExpungeSqlBuilder {
 		return rawSql;
 	}
 
-	public void validateOkToDeleteAndExpunge(List<Long> thePids) {
+	public void validateOkToDeleteAndExpunge(Set<Long> thePids, boolean theCascade) {
 		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete()) {
 			ourLog.info("Referential integrity on delete disabled.  Skipping referential integrity check.");
 			return;
@@ -87,6 +89,13 @@ public class DeleteExpungeSqlBuilder {
 		findResourceLinksWithTargetPidIn(targetPidsAsResourceIds, targetPidsAsResourceIds, conflictResourceLinks);
 
 		if (conflictResourceLinks.isEmpty()) {
+			return;
+		}
+
+		if (theCascade) {
+			for (ResourceLink next : conflictResourceLinks) {
+				thePids.add(next.getSourceResourcePid());
+			}
 			return;
 		}
 

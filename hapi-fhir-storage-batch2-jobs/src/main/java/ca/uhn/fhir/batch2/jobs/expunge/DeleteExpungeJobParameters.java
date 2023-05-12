@@ -26,7 +26,7 @@ public class DeleteExpungeJobParameters extends PartitionedUrlListJobParameters 
 	@JsonProperty("cascade")
 	private boolean myCascade;
 
-	public boolean isMyCascade() {
+	public boolean isCascade() {
 		return myCascade;
 	}
 
