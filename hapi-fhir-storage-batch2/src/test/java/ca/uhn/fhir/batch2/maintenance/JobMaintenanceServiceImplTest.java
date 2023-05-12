@@ -19,11 +19,16 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -53,6 +58,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -61,6 +67,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
+	@RegisterExtension
+	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) JobMaintenanceServiceImpl.ourLog, Level.WARN);
 	@Mock
 	IJobCompletionHandler<TestJobParameters> myCompletionHandler;
 	@Mock
@@ -113,6 +121,26 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		mySvc.runMaintenancePass();
 
 		verify(myJobPersistence, times(1)).updateInstance(any(), any());
+	}
+
+	@Test
+	public void testInProgress_Calculate_progresss_JobDefinitionMissing() {
+		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
+		List<WorkChunk> chunks = List.of(
+			JobCoordinatorImplTest.createWorkChunk(STEP_1, null).setStatus(WorkChunkStatusEnum.COMPLETED),
+			JobCoordinatorImplTest.createWorkChunk(STEP_2, null).setStatus(WorkChunkStatusEnum.QUEUED)
+		);
+
+		JobInstance instance = createInstance();
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(List.of(instance));
+
+		mySvc.runMaintenancePass();
+
+		String assumedRoleLogText = String.format("Job definition %s for instance %s is currently unavailable", JOB_DEFINITION_ID,  instance.getInstanceId());
+		List<ILoggingEvent> fetchedCredentialLogs = myLogCapture.filterLoggingEventsWithMessageEqualTo(assumedRoleLogText);
+		assertEquals(1, fetchedCredentialLogs.size());
+
+		verify(myJobPersistence, never()).updateInstance(any(), any());
 	}
 
 	@Test
