@@ -48,6 +48,7 @@ public class Batch2JobInfo {
 	private String myReport;
 
 	private RequestPartitionId myRequestPartitionId;
+	private Integer myCombinedRecordsProcessed;
 
 	public String getJobId() {
 		return myJobId;
@@ -112,4 +113,13 @@ public class Batch2JobInfo {
 	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
 		myRequestPartitionId = theRequestPartitionId;
 	}
+
+	public Integer getCombinedRecordsProcessed() {
+		return myCombinedRecordsProcessed;
+	}
+
+	public void setCombinedRecordsProcessed(Integer theCombinedRecordsProcessed) {
+		myCombinedRecordsProcessed = theCombinedRecordsProcessed;
+	}
+
 }
