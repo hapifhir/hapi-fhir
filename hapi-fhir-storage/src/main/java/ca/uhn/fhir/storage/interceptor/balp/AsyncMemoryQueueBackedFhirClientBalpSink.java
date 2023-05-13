@@ -1,17 +1,40 @@
+/*-
+ * #%L
+ * HAPI FHIR Storage api
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.storage.interceptor.balp;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -29,6 +52,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 
 	public static final IBaseResource[] EMPTY_RESOURCE_ARRAY = new IBaseResource[0];
 	private static final AtomicLong ourNextThreadId = new AtomicLong(0);
+	private static final Logger ourLog = LoggerFactory.getLogger(AsyncMemoryQueueBackedFhirClientBalpSink.class);
 	private final List<IBaseResource> myQueue = new ArrayList<>(100);
 	private final ThreadPoolTaskExecutor myThreadPool;
 	private final Runnable myTransmitterTask = new TransmitterTask();
@@ -47,6 +71,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 		this(theFhirContext, theTargetBaseUrl, null);
 	}
 
+
 	/**
 	 * Sets the FhirContext to use when initiating outgoing connections
 	 *
@@ -63,7 +88,6 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 		this(createClient(theFhirContext, theTargetBaseUrl, theClientInterceptors));
 	}
 
-
 	/**
 	 * Constructor
 	 *
@@ -71,15 +95,15 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	 */
 	public AsyncMemoryQueueBackedFhirClientBalpSink(IGenericClient theClient) {
 		super(theClient);
-		myThreadPool = ThreadPoolUtil.newThreadPool(1, 1, "BalpClientSink-" + ourNextThreadId.getAndIncrement(), 100);
+		myThreadPool = ThreadPoolUtil.newThreadPool(1, 1, "BalpClientSink-" + ourNextThreadId.getAndIncrement() + "-", 100);
 	}
 
 	@Override
 	protected void recordAuditEvent(IBaseResource theAuditEvent) {
 		synchronized (myQueue) {
 			myQueue.add(theAuditEvent);
-			myThreadPool.execute(myTransmitterTask);
 		}
+		myThreadPool.submit(myTransmitterTask);
 	}
 
 	@PreDestroy
@@ -101,17 +125,32 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 				}
 			}
 
-			if (queue.length > 0) {
-				BundleBuilder bundleBuilder = new BundleBuilder(myClient.getFhirContext());
-				for (IBaseResource next : queue) {
-					bundleBuilder.addTransactionCreateEntry(next);
-				}
+			if (queue.length == 0) {
+				return;
+			}
 
-				IBaseBundle transactionBundle = bundleBuilder.getBundle();
+			BundleBuilder bundleBuilder = new BundleBuilder(myClient.getFhirContext());
+			for (IBaseResource next : queue) {
+				bundleBuilder.addTransactionCreateEntry(next);
+			}
+
+			IBaseBundle transactionBundle = bundleBuilder.getBundle();
+			try {
 				myClient.transaction().withBundle(transactionBundle).execute();
+				return;
+			} catch (BaseServerResponseException e) {
+				ourLog.error("Failed to transmit AuditEvent items to target. Will re-attempt {} failed events once. Error: {}", queue.length, e.toString());
+			}
+
+			// Retry once then give up
+			for (IBaseResource next : queue) {
+				try {
+					myClient.create().resource(next).execute();
+				} catch (BaseServerResponseException e) {
+					ourLog.error("Second failure uploading AuditEvent. Error: {}", e.toString());
+				}
 			}
 		}
-
 	}
 
 }

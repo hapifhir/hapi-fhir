@@ -235,7 +235,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *
 	 * @param theResource The FHIR resource object corresponding to the entity to reindex
 	 * @param theEntity   The storage entity to reindex
+	 * @deprecated Use {@link #reindex(IResourcePersistentId, ReindexParameters, RequestDetails, TransactionDetails)}
 	 */
+	@Deprecated
 	void reindex(T theResource, IBasePersistedResource theEntity);
 
 	/**

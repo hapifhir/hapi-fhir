@@ -966,7 +966,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * This should be the very first thing..
 		 */
 		if (theResource != null) {
-			if (thePerformIndexing) {
+			if (thePerformIndexing && theDeletedTimestampOrNull == null) {
 				if (!ourValidationDisabledForUnitTest) {
 					validateResourceForStorage((T) theResource, entity);
 				}
@@ -1157,6 +1157,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (thePerformIndexing) {
 			if (newParams == null) {
 				myExpungeService.deleteAllSearchParams(JpaPid.fromId(entity.getId()));
+				entity.clearAllParamsPopulated();
 			} else {
 
 				// Synchronize search param indexes

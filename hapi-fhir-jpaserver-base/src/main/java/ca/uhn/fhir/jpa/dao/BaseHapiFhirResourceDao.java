@@ -1341,7 +1341,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (theReindexParameters.getReindexSearchParameters() == ReindexParameters.ReindexSearchParametersEnum.ALL) {
-			reindexSearchParameters(entity, retVal);
+			reindexSearchParameters(entity, retVal, theTransactionDetails);
 		}
 		if (theReindexParameters.getOptimizeStorage() != ReindexParameters.OptimizeStorageModeEnum.NONE) {
 			reindexOptimizeStorage(entity, theReindexParameters.getOptimizeStorage());
@@ -1351,15 +1351,41 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@SuppressWarnings("unchecked")
-	private void reindexSearchParameters(ResourceTable entity, ReindexOutcome theReindexOutcome) {
+	private void reindexSearchParameters(ResourceTable entity, ReindexOutcome theReindexOutcome, TransactionDetails theTransactionDetails) {
 		try {
 			T resource = (T) myJpaStorageResourceParser.toResource(entity, false);
-			reindex(resource, entity);
+			reindexSearchParameters(resource, entity, theTransactionDetails);
 		} catch (Exception e) {
 			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e);
 			myResourceTableDao.updateIndexStatus(entity.getId(), INDEX_STATUS_INDEXING_FAILED);
 		}
 	}
+
+	/**
+	 * @deprecated Use {@link #reindex(IResourcePersistentId, ReindexParameters, RequestDetails, TransactionDetails)}
+	 */
+	@Deprecated
+	@Override
+	public void reindex(T theResource, IBasePersistedResource theEntity) {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
+		ResourceTable entity = (ResourceTable) theEntity;
+		TransactionDetails transactionDetails = new TransactionDetails(entity.getUpdatedDate());
+
+		reindexSearchParameters(theResource, theEntity, transactionDetails);
+	}
+
+	private void reindexSearchParameters(T theResource, IBasePersistedResource theEntity, TransactionDetails transactionDetails) {
+		ourLog.debug("Indexing resource {} - PID {}", theEntity.getIdDt().getValue(), theEntity.getPersistentId());
+		if (theResource != null) {
+			CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
+		}
+
+		ResourceTable resourceTable = updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
+		if (theResource != null) {
+			CURRENTLY_REINDEXING.put(theResource, null);
+		}
+	}
+
 
 	private void reindexOptimizeStorage(ResourceTable entity, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageMode) {
 		ResourceHistoryTable historyEntity = entity.getCurrentVersionEntity();
@@ -1498,23 +1524,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
 		entity.setTransientForcedId(theId.getIdPart());
 		return entity;
-	}
-
-	@Override
-	public void reindex(T theResource, IBasePersistedResource theEntity) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
-
-		ourLog.debug("Indexing resource {} - PID {}", theEntity.getIdDt().getValue(), theEntity.getPersistentId());
-		if (theResource != null) {
-			CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
-		}
-
-		ResourceTable entity = (ResourceTable) theEntity;
-		TransactionDetails transactionDetails = new TransactionDetails(entity.getUpdatedDate());
-		ResourceTable resourceTable = updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
-		if (theResource != null) {
-			CURRENTLY_REINDEXING.put(theResource, null);
-		}
 	}
 
 	@Transactional
