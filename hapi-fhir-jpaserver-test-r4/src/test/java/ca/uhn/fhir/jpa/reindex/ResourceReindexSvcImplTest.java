@@ -3,12 +3,16 @@ package ca.uhn.fhir.jpa.reindex;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -148,6 +152,31 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(1, myCaptureQueriesListener.getCommitCount());
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+
+	}
+
+	// FIXME: remove
+	@Test
+	public void testLoadPageWithLastUpdateExpression() {
+		Date start = new Date();
+		sleepUntilTimeChanges();
+		for (int i = 0; i < 5; i++) {
+			sleepUntilTimeChanges();
+		}
+		sleepUntilTimeChanges();
+		for (int i = 0; i < 5; i++) {
+			createPatient(withActiveTrue());
+			sleepUntilTimeChanges();
+		}
+		Date end = new Date();
+
+		if (!new DateType(start).getValueAsString().equals(new DateType(end).getValueAsString())) {
+			return;
+		}
+
+		String searchUrl = "Patient?active=true&_lastUpdated=lt" + new DateType(start).getValueAsString();
+		IResourcePidList ids = mySvc.fetchResourceIdsPage(start, end, 2, null, searchUrl);
+
 
 	}
 

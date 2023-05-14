@@ -30,6 +30,8 @@ import ca.uhn.fhir.util.DateUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -355,17 +357,21 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myLowerBound == null || myLowerBound.getValue() == null) {
 			return null;
 		}
-		Date retVal = myLowerBound.getValue();
+		return getLowerBoundAsInstant(myLowerBound);
+	}
 
-		if (myLowerBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
+	@Nonnull
+	private static Date getLowerBoundAsInstant(@Nonnull DateParam theLowerBound) {
+		Date retVal = theLowerBound.getValue();
+		if (theLowerBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
 			retVal = DateUtils.getLowestInstantFromDate(retVal);
 		}
 
-		if (myLowerBound.getPrefix() != null) {
-			switch (myLowerBound.getPrefix()) {
+		if (theLowerBound.getPrefix() != null) {
+			switch (theLowerBound.getPrefix()) {
 				case GREATERTHAN:
 				case STARTS_AFTER:
-					retVal = myLowerBound.getPrecision().add(retVal, 1);
+					retVal = theLowerBound.getPrecision().add(retVal, 1);
 					break;
 				case EQUAL:
 				case NOT_EQUAL:
@@ -375,7 +381,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case APPROXIMATE:
 				case LESSTHAN_OR_EQUALS:
 				case ENDS_BEFORE:
-					throw new IllegalStateException(Msg.code(1928) + "Invalid lower bound comparator: " + myLowerBound.getPrefix());
+					throw new IllegalStateException(Msg.code(1928) + "Invalid lower bound comparator: " + theLowerBound.getPrefix());
 			}
 		}
 		return retVal;
@@ -417,14 +423,19 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			return null;
 		}
 
-		Date retVal = myUpperBound.getValue();
+		return getUpperBoundAsInstant(myUpperBound);
+	}
 
-		if (myUpperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
+	@Nonnull
+	private static Date getUpperBoundAsInstant(@Nonnull DateParam theUpperBound) {
+		Date retVal = theUpperBound.getValue();
+
+		if (theUpperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
 			retVal = DateUtils.getHighestInstantFromDate(retVal);
 		}
 
-		if (myUpperBound.getPrefix() != null) {
-			switch (myUpperBound.getPrefix()) {
+		if (theUpperBound.getPrefix() != null) {
+			switch (theUpperBound.getPrefix()) {
 				case LESSTHAN:
 				case ENDS_BEFORE:
 					retVal = new Date(retVal.getTime() - 1L);
@@ -432,14 +443,14 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case EQUAL:
 				case NOT_EQUAL:
 				case LESSTHAN_OR_EQUALS:
-					retVal = myUpperBound.getPrecision().add(retVal, 1);
+					retVal = theUpperBound.getPrecision().add(retVal, 1);
 					retVal = new Date(retVal.getTime() - 1L);
 					break;
 				case GREATERTHAN_OR_EQUALS:
 				case GREATERTHAN:
 				case APPROXIMATE:
 				case STARTS_AFTER:
-					throw new IllegalStateException(Msg.code(1929) + "Invalid upper bound comparator: " + myUpperBound.getPrefix());
+					throw new IllegalStateException(Msg.code(1929) + "Invalid upper bound comparator: " + theUpperBound.getPrefix());
 			}
 		}
 		return retVal;
@@ -626,12 +637,12 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * are the same value. As such, even though the prefixes for the lower and
 	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
 	 * the resulting prefix is effectively <code>eq</code> where only a single
-	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * date is provided - as required by the FHIR specification (i.e. "If no
 	 * prefix is present, the prefix <code>eq</code> is assumed").
 	 */
 	private void validateAndSet(DateParam lowerBound, DateParam upperBound) {
 		if (hasBound(lowerBound) && hasBound(upperBound)) {
-			if (lowerBound.getValue().getTime() > upperBound.getValue().getTime()) {
+			if (getLowerBoundAsInstant(lowerBound).after(getUpperBoundAsInstant(upperBound))) {
 				throw new DataFormatException(Msg.code(1932) + format(
 					"Lower bound of %s is after upper bound of %s",
 					lowerBound.getValueAsString(), upperBound.getValueAsString()));
