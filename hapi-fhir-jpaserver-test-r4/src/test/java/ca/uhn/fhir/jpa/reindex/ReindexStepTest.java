@@ -66,6 +66,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		assertEquals(2, outcome.getRecordsProcessed());
 		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(1, myCaptureQueriesListener.getCommitCount());

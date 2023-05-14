@@ -130,11 +130,4 @@ class DateRangeUtilTest {
 		}
 	}
 
-	@Test
-	public void testNarrow() {
-		DateRangeParam param = new DateRangeParam("lt2023-05-06", null);
-
-
-	}
-
 }

@@ -1061,7 +1061,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						verifyMatchUrlForConditionalCreate(theResource, entity.getCreatedByMatchUrl(), newParams, theRequest);
 					}
 
-					entity.setUpdated(theTransactionDetails.getTransactionDate());
+					if (CURRENTLY_REINDEXING.get(theResource) != Boolean.TRUE) {
+						entity.setUpdated(theTransactionDetails.getTransactionDate());
+					}
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
