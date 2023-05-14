@@ -642,7 +642,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 */
 	private void validateAndSet(DateParam lowerBound, DateParam upperBound) {
 		if (hasBound(lowerBound) && hasBound(upperBound)) {
-			if (getLowerBoundAsInstant(lowerBound).after(getUpperBoundAsInstant(upperBound))) {
+			Date lowerBoundAsInstant = getLowerBoundAsInstant(lowerBound);
+			Date upperBoundAsInstant = getUpperBoundAsInstant(upperBound);
+			if (lowerBoundAsInstant.after(upperBoundAsInstant)) {
 				throw new DataFormatException(Msg.code(1932) + format(
 					"Lower bound of %s is after upper bound of %s",
 					lowerBound.getValueAsString(), upperBound.getValueAsString()));

@@ -4,11 +4,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.DocumentReference;
@@ -19,6 +24,8 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -31,9 +38,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +57,8 @@ public class PackageInstallerSvcImplTest {
 	private INpmPackageVersionDao myPackageVersionDao;
 	@Mock
 	private IHapiPackageCacheManager myPackageCacheManager;
+	@Mock
+	private ISearchParamRegistryController mySearchParamRegistryController;
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock
@@ -174,13 +187,29 @@ public class PackageInstallerSvcImplTest {
 	}
 
 	@Test
-	public void testDontTryToInstallDuplicateCodeSystem() throws IOException {
+	public void testDontTryToInstallDuplicateCodeSystem_CodeSystemAlreadyExistsWithDifferentId() throws IOException {
 		// Setup
+
+		// The CodeSystem that is already saved in the repository
+		CodeSystem existingCs = new CodeSystem();
+		existingCs.setId("CodeSystem/existingcs");
+		existingCs.setUrl("http://my-code-system");
+		existingCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		// A new code system in a package we're installing that has the
+		// same URL as the previously saved one, but a different ID.
 		CodeSystem cs = new CodeSystem();
+		cs.setId("CodeSystem/mycs");
 		cs.setUrl("http://my-code-system");
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 
 		NpmPackage pkg = createPackage(cs, PACKAGE_ID_1);
+
+		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
+		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);
+		when(myDaoRegistry.getResourceDao(CodeSystem.class)).thenReturn(myCodeSystemDao);
+		when(myCodeSystemDao.search(any(), any())).thenReturn(new SimpleBundleProvider(existingCs));
+		when(myCodeSystemDao.update(any(),any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
 
 		PackageInstallationSpec spec = new PackageInstallationSpec();
 		spec.setName(PACKAGE_ID_1);
@@ -188,13 +217,17 @@ public class PackageInstallerSvcImplTest {
 		spec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setPackageContents(packageToBytes(pkg));
 
-		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
-		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);
-
-		when(myDaoRegistry.getResourceDao(CodeSystem.class)).thenReturn(myCodeSystemDao);
-
 		// Test
 		mySvc.install(spec);
+
+		// Verify
+		verify(myCodeSystemDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
+		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
+		assertEquals("?url=http%3A%2F%2Fmy-code-system", map.toNormalizedQueryString(myCtx));
+
+		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
+		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
+		assertEquals("existingcs", codeSystem.getIdPart());
 	}
 
 	@Nonnull
@@ -204,6 +237,11 @@ public class PackageInstallerSvcImplTest {
 		byte[] bytes = stream.toByteArray();
 		return bytes;
 	}
+
+	@Captor
+	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
+	@Captor
+	private ArgumentCaptor<CodeSystem> myCodeSystemCaptor;
 
 	@Nonnull
 	private NpmPackage createPackage(CodeSystem cs, String packageId) throws IOException {
