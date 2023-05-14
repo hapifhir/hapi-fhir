@@ -155,30 +155,4 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 	}
 
-	// FIXME: remove
-	@Test
-	public void testLoadPageWithLastUpdateExpression() {
-		Date start = new Date();
-		sleepUntilTimeChanges();
-		for (int i = 0; i < 5; i++) {
-			sleepUntilTimeChanges();
-		}
-		sleepUntilTimeChanges();
-		for (int i = 0; i < 5; i++) {
-			createPatient(withActiveTrue());
-			sleepUntilTimeChanges();
-		}
-		Date end = new Date();
-
-		if (!new DateType(start).getValueAsString().equals(new DateType(end).getValueAsString())) {
-			return;
-		}
-
-		String searchUrl = "Patient?active=true&_lastUpdated=lt" + new DateType(start).getValueAsString();
-		IResourcePidList ids = mySvc.fetchResourceIdsPage(start, end, 2, null, searchUrl);
-
-
-	}
-
-
 }
