@@ -224,6 +224,9 @@ public class SearchParamExtractorService {
 
 			@Override
 			public IBaseResource fetchResourceAtPath(@Nonnull PathAndRef thePathAndRef) {
+				if (thePathAndRef.getRef() == null) {
+					return null;
+				}
 				return findContainedResource(containedResources, thePathAndRef.getRef());
 			}
 		};
