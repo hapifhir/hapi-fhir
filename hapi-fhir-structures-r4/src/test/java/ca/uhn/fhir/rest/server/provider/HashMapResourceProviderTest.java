@@ -3,15 +3,13 @@ package ca.uhn.fhir.rest.server.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -348,6 +346,29 @@ public class HashMapResourceProviderTest {
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
+	}
+
+	@Test
+	void testReadDeletedOk() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+		SystemRequestDetails srd = new SystemRequestDetails();
+
+		IIdType patientId = myPatientResourceProvider.create(patient, srd).getId().toVersionless();
+		Patient readPatient = myPatientResourceProvider.read(patientId, srd, true);
+		assertFalse(readPatient.isDeleted());
+	}
+
+	@Test
+	void testReadDeletedDeletedOk() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+		SystemRequestDetails srd = new SystemRequestDetails();
+
+		IIdType patientId = myPatientResourceProvider.create(patient, srd).getId().toVersionless();
+		myPatientResourceProvider.delete(patientId, srd);
+		Patient readPatient = myPatientResourceProvider.read(patientId, srd, true);
+		assertTrue(readPatient.isDeleted());
 	}
 
 	@AfterAll
