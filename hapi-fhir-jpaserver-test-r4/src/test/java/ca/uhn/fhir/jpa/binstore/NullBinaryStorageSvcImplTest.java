@@ -43,6 +43,6 @@ public class NullBinaryStorageSvcImplTest {
 
 	@Test
 	public void newBlobId() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.newBlobId(null, null));
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.newBlobId(null, null, null));
 	}
 }

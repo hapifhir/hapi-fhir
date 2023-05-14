@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.binstore;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
@@ -203,7 +202,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCopyBlobToOutputStream_Exception() throws SQLException {
-		DatabaseBlobBinaryStorageSvcImpl svc = new DatabaseBlobBinaryStorageSvcImpl(FhirContext.forR4());
+		DatabaseBlobBinaryStorageSvcImpl svc = new DatabaseBlobBinaryStorageSvcImpl();
 
 		BinaryStorageEntity mockInput = new BinaryStorageEntity();
 		Blob blob = mock(Blob.class);
@@ -220,7 +219,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCopyBlobToByteArray_Exception() throws SQLException {
-		DatabaseBlobBinaryStorageSvcImpl svc = new DatabaseBlobBinaryStorageSvcImpl(FhirContext.forR4());
+		DatabaseBlobBinaryStorageSvcImpl svc = new DatabaseBlobBinaryStorageSvcImpl();
 
 		BinaryStorageEntity mockInput = new BinaryStorageEntity();
 		Blob blob = mock(Blob.class);
@@ -241,7 +240,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		@Primary
 		@Bean
 		public IBinaryStorageSvc databaseBlobBinaryStorageSvc() {
-			return new DatabaseBlobBinaryStorageSvcImpl(FhirContext.forR4());
+			return new DatabaseBlobBinaryStorageSvcImpl();
 		}
 
 	}

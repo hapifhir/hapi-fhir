@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.binary.api;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -82,12 +81,12 @@ public interface IBinaryStorageSvc {
 
 	/**
 	 * Generate a new blob ID that will be passed to {@link #storeBlob(IIdType, String, String, InputStream)} later
-	 * @deprecated Use {@link #newBlobId(RequestDetails theRequestDetails, String theContentType)} instead. This method
+	 * @deprecated Use {@link #newBlobId(RequestDetails theRequestDetails, String theContentType, byte[] theBytes)} instead. This method
 	 * will be removed because it doesn't receive the parameters it needs to forward to the pointcut)
 	 */
 	@Deprecated(since = "6.6.0", forRemoval = true)
 	default String newBlobId() {
-		return newBlobId(new ServletRequestDetails(), null);
+		return newBlobId(new ServletRequestDetails(), null, new byte[0]);
 	}
 
 	/**
@@ -95,7 +94,7 @@ public interface IBinaryStorageSvc {
 	 * @param theRequestDetails The operation request details.
 	 * @param theContentType The operation request content type.
 	 */
-	String newBlobId(RequestDetails theRequestDetails, String theContentType);
+	String newBlobId(RequestDetails theRequestDetails, String theContentType, byte[] theBytes);
 
 	/**
 	 * Store a new binary blob
@@ -113,7 +112,7 @@ public interface IBinaryStorageSvc {
 	@Nonnull
 	default StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
 											  InputStream theInputStream) throws IOException {
-		return storeBlob(theResourceId, theBlobIdOrNull, theContentType, theInputStream, new SystemRequestDetails());
+		return storeBlob(theResourceId, theBlobIdOrNull, theContentType, theInputStream, new ServletRequestDetails());
 	}
 
 	/**

@@ -95,15 +95,13 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public String newBlobId(RequestDetails theRequestDetails, String theContentType) {
+	public String newBlobId(RequestDetails theRequestDetails, String theContentType, byte[] theBytes) {
 		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < ID_LENGTH; i++) {
 			int nextInt = Math.abs(myRandom.nextInt());
 			b.append(CHARS.charAt(nextInt % CHARS.length()));
 		}
-		String generatedBlobId = b.toString();
-		String blobPrefixFromHooks = callBlobIdPointcut(generatedBlobId.getBytes(), theRequestDetails, theContentType);
-		return blobPrefixFromHooks + generatedBlobId;
+		return b.toString();
 	}
 
 	/**
@@ -141,15 +139,17 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		};
 	}
 
+	@Deprecated(since = "6.6.0 - Maintained for interface backwards compatibility. Note that invokes interceptor pointcut with empty parameters", forRemoval = true)
+	protected String provideIdForNewBlob(String theBlobIdOrNull) {
+		return isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId();
+	}
+
+	@Nonnull
 	protected String provideIdForNewBlob(String theBlobIdOrNull, byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
+		String unPrefixedBlobId = isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId(theRequestDetails, theContentType, theBytes);
 		String blobPrefixFromHooksOrNull = callBlobIdPointcut(theBytes, theRequestDetails, theContentType);
-		String blobPrefixFromHooks = blobPrefixFromHooksOrNull == null ? "" : blobPrefixFromHooksOrNull;
-
-		String unPrefixedBlobId = isNotBlank(theBlobIdOrNull)
-			? theBlobIdOrNull
-			: newBlobId(theRequestDetails, theContentType);
-
-		return blobPrefixFromHooks + unPrefixedBlobId;
+		String blobIdPrefixFromHooks = blobPrefixFromHooksOrNull == null ? "" : blobPrefixFromHooksOrNull;
+		return blobIdPrefixFromHooks + unPrefixedBlobId;
 	}
 
 	private String callBlobIdPointcut(byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
@@ -197,5 +197,10 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	@VisibleForTesting
 	public void setInterceptorBroadcasterForTests(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	@VisibleForTesting
+	public void setFhirContextForTests(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
 	}
 }
