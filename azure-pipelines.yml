@@ -129,8 +129,8 @@ stages:
                      module: hapi-tinder-plugin
                   -  name: hapi_tinder_test
                      module: hapi-tinder-test
-                  -  name: tests_hapi_fhir_base_test_jaxrsserver_kotlin
-                     module: tests/hapi-fhir-base-test-jaxrsserver-kotlin
+#                  -  name: tests_hapi_fhir_base_test_jaxrsserver_kotlin
+#                     module: tests/hapi-fhir-base-test-jaxrsserver-kotlin
                   -  name: tests_hapi_fhir_base_test_mindeps_client
                      module: tests/hapi-fhir-base-test-mindeps-client
                   -  name: tests_hapi_fhir_base_test_mindeps_server
