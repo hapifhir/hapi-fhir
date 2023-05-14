@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -86,13 +87,13 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	protected final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
 	protected final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 
-
 	@Override
 	@BeforeEach
 	protected void before() throws Exception {
 		super.before();
 		mySubscriptionTopicDao = myDaoRegistry.getResourceDao(SubscriptionTopic.class);
 		mySubscriptionTestUtil.registerRestHookInterceptor();
+		mySubscriptionTestUtil.registerSubscriptionLoggingInterceptor();
 		ourListenerRestServer.unregisterProvider(mySystemProvider);
 		ourListenerRestServer.registerProvider(ourTestSystemProvider);
 
@@ -138,6 +139,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		mySubscriptionTestUtil.unregisterSubscriptionLoggingInterceptor();
+
 		ourListenerRestServer.unregisterProvider(ourTestSystemProvider);
 		ourListenerRestServer.registerProvider(mySystemProvider);
 		mySubscriptionTopicsCheckedLatch.clear();
@@ -200,11 +203,15 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		ourCountHolder = myCountHolder;
 	}
 
-	// WIP STR5 consolidate with lambda
 	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
+		return createResource(theResource, theExpectDelivery, 1);
+	}
+
+	// WIP STR5 consolidate with lambda
+	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery, int theCount) throws InterruptedException {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		if (theExpectDelivery) {
-			mySubscriptionDeliveredLatch.setExpectedCount(1);
+			mySubscriptionDeliveredLatch.setExpectedCount(theCount);
 		}
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		IIdType id = dao.create(theResource, mySrd).getId();
@@ -223,8 +230,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		DaoMethodOutcome retval = dao.update(theResource, mySrd);
 
-		mySubscriptionTopicsCheckedLatch.awaitExpected();
-		ResourceModifiedMessage lastMessage = mySubscriptionTopicsCheckedLatch.getLatchInvocationParameterOfType(ResourceModifiedMessage.class);
+		List<HookParams> hookParams = mySubscriptionTopicsCheckedLatch.awaitExpected();
+		ResourceModifiedMessage lastMessage = PointcutLatch.getInvocationParameterOfType(hookParams, ResourceModifiedMessage.class);
 		assertEquals(theResource.getIdElement().toVersionless().toString(), lastMessage.getPayloadId());
 
 		if (theExpectDelivery) {

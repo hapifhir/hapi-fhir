@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.enumeration.CareGapsStatusCode;
 import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.cr.common.Searches;
 import ca.uhn.fhir.cr.config.CrProperties;
+import ca.uhn.fhir.cr.enumeration.CareGapsStatusCode;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -59,7 +59,6 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
 import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -537,4 +536,9 @@ public class CareGapsService implements IDaoRegistryUser {
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;
 	}
+
+	public CrProperties getCrProperties() {
+		return myCrProperties;
+	}
+
 }

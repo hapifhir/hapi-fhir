@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.subscription.channel.models.ReceivingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.slf4j.Logger;
@@ -146,5 +147,10 @@ public class SubscriptionChannelRegistry {
 
 	public synchronized int size() {
 		return myDeliveryReceiverChannels.size();
+	}
+
+	@VisibleForTesting
+	public void logForUnitTest() {
+		myDeliveryReceiverChannels.logForUnitTest();
 	}
 }

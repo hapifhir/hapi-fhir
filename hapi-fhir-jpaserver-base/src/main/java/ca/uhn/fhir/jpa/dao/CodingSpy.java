@@ -26,14 +26,14 @@ import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * We are trying to preserve null behaviour despite IBaseCoding using primitive boolean for userSelected.
  */
 public class CodingSpy {
-	final Map<Class, Field> mySpies = new HashMap<>();
+	final Map<Class, Field> mySpies = new ConcurrentHashMap<>();
 
 	/**
 	 * Reach into the Coding and pull out the Boolean instead of the boolean.

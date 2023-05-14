@@ -65,7 +65,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -248,7 +257,11 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Read(version = true)
-	public synchronized T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+	public T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+		return read(theId, theRequestDetails, false);
+	}
+
+	public synchronized T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(2247) + theId);
@@ -266,8 +279,10 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			retVal = versions.lastEntry().getValue();
 		}
 
-		if (retVal == null || ResourceMetadataKeyEnum.DELETED_AT.get(retVal) != null) {
-			throw new ResourceGoneException(Msg.code(2244) + theId);
+		if (retVal == null || retVal.isDeleted()) {
+			if (!theDeletedOk) {
+				throw new ResourceGoneException(Msg.code(2244) + theId);
+			}
 		}
 
 		myReadCount.incrementAndGet();
@@ -330,7 +345,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			if (next.isEmpty() == false) {
 				T nextResource = next.lastEntry().getValue();
 				if (nextResource != null) {
-					if (ResourceMetadataKeyEnum.DELETED_AT.get(nextResource) == null) {
+					if (!nextResource.isDeleted()) {
 						// Clone the resource for search results so that the
 						// stored metadata doesn't appear in the results
 						T nextResourceClone = myFhirContext.newTerser().clone(nextResource);
