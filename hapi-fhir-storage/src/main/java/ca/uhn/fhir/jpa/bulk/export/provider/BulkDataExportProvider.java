@@ -47,13 +47,18 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier;
+import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ArrayUtil;
@@ -100,6 +105,8 @@ public class BulkDataExportProvider {
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private IRuleApplier myRuleApplier;
 
 	private Set<String> myCompartmentResources;
 
@@ -284,12 +291,27 @@ public class BulkDataExportProvider {
 	) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
+		validatePermittedToExportThesePatients(theRequestDetails, thePatient);
+
 		validateTargetsExists(theRequestDetails, "Patient", Lists.transform(thePatient, s->new IdDt(s.getValue())));
 
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theExportIdentifier, thePatient, theTypePostFetchFilterUrl);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 
 		startJob(theRequestDetails, bulkDataExportOptions);
+	}
+
+	private void validatePermittedToExportThesePatients(ServletRequestDetails theRequestDetails, List<IPrimitiveType<String>> thePatient) {
+		List<AuthorizationInterceptor.Verdict> collect = thePatient.stream()
+			.map(patId -> new IdDt(patId.getValue()))
+			.map(patId -> myRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, theRequestDetails, null, patId, null, null)).collect(Collectors.toList());
+		for (AuthorizationInterceptor.Verdict next : collect) {
+			if (!next.getDecision().equals(PolicyEnum.ALLOW)) {
+				throw new ForbiddenOperationException("Not permitted to export patient! ");
+			} else {
+				ourLog.warn("Permitted to export patient!");
+			}
+		}
 	}
 
 	/**
