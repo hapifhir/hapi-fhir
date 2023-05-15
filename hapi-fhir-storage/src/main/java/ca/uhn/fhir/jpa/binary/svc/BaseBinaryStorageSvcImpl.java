@@ -47,6 +47,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
@@ -152,6 +153,11 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		return blobIdPrefixFromHooks + unPrefixedBlobId;
 	}
 
+	/**
+	 * Invokes STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX pointcut if present
+	 * @return null if pointcut is not present
+	 */
+	@Nullable
 	private String callBlobIdPointcut(byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
 		// Interceptor call: STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext)
