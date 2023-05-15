@@ -411,7 +411,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	@Hook(Pointcut.STORAGE_INITIATE_BULK_EXPORT)
 	public void initiateBulkExport(RequestDetails theRequestDetails, BulkDataExportOptions theBulkExportOptions, Pointcut thePointcut) {
-		RestOperationTypeEnum restOperationType = determineRestOperationTypeFromBulkExportOptions(theBulkExportOptions);
+//		RestOperationTypeEnum restOperationType = determineRestOperationTypeFromBulkExportOptions(theBulkExportOptions);
+		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
 
 		if (theRequestDetails != null) {
 			theRequestDetails.setAttribute(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, theBulkExportOptions);
@@ -419,6 +420,10 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
 	}
 
+	/**
+	 * TODO GGG This method should eventually be used when invoking the rules applier.....however we currently rely on the incorrect
+	 * behaviour of passing down `EXTENDED_OPERATION_SERVER`.
+	 */
 	private RestOperationTypeEnum determineRestOperationTypeFromBulkExportOptions(BulkDataExportOptions theBulkExportOptions) {
 		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
 		BulkDataExportOptions.ExportStyle exportStyle = theBulkExportOptions.getExportStyle();

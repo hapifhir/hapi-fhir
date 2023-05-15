@@ -13,6 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -104,4 +107,57 @@ public class RuleBulkExportImplTest {
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
+	@Test
+	public void testPatientExportRules() {
+		//Given
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setPatientIds(Set.of(new IdDt("Patient/123")));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: We permit the request, as a patient ID that was requested is honoured by this rule.
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOutOfBounds() {
+
+		//Given
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setPatientIds(Set.of(new IdDt("Patient/456")));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: we should deny the request, as the requested export does not contain the patient permitted.
+		assertEquals(PolicyEnum.DENY, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExport() {
+		//Given
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: We make no claims about type-level export on Patient.
+		assertEquals(null, verdict);
+	}
 }
