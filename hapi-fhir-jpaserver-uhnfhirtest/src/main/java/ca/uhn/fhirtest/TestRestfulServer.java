@@ -74,7 +74,6 @@ public class TestRestfulServer extends RestfulServer {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestRestfulServer.class);
 
 	private AnnotationConfigWebApplicationContext myAppCtx;
-	private static final boolean ourRegisterBalpInterceptor = true;
 
 	@Override
 	public void destroy() {
@@ -123,9 +122,7 @@ public class TestRestfulServer extends RestfulServer {
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(JpaStorageSettings.class));
 				setServerConformanceProvider(confProvider);
-				if (ourRegisterBalpInterceptor) {
-					registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
-				}
+				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "DSTU3": {
@@ -143,9 +140,7 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				if (ourRegisterBalpInterceptor) {
-					registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
-				}
+				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R4": {
@@ -165,9 +160,7 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				providers.add(myAppCtx.getBean(IpsOperationProvider.class));
-				if (ourRegisterBalpInterceptor) {
-					registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
-				}
+				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R4B": {
@@ -186,9 +179,7 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				if (ourRegisterBalpInterceptor) {
-					registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
-				}
+				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R5": {
@@ -207,9 +198,7 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				if (ourRegisterBalpInterceptor) {
-					registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
-				}
+				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "AUDIT": {
