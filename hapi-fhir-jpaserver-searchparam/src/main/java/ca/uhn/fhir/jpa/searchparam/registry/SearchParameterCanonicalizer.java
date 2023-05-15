@@ -99,11 +99,16 @@ public class SearchParameterCanonicalizer {
 		Collection<String> base = toStrings(Collections.singletonList(theNextSp.getBaseElement()));
 		// add extensions as base if the SP is for a custom resource type
 		List<ExtensionDt> customSPBase = theNextSp.getUndeclaredExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
+		ArrayList<String> baseFromExtensions = new ArrayList<>();
 		for (ExtensionDt e : customSPBase) {
 			String eStr = e.getValueAsPrimitive().getValueAsString();
 			if (StringUtils.isNotBlank(eStr)) {
-				base.add(eStr);
+				baseFromExtensions.add(eStr);
 			}
+		}
+		if (!baseFromExtensions.isEmpty()){
+			base.remove("Resource");
+			base.addAll(baseFromExtensions);
 		}
 
 		RestSearchParameterTypeEnum paramType = null;
@@ -194,11 +199,16 @@ public class SearchParameterCanonicalizer {
 		List<String> base = new ArrayList<>(toStrings(theNextSp.getBase()));
 		// add extensions as base if the SP is for a custom resource type
 		List<Extension> customSPBase = theNextSp.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
+		ArrayList<String> baseFromExtensions = new ArrayList<>();
 		for (Extension e : customSPBase){
 			String eStr = e.getValueAsPrimitive().getValueAsString();
 			if (StringUtils.isNotBlank(eStr)) {
-				base.add(eStr);
+				baseFromExtensions.add(eStr);
 			}
+		}
+		if (!baseFromExtensions.isEmpty()){
+			base.remove("Resource");
+			base.addAll(baseFromExtensions);
 		}
 
 		RestSearchParameterTypeEnum paramType = null;
@@ -299,11 +309,14 @@ public class SearchParameterCanonicalizer {
 		String description = terser.getSinglePrimitiveValueOrNull(theNextSp, "description");
 		String path = terser.getSinglePrimitiveValueOrNull(theNextSp, "expression");
 
+
 		List<String> base = terser
 			.getValues(theNextSp, "base", IPrimitiveType.class)
 			.stream()
 			.map(IPrimitiveType::getValueAsString)
 			.collect(Collectors.toList());
+
+		ArrayList<String> baseFromExtension = new ArrayList<>();
 		if (theNextSp instanceof IBaseHasExtensions) {
 			((IBaseHasExtensions) theNextSp)
 				.getExtension()
@@ -313,7 +326,12 @@ public class SearchParameterCanonicalizer {
 				.map(t -> ((IPrimitiveType<?>) t.getValue()))
 				.map(IPrimitiveType::getValueAsString)
 				.filter(StringUtils::isNotBlank)
-				.forEach(base::add);
+				.forEach(baseFromExtension::add);
+		}
+
+		if (!baseFromExtension.isEmpty()){
+			base.remove("Resource");
+			base.addAll(baseFromExtension);
 		}
 
 		RestSearchParameterTypeEnum paramType = null;
