@@ -333,7 +333,7 @@ public class TestRestfulServer extends RestfulServer {
 	}
 
 	/**
-	 * The public server is deployed to http://fhirtest.uhn.ca and the JEE webserver
+	 * The public server is deployed to <a href="https://hapi.fhir.org">hapi.fhir.org</a> and the JEE webserver
 	 * where this FHIR server is deployed is actually fronted by an Apache HTTPd instance,
 	 * so we use an address strategy to let the server know how it should address itself.
 	 */

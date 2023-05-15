@@ -69,7 +69,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	 * This method clears the Hibernate Search index for the given resources.
 	 */
 	private void clearHibernateSearchIndex(List<JpaPid> thePersistentIds) {
-		if (myFullTextSearchSvc != null) {
+		if (myFullTextSearchSvc != null && !myFullTextSearchSvc.isDisabled()) {
 			List<Object> objectIds = thePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
 			myFullTextSearchSvc.deleteIndexedDocumentsByTypeAndId(ResourceTable.class, objectIds);
 			ourLog.info("Cleared Hibernate Search indexes.");

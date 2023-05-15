@@ -94,7 +94,7 @@ public class SearchParamRegistryImplTest {
 		ResourceTable searchParamEntity = new ResourceTable();
 		searchParamEntity.setResourceType("SearchParameter");
 		searchParamEntity.setId(theId);
-		searchParamEntity.setVersion(theVersion);
+		searchParamEntity.setVersionForUnitTest(theVersion);
 		return searchParamEntity;
 	}
 
@@ -199,7 +199,7 @@ public class SearchParamRegistryImplTest {
 
 		// Update the resource without changing anything that would affect our cache
 		ResourceTable lastEntity = newEntities.get(newEntities.size() - 1);
-		lastEntity.setVersion(2);
+		lastEntity.setVersionForUnitTest(2);
 		resetMock(Enumerations.PublicationStatus.ACTIVE, newEntities);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 1, 0);

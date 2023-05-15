@@ -127,7 +127,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		ResourceTable entity = new ResourceTable();
 		entity.setId(55L);
 		entity.setResourceType("Observation");
-		entity.setVersion(0L);
+		entity.setVersionForUnitTest(0L);
 
 		testObservationPersist.deleteObservationIndex(entity);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);

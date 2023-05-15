@@ -222,4 +222,9 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 	}
 
+	public void unresolveMatchUrl(TransactionDetails theTransactionDetails, String theResourceType, String theMatchUrl) {
+		Validate.notBlank(theMatchUrl);
+		String matchUrl = massageForStorage(theResourceType, theMatchUrl);
+		theTransactionDetails.removeResolvedMatchUrl(matchUrl);
+	}
 }

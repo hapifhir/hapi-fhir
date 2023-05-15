@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.delete.job;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
