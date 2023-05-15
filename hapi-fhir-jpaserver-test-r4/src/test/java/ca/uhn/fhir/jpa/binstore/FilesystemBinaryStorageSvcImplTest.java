@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -35,6 +37,8 @@ public class FilesystemBinaryStorageSvcImplTest {
 	public void before() {
 		myPath = new File("./target/fstmp");
 		mySvc = new FilesystemBinaryStorageSvcImpl(myPath.getAbsolutePath());
+		mySvc.setFhirContextForTests(FhirContext.forR4Cached());
+		mySvc.setInterceptorBroadcasterForTests(new InterceptorService());
 	}
 
 	@AfterEach
