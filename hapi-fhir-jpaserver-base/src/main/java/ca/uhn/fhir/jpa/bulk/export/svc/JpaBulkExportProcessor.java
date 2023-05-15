@@ -252,12 +252,14 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	private LinkedHashSet<JpaPid> getRelatedResourceTypePids(ExportPIDIteratorParameters theParams, RuntimeResourceDefinition theDef) {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
+		// expand the group pid -> list of patients in that group (list of patient pids)
 		Set<JpaPid> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
 		assert expandedMemberResourceIds != null && !expandedMemberResourceIds.isEmpty();
 		Logs.getBatchTroubleshootingLog().debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
 
-		//Next, let's search for the target resources, with their correct patient references, chunked.
-		//The results will be jammed into myReadPids
+		// for each patient pid ->
+		//	search for the target resources, with their correct patient references, chunked.
+		// The results will be jammed into myReadPids
 		QueryChunker<JpaPid> queryChunker = new QueryChunker<>();
 		queryChunker.chunk(expandedMemberResourceIds, QUERY_CHUNK_SIZE, (idChunk) -> {
 			queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, theDef);
@@ -443,14 +445,15 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		}
 	}
 
+	// gets all the resources related to each patient provided in the list of thePatientPids
 	private void queryResourceTypeWithReferencesToPatients(Set<JpaPid> theReadPids,
-																			 List<JpaPid> JpaPidChunk,
+																			 List<JpaPid> thePatientPids,
 																			 ExportPIDIteratorParameters theParams,
 																			 RuntimeResourceDefinition theDef) {
 
 		//Convert Resource Persistent IDs to actual client IDs.
-		Set<JpaPid> pidSet = new HashSet<>(JpaPidChunk);
-		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(pidSet);
+		Set<JpaPid> pidSet = new HashSet<>(thePatientPids);
+		Set<String> patientId = myIdHelperService.translatePidsToFhirResourceIds(pidSet);
 
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
@@ -461,13 +464,15 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			validateSearchParametersForGroup(expandedSpMap, theParams.getResourceType());
 
 			// Fetch and cache a search builder for this resource type
+			// filter by ResourceType
 			ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
 			// Now, further filter the query with patient references defined by the chunk of IDs we have.
+			// filter by PatientIds
 			if (PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(theParams.getResourceType())) {
-				filterSearchByHasParam(resourceIds, expandedSpMap, theParams);
+				filterSearchByHasParam(patientId, expandedSpMap, theParams);
 			} else {
-				filterSearchByResourceIds(resourceIds, expandedSpMap, theParams);
+				filterSearchByResourceIds(patientId, expandedSpMap, theParams);
 			}
 
 			//Execute query and all found pids to our local iterator.
@@ -480,10 +485,17 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				theReadPids.add(resultIterator.next());
 			}
 
-			// add _include to results to support ONC
-			Set<Include> includes = Collections.singleton(new Include("*", true));
+			// Construct our Includes filter
+			// We use this to recursively fetch resources of interest
+			// (but should only request those the user has requested/can see)
+			Set<Include> includes = new HashSet<>();
+			for (String resourceType : theParams.getRequestedResourceTypes()) {
+				includes.add(new Include(resourceType + ":*", true));
+			}
+
 			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
 			Set<JpaPid> includeIds = searchBuilder.loadIncludes(myContext, myEntityManager, theReadPids, includes, false, expandedSpMap.getLastUpdated(), theParams.getInstanceId(), requestDetails, null);
+
 			// gets rid of the Patient duplicates
 			theReadPids.addAll(includeIds.stream().filter((id) -> !id.getResourceType().equals("Patient")).collect(Collectors.toSet()));
 		}

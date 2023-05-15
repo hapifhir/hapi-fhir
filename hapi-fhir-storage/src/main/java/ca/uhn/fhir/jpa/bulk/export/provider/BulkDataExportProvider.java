@@ -204,7 +204,7 @@ public class BulkDataExportProvider {
 		ServletRequestDetails theRequestDetails
 	) {
 		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
-		ourLog.debug("_type={}", theIdParam);
+		ourLog.debug("_type={}", theType);
 		ourLog.debug("_since={}", theSince);
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm={}", theMdm);
