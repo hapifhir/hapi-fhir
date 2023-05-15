@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.cr.common;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -40,17 +41,16 @@ public class HapiFhirDal implements FhirDal {
 	private static Logger logger = LoggerFactory.getLogger(HapiFhirDal.class);
 	protected final DaoRegistry myDaoRegistry;
 	protected final RequestDetails myRequestDetails;
-	protected final BaseRequestPartitionHelperSvc myBaseRequestPartitionHelperSvc;
-
-	public HapiFhirDal(DaoRegistry theDaoRegistry, BaseRequestPartitionHelperSvc theBaseRequestPartitionHelperSvc) {
-		this(theDaoRegistry,null, theBaseRequestPartitionHelperSvc);
+	protected final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	public HapiFhirDal(DaoRegistry theDaoRegistry, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		this(theDaoRegistry,null, theRequestPartitionHelperSvc);
 
 	}
 
-	public HapiFhirDal(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, BaseRequestPartitionHelperSvc theBaseRequestPartitionHelperSvc) {
+	public HapiFhirDal(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
-		this.myBaseRequestPartitionHelperSvc = theBaseRequestPartitionHelperSvc;
+		this.myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 	@Override
@@ -84,20 +84,15 @@ public class HapiFhirDal implements FhirDal {
 
 	@Override
 	public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
+		var tenant = myRequestDetails.getTenantId();
+		var reqType = myRequestDetails.getRestOperationType();
+		var user = myRequestDetails.getUserData();
+		myRequestPartitionHelperSvc.validateHasPartitionPermissions(myRequestDetails, theResourceType, RequestPartitionId.fromPartitionName(tenant));
 
-		if(myBaseRequestPartitionHelperSvc.isResourcePartitionable(theResourceType)){
-			var b = this.myDaoRegistry.getResourceDao(theResourceType)
+		var b = this.myDaoRegistry.getResourceDao(theResourceType)
 				.search(new SearchParameterMap().add("url", new UriParam(theUrl)), myRequestDetails);
 			return new BundleIterable(myRequestDetails, b);
-		} else {
-			//In Partitioned deployment certain resources are only available in default partition
-			SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-			systemRequestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
-			var b = this.myDaoRegistry.getResourceDao(theResourceType)
-				.search(new SearchParameterMap().add("url", new UriParam(theUrl)), systemRequestDetails);
-			return new BundleIterable(systemRequestDetails, b);
 
-		}
 	}
 
 

@@ -160,7 +160,7 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 			//if non-partitionable datatype, set to default partition
 			systemRequestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		}
-		return search(getClass(theDataType), hapiMap, systemRequestDetails);
+		return search(getClass(theDataType), hapiMap, myRequestDetails);
 	}
 
 	@Override

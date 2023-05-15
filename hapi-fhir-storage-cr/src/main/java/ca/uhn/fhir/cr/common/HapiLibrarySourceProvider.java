@@ -69,7 +69,7 @@ public class HapiLibrarySourceProvider
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
 
-		var libraries = search(getClass("Library"), Searches.byName(name), systemRequestDetails);
+		var libraries = search(getClass("Library"), Searches.byName(name), myRequestDetails);
 		var libraryList = new ArrayList<IBaseResource>();
 		for(var l:libraries){
 			libraryList.add(l);

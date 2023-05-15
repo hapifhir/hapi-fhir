@@ -39,6 +39,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -58,7 +59,6 @@ import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
@@ -75,12 +75,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 
 
@@ -167,8 +170,8 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	IFhirDalFactory fhirDalFactory(DaoRegistry theDaoRegistry, BaseRequestPartitionHelperSvc theBaseRequestPartitionHelperSvc) {
-		return rd -> new HapiFhirDal(theDaoRegistry, rd, theBaseRequestPartitionHelperSvc);
+	IFhirDalFactory fhirDalFactory(DaoRegistry theDaoRegistry, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return rd -> new HapiFhirDal(theDaoRegistry, rd, theRequestPartitionHelperSvc);
 	}
 
 	@Bean
@@ -300,9 +303,19 @@ public abstract class BaseClinicalReasoningConfig {
 			factory,
 			null, false);
 
-		return new DelegatingSecurityContextExecutor(myCommonPool,
+		Executor executor = new DelegatingSecurityContextExecutor(myCommonPool,
 			SecurityContextHolder.getContext());
+		return executor;
 	}
+
+	@Bean
+	public ExecutorService measureExecutor() {
+		ExecutorService executor = Executors.newFixedThreadPool(CrProperties.MeasureProperties.DEFAULT_THREADS_BATCH_SIZE);
+		executor = new DelegatingSecurityContextExecutorService(executor);
+
+		return executor;
+	}
+
 
 	@Bean
 	public PreExpandedValidationSupportLoader preExpandedValidationSupportLoader(ValidationSupportChain theSupportChain,

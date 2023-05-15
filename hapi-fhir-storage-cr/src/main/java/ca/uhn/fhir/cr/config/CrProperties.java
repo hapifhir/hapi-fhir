@@ -23,6 +23,9 @@ import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.concurrent.Executor;
 
 public class CrProperties {
 
@@ -60,7 +63,6 @@ public class CrProperties {
 	}
 
 	public static class MeasureProperties {
-
 		private boolean myThreadedCareGapsEnabled = true;
 		private MeasureReportConfiguration myMeasureReportConfiguration;
 		private MeasureEvaluationOptions myMeasureEvaluationOptions;
@@ -68,6 +70,7 @@ public class CrProperties {
 		public static final int DEFAULT_THREADS_FOR_MEASURE_EVAL = 4;
 		public static final int DEFAULT_THREADS_BATCH_SIZE = 250;
 		public static final boolean DEFAULT_THREADS_ENABLED_FOR_MEASURE_EVAL = true;
+
 
 		public MeasureProperties() {
 			myMeasureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
