@@ -238,10 +238,11 @@ public class BulkDataExportProvider {
 	 * @param theIdParams           the id(s) to verify exist
 	 */
 	private void validateTargetsExists(RequestDetails theRequestDetails, String theTargetResourceName, Iterable<IIdType> theIdParams) {
-		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequestDetails, theTargetResourceName, theIdParams.iterator().next());
+		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
 		for (IIdType nextId: theIdParams) {
 			myDaoRegistry.getResourceDao(theTargetResourceName)
-				.read(nextId, new SystemRequestDetails().setRequestPartitionId(partitionId));
+				.read(nextId, requestDetails);
 		}
 
 	}
