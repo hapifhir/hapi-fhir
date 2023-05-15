@@ -105,7 +105,8 @@ public class BulkDataExportProvider {
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
-	@Autowired
+
+	@Autowired(required = false)
 	private AuthorizationInterceptor myAuthorizationInterceptor;
 
 	private Set<String> myCompartmentResources;
@@ -291,7 +292,9 @@ public class BulkDataExportProvider {
 	) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
-		validatePermittedToExportThesePatients(theRequestDetails, thePatient);
+		if (myAuthorizationInterceptor != null) {
+			validatePermittedToExportThesePatients(theRequestDetails, thePatient);
+		}
 
 		validateTargetsExists(theRequestDetails, "Patient", Lists.transform(thePatient, s->new IdDt(s.getValue())));
 
