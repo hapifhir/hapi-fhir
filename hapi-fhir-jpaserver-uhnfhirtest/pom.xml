@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.7.0-SNAPSHOT</version>
+		<version>6.7.1-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-jpaserver-uhnfhirtest</artifactId>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<name>HAPI FHIR - fhirtest.uhn.ca Deployable WAR</name>
 
@@ -232,26 +232,6 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Build-Time>${maven.build.timestamp}</Build-Time>
-						</manifestEntries>
-					</archive>
-					<overlays>
-						<overlay>
-							<groupId>ca.uhn.hapi.fhir</groupId>
-							<artifactId>hapi-fhir-testpage-overlay</artifactId>
-							<excludes>
-								<exclude>WEB-INF/classes/**/*.class</exclude>
-							</excludes>
-						</overlay>
-					</overlays>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>
@@ -260,5 +240,42 @@
 		</plugins>
 		<finalName>hapi-fhir-jpaserver</finalName>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>DIST</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>war</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<archive>
+								<manifestEntries>
+									<Build-Time>${maven.build.timestamp}</Build-Time>
+								</manifestEntries>
+							</archive>
+							<overlays>
+								<overlay>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-testpage-overlay</artifactId>
+									<excludes>
+										<exclude>WEB-INF/classes/**/*.class</exclude>
+									</excludes>
+								</overlay>
+							</overlays>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
