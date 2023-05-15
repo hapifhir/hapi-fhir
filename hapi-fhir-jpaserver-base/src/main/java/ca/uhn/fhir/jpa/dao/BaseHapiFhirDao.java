@@ -1086,7 +1086,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return entity;
 		}
 
-		if (entity.getId() != null) {
+		if (entity.getId() != null && theUpdateVersion) {
 			entity.markVersionUpdatedInCurrentTransaction();
 		}
 
