@@ -117,6 +117,7 @@ public class StorageSettings {
 	private boolean myAutoSupportDefaultSearchParams = true;
 	private boolean myIndexIdentifierOfType = false;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
+	private boolean myTagStorageModeIsInline = false;
 
 	/**
 	 * Since 6.4.0
@@ -1255,7 +1256,13 @@ public class StorageSettings {
 		return myQualifySubscriptionMatchingChannelName;
 	}
 
+	public boolean getTagStorageModeIsInline() {
+		return myTagStorageModeIsInline;
+	}
 
+	public void setTagStorageModeIsInline(boolean theTagStorageModeIsInline) {
+		myTagStorageModeIsInline = theTagStorageModeIsInline;
+	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");

@@ -62,6 +62,7 @@ public final class ResourceIndexedSearchParams {
 	final public Collection<SearchParamPresentEntity> mySearchParamPresentEntities = new HashSet<>();
 	final public Collection<ResourceIndexedSearchParamComposite>  myCompositeParams = new HashSet<>();
 
+	final private Set<String> myIndexableResourceParams = Set.of("_tag", "_security", "_profile");
 	public ResourceIndexedSearchParams() {
 	}
 
@@ -344,7 +345,7 @@ public final class ResourceIndexedSearchParams {
 	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(PartitionSettings thePartitionSettings, StorageSettings theStorageSettings, ResourceTable theEntity, ResourceSearchParams activeSearchParams, RestSearchParameterTypeEnum type,
 																												Collection<RT> paramCollection) {
 		for (String nextParamName : activeSearchParams.getSearchParamNames()) {
-			if (nextParamName == null) {
+			if (nextParamName == null || !(theStorageSettings.getTagStorageModeIsInline() && myIndexableResourceParams.contains(nextParamName))) {
 				continue;
 			}
 
