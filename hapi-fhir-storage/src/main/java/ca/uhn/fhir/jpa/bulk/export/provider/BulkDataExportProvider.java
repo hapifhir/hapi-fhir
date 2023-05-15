@@ -106,7 +106,7 @@ public class BulkDataExportProvider {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	private IRuleApplier myRuleApplier;
+	private AuthorizationInterceptor myAuthorizationInterceptor;
 
 	private Set<String> myCompartmentResources;
 
@@ -304,7 +304,7 @@ public class BulkDataExportProvider {
 	private void validatePermittedToExportThesePatients(ServletRequestDetails theRequestDetails, List<IPrimitiveType<String>> thePatient) {
 		List<AuthorizationInterceptor.Verdict> collect = thePatient.stream()
 			.map(patId -> new IdDt(patId.getValue()))
-			.map(patId -> myRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, theRequestDetails, null, patId, null, null)).collect(Collectors.toList());
+			.map(patId -> myAuthorizationInterceptor.applyRulesAndReturnDecision(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, theRequestDetails, null, patId, null, null)).collect(Collectors.toList());
 		for (AuthorizationInterceptor.Verdict next : collect) {
 			if (!next.getDecision().equals(PolicyEnum.ALLOW)) {
 				throw new ForbiddenOperationException("Not permitted to export patient! ");
