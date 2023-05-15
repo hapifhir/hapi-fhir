@@ -620,6 +620,23 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myHasLinks = theHasLinks;
 	}
 
+	/**
+	 * Clears all the index population flags, e.g. {@link #isParamsStringPopulated()}
+	 *
+	 * @since 6.8.0
+	 */
+	public void clearAllParamsPopulated() {
+		myParamsTokenPopulated = false;
+		myParamsCoordsPopulated = false;
+		myParamsDatePopulated = false;
+		myParamsNumberPopulated = false;
+		myParamsStringPopulated = false;
+		myParamsQuantityPopulated = false;
+		myParamsQuantityNormalizedPopulated = false;
+		myParamsUriPopulated = false;
+		myHasLinks = false;
+	}
+
 	public boolean isParamsComboStringUniquePresent() {
 		if (myParamsComboStringUniquePresent == null) {
 			return false;

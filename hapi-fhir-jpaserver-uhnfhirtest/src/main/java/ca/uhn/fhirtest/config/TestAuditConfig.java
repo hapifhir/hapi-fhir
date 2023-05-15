@@ -6,34 +6,20 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
-import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
-import ca.uhn.fhir.jpa.ips.generator.IIpsGeneratorSvc;
-import ca.uhn.fhir.jpa.ips.generator.IpsGeneratorSvcImpl;
-import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
-import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
-import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.validation.IInstanceValidatorModule;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
-import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
-import org.hibernate.search.engine.cfg.BackendSettings;
-import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -168,6 +154,11 @@ public class TestAuditConfig {
 
 
 	@Bean
+	public OldAuditEventPurgeService oldEventPurgeService() {
+		return new OldAuditEventPurgeService();
+	}
+
+	@Bean
 	public DaoRegistryConfigurer daoRegistryConfigurer() {
 		return new DaoRegistryConfigurer();
 	}
@@ -176,7 +167,6 @@ public class TestAuditConfig {
 
 		@Autowired
 		private DaoRegistry myDaoRegistry;
-
 
 		@PostConstruct
 		public void start() {

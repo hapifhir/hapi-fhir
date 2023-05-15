@@ -85,6 +85,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.util.comparator.ComparableComparator;
 
 import javax.annotation.Nonnull;
+import javax.persistence.Id;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,6 +101,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -3346,6 +3348,34 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test
+	public void testDeleteResource_WithOutgoingReference() {
+		// Setup
+		createOrganization(withId("A"));
+		IIdType patientId = createPatient(withOrganization(new IdType("Organization/A")), withActiveTrue());
+
+		// Test
+		myCaptureQueriesListener.clear();
+		myPatientDao.delete(patientId, mySrd);
+
+		// Verify
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		runInTransaction(()->{
+			ResourceTable version = myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow();
+			assertFalse(version.isParamsTokenPopulated());
+			assertFalse(version.isHasLinks());
+			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(0, myResourceLinkDao.count());
+		});
+
+	}
+
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@Test
 	public void testDeleteResource_WithMassIngestionMode_enabled() {
 		myStorageSettings.setMassIngestionMode(true);
 
@@ -3353,6 +3383,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Observation observation = new Observation().setStatus(Observation.ObservationStatus.FINAL).addCategory(new CodeableConcept().addCoding(new Coding("http://category-type", "12345", null))).setCode(new CodeableConcept().addCoding(new Coding("http://coverage-type", "12345", null)));
 
 		IIdType idDt = myObservationDao.create(observation, mySrd).getEntity().getIdDt();
+		runInTransaction(()->{
+			assertEquals(4, myResourceIndexedSearchParamTokenDao.count());
+			ResourceTable version = myResourceTableDao.findById(idDt.getIdPartAsLong()).orElseThrow();
+			assertTrue(version.isParamsTokenPopulated());
+		});
 
 		// when
 		myCaptureQueriesListener.clear();
@@ -3360,6 +3395,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// then
 		assertQueryCount(3, 1, 1, 2);
+		runInTransaction(()->{
+			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
+			ResourceTable version = myResourceTableDao.findById(idDt.getIdPartAsLong()).orElseThrow();
+			assertFalse(version.isParamsTokenPopulated());
+		});
 	}
 
 	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount) {

@@ -21,17 +21,21 @@ package ca.uhn.fhir.storage.interceptor.balp;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.ThreadPoolUtil;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -41,16 +45,17 @@ import java.util.concurrent.atomic.AtomicLong;
  * events will be converted automatically prior to sending.
  * <p>
  * This sink transmits events asynchronously using an in-memory queue. This means that
- * in the event of a server shutdown data could be lost.
+ * in the event of a server shutdown or unavailability of the target server <b>data could be lost</b>.
  * </p>
  */
 public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink implements IBalpAuditEventSink {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AsyncMemoryQueueBackedFhirClientBalpSink.class);
-	private final ArrayBlockingQueue<IBaseResource> myQueue;
+	public static final IBaseResource[] EMPTY_RESOURCE_ARRAY = new IBaseResource[0];
 	private static final AtomicLong ourNextThreadId = new AtomicLong(0);
-	private boolean myRunning;
-	private TransmitterThread myThread;
+	private static final Logger ourLog = LoggerFactory.getLogger(AsyncMemoryQueueBackedFhirClientBalpSink.class);
+	private final List<IBaseResource> myQueue = new ArrayList<>(100);
+	private final ThreadPoolTaskExecutor myThreadPool;
+	private final Runnable myTransmitterTask = new TransmitterTask();
 
 	/**
 	 * Sets the FhirContext to use when initiating outgoing connections
@@ -65,6 +70,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	public AsyncMemoryQueueBackedFhirClientBalpSink(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl) {
 		this(theFhirContext, theTargetBaseUrl, null);
 	}
+
 
 	/**
 	 * Sets the FhirContext to use when initiating outgoing connections
@@ -82,7 +88,6 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 		this(createClient(theFhirContext, theTargetBaseUrl, theClientInterceptors));
 	}
 
-
 	/**
 	 * Constructor
 	 *
@@ -90,76 +95,61 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	 */
 	public AsyncMemoryQueueBackedFhirClientBalpSink(IGenericClient theClient) {
 		super(theClient);
-		myQueue = new ArrayBlockingQueue<>(100);
+		myThreadPool = ThreadPoolUtil.newThreadPool(1, 1, "BalpClientSink-" + ourNextThreadId.getAndIncrement() + "-", 100);
 	}
 
 	@Override
 	protected void recordAuditEvent(IBaseResource theAuditEvent) {
-		myQueue.add(theAuditEvent);
-	}
-
-	@PostConstruct
-	public void start() {
-		if (!myRunning) {
-			myRunning = true;
-			myThread = new TransmitterThread();
-			myThread.start();
+		synchronized (myQueue) {
+			myQueue.add(theAuditEvent);
 		}
+		myThreadPool.submit(myTransmitterTask);
 	}
 
 	@PreDestroy
 	public void stop() {
-		if (myRunning) {
-			myRunning = false;
-			myThread.interrupt();
-		}
+		myThreadPool.shutdown();
 	}
 
-	public boolean isRunning() {
-		return myThread != null && myThread.isRunning();
-	}
-
-	private class TransmitterThread extends Thread {
-
-		private boolean myThreadRunning;
-
-		public TransmitterThread() {
-			setName("BalpClientSink-" + ourNextThreadId.getAndIncrement());
-		}
+	private class TransmitterTask implements Runnable {
 
 		@Override
 		public void run() {
-			ourLog.info("Starting BALP Client Sink Transmitter");
-			myThreadRunning = true;
-			while (myRunning) {
-				IBaseResource next = null;
-				try {
-					next = myQueue.poll(10, TimeUnit.SECONDS);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
+			IBaseResource[] queue;
+			synchronized (myQueue) {
+				if (myQueue.isEmpty()) {
+					queue = EMPTY_RESOURCE_ARRAY;
+				} else {
+					queue = myQueue.toArray(EMPTY_RESOURCE_ARRAY);
+					myQueue.clear();
 				}
-
-				// TODO: Currently we transmit events one by one, but a nice optimization
-				// would be to batch them into FHIR transaction Bundles. If we do this, we
-				// would get better performance, but we'd also want to have some retry
-				// logic that submits events individually if a transaction fails.
-
-				if (next != null) {
-					try {
-						transmitEventToClient(next);
-					} catch (Exception e) {
-						ourLog.warn("Failed to transmit AuditEvent to sink: {}", e.toString());
-						myQueue.add(next);
-					}
-				}
-
 			}
-			ourLog.info("Stopping BALP Client Sink Transmitter");
-			myThreadRunning = false;
-		}
 
-		public boolean isRunning() {
-			return myThreadRunning;
+			if (queue.length == 0) {
+				return;
+			}
+
+			BundleBuilder bundleBuilder = new BundleBuilder(myClient.getFhirContext());
+			for (IBaseResource next : queue) {
+				bundleBuilder.addTransactionCreateEntry(next);
+			}
+
+			IBaseBundle transactionBundle = bundleBuilder.getBundle();
+			try {
+				myClient.transaction().withBundle(transactionBundle).execute();
+				return;
+			} catch (BaseServerResponseException e) {
+				ourLog.error("Failed to transmit AuditEvent items to target. Will re-attempt {} failed events once. Error: {}", queue.length, e.toString());
+			}
+
+			// Retry once then give up
+			for (IBaseResource next : queue) {
+				try {
+					myClient.create().resource(next).execute();
+				} catch (BaseServerResponseException e) {
+					ourLog.error("Second failure uploading AuditEvent. Error: {}", e.toString());
+				}
+			}
 		}
 	}
 
