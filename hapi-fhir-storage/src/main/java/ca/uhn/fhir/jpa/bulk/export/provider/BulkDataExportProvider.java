@@ -63,6 +63,7 @@ import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -284,7 +285,9 @@ public class BulkDataExportProvider {
 	) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
-		validateTargetsExists(theRequestDetails, "Patient", Lists.transform(thePatient, s->new IdDt(s.getValue())));
+		if (thePatient != null) {
+			validateTargetsExists(theRequestDetails, "Patient", Lists.transform(thePatient, s -> new IdDt(s.getValue())));
+		}
 
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theExportIdentifier, thePatient, theTypePostFetchFilterUrl);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
