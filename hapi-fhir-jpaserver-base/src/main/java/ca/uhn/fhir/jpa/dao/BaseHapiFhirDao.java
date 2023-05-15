@@ -536,20 +536,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 
 	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
-		String newVersion;
-		long newVersionLong;
 		if (theResourceId == null || theResourceId.getVersionIdPart() == null) {
-			newVersion = "1";
-			newVersionLong = 1;
+			theSavedEntity.initializeVersion();
 		} else {
-			newVersionLong = theResourceId.getVersionIdPartAsLong() + 1;
-			newVersion = Long.toString(newVersionLong);
+			theSavedEntity.markVersionUpdatedInCurrentTransaction();
 		}
 
 		assert theResourceId != null;
+		String newVersion = Long.toString(theSavedEntity.getVersion());
 		IIdType newId = theResourceId.withVersion(newVersion);
 		theResource.getIdElement().setValue(newId.getValue());
-		theSavedEntity.setVersion(newVersionLong);
 	}
 
 	public boolean isLogicalReference(IIdType theId) {
@@ -1090,9 +1086,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return entity;
 		}
 
-		if (theUpdateVersion) {
-			long newVersion = entity.getVersion() + 1;
-			entity.setVersion(newVersion);
+		if (entity.getId() != null && theUpdateVersion) {
+			entity.markVersionUpdatedInCurrentTransaction();
 		}
 
 		/*
@@ -1295,6 +1290,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	private void createHistoryEntry(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, EncodedResource theChanged) {
 		boolean versionedTags = getStorageSettings().getTagStorageMode() == JpaStorageSettings.TagStorageModeEnum.VERSIONED;
+
 		final ResourceHistoryTable historyEntry = theEntity.toHistory(versionedTags);
 		historyEntry.setEncoding(theChanged.getEncoding());
 		historyEntry.setResource(theChanged.getResourceBinary());

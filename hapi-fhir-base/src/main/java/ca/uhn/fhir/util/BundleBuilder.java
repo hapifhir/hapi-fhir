@@ -255,6 +255,22 @@ public class BundleBuilder {
 	 * <p>
 	 * Note that the resource is only used to extract its ID and type, and the body of the resource is not included in the entry,
 	 *
+	 * @param theCondition The conditional URL, e.g. "Patient?identifier=foo|bar"
+	 * @since 6.8.0
+	 */
+	public DeleteBuilder addTransactionDeleteConditionalEntry(String theCondition) {
+		Validate.notBlank(theCondition, "theCondition must not be blank");
+
+		setBundleField("type", "transaction");
+		return addDeleteEntry(theCondition);
+	}
+
+	/**
+	 * Adds an entry containing a delete (DELETE) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 * <p>
+	 * Note that the resource is only used to extract its ID and type, and the body of the resource is not included in the entry,
+	 *
 	 * @param theResource The resource to delete.
 	 */
 	public DeleteBuilder addTransactionDeleteEntry(IBaseResource theResource) {
