@@ -108,7 +108,7 @@ public class RuleBulkExportImplTest {
 	}
 
 	@Test
-	public void testPatientExportRules() {
+	public void testPatientExportRulesInBounds() {
 		//Given
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
@@ -127,7 +127,6 @@ public class RuleBulkExportImplTest {
 
 	@Test
 	public void testPatientExportRulesOutOfBounds() {
-
 		//Given
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
