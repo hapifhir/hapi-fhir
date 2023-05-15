@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -30,6 +29,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testRestHookSubscriptionTopicApplicationFhirJson() throws Exception {
+		//setup
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(Enumerations.EncounterStatus.PLANNED, Enumerations.EncounterStatus.COMPLETED, SubscriptionTopic.InteractionTrigger.CREATE);
 		waitForRegisteredSubscriptionTopicCount(1);
@@ -38,10 +38,11 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, getSystemProviderCount());
-		Encounter sentEncounter = sendEncounterWithStatus(Enumerations.EncounterStatus.COMPLETED, false);
 
-		await().until(() -> getSystemProviderCount() > 0);
+		// execute
+		Encounter sentEncounter = sendEncounterWithStatus(Enumerations.EncounterStatus.COMPLETED, true);
 
+		// verify
 		Bundle receivedBundle = getLastSystemProviderBundle();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
 		assertEquals(2, resources.size());

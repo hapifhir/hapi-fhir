@@ -128,6 +128,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		mySubscriptionMatchingPost.clear();
 		mySubscriptionActivatedPost.clear();
 		ourObservationListener.clear();
+		mySubscriptionResourceMatched.clear();
+		mySubscriptionResourceNotMatched.clear();
 		super.clearRegistry();
 	}
 
@@ -145,9 +147,11 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	}
 
 	protected Subscription sendSubscription(Subscription theSubscription, RequestPartitionId theRequestPartitionId, Boolean mockDao) throws InterruptedException {
+		mySubscriptionResourceNotMatched.setExpectedCount(1);
 		mySubscriptionActivatedPost.setExpectedCount(1);
 		Subscription retVal = sendResource(theSubscription, theRequestPartitionId);
 		mySubscriptionActivatedPost.awaitExpected();
+		mySubscriptionResourceNotMatched.awaitExpected();
 		return retVal;
 	}
 

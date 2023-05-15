@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
@@ -339,13 +338,14 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	@Override
 	public String toString() {
-		ToStringBuilder stringBuilder = new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
-			.append("idElement", myIdElement);
-//			.append("status", myStatus)
-//			.append("endpointUrl", myEndpointUrl)
-//			.append("payloadString", myPayloadString)
+		ToStringBuilder stringBuilder = new ToStringBuilder(this)
+			.append("myIdElement", myIdElement)
+			.append("myStatus", myStatus)
+			.append("myCriteriaString", myCriteriaString);
+//			.append("myEndpointUrl", myEndpointUrl)
+//			.append("myPayloadString", myPayloadString)
 //			.append("myHeaders", myHeaders)
-//			.append("channelType", myChannelType);
+//			.append("myChannelType", myChannelType)
 //			.append("myTrigger", myTrigger)
 //			.append("myEmailDetails", myEmailDetails)
 //			.append("myRestHookDetails", myRestHookDetails)

@@ -437,15 +437,15 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Override
 	protected void afterResetInterceptors() {
 		super.afterResetInterceptors();
-		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
+//		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@BeforeEach
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
 
-		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
-		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
+//		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
+//		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@BeforeEach

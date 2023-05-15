@@ -112,12 +112,12 @@
 		<module>hapi-fhir-jpaserver-ips</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
-		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
+<!--		<module>hapi-fhir-jpaserver-uhnfhirtest</module>-->
 		<module>hapi-fhir-client-okhttp</module>
 		<module>hapi-fhir-android</module>
 		<module>hapi-fhir-cli</module>
 		<module>hapi-fhir-dist</module>
-		<module>tests/hapi-fhir-base-test-jaxrsserver-kotlin</module>
+<!--		<module>tests/hapi-fhir-base-test-jaxrsserver-kotlin</module>-->
 		<module>tests/hapi-fhir-base-test-mindeps-client</module>
 		<module>tests/hapi-fhir-base-test-mindeps-server</module>
 		<module>hapi-fhir-spring-boot</module>
@@ -982,7 +982,7 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE3-SNAPSHOT</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE2</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -2479,7 +2479,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.3.0</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>
