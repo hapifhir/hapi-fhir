@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.binary.api;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -79,8 +83,20 @@ public interface IBinaryStorageSvc {
 
 	/**
 	 * Generate a new blob ID that will be passed to {@link #storeBlob(IIdType, String, String, InputStream)} later
+	 * @deprecated Use {@link #newBlobId(RequestDetails theRequestDetails, String theContentType, byte[] theBytes)} instead. This method
+	 * will be removed because it doesn't receive the parameters it needs to forward to the pointcut)
 	 */
-	String newBlobId();
+	@Deprecated(since = "6.6.0", forRemoval = true)
+	default String newBlobId() {
+		return newBlobId(new ServletRequestDetails(), null, new byte[0]);
+	}
+
+	/**
+	 * Generate a new blob ID that will be passed to {@link #storeBlob(IIdType, String, String, InputStream)} later
+	 * @param theRequestDetails The operation request details.
+	 * @param theContentType The operation request content type.
+	 */
+	String newBlobId(RequestDetails theRequestDetails, String theContentType, byte[] theBytes);
 
 	/**
 	 * Store a new binary blob
@@ -90,9 +106,33 @@ public interface IBinaryStorageSvc {
 	 * @param theContentType  The content type to associate with this blob
 	 * @param theInputStream  An InputStream to read from. This method should close the stream when it has been fully consumed.
 	 * @return Returns details about the stored data
+	 * @deprecated Use {@link #storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
+	 * 	InputStream theInputStream, RequestDetails theRequestDetails)} instead. This method
+	 * 	will be removed because it doesn't receive the 'theRequestDetails' parameter it needs to forward to the pointcut)
+	 */
+	@Deprecated(since = "6.6.0", forRemoval = true)
+	@Nonnull
+	default StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
+											  InputStream theInputStream) throws IOException {
+		return storeBlob(theResourceId, theBlobIdOrNull, theContentType, theInputStream, new ServletRequestDetails());
+	}
+
+	/**
+	 * Store a new binary blob
+	 *
+	 * @param theResourceId   The resource ID that owns this blob. Note that it should not be possible to retrieve a blob without both the resource ID and the blob ID being correct.
+	 * @param theBlobIdOrNull If set, forces
+	 * @param theContentType  The content type to associate with this blob
+	 * @param theInputStream  An InputStream to read from. This method should close the stream when it has been fully consumed.
+	 * @param theRequestDetails The operation request details.
+	 * @return Returns details about the stored data
 	 */
 	@Nonnull
-	StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException;
+	default StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
+									InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
+      // todo jm: remove default implementation after 6.6.0
+		throw new InternalErrorException(Msg.code(2345) + "Default implementation is for backwards compatibility. Implementation override required.");
+	}
 
 	StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) throws IOException;
 
@@ -116,7 +156,7 @@ public interface IBinaryStorageSvc {
 	 * Fetch the byte[] contents of a given Binary resource's `data` element. If the data is a standard base64encoded string that is embedded, return it.
 	 * Otherwise, attempt to load the externalized binary blob via the the externalized binary storage service.
 	 *
-	 * @param theResourceId The resource ID The ID of the Binary resource you want to extract data bytes from
+	 * @param theResource The  Binary resource you want to extract data bytes from
 	 * @return The binary data blob as a byte array
 	 */
 	byte[] fetchDataBlobFromBinary(IBaseBinary theResource) throws IOException;
