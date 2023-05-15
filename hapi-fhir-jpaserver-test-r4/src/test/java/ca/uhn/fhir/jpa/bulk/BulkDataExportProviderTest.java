@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -98,6 +99,8 @@ public class BulkDataExportProviderTest {
 	private final HttpClientExtension myClient = new HttpClientExtension();
 	@Mock
 	private IBatch2JobRunner myJobRunner;
+	@Mock
+	IFhirResourceDao myFhirResourceDao;
 	@InjectMocks
 	private BulkDataExportProvider myProvider;
 	@RegisterExtension
@@ -140,6 +143,8 @@ public class BulkDataExportProviderTest {
 		myProvider.setStorageSettings(myStorageSettings);
 		DaoRegistry daoRegistry = mock(DaoRegistry.class);
 		lenient().when(daoRegistry.getRegisteredDaoTypes()).thenReturn(Set.of("Patient", "Observation", "Encounter"));
+
+		lenient().when(daoRegistry.getResourceDao(anyString())).thenReturn(myFhirResourceDao);
 		myProvider.setDaoRegistry(daoRegistry);
 
 	}

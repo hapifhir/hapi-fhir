@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -60,6 +62,8 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -211,6 +215,9 @@ public class BulkDataExportProvider {
 
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
+		// verify the Group exists before starting the job
+		validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
+
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm, theExportIdentifier, theTypePostFetchFilterUrl);
 
 		if (isNotEmpty(bulkDataExportOptions.getResourceTypes())) {
@@ -221,6 +228,24 @@ public class BulkDataExportProvider {
 		}
 
 		startJob(theRequestDetails, bulkDataExportOptions);
+	}
+
+	/**
+	 * Throw ResourceNotFound if the target resources don't exist.
+	 * Otherwise, we start a bulk-export job which then fails, reporting a 500.
+	 *
+	 * @param theRequestDetails     the caller details
+	 * @param theTargetResourceName the type of the target
+	 * @param theIdParams           the id(s) to verify exist
+	 */
+	private void validateTargetsExists(RequestDetails theRequestDetails, String theTargetResourceName, Iterable<IIdType> theIdParams) {
+		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequestDetails, theTargetResourceName, theIdParams.iterator().next());
+		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
+		for (IIdType nextId: theIdParams) {
+			myDaoRegistry.getResourceDao(theTargetResourceName)
+				.read(nextId, requestDetails);
+		}
+
 	}
 
 	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
@@ -259,6 +284,11 @@ public class BulkDataExportProvider {
 		ServletRequestDetails theRequestDetails
 	) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
+
+		if (thePatient != null) {
+			validateTargetsExists(theRequestDetails, "Patient", Lists.transform(thePatient, s -> new IdDt(s.getValue())));
+		}
+
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theExportIdentifier, thePatient, theTypePostFetchFilterUrl);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 
@@ -280,6 +310,9 @@ public class BulkDataExportProvider {
 		ServletRequestDetails theRequestDetails
 	) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
+
+		validateTargetsExists(theRequestDetails, "Patient", List.of(theIdParam));
+
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theExportIdentifier, theIdParam, theTypePostFetchFilterUrl);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 
@@ -529,7 +562,7 @@ public class BulkDataExportProvider {
 	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
-		if (prefer.getRespondAsync() == false) {
+		if (!prefer.getRespondAsync()) {
 			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
 		}
 	}
