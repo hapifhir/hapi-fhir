@@ -106,12 +106,28 @@ public class InstanceProgress {
 	}
 
 	/**
+	 * Signal to the progress calculator to skip the incomplete work chunk count when determining the completed percentage.
+	 * <p/>
+	 * This is a hack:  The reason we do this is to get around a race condition in which all work chunks are complete but
+	 * the last chunk is * still in QUEUED status and will only be marked COMPLETE later.
+	 *
+	 * @param theInstance The Batch 2 {@link JobInstance} that we're updating
+	 */
+	public void updateInstanceForReductionStep(JobInstance theInstance) {
+		updateInstance(theInstance, true);
+	}
+
+	public void updateInstance(JobInstance theInstance) {
+		updateInstance(theInstance, false);
+	}
+
+	/**
 	 * Update the job instance with status information.
 	 * We shouldn't read any values from theInstance here -- just write.
 	 *
 	 * @param theInstance the instance to update with progress statistics
 	 */
-	public void updateInstance(JobInstance theInstance) {
+	public void updateInstance(JobInstance theInstance, boolean theCalledFromReducer) {
 		if (myEarliestStartTime != null) {
 			theInstance.setStartTime(myEarliestStartTime);
 		}
@@ -122,7 +138,9 @@ public class InstanceProgress {
 		theInstance.setCombinedRecordsProcessed(myRecordsProcessed);
 
 		if (getChunkCount() > 0) {
-			double percentComplete = (double) (myCompleteChunkCount) / (double) getChunkCount();
+			final int chunkCount = getChunkCount();
+			final int conditionalChunkCount = theCalledFromReducer ? (chunkCount - myIncompleteChunkCount) : chunkCount;
+			final double percentComplete = (double) (myCompleteChunkCount) / (double) conditionalChunkCount;
 			theInstance.setProgress(percentComplete);
 		}
 
