@@ -231,9 +231,9 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		for (String excludedString : theExcludedList) {
 			assertThat("export doesn't have expected ids", foundIds, not(hasItem(excludedString)));
 		}
-		if (!Objects.equals(jobInfo.getCombinedRecordsProcessed(), 2)) {
-			assertThat(jobInfo.getCombinedRecordsProcessed(), equalTo(2));
-		}
+
+		assertThat(jobInfo.getCombinedRecordsProcessed(), equalTo(2));
+
 		ourLog.info("Job {} ok", theInstanceId);
 	}
 
