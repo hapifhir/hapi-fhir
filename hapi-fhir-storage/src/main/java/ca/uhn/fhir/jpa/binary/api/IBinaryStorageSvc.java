@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.binary.api;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -130,7 +131,7 @@ public interface IBinaryStorageSvc {
 	default StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
 									InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
       // todo jm: remove default implementation after 6.6.0
-		throw new InternalErrorException("Default implementation is for backwards compatibility. Implementation override required.");
+		throw new InternalErrorException(Msg.code(2345) + "Default implementation is for backwards compatibility. Implementation override required.");
 	}
 
 	StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) throws IOException;
