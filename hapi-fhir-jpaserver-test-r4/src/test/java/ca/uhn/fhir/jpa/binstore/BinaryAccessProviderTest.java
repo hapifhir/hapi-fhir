@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
-import ca.uhn.fhir.mdm.util.MessageHelper;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -65,8 +66,6 @@ public class BinaryAccessProviderTest {
 	private IFhirResourceDao myResourceDao;
 	@Spy
 	protected IBinaryStorageSvc myBinaryStorageSvc;
-	@Autowired
-	private MessageHelper myMessageHelper;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -257,7 +256,7 @@ public class BinaryAccessProviderTest {
 		when(theServletRequest.getContentLength()).thenReturn(15);
 		when(myBinaryStorageSvc.shouldStoreBlob(15, docRef.getIdElement(), "Integer")).thenReturn(true);
 		myRequestDetails.setServletRequest(theServletRequest);
-		when(myBinaryStorageSvc.storeBlob(eq(docRef.getIdElement()), isNull(), eq("Integer"), any(InputStream.class), any(ServletRequestDetails.class))).thenReturn(sd);
+		doReturn(sd).when(myBinaryStorageSvc).storeBlob(eq(docRef.getIdElement()), isNull(), eq("Integer"), any(InputStream.class), any(RequestDetails.class));
 		myRequestDetails.setRequestContents(SOME_BYTES);
 
 		try {
