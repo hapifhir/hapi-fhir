@@ -124,7 +124,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable("HFJ_RES_VER_PROV")
 			.addIndex("20230510.1", "IDX_RESVERPROV_RES_VER_PID")
-			.unique(true)
+			.unique(false)
 			.withColumns("RES_VER_PID")
 			.failureAllowed();
 		version.onTable("HFJ_RES_VER_PROV")
