@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -398,6 +399,120 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			));
 		});
 
+	}
+
+	@Test
+	public void testSearchResourcesOnTag_whenTagIsMissing_returnsResourcesWithMissingTag(){
+		// given
+		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+		myStorageSettings.setTagStorageModeIsInline(true);
+
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.addBase("Organization");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setCode("_tag");
+		searchParameter.setName("Tag");
+		searchParameter.setExpression("meta.tag");
+
+		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
+		searchParameterDao.create(searchParameter, (RequestDetails) null);
+
+		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
+		Organization organizationWithNoTag = new Organization();
+		organizationWithNoTag.setName("noTag");
+		organizationDao.create(organizationWithNoTag);
+
+		Organization organizationWithTag = new Organization();
+		organizationWithTag.setName("withTag");
+		organizationWithTag.getMeta().addTag("tagSystem", "tagCode", "tagDisplay");
+		organizationDao.create(organizationWithTag);
+
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamToken> matched = myResourceIndexedSearchParamTokenDao.findAll().stream()
+				.filter(theRow -> theRow.getResourceType().equals("Organization"))
+				.filter(theRow -> theRow.getParamName().equals("_tag"))
+				.collect(Collectors.toList());
+
+			assertThat(matched, hasSize(2));
+			assertThat(matched, hasItems(
+				hasProperty("missing", is(true)),
+				hasProperty("system", is("tagSystem"))
+			));
+		});
+
+		// when
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamToken> matched = myResourceIndexedSearchParamTokenDao.findAll().stream()
+				.filter(theRow -> theRow.getResourceType().equals("Organization"))
+				.filter(theRow -> theRow.getParamName().equals("_tag"))
+				.filter(theRow -> theRow.isMissing() == true)
+				.collect(Collectors.toList());
+
+			// then
+			assertThat(matched, hasSize(1));
+			assertThat(matched, hasItem(
+				hasProperty("missing", is(true))
+			));
+		});
+	}
+
+	@Test
+	public void testSearchResourcesOnSystem_whenSystemIsMissing_returnsResourcesWithMissingSystem(){
+		// given
+		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+		myStorageSettings.setTagStorageModeIsInline(true);
+
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.addBase("Organization");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setCode("_security");
+		searchParameter.setName("Security");
+		searchParameter.setExpression("meta.security");
+
+		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
+		searchParameterDao.create(searchParameter, (RequestDetails) null);
+
+		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
+		Organization organizationWithNoSecurity = new Organization();
+		organizationWithNoSecurity.setName("noSecurity");
+		organizationDao.create(organizationWithNoSecurity);
+
+		Organization organizationWithSecurity = new Organization();
+		organizationWithSecurity.setName("withTag");
+		organizationWithSecurity.getMeta().addSecurity("securitySystem", "securityCode", "securityDisplay");
+		organizationDao.create(organizationWithSecurity);
+
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamToken> matched = myResourceIndexedSearchParamTokenDao.findAll().stream()
+				.filter(theRow -> theRow.getResourceType().equals("Organization"))
+				.filter(theRow -> theRow.getParamName().equals("_security"))
+				.collect(Collectors.toList());
+
+			assertThat(matched, hasSize(2));
+			assertThat(matched, hasItems(
+				hasProperty("missing", is(true)),
+				hasProperty("system", is("securitySystem"))
+			));
+		});
+
+		// when
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamToken> matched = myResourceIndexedSearchParamTokenDao.findAll().stream()
+				.filter(theRow -> theRow.getResourceType().equals("Organization"))
+				.filter(theRow -> theRow.getParamName().equals("_security"))
+				.filter(theRow -> theRow.isMissing() == true)
+				.collect(Collectors.toList());
+
+			// then
+			assertThat(matched, hasSize(1));
+			assertThat(matched, hasItem(
+				hasProperty("missing", is(true))
+			));
+		});
 	}
 
 	@Test
