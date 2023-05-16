@@ -32,7 +32,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
 	@Autowired
-	private MdmSettings myMdmSettings;
+	protected MdmSettings myMdmSettings;
 	@Autowired
 	private MdmControllerHelper myMdmHelper;
 	@Autowired

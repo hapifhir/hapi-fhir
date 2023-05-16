@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -214,10 +215,10 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		latch.setExpectedCount(1);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			latch.awaitExpected();
+			List<HookParams> hookParams = latch.awaitExpected();
 
-			RequestDetails requestDetails = latch.getLatchInvocationParameterOfType(RequestDetails.class);
-			ResponseDetails responseDetails= latch.getLatchInvocationParameterOfType(ResponseDetails.class);
+			RequestDetails requestDetails = PointcutLatch.getInvocationParameterOfType(hookParams, RequestDetails.class);
+			ResponseDetails responseDetails= PointcutLatch.getInvocationParameterOfType(hookParams, ResponseDetails.class);
 
 			assertThat(responseDetails, is(notNullValue()));
 			assertThat(requestDetails, is(notNullValue()));
