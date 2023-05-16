@@ -128,6 +128,7 @@ public class InstanceProgress {
 	 * @param theInstance the instance to update with progress statistics
 	 */
 	public void updateInstance(JobInstance theInstance, boolean theCalledFromReducer) {
+		ourLog.debug("updateInstance {}: {}", theInstance.getInstanceId(), this);
 		if (myEarliestStartTime != null) {
 			theInstance.setStartTime(myEarliestStartTime);
 		}
