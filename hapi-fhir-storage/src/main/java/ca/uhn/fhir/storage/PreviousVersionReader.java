@@ -26,9 +26,6 @@ public class PreviousVersionReader<T extends IBaseResource> {
 		}
 		long previousVersion = currentVersion - 1L;
 		IIdType previousId = theResource.getIdElement().withVersion(Long.toString(previousVersion));
-		// WIP STR5 preserve partition
-
-		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-		return Optional.ofNullable(myDao.read(previousId, systemRequestDetails, theDeletedOk));
+		return Optional.ofNullable(myDao.read(previousId, new SystemRequestDetails(), theDeletedOk));
 	}
 }

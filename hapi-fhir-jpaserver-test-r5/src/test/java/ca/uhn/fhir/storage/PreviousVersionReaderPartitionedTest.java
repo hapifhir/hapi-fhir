@@ -1,6 +1,8 @@
 package ca.uhn.fhir.storage;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.SimplePartitionTestHelper;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -9,6 +11,7 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Patient;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,16 +24,29 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class PreviousVersionReaderTest extends BaseJpaR5Test {
+public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 	PreviousVersionReader<Patient> mySvc;
-	SystemRequestDetails mySrd = new SystemRequestDetails();
+	SystemRequestDetails mySrd;
 	@Autowired
 	DaoRegistry myDaoRegistry;
+	SimplePartitionTestHelper mySimplePartitionTestHelper;
 
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
+
+		mySimplePartitionTestHelper = new SimplePartitionTestHelper(myPartitionSettings, myPartitionConfigSvc, myInterceptorRegistry);
+		mySimplePartitionTestHelper.beforeEach(null);
+
 		mySvc = new PreviousVersionReader<>(myDaoRegistry, Patient.class);
+		mySrd = new SystemRequestDetails();
+		RequestPartitionId part1 = RequestPartitionId.fromPartitionId(SimplePartitionTestHelper.TEST_PARTITION_ID);
+		mySrd.setRequestPartitionId(part1);
+	}
+
+	@AfterEach
+	public void after() throws Exception {
+		mySimplePartitionTestHelper.afterEach(null);
 	}
 
 	@Test
