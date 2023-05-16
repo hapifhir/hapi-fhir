@@ -1198,7 +1198,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					sqlBuilder.append("SELECT r.").append(findPidFieldName);
 					sqlBuilder.append(", r.").append(findResourceTypeFieldName);
 					if (findVersionFieldName != null) {
-						sqlBuilder.append(", r." + findVersionFieldName);
+						sqlBuilder.append(", r.").append(findVersionFieldName);
 					}
 					sqlBuilder.append(" FROM ResourceLink r WHERE ");
 
@@ -1376,6 +1376,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							if (maxCount != null) {
 								q.setMaxResults(maxCount);
 							}
+							@SuppressWarnings("unchecked")
 							List<Tuple> results = q.getResultList();
 							for (Tuple result : results) {
 								if (result != null) {
