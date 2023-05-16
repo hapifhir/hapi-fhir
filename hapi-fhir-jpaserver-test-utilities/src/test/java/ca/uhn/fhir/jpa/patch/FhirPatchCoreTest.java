@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.patch.FhirPatch;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.XmlUtil;
