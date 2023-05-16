@@ -382,7 +382,6 @@ public class JpaStorageSettings extends StorageSettings {
 	public void setTagStorageMode(@Nonnull TagStorageModeEnum theTagStorageMode) {
 		Validate.notNull(theTagStorageMode, "theTagStorageMode must not be null");
 		myTagStorageMode = theTagStorageMode;
-		setTagStorageModeIsInline(TagStorageModeEnum.INLINE.equals(theTagStorageMode));
 	}
 
 	/**
