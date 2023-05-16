@@ -107,8 +107,6 @@ public class BulkDataExportProvider {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	@Autowired(required = false)
-	private AuthorizationInterceptor myAuthorizationInterceptor;
 
 	private Set<String> myCompartmentResources;
 
