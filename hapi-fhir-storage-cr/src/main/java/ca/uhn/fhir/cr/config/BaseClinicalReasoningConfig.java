@@ -38,7 +38,6 @@ import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
-import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -58,7 +57,6 @@ import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
@@ -170,15 +168,15 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	IFhirDalFactory fhirDalFactory(DaoRegistry theDaoRegistry, BaseRequestPartitionHelperSvc theBaseRequestPartitionHelperSvc) {
-		return rd -> new HapiFhirDal(theDaoRegistry, rd, theBaseRequestPartitionHelperSvc);
+	IFhirDalFactory fhirDalFactory(DaoRegistry theDaoRegistry) {
+		return rd -> new HapiFhirDal(theDaoRegistry, rd);
 	}
 
 	@Bean
 	IDataProviderFactory dataProviderFactory(ModelResolver theModelResolver, DaoRegistry theDaoRegistry,
-														  SearchParameterResolver theSearchParameterResolver, BaseRequestPartitionHelperSvc theBaseRequestPartitionHelperSvc) {
+														  SearchParameterResolver theSearchParameterResolver) {
 		return (rd, t) -> {
-			HapiFhirRetrieveProvider provider = new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, rd, theBaseRequestPartitionHelperSvc);
+			HapiFhirRetrieveProvider provider = new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, rd);
 			if (t != null) {
 				provider.setTerminologyProvider(t);
 				provider.setExpandValueSets(true);
@@ -209,8 +207,8 @@ public abstract class BaseClinicalReasoningConfig {
 
 	@Bean
 	public HapiFhirRetrieveProvider fhirRetrieveProvider(DaoRegistry theDaoRegistry,
-																		  SearchParameterResolver theSearchParameterResolver, BaseRequestPartitionHelperSvc theBaseRequestPartitionHelperSvc) {
-		return new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, theBaseRequestPartitionHelperSvc);
+																		  SearchParameterResolver theSearchParameterResolver) {
+		return new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver);
 	}
 
 	@Bean

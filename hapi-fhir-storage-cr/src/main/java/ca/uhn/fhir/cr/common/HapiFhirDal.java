@@ -19,38 +19,30 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
 /**
  * This class leverages DaoRegistry from Hapi-fhir to implement CRUD FHIR API operations constrained to provide only the operations necessary for the cql-evaluator modules to function.
  **/
 public class HapiFhirDal implements FhirDal {
-	private static Logger logger = LoggerFactory.getLogger(HapiFhirDal.class);
+
 	protected final DaoRegistry myDaoRegistry;
 	protected final RequestDetails myRequestDetails;
-	protected final BaseRequestPartitionHelperSvc myBaseRequestPartitionHelperSvc;
 
-	public HapiFhirDal(DaoRegistry theDaoRegistry, BaseRequestPartitionHelperSvc theBaseRequestPartitionHelperSvc) {
-		this(theDaoRegistry,null, theBaseRequestPartitionHelperSvc);
-
+	public HapiFhirDal(DaoRegistry theDaoRegistry) {
+		this(theDaoRegistry,null);
 	}
 
-	public HapiFhirDal(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, BaseRequestPartitionHelperSvc theBaseRequestPartitionHelperSvc) {
+	public HapiFhirDal(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
-		this.myBaseRequestPartitionHelperSvc = theBaseRequestPartitionHelperSvc;
 	}
 
 	@Override
@@ -84,20 +76,9 @@ public class HapiFhirDal implements FhirDal {
 
 	@Override
 	public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
-
-		if(myBaseRequestPartitionHelperSvc.isResourcePartitionable(theResourceType)){
-			var b = this.myDaoRegistry.getResourceDao(theResourceType)
-				.search(new SearchParameterMap().add("url", new UriParam(theUrl)), myRequestDetails);
-			return new BundleIterable(myRequestDetails, b);
-		} else {
-			//In Partitioned deployment certain resources are only available in default partition
-			SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-			systemRequestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
-			var b = this.myDaoRegistry.getResourceDao(theResourceType)
-				.search(new SearchParameterMap().add("url", new UriParam(theUrl)), systemRequestDetails);
-			return new BundleIterable(systemRequestDetails, b);
-
-		}
+		var b = this.myDaoRegistry.getResourceDao(theResourceType)
+			.search(new SearchParameterMap().add("url", new UriParam(theUrl)), myRequestDetails);
+		return new BundleIterable(myRequestDetails, b);
 	}
 
 
