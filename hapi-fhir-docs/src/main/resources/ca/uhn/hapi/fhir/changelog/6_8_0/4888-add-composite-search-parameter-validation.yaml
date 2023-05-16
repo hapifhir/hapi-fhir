@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4888
+jira: SMILE-6047
+title: "Added validation for creating a Composite SearchParameter with referenced \"component\" elements. 
+Only 4 types of \"component\" SearchParameter are allowed: STRING, TOKEN, DATE, QUANTITY"
