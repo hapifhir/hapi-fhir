@@ -110,12 +110,19 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 	 * Guts of beforeEach exposed for manual lifecycle.
 	 */
 	public void setUp() {
+		setUp(myLevel);
+	}
+
+	/**
+	 * Guts of beforeEach exposed for manual lifecycle.
+	 */
+	public void setUp(Level theLevel) {
 		myListAppender = new ListAppender<>();
 		myListAppender.start();
 		myLogger.addAppender(myListAppender);
-		if (myLevel != null) {
+		if (theLevel != null) {
 			mySavedLevel = myLogger.getLevel();
-			myLogger.setLevel(myLevel);
+			myLogger.setLevel(theLevel);
 		}
 	}
 
