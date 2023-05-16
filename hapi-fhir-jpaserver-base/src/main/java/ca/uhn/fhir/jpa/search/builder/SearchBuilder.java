@@ -1347,12 +1347,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 			}
 
-			if (theReverseMode) {
-				if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
-					pidsToInclude = new HashSet<>(QueryParameterUtils.filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
-				}
-			}
-
 			nextRoundMatches.clear();
 			for (JpaPid next : pidsToInclude) {
 				if (original.contains(next) == false && allAdded.contains(next) == false) {
