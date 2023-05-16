@@ -26,46 +26,46 @@ import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENA
 
 public class HapiSchemaMigrationTest {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(HapiSchemaMigrationTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(HapiSchemaMigrationTest.class);
 	public static final String TEST_SCHEMA_NAME = "test";
 
 	@RegisterExtension
 	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
 
 	@AfterEach
-	public void afterEach(){
-        myEmbeddedServersExtension.clearDatabases();
-        HapiSystemProperties.enableUnitTestMode();
+	public void afterEach() {
+		myEmbeddedServersExtension.clearDatabases();
+		HapiSystemProperties.enableUnitTestMode();
 	}
 
 	@ParameterizedTest
 	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
-	public void testMigration(DriverTypeEnum theDriverType){
-        // ensure all migrations are run
-        HapiSystemProperties.disableUnitTestMode();
-        ourLog.info("isUnitTestModeEnabled: {}", HapiSystemProperties.isUnitTestModeEnabled());
+	public void testMigration(DriverTypeEnum theDriverType) {
+		// ensure all migrations are run
+		HapiSystemProperties.disableUnitTestMode();
+		ourLog.info("isUnitTestModeEnabled: {}", HapiSystemProperties.isUnitTestModeEnabled());
 
-        ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
+		ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
 
-        myEmbeddedServersExtension.initializePersistenceSchema(theDriverType);
-        myEmbeddedServersExtension.insertPersistenceTestData(theDriverType);
+		myEmbeddedServersExtension.initializePersistenceSchema(theDriverType);
+		myEmbeddedServersExtension.insertPersistenceTestData(theDriverType);
 
-        DataSource dataSource = myEmbeddedServersExtension.getDataSource(theDriverType);
-        HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
+		DataSource dataSource = myEmbeddedServersExtension.getDataSource(theDriverType);
+		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
-        VersionEnum[] allVersions = VersionEnum.values();
+		VersionEnum[] allVersions = VersionEnum.values();
 
-        int fromVersion = FIRST_TESTED_VERSION.ordinal() - 1;
-        VersionEnum from = allVersions[fromVersion];
+		int fromVersion = FIRST_TESTED_VERSION.ordinal() - 1;
+		VersionEnum from = allVersions[fromVersion];
 
-        int lastVersion = allVersions.length - 1;
-        VersionEnum to = allVersions[lastVersion];
+		int lastVersion = allVersions.length - 1;
+		VersionEnum to = allVersions[lastVersion];
 
-        MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.EMPTY_SET).getTaskList(from, to);
+		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.EMPTY_SET).getTaskList(from, to);
 		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(theDriverType);
 		schemaMigrator.createMigrationTableIfRequired();
-        schemaMigrator.migrate();
-    }
+		schemaMigrator.migrate();
+	}
 }
