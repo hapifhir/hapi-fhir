@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -366,6 +367,7 @@ public class JpaBulkExportProcessorTest {
 	// source is: "isExpandMdm,(whether or not to test on a specific partition)
 	@ParameterizedTest
 	@CsvSource({"false, false", "false, true", "true, true", "true, false"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void getResourcePidIterator_groupExportStyleWithNonPatientResource_returnsIterator(boolean theMdm, boolean thePartitioned) {
 		// setup
 		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
@@ -434,8 +436,9 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(observationDao);
 		when(mySearchBuilderFactory.newSearchBuilder(eq(observationDao), eq("Observation"), eq(Observation.class)))
 			.thenReturn(observationSearchBuilder);
-		when(observationSearchBuilder.loadIncludes(any(), any(), eq(observationPidSet), any(), eq(false), any(), any(),
-			any(SystemRequestDetails.class), any()))
+		when(observationSearchBuilder.loadIncludes(
+			any(SearchBuilderLoadIncludesParameters.class)
+		))
 			.thenReturn(new HashSet<>());
 
 		// ret
@@ -469,10 +472,12 @@ public class JpaBulkExportProcessorTest {
 		ArgumentCaptor<SystemRequestDetails> groupDaoReadSystemRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(groupDao).read(any(IIdType.class), groupDaoReadSystemRequestDetailsCaptor.capture());
 		validatePartitionId(thePartitioned, groupDaoReadSystemRequestDetailsCaptor.getValue().getRequestPartitionId());
-		ArgumentCaptor<SystemRequestDetails> searchBuilderLoadIncludesRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
-		verify(observationSearchBuilder).loadIncludes(any(), any(), eq(observationPidSet), any(), eq(false), any(), any(),
-			searchBuilderLoadIncludesRequestDetailsCaptor.capture(), any());
-		validatePartitionId(thePartitioned, searchBuilderLoadIncludesRequestDetailsCaptor.getValue().getRequestPartitionId());
+		ArgumentCaptor<SearchBuilderLoadIncludesParameters> searchBuilderLoadIncludesRequestDetailsCaptor = ArgumentCaptor.forClass(SearchBuilderLoadIncludesParameters.class);
+		verify(observationSearchBuilder).loadIncludes(searchBuilderLoadIncludesRequestDetailsCaptor.capture());
+		SearchBuilderLoadIncludesParameters param = searchBuilderLoadIncludesRequestDetailsCaptor.getValue();
+		assertTrue(param.getRequestDetails() instanceof SystemRequestDetails);
+		SystemRequestDetails details = (SystemRequestDetails) param.getRequestDetails();
+		validatePartitionId(thePartitioned, details.getRequestPartitionId());
 	}
 
 	@ParameterizedTest
