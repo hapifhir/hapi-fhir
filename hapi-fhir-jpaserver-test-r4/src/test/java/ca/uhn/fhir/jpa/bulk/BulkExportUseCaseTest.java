@@ -513,6 +513,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myStorageSettings.setBulkExportFileMaximumCapacity(JpaStorageSettings.DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY);
 		}
 
+		// TODO reenable 4637
+		// Reenable when bulk exports that return no results work as expected
 		@Disabled
 		@Test
 		public void testPatientExportIgnoresResourcesNotInPatientCompartment() {
