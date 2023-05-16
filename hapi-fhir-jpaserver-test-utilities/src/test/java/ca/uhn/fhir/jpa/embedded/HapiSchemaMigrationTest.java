@@ -16,17 +16,17 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.util.Collections;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
 
 
 public class HapiSchemaMigrationTest {
 
     private static final Logger ourLog = LoggerFactory.getLogger(HapiSchemaMigrationTest.class);
-
-    public static final VersionEnum FIRST_TESTED_VERSION = VersionEnum.V5_1_0;
 	public static final String TEST_SCHEMA_NAME = "test";
 
 	@RegisterExtension
@@ -47,11 +47,11 @@ public class HapiSchemaMigrationTest {
 
         ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
 
-        JpaEmbeddedDatabase embeddedDatabase = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
-        embeddedDatabase.initializeDatabaseForVersion(FIRST_TESTED_VERSION);
-        embeddedDatabase.insertTestData(FIRST_TESTED_VERSION);
+        myEmbeddedServersExtension.initializePersistenceSchema(theDriverType);
+        myEmbeddedServersExtension.insertPersistenceTestData(theDriverType);
 
-		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(embeddedDatabase.getDataSource(), theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
+        DataSource dataSource = myEmbeddedServersExtension.getDataSource(theDriverType);
+        HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
         VersionEnum[] allVersions = VersionEnum.values();
@@ -63,7 +63,7 @@ public class HapiSchemaMigrationTest {
         VersionEnum to = allVersions[lastVersion];
 
         MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.EMPTY_SET).getTaskList(from, to);
-		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, embeddedDatabase.getDataSource(), new Properties(), migrationTasks, hapiMigrationStorageSvc);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(theDriverType);
 		schemaMigrator.createMigrationTableIfRequired();
         schemaMigrator.migrate();

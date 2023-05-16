@@ -20,17 +20,26 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
 public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
+
+    public static final VersionEnum FIRST_TESTED_VERSION = VersionEnum.V5_1_0;
+
+    private static final Logger ourLog = LoggerFactory.getLogger(HapiEmbeddedDatabasesExtension.class);
 
     private final Set<JpaEmbeddedDatabase> myEmbeddedDatabases = new HashSet<>();
 
@@ -71,6 +80,31 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 	private Set<JpaEmbeddedDatabase> getAllEmbeddedDatabases(){
 		return myEmbeddedDatabases;
 	}
+
+    public void initializePersistenceSchema(DriverTypeEnum theDriverType) {
+        JpaEmbeddedDatabase embeddedDatabase = getEmbeddedDatabase(theDriverType);
+        String fileName = String.format("migration/releases/%s/schema/%s.sql", FIRST_TESTED_VERSION, embeddedDatabase.getDriverType());
+        String sql = getSqlFromResourceFile(fileName);
+        embeddedDatabase.executeSqlAsBatch(sql);
+    }
+
+    public void insertPersistenceTestData(DriverTypeEnum theDriverType) {
+        JpaEmbeddedDatabase embeddedDatabase = getEmbeddedDatabase(theDriverType);
+        String fileName = String.format("migration/releases/%s/data/%s.sql", FIRST_TESTED_VERSION, embeddedDatabase.getDriverType());
+        String sql = getSqlFromResourceFile(fileName);
+        embeddedDatabase.insertTestData(sql);
+    }
+
+    public String getSqlFromResourceFile(String theFileName) {
+        try {
+            ourLog.info("Loading file: {}", theFileName);
+            File file = new File(HapiEmbeddedDatabasesExtension.class.getClassLoader().getResource(theFileName).toURI());
+            String sql = Files.readString(file.toPath());
+            return sql;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 	public static class DatabaseVendorProvider implements ArgumentsProvider {
 		@Override

@@ -33,7 +33,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
     @Override
     public void disableConstraints() {
         List<String> sql = new ArrayList<>();
-        List<Map<String, Object>> queryResults = query("SELECT CONSTRAINT_NAME, TABLE_NAME FROM USER_CONSTRAINTS");
+        List<Map<String, Object>> queryResults = query("SELECT CONSTRAINT_NAME, TABLE_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_TYPE != 'P'");
         for(Map<String, Object> row : queryResults){
             String tableName = row.get("TABLE_NAME").toString();
             String constraintName = row.get("CONSTRAINT_NAME").toString();
@@ -45,7 +45,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
     @Override
     public void enableConstraints() {
         List<String> sql = new ArrayList<>();
-        List<Map<String, Object>> queryResults = query("SELECT CONSTRAINT_NAME, TABLE_NAME FROM USER_CONSTRAINTS");
+        List<Map<String, Object>> queryResults = query("SELECT CONSTRAINT_NAME, TABLE_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_TYPE != 'P'");
         for(Map<String, Object> row : queryResults){
             String tableName = row.get("TABLE_NAME").toString();
             String constraintName = row.get("CONSTRAINT_NAME").toString();

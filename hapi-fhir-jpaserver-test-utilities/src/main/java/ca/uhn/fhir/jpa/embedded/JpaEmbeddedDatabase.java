@@ -21,15 +21,12 @@ package ca.uhn.fhir.jpa.embedded;
 
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -100,31 +97,10 @@ public abstract class JpaEmbeddedDatabase {
 		return myConnectionProperties.getDataSource();
 	}
 
-    public void initializeDatabaseForVersion(VersionEnum theVersionEnum) {
-        String fileName = String.format("migration-data/releases/%s/init-scripts/%s.sql", theVersionEnum, getDriverType());
-        ourLog.info("Loading init script: {}", fileName);
-        String sql = getSqlFromResourceFile(fileName);
-        List<String> statements = Arrays.stream(sql.split(";")).collect(Collectors.toList());
-        executeSqlAsBatch(statements);
-    }
-
-    public void insertTestData(VersionEnum theVersionEnum) {
+    public void insertTestData(String theSql){
         disableConstraints();
-        String fileName = String.format("migration-data/releases/%s/test-data/%s.sql", theVersionEnum, getDriverType());
-        ourLog.info("Loading test data: {}", fileName);
-        String sql = getSqlFromResourceFile(fileName);
-        executeSqlAsBatch(sql);
+        executeSqlAsBatch(theSql);
         enableConstraints();
-    }
-
-    public String getSqlFromResourceFile(String theFileName) {
-        try {
-            File file = new File(this.getClass().getClassLoader().getResource(theFileName).toURI());
-            String sql = Files.readString(file.toPath());
-            return sql;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void executeSqlAsBatch(String theSql){
