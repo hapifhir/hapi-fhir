@@ -473,7 +473,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		//Convert Resource Persistent IDs to actual client IDs.
 		Set<JpaPid> pidSet = new HashSet<>(thePatientPids);
-		Set<String> patientId = myIdHelperService.translatePidsToFhirResourceIds(pidSet);
+		Set<String> patientIds = myIdHelperService.translatePidsToFhirResourceIds(pidSet);
 
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
@@ -490,9 +490,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			// Now, further filter the query with patient references defined by the chunk of IDs we have.
 			// filter by PatientIds
 			if (PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(theParams.getResourceType())) {
-				filterSearchByHasParam(patientId, expandedSpMap, theParams);
+				filterSearchByHasParam(patientIds, expandedSpMap, theParams);
 			} else {
-				filterSearchByResourceIds(patientId, expandedSpMap, theParams);
+				filterSearchByResourceIds(patientIds, expandedSpMap, theParams);
 			}
 
 			//Execute query and all found pids to our local iterator.
