@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PreviousVersionReaderTest extends BaseJpaR5Test {
@@ -29,9 +31,7 @@ public class PreviousVersionReaderTest extends BaseJpaR5Test {
 	@Test
 	void readPreviousVersion() {
 		// setup
-		Patient male = new Patient();
-		male.setGender(Enumerations.AdministrativeGender.MALE);
-		Patient patient = (Patient) myPatientDao.create(male, mySrd).getResource();
+		Patient patient = createMale();
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 		myPatientDao.update(patient, mySrd);
 		assertEquals(Enumerations.AdministrativeGender.FEMALE, myPatientDao.read(patient.getIdElement(), mySrd).getGenderElement().getValue());
@@ -44,4 +44,42 @@ public class PreviousVersionReaderTest extends BaseJpaR5Test {
 		Patient previousPatient = oPreviousPatient.get();
 		assertEquals(Enumerations.AdministrativeGender.MALE, previousPatient.getGenderElement().getValue());
 	}
+
+	private Patient createMale() {
+		Patient male = new Patient();
+		male.setGender(Enumerations.AdministrativeGender.MALE);
+		Patient patient = (Patient) myPatientDao.create(male, mySrd).getResource();
+		return patient;
+	}
+
+	@Test
+	void noPrevious() {
+		// setup
+		Patient patient = createMale();
+
+		// execute
+		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(patient);
+
+		// verify
+		assertFalse(oPreviousPatient.isPresent());
+	}
+
+	@Test
+	void currentDeleted() {
+		// setup
+		Patient patient = createMale();
+		IdType patientId = patient.getIdElement().toVersionless();
+		myPatientDao.delete(patientId, mySrd);
+
+		Patient currentDeletedVersion = myPatientDao.read(patientId, mySrd, true);
+
+		// execute
+		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(currentDeletedVersion);
+
+		// verify
+		assertTrue(oPreviousPatient.isPresent());
+		Patient previousPatient = oPreviousPatient.get();
+		assertEquals(Enumerations.AdministrativeGender.MALE, previousPatient.getGenderElement().getValue());
+	}
+
 }
