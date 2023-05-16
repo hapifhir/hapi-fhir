@@ -51,6 +51,7 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.inject.Named;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +133,8 @@ public class MeasureService implements IDaoRegistryUser {
 	protected DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private ExecutorService myMeasureExecutor;
+	@Named("cqlExecutor")
+	private ExecutorService myCqlExecutor;
 
 	protected RequestDetails myRequestDetails;
 	/**
@@ -186,7 +188,7 @@ public class MeasureService implements IDaoRegistryUser {
 
 		TerminologyProvider terminologyProvider;
 
-		myMeasureEvaluationOptions.setMeasureExecutor(myMeasureExecutor);
+		myMeasureEvaluationOptions.setMeasureExecutor(myCqlExecutor);
 
 		if (theTerminologyEndpoint != null) {
 			IGenericClient client = Clients.forEndpoint(getFhirContext(), theTerminologyEndpoint);

@@ -59,10 +59,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static ca.uhn.fhir.cr.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
@@ -143,7 +145,8 @@ public class MeasureService implements IDaoRegistryUser {
 	protected DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private ExecutorService myMeasureExecutor;
+	@Named("cqlExecutor")
+	private ExecutorService myCqlExecutor;
 
 	protected RequestDetails myRequestDetails;
 
@@ -198,7 +201,7 @@ public class MeasureService implements IDaoRegistryUser {
 
 		TerminologyProvider terminologyProvider;
 
-		myMeasureEvaluationOptions.setMeasureExecutor(myMeasureExecutor);
+		myMeasureEvaluationOptions.setMeasureExecutor(myCqlExecutor);
 
 		if (theTerminologyEndpoint != null) {
 			IGenericClient client = Clients.forEndpoint(getFhirContext(), theTerminologyEndpoint);

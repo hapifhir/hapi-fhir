@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cr.common.CodeCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.CqlExceptionHandlingInterceptor;
-import ca.uhn.fhir.cr.common.CqlForkJoinWorkerThreadFactory;
+import ca.uhn.fhir.cr.common.CqlThreadFactory;
 import ca.uhn.fhir.cr.common.ElmCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.HapiFhirDal;
 import ca.uhn.fhir.cr.common.HapiFhirRetrieveProvider;
@@ -72,17 +72,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
+
 
 
 @Configuration
@@ -295,19 +292,11 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	public Executor cqlExecutor() {
-		CqlForkJoinWorkerThreadFactory factory = new CqlForkJoinWorkerThreadFactory();
-		ForkJoinPool myCommonPool = new ForkJoinPool(Math.min(32767, Runtime.getRuntime().availableProcessors()),
-			factory,
-			null, false);
-
-		return new DelegatingSecurityContextExecutor(myCommonPool,
-			SecurityContextHolder.getContext());
-	}
-
-	@Bean
-	public ExecutorService measureExecutor() {
-		ExecutorService executor = Executors.newFixedThreadPool(CrProperties.MeasureProperties.DEFAULT_THREADS_BATCH_SIZE);
+	public ExecutorService cqlExecutor() {
+		CqlThreadFactory factory = new CqlThreadFactory();
+		ExecutorService executor = Executors.
+			newFixedThreadPool(CrProperties.MeasureProperties.DEFAULT_THREADS_BATCH_SIZE
+			,  factory);
 		executor = new DelegatingSecurityContextExecutorService(executor);
 
 		return executor;
