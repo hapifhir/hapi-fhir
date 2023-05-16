@@ -270,13 +270,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		queryChunker.chunk(expandedMemberResourceIds, QUERY_CHUNK_SIZE, (idChunk) -> {
 			try {
 				queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, theDef);
-			} catch (IOException theE) {
+			} catch (IOException ex) {
 				// we will never see this;
 				// SearchBuilder#QueryIterator does not (nor can ever) throw
-				// an IOException... but Java requires the check
+				// an IOException... but Java requires the check,
 				// so we'll put a log here (just in the off chance)
-				ourLog.error("Couldn't close query iterator ", theE);
-				throw new RuntimeException(theE);
+				ourLog.error("Couldn't close query iterator ", ex);
+				throw new RuntimeException(Msg.code(2304) + "Couldn't close query iterator", ex);
 			}
 		});
 		return pids;
