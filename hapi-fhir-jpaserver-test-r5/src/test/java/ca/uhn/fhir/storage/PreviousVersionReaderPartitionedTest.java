@@ -5,8 +5,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.SimplePartitionTestHelper;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Patient;
@@ -18,11 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 	PreviousVersionReader<Patient> mySvc;
@@ -38,7 +34,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		mySimplePartitionTestHelper = new SimplePartitionTestHelper(myPartitionSettings, myPartitionConfigSvc, myInterceptorRegistry);
 		mySimplePartitionTestHelper.beforeEach(null);
 
-		mySvc = new PreviousVersionReader<>(myDaoRegistry, Patient.class);
+		mySvc = new PreviousVersionReader<>(myPatientDao);
 		mySrd = new SystemRequestDetails();
 		RequestPartitionId part1 = RequestPartitionId.fromPartitionId(SimplePartitionTestHelper.TEST_PARTITION_ID);
 		mySrd.setRequestPartitionId(part1);
@@ -69,8 +65,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 	private Patient createMale() {
 		Patient male = new Patient();
 		male.setGender(Enumerations.AdministrativeGender.MALE);
-		Patient patient = (Patient) myPatientDao.create(male, mySrd).getResource();
-		return patient;
+		return (Patient) myPatientDao.create(male, mySrd).getResource();
 	}
 
 	@Test
@@ -109,12 +104,8 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Patient latestUndeletedVersion = setupPreviousDeletedResource();
 
 		// execute
-		try {
-			mySvc.readPreviousVersion(latestUndeletedVersion);
-			fail();
-		} catch (ResourceGoneException e) {
-			assertThat(e.getMessage(), Matchers.startsWith("Resource was deleted at"));
-		}
+		Optional<Patient> oDeletedPatient = mySvc.readPreviousVersion(latestUndeletedVersion);
+		assertFalse(oDeletedPatient.isPresent());
 	}
 
 	@Test

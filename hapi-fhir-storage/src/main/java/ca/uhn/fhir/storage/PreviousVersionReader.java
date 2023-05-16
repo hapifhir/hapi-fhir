@@ -1,8 +1,8 @@
 package ca.uhn.fhir.storage;
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -11,8 +11,8 @@ import java.util.Optional;
 public class PreviousVersionReader<T extends IBaseResource> {
 	private final IFhirResourceDao<T> myDao;
 
-	public PreviousVersionReader(DaoRegistry myDaoRegistry, Class<T> theResourceClass) {
-		myDao = myDaoRegistry.getResourceDao(theResourceClass);
+	public PreviousVersionReader(IFhirResourceDao<T> theDao) {
+		myDao = theDao;
 	}
 
 	public Optional<T> readPreviousVersion(T theResource) {
@@ -26,6 +26,11 @@ public class PreviousVersionReader<T extends IBaseResource> {
 		}
 		long previousVersion = currentVersion - 1L;
 		IIdType previousId = theResource.getIdElement().withVersion(Long.toString(previousVersion));
-		return Optional.ofNullable(myDao.read(previousId, new SystemRequestDetails(), theDeletedOk));
+		try {
+			return Optional.ofNullable(myDao.read(previousId, new SystemRequestDetails(), theDeletedOk));
+		} catch (ResourceGoneException e) {
+			// This will only happen in the case where theDeleteOk = false
+			return Optional.empty();
+		}
 	}
 }
