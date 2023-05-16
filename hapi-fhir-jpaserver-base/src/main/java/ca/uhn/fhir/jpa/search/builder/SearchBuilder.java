@@ -50,6 +50,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchConstants;
@@ -1108,26 +1109,62 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * The JpaPid returned will have resource type populated.
 	 */
 	@Override
-	public Set<JpaPid> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<JpaPid> theMatches, Collection<Include> theIncludes,
-																 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount) {
-		if (theMatches.size() == 0) {
+	public Set<JpaPid> loadIncludes(
+		FhirContext theContext,
+		EntityManager theEntityManager,
+		Collection<JpaPid> theMatches,
+		Collection<Include> theIncludes,
+		boolean theReverseMode,
+		DateRangeParam theLastUpdated,
+		String theSearchIdOrDescription,
+		RequestDetails theRequest,
+		Integer theMaxCount
+	) {
+		SearchBuilderLoadIncludesParameters<JpaPid> parameters = new SearchBuilderLoadIncludesParameters<>();
+		parameters.setFhirContext(theContext);
+		parameters.setEntityManager(theEntityManager);
+		parameters.setMatches(theMatches);
+		parameters.setIncludeFilters(theIncludes);
+		parameters.setReverseMode(theReverseMode);
+		parameters.setLastUpdated(theLastUpdated);
+		parameters.setSearchIdOrDescription(theSearchIdOrDescription);
+		parameters.setRequestDetails(theRequest);
+		parameters.setMaxCount(theMaxCount);
+		return loadIncludes(parameters);
+	}
+
+	@Override
+	public Set<JpaPid> loadIncludes(SearchBuilderLoadIncludesParameters<JpaPid> theParameters) {
+		Collection<JpaPid> matches = theParameters.getMatches();
+		Collection<Include> currentIncludes = theParameters.getIncludeFilters();
+		boolean reverseMode = theParameters.isReverseMode();
+		EntityManager entityManager = theParameters.getEntityManager();
+		Integer maxCount = theParameters.getMaxCount();
+		FhirContext fhirContext = theParameters.getFhirContext();
+		DateRangeParam lastUpdated = theParameters.getLastUpdated();
+		RequestDetails request = theParameters.getRequestDetails();
+		String searchIdOrDescription = theParameters.getSearchIdOrDescription();
+		List<String> desiredResourceTypes = theParameters.getDesiredResourceTypes();
+		boolean hasDesiredResourceTypes = desiredResourceTypes != null && !desiredResourceTypes.isEmpty();
+
+		if (matches.size() == 0) {
 			return new HashSet<>();
 		}
-		if (theIncludes == null || theIncludes.isEmpty()) {
+		if (currentIncludes == null || currentIncludes.isEmpty()) {
 			return new HashSet<>();
 		}
-		String searchPidFieldName = theReverseMode ? MY_TARGET_RESOURCE_PID : MY_SOURCE_RESOURCE_PID;
-		String findPidFieldName = theReverseMode ? MY_SOURCE_RESOURCE_PID : MY_TARGET_RESOURCE_PID;
-		String findResourceTypeFieldName = theReverseMode ? MY_SOURCE_RESOURCE_TYPE : MY_TARGET_RESOURCE_TYPE;
+		String searchPidFieldName = reverseMode ? MY_TARGET_RESOURCE_PID : MY_SOURCE_RESOURCE_PID;
+		String findPidFieldName = reverseMode ? MY_SOURCE_RESOURCE_PID : MY_TARGET_RESOURCE_PID;
+		String findResourceTypeFieldName = reverseMode ? MY_SOURCE_RESOURCE_TYPE : MY_TARGET_RESOURCE_TYPE;
 		String findVersionFieldName = null;
-		if (!theReverseMode && myStorageSettings.isRespectVersionsForSearchIncludes()) {
+		if (!reverseMode && myStorageSettings.isRespectVersionsForSearchIncludes()) {
 			findVersionFieldName = MY_TARGET_RESOURCE_VERSION;
 		}
 
-		List<JpaPid> nextRoundMatches = new ArrayList<>(theMatches);
+		List<JpaPid> nextRoundMatches = new ArrayList<>(matches);
 		HashSet<JpaPid> allAdded = new HashSet<>();
-		HashSet<JpaPid> original = new HashSet<>(theMatches);
-		ArrayList<Include> includes = new ArrayList<>(theIncludes);
+		HashSet<JpaPid> original = new HashSet<>(matches);
+		ArrayList<Include> includes = new ArrayList<>(currentIncludes);
 
 		int roundCounts = 0;
 		StopWatch w = new StopWatch();
@@ -1184,7 +1221,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					 * resource type than the one you are searching on.
 					 */
 					if (wantResourceType != null
-						&& (theReverseMode || (myParams != null && myParams.getEverythingMode() != null))) {
+						&& (reverseMode || (myParams != null && myParams.getEverythingMode() != null))
+					) {
 						// because mySourceResourceType is not part of the HFJ_RES_LINK
 						// index, this might not be the most optimal performance.
 						// but it is for an $everything operation (and maybe we should update the index)
@@ -1192,23 +1230,30 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					} else {
 						wantResourceType = null;
 					}
+
 					// When calling $everything on a Patient instance, we don't want to recurse into new Patient resources
 					// (e.g. via Provenance, List, or Group) when in an $everything operation
 					if (myParams != null && myParams.getEverythingMode() == SearchParameterMap.EverythingModeEnum.PATIENT_INSTANCE) {
 						sqlBuilder.append(" AND r.myTargetResourceType != 'Patient'");
 						sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
 					}
+					if (hasDesiredResourceTypes) {
+						sqlBuilder.append(" AND r.myTargetResourceType IN (:desired_target_resource_types)");
+					}
 
 					String sql = sqlBuilder.toString();
 					List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 					for (Collection<JpaPid> nextPartition : partitions) {
-						TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
+						TypedQuery<?> q = entityManager.createQuery(sql, Object[].class);
 						q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
 						if (wantResourceType != null) {
 							q.setParameter("want_resource_type", wantResourceType);
 						}
-						if (theMaxCount != null) {
-							q.setMaxResults(theMaxCount);
+						if (maxCount != null) {
+							q.setMaxResults(maxCount);
+						}
+						if (hasDesiredResourceTypes) {
+							q.setParameter("desired_target_resource_types", String.join(", ", desiredResourceTypes));
 						}
 						List<?> results = q.getResultList();
 						for (Object nextRow : results) {
@@ -1240,7 +1285,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (isBlank(resType)) {
 						continue;
 					}
-					RuntimeResourceDefinition def = theContext.getResourceDefinition(resType);
+					RuntimeResourceDefinition def = fhirContext.getResourceDefinition(resType);
 					if (def == null) {
 						ourLog.warn("Unknown resource type in include/revinclude=" + nextInclude.getValue());
 						continue;
@@ -1319,7 +1364,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 						for (Collection<JpaPid> nextPartition : partitions) {
-							Query q = theEntityManager.createNativeQuery(sql, Tuple.class);
+							Query q = entityManager.createNativeQuery(sql, Tuple.class);
 							q.setParameter("src_path", nextPath);
 							q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
 							if (targetResourceType != null) {
@@ -1328,8 +1373,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
 
-							if (theMaxCount != null) {
-								q.setMaxResults(theMaxCount);
+							if (maxCount != null) {
+								q.setMaxResults(maxCount);
 							}
 							List<Tuple> results = q.getResultList();
 							for (Tuple result : results) {
@@ -1347,9 +1392,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 			}
 
-			if (theReverseMode) {
-				if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
-					pidsToInclude = new HashSet<>(QueryParameterUtils.filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+			if (reverseMode) {
+				if (lastUpdated != null && (lastUpdated.getLowerBoundAsInstant() != null || lastUpdated.getUpperBoundAsInstant() != null)) {
+					pidsToInclude = new HashSet<>(QueryParameterUtils.filterResourceIdsByLastUpdated(entityManager, lastUpdated, pidsToInclude));
 				}
 			}
 
@@ -1362,7 +1407,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			addedSomeThisRound = allAdded.addAll(pidsToInclude);
 
-			if (theMaxCount != null && allAdded.size() >= theMaxCount) {
+			if (maxCount != null && allAdded.size() >= maxCount) {
 				break;
 			}
 
@@ -1370,21 +1415,21 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		allAdded.removeAll(original);
 
-		ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
+		ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), reverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), searchIdOrDescription);
 
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
 		if (allAdded.size() > 0) {
 
-			if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+			if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, request)) {
 				List<JpaPid> includedPidList = new ArrayList<>(allAdded);
 				JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, () -> this);
 				HookParams params = new HookParams()
 					.add(IPreResourceAccessDetails.class, accessDetails)
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					.add(RequestDetails.class, request)
+					.addIfMatchesType(ServletRequestDetails.class, request);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, request, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 				for (int i = includedPidList.size() - 1; i >= 0; i--) {
 					if (accessDetails.isDontReturnResourceAtIndex(i)) {

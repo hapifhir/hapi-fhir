@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -494,7 +495,17 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			}
 
 			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
-			Set<JpaPid> includeIds = searchBuilder.loadIncludes(myContext, myEntityManager, theReadPids, includes, false, expandedSpMap.getLastUpdated(), theParams.getInstanceId(), requestDetails, null);
+			SearchBuilderLoadIncludesParameters<JpaPid> loadIncludesParameters = new SearchBuilderLoadIncludesParameters<>();
+			loadIncludesParameters.setFhirContext(myContext);
+			loadIncludesParameters.setMatches(theReadPids);
+			loadIncludesParameters.setEntityManager(myEntityManager);
+			loadIncludesParameters.setRequestDetails(requestDetails);
+			loadIncludesParameters.setIncludeFilters(includes);
+			loadIncludesParameters.setReverseMode(false);
+			loadIncludesParameters.setLastUpdated(expandedSpMap.getLastUpdated());
+			loadIncludesParameters.setSearchIdOrDescription(theParams.getInstanceId());
+			loadIncludesParameters.setDesiredResourceTypes(theParams.getRequestedResourceTypes());
+			Set<JpaPid> includeIds = searchBuilder.loadIncludes(loadIncludesParameters);
 
 			// gets rid of the Patient duplicates
 			theReadPids.addAll(includeIds.stream().filter((id) -> !id.getResourceType().equals("Patient")).collect(Collectors.toSet()));
