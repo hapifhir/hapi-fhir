@@ -3,18 +3,23 @@ package ca.uhn.fhir.storage;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Patient;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PreviousVersionReaderTest extends BaseJpaR5Test {
 	PreviousVersionReader<Patient> mySvc;
@@ -80,6 +85,56 @@ public class PreviousVersionReaderTest extends BaseJpaR5Test {
 		assertTrue(oPreviousPatient.isPresent());
 		Patient previousPatient = oPreviousPatient.get();
 		assertEquals(Enumerations.AdministrativeGender.MALE, previousPatient.getGenderElement().getValue());
+	}
+
+	@Test
+	void previousDeleted() {
+		// setup
+		Patient latestUndeletedVersion = setupPreviousDeletedResource();
+
+		// execute
+		try {
+			mySvc.readPreviousVersion(latestUndeletedVersion);
+			fail();
+		} catch (ResourceGoneException e) {
+			assertThat(e.getMessage(), Matchers.startsWith("Resource was deleted at"));
+		}
+	}
+
+	@Test
+	void previousDeletedDeletedOk() {
+		// setup
+		Patient latestUndeletedVersion = setupPreviousDeletedResource();
+
+		// execute
+		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(latestUndeletedVersion, true);
+
+		// verify
+		assertTrue(oPreviousPatient.isPresent());
+		Patient previousPatient = oPreviousPatient.get();
+		assertTrue(previousPatient.isDeleted());
+	}
+
+	@NotNull
+	private Patient setupPreviousDeletedResource() {
+		Patient patient = createMale();
+		assertEquals(1L, patient.getIdElement().getVersionIdPartAsLong());
+		IdType patientId = patient.getIdElement().toVersionless();
+		myPatientDao.delete(patientId, mySrd);
+
+		Patient currentDeletedVersion = myPatientDao.read(patientId, mySrd, true);
+		assertEquals(2L, currentDeletedVersion.getIdElement().getVersionIdPartAsLong());
+
+		currentDeletedVersion.setGender(Enumerations.AdministrativeGender.FEMALE);
+		currentDeletedVersion.setId(currentDeletedVersion.getIdElement().toVersionless());
+		myPatientDao.update(currentDeletedVersion, mySrd);
+
+		Patient latestUndeletedVersion = myPatientDao.read(patientId, mySrd);
+		assertEquals(3L, latestUndeletedVersion.getIdElement().getVersionIdPartAsLong());
+
+		assertFalse(latestUndeletedVersion.isDeleted());
+		assertEquals(Enumerations.AdministrativeGender.FEMALE, latestUndeletedVersion.getGenderElement().getValue());
+		return latestUndeletedVersion;
 	}
 
 }
