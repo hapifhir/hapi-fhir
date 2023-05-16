@@ -21,17 +21,21 @@ package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.util.VersionEnum;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.utils.StringUtils;
 
 import javax.sql.DataSource;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -47,9 +51,12 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		myEmbeddedDatabases.add(new H2EmbeddedDatabase());
 		myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
 		myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
-		// TODO ND Dockerized Oracle will not run on an M1 machine so it should be conditionally added based on OS
-
-		myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
+		if (canUseOracle()) {
+			myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
+		} else {
+			String message = "Cannot add OracleEmbeddedDatabase. If you are using a Mac you must configure the TestContainers API to run using Colima (https://www.testcontainers.org/supported_docker_environment#using-colima)";
+			ourLog.warn(message);
+		}
 	}
 
 	@Override
@@ -109,12 +116,33 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 	public static class DatabaseVendorProvider implements ArgumentsProvider {
 		@Override
 		public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-			return Stream.of(
-				Arguments.of(DriverTypeEnum.H2_EMBEDDED),
-				Arguments.of(DriverTypeEnum.POSTGRES_9_4),
-				Arguments.of(DriverTypeEnum.MSSQL_2012),
-				Arguments.of(DriverTypeEnum.ORACLE_12C)
-			);
+			List<Arguments> arguments = new ArrayList<>();
+			arguments.add(Arguments.of(DriverTypeEnum.H2_EMBEDDED));
+			arguments.add(Arguments.of(DriverTypeEnum.POSTGRES_9_4));
+			arguments.add(Arguments.of(DriverTypeEnum.MSSQL_2012));
+
+			if (canUseOracle()) {
+				arguments.add(Arguments.of(DriverTypeEnum.ORACLE_12C));
+			}
+
+			return arguments.stream();
 		}
+	}
+
+	private static boolean canUseOracle() {
+		if (!isMac()) {
+			return true;
+		}
+		return isColimaConfigured();
+	}
+
+	private static boolean isMac() {
+		return SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_MAC_OSX;
+	}
+
+	private static boolean isColimaConfigured() {
+		return StringUtils.isNotBlank(System.getenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"))
+			&& StringUtils.isNotBlank(System.getenv("DOCKER_HOST"))
+			&& System.getenv("DOCKER_HOST").contains("colima");
 	}
 }
