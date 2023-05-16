@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import static ca.uhn.fhir.cr.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
 import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
@@ -141,6 +142,9 @@ public class MeasureService implements IDaoRegistryUser {
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 
+	@Autowired
+	private ExecutorService myMeasureExecutor;
+
 	protected RequestDetails myRequestDetails;
 
 	public RequestDetails getRequestDetails() {
@@ -193,6 +197,8 @@ public class MeasureService implements IDaoRegistryUser {
 		Measure measure = read(theId, myRequestDetails);
 
 		TerminologyProvider terminologyProvider;
+
+		myMeasureEvaluationOptions.setMeasureExecutor(myMeasureExecutor);
 
 		if (theTerminologyEndpoint != null) {
 			IGenericClient client = Clients.forEndpoint(getFhirContext(), theTerminologyEndpoint);
