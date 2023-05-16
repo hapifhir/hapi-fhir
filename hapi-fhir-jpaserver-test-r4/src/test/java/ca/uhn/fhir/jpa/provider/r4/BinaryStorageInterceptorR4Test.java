@@ -10,10 +10,10 @@ import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.stream.Collectors;
-
-import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -57,7 +55,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 	@Autowired
-	private StorageSettings myOldStorageSettings;;
+	private StorageSettings myOldStorageSettings;
 
 	@Autowired
 	private MemoryBinaryStorageSvcImpl myStorageSvc;
@@ -89,7 +87,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
 	}
 
-	class BinaryFilePrefixingInterceptor{
+	private static class BinaryFilePrefixingInterceptor{
 
 		@Hook(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX)
 		public String provideFilenameForBinary(RequestDetails theRequestDetails, IBaseResource theResource) {
@@ -117,11 +115,37 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		DaoMethodOutcome outcome = myBinaryDao.create(binary, mySrd);
 
 		// Make sure it was externalized
-		IIdType id = outcome.getId().toUnqualifiedVersionless();
+		outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, (containsString("prefix-bar-bar2-")));
+		myInterceptorRegistry.unregisterInterceptor(interceptor);
+	}
+
+	private static class BinaryBlobIdPrefixInterceptor{
+		@Hook(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX)
+		public String provideBlobIdForBinary(RequestDetails theRequestDetails, IBaseResource theResource) {
+			ourLog.info("Received binary for prefixing!" + theResource.getIdElement());
+			return "prefix-test-blob-id-";
+		}
+	}
+
+	@Test
+	public void testExternalizingBinaryFromRequestTriggersPointcut() {
+		BinaryBlobIdPrefixInterceptor interceptor = new BinaryBlobIdPrefixInterceptor();
+		myInterceptorRegistry.registerInterceptor(interceptor);
+		// Create a resource with two metadata extensions on the binary
+		Binary binary = new Binary();
+		binary.setContentType("application/octet-stream");
+		binary.setData(SOME_BYTES);
+		DaoMethodOutcome outcome = myBinaryDao.create(binary, mySrd);
+
+		// Make sure it was externalized
+		outcome.getId().toUnqualifiedVersionless();
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, containsString("\"valueString\": \"prefix-test-blob-id-"));
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 	}
 
@@ -219,7 +243,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	}
 
 
-	class ContentTypeStrippingInterceptor implements IClientInterceptor {
+	static class ContentTypeStrippingInterceptor implements IClientInterceptor {
 
 		@Override
 		public void interceptRequest(IHttpRequest theRequest) {
@@ -228,7 +252,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		}
 
 		@Override
-		public void interceptResponse(IHttpResponse theResponse) throws IOException {
+		public void interceptResponse(IHttpResponse theResponse) {
 
 		}
 	}

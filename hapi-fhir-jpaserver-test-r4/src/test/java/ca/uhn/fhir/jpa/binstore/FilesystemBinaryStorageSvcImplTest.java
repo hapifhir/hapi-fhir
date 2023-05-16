@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -34,6 +37,8 @@ public class FilesystemBinaryStorageSvcImplTest {
 	public void before() {
 		myPath = new File("./target/fstmp");
 		mySvc = new FilesystemBinaryStorageSvcImpl(myPath.getAbsolutePath());
+		mySvc.setFhirContextForTests(FhirContext.forR4Cached());
+		mySvc.setInterceptorBroadcasterForTests(new InterceptorService());
 	}
 
 	@AfterEach
@@ -45,7 +50,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 	public void testStoreAndRetrieve() throws IOException {
 		IIdType id = new IdType("Patient/123");
 		String contentType = "image/png";
-		StoredDetails outcome = mySvc.storeBlob(id, null, contentType, new ByteArrayInputStream(SOME_BYTES));
+		StoredDetails outcome = mySvc.storeBlob(id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
 
 		ourLog.info("Got id: {}", outcome);
 
@@ -68,7 +73,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 		IIdType id = new IdType("Patient/123");
 		String contentType = "image/png";
 		String blobId = "ABCDEFGHIJKLMNOPQRSTUV";
-		StoredDetails outcome = mySvc.storeBlob(id, blobId, contentType, new ByteArrayInputStream(SOME_BYTES));
+		StoredDetails outcome = mySvc.storeBlob(id, blobId, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
 		assertEquals(blobId, outcome.getBlobId());
 
 		ourLog.info("Got id: {}", outcome);
@@ -103,7 +108,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 	public void testExpunge() throws IOException {
 		IIdType id = new IdType("Patient/123");
 		String contentType = "image/png";
-		StoredDetails outcome = mySvc.storeBlob(id, null, contentType, new ByteArrayInputStream(SOME_BYTES));
+		StoredDetails outcome = mySvc.storeBlob(id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
 
 		ourLog.info("Got id: {}", outcome);
 
@@ -129,7 +134,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 		IIdType id = new IdType("Patient/123");
 		String contentType = "image/png";
 		try {
-			mySvc.storeBlob(id, null, contentType, new ByteArrayInputStream(SOME_BYTES));
+			mySvc.storeBlob(id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
 			fail();
 		} catch (PayloadTooLargeException e) {
 			assertEquals(Msg.code(1343) + "Binary size exceeds maximum: 5", e.getMessage());

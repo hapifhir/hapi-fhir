@@ -104,6 +104,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		info.setEndTime(theInstance.getEndTime());
 		info.setReport(theInstance.getReport());
 		info.setErrorMsg(theInstance.getErrorMessage());
+		info.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
 		if ( Batch2JobDefinitionConstants.BULK_EXPORT.equals(theInstance.getJobDefinitionId())) {
 			BulkExportJobParameters parameters = theInstance.getParameters(BulkExportJobParameters.class);
 			info.setRequestPartitionId(parameters.getPartitionId());
