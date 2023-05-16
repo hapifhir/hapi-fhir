@@ -276,7 +276,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				// an IOException... but Java requires the check,
 				// so we'll put a log here (just in the off chance)
 				ourLog.error("Couldn't close query iterator ", ex);
-				throw new RuntimeException(Msg.code(2304) + "Couldn't close query iterator", ex);
+				throw new RuntimeException(Msg.code(2346) + "Couldn't close query iterator", ex);
 			}
 		});
 		return pids;
