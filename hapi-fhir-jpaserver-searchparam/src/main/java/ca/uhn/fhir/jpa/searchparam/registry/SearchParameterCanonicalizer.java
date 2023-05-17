@@ -106,6 +106,8 @@ public class SearchParameterCanonicalizer {
 				baseFromExtensions.add(eStr);
 			}
 		}
+		// when base contains custom resources, "Resource" is present to satisfy 1...* cardinality requirement of FHIR
+		// removed it for RuntimeSearchParam
 		if (!baseFromExtensions.isEmpty()){
 			base.remove("Resource");
 			base.addAll(baseFromExtensions);
@@ -164,8 +166,10 @@ public class SearchParameterCanonicalizer {
 				targetsFromExtensions.add(eStr);
 			}
 		}
+		// when targets contains custom resources, "Resource" is present to satisfy 1...* cardinality requirement of FHIR
+		// removed it for RuntimeSearchParam
 		if (!targetsFromExtensions.isEmpty()){
-			targets.remove("String");
+			targets.remove("Resource");
 			targets.addAll(targetsFromExtensions);
 		}
 
@@ -210,6 +214,8 @@ public class SearchParameterCanonicalizer {
 				baseFromExtensions.add(eStr);
 			}
 		}
+		// when base contains custom resources, "Resource" is present to satisfy 1...* cardinality requirement of FHIR
+		// removed it for RuntimeSearchParam
 		if (!baseFromExtensions.isEmpty()){
 			base.remove("Resource");
 			base.addAll(baseFromExtensions);
@@ -276,6 +282,8 @@ public class SearchParameterCanonicalizer {
 				targetsFromExtensions.add(eStr);
 			}
 		}
+		// when targets contains custom resources, "Resource" is present to satisfy 1...* cardinality requirement of FHIR
+		// removed it for RuntimeSearchParam
 		if (!targetsFromExtensions.isEmpty()){
 			targets.remove("Resource");
 			targets.addAll(targetsFromExtensions);
@@ -336,7 +344,8 @@ public class SearchParameterCanonicalizer {
 				.filter(StringUtils::isNotBlank)
 				.forEach(baseFromExtension::add);
 		}
-
+		// when base contains custom resources, "Resource" is present to satisfy 1...* cardinality requirement of FHIR
+		// removed it for RuntimeSearchParam
 		if (!baseFromExtension.isEmpty()){
 			base.remove("Resource");
 			base.addAll(baseFromExtension);
@@ -405,6 +414,8 @@ public class SearchParameterCanonicalizer {
 				.filter(StringUtils::isNotBlank)
 				.forEach(targetsFromExtensions::add);
 		}
+		// when targets contains custom resources, "Resource" is present to satisfy 1...* cardinality requirement of FHIR
+		// removed it for RuntimeSearchParam
 		if(!targetsFromExtensions.isEmpty()){
 			targets.remove("Resource");
 			targets.addAll(targetsFromExtensions);
