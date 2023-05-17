@@ -254,7 +254,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 			resource.setDeleted(currentDate);
 			resource.setUpdated(currentDate);
 			resource.setHashSha256(null);
-			resource.setVersion(2L);
+			resource.setVersionForUnitTest(2L);
 			myResourceTableDao.save(resource);
 		});
 

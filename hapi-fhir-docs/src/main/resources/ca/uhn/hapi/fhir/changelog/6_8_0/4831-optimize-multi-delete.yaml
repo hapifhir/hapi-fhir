@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 4831
+title: "Conditional deletes that delete multiple resources at once have been optimized to perform
+   fewer SQL select statements, which should improve performance on large deletes."
