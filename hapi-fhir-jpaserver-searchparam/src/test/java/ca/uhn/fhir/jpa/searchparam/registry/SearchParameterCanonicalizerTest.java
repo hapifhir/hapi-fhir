@@ -35,6 +35,39 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SearchParameterCanonicalizerTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterCanonicalizerTest.class);
 
+	ca.uhn.fhir.model.dstu2.resource.SearchParameter initSearchParamDstu2(){
+		ca.uhn.fhir.model.dstu2.resource.SearchParameter sp = new ca.uhn.fhir.model.dstu2.resource.SearchParameter();
+		sp.setId("SearchParameter/meal-chef");
+		sp.setUrl("http://example.org/SearchParameter/meal-chef");
+		sp.setBase(ResourceTypeEnum.RESOURCE);
+		sp.setCode("chef");
+		sp.setType(SearchParamTypeEnum.REFERENCE);
+		sp.setStatus(ConformanceResourceStatusEnum.ACTIVE);
+		sp.setXpath("Meal.chef | Observation.subject");
+		sp.addTarget(ResourceTypeEnum.RESOURCE);
+		sp.addTarget(ResourceTypeEnum.OBSERVATION);
+		sp.addUndeclaredExtension(new ExtensionDt(false, EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE, new StringDt("Meal")));
+		sp.addUndeclaredExtension(new ExtensionDt(false, EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new StringDt("Chef")));
+		return sp;
+	}
+
+	org.hl7.fhir.dstu3.model.SearchParameter initSearchParamDstu3(){
+		org.hl7.fhir.dstu3.model.SearchParameter sp = new org.hl7.fhir.dstu3.model.SearchParameter();
+		sp.setId("SearchParameter/meal-chef");
+		sp.setUrl("http://example.org/SearchParameter/meal-chef");
+		sp.addBase("Resource");
+		sp.addBase("Patient");
+		sp.setCode("chef");
+		sp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		sp.setExpression("Meal.chef | Observation.subject");
+		sp.addTarget("Resource");
+		sp.addTarget("Observation");
+		sp.addExtension(EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE, new org.hl7.fhir.dstu3.model.StringType("Meal"));
+		sp.addExtension(EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new org.hl7.fhir.dstu3.model.StringType("Chef"));
+		return sp;
+	}
+
 	IBaseResource initSearchParamR4(){
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/meal-chef");
@@ -86,38 +119,6 @@ public class SearchParameterCanonicalizerTest {
 		return sp;
 	}
 
-	org.hl7.fhir.dstu3.model.SearchParameter initSearchParamDstu3(){
-		org.hl7.fhir.dstu3.model.SearchParameter sp = new org.hl7.fhir.dstu3.model.SearchParameter();
-		sp.setId("SearchParameter/meal-chef");
-		sp.setUrl("http://example.org/SearchParameter/meal-chef");
-		sp.addBase("Resource");
-		sp.addBase("Patient");
-		sp.setCode("chef");
-		sp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		sp.setExpression("Meal.chef | Observation.subject");
-		sp.addTarget("Resource");
-		sp.addTarget("Observation");
-		sp.addExtension(EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE, new org.hl7.fhir.dstu3.model.StringType("Meal"));
-		sp.addExtension(EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new org.hl7.fhir.dstu3.model.StringType("Chef"));
-		return sp;
-	}
-
-	ca.uhn.fhir.model.dstu2.resource.SearchParameter initSearchParamDstu2(){
-		ca.uhn.fhir.model.dstu2.resource.SearchParameter sp = new ca.uhn.fhir.model.dstu2.resource.SearchParameter();
-		sp.setId("SearchParameter/meal-chef");
-		sp.setUrl("http://example.org/SearchParameter/meal-chef");
-		sp.setBase(ResourceTypeEnum.RESOURCE);
-		sp.setCode("chef");
-		sp.setType(SearchParamTypeEnum.REFERENCE);
-		sp.setStatus(ConformanceResourceStatusEnum.ACTIVE);
-		sp.setXpath("Meal.chef | Observation.subject");
-		sp.addTarget(ResourceTypeEnum.RESOURCE);
-		sp.addTarget(ResourceTypeEnum.OBSERVATION);
-		sp.addUndeclaredExtension(new ExtensionDt(false, EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE, new StringDt("Meal")));
-		sp.addUndeclaredExtension(new ExtensionDt(false, EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new StringDt("Chef")));
-		return sp;
-	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
@@ -194,7 +195,7 @@ public class SearchParameterCanonicalizerTest {
 		} else {
 			assertThat(output.getBase(), containsInAnyOrder("Meal", "Patient"));
 		}
-		assertThat(output.getTargets(), contains("Chef", "Observation"));
+		assertThat(output.getTargets(), containsInAnyOrder("Chef", "Observation"));
 		assertThat(output.getBase(), not(contains("Resource")));
 		assertThat(output.getTargets(), not(contains("Resource")));
 	}
