@@ -81,20 +81,8 @@ public interface IBinaryStorageSvc {
 
 	/**
 	 * Generate a new blob ID that will be passed to {@link #storeBlob(IIdType, String, String, InputStream)} later
-	 * @deprecated Use {@link #newBlobId(RequestDetails theRequestDetails, String theContentType, byte[] theBytes)} instead. This method
-	 * will be removed because it doesn't receive the parameters it needs to forward to the pointcut)
 	 */
-	@Deprecated(since = "6.6.0", forRemoval = true)
-	default String newBlobId() {
-		return newBlobId(new ServletRequestDetails(), null, new byte[0]);
-	}
-
-	/**
-	 * Generate a new blob ID that will be passed to {@link #storeBlob(IIdType, String, String, InputStream)} later
-	 * @param theRequestDetails The operation request details.
-	 * @param theContentType The operation request content type.
-	 */
-	String newBlobId(RequestDetails theRequestDetails, String theContentType, byte[] theBytes);
+	String newBlobId();
 
 	/**
 	 * Store a new binary blob

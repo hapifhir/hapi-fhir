@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NullBinaryStorageSvcImplTest {
 
-	private NullBinaryStorageSvcImpl mySvc = new NullBinaryStorageSvcImpl();
+	private final NullBinaryStorageSvcImpl mySvc = new NullBinaryStorageSvcImpl();
 
 	@Test
 	public void shouldStoreBlob() {
@@ -43,6 +43,6 @@ public class NullBinaryStorageSvcImplTest {
 
 	@Test
 	public void newBlobId() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.newBlobId(null, null, null));
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.newBlobId());
 	}
 }

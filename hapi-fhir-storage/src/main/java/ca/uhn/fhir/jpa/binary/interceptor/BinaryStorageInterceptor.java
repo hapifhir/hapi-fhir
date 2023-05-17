@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.IBinaryTarget;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -215,7 +216,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 						newBlobId = storedDetails.getBlobId();
 					} else {
 						assert thePointcut == Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED : thePointcut.name();
-						newBlobId = myBinaryStorageSvc.newBlobId(theRequestDetails, nextContentType, data);
+						newBlobId = myBinaryStorageSvc.newBlobId();
 
 						String prefix = invokeAssignBlobPrefix(theRequestDetails, theResource);
 						if (isNotBlank(prefix)) {
@@ -225,6 +226,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 							List<DeferredBinaryTarget> deferredBinaryTargets = getOrCreateDeferredBinaryStorageMap(theTransactionDetails);
 							DeferredBinaryTarget newDeferredBinaryTarget = new DeferredBinaryTarget(newBlobId, nextTarget, data);
 							deferredBinaryTargets.add(newDeferredBinaryTarget);
+							newDeferredBinaryTarget.setBlobIdPrefixHookApplied(true);
 						} else {
 							throw new InternalErrorException(Msg.code(2341) + "Invalid blob ID for backing storage service.[blobId=" + newBlobId + ",service=" + myBinaryStorageSvc.getClass().getName() +"]");
 						}
@@ -241,14 +243,17 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	 * @return A string, which will be used to prefix the blob ID. May be null.
 	 */
 	private String invokeAssignBlobPrefix(RequestDetails theRequest, IBaseResource theResource) {
-		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequest)) {
-			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.add(IBaseResource.class, theResource);
-			return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, params);
-		} else {
+		if ( ! CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequest)) {
 			return null;
 		}
+
+		HookParams params = new HookParams()
+			.add(RequestDetails.class, theRequest)
+			.add(IBaseResource.class, theResource);
+
+		BaseBinaryStorageSvcImpl.setBlobIdPrefixApplied(theRequest);
+
+		return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, params);
 	}
 
 	@Nonnull
@@ -269,12 +274,21 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 				IBinaryTarget target = next.getBinaryTarget();
 				InputStream dataStream = next.getDataStream();
 				String contentType = target.getContentType();
-				myBinaryStorageSvc.storeBlob(resourceId, blobId, contentType, dataStream, new ServletRequestDetails());
+				RequestDetails requestDetails = initRequestDetails(next);
+				myBinaryStorageSvc.storeBlob(resourceId, blobId, contentType, dataStream, requestDetails);
 			}
 		}
 	}
 
-	private String getDeferredListKey() {
+	private RequestDetails initRequestDetails(DeferredBinaryTarget theDeferredBinaryTarget) {
+		ServletRequestDetails requestDetails = new ServletRequestDetails();
+		if (theDeferredBinaryTarget.isBlobIdPrefixHookApplied()) {
+			BaseBinaryStorageSvcImpl.setBlobIdPrefixApplied(requestDetails);
+		}
+		return requestDetails;
+	}
+
+	public String getDeferredListKey() {
 		return myDeferredListKey;
 	}
 
@@ -356,6 +370,8 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 		private final String myBlobId;
 		private final IBinaryTarget myBinaryTarget;
 		private final InputStream myDataStream;
+		private boolean myBlobIdPrefixHookApplied;
+
 
 		private DeferredBinaryTarget(String theBlobId, IBinaryTarget theBinaryTarget, byte[] theData) {
 			myBlobId = theBlobId;
@@ -373,6 +389,12 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 
 		InputStream getDataStream() {
 			return myDataStream;
+		}
+
+		boolean isBlobIdPrefixHookApplied() { return myBlobIdPrefixHookApplied; }
+
+		void setBlobIdPrefixHookApplied(boolean theBlobIdPrefixHookApplied) {
+			myBlobIdPrefixHookApplied = theBlobIdPrefixHookApplied;
 		}
 	}
 
