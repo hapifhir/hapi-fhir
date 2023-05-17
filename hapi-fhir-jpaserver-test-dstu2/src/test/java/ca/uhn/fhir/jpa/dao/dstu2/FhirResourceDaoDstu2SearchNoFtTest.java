@@ -2038,40 +2038,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	public void testSearchWithMissingDate2() {
-		IIdType orgId = myOrganizationDao.create(new Organization(), mySrd).getId();
-		IIdType notMissing;
-		IIdType missing;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			missing = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-//		{
-//			Patient patient = new Patient();
-//			patient.addIdentifier().setSystem("urn:system").setValue("002");
-//			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("John");
-//			patient.setBirthDate(new DateDt("2011-01-01"));
-//			patient.getManagingOrganization().setReference(orgId);
-//			notMissing = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-//		}
-		// Date Param
-
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			DateParam param = new DateParam();
-			param.setMissing(true);
-			params.add(Patient.SP_BIRTHDATE, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-//			assertThat(patients, not(containsInRelativeOrder(notMissing)));
-		}
-	}
-
-
-
-	@Test
 	public void testSearchWithMissingQuantity() {
 		IIdType notMissing;
 		IIdType missing;
