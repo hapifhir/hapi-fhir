@@ -112,12 +112,12 @@
 		<module>hapi-fhir-jpaserver-ips</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
-<!--		<module>hapi-fhir-jpaserver-uhnfhirtest</module>-->
+		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
 		<module>hapi-fhir-client-okhttp</module>
 		<module>hapi-fhir-android</module>
 		<module>hapi-fhir-cli</module>
 		<module>hapi-fhir-dist</module>
-<!--		<module>tests/hapi-fhir-base-test-jaxrsserver-kotlin</module>-->
+		<module>tests/hapi-fhir-base-test-jaxrsserver-kotlin</module>
 		<module>tests/hapi-fhir-base-test-mindeps-client</module>
 		<module>tests/hapi-fhir-base-test-mindeps-server</module>
 		<module>hapi-fhir-spring-boot</module>
