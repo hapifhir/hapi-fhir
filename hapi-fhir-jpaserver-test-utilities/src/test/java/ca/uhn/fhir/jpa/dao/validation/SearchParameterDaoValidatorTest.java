@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,6 +42,16 @@ public class SearchParameterDaoValidatorTest {
 	private SearchParameterDaoValidator mySvc;
 
 	private VersionCanonicalizer myVersionCanonicalizer = new VersionCanonicalizer(ourCtx);
+
+	@BeforeEach
+	public void before() {
+		RuntimeSearchParam observationCodeSearchParam = new RuntimeSearchParam(new IdDt("observation-code"),
+			null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN,
+			null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, List.of("Observation"));
+
+		lenient().when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("observation-code")))
+			.thenReturn(observationCodeSearchParam);
+	}
 
 	@Test
 	public void testValidateSubscription() {
@@ -75,16 +86,11 @@ public class SearchParameterDaoValidatorTest {
 	}
 
 	@Test
-	public void testValidateCompositeSearchParameterIncorrectComponentType() {
-		RuntimeSearchParam observationCodeSearchParam = new RuntimeSearchParam(new IdDt("observation-code"),
-			null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN,
-			null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, List.of("Observation"));
+	public void validate_compositeSearchParameterWithInvalidComponentType_throwsException() {
 		RuntimeSearchParam observationPatientSearchParam = new RuntimeSearchParam(new IdDt("observation-patient"),
 			null, null, null, "Observation.subject.where(resolve() is Patient)", RestSearchParameterTypeEnum.REFERENCE,
 			null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, List.of("Observation"));
 
-		lenient().when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("observation-code")))
-			.thenReturn(observationCodeSearchParam);
 		lenient().when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("observation-patient")))
 			.thenReturn(observationPatientSearchParam);
 
@@ -105,20 +111,16 @@ public class SearchParameterDaoValidatorTest {
 		org.hl7.fhir.r5.model.SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
 
 		UnprocessableEntityException thrown = assertThrows(UnprocessableEntityException.class, () -> mySvc.validate(canonicalSp));
-		assertTrue(thrown.getMessage().contains("Incorrect component Search Parameter"));
+		assertTrue(thrown.getMessage().startsWith("HAPI-1117: "));
+		assertTrue(thrown.getMessage().contains("Invalid component search parameter type: REFERENCE in component.definition: SearchParameter/observation-patient"));
 	}
 
 	@Test
-	public void testValidateCompositeSearchParameterCorrectComponentTypes() {
-		RuntimeSearchParam observationCodeSearchParam = new RuntimeSearchParam(new IdDt("observation-code"),
-			null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN,
-			null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, List.of("Observation"));
+	public void validate_compositeSearchParameterWithCorrectComponentTypes_doesNotThrowException() {
 		RuntimeSearchParam observationEffectiveSearchParam = new RuntimeSearchParam(new IdDt("observation-effective"),
 			null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE,
 			null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, List.of("Observation"));
 
-		lenient().when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("observation-code")))
-			.thenReturn(observationCodeSearchParam);
 		lenient().when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("observation-effective")))
 			.thenReturn(observationEffectiveSearchParam);
 
@@ -135,6 +137,29 @@ public class SearchParameterDaoValidatorTest {
 			.setDefinition("SearchParameter/observation-code").setExpression("Observation"));
 		sp.addComponent(new SearchParameter.SearchParameterComponentComponent()
 			.setDefinition("SearchParameter/observation-effective").setExpression("Observation"));
+
+		org.hl7.fhir.r5.model.SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
+		Assertions.assertDoesNotThrow(() -> mySvc.validate(canonicalSp));
+	}
+
+	@Test
+	public void validate_compositeSearchParameterWithNonExistingComponent_doesNotThrowException() {
+		lenient().when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("observation-not-existing")))
+			.thenReturn(null);
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/code-effective");
+		sp.setUrl("http://example.org/SearchParameter/patient-code");
+		sp.addBase("Observation");
+		sp.setCode("code-effective");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setExpression("Observation");
+		sp.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false)));
+		sp.addComponent(new SearchParameter.SearchParameterComponentComponent()
+			.setDefinition("SearchParameter/observation-code").setExpression("Observation"));
+		sp.addComponent(new SearchParameter.SearchParameterComponentComponent()
+			.setDefinition("SearchParameter/observation-not-existing").setExpression("Observation"));
 
 		org.hl7.fhir.r5.model.SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
 		Assertions.assertDoesNotThrow(() -> mySvc.validate(canonicalSp));

@@ -24,21 +24,28 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.PrimitiveType;
 import org.hl7.fhir.r5.model.SearchParameter;
 
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParameterDaoValidator {
 
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
+	private static final Set<RestSearchParameterTypeEnum> allowedCompositeSearchParameterTypes = Set.of(RestSearchParameterTypeEnum.STRING,
+		RestSearchParameterTypeEnum.TOKEN, RestSearchParameterTypeEnum.DATE, RestSearchParameterTypeEnum.QUANTITY);
 
 	private final FhirContext myFhirContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -126,6 +133,10 @@ public class SearchParameterDaoValidator {
 				}
 			}
 		}
+
+		if (isCompositeWithComponent(searchParameter)) {
+			validateCompositeSearchParameterComponents(searchParameter);
+		}
 	}
 
 	private boolean isCompositeWithoutBase(SearchParameter searchParameter) {
@@ -137,6 +148,11 @@ public class SearchParameterDaoValidator {
 
 	private boolean isCompositeWithoutExpression(SearchParameter searchParameter) {
 		return searchParameter.getType() != null && searchParameter.getType().name().equals(Enumerations.SearchParamType.COMPOSITE.name()) && isBlank(searchParameter.getExpression());
+	}
+
+	private boolean isCompositeWithComponent(SearchParameter searchParameter) {
+		return searchParameter.hasType() && searchParameter.getType().equals(Enumerations.SearchParamType.COMPOSITE) &&
+			searchParameter.hasComponent();
 	}
 
 	private void validateExpressionPath(SearchParameter theSearchParameter) {
@@ -164,5 +180,19 @@ public class SearchParameterDaoValidator {
 			.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.stream()
 			.anyMatch(t -> theValueAsString.equals(t.getValueAsPrimitive().getValueAsString()));
+	}
+
+	private void validateCompositeSearchParameterComponents(SearchParameter searchParameter) {
+		searchParameter.getBase().stream().map(PrimitiveType::getValueAsString).forEach(base ->
+			searchParameter.getComponent().forEach(component -> {
+				RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParam(base,
+					StringUtils.substringAfterLast(component.getDefinition(), "/"));
+
+				if (componentSearchParam != null && !allowedCompositeSearchParameterTypes.contains(componentSearchParam.getParamType())) {
+					throw new UnprocessableEntityException(String.format("%sInvalid component search parameter type: %s in component.definition: %s, supported types: %s",
+						Msg.code(1117), componentSearchParam.getParamType().name(), component.getDefinition(),
+						allowedCompositeSearchParameterTypes.stream().map(Enum::name).collect(Collectors.joining(", "))));
+				}
+			}));
 	}
 }
