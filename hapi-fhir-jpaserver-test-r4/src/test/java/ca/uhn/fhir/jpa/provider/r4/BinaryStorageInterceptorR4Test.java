@@ -27,6 +27,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +46,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	public static final byte[] FEW_BYTES = {4, 3, 2, 1};
@@ -123,7 +130,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 	}
 
-	private static class BinaryBlobIdPrefixInterceptor{
+	private static class BinaryBlobIdPrefixInterceptor {
 		@Hook(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX)
 		public String provideBlobIdForBinary(RequestDetails theRequestDetails, IBaseResource theResource) {
 			ourLog.info("Received binary for prefixing!" + theResource.getIdElement());
@@ -132,8 +139,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExternalizingBinaryFromRequestTriggersPointcut() {
-		BinaryBlobIdPrefixInterceptor interceptor = new BinaryBlobIdPrefixInterceptor();
+	public void testExternalizingBinaryFromRequestTriggersPointcutOnce() {
+		BinaryBlobIdPrefixInterceptor interceptor = spy(new BinaryBlobIdPrefixInterceptor());
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		// Create a resource with two metadata extensions on the binary
 		Binary binary = new Binary();
@@ -141,11 +148,13 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		binary.setData(SOME_BYTES);
 		DaoMethodOutcome outcome = myBinaryDao.create(binary, mySrd);
 
-		// Make sure it was externalized
+		// Make sure blobId prefix was set and pointcut called only once
 		outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString("\"valueString\": \"prefix-test-blob-id-"));
+		verify(interceptor, times(1)).provideBlobIdForBinary(any(), any());
+
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 	}
 
