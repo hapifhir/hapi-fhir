@@ -63,7 +63,7 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public String newBlobId(RequestDetails theRequestDetails, String theContentType, byte[] theBytes) {
+	public String newBlobId() {
 		throw new UnsupportedOperationException(Msg.code(1345));
 	}
 

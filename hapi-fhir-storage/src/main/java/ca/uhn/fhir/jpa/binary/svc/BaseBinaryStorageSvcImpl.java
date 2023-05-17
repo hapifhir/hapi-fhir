@@ -97,7 +97,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public String newBlobId(RequestDetails theRequestDetails, String theContentType, byte[] theBytes) {
+	public String newBlobId() {
 		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < ID_LENGTH; i++) {
 			int nextInt = Math.abs(myRandom.nextInt());
@@ -148,7 +148,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Nonnull
 	protected String provideIdForNewBlob(String theBlobIdOrNull, byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
-		String blobId = isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId(theRequestDetails, theContentType, theBytes);
+		String blobId = isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId();
 
 		// make sure another pointcut didn't already apply a prefix to the blobId
 		if (isBlobIdPrefixApplied(theRequestDetails)) {

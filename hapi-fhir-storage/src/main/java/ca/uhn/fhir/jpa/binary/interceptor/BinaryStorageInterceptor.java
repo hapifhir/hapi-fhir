@@ -216,7 +216,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 						newBlobId = storedDetails.getBlobId();
 					} else {
 						assert thePointcut == Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED : thePointcut.name();
-						newBlobId = myBinaryStorageSvc.newBlobId(theRequestDetails, nextContentType, data);
+						newBlobId = myBinaryStorageSvc.newBlobId();
 
 						String prefix = invokeAssignBlobPrefix(theRequestDetails, theResource);
 						if (isNotBlank(prefix)) {
