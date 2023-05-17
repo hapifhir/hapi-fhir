@@ -35,33 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SearchParameterCanonicalizerTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterCanonicalizerTest.class);
 
-//	SearchParameter initSearchParam(String version){
-//		switch (version){
-//			case "Dstu2":
-//				ca.uhn.fhir.model.dstu2.resource.SearchParameter sp = new ca.uhn.fhir.model.dstu2.resource.SearchParameter();
-//				sp.setBase(ResourceTypeEnum.RESOURCE);
-//				sp.setType(SearchParamTypeEnum.REFERENCE);
-//				sp.setStatus(ConformanceResourceStatusEnum.ACTIVE);
-//				sp.setXpath("Meal.chef | Observation.subject");
-//				break;
-//			case "Dstu3":
-//				org.hl7.fhir.dstu3.model.SearchParameter sp = new org.hl7.fhir.dstu3.model.SearchParameter();
-//				sp.addBase("Resource");
-//				sp.addBase("Patient");
-//				sp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-//				sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-//				sp.setExpression("Meal.chef | Observation.subject");
-//				break;
-//			case "R4":
-//				SearchParameter sp = new SearchParameter();
-//				sp.addBase("Resource");
-//				sp.addBase("Patient");
-//				sp.setType(Enumerations.SearchParamType.REFERENCE);
-//				sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-//				sp.setExpression("Meal.chef | Observation.subject");
-//		}
-//	}
-
 	IBaseResource initSearchParamR4(){
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/meal-chef");
@@ -215,7 +188,7 @@ public class SearchParameterCanonicalizerTest {
 		assertEquals(RestSearchParameterTypeEnum.REFERENCE, output.getParamType());
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, output.getStatus());
 		assertThat(output.getPathsSplit(), containsInAnyOrder("Meal.chef", "Observation.subject"));
-		// DSTU2 Resources must only has 1 base
+		// DSTU2 Resources must only have 1 base
 		if ("Dstu2".equals(version)){
 			assertThat(output.getBase(), containsInAnyOrder("Meal"));
 		} else {
