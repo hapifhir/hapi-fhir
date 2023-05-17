@@ -154,15 +154,19 @@ public class SearchParameterCanonicalizer {
 					break;
 			}
 		}
-		Set<String> providesMembershipInCompartments = Collections.emptySet();
 		Set<String> targets = DatatypeUtil.toStringSet(theNextSp.getTarget());
 		// add extensions as target if the SP is for a custom resource type
+		Set<String> targetsFromExtensions = new HashSet<>();
 		List<ExtensionDt> customSPTargets = theNextSp.getUndeclaredExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE);
 		for (ExtensionDt e : customSPTargets) {
 			String eStr = e.getValueAsPrimitive().getValueAsString();
 			if (StringUtils.isNotBlank(eStr)) {
-				targets.add(eStr);
+				targetsFromExtensions.add(eStr);
 			}
+		}
+		if (!targetsFromExtensions.isEmpty()){
+			targets.remove("String");
+			targets.addAll(targetsFromExtensions);
 		}
 
 		if (isBlank(name) || isBlank(path)) {
@@ -188,7 +192,7 @@ public class SearchParameterCanonicalizer {
 		}
 
 		List<RuntimeSearchParam.Component> components = Collections.emptyList();
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, Collections.emptySet(), targets, status, unique, components, base);
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {
@@ -262,15 +266,19 @@ public class SearchParameterCanonicalizer {
 			}
 		}
 
-		Set<String> providesMembershipInCompartments = Collections.emptySet();
 		Set<String> targets = DatatypeUtil.toStringSet(theNextSp.getTarget());
 		// add extensions as target if the SP is for a custom resource type
+		Set<String> targetsFromExtensions = new HashSet<>();
 		List<Extension> customSPTargets = theNextSp.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE);
 		for (Extension e : customSPTargets) {
 			String eStr = e.getValueAsPrimitive().getValueAsString();
 			if (StringUtils.isNotBlank(eStr)) {
-				targets.add(eStr);
+				targetsFromExtensions.add(eStr);
 			}
+		}
+		if (!targetsFromExtensions.isEmpty()){
+			targets.remove("Resource");
+			targets.addAll(targetsFromExtensions);
 		}
 
 		if (isBlank(name) || isBlank(path) || paramType == null) {
@@ -300,7 +308,7 @@ public class SearchParameterCanonicalizer {
 			components.add(new RuntimeSearchParam.Component(next.getExpression(), next.getDefinition().getReferenceElement().toUnqualifiedVersionless().getValue()));
 		}
 
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, Collections.emptySet(), targets, status, unique, components, base);
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterR4Plus(IBaseResource theNextSp) {
@@ -379,13 +387,13 @@ public class SearchParameterCanonicalizer {
 				status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.UNKNOWN;
 				break;
 		}
-		Set<String> providesMembershipInCompartments = Collections.emptySet();
 
 		Set<String> targets = terser
 			.getValues(theNextSp, "target", IPrimitiveType.class)
 			.stream()
 			.map(IPrimitiveType::getValueAsString)
 			.collect(Collectors.toSet());
+		Set<String> targetsFromExtensions = new HashSet<>();
 		if (theNextSp instanceof IBaseHasExtensions) {
 			((IBaseHasExtensions) theNextSp)
 				.getExtension()
@@ -395,7 +403,11 @@ public class SearchParameterCanonicalizer {
 				.map(t -> ((IPrimitiveType<?>) t.getValue()))
 				.map(IPrimitiveType::getValueAsString)
 				.filter(StringUtils::isNotBlank)
-				.forEach(targets::add);
+				.forEach(targetsFromExtensions::add);
+		}
+		if(!targetsFromExtensions.isEmpty()){
+			targets.remove("Resource");
+			targets.addAll(targetsFromExtensions);
 		}
 
 		if (isBlank(name) || isBlank(path) || paramType == null) {
@@ -435,7 +447,7 @@ public class SearchParameterCanonicalizer {
 			components.add(new RuntimeSearchParam.Component(expression, definition));
 		}
 
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, Collections.emptySet(), targets, status, unique, components, base);
 	}
 
 	/**
