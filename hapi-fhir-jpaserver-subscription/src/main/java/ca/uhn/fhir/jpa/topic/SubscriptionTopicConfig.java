@@ -64,7 +64,7 @@ public class SubscriptionTopicConfig {
 	}
 
 	@Bean
-	SubscriptionTopicBundleDispatcher subscriptionTopicBundleDispatcher(SubscriptionRegistry theSubscriptionRegistry, SubscriptionMatchDeliverer theSubscriptionMatchDeliverer, SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
-		return new SubscriptionTopicBundleDispatcher(theSubscriptionRegistry, theSubscriptionMatchDeliverer, theSubscriptionTopicPayloadBuilder);
+	SubscriptionTopicDispatcher subscriptionTopicBundleDispatcher(SubscriptionRegistry theSubscriptionRegistry, SubscriptionMatchDeliverer theSubscriptionMatchDeliverer, SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
+		return new SubscriptionTopicDispatcher(theSubscriptionRegistry, theSubscriptionMatchDeliverer, theSubscriptionTopicPayloadBuilder);
 	}
 }

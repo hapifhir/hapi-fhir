@@ -17,12 +17,12 @@ import java.util.UUID;
 /**
  * Deliver subscription bundles to topic subscriptions
  */
-public class SubscriptionTopicBundleDispatcher {
+public class SubscriptionTopicDispatcher {
 	private final SubscriptionRegistry mySubscriptionRegistry;
 	private final SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
 	private final SubscriptionTopicPayloadBuilder mySubscriptionTopicPayloadBuilder;
 
-	public SubscriptionTopicBundleDispatcher(SubscriptionRegistry theSubscriptionRegistry, SubscriptionMatchDeliverer theSubscriptionMatchDeliverer, SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
+	public SubscriptionTopicDispatcher(SubscriptionRegistry theSubscriptionRegistry, SubscriptionMatchDeliverer theSubscriptionMatchDeliverer, SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
 		mySubscriptionRegistry = theSubscriptionRegistry;
 		mySubscriptionMatchDeliverer = theSubscriptionMatchDeliverer;
 		mySubscriptionTopicPayloadBuilder = theSubscriptionTopicPayloadBuilder;

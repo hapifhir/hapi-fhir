@@ -60,7 +60,7 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	private SubscriptionTopicBundleDispatcher mySubscriptionTopicBundleDispatcher;
+	private SubscriptionTopicDispatcher mySubscriptionTopicDispatcher;
 
 	public SubscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -109,6 +109,6 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 		List<IBaseResource> matchedResource = Collections.singletonList(theMsg.getNewPayload(myFhirContext));
 		RestOperationTypeEnum restOperationType = theMsg.getOperationType().asRestOperationType();
 
-		mySubscriptionTopicBundleDispatcher.dispatch(topicUrl, matchedResource, restOperationType, theInMemoryMatchResult);
+		mySubscriptionTopicDispatcher.dispatch(topicUrl, matchedResource, restOperationType, theInMemoryMatchResult);
 	}
 }
