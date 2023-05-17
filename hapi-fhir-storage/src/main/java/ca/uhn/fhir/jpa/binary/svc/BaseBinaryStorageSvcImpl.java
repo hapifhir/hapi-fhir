@@ -57,6 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	public static long DEFAULT_MAXIMUM_BINARY_SIZE = Long.MAX_VALUE - 1;
+	public static String BLOB_ID_PREFIX_APPLIED = "blob-id-prefix-applied";
 
 	private final SecureRandom myRandom;
 	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -147,10 +148,24 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Nonnull
 	protected String provideIdForNewBlob(String theBlobIdOrNull, byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
-		String unPrefixedBlobId = isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId(theRequestDetails, theContentType, theBytes);
+		String blobId = isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId(theRequestDetails, theContentType, theBytes);
+
+		// make sure another pointcut didn't already apply a prefix to the blobId
+		if (isBlobIdPrefixApplied(theRequestDetails)) {
+			return blobId;
+		}
+
 		String blobPrefixFromHooksOrNull = callBlobIdPointcut(theBytes, theRequestDetails, theContentType);
 		String blobIdPrefixFromHooks = blobPrefixFromHooksOrNull == null ? "" : blobPrefixFromHooksOrNull;
-		return blobIdPrefixFromHooks + unPrefixedBlobId;
+		return blobIdPrefixFromHooks + blobId;
+	}
+
+	protected boolean isBlobIdPrefixApplied(RequestDetails theRequestDetails) {
+		return theRequestDetails.getUserData().get(BLOB_ID_PREFIX_APPLIED) == Boolean.TRUE;
+	}
+
+	public static void setBlobIdPrefixApplied(RequestDetails theRequestDetails) {
+		theRequestDetails.getUserData().put(BLOB_ID_PREFIX_APPLIED, true);
 	}
 
 	/**
@@ -167,6 +182,8 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		HookParams hookParams = new HookParams()
 			.add(RequestDetails.class, theRequestDetails)
 			.add(IBaseResource.class, binary);
+
+		setBlobIdPrefixApplied(theRequestDetails);
 
 		return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
 			myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, hookParams);
