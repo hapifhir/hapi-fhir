@@ -51,7 +51,7 @@ public class SubscriptionMatchDeliverer {
 		mySubscriptionChannelRegistry = theSubscriptionChannelRegistry;
 	}
 
-	public boolean deliverPayload(IBaseResource thePayload, ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription, InMemoryMatchResult matchResult) {
+	public boolean deliverPayload(IBaseResource thePayload, ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription, InMemoryMatchResult theInMemoryMatchResult) {
 			EncodingEnum encoding = null;
 
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
@@ -79,7 +79,7 @@ public class SubscriptionMatchDeliverer {
 		HookParams params = new HookParams()
 			.add(CanonicalSubscription.class, theActiveSubscription.getSubscription())
 			.add(ResourceDeliveryMessage.class, deliveryMsg)
-			.add(InMemoryMatchResult.class, matchResult);
+			.add(InMemoryMatchResult.class, theInMemoryMatchResult);
 		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, params)) {
 			ourLog.info("Interceptor has decided to abort processing of subscription {}", subscriptionId);
 			return false;

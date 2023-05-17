@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -32,8 +32,8 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
 
+import java.util.List;
 import java.util.UUID;
 
 public class SubscriptionTopicPayloadBuilder {
@@ -43,12 +43,12 @@ public class SubscriptionTopicPayloadBuilder {
 		myFhirContext = theFhirContext;
 	}
 
-	public IBaseBundle buildPayload(IBaseResource theMatchedResource, ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription, SubscriptionTopic theTopic) {
+	public IBaseBundle buildPayload(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl, RestOperationTypeEnum theRestOperationType) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
 		// WIP STR5 set eventsSinceSubscriptionStart from the database
 		int eventsSinceSubscriptionStart = 1;
-		IBaseResource subscriptionStatus = buildSubscriptionStatus(theMatchedResource, theActiveSubscription, theTopic, eventsSinceSubscriptionStart);
+		IBaseResource subscriptionStatus = buildSubscriptionStatus(theResources, theActiveSubscription, theTopicUrl, eventsSinceSubscriptionStart);
 
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 
@@ -65,21 +65,27 @@ public class SubscriptionTopicPayloadBuilder {
 		// WIP STR5 is this the right type of entry? see http://hl7.org/fhir/subscriptionstatus-examples.html
 		// WIP STR5 Also see http://hl7.org/fhir/R4B/notification-full-resource.json.html need to conform to these
 		bundleBuilder.addCollectionEntry(subscriptionStatus);
-		switch (theMsg.getOperationType()) {
-			case CREATE:
-				bundleBuilder.addTransactionCreateEntry(theMatchedResource);
-				break;
-			case UPDATE:
-				bundleBuilder.addTransactionUpdateEntry(theMatchedResource);
-				break;
-			case DELETE:
-				bundleBuilder.addTransactionDeleteEntry(theMatchedResource);
-				break;
+		for (IBaseResource resource : theResources) {
+			switch(theRestOperationType) {
+				case CREATE:
+					bundleBuilder.addTransactionCreateEntry(resource);
+					break;
+				case UPDATE:
+					bundleBuilder.addTransactionUpdateEntry(resource);
+					break;
+				case DELETE:
+					bundleBuilder.addTransactionDeleteEntry(resource);
+					break;
+				default:
+					throw new IllegalStateException("Unsupported rest operation type: " + theRestOperationType);
+			}
 		}
+
 		return bundleBuilder.getBundle();
 	}
 
-	private SubscriptionStatus buildSubscriptionStatus(IBaseResource theMatchedResource, ActiveSubscription theActiveSubscription, SubscriptionTopic theTopic, int theEventsSinceSubscriptionStart) {
+
+	private SubscriptionStatus buildSubscriptionStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl, int theEventsSinceSubscriptionStart) {
 		SubscriptionStatus subscriptionStatus = new SubscriptionStatus();
 		subscriptionStatus.setId(UUID.randomUUID().toString());
 		subscriptionStatus.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
@@ -87,9 +93,14 @@ public class SubscriptionTopicPayloadBuilder {
 		// WIP STR5 count events since subscription start and set eventsSinceSubscriptionStart
 		// store counts by subscription id
 		subscriptionStatus.setEventsSinceSubscriptionStart(theEventsSinceSubscriptionStart);
-		subscriptionStatus.addNotificationEvent().setEventNumber(theEventsSinceSubscriptionStart).setFocus(new Reference(theMatchedResource.getIdElement()));
+		SubscriptionStatus.SubscriptionStatusNotificationEventComponent event = subscriptionStatus.addNotificationEvent();
+		event.setEventNumber(theEventsSinceSubscriptionStart);
+		if (theResources.size() > 0) {
+			event.setFocus(new Reference(theResources.get(0).getIdElement()));
+		}
 		subscriptionStatus.setSubscription(new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
-		subscriptionStatus.setTopic(theTopic.getUrl());
+		subscriptionStatus.setTopic(theTopicUrl);
 		return subscriptionStatus;
 	}
+
 }

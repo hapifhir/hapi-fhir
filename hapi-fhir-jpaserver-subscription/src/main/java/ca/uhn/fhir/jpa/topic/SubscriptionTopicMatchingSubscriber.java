@@ -25,12 +25,11 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.util.Logs;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
@@ -41,8 +40,8 @@ import org.springframework.messaging.MessagingException;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
@@ -60,6 +59,8 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	SubscriptionTopicPayloadBuilder mySubscriptionTopicPayloadBuilder;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private SubscriptionTopicBundleDispatcher mySubscriptionTopicBundleDispatcher;
 
 	public SubscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -103,18 +104,11 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 		}
 	}
 
-	private void deliverToTopicSubscriptions(ResourceModifiedMessage theMsg, SubscriptionTopic topic, InMemoryMatchResult result) {
-		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(topic.getUrl());
-		if (!topicSubscriptions.isEmpty()) {
-			IBaseResource matchedResource = theMsg.getNewPayload(myFhirContext);
+	private void deliverToTopicSubscriptions(ResourceModifiedMessage theMsg, SubscriptionTopic theSubscriptionTopic, InMemoryMatchResult theInMemoryMatchResult) {
+		String topicUrl = theSubscriptionTopic.getUrl();
+		List<IBaseResource> matchedResource = Collections.singletonList(theMsg.getNewPayload(myFhirContext));
+		RestOperationTypeEnum restOperationType = theMsg.getOperationType().asRestOperationType();
 
-			for (ActiveSubscription activeSubscription : topicSubscriptions) {
-				// WIP STR5 apply subscription filters
-				IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(matchedResource, theMsg, activeSubscription, topic);
-				// WIP STR5 do we need to add a total?  If so can do that with R5BundleFactory
-				bundlePayload.setId(UUID.randomUUID().toString());
-				mySubscriptionMatchDeliverer.deliverPayload(bundlePayload, theMsg, activeSubscription, result);
-			}
-		}
+		mySubscriptionTopicBundleDispatcher.dispatch(topicUrl, matchedResource, restOperationType, theInMemoryMatchResult);
 	}
 }
