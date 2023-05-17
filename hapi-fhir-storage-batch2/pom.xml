@@ -52,7 +52,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
-			<artifactId>javax.el</artifactId>
+			<artifactId>jakarta.el</artifactId>
 		</dependency>
 
 		<!-- test -->
