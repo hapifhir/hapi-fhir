@@ -8,6 +8,7 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SubscriptionCanonicalizerTest {
 
 	private static final String TEST_TOPIC = "http://test.topic";
+	private static final String TEST_FILTER = "Encounter?patient=Patient/123";
 	FhirContext r4Context = FhirContext.forR4();
 
 	private final SubscriptionCanonicalizer testedSC = new SubscriptionCanonicalizer(r4Context);
@@ -64,7 +66,7 @@ class SubscriptionCanonicalizerTest {
 
 	@Test
 	public void testCanonicalizeDstu2SendDeleteMessages() {
-		SubscriptionCanonicalizer dstu2Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu2());
+		SubscriptionCanonicalizer dstu2Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu2Cached());
 		ca.uhn.fhir.model.dstu2.resource.Subscription dstu2Sub = new ca.uhn.fhir.model.dstu2.resource.Subscription();
 		ExtensionDt extensionDt = new ExtensionDt();
 		extensionDt.setUrl(EX_SEND_DELETE_MESSAGES);
@@ -77,7 +79,7 @@ class SubscriptionCanonicalizerTest {
 	@Test
 	public void testR5() {
 		// setup
-		SubscriptionCanonicalizer r5Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5());
+		SubscriptionCanonicalizer r5Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached());
 		org.hl7.fhir.r5.model.Subscription subscription = new org.hl7.fhir.r5.model.Subscription();
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
 		subscription.setContentType(CT_FHIR_JSON_NEW);
@@ -94,6 +96,48 @@ class SubscriptionCanonicalizerTest {
 
 		// execute
 		CanonicalSubscription canonicalize = r5Canonicalizer.canonicalize(subscription);
+
+		// verify
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonicalize.getStatus());
+		assertEquals(CT_FHIR_JSON_NEW, canonicalize.getContentType());
+		assertEquals(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE, canonicalize.getContent());
+		assertEquals("http://foo", canonicalize.getEndpointUrl());
+		assertEquals(TEST_TOPIC, canonicalize.getTopic());
+		assertEquals(CanonicalSubscriptionChannelType.RESTHOOK, canonicalize.getChannelType());
+		assertThat(canonicalize.getFilters(), hasSize(2));
+
+		CanonicalTopicSubscriptionFilter filter1 = canonicalize.getFilters().get(0);
+		assertEquals("Observation", filter1.getResourceType());
+		assertEquals("param1", filter1.getFilterParameter());
+		// WIP STR5 assert comparator once core libs are updated
+		assertEquals(Enumerations.SearchModifierCode.EXACT, filter1.getModifier());
+		assertEquals("value1", filter1.getValue());
+
+		CanonicalTopicSubscriptionFilter filter2 = canonicalize.getFilters().get(1);
+		assertEquals("CarePlan", filter2.getResourceType());
+		assertEquals("param2", filter2.getFilterParameter());
+		// WIP STR5 assert comparator once core libs are updated
+		assertEquals(Enumerations.SearchModifierCode.EXACT, filter1.getModifier());
+		assertEquals("value2", filter2.getValue());
+		assertEquals(123, canonicalize.getHeartbeatPeriod());
+		assertEquals(456, canonicalize.getMaxCount());
+	}
+
+	@Test
+	void testR4Backport() {
+		// setup
+		SubscriptionCanonicalizer r4Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4Cached());
+		Subscription subscription = new Subscription();
+		subscription.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL);
+		subscription.setId("testId");
+		subscription.setCriteria(TEST_TOPIC);
+		subscription.getCriteriaElement().addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL, new StringType(TEST_FILTER));
+		// FIXME KHS continue with http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Subscription-subscription-zulip.json.html
+
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+
+		// execute
+		CanonicalSubscription canonicalize = r4Canonicalizer.canonicalize(subscription);
 
 		// verify
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonicalize.getStatus());
