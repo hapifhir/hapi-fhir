@@ -12,7 +12,7 @@ import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder.ICreationArgument;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Disabled;
@@ -30,7 +30,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -194,7 +193,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			}
 
 			@SafeVarargs
-			private IIdType withObservation(Consumer<IBaseResource>... theBuilder) {
+			private IIdType withObservation(ICreationArgument... theBuilder) {
 				myObservationId = myDataBuilder.createObservation(theBuilder);
 				return myObservationId;
 			}
@@ -270,7 +269,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		IIdType myResourceId;
 
 		private IIdType withRiskAssessmentWithProbabilty(double theValue) {
-			myResourceId = myDataBuilder.createResource("RiskAssessment", myDataBuilder.withPrimitiveAttribute("prediction.probabilityDecimal", theValue));
+			myResourceId = myDataBuilder.createResource("RiskAssessment", myDataBuilder.withResourcePrimitiveAttribute("prediction.probabilityDecimal", theValue));
 			return myResourceId;
 		}
 
