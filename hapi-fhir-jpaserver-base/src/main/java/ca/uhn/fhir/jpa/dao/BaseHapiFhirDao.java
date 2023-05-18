@@ -166,7 +166,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
@@ -537,20 +536,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 
 	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
-		String newVersion;
-		long newVersionLong;
 		if (theResourceId == null || theResourceId.getVersionIdPart() == null) {
-			newVersion = "1";
-			newVersionLong = 1;
+			theSavedEntity.initializeVersion();
 		} else {
-			newVersionLong = theResourceId.getVersionIdPartAsLong() + 1;
-			newVersion = Long.toString(newVersionLong);
+			theSavedEntity.markVersionUpdatedInCurrentTransaction();
 		}
 
 		assert theResourceId != null;
+		String newVersion = Long.toString(theSavedEntity.getVersion());
 		IIdType newId = theResourceId.withVersion(newVersion);
 		theResource.getIdElement().setValue(newId.getValue());
-		theSavedEntity.setVersion(newVersionLong);
 	}
 
 	public boolean isLogicalReference(IIdType theId) {
@@ -966,7 +961,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * This should be the very first thing..
 		 */
 		if (theResource != null) {
-			if (thePerformIndexing) {
+			if (thePerformIndexing && theDeletedTimestampOrNull == null) {
 				if (!ourValidationDisabledForUnitTest) {
 					validateResourceForStorage((T) theResource, entity);
 				}
@@ -1062,7 +1057,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						verifyMatchUrlForConditionalCreate(theResource, entity.getCreatedByMatchUrl(), newParams, theRequest);
 					}
 
-					entity.setUpdated(theTransactionDetails.getTransactionDate());
+					if (CURRENTLY_REINDEXING.get(theResource) != Boolean.TRUE) {
+						entity.setUpdated(theTransactionDetails.getTransactionDate());
+					}
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
@@ -1091,17 +1088,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return entity;
 		}
 
-		if (theUpdateVersion && !entity.isVersionUpdatedInCurrentTransaction()) {
-			/*
-			 * Note that we set the version here so that it has the right new value
-			 * when we copy it to the new ResourceHistoryEntity that we create, but
-			 * other than that Hibernate will ignore whatever we send in here because
-			 * the ResourceTable.myVersion field is an optimistic lock @Version
-			 * field so hibernate manages it on its own.
-			 */
-			long newVersion = entity.getVersion() + 1;
-			entity.setVersion(newVersion);
-			entity.setVersionUpdatedInCurrentTransaction(true);
+		if (entity.getId() != null && theUpdateVersion) {
+			entity.markVersionUpdatedInCurrentTransaction();
 		}
 
 		/*
@@ -1165,6 +1153,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (thePerformIndexing) {
 			if (newParams == null) {
 				myExpungeService.deleteAllSearchParams(JpaPid.fromId(entity.getId()));
+				entity.clearAllParamsPopulated();
 			} else {
 
 				// Synchronize search param indexes

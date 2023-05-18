@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.7.0-SNAPSHOT</version>
+	<version>6.7.1-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -112,7 +112,7 @@
 		<module>hapi-fhir-jpaserver-ips</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
-<!--		<module>hapi-fhir-jpaserver-uhnfhirtest</module>-->
+		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
 		<module>hapi-fhir-client-okhttp</module>
 		<module>hapi-fhir-android</module>
 		<module>hapi-fhir-cli</module>

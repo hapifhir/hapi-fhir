@@ -153,10 +153,6 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 		myUpdated = theUpdated;
 	}
 
-	public void setUpdated(InstantDt theUpdated) {
-		myUpdated = theUpdated.getValue();
-	}
-
 	@Override
 	public abstract long getVersion();
 

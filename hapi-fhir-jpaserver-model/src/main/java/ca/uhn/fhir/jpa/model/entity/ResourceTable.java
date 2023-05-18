@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Session;
@@ -59,6 +60,7 @@ import javax.persistence.Index;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -67,6 +69,7 @@ import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -277,7 +280,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
 
-
 	/**
 	 * The id of the Resource.
 	 * Will contain either the client-assigned id, or the sequence value.
@@ -288,6 +290,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		length = 64,
 		// we never update this after insert, and the Generator will otherwise "dirty" the object.
 		updatable = false)
+
 	// inject the pk for server-assigned sequence ids.
 	@GeneratorType(when = GenerationTime.INSERT, type = FhirIdGenerator.class)
 	// Make sure the generator doesn't bump the history version.
@@ -308,15 +311,20 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private long myVersion;
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
+
 	@Transient
 	private transient ResourceHistoryTable myCurrentVersionEntity;
+
 	@Transient
 	private transient ResourceHistoryTable myNewVersionEntity;
+
 	@Transient
-	private transient boolean versionUpdatedInCurrentTransaction;
+	private transient boolean myVersionUpdatedInCurrentTransaction;
+
 	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
 	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;
+
 	@Transient
 	private volatile String myCreatedByMatchUrl;
 
@@ -328,24 +336,36 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	/**
-	 * If we've already updated the resource within the current transaction, we don't
-	 * want to update it a second time or create a second {@link ResourceHistoryTable}
-	 * entity for this resource. This could happen if a resource was deleted and
-	 * resurrected within a single FHIR transaction bundle, which is legal to do.
-	 * We can't actually create multiple versions of a resource within a single
-	 * transaction because the resource version field {@link #myVersion} is an
-	 * optimistic lock {@link Version @Version} field, so it can only increment
-	 * by one within a single transaction.
+	 * Setting this flag is an indication that we're making changes and the version number will
+	 * be incremented in the current transaction. When this is set, calls to {@link #getVersion()}
+	 * will be incremented by one.
+	 * This flag is cleared in {@link #postPersist()} since at that time the new version number
+	 * should be reflected.
 	 */
-	public boolean isVersionUpdatedInCurrentTransaction() {
-		return versionUpdatedInCurrentTransaction;
+	public void markVersionUpdatedInCurrentTransaction() {
+		if (!myVersionUpdatedInCurrentTransaction) {
+			/*
+			 * Note that modifying this number doesn't actually directly affect what
+			 * gets stored in the database since this is a @Version field and the
+			 * value is therefore managed by Hibernate. So in other words, if the
+			 * row in the database is updated, it doesn't matter what we set
+			 * this field to, hibernate will increment it by one. However, we still
+			 * increment it for two reasons:
+			 * 1. The value gets used for the version attribute in the ResourceHistoryTable
+			 *    entity we create for each new version.
+			 * 2. For updates to existing resources, there may actually not be any other
+			 *    changes to this entity so incrementing this is a signal to
+			 *    Hibernate that something changed and we need to force an entity
+			 *    update.
+			 */
+			myVersion++;
+			this.myVersionUpdatedInCurrentTransaction = true;
+		}
 	}
 
-	/**
-	 * @see #isVersionUpdatedInCurrentTransaction()
-	 */
-	public void setVersionUpdatedInCurrentTransaction(boolean versionUpdatedInCurrentTransaction) {
-		this.versionUpdatedInCurrentTransaction = versionUpdatedInCurrentTransaction;
+	@PostPersist
+	public void postPersist() {
+		myVersionUpdatedInCurrentTransaction = false;
 	}
 
 	@Override
@@ -562,9 +582,25 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myVersion;
 	}
 
-	public void setVersion(long theVersion) {
+	/**
+	 * Sets the version on this entity to {@literal 1}. This should only be called
+	 * on resources that are not yet persisted. After that time the version number
+	 * is managed by hibernate.
+	 */
+	public void initializeVersion() {
+		assert myId == null;
+		myVersion = 1;
+	}
+
+	/**
+	 * Don't call this in any JPA environments, the version will be ignored
+	 * since this field is managed by hibernate
+	 */
+	@VisibleForTesting
+	public void setVersionForUnitTest(long theVersion) {
 		myVersion = theVersion;
 	}
+
 
 	@Override
 	public boolean isDeleted() {
@@ -582,6 +618,23 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setHasLinks(boolean theHasLinks) {
 		myHasLinks = theHasLinks;
+	}
+
+	/**
+	 * Clears all the index population flags, e.g. {@link #isParamsStringPopulated()}
+	 *
+	 * @since 6.8.0
+	 */
+	public void clearAllParamsPopulated() {
+		myParamsTokenPopulated = false;
+		myParamsCoordsPopulated = false;
+		myParamsDatePopulated = false;
+		myParamsNumberPopulated = false;
+		myParamsStringPopulated = false;
+		myParamsQuantityPopulated = false;
+		myParamsQuantityNormalizedPopulated = false;
+		myParamsUriPopulated = false;
+		myHasLinks = false;
 	}
 
 	public boolean isParamsComboStringUniquePresent() {
@@ -715,8 +768,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	/**
 	 * This method creates a new history entity, or might reuse the current one if we've
-	 * already created one in the current transaction. See {@link #isVersionUpdatedInCurrentTransaction()}
-	 * for an explanation of why.
+	 * already created one in the current transaction. This is because we can only increment
+	 * the version once in a DB transaction (since hibernate manages that number) so creating
+	 * multiple {@link ResourceHistoryTable} entities will result in a constraint error.
 	 */
 	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
 		boolean createVersionTags = theCreateVersionTags;
@@ -725,12 +779,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		if (retVal == null) {
 			retVal = new ResourceHistoryTable();
 			myNewVersionEntity = retVal;
-			createVersionTags = false; // Tags should already be set
+		} else {
+			// Tags should already be set
+			createVersionTags = false;
 		}
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
-		retVal.setVersion(myVersion);
+		retVal.setVersion(getVersion());
 		retVal.setTransientForcedId(getTransientForcedId());
 
 		retVal.setPublished(getPublishedDate());

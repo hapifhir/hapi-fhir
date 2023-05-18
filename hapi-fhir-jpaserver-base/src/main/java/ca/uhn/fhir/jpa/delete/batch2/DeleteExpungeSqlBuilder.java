@@ -41,9 +41,6 @@ import java.util.stream.Collectors;
 
 public class DeleteExpungeSqlBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSqlBuilder.class);
-	public static final String PROCESS_NAME = "Delete Expunging";
-	public static final String THREAD_PREFIX = "delete-expunge";
-	
 	private final ResourceTableFKProvider myResourceTableFKProvider;
 	private final JpaStorageSettings myStorageSettings;
 	private final IIdHelperService myIdHelper;

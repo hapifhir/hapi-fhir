@@ -123,7 +123,7 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 			myStringValue = null;
 		} else {
 			// NB this might be null
-			myStringValue = encode(myCoercedValue);
+ 			myStringValue = encode(myCoercedValue);
 		}
 	}
 
