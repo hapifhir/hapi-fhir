@@ -139,17 +139,18 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Patch Dependencies -->
 		<dependency>
 			<groupId>io.dogote</groupId>
 			<artifactId>json-patch</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>org.hl7.fhir.utilities</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.github.dnault</groupId>
 			<artifactId>xml-patch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>org.hl7.fhir.utilities</artifactId>
 		</dependency>
 
 	</dependencies>

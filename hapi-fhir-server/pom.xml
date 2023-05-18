@@ -109,11 +109,6 @@
 		<!-- mail end -->
 
 		<dependency>
-			<groupId>io.dogote</groupId>
-			<artifactId>json-patch</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 		</dependency>

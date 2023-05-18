@@ -149,14 +149,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.github.dnault</groupId>
-			<artifactId>xml-patch</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.dogote</groupId>
-			<artifactId>json-patch</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-commons</artifactId>
 		</dependency>

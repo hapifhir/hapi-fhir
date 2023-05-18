@@ -26,10 +26,11 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.patch.FhirPatch;
-import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
-import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
+
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.patch.FhirPatch;
+import ca.uhn.fhir.patch.JsonPatchUtils;
+import ca.uhn.fhir.patch.XmlPatchUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;

@@ -233,16 +233,6 @@
 		</dependency>
 
 
-		<!-- Patch Dependencies -->
-		<dependency>
-			<groupId>io.dogote</groupId>
-			<artifactId>json-patch</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.github.dnault</groupId>
-			<artifactId>xml-patch</artifactId>
-		</dependency>
-
 		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->
 
 		<!-- 
