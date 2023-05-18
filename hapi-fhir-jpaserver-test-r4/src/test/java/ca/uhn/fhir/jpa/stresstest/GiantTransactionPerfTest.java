@@ -384,16 +384,6 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public void setResourceTextVcForVersion(Long id, String resourceText) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setRequestIdAndSourceUri(Long theId, String theRequestId, String theSourceUri) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
 		public void updateVersion(long theId, long theOldVersion, long theNewVersion) {
 			throw new UnsupportedOperationException();
 		}

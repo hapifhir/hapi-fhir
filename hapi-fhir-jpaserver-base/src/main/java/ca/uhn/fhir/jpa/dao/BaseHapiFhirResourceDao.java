@@ -1450,20 +1450,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private void reindexOptimizeStorageHistoryEntity(ResourceTable entity, ResourceHistoryTable historyEntity) {
+		boolean changed = false;
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC || historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
 			byte[] resourceBytes = historyEntity.getResource();
 			if (resourceBytes != null) {
 				String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
 				if (myStorageSettings.getInlineResourceTextBelowSize() > 0 && resourceText.length() < myStorageSettings.getInlineResourceTextBelowSize()) {
 					ourLog.debug("Storing text of resource {} version {} as inline VARCHAR", entity.getResourceId(), historyEntity.getVersion());
-					myResourceHistoryTableDao.setResourceTextVcForVersion(historyEntity.getId(), resourceText);
+					historyEntity.setResourceTextVc(resourceText);
+					historyEntity.setResource(null);
+					historyEntity.setEncoding(ResourceEncodingEnum.JSON);
+					changed = true;
 				}
 			}
 		}
 		if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
 			if (historyEntity.getProvenance() != null) {
-				myResourceHistoryTableDao.setRequestIdAndSourceUri(historyEntity.getId(), historyEntity.getProvenance().getRequestId(), historyEntity.getProvenance().getSourceUri());
+				historyEntity.setSourceUri(historyEntity.getProvenance().getSourceUri());
+				historyEntity.setRequestId(historyEntity.getProvenance().getRequestId());
+				changed = true;
 			}
+		}
+		if (changed) {
+			myResourceHistoryTableDao.save(historyEntity);
 		}
 	}
 

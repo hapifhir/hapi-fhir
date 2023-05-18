@@ -41,7 +41,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import software.amazon.awssdk.utils.StringUtils;
@@ -135,11 +134,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable(ResourceHistoryTable.HFJ_RES_VER)
 			.addColumn("20230510.4", "SOURCE_URI")
 			.nullable()
-			.type(ColumnTypeEnum.STRING, ResourceHistoryTable.SOURCE_URI_LENGTH);
+			.type(ColumnTypeEnum.STRING, 100);
 		version.onTable(ResourceHistoryTable.HFJ_RES_VER)
 			.addColumn("20230510.4", "REQUEST_ID")
 			.nullable()
-			.type(ColumnTypeEnum.STRING, Constants.REQUEST_ID_LENGTH);
+			.type(ColumnTypeEnum.STRING, 16);
 	}
 
 	protected void init660() {

@@ -67,17 +67,6 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 		"WHERE v.myResourceVersion != t.myVersion")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage);
 
-	/**
-	 * Sets the inline text and clears the LOB copy of the text
-	 */
-	@Modifying
-	@Query("UPDATE ResourceHistoryTable as t SET t.myResource = null, t.myResourceTextVc = :text WHERE t.myId = :pid")
-	void setResourceTextVcForVersion(@Param("pid") Long id, @Param("text") String resourceText);
-
-	@Modifying
-	@Query("UPDATE ResourceHistoryTable as t SET t.myRequestId = :request_id, t.mySourceUri = :source_uri WHERE t.myId = :pid")
-	void setRequestIdAndSourceUri(@Param("pid") Long theId, @Param("request_id") String theRequestId, @Param("source_uri") String theSourceUri);
-
 	@Modifying
 	@Query("UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceId = :id AND r.myResourceVersion = :oldVersion")
 	void updateVersion(@Param("id") long theId, @Param("oldVersion") long theOldVersion, @Param("newVersion") long theNewVersion);

@@ -103,6 +103,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -952,14 +953,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@ParameterizedTest
 	@CsvSource({
 		// NoOp    OptimisticLock  OptimizeMode      ExpectedSelect  ExpectedUpdate
-		"  false,  false,          CURRENT_VERSION,  2,              10",
+		"  false,  false,          CURRENT_VERSION,  2,              1",
 		"  true,   false,          CURRENT_VERSION,  2,              0",
-		"  false,  true,           CURRENT_VERSION,  12,             10",
+		"  false,  true,           CURRENT_VERSION,  12,             1",
 		"  true,   true,           CURRENT_VERSION,  12,             0",
-		"  false,  false,          ALL_VERSIONS,     22,             20",
-		"  true,   false,          ALL_VERSIONS,     22,             0",
-		"  false,  true,           ALL_VERSIONS,     32,             20",
-		"  true,   true,           ALL_VERSIONS,     32,             0",
+		"  false,  false,          ALL_VERSIONS,     12,             10",
+		"  true,   false,          ALL_VERSIONS,     12,             0",
+		"  false,  true,           ALL_VERSIONS,     22,             10",
+		"  true,   true,           ALL_VERSIONS,     22,             0",
 	})
 	public void testReindexJob_OptimizeStorage(boolean theNoOp, boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
 		// Setup
@@ -997,7 +998,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		RunOutcome outcome = myReindexStep.doReindex(data, mock(IJobDataSink.class), "123", "456", params);
 
 		// validate
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(theExpectedUpdateCount, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
