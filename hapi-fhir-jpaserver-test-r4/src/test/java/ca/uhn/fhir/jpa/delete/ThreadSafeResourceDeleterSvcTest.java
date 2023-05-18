@@ -201,7 +201,7 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		return myOrganizationDao.search(map).size();
 	}
 
-	private IIdType createPatientWithVersion(Consumer<IBaseResource> theWithId) {
+	private IIdType createPatientWithVersion(ICreationArgument theWithId) {
 		Patient patient = new Patient();
 		patient.addName(new HumanName().setFamily("FAMILY"));
 		theWithId.accept(patient);
