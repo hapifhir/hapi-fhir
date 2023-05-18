@@ -1322,17 +1322,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						// Case 2: Where target_resource_id is null in hfj_res_link table and referred by a canonical url in target_resource_url
 
 						// Case 1:
+						Map<String, Object> localReferenceQueryParams = new HashMap<>();
+
 						String searchPidFieldSqlColumn = searchPidFieldName.equals(MY_TARGET_RESOURCE_PID) ? "target_resource_id" : "src_resource_id";
-						StringBuilder resourceIdBasedQuery = new StringBuilder("SELECT " + fieldsToLoad +
+						StringBuilder localReferenceQuery = new StringBuilder("SELECT " + fieldsToLoad +
 							" FROM hfj_res_link r " +
 							" WHERE r.src_path = :src_path AND " +
 							" r.target_resource_id IS NOT NULL AND " +
 							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ");
+						localReferenceQueryParams.put("src_path", nextPath);
+						// we loop over target_pids later.
 						if (targetResourceTypes != null) {
 							if (targetResourceTypes.size() == 1) {
-								resourceIdBasedQuery.append(" AND r.target_resource_type = :target_resource_type ");
+								localReferenceQuery.append(" AND r.target_resource_type = :target_resource_type ");
+								localReferenceQueryParams.put("target_resource_type", targetResourceTypes.iterator().next());
 							} else {
-								resourceIdBasedQuery.append(" AND r.target_resource_type in (:target_resource_types) ");
+								localReferenceQuery.append(" AND r.target_resource_type in (:target_resource_types) ");
+								localReferenceQueryParams.put("target_resource_types", targetResourceTypes);
 							}
 						}
 
@@ -1341,20 +1347,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						//@formatter:on
 
-						String sql = resourceIdBasedQuery + " UNION " + canonicalQuery.getLeft();
+						String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
 
 						List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 						for (Collection<JpaPid> nextPartition : partitions) {
 							Query q = entityManager.createNativeQuery(sql, Tuple.class);
-							q.setParameter("src_path", nextPath);
 							q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
-							if (targetResourceTypes != null) {
-								if (targetResourceTypes.size() == 1) {
-									q.setParameter("target_resource_type", targetResourceTypes.iterator().next());
-								} else {
-									q.setParameter("target_resource_types", targetResourceTypes);
-								}
-							}
+							localReferenceQueryParams.forEach(q::setParameter);
 							canonicalQuery.getRight().forEach(q::setParameter);
 
 							if (maxCount != null) {
@@ -1385,7 +1384,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			nextRoundMatches.clear();
 			for (JpaPid next : pidsToInclude) {
-				if (original.contains(next) == false && allAdded.contains(next) == false) {
+				if ( !original.contains(next) && !allAdded.contains(next) ) {
 					nextRoundMatches.add(next);
 				}
 			}
@@ -1396,7 +1395,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				break;
 			}
 
-		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
+		} while (!includes.isEmpty() && !nextRoundMatches.isEmpty() && addedSomeThisRound);
 
 		allAdded.removeAll(original);
 
@@ -1405,7 +1404,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
-		if (allAdded.size() > 0) {
+		if (!allAdded.isEmpty()) {
 
 			if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, request)) {
 				List<JpaPid> includedPidList = new ArrayList<>(allAdded);
@@ -1447,39 +1446,43 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	@Nonnull
-	private static Pair<String, Map<String, Object>> buildCanonicalUrlQuery(String theVersionFieldName, String thePidFieldSqlColumn, Set<String> theTargetResourceTypes) {
+	private Pair<String, Map<String, Object>> buildCanonicalUrlQuery(String theVersionFieldName, String thePidFieldSqlColumn, Set<String> theTargetResourceTypes) {
 		String fieldsToLoadFromSpidxUriTable = "rUri.res_id";
 		if (theVersionFieldName != null) {
 			// canonical-uri references aren't versioned, but we need to match the column count for the UNION
 			fieldsToLoadFromSpidxUriTable += ", NULL";
 		}
-		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
-		StringBuilder canonicalUrlQuery = new StringBuilder("SELECT " + fieldsToLoadFromSpidxUriTable +
-			" FROM hfj_res_link r " +
-			" JOIN hfj_spidx_uri rUri ON ( " +
-			"   r.target_resource_url = rUri.sp_uri AND " +
-			"   rUri.sp_name = 'url' ");
+		// The logical join will be by hfj_spidx_uri on sp_name='uri' and sp_uri=target_resource_url.
+		// But sp_name isn't indexed, so we use hash_identity instead.
+		if (theTargetResourceTypes == null) {
+			// hash_identity includes the resource type.  So a null wildcard must be replaced with a list of all types.
+			theTargetResourceTypes = myDaoRegistry.getRegisteredDaoTypes();
+		}
+		assert !theTargetResourceTypes.isEmpty();
 
-		if (theTargetResourceTypes != null) {
-			if (theTargetResourceTypes.size() ==1 ) {
-				canonicalUrlQuery.append(" AND rUri.res_type = :target_resource_type ");
-				canonicalUriQueryParams.put("target_resource_type", theTargetResourceTypes.iterator().next());
-			} else {
-				canonicalUrlQuery.append(" AND rUri.res_type IN (:target_resource_types) ");
-				canonicalUriQueryParams.put("target_resource_types", theTargetResourceTypes);
-			}
+		Set<Long> identityHashesForTypes = theTargetResourceTypes.stream()
+			.map(type-> BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings, myRequestPartitionId, type, "url"))
+			.collect(Collectors.toSet());
+
+		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
+		StringBuilder canonicalUrlQuery = new StringBuilder(
+			"SELECT " + fieldsToLoadFromSpidxUriTable +
+			" FROM hfj_res_link r " +
+			" JOIN hfj_spidx_uri rUri ON ( ");
+		// join on hash_identity and sp_uri - indexed in IDX_SP_URI_HASH_IDENTITY_V2
+		if (theTargetResourceTypes.size() == 1) {
+			canonicalUrlQuery.append("   rUri.hash_identity = :uri_identity_hash ");
+			canonicalUriQueryParams.put("uri_identity_hash", identityHashesForTypes.iterator().next());
+		} else {
+			canonicalUrlQuery.append("   rUri.hash_identity in (:uri_identity_hashes) ");
+			canonicalUriQueryParams.put("uri_identity_hashes", identityHashesForTypes);
 		}
 
-		canonicalUrlQuery.append(" ) ");
-		canonicalUrlQuery.append(
+		canonicalUrlQuery.append("  AND r.target_resource_url = rUri.sp_uri  )" +
 			" WHERE r.src_path = :src_path AND " +
 				" r.target_resource_id IS NULL AND " +
 				" r." + thePidFieldSqlColumn + " IN (:target_pids) ");
 		return Pair.of(canonicalUrlQuery.toString(), canonicalUriQueryParams);
-	}
-
-	private long identityHashForUri(String theResourceType) {
-		return BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings, myRequestPartitionId, theResourceType, "uri");
 	}
 
 	private List<Collection<JpaPid>> partition(Collection<JpaPid> theNextRoundMatches, int theMaxLoad) {
