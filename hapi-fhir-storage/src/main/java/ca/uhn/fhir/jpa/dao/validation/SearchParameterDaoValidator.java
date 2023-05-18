@@ -32,9 +32,10 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.PrimitiveType;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.SearchParameter;
 
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class SearchParameterDaoValidator {
 
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
-	private static final Set<RestSearchParameterTypeEnum> allowedCompositeSearchParameterTypes = Set.of(RestSearchParameterTypeEnum.STRING,
+	private static final Set<RestSearchParameterTypeEnum> ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES = Set.of(RestSearchParameterTypeEnum.STRING,
 		RestSearchParameterTypeEnum.TOKEN, RestSearchParameterTypeEnum.DATE, RestSearchParameterTypeEnum.QUANTITY);
 
 	private final FhirContext myFhirContext;
@@ -135,6 +136,7 @@ public class SearchParameterDaoValidator {
 		}
 
 		if (isCompositeWithComponent(searchParameter)) {
+			//validateCompositeSearchParameterBaseResource()
 			validateCompositeSearchParameterComponents(searchParameter);
 		}
 	}
@@ -150,9 +152,9 @@ public class SearchParameterDaoValidator {
 		return searchParameter.getType() != null && searchParameter.getType().name().equals(Enumerations.SearchParamType.COMPOSITE.name()) && isBlank(searchParameter.getExpression());
 	}
 
-	private boolean isCompositeWithComponent(SearchParameter searchParameter) {
-		return searchParameter.hasType() && searchParameter.getType().equals(Enumerations.SearchParamType.COMPOSITE) &&
-			searchParameter.hasComponent();
+	private boolean isCompositeWithComponent(SearchParameter theSearchParameter) {
+		return theSearchParameter.hasType() && theSearchParameter.getType().equals(Enumerations.SearchParamType.COMPOSITE) &&
+			theSearchParameter.hasComponent();
 	}
 
 	private void validateExpressionPath(SearchParameter theSearchParameter) {
@@ -182,17 +184,37 @@ public class SearchParameterDaoValidator {
 			.anyMatch(t -> theValueAsString.equals(t.getValueAsPrimitive().getValueAsString()));
 	}
 
-	private void validateCompositeSearchParameterComponents(SearchParameter searchParameter) {
-		searchParameter.getBase().stream().map(PrimitiveType::getValueAsString).forEach(base ->
-			searchParameter.getComponent().forEach(component -> {
-				RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParam(base,
-					StringUtils.substringAfterLast(component.getDefinition(), "/"));
+	//TODO:check if we need to validate SearchParameter base or custom base resources
+	private void validateCompositeSearchParameterBaseResource(SearchParameter theSearchParameter) {
+		List<Extension> customBaseResources = theSearchParameter.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
+		if (ElementUtil.isEmpty(customBaseResources) && !ElementUtil.isEmpty(theSearchParameter.getBase())
+			&& theSearchParameter.getBase().size() > 1) {
+			throw new UnprocessableEntityException(String.format("%sOnly one base resource allowed for composite Search Parameter but provided: %s",
+				Msg.code(2348), theSearchParameter.getBase().size()));
+		}
+		if (ElementUtil.isEmpty(theSearchParameter.getBase()) && !ElementUtil.isEmpty(customBaseResources)
+			&& customBaseResources.size() > 1) {
+			throw new UnprocessableEntityException(String.format("%sOnly one custom base resource allowed for composite Search Parameter but provided: %s",
+				Msg.code(2349), customBaseResources.size()));
+		}
+	}
 
-				if (componentSearchParam != null && !allowedCompositeSearchParameterTypes.contains(componentSearchParam.getParamType())) {
+	private void validateCompositeSearchParameterComponents(SearchParameter theSearchParameter) {
+		// recheck if only one base is allowed for composite search parameter
+		// check if we need to check custom base resource
+		String base = theSearchParameter.getBase().get(0).getValueAsString();
+		// no need to check if component is null - .getComponent() returns empty list if it is null
+		for (SearchParameter.SearchParameterComponentComponent nextComponent : theSearchParameter.getComponent()) {
+			if (nextComponent.getDefinition() != null) {
+				RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParam(base,
+					StringUtils.substringAfterLast(nextComponent.getDefinition(), "/"));
+				// only 4 types of component search parameters are supported for creating composite search parameter
+				if (componentSearchParam != null && !ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES.contains(componentSearchParam.getParamType())) {
 					throw new UnprocessableEntityException(String.format("%sInvalid component search parameter type: %s in component.definition: %s, supported types: %s",
-						Msg.code(1117), componentSearchParam.getParamType().name(), component.getDefinition(),
-						allowedCompositeSearchParameterTypes.stream().map(Enum::name).collect(Collectors.joining(", "))));
+						Msg.code(2347), componentSearchParam.getParamType().name(), nextComponent.getDefinition(),
+						ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES.stream().map(Enum::name).collect(Collectors.joining(", "))));
 				}
-			}));
+			}
+		}
 	}
 }

@@ -111,7 +111,7 @@ public class SearchParameterDaoValidatorTest {
 		org.hl7.fhir.r5.model.SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
 
 		UnprocessableEntityException thrown = assertThrows(UnprocessableEntityException.class, () -> mySvc.validate(canonicalSp));
-		assertTrue(thrown.getMessage().startsWith("HAPI-1117: "));
+		assertTrue(thrown.getMessage().startsWith("HAPI-2347: "));
 		assertTrue(thrown.getMessage().contains("Invalid component search parameter type: REFERENCE in component.definition: SearchParameter/observation-patient"));
 	}
 
