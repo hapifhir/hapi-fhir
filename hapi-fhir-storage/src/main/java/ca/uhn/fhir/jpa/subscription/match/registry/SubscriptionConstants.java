@@ -48,5 +48,11 @@ public class SubscriptionConstants {
 	public static final String ERROR_STATUS = Subscription.SubscriptionStatus.ERROR.toCode();
 	public static final String SUBSCRIPTION_TOPIC_PROFILE_URL = "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-subscription";
 	public static final String SUBSCRIPTION_TOPIC_FILTER_URL = "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-filter-criteria";
+	public static final String SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL = "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-heartbeat-period";
+	public static final String SUBSCRIPTION_TOPIC_CHANNEL_TIMEOUT_URL = "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-timeout";
+	public static final String SUBSCRIPTION_TOPIC_CHANNEL_MAX_COUNT = "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-max-count";
+	public static final String SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT = "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-payload-content";
+
+
 
 }

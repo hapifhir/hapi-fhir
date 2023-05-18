@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -266,9 +267,6 @@ public class SubscriptionCanonicalizer {
 		org.hl7.fhir.r4.model.Subscription subscription = (org.hl7.fhir.r4.model.Subscription) theSubscription;
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		retVal.setStatus(subscription.getStatus());
-		retVal.setChannelType(getChannelType(theSubscription));
-		retVal.setCriteriaString(subscription.getCriteria());
-		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 		retVal.setHeaders(subscription.getChannel().getHeader());
 		retVal.setChannelExtensions(extractExtension(subscription));
 		retVal.setIdElement(subscription.getIdElement());
@@ -277,6 +275,52 @@ public class SubscriptionCanonicalizer {
 		retVal.setTags(extractTags(subscription));
 		setPartitionIdOnReturnValue(theSubscription, retVal);
 		retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+
+		List<org.hl7.fhir.r4.model.CanonicalType> profiles = subscription.getMeta().getProfile();
+		for (org.hl7.fhir.r4.model.CanonicalType next : profiles) {
+			if (SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL.equals(next.getValueAsString())) {
+				retVal.setTopicSubscription(true);
+			}
+		}
+
+		if (retVal.isTopicSubscription()) {
+			CanonicalTopicSubscription topicSubscription = retVal.getTopicSubscription();
+			topicSubscription.setTopic(getCriteria(theSubscription));
+			// WIP STR5 support other types
+			topicSubscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
+			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
+			retVal.setChannelType(getChannelType(subscription));
+			// WIP STR5 set other topic subscription fields
+
+			for (org.hl7.fhir.r4.model.Extension next : subscription.getCriteriaElement().getExtension()) {
+				if (SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL.equals(next.getUrl())) {
+					List<CanonicalTopicSubscriptionFilter> filters = CanonicalTopicSubscriptionFilter.fromQueryUrl(next.getValue().primitiveValue());
+					filters.forEach(topicSubscription::addFilter);
+				}
+			}
+
+			if (subscription.getChannel().hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL)) {
+				org.hl7.fhir.r4.model.Extension timeoutExtension = subscription.getChannel().getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL);
+				topicSubscription.setHeartbeatPeriod(Integer.valueOf(timeoutExtension.getValue().primitiveValue()));
+			}
+			if (subscription.getChannel().hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_TIMEOUT_URL)) {
+				org.hl7.fhir.r4.model.Extension timeoutExtension = subscription.getChannel().getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_TIMEOUT_URL);
+				topicSubscription.setTimeout(Integer.valueOf(timeoutExtension.getValue().primitiveValue()));
+			}
+			if (subscription.getChannel().hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_MAX_COUNT)) {
+				org.hl7.fhir.r4.model.Extension timeoutExtension = subscription.getChannel().getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_MAX_COUNT);
+				topicSubscription.setMaxCount(Integer.valueOf(timeoutExtension.getValue().primitiveValue()));
+			}
+			if (subscription.getChannel().getPayloadElement().hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT)) {
+				org.hl7.fhir.r4.model.Extension timeoutExtension = subscription.getChannel().getPayloadElement().getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT);
+				topicSubscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(timeoutExtension.getValue().primitiveValue()));
+			}
+
+		} else {
+			retVal.setCriteriaString(getCriteria(theSubscription));
+			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
+			retVal.setChannelType(getChannelType(subscription));
+		}
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
@@ -344,6 +388,7 @@ public class SubscriptionCanonicalizer {
 
 		if (retVal.isTopicSubscription()) {
 			retVal.getTopicSubscription().setTopic(getCriteria(theSubscription));
+			// WIP STR5 support other types
 			retVal.getTopicSubscription().setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 			retVal.setChannelType(getChannelType(subscription));

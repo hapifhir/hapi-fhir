@@ -19,8 +19,13 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
+import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.r5.model.Enumerations;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class CanonicalTopicSubscriptionFilter {
 	@JsonProperty("resourceType")
@@ -77,5 +82,26 @@ public class CanonicalTopicSubscriptionFilter {
 
 	public void setValue(String theValue) {
 		myValue = theValue;
+	}
+
+	// FIXME KHS test
+	public static List<CanonicalTopicSubscriptionFilter> fromQueryUrl(String theQueryUrl) {
+		UrlUtil.UrlParts urlParts = UrlUtil.parseUrl(theQueryUrl);
+		String resourceName = urlParts.getResourceType();
+
+		Map<String, String[]> params = UrlUtil.parseQueryString(urlParts.getParams());
+		List<CanonicalTopicSubscriptionFilter> retval = new ArrayList<>();
+		params.forEach((key, valueList) -> {
+			for (String value : valueList) {
+				CanonicalTopicSubscriptionFilter filter = new CanonicalTopicSubscriptionFilter();
+				filter.setResourceType(resourceName);
+				filter.setFilterParameter(key);
+				filter.setComparator(Enumerations.SearchComparator.EQ);
+				// WIP STR5 set modifier
+				filter.setValue(value);
+				retval.add(filter);
+			}
+		});
+		return retval;
 	}
 }
