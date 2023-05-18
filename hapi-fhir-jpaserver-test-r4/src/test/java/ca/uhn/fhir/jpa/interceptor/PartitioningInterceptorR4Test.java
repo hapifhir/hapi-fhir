@@ -283,7 +283,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		when(mySrd.getRequestId()).thenReturn("REQUEST_ID");
 	}
 
-	private ICreationArgument withPartition(Integer thePartitionId) {
+	private IResourceCreationArgument withPartition(Integer thePartitionId) {
 		return t -> {
 			if (thePartitionId != null) {
 				addCreatePartition(thePartitionId, null);
