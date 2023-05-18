@@ -76,8 +76,6 @@ public class SubscriptionTopicPayloadBuilder {
 				case DELETE:
 					bundleBuilder.addTransactionDeleteEntry(resource);
 					break;
-				default:
-					throw new IllegalStateException("Unsupported rest operation type: " + theRestOperationType);
 			}
 		}
 
