@@ -17,9 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.subscription.match.registry;
-
-import org.hl7.fhir.dstu2.model.Subscription;
+package ca.uhn.fhir.subscription;
 
 public class SubscriptionConstants {
 
@@ -43,9 +41,10 @@ public class SubscriptionConstants {
 	public static final int DELIVERY_EXECUTOR_QUEUE_SIZE = 1000;
 	public static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	public static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
-	public static final String REQUESTED_STATUS = Subscription.SubscriptionStatus.REQUESTED.toCode();
-	public static final String ACTIVE_STATUS = Subscription.SubscriptionStatus.ACTIVE.toCode();
-	public static final String ERROR_STATUS = Subscription.SubscriptionStatus.ERROR.toCode();
+	// These STATUS codes are unchanged from DSTU2 Subscription onwards
+	public static final String REQUESTED_STATUS = "requested";
+	public static final String ACTIVE_STATUS = "active";
+	public static final String ERROR_STATUS = "error";
 	public static final String SUBSCRIPTION_TOPIC_PROFILE_URL = "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-subscription";
 	public static final String SUBSCRIPTION_TOPIC_FILTER_URL = "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-filter-criteria";
 	public static final String SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL = "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-heartbeat-period";
