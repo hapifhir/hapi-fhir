@@ -17,19 +17,23 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
 
-import ca.uhn.fhir.context.phonetic.NumericEncoder;
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBase;
 
-// Useful for numerical identifiers like phone numbers, address parts etc.
-// This should not be used where decimals are important.  A new "quantity matcher" should be added to handle cases like that.
-public class NumericMatcher implements IMdmStringMatcher {
-	private final NumericEncoder encoder = new NumericEncoder();
+public class EmptyFieldMatcher implements IMdmFieldMatcher {
+
+	public EmptyFieldMatcher() {
+	}
 
 	@Override
-	public boolean matches(String theLeftString, String theRightString) {
-		String left = encoder.encode(theLeftString);
-		String right = encoder.encode(theRightString);
-		return left.equals(right);
+	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
+		for (IBase b : new IBase[] {theLeftBase, theRightBase}) {
+			if (b != null && !b.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

@@ -20,14 +20,14 @@
 package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
+import ca.uhn.fhir.rest.api.server.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IBase;
 
 public class MdmMatcherJson implements IModelJson {
 	@JsonProperty(value = "algorithm", required = true)
-	MdmMatcherEnum myAlgorithm;
+	MatchTypeEnum myAlgorithm;
 
 	@JsonProperty(value = "identifierSystem", required = false)
 	String myIdentifierSystem;
@@ -38,11 +38,11 @@ public class MdmMatcherJson implements IModelJson {
 	@JsonProperty(value = "exact")
 	boolean myExact;
 
-	public MdmMatcherEnum getAlgorithm() {
+	public MatchTypeEnum getAlgorithm() {
 		return myAlgorithm;
 	}
 
-	public MdmMatcherJson setAlgorithm(MdmMatcherEnum theAlgorithm) {
+	public MdmMatcherJson setAlgorithm(MatchTypeEnum theAlgorithm) {
 		myAlgorithm = theAlgorithm;
 		return this;
 	}

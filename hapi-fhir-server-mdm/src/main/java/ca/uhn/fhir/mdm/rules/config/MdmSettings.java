@@ -27,6 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 public class MdmSettings implements IMdmSettings {
@@ -41,6 +46,11 @@ public class MdmSettings implements IMdmSettings {
 	private boolean myPreventEidUpdates;
 	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
+
+	/**
+	 * Map of name -> set of related nicknames
+	 */
+	private Map<String, Collection<String>> myNickNameMap = new HashMap<>();
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -157,5 +167,10 @@ public class MdmSettings implements IMdmSettings {
 	@Override
 	public void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch) {
 		mySearchAllPartitionForMatch = theSearchAllPartitionForMatch;
+	}
+
+	@Override
+	public Map<String, Collection<String>> nicknameMap() {
+		return myNickNameMap;
 	}
 }

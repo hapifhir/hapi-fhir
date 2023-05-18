@@ -17,8 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
 
-public interface IMdmStringMatcher {
-	boolean matches(String theLeftString, String theRightString);
+public class SubstringStringMatcher implements IMdmStringMatcher {
+	@Override
+	public boolean matches(String theLeftString, String theRightString) {
+		return theLeftString.startsWith(theRightString) || theRightString.startsWith(theLeftString);
+	}
 }

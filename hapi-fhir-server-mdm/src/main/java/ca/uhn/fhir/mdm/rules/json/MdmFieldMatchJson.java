@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
-import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -33,7 +33,7 @@ import javax.annotation.Nonnull;
 /**
  * Contains all business data for determining if a match exists on a particular field, given:
  * <p></p>
- * 1. A {@link MdmMatcherEnum} which determines the actual similarity values.
+ * 1. A {@link MatchTypeEnum} which determines the actual similarity values.
  * 2. A given resource type (e.g. Patient)
  * 3. A given FHIRPath expression for finding the particular primitive to be used for comparison. (e.g. name.given)
  */

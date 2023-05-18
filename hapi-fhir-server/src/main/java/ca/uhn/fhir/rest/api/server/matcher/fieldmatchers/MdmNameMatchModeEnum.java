@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
 
 public enum MdmNameMatchModeEnum {
 	ANY_ORDER,

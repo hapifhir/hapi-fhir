@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.util.NameUtil;

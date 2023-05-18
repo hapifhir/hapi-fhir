@@ -2,6 +2,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.rest.api.server.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.Identifier;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier left = new Identifier().setSystem(MATCHING_SYSTEM).setValue(MATCHING_VALUE);
 		Identifier right = new Identifier().setSystem(MATCHING_SYSTEM).setValue(MATCHING_VALUE);
 
-		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MdmMatcherEnum.IDENTIFIER);
+		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MatchTypeEnum.IDENTIFIER);
 		MdmFieldMatchJson fieldMatch = new MdmFieldMatchJson().setMatcher(matcher);
 
 		assertTrue(fieldMatch.match(ourFhirContext, left, right).match);
@@ -33,7 +34,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier rightNoSystem = new Identifier().setValue(MATCHING_VALUE);
 		Identifier rightNoValue = new Identifier().setSystem(MATCHING_SYSTEM);
 
-		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MdmMatcherEnum.IDENTIFIER);
+		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MatchTypeEnum.IDENTIFIER);
 		MdmFieldMatchJson fieldMatch = new MdmFieldMatchJson().setMatcher(matcher);
 
 		assertFalse(fieldMatch.match(ourFhirContext, left, rightWrongSystem).match);
@@ -51,7 +52,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier left = new Identifier().setSystem(MATCHING_SYSTEM);
 		Identifier right = new Identifier().setSystem(MATCHING_SYSTEM);
 
-		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MdmMatcherEnum.IDENTIFIER).setIdentifierSystem(MATCHING_SYSTEM);
+		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MatchTypeEnum.IDENTIFIER).setIdentifierSystem(MATCHING_SYSTEM);
 		MdmFieldMatchJson fieldMatch = new MdmFieldMatchJson().setMatcher(matcher);
 
 		assertFalse(fieldMatch.match(ourFhirContext, left, right).match);
@@ -62,7 +63,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier left = new Identifier().setSystem(MATCHING_SYSTEM).setValue(MATCHING_VALUE);
 		Identifier right = new Identifier().setSystem(MATCHING_SYSTEM).setValue(MATCHING_VALUE);
 
-		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MdmMatcherEnum.IDENTIFIER).setIdentifierSystem(MATCHING_SYSTEM);
+		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MatchTypeEnum.IDENTIFIER).setIdentifierSystem(MATCHING_SYSTEM);
 		MdmFieldMatchJson fieldMatch = new MdmFieldMatchJson().setMatcher(matcher);
 
 		assertTrue(fieldMatch.match(ourFhirContext, left, right).match);
@@ -73,7 +74,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier left = new Identifier().setSystem(OTHER_SYSTEM).setValue(MATCHING_VALUE);
 		Identifier right = new Identifier().setSystem(OTHER_SYSTEM).setValue(MATCHING_VALUE);
 
-		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MdmMatcherEnum.IDENTIFIER).setIdentifierSystem(MATCHING_SYSTEM);
+		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MatchTypeEnum.IDENTIFIER).setIdentifierSystem(MATCHING_SYSTEM);
 		MdmFieldMatchJson fieldMatch = new MdmFieldMatchJson().setMatcher(matcher);
 
 		assertFalse(fieldMatch.match(ourFhirContext, left, right).match);

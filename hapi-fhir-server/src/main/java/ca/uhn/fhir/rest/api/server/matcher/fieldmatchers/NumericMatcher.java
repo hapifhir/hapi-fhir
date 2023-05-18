@@ -17,14 +17,19 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
 
-import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.model.api.IBase;
+import ca.uhn.fhir.context.phonetic.NumericEncoder;
 
-/**
- * Measure how similar two IBase (resource fields) are to one another.  1.0 means identical.  0.0 means completely different.
- */
-public interface IMdmFieldMatcher {
-	boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem);
+// Useful for numerical identifiers like phone numbers, address parts etc.
+// This should not be used where decimals are important.  A new "quantity matcher" should be added to handle cases like that.
+public class NumericMatcher implements IMdmStringMatcher {
+	private final NumericEncoder encoder = new NumericEncoder();
+
+	@Override
+	public boolean matches(String theLeftString, String theRightString) {
+		String left = encoder.encode(theLeftString);
+		String right = encoder.encode(theRightString);
+		return left.equals(right);
+	}
 }

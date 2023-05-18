@@ -1,8 +1,8 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
 
+import ca.uhn.fhir.rest.api.server.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ public class ExtensionMatcherR4Test extends BaseMatcherR4Test {
 		patient1.addExtension("asd",new StringType("Patient1"));
 		patient2.addExtension("asd",new StringType("Patient1"));
 
-		assertTrue(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
+		assertTrue(MatchTypeEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
 	}
 
 	@Test
@@ -30,7 +30,7 @@ public class ExtensionMatcherR4Test extends BaseMatcherR4Test {
 		patient1.addExtension("asd",new StringType("Patient1"));
 		patient2.addExtension("asd",new StringType("Patient2"));
 
-		assertFalse(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
+		assertFalse(MatchTypeEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
 	}
 
 	@Test
@@ -41,7 +41,7 @@ public class ExtensionMatcherR4Test extends BaseMatcherR4Test {
 		patient1.addExtension("asd",new StringType("Patient1"));
 		patient2.addExtension("asd1",new StringType("Patient1"));
 
-		assertFalse(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
+		assertFalse(MatchTypeEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
 	}
 
 	@Test
@@ -54,7 +54,7 @@ public class ExtensionMatcherR4Test extends BaseMatcherR4Test {
 		patient2.addExtension("asd",new StringType("Patient1"));
 		patient2.addExtension("asdasd", new StringType("some value"));
 
-		assertTrue(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
+		assertTrue(MatchTypeEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
 	}
 
 	@Test
@@ -65,7 +65,7 @@ public class ExtensionMatcherR4Test extends BaseMatcherR4Test {
 		patient1.addExtension("asd", new IntegerType(123));
 		patient2.addExtension("asd", new IntegerType(123));
 
-		assertTrue(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
+		assertTrue(MatchTypeEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class ExtensionMatcherR4Test extends BaseMatcherR4Test {
 		Patient patient1 = new Patient();
 		Patient patient2 = new Patient();
 
-		assertFalse(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
+		assertFalse(MatchTypeEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
 	}
 
 }

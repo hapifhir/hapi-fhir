@@ -17,23 +17,16 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 
-public class EmptyFieldMatcher implements IMdmFieldMatcher {
+/**
+ * Measure how similar two IBase (resource fields) are to one another.  1.0 means identical.  0.0 means completely different.
+ */
+public interface IMdmFieldMatcher {
+//	boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem);
 
-	public EmptyFieldMatcher() {
-	}
-
-	@Override
-	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
-		for (IBase b : new IBase[] {theLeftBase, theRightBase}) {
-			if (b != null && !b.isEmpty()) {
-				return false;
-			}
-		}
-		return true;
-	}
+	boolean matches(IBase theLeftBase, IBase theRightBase);
 }

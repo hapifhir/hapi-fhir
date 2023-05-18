@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.searchparam.nickname;
+package ca.uhn.fhir.rest.api.server.matcher.nickname;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
@@ -45,7 +45,7 @@ class NicknameMap {
 		}
 	}
 
-	private void add(String theKey, List<String> theValues) {
+	void add(String theKey, List<String> theValues) {
 		myFormalToNick.put(theKey, theValues);
 		for (String value : theValues) {
 			myNicknameToFormal.putIfAbsent(value, new ArrayList<>());

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
+import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.IMdmStringMatcher;
+import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.NicknameMatcher;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

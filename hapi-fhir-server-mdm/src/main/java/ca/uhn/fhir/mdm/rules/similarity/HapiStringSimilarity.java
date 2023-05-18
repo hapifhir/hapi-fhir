@@ -20,7 +20,7 @@
 package ca.uhn.fhir.mdm.rules.similarity;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.rules.matcher.BaseHapiStringMetric;
+import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.BaseHapiStringMetric;
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;

@@ -23,11 +23,11 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.server.matcher.nickname.NicknameSvc;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,8 +39,8 @@ public class NicknameInterceptor {
 
 	private final NicknameSvc myNicknameSvc;
 
-	public NicknameInterceptor() throws IOException {
-		myNicknameSvc = new NicknameSvc();
+	public NicknameInterceptor(NicknameSvc theNicknameSvc) {
+		myNicknameSvc = theNicknameSvc;
 	}
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)

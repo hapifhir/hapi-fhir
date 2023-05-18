@@ -24,6 +24,7 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.rest.api.server.matcher.IMatcherFactory;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -48,9 +49,15 @@ public class MdmResourceFieldMatcher {
 	private final String myName;
 	private final boolean myIsFhirPathExpression;
 
-	public MdmResourceFieldMatcher(FhirContext theFhirContext, MdmFieldMatchJson theMdmFieldMatchJson, MdmRulesJson theMdmRulesJson) {
+	private IMatcherFactory myIMatcherFactory;
+
+	public MdmResourceFieldMatcher(
+		FhirContext theFhirContext,
+		MdmFieldMatchJson theMdmFieldMatchJson,
+		MdmRulesJson theMdmRulesJson
+	) {
 		myFhirContext = theFhirContext;
-		myMdmFieldMatchJson = theMdmFieldMatchJson;
+//		myMdmFieldMatchJson = theMdmFieldMatchJson;
 		myResourceType = theMdmFieldMatchJson.getResourceType();
 		myResourcePath = theMdmFieldMatchJson.getResourcePath();
 		myFhirPath = theMdmFieldMatchJson.getFhirPath();

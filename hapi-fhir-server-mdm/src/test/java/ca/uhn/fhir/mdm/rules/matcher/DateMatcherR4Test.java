@@ -1,6 +1,7 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.api.server.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean dateMatch(Date theDate, Date theSameMonth, TemporalPrecisionEnum theTheDay) {
-		return MdmMatcherEnum.DATE.match(ourFhirContext, new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), true, null);
+		return MatchTypeEnum.DATE.match(ourFhirContext, new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), true, null);
 	}
 
 	@Test
@@ -87,7 +88,7 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean dateTimeMatch(Date theDate, Date theSecondDate, TemporalPrecisionEnum thePrecision, TemporalPrecisionEnum theSecondPrecision) {
-		return MdmMatcherEnum.DATE.match(
+		return MatchTypeEnum.DATE.match(
 			ourFhirContext,
 			new DateTimeType(theDate, thePrecision),
 			new DateTimeType(theSecondDate, theSecondPrecision),

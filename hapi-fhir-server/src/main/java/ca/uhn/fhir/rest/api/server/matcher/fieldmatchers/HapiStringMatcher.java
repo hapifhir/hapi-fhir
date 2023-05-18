@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -35,6 +35,11 @@ public class HapiStringMatcher extends BaseHapiStringMetric implements IMdmField
 
 	public HapiStringMatcher() {
 		myStringMatcher = String::equals;
+	}
+
+	@Override
+	public void setSettings(IMdmSettings theSettings) {
+		myStringMatcher.setSettings(theSettings);
 	}
 
 	@Override

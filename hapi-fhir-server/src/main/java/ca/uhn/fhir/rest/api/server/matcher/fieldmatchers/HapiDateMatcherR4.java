@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.BaseDateTimeType;
