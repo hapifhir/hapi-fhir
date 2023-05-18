@@ -295,7 +295,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		// Verify
 
-		verify(myJobPersistence, times(2)).updateInstance(eq(INSTANCE_ID), any());
+		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
 
 		assertEquals(1.0, instance.getProgress());
 		assertEquals(StatusEnum.COMPLETED, instance.getStatus());
@@ -342,7 +342,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertEquals(parseTime("2022-02-12T14:10:00-04:00"), instance.getEndTime());
 
 		// twice - once to move to FAILED, and once to purge the chunks
-		verify(myJobPersistence, times(2)).updateInstance(eq(INSTANCE_ID), any());
+		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
 		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
 
 		verifyNoMoreInteractions(myJobPersistence);

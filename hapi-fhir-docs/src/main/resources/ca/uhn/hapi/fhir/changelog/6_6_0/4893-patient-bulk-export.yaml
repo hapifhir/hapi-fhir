@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4893
+title: "Update the IRuleBuilder to support Patient Export rules via the new `patientExportOnPatient` method on the IRuleBuilder. Previously, it was accidentally using Group Export rules."
