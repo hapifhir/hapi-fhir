@@ -272,7 +272,7 @@ public interface ITestDataBuilder {
 	}
 
 	@Nonnull
-	private Consumer<IBaseResource> withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
+	default Consumer<IBaseResource> withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
 		return t -> {
 			if (theReferenceValue != null && theReferenceValue.getValue() != null) {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
