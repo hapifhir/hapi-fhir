@@ -15,7 +15,6 @@ import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Level;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
@@ -260,10 +259,6 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 	@Nested
 	public class MisconfigurationChecks {
-
-
-		// wipjv check for unsupported params during CdrAuthInterceptor scopes->perms translation.
-
 		/**
 		 * in case an unsupported perm snuck through the front door.
 		 * Each scope provides positive perm, so unsupported means we can't vote yes.  Abstain.
@@ -321,7 +316,6 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 		}
 
 	}
-	// wipjv how to test the difference between patient/*.rs?code=foo and patient/Observation.rs?code=foo?
 	// We need the builder to set AppliesTypeEnum, and the use that to build the matcher expression.
 
 	private AuthorizationInterceptor.Verdict applyRuleToResource(IBaseResource theResource) {
