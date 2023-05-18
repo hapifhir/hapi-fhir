@@ -109,6 +109,7 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -1307,27 +1308,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					paths = param.getPathsSplitForResourceType(resType);
 					// end replace
 
-					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
+					Set<String> targetResourceTypes = computeTargetResourceTypes(nextInclude, param);
+
 					for (String nextPath : paths) {
 						String findPidFieldSqlColumn = findPidFieldName.equals(MY_SOURCE_RESOURCE_PID) ? "src_resource_id" : "target_resource_id";
 						String fieldsToLoad = "r." + findPidFieldSqlColumn + " AS " + RESOURCE_ID_ALIAS;
 						if (findVersionFieldName != null) {
 							fieldsToLoad += ", r.target_resource_version AS " + RESOURCE_VERSION_ALIAS;
 						}
-
-						boolean haveTargetTypesDefinedByParam = param.hasTargets();
-						Set<String> targetResourceTypes;
-						if (targetResourceType != null) {
-							targetResourceTypes = Set.of(targetResourceType);
-						} else if (haveTargetTypesDefinedByParam) {
-							targetResourceTypes = param.getTargets();
-						} else {
-							// all types!
-							targetResourceTypes = null;
-						}
-
-
-
+						
 						// Query for includes lookup has 2 cases
 						// Case 1: Where target_resource_id is available in hfj_res_link table for local references
 						// Case 2: Where target_resource_id is null in hfj_res_link table and referred by a canonical url in target_resource_url
@@ -1339,7 +1328,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							" WHERE r.src_path = :src_path AND " +
 							" r.target_resource_id IS NOT NULL AND " +
 							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ");
-						if (targetResourceType != null) {
+						if (targetResourceTypes != null) {
 							if (targetResourceTypes.size() == 1) {
 								resourceIdBasedQuery.append(" AND r.target_resource_type = :target_resource_type ");
 							} else {
@@ -1439,6 +1428,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		return allAdded;
+	}
+
+	@Nullable
+	private static Set<String> computeTargetResourceTypes(Include nextInclude, RuntimeSearchParam param) {
+		String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
+		boolean haveTargetTypesDefinedByParam = param.hasTargets();
+		Set<String> targetResourceTypes;
+		if (targetResourceType != null) {
+			targetResourceTypes = Set.of(targetResourceType);
+		} else if (haveTargetTypesDefinedByParam) {
+			targetResourceTypes = param.getTargets();
+		} else {
+			// all types!
+			targetResourceTypes = null;
+		}
+		return targetResourceTypes;
 	}
 
 	@Nonnull
