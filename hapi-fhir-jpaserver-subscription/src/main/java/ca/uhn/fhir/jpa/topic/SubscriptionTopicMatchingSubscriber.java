@@ -98,17 +98,17 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 			SubscriptionTopicMatcher matcher = new SubscriptionTopicMatcher(mySubscriptionTopicSupport, topic);
 			InMemoryMatchResult result = matcher.match(theMsg);
 			if (result.matched()) {
-				ourLog.info("Matched topic {} to message {}", topic.getUrl(), theMsg);
-				deliverToTopicSubscriptions(theMsg, topic, result);
+				int deliveries = deliverToTopicSubscriptions(theMsg, topic, result);
+				ourLog.info("Matched topic {} to message {}.  Notifications sent to {} subscriptions for delivery.", topic.getUrl(), theMsg, deliveries);
 			}
 		}
 	}
 
-	private void deliverToTopicSubscriptions(ResourceModifiedMessage theMsg, SubscriptionTopic theSubscriptionTopic, InMemoryMatchResult theInMemoryMatchResult) {
+	private int deliverToTopicSubscriptions(ResourceModifiedMessage theMsg, SubscriptionTopic theSubscriptionTopic, InMemoryMatchResult theInMemoryMatchResult) {
 		String topicUrl = theSubscriptionTopic.getUrl();
 		List<IBaseResource> matchedResource = Collections.singletonList(theMsg.getNewPayload(myFhirContext));
 		RestOperationTypeEnum restOperationType = theMsg.getOperationType().asRestOperationType();
 
-		mySubscriptionTopicDispatcher.dispatch(topicUrl, matchedResource, restOperationType, theInMemoryMatchResult, theMsg.getPartitionId(), theMsg.getTransactionId());
+		return mySubscriptionTopicDispatcher.dispatch(topicUrl, matchedResource, restOperationType, theInMemoryMatchResult, theMsg.getPartitionId(), theMsg.getTransactionId());
 	}
 }

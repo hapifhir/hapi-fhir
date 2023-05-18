@@ -17,13 +17,9 @@ public class SubscriptionDeliveryRequest {
 	// One of these two will be populated
 	private final IBaseResource myPayload;
 	private final IIdType myPayloadId;
-	@Nonnull
 	private final ActiveSubscription myActiveSubscription;
-	@Nonnull
 	private final RestOperationTypeEnum myRestOperationType;
-	@Nullable
 	private final RequestPartitionId myRequestPartitionId;
-	@Nullable
 	private final String myTransactionId;
 
 	public SubscriptionDeliveryRequest(@Nonnull IBaseBundle theBundlePayload, @Nonnull ActiveSubscription theActiveSubscription, @Nonnull RestOperationTypeEnum theOperationType, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theTransactionId) {
@@ -35,7 +31,7 @@ public class SubscriptionDeliveryRequest {
 		myTransactionId = theTransactionId;
 	}
 
-	public SubscriptionDeliveryRequest(IBaseResource thePayload, ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription) {
+	public SubscriptionDeliveryRequest(@Nonnull IBaseResource thePayload, @Nonnull ResourceModifiedMessage theMsg, @Nonnull ActiveSubscription theActiveSubscription) {
 		myPayload = thePayload;
 		myPayloadId = null;
 		myActiveSubscription = theActiveSubscription;
@@ -44,7 +40,7 @@ public class SubscriptionDeliveryRequest {
 		myTransactionId = theMsg.getTransactionId();
 	}
 
-	public SubscriptionDeliveryRequest(IIdType thePayloadId, ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription) {
+	public SubscriptionDeliveryRequest(@Nonnull IIdType thePayloadId, @Nonnull ResourceModifiedMessage theMsg, @Nonnull ActiveSubscription theActiveSubscription) {
 		myPayload = null;
 		myPayloadId = thePayloadId;
 		myActiveSubscription = theActiveSubscription;

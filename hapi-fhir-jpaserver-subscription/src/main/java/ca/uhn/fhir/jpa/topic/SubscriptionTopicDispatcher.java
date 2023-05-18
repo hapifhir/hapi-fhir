@@ -17,7 +17,7 @@ import java.util.UUID;
 
 /**
  * Subscription topic notifications are natively supported in R5, R4B.  They are also partially supported and in R4
- * via the subscription backport spec http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/components.html.
+ * via the subscription backport spec <a href="http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/components.html">Subscription Backport</a>.
  * In all versions, it is possible for a FHIR Repository to submit topic subscription notifications triggered by some
  * arbitrary "business event".  In R5 and R4B most subscription topic notifications will be triggered by a SubscriptionTopic
  * match.  However, in the R4 backport, the SubscriptionTopic is not supported and the SubscriptionTopicDispatcher service
@@ -47,8 +47,11 @@ public class SubscriptionTopicDispatcher {
 	 * @param theRequestPartitionId  The request partitions of the request, if any.  This is used by subscriptions that need to perform repository
 	 *                               operations as a part of their delivery.  Those repository operations will be performed on the supplied request partitions
 	 * @param theTransactionId			The transaction ID of the request, if any.  This is used for logging.
+	 * @return 							   The number of subscription notifications that were successfully queued for delivery
 	 */
-	public void dispatch(@Nonnull String theTopicUrl, @Nonnull List<IBaseResource> theResources, @Nonnull RestOperationTypeEnum theRequestType, @Nullable InMemoryMatchResult theInMemoryMatchResult, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theTransactionId) {
+	public int dispatch(@Nonnull String theTopicUrl, @Nonnull List<IBaseResource> theResources, @Nonnull RestOperationTypeEnum theRequestType, @Nullable InMemoryMatchResult theInMemoryMatchResult, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theTransactionId) {
+		int count = 0;
+
 		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(theTopicUrl);
 		if (!topicSubscriptions.isEmpty()) {
 			for (ActiveSubscription activeSubscription : topicSubscriptions) {
@@ -57,8 +60,12 @@ public class SubscriptionTopicDispatcher {
 				// WIP STR5 do we need to add a total?  If so can do that with R5BundleFactory
 				bundlePayload.setId(UUID.randomUUID().toString());
 				SubscriptionDeliveryRequest subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(bundlePayload, activeSubscription, theRequestType, theRequestPartitionId, theTransactionId);
-				mySubscriptionMatchDeliverer.deliverPayload(subscriptionDeliveryRequest, theInMemoryMatchResult);
+				boolean success = mySubscriptionMatchDeliverer.deliverPayload(subscriptionDeliveryRequest, theInMemoryMatchResult);
+				if (success) {
+					count++;
+				}
 			}
 		}
+		return count;
 	}
 }

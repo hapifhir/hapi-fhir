@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageChannel;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -53,7 +54,7 @@ public class SubscriptionMatchDeliverer {
 		mySubscriptionChannelRegistry = theSubscriptionChannelRegistry;
 	}
 
-	public boolean deliverPayload(IBaseResource thePayload, ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription, InMemoryMatchResult theInMemoryMatchResult) {
+	public boolean deliverPayload(@Nullable IBaseResource thePayload, @Nonnull ResourceModifiedMessage theMsg, @Nonnull ActiveSubscription theActiveSubscription, @Nullable InMemoryMatchResult theInMemoryMatchResult) {
 		SubscriptionDeliveryRequest subscriptionDeliveryRequest;
 		if (thePayload != null) {
 			subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(thePayload, theMsg, theActiveSubscription);
@@ -63,22 +64,30 @@ public class SubscriptionMatchDeliverer {
 		ResourceDeliveryMessage deliveryMsg = buildResourceDeliveryMessage(subscriptionDeliveryRequest);
 		deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
 
+		return sendToDeliveryChannel(theActiveSubscription, theInMemoryMatchResult, deliveryMsg);
+	}
+
+	public boolean deliverPayload(@Nonnull SubscriptionDeliveryRequest subscriptionDeliveryRequest, @Nullable InMemoryMatchResult theInMemoryMatchResult) {
+		ResourceDeliveryMessage deliveryMsg = buildResourceDeliveryMessage(subscriptionDeliveryRequest);
+
+		return sendToDeliveryChannel(subscriptionDeliveryRequest.getActiveSubscription(), theInMemoryMatchResult, deliveryMsg);
+	}
+
+	private boolean sendToDeliveryChannel(@Nonnull ActiveSubscription theActiveSubscription, @Nullable InMemoryMatchResult theInMemoryMatchResult, @Nonnull ResourceDeliveryMessage deliveryMsg) {
 		if (!callHooks(theActiveSubscription, theInMemoryMatchResult, deliveryMsg)) {
 			return false;
 		}
 
-		return sendToDeliveryChannel(theActiveSubscription, deliveryMsg);
-	}
-
-
-	public boolean deliverPayload(@Nonnull SubscriptionDeliveryRequest subscriptionDeliveryRequest, InMemoryMatchResult theInMemoryMatchResult) {
-		ResourceDeliveryMessage deliveryMsg = buildResourceDeliveryMessage(subscriptionDeliveryRequest);
-
-		if (!callHooks(subscriptionDeliveryRequest.getActiveSubscription(), theInMemoryMatchResult, deliveryMsg)) {
-			return false;
+		boolean retVal = false;
+		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
+		MessageChannel deliveryChannel = mySubscriptionChannelRegistry.getDeliverySenderChannel(theActiveSubscription.getChannelName());
+		if (deliveryChannel != null) {
+			retVal = true;
+			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);
+		} else {
+			ourLog.warn("Do not have delivery channel for subscription {}", theActiveSubscription.getId());
 		}
-
-		return sendToDeliveryChannel(subscriptionDeliveryRequest.getActiveSubscription(), deliveryMsg);
+		return retVal;
 	}
 
 	private ResourceDeliveryMessage buildResourceDeliveryMessage(@Nonnull SubscriptionDeliveryRequest theRequest) {
@@ -116,19 +125,6 @@ public class SubscriptionMatchDeliverer {
 			return false;
 		}
 		return true;
-	}
-
-	private boolean sendToDeliveryChannel(ActiveSubscription nextActiveSubscription, ResourceDeliveryMessage theDeliveryMsg) {
-		boolean retVal = false;
-		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(theDeliveryMsg);
-		MessageChannel deliveryChannel = mySubscriptionChannelRegistry.getDeliverySenderChannel(nextActiveSubscription.getChannelName());
-		if (deliveryChannel != null) {
-			retVal = true;
-			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);
-		} else {
-			ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getId());
-		}
-		return retVal;
 	}
 
 	private void trySendToDeliveryChannel(ResourceDeliveryJsonMessage theWrappedMsg, MessageChannel theDeliveryChannel) {
