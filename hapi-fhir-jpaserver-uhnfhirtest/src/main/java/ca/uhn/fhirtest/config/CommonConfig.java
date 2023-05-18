@@ -113,8 +113,8 @@ public class CommonConfig {
 	}
 
 	@Bean
-	public IBalpAuditEventSink balpAuditEventSink(FhirContext theFhirContext) {
-		return new AsyncMemoryQueueBackedFhirClientBalpSink(theFhirContext, "http://localhost:8000/baseAudit");
+	public IBalpAuditEventSink balpAuditEventSink() {
+		return new AsyncMemoryQueueBackedFhirClientBalpSink(FhirContext.forR4Cached(), "http://localhost:8000/baseAudit");
 	}
 
 	@Bean
