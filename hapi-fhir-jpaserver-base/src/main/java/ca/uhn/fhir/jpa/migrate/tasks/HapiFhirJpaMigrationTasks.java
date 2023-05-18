@@ -136,7 +136,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			.type(ColumnTypeEnum.STRING, 100);
 		version.onTable(ResourceHistoryTable.HFJ_RES_VER)
-			.addColumn("20230510.4", "REQUEST_ID")
+			.addColumn("20230510.5", "REQUEST_ID")
 			.nullable()
 			.type(ColumnTypeEnum.STRING, 16);
 	}
