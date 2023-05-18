@@ -52,8 +52,8 @@ public interface ITestDataBuilder {
 	/**
 	 * Name chosen to avoid potential for conflict. This is an internal API to this interface.
 	 */
-	static void __setPrimitiveChild(FhirContext theFhirContext, IBaseResource theTarget, String theElementName, String theElementType, String theValue) {
-		RuntimeResourceDefinition def = theFhirContext.getResourceDefinition(theTarget.getClass());
+	static void __setPrimitiveChild(FhirContext theFhirContext, IBase theTarget, String theElementName, String theElementType, String theValue) {
+		BaseRuntimeElementCompositeDefinition def = (BaseRuntimeElementCompositeDefinition) theFhirContext.getElementDefinition(theTarget.getClass());
 		BaseRuntimeChildDefinition activeChild = def.getChildByName(theElementName);
 
 		IPrimitiveType<?> booleanType = (IPrimitiveType<?>) activeChild.getChildByName(theElementName).newInstance();
@@ -64,18 +64,18 @@ public interface ITestDataBuilder {
 	/**
 	 * Set Patient.active = true
 	 */
-	default IResourceCreationArgument withActiveTrue() {
+	default ICreationArgument withActiveTrue() {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "active", "boolean", "true");
 	}
 
 	/**
 	 * Set Patient.active = false
 	 */
-	default IResourceCreationArgument withActiveFalse() {
+	default ICreationArgument withActiveFalse() {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "active", "boolean", "false");
 	}
 
-	default IResourceCreationArgument withFamily(String theFamily) {
+	default ICreationArgument withFamily(String theFamily) {
 		return t -> {
 			IPrimitiveType<?> family = (IPrimitiveType<?>) getFhirContext().getElementDefinition("string").newInstance();
 			family.setValueAsString(theFamily);
@@ -84,7 +84,7 @@ public interface ITestDataBuilder {
 			ICompositeType humanName = (ICompositeType) humanNameDef.newInstance();
 			humanNameDef.getChildByName("family").getMutator().addValue(humanName, family);
 
-			RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
+			BaseRuntimeElementCompositeDefinition resourceDef = (BaseRuntimeElementCompositeDefinition) getFhirContext().getElementDefinition(t.getClass());
 			resourceDef.getChildByName("name").getMutator().addValue(t, humanName);
 		};
 	}
@@ -92,42 +92,42 @@ public interface ITestDataBuilder {
 	/**
 	 * Patient.name.given
 	 */
-	default IResourceCreationArgument withGiven(String theName) {
+	default ICreationArgument withGiven(String theName) {
 		return withResourcePrimitiveAttribute("name.given", theName);
 	}
 
 	/**
 	 * Set Patient.birthdate
 	 */
-	default IResourceCreationArgument withBirthdate(String theBirthdate) {
+	default ICreationArgument withBirthdate(String theBirthdate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "birthDate", "dateTime", theBirthdate);
 	}
 
 	/**
 	 * Set Observation.status
 	 */
-	default IResourceCreationArgument withStatus(String theStatus) {
+	default ICreationArgument withStatus(String theStatus) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "status", "code", theStatus);
 	}
 
 	/**
 	 * Set Observation.effectiveDate
 	 */
-	default IResourceCreationArgument withEffectiveDate(String theDate) {
+	default ICreationArgument withEffectiveDate(String theDate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "effectiveDateTime", "dateTime", theDate);
 	}
 
 	/**
 	 * Set Observation.effectiveDate
 	 */
-	default IResourceCreationArgument withDateTimeAt(String thePath, String theDate) {
+	default ICreationArgument withDateTimeAt(String thePath, String theDate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "dateTime", theDate);
 	}
 
 	/**
 	 * Set [Resource].identifier.system and [Resource].identifier.value
 	 */
-	default IResourceCreationArgument withIdentifier(String theSystem, String theValue) {
+	default ICreationArgument withIdentifier(String theSystem, String theValue) {
 		return t -> {
 			IPrimitiveType<?> system = (IPrimitiveType<?>) getFhirContext().getElementDefinition("uri").newInstance();
 			system.setValueAsString(theSystem);
@@ -140,7 +140,7 @@ public interface ITestDataBuilder {
 			identifierDef.getChildByName("system").getMutator().addValue(identifier, system);
 			identifierDef.getChildByName("value").getMutator().addValue(identifier, value);
 
-			RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
+			RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition((Class<? extends IBaseResource>) t.getClass());
 			resourceDef.getChildByName("identifier").getMutator().addValue(t, identifier);
 		};
 	}
@@ -148,74 +148,74 @@ public interface ITestDataBuilder {
 	/**
 	 * Set Organization.name
 	 */
-	default IResourceCreationArgument withName(String theStatus) {
+	default ICreationArgument withName(String theStatus) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "name", "string", theStatus);
 	}
 
-	default IResourceCreationArgument withId(String theId) {
+	default ICreationArgument withId(String theId) {
 		return t -> {
 			assertThat(theId, matchesPattern("[a-zA-Z0-9-]+"));
-			t.setId(theId);
+			((IBaseResource)t).setId(theId);
 		};
 	}
 
-	default IResourceCreationArgument withId(IIdType theId) {
-		return t -> t.setId(theId.toUnqualifiedVersionless());
+	default ICreationArgument withId(IIdType theId) {
+		return t -> ((IBaseResource)t).setId(theId.toUnqualifiedVersionless());
 	}
 
-	default IResourceCreationArgument withTag(String theSystem, String theCode) {
-		return t -> t.getMeta().addTag().setSystem(theSystem).setCode(theCode);
+	default ICreationArgument withTag(String theSystem, String theCode) {
+		return t -> ((IBaseResource)t).getMeta().addTag().setSystem(theSystem).setCode(theCode);
 	}
 
-	default IResourceCreationArgument withSecurity(String theSystem, String theCode) {
-		return t -> t.getMeta().addSecurity().setSystem(theSystem).setCode(theCode);
+	default ICreationArgument withSecurity(String theSystem, String theCode) {
+		return t -> ((IBaseResource)t).getMeta().addSecurity().setSystem(theSystem).setCode(theCode);
 	}
 
-	default IResourceCreationArgument withProfile(String theProfile) {
-		return t -> t.getMeta().addProfile(theProfile);
+	default ICreationArgument withProfile(String theProfile) {
+		return t -> ((IBaseResource)t).getMeta().addProfile(theProfile);
 	}
 
-	default IResourceCreationArgument withSource(FhirContext theContext, String theSource) {
-		return t -> MetaUtil.setSource(theContext, t.getMeta(), theSource);
+	default ICreationArgument withSource(FhirContext theContext, String theSource) {
+		return t -> MetaUtil.setSource(theContext, ((IBaseResource)t).getMeta(), theSource);
 	}
 
-	default IResourceCreationArgument withLastUpdated(Date theLastUpdated) {
-		return t -> t.getMeta().setLastUpdated(theLastUpdated);
+	default ICreationArgument withLastUpdated(Date theLastUpdated) {
+		return t -> ((IBaseResource)t).getMeta().setLastUpdated(theLastUpdated);
 	}
 
-	default IResourceCreationArgument withLastUpdated(String theIsoDate) {
-		return t -> t.getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
+	default ICreationArgument withLastUpdated(String theIsoDate) {
+		return t -> ((IBaseResource)t).getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
 	}
 
-	default IIdType createEncounter(IResourceCreationArgument... theModifiers) {
+	default IIdType createEncounter(ICreationArgument... theModifiers) {
 		return createResource("Encounter", theModifiers);
 	}
 
-	default IIdType createGroup(IResourceCreationArgument... theModifiers) {
+	default IIdType createGroup(ICreationArgument... theModifiers) {
 		return createResource("Group", theModifiers);
 	}
 
-	default IIdType createObservation(IResourceCreationArgument... theModifiers) {
+	default IIdType createObservation(ICreationArgument... theModifiers) {
 		return createResource("Observation", theModifiers);
 	}
 
-	default IIdType createObservation(Collection<IResourceCreationArgument> theModifiers) {
-		return createResource("Observation", theModifiers.toArray(new IResourceCreationArgument[0]));
+	default IIdType createObservation(Collection<ICreationArgument> theModifiers) {
+		return createResource("Observation", theModifiers.toArray(new ICreationArgument[0]));
 	}
 
-	default IBaseResource buildPatient(IResourceCreationArgument... theModifiers) {
+	default IBaseResource buildPatient(ICreationArgument... theModifiers) {
 		return buildResource("Patient", theModifiers);
 	}
 
-	default IIdType createPatient(IResourceCreationArgument... theModifiers) {
+	default IIdType createPatient(ICreationArgument... theModifiers) {
 		return createResource("Patient", theModifiers);
 	}
 
-	default IIdType createOrganization(IResourceCreationArgument... theModifiers) {
+	default IIdType createOrganization(ICreationArgument... theModifiers) {
 		return createResource("Organization", theModifiers);
 	}
 
-	default IIdType createResource(String theResourceType, IResourceCreationArgument... theModifiers) {
+	default IIdType createResource(String theResourceType, ICreationArgument... theModifiers) {
 		IBaseResource resource = buildResource(theResourceType, theModifiers);
 
 		if (ourLog.isDebugEnabled()) {
@@ -229,7 +229,7 @@ public interface ITestDataBuilder {
 		}
 	}
 
-	default IIdType createResourceFromJson(String theJson, IResourceCreationArgument... theModifiers) {
+	default IIdType createResourceFromJson(String theJson, ICreationArgument... theModifiers) {
 		IBaseResource resource = getFhirContext().newJsonParser().parseResource(theJson);
 		applyElementModifiers(resource, theModifiers);
 
@@ -244,48 +244,48 @@ public interface ITestDataBuilder {
 		}
 	}
 
-	default <T extends IBaseResource> T buildResource(String theResourceType, IResourceCreationArgument... theModifiers) {
+	default <T extends IBaseResource> T buildResource(String theResourceType, ICreationArgument... theModifiers) {
 		IBaseResource resource = getFhirContext().getResourceDefinition(theResourceType).newInstance();
 		applyElementModifiers(resource, theModifiers);
 		return (T) resource;
 	}
 
-	default IResourceCreationArgument withSubject(@Nullable IIdType theSubject) {
+	default ICreationArgument withSubject(@Nullable IIdType theSubject) {
 		return withReference("subject", theSubject);
 	}
 
-	default IResourceCreationArgument withSubject(@Nullable String theSubject) {
+	default ICreationArgument withSubject(@Nullable String theSubject) {
 		return withSubject(new IdType(theSubject));
 	}
 
-	default IResourceCreationArgument withPatient(@Nullable IIdType theSubject) {
+	default ICreationArgument withPatient(@Nullable IIdType theSubject) {
 		return withReference("patient", theSubject);
 	}
 
-	default IResourceCreationArgument withPatient(@Nullable String theSubject) {
+	default ICreationArgument withPatient(@Nullable String theSubject) {
 		return withSubject(new IdType(theSubject));
 	}
 
-	default IResourceCreationArgument withGroupMember(@Nullable IIdType theMember) {
+	default ICreationArgument withGroupMember(@Nullable IIdType theMember) {
 		return withResourcePrimitiveAttribute("member.entity.reference", theMember);
 	}
 
-	default IResourceCreationArgument withGroupMember(@Nullable String theMember) {
+	default ICreationArgument withGroupMember(@Nullable String theMember) {
 		return withGroupMember(new IdType(theMember));
 	}
 
-	default IResourceCreationArgument withEncounter(@Nullable String theEncounter) {
+	default ICreationArgument withEncounter(@Nullable String theEncounter) {
 		return withReference("encounter", new IdType(theEncounter));
 	}
 
 	@Nonnull
-	private IResourceCreationArgument withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
+	private ICreationArgument withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
 		return t -> {
 			if (theReferenceValue != null && theReferenceValue.getValue() != null) {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
 				reference.setReference(theReferenceValue.getValue());
 
-				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t);
+				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition((IBaseResource) t);
 				resourceDef.getChildByName(theReferenceName).getMutator().addValue(t, reference);
 			}
 		};
@@ -298,14 +298,14 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default IResourceCreationArgument withResourcePrimitiveAttribute(String thePath, Object theValue) {
+	default ICreationArgument withResourcePrimitiveAttribute(String thePath, Object theValue) {
 		return t -> {
 			FhirTerser terser = getFhirContext().newTerser();
 			terser.addElement(t, thePath, "" + theValue);
 		};
 	}
 
-	default <E extends IBase> IResourceCreationArgument withElementAt(String thePath, Consumer<E>... theModifiers) {
+	default <E extends IBase> ICreationArgument withElementAt(String thePath, Consumer<E>... theModifiers) {
 		return t -> {
 			FhirTerser terser = getFhirContext().newTerser();
 			E element = terser.addElement(t, thePath);
@@ -313,7 +313,7 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default IResourceCreationArgument withQuantityAtPath(String thePath, Number theValue, String theSystem, String theCode) {
+	default ICreationArgument withQuantityAtPath(String thePath, Number theValue, String theSystem, String theCode) {
 		return withElementAt(thePath,
 			withPrimitiveAttribute("value", theValue),
 			withPrimitiveAttribute("system", theSystem),
@@ -340,19 +340,19 @@ public interface ITestDataBuilder {
 		}
 	}
 
-	default IResourceCreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
+	default ICreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
 		return withObservationCode(theSystem, theCode, null);
 	}
 
-	default IResourceCreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
+	default ICreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
 		return withCodingAt("code.coding", theSystem, theCode, theDisplay);
 	}
 
-	default <T extends IBase> IResourceCreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
+	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
 		return withCodingAt(thePath, theSystem, theValue, null);
 	}
 
-	default <T extends IBase> IResourceCreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue, @Nullable String theDisplay) {
+	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue, @Nullable String theDisplay) {
 		return withElementAt(thePath,
 			withPrimitiveAttribute("system", theSystem),
 			withPrimitiveAttribute("code", theValue),
@@ -360,15 +360,15 @@ public interface ITestDataBuilder {
 		);
 	}
 
-	default <E extends IBase> IResourceCreationArgument withObservationComponent(Consumer<E>... theModifiers) {
+	default ICreationArgument withObservationComponent(ICreationArgument... theModifiers) {
 		return withElementAt("component", theModifiers);
 	}
 
-	default IResourceCreationArgument withObservationHasMember(@Nullable IIdType theHasMember) {
+	default ICreationArgument withObservationHasMember(@Nullable IIdType theHasMember) {
 		return withReference("hasMember", theHasMember);
 	}
 
-	default IResourceCreationArgument withOrganization(@Nullable IIdType theHasMember) {
+	default ICreationArgument withOrganization(@Nullable IIdType theHasMember) {
 		return withReference("managingOrganization", theHasMember);
 	}
 
@@ -387,8 +387,8 @@ public interface ITestDataBuilder {
 	 */
 	FhirContext getFhirContext();
 
-	default IResourceCreationArgument[] asArray(IResourceCreationArgument theIBaseResourceConsumer) {
-		return new IResourceCreationArgument[]{theIBaseResourceConsumer};
+	default ICreationArgument[] asArray(ICreationArgument theIBaseResourceConsumer) {
+		return new ICreationArgument[]{theIBaseResourceConsumer};
 	}
 
 	interface Support {
@@ -419,7 +419,7 @@ public interface ITestDataBuilder {
 		}
 	}
 
-	interface IResourceCreationArgument extends Consumer<IBaseResource> {
+	interface ICreationArgument extends Consumer<IBase> {
 		// nothing
 	}
 

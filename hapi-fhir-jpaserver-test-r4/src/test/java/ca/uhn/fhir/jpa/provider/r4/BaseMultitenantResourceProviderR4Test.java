@@ -123,7 +123,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 
 
 
-	protected IResourceCreationArgument withTenant(String theTenantId) {
+	protected ICreationArgument withTenant(String theTenantId) {
 		return t -> myTenantClientInterceptor.setTenantId(theTenantId);
 	}
 

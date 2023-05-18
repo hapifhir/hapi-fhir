@@ -183,7 +183,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		when(mySrd.getRequestId()).thenReturn("REQUEST_ID");
 	}
 
-	protected IResourceCreationArgument withPartition(Integer thePartitionId) {
+	protected ICreationArgument withPartition(Integer thePartitionId) {
 		return t -> {
 			if (thePartitionId != null) {
 				addCreatePartition(thePartitionId, null);
