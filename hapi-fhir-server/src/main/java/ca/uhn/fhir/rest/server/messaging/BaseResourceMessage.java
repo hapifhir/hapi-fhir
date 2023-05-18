@@ -20,7 +20,6 @@
 package ca.uhn.fhir.rest.server.messaging;
 
 
-
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -146,7 +145,7 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	/**
 	 * Adds a transaction ID to this message. This ID can be used for many purposes. For example, performing tracing
 	 * across asynchronous hooks, tying data together, or downstream logging purposes.
-	 *
+	 * <p>
 	 * One current internal implementation uses this field to tie back MDM processing results (which are asynchronous)
 	 * to the original transaction log that caused the MDM processing to occur.
 	 *
@@ -195,7 +194,7 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	 * @return null by default
 	 */
 	@Nullable
-	protected String getMessageKeyDefaultValue(){
+	protected String getMessageKeyDefaultValue() {
 		return null;
 	}
 
@@ -210,6 +209,19 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 
 		OperationTypeEnum(RestOperationTypeEnum theRestOperationTypeEnum) {
 			myRestOperationTypeEnum = theRestOperationTypeEnum;
+		}
+
+		public static OperationTypeEnum from(RestOperationTypeEnum theRestOperationType) {
+			switch (theRestOperationType) {
+				case CREATE:
+					return CREATE;
+				case UPDATE:
+					return UPDATE;
+				case DELETE:
+					return DELETE;
+				default:
+					throw new IllegalArgumentException("Unknown operation type: " + theRestOperationType);
+			}
 		}
 
 		public RestOperationTypeEnum asRestOperationType() {

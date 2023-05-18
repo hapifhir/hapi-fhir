@@ -109,6 +109,6 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 		List<IBaseResource> matchedResource = Collections.singletonList(theMsg.getNewPayload(myFhirContext));
 		RestOperationTypeEnum restOperationType = theMsg.getOperationType().asRestOperationType();
 
-		mySubscriptionTopicDispatcher.dispatch(topicUrl, matchedResource, restOperationType, theInMemoryMatchResult);
+		mySubscriptionTopicDispatcher.dispatch(topicUrl, matchedResource, restOperationType, theInMemoryMatchResult, theMsg.getPartitionId(), theMsg.getTransactionId());
 	}
 }
