@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -100,6 +101,11 @@ public abstract class BaseSubscriptionTest {
 		// Default implementation returns the name unchanged
 		public IChannelNamer channelNamer() {
 			return (theNameComponent, theChannelSettings) -> theNameComponent;
+		}
+
+		@Bean
+		public IEmailSender emailSender(){
+			return mock(IEmailSender.class);
 		}
 	}
 }

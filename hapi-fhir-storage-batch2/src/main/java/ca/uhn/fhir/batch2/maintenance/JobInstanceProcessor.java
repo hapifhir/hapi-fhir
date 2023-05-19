@@ -29,7 +29,6 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-import ca.uhn.fhir.batch2.progress.InstanceProgress;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -139,14 +138,6 @@ public class JobInstanceProcessor {
 
 		if (theInstance.isFinished() && !theInstance.isWorkChunksPurged()) {
 			myJobPersistence.deleteChunksAndMarkInstanceAsChunksPurged(theInstance.getInstanceId());
-
-			// update final statistics.
-			// wipmb For 6.8 - do we need to run stats again?  If the status changed to finished, then we just ran them above.
-			InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(theInstance.getInstanceId());
-			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance->{
-				progress.updateInstance(instance);
-				return true;
-			});
 		}
 	}
 
