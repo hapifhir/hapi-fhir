@@ -3,7 +3,8 @@ package ca.uhn.fhir.jpa.topic.filter;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Observation;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -38,21 +39,27 @@ class SubscriptionTopicFilterUtilTest {
 	void testFalseMatchNoFilters() {
 		myObservation = new Observation();
 		CanonicalTopicSubscription topicSubscription = new CanonicalTopicSubscription();
-		boolean result = SubscriptionTopicFilterUtil.matchFilters(List.of(myObservation), myFalseMatcher, topicSubscription);
+		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myFalseMatcher, topicSubscription);
 		assertTrue(result);
 	}
 
 	@Test
 	void testFalseMatchOneFilter() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123");
-		boolean result = SubscriptionTopicFilterUtil.matchFilters(List.of(myObservation), myFalseMatcher, topicSubscription);
+		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myFalseMatcher, topicSubscription);
 		assertFalse(result);
 	}
 
 	@Test
+	void testFalseMatchOneFilterTypeMismatch() {
+		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123");
+		boolean result = SubscriptionTopicFilterUtil.matchFilters(new Encounter(), "Encounter", myFalseMatcher, topicSubscription);
+		assertTrue(result);
+	}
+	@Test
 	void testFalseMatchTwoFilters() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123", "Observation?code=456");
-		boolean result = SubscriptionTopicFilterUtil.matchFilters(List.of(myObservation), myFalseMatcher, topicSubscription);
+		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myFalseMatcher, topicSubscription);
 		assertFalse(result);
 	}
 
@@ -60,35 +67,35 @@ class SubscriptionTopicFilterUtilTest {
 	void testTrueMatchNoFilters() {
 		myObservation = new Observation();
 		CanonicalTopicSubscription topicSubscription = new CanonicalTopicSubscription();
-		boolean result = SubscriptionTopicFilterUtil.matchFilters(List.of(myObservation), myTrueMatcher, topicSubscription);
+		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myTrueMatcher, topicSubscription);
 		assertTrue(result);
 	}
 
 	@Test
 	void testTrueMatchOneFilter() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123");
-		boolean result = SubscriptionTopicFilterUtil.matchFilters(List.of(myObservation), myTrueMatcher, topicSubscription);
+		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myTrueMatcher, topicSubscription);
 		assertTrue(result);
 	}
 
 	@Test
 	void testTrueMatchTwoFilters() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123", "Observation?code=456");
-		boolean result = SubscriptionTopicFilterUtil.matchFilters(List.of(myObservation), myTrueMatcher, topicSubscription);
+		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myTrueMatcher, topicSubscription);
 		assertTrue(result);
 	}
 
 	@Test
 	void testTrueFalseMatchTwoFilters() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123", "Observation?code=456");
-		boolean result = SubscriptionTopicFilterUtil.matchFilters(List.of(myObservation), myTrueFalseMatcher, topicSubscription);
+		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myTrueFalseMatcher, topicSubscription);
 		assertFalse(result);
 	}
 
 	@Test
 	void testFalseTrueMatchTwoFilters() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123", "Observation?code=456");
-		boolean result = SubscriptionTopicFilterUtil.matchFilters(List.of(myObservation), myFalseTrueMatcher, topicSubscription);
+		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myFalseTrueMatcher, topicSubscription);
 		assertFalse(result);
 	}
 

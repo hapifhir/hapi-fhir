@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.topic;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionDeliveryRequest;
@@ -27,11 +28,13 @@ import java.util.UUID;
  * send topic notifications to all Subscription resources subscribed to that topic.
  */
 public class SubscriptionTopicDispatcher {
+	private final FhirContext myFhirContext;
 	private final SubscriptionRegistry mySubscriptionRegistry;
 	private final SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
 	private final SubscriptionTopicPayloadBuilder mySubscriptionTopicPayloadBuilder;
 
-	public SubscriptionTopicDispatcher(SubscriptionRegistry theSubscriptionRegistry, SubscriptionMatchDeliverer theSubscriptionMatchDeliverer, SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
+	public SubscriptionTopicDispatcher(FhirContext theFhirContext, SubscriptionRegistry theSubscriptionRegistry, SubscriptionMatchDeliverer theSubscriptionMatchDeliverer, SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
+		myFhirContext = theFhirContext;
 		mySubscriptionRegistry = theSubscriptionRegistry;
 		mySubscriptionMatchDeliverer = theSubscriptionMatchDeliverer;
 		mySubscriptionTopicPayloadBuilder = theSubscriptionTopicPayloadBuilder;
@@ -86,8 +89,12 @@ public class SubscriptionTopicDispatcher {
 
 
 	private boolean matchFiltersAndDeliver(String theTopicUrl, List<IBaseResource> theResources, ISubscriptionTopicFilterMatcher theSubscriptionTopicFilterMatcher, RestOperationTypeEnum theRequestType, InMemoryMatchResult theInMemoryMatchResult, RequestPartitionId theRequestPartitionId, String theTransactionId, ActiveSubscription theActiveSubscription) {
-		if (!SubscriptionTopicFilterUtil.matchFilters(theResources, theSubscriptionTopicFilterMatcher, theActiveSubscription.getSubscription().getTopicSubscription())) {
-			return false;
+		if (theResources.size() > 0) {
+			IBaseResource firstResource = theResources.get(0);
+			String resourceType = myFhirContext.getResourceType(firstResource);
+			if (!SubscriptionTopicFilterUtil.matchFilters(firstResource, resourceType, theSubscriptionTopicFilterMatcher, theActiveSubscription.getSubscription().getTopicSubscription())) {
+				return false;
+			}
 		}
 		// WIP STR5 apply subscription filters
 		IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(theResources, theActiveSubscription, theTopicUrl, theRequestType);

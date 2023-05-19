@@ -55,7 +55,34 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
 	}
 
+@Test
+void testWithFilters() throws Exception {
+	//setup
+	// WIP SR4B test update, delete, etc
+	createEncounterSubscriptionTopic(Enumerations.EncounterStatus.PLANNED, Enumerations.EncounterStatus.COMPLETED, SubscriptionTopic.InteractionTrigger.CREATE);
+	waitForRegisteredSubscriptionTopicCount(1);
 
+	// FIXME KHS add list of filters
+	Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
+	waitForActivatedSubscriptionCount(1);
+
+	assertEquals(0, getSystemProviderCount());
+
+	// execute
+	Encounter sentEncounter = sendEncounterWithStatus(Enumerations.EncounterStatus.COMPLETED, true);
+
+	// verify
+	Bundle receivedBundle = getLastSystemProviderBundle();
+	List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
+	assertEquals(2, resources.size());
+
+	SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
+	validateSubscriptionStatus(subscription, sentEncounter, ss);
+
+	Encounter encounter = (Encounter) resources.get(1);
+	assertEquals(Enumerations.EncounterStatus.COMPLETED, encounter.getStatus());
+	assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
+}
 
 	private Subscription createTopicSubscription(String theTopicUrl) throws InterruptedException {
 		Subscription subscription = newTopicSubscription(theTopicUrl, Constants.CT_FHIR_JSON_NEW);

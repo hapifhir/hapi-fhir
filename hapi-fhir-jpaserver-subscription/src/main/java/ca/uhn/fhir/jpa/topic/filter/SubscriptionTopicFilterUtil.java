@@ -4,22 +4,22 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.List;
+import javax.annotation.Nonnull;
 
 public final class SubscriptionTopicFilterUtil {
 	private SubscriptionTopicFilterUtil() {
 	}
 
-	public static boolean matchFilters(List<IBaseResource> theResources, ISubscriptionTopicFilterMatcher theSubscriptionTopicFilterMatcher, CanonicalTopicSubscription topicSubscription) {
+	public static boolean matchFilters(@Nonnull IBaseResource theResource, @Nonnull String theResourceType, @Nonnull ISubscriptionTopicFilterMatcher theSubscriptionTopicFilterMatcher, @Nonnull CanonicalTopicSubscription topicSubscription) {
 		boolean match = true;
-		if (theResources.size() > 0) {
-			IBaseResource resourceToMatch = theResources.get(0);
 			for (CanonicalTopicSubscriptionFilter filter : topicSubscription.getFilters()) {
-				if (!theSubscriptionTopicFilterMatcher.match(filter, resourceToMatch).matched()) {
+				if (filter.getResourceType() == null || !filter.getResourceType().equals(theResourceType)) {
+					continue;
+				}
+				if (!theSubscriptionTopicFilterMatcher.match(filter, theResource).matched()) {
 					match = false;
 					break;
 				}
-			}
 		}
 		return match;
 	}
