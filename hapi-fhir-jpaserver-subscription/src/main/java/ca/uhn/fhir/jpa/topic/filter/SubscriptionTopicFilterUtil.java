@@ -16,7 +16,7 @@ public final class SubscriptionTopicFilterUtil {
 	public static boolean matchFilters(@Nonnull IBaseResource theResource, @Nonnull String theResourceType, @Nonnull ISubscriptionTopicFilterMatcher theSubscriptionTopicFilterMatcher, @Nonnull CanonicalTopicSubscription topicSubscription) {
 		boolean match = true;
 			for (CanonicalTopicSubscriptionFilter filter : topicSubscription.getFilters()) {
-				if (filter.getResourceType() == null || !filter.getResourceType().equals(theResourceType)) {
+				if (filter.getResourceType() == null || "Resource".equals(filter.getResourceType()) || !filter.getResourceType().equals(theResourceType)) {
 					continue;
 				}
 				if (!theSubscriptionTopicFilterMatcher.match(filter, theResource).matched()) {
