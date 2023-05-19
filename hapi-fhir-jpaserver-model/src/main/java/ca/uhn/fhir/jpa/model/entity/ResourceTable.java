@@ -48,6 +48,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 import org.hibernate.tuple.ValueGenerator;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.InstantType;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -818,7 +819,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		}
 		b.append("lastUpdated", getUpdated().getValueAsString());
 		if (getDeleted() != null) {
-			b.append("deleted");
+			b.append("deleted", new InstantType(getDeleted()).getValueAsString());
 		}
 		return b.build();
 	}
