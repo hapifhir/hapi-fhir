@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDe
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -61,6 +62,8 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private SubscriptionTopicDispatcher mySubscriptionTopicDispatcher;
+	@Autowired
+	private InMemoryTopicFilterMatcher myInMemoryTopicFilterMatcher;
 
 	public SubscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -106,9 +109,10 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 
 	private int deliverToTopicSubscriptions(ResourceModifiedMessage theMsg, SubscriptionTopic theSubscriptionTopic, InMemoryMatchResult theInMemoryMatchResult) {
 		String topicUrl = theSubscriptionTopic.getUrl();
-		List<IBaseResource> matchedResource = Collections.singletonList(theMsg.getNewPayload(myFhirContext));
+		IBaseResource matchedResource = theMsg.getNewPayload(myFhirContext);
+		List<IBaseResource> matchedResourceList = Collections.singletonList(matchedResource);
 		RestOperationTypeEnum restOperationType = theMsg.getOperationType().asRestOperationType();
 
-		return mySubscriptionTopicDispatcher.dispatch(topicUrl, matchedResource, restOperationType, theInMemoryMatchResult, theMsg.getPartitionId(), theMsg.getTransactionId());
+		return mySubscriptionTopicDispatcher.dispatch(topicUrl, matchedResourceList, myInMemoryTopicFilterMatcher, restOperationType, theInMemoryMatchResult, theMsg.getPartitionId(), theMsg.getTransactionId());
 	}
 }

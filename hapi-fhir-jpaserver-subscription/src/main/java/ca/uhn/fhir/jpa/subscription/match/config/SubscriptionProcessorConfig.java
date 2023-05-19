@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.match.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryChannelNamer;
@@ -43,6 +44,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicPayloadBuilder;
+import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -147,5 +149,10 @@ public class SubscriptionProcessorConfig {
 	@Bean
 	SubscriptionTopicDispatcher subscriptionTopicDispatcher(SubscriptionRegistry theSubscriptionRegistry, SubscriptionMatchDeliverer theSubscriptionMatchDeliverer, SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
 		return new SubscriptionTopicDispatcher(theSubscriptionRegistry, theSubscriptionMatchDeliverer, theSubscriptionTopicPayloadBuilder);
+	}
+
+	@Bean
+	InMemoryTopicFilterMatcher inMemoryTopicFilterMatcher(SearchParamMatcher theSearchParamMatcher) {
+		return new InMemoryTopicFilterMatcher(theSearchParamMatcher);
 	}
 }

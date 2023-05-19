@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionDeliver
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.topic.filter.ISubscriptionTopicFilterMatcher;
+import ca.uhn.fhir.jpa.topic.filter.SubscriptionTopicFilterUtil;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,18 +51,13 @@ public class SubscriptionTopicDispatcher {
 	 * @param theTransactionId			The transaction ID of the request, if any.  This is used for logging.
 	 * @return 							   The number of subscription notifications that were successfully queued for delivery
 	 */
-	public int dispatch(@Nonnull String theTopicUrl, @Nonnull List<IBaseResource> theResources, @Nonnull RestOperationTypeEnum theRequestType, @Nullable InMemoryMatchResult theInMemoryMatchResult, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theTransactionId) {
+	public int dispatch(@Nonnull String theTopicUrl, @Nonnull List<IBaseResource> theResources, @Nonnull ISubscriptionTopicFilterMatcher theSubscriptionTopicFilterMatcher, @Nonnull RestOperationTypeEnum theRequestType, @Nullable InMemoryMatchResult theInMemoryMatchResult, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theTransactionId) {
 		int count = 0;
 
 		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(theTopicUrl);
 		if (!topicSubscriptions.isEmpty()) {
 			for (ActiveSubscription activeSubscription : topicSubscriptions) {
-				// WIP STR5 apply subscription filters
-				IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(theResources, activeSubscription, theTopicUrl, theRequestType);
-				// WIP STR5 do we need to add a total?  If so can do that with R5BundleFactory
-				bundlePayload.setId(UUID.randomUUID().toString());
-				SubscriptionDeliveryRequest subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(bundlePayload, activeSubscription, theRequestType, theRequestPartitionId, theTransactionId);
-				boolean success = mySubscriptionMatchDeliverer.deliverPayload(subscriptionDeliveryRequest, theInMemoryMatchResult);
+				boolean success = matchFiltersAndDeliver(theTopicUrl, theResources, theSubscriptionTopicFilterMatcher, theRequestType, theInMemoryMatchResult, theRequestPartitionId, theTransactionId, activeSubscription);
 				if (success) {
 					count++;
 				}
@@ -68,4 +65,17 @@ public class SubscriptionTopicDispatcher {
 		}
 		return count;
 	}
+
+	private boolean matchFiltersAndDeliver(String theTopicUrl, List<IBaseResource> theResources, ISubscriptionTopicFilterMatcher theSubscriptionTopicFilterMatcher, RestOperationTypeEnum theRequestType, InMemoryMatchResult theInMemoryMatchResult, RequestPartitionId theRequestPartitionId, String theTransactionId, ActiveSubscription theActiveSubscription) {
+		if (!SubscriptionTopicFilterUtil.matchFilters(theResources, theSubscriptionTopicFilterMatcher, theActiveSubscription.getSubscription().getTopicSubscription())) {
+			return false;
+		}
+		// WIP STR5 apply subscription filters
+		IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(theResources, theActiveSubscription, theTopicUrl, theRequestType);
+		// WIP STR5 do we need to add a total?  If so can do that with R5BundleFactory
+		bundlePayload.setId(UUID.randomUUID().toString());
+		SubscriptionDeliveryRequest subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(bundlePayload, theActiveSubscription, theRequestType, theRequestPartitionId, theTransactionId);
+		return mySubscriptionMatchDeliverer.deliverPayload(subscriptionDeliveryRequest, theInMemoryMatchResult);
+	}
+
 }
