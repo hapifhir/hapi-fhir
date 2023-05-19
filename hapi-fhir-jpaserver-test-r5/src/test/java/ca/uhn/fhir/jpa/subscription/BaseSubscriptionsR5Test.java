@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -53,6 +54,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -183,12 +185,16 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return subscription;
 	}
 
-	protected Subscription newTopicSubscription(String theTopicUrl, String thePayload) {
+	protected Subscription newTopicSubscription(String theTopicUrl, String thePayload, String... theFilters) {
 
 		Subscription subscription = new Subscription();
 		subscription.setTopic(theTopicUrl);
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
+
+		for (String nextFilter : theFilters) {
+			filterComponentFromQueryString(nextFilter).forEach(subscription::addFilterBy);
+		}
 
 		subscription.getChannelType()
 			.setSystem(CanonicalSubscriptionChannelType.RESTHOOK.getSystem())
@@ -196,6 +202,10 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		subscription.setContentType(thePayload);
 		subscription.setEndpoint(ourListenerServerBase);
 		return subscription;
+	}
+
+	private Stream<Subscription.SubscriptionFilterByComponent> filterComponentFromQueryString(String theNextFilter) {
+		return CanonicalTopicSubscriptionFilter.fromQueryUrl(theNextFilter).stream().map(CanonicalTopicSubscriptionFilter::toSubscriptionFilterByComponent);
 	}
 
 	@PostConstruct

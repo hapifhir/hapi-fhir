@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.model;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,6 @@ public class CanonicalTopicSubscriptionFilter {
 
 	@JsonProperty("filterParameter")
 	String myFilterParameter;
-
 
 	@JsonProperty("comparator")
 	Enumerations.SearchComparator myComparator;
@@ -102,6 +102,16 @@ public class CanonicalTopicSubscriptionFilter {
 				retval.add(filter);
 			}
 		});
+		return retval;
+	}
+
+	public Subscription.SubscriptionFilterByComponent toSubscriptionFilterByComponent() {
+		Subscription.SubscriptionFilterByComponent retval = new Subscription.SubscriptionFilterByComponent();
+		retval.setResourceType(myResourceType);
+		retval.setFilterParameter(myFilterParameter);
+		retval.setComparator(myComparator);
+		retval.setModifier(myModifier);
+		retval.setValue(myValue);
 		return retval;
 	}
 

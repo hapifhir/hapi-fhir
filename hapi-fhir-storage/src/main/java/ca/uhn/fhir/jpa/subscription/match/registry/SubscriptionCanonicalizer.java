@@ -447,7 +447,6 @@ public class SubscriptionCanonicalizer {
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
 
-
 		setPartitionIdOnReturnValue(theSubscription, retVal);
 		retVal.setChannelExtensions(extractExtension(subscription));
 		retVal.setIdElement(subscription.getIdElement());

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SubscriptionTopicFilterUtilTest {
 
-	private final ISubscriptionTopicFilterMatcher myFalseMatcher = (f, r) -> InMemoryMatchResult.noMatch();;
+	private final ISubscriptionTopicFilterMatcher myFalseMatcher = (f, r) -> InMemoryMatchResult.noMatch();
 	private final ISubscriptionTopicFilterMatcher myTrueMatcher = (f, r) -> InMemoryMatchResult.successfulMatch();
 	private final AtomicInteger myCounter = new AtomicInteger();
 	private final ISubscriptionTopicFilterMatcher myTrueFalseMatcher = (f, r) -> {

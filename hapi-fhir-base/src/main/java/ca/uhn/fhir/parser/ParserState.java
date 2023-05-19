@@ -148,8 +148,8 @@ class ParserState<T> {
 		return myState.isPreResource();
 	}
 
-	boolean isToplevelElement() {
-		return myState.myStack == null;
+	boolean isToplevelResourceElement() {
+		return myState instanceof ParserState.ResourceStateHl7Org;
 	}
 
 	private Object newContainedDt(IResource theTarget) {
