@@ -214,7 +214,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			.setExpungeDeletedResources(true), null);
 
 		// Verify
-		myCaptureQueriesListener.logSelectQueries();
+		/*
+		 * Note: $expunge is still pretty inefficient. We load all the HFJ_RESOURCE entities
+		 * in one shot, but we then load HFJ_RES_VER entities one by one and delete the FK
+		 * constraints on both HFJ_RESOURCE and HFJ_RES_VER one by one. This could definitely
+		 * stand to be optimized. The one gotcha is that we call an interceptor for each
+		 * version being deleted (I think so that MDM can do cleanup?) so we need to be careful
+		 * about any batch deletes.
+		 */
 		assertEquals(47, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
