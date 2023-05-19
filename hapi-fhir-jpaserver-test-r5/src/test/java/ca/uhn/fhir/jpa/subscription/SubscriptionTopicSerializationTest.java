@@ -37,5 +37,9 @@ public class SubscriptionTopicSerializationTest {
 
 		Subscription subscription = ourFhirContext.newJsonParser().parseResource(Subscription.class, input);
 		assertEquals("Encounter", subscription.getFilterByFirstRep().getResourceType());
+
+		// Also test the other direction
+		String serialized = ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription);
+		assertEquals(input.trim(), serialized);
 	}
 }
