@@ -45,6 +45,8 @@ public class SubscriptionTopicDispatcher {
 	 *                               This list should _not_ include the SubscriptionStatus.  The SubscriptionStatus will be added as the first element to
 	 *                               the delivered bundle.  The reason for this is that the SubscriptionStatus needs to reference the subscription ID, which is
 	 *                               not known until the bundle is delivered.
+	 * @param theSubscriptionTopicFilterMatcher is used to match the primary "focus" resource against the subscription filters
+	 * @param theRequestType			The type of request that led to this dispatch.  This determines the request type of the bundle entries
 	 * @param theInMemoryMatchResult Information about the match event that led to this dispatch that is sent to SUBSCRIPTION_RESOURCE_MATCHED
 	 * @param theRequestPartitionId  The request partitions of the request, if any.  This is used by subscriptions that need to perform repository
 	 *                               operations as a part of their delivery.  Those repository operations will be performed on the supplied request partitions
@@ -66,6 +68,23 @@ public class SubscriptionTopicDispatcher {
 		return count;
 	}
 
+	/**
+	 * Deliver a Subscription topic notification to all subscriptions for the given topic.
+	 *
+	 * @param theTopicUrl            Deliver to subscriptions for this topic
+	 * @param theResources           The list of resources to deliver.  The first resource will be the primary "focus" resource per the Subscription documentation.
+	 *                               This list should _not_ include the SubscriptionStatus.  The SubscriptionStatus will be added as the first element to
+	 *                               the delivered bundle.  The reason for this is that the SubscriptionStatus needs to reference the subscription ID, which is
+	 *                               not known until the bundle is delivered.
+	 * @param theRequestType			The type of request that led to this dispatch.  This determines the request type of the bundle entries
+	 * @return 							   The number of subscription notifications that were successfully queued for delivery
+	 */
+
+	public int dispatch(String theTopicUrl, List<IBaseResource> theResources, RestOperationTypeEnum theRequestType) {
+		return dispatch(theTopicUrl, theResources, (f, r) -> InMemoryMatchResult.successfulMatch(), theRequestType, null, null, null);
+	}
+
+
 	private boolean matchFiltersAndDeliver(String theTopicUrl, List<IBaseResource> theResources, ISubscriptionTopicFilterMatcher theSubscriptionTopicFilterMatcher, RestOperationTypeEnum theRequestType, InMemoryMatchResult theInMemoryMatchResult, RequestPartitionId theRequestPartitionId, String theTransactionId, ActiveSubscription theActiveSubscription) {
 		if (!SubscriptionTopicFilterUtil.matchFilters(theResources, theSubscriptionTopicFilterMatcher, theActiveSubscription.getSubscription().getTopicSubscription())) {
 			return false;
@@ -77,5 +96,4 @@ public class SubscriptionTopicDispatcher {
 		SubscriptionDeliveryRequest subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(bundlePayload, theActiveSubscription, theRequestType, theRequestPartitionId, theTransactionId);
 		return mySubscriptionMatchDeliverer.deliverPayload(subscriptionDeliveryRequest, theInMemoryMatchResult);
 	}
-
 }

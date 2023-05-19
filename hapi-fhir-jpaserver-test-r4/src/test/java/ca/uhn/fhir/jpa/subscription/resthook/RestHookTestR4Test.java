@@ -1320,7 +1320,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		patient.setActive(true);
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 
-		mySubscriptionTopicDispatcher.dispatch(SubscriptionTestDataHelper.TEST_TOPIC, List.of(patient), RestOperationTypeEnum.CREATE, null, null, null);
+		int count = mySubscriptionTopicDispatcher.dispatch(SubscriptionTestDataHelper.TEST_TOPIC, List.of(patient), RestOperationTypeEnum.CREATE);
+		assertEquals(1, count);
 
 		waitForQueueToDrain();
 
