@@ -148,6 +148,10 @@ class ParserState<T> {
 		return myState.isPreResource();
 	}
 
+	boolean isToplevelElement() {
+		return myState.myStack == null;
+	}
+
 	private Object newContainedDt(IResource theTarget) {
 		return ReflectionUtil.newInstance(theTarget.getStructureFhirVersionEnum().getVersionImplementation().getContainedType());
 	}
