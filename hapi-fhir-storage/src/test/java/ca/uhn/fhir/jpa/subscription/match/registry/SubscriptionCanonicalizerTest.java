@@ -117,15 +117,15 @@ class SubscriptionCanonicalizerTest {
 		CanonicalTopicSubscriptionFilter filter1 = canonical.getFilters().get(0);
 		assertEquals("Observation", filter1.getResourceType());
 		assertEquals("param1", filter1.getFilterParameter());
-		// WIP STR5 assert comparator once core libs are updated
+		assertEquals(Enumerations.SearchComparator.EQ, filter1.getComparator());
 		assertEquals(Enumerations.SearchModifierCode.EXACT, filter1.getModifier());
 		assertEquals("value1", filter1.getValue());
 
 		CanonicalTopicSubscriptionFilter filter2 = canonical.getFilters().get(1);
 		assertEquals("CarePlan", filter2.getResourceType());
 		assertEquals("param2", filter2.getFilterParameter());
-		// WIP STR5 assert comparator once core libs are updated
-		assertEquals(Enumerations.SearchModifierCode.EXACT, filter1.getModifier());
+		assertEquals(Enumerations.SearchComparator.EQ, filter2.getComparator());
+		assertEquals(Enumerations.SearchModifierCode.EXACT, filter2.getModifier());
 		assertEquals("value2", filter2.getValue());
 		assertEquals(123, canonical.getHeartbeatPeriod());
 		assertEquals(456, canonical.getMaxCount());
@@ -189,7 +189,7 @@ class SubscriptionCanonicalizerTest {
 		filter.setResourceType(theResourceType);
 		filter.setFilterParameter(theParam);
 		filter.setModifier(Enumerations.SearchModifierCode.EXACT);
-		// WIP STR5 add comparator once core libs are updated
+		filter.setComparator(Enumerations.SearchComparator.EQ);
 		filter.setValue(theValue);
 		return filter;
 	}

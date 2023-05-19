@@ -287,10 +287,12 @@ public class SubscriptionCanonicalizer {
 		if (retVal.isTopicSubscription()) {
 			CanonicalTopicSubscription topicSubscription = retVal.getTopicSubscription();
 			topicSubscription.setTopic(getCriteria(theSubscription));
-			// WIP STR5 support other types
+
+			// WIP STR5 support other content types
 			topicSubscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 			retVal.setChannelType(getChannelType(subscription));
+
 			// WIP STR5 set other topic subscription fields
 
 			for (org.hl7.fhir.r4.model.Extension next : subscription.getCriteriaElement().getExtension()) {
@@ -389,10 +391,12 @@ public class SubscriptionCanonicalizer {
 
 		if (retVal.isTopicSubscription()) {
 			retVal.getTopicSubscription().setTopic(getCriteria(theSubscription));
-			// WIP STR5 support other types
+
+			// WIP STR5 support other content types
 			retVal.getTopicSubscription().setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 			retVal.setChannelType(getChannelType(subscription));
+
 			// WIP STR5 set other topic subscription fields
 		} else {
 			retVal.setCriteriaString(getCriteria(theSubscription));
@@ -520,8 +524,7 @@ public class SubscriptionCanonicalizer {
 		retVal.setResourceType(theFilter.getResourceType());
 		retVal.setFilterParameter(theFilter.getFilterParameter());
 		retVal.setModifier(theFilter.getModifier());
-		// WIP STR5 add this once it's available
-//		retVal.setComparator(theFilter.getComparator());
+		retVal.setComparator(theFilter.getComparator());
 		retVal.setValue(theFilter.getValue());
 		return retVal;
 	}

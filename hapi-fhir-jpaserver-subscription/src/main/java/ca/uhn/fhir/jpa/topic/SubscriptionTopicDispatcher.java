@@ -109,9 +109,7 @@ public class SubscriptionTopicDispatcher {
 				}
 			}
 		}
-		// WIP STR5 apply subscription filters
 		IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(theResources, theActiveSubscription, theTopicUrl, theRequestType);
-		// WIP STR5 do we need to add a total?  If so can do that with R5BundleFactory
 		bundlePayload.setId(UUID.randomUUID().toString());
 		SubscriptionDeliveryRequest subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(bundlePayload, theActiveSubscription, theRequestType, theRequestPartitionId, theTransactionId);
 		return mySubscriptionMatchDeliverer.deliverPayload(subscriptionDeliveryRequest, theInMemoryMatchResult);

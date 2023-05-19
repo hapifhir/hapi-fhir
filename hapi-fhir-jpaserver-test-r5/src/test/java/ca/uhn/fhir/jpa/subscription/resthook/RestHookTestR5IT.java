@@ -279,7 +279,6 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 	@NotNull
 	private Subscription createTopicSubscription() throws InterruptedException {
-		// WIP STR5 will likely require matching TopicSubscription
 		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 
 		return postSubscription(subscription);
@@ -453,7 +452,6 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		ourLog.info(">>>2 Creating subscriptions");
 		Subscription subscription1 = createTopicSubscription();
-		// WIP STR5 will likely require matching TopicSubscription
 		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE2, Constants.CT_FHIR_JSON_NEW);
 
 		Subscription subscription2 = postSubscription(subscription);
@@ -543,7 +541,6 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 	@Nonnull
 	private Subscription createTopicSubscription(String theTopicUrlSuffix) throws InterruptedException {
-		// WIP STR5 will likely require matching TopicSubscription
 		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + theTopicUrlSuffix, Constants.CT_FHIR_JSON_NEW);
 
 		return postSubscription(subscription);
@@ -553,7 +550,6 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	public void testSubscriptionTriggerViaSubscription() throws Exception {
 		createSubscriptionTopic();
 
-		// WIP STR5 will likely require matching TopicSubscription
 		Subscription subscription1 = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE, Constants.CT_FHIR_XML_NEW);
 
 		Subscription subscription = postSubscription(subscription1);
@@ -607,7 +603,6 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		ourLog.info("** About to create non-matching subscription");
 
-		// WIP STR5 will likely require matching TopicSubscription
 		Subscription subscription1 = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE2, Constants.CT_FHIR_XML_NEW);
 
 		Subscription subscription = postSubscription(subscription1);
@@ -648,11 +643,9 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE2);
 		waitForRegisteredSubscriptionTopicCount(2);
 
-		// WIP STR5 will likely require matching TopicSubscription
 		Subscription subscription3 = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE, Constants.CT_FHIR_XML_NEW);
 
 		postSubscription(subscription3);
-		// WIP STR5 will likely require matching TopicSubscription
 		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE2, Constants.CT_FHIR_XML_NEW);
 
 		postSubscription(subscription);

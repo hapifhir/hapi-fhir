@@ -1330,7 +1330,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Bundle bundle = ourTransactionProvider.getTransactions().get(0);
 		assertEquals(2, bundle.getEntry().size());
 		Parameters parameters = (Parameters) bundle.getEntry().get(0).getResource();
-		// WIP STR5 assert parameterscontents
+		// WIP STR5 assert parameters contents
 		Patient bundlePatient = (Patient) bundle.getEntry().get(1).getResource();
 		assertTrue(bundlePatient.getActive());
 		assertEquals(Enumerations.AdministrativeGender.FEMALE, bundlePatient.getGender());
