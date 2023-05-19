@@ -3,13 +3,11 @@ package ca.uhn.fhir.jpa.topic;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.r4b.model.Bundle;
 import org.hl7.fhir.r4b.model.Encounter;
 import org.hl7.fhir.r4b.model.Resource;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -17,6 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SubscriptionTopicPayloadBuilderR4BTest {
+	private static final String TEST_TOPIC_URL = "test-builder-topic-url";
 	FhirContext ourFhirContext = FhirContext.forR4BCached();
 	@Test
 	public void testBuildPayloadDelete() {
@@ -24,14 +23,11 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		var svc = new SubscriptionTopicPayloadBuilder(ourFhirContext);
 		var encounter = new Encounter();
 		encounter.setId("Encounter/1");
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		CanonicalSubscription sub = new CanonicalSubscription();
 		ActiveSubscription subscription = new ActiveSubscription(sub, "test");
-		SubscriptionTopic topic = new SubscriptionTopic();
-		msg.setOperationType(BaseResourceMessage.OperationTypeEnum.DELETE);
 
 		// run
-		Bundle payload = (Bundle)svc.buildPayload(encounter, msg, subscription, topic);
+		Bundle payload = (Bundle)svc.buildPayload(List.of(encounter), subscription, TEST_TOPIC_URL, RestOperationTypeEnum.DELETE);
 
 		// verify
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
@@ -47,14 +43,11 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		var svc = new SubscriptionTopicPayloadBuilder(ourFhirContext);
 		var encounter = new Encounter();
 		encounter.setId("Encounter/1");
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		CanonicalSubscription sub = new CanonicalSubscription();
 		ActiveSubscription subscription = new ActiveSubscription(sub, "test");
-		SubscriptionTopic topic = new SubscriptionTopic();
-		msg.setOperationType(BaseResourceMessage.OperationTypeEnum.UPDATE);
 
 		// run
-		Bundle payload = (Bundle)svc.buildPayload(encounter, msg, subscription, topic);
+		Bundle payload = (Bundle)svc.buildPayload(List.of(encounter), subscription, TEST_TOPIC_URL, RestOperationTypeEnum.UPDATE);
 
 		// verify
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
@@ -71,14 +64,11 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		var svc = new SubscriptionTopicPayloadBuilder(ourFhirContext);
 		var encounter = new Encounter();
 		encounter.setId("Encounter/1");
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		CanonicalSubscription sub = new CanonicalSubscription();
 		ActiveSubscription subscription = new ActiveSubscription(sub, "test");
-		SubscriptionTopic topic = new SubscriptionTopic();
-		msg.setOperationType(BaseResourceMessage.OperationTypeEnum.CREATE);
 
 		// run
-		Bundle payload = (Bundle)svc.buildPayload(encounter, msg, subscription, topic);
+		Bundle payload = (Bundle)svc.buildPayload(List.of(encounter), subscription, TEST_TOPIC_URL, RestOperationTypeEnum.CREATE);
 
 		// verify
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
