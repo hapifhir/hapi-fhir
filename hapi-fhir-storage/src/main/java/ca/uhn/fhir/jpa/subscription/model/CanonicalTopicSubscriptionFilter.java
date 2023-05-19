@@ -84,7 +84,6 @@ public class CanonicalTopicSubscriptionFilter {
 		myValue = theValue;
 	}
 
-	// FIXME KHS test
 	public static List<CanonicalTopicSubscriptionFilter> fromQueryUrl(String theQueryUrl) {
 		UrlUtil.UrlParts urlParts = UrlUtil.parseUrl(theQueryUrl);
 		String resourceName = urlParts.getResourceType();
