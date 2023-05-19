@@ -17,13 +17,18 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
+package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
 import ca.uhn.fhir.context.phonetic.NumericEncoder;
+import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
+import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 // Useful for numerical identifiers like phone numbers, address parts etc.
 // This should not be used where decimals are important.  A new "quantity matcher" should be added to handle cases like that.
-public class NumericMatcher implements IMdmStringMatcher {
+public class NumericMatcher implements IMdmFieldMatcher {
 	private final NumericEncoder encoder = new NumericEncoder();
 
 	@Override
@@ -31,5 +36,15 @@ public class NumericMatcher implements IMdmStringMatcher {
 		String left = encoder.encode(theLeftString);
 		String right = encoder.encode(theRightString);
 		return left.equals(right);
+	}
+
+	@Override
+	public boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theParams) {
+		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
+			String left = encoder.encode(StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.isExactMatch()));
+			String right = encoder.encode(StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.isExactMatch()));
+			return left.equals(right);
+		}
+		return false;
 	}
 }

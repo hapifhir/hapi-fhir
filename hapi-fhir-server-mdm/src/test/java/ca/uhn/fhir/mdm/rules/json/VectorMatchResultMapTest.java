@@ -1,7 +1,7 @@
 package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.rest.api.server.matcher.models.MatchTypeEnum;
+import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

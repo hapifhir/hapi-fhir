@@ -20,7 +20,7 @@
 package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.server.matcher.models.MatchTypeEnum;
+import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -65,11 +65,11 @@ public class MdmMatcherJson implements IModelJson {
 		return this;
 	}
 
-	public boolean isMatchingEmptyFields() {
-		return myAlgorithm.isMatchingEmptyFields();
-	}
+//	public boolean isMatchingEmptyFields() {
+//		return myAlgorithm.isMatchingEmptyFields();
+//	}
 
-	public boolean match(FhirContext theFhirContext, IBase theLeftValue, IBase theRightValue) {
-		return myAlgorithm.match(theFhirContext, theLeftValue, theRightValue, myExact, myIdentifierSystem);
-	}
+//	public boolean match(FhirContext theFhirContext, IBase theLeftValue, IBase theRightValue) {
+//		return myAlgorithm.match(theFhirContext, theLeftValue, theRightValue, myExact, myIdentifierSystem);
+//	}
 }

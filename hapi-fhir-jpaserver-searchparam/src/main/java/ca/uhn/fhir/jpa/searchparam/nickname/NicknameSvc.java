@@ -17,45 +17,19 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.api.server.matcher.nickname;
-
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+package ca.uhn.fhir.jpa.searchparam.nickname;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class NicknameSvc {
-	private final NicknameMap myNicknameMap = new NicknameMap();
+	private final NicknameMap myNicknameMap;
 
-	public NicknameSvc(@Nonnull Map<String, Collection<String>> theNicknamesMap) {
-		if (theNicknamesMap.isEmpty()) {
-			try {
-				Resource nicknameCsvResource = new ClassPathResource("/nickname/names.csv");
-				try (InputStream inputStream = nicknameCsvResource.getInputStream()) {
-					try (Reader reader = new InputStreamReader(inputStream)) {
-						myNicknameMap.load(reader);
-					}
-				}
-			} catch (IOException ex) {
-
-			}
-		} else {
-			for (Map.Entry<String, Collection<String>> entry : theNicknamesMap.entrySet()) {
-				myNicknameMap.add(entry.getKey(), new ArrayList<>(entry.getValue()));
-			}
-		}
+	public NicknameSvc(@Nonnull NicknameMap theNicknamesMap) {
+		myNicknameMap = theNicknamesMap;
 	}
 
 	public int size() {

@@ -17,9 +17,19 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
+package ca.uhn.fhir.jpa.searchparam.matcher;
 
-public enum MdmNameMatchModeEnum {
-	ANY_ORDER,
-	FIRST_AND_LAST
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBase;
+
+/**
+ * Measure how similar two IBase (resource fields) are to one another.  1.0 means identical.  0.0 means completely different.
+ */
+public interface IMdmFieldMatcher {
+	boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theParams);
+
+	default boolean isMatchingEmptyFields() {
+		// false because most people are overriding this
+		return false;
+	}
 }

@@ -17,17 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
+package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.util.StringUtil;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
 
-public abstract class BaseHapiStringMetric implements IMdmFieldMatcher {
-	protected String extractString(IPrimitiveType<?> thePrimitive, boolean theExact) {
-		String theString = thePrimitive.getValueAsString();
-		if (theExact) {
-			return theString;
-		}
-		return StringUtil.normalizeStringForSearchIndexing(theString);
-	}
+public interface IMdmStringMatcher extends IMdmFieldMatcher {
+	boolean matches(String theLeftString, String theRightString);
 }

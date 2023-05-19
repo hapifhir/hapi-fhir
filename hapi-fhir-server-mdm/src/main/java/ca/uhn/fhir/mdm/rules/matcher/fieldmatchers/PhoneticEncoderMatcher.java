@@ -17,15 +17,20 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
+package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
+import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
+import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
 import ca.uhn.fhir.util.PhoneticEncoderUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhoneticEncoderMatcher implements IMdmStringMatcher {
+public class PhoneticEncoderMatcher implements IMdmFieldMatcher {
 	private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderMatcher.class);
 
 	private final IPhoneticEncoder myStringEncoder;
@@ -34,8 +39,16 @@ public class PhoneticEncoderMatcher implements IMdmStringMatcher {
 		myStringEncoder = PhoneticEncoderUtil.getEncoder(thePhoneticEnum.name());
 	}
 
-	@Override
 	public boolean matches(String theLeftString, String theRightString) {
 		return myStringEncoder.encode(theLeftString).equals(myStringEncoder.encode(theRightString));
 	}
+
+	@Override
+	public boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theParams) {
+		String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.isExactMatch());
+		String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.isExactMatch());
+
+		return matches(leftString, rightString);
+	}
+
 }

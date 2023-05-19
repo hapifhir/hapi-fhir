@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatcherFactory;
+import ca.uhn.fhir.jpa.searchparam.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
-import ca.uhn.fhir.rest.api.server.matcher.nickname.NicknameSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,12 +49,11 @@ public class MdmCommonConfig {
 	}
 
 	@Bean
-	public NicknameSvc nicknameSvc(IMdmSettings theSettings) {
-		return new NicknameSvc(theSettings.nicknameMap());
-	}
-
-	@Bean
-	public MdmMatcherFactory matcherFactory(NicknameSvc theNicknameSvc) {
-		return new MdmMatcherFactory();
+	public MdmMatcherFactory matcherFactory(
+		FhirContext theFhirContext,
+		IMdmSettings theSettings,
+		NicknameServiceFactory theNicknameServiceFactory
+	) {
+		return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameServiceFactory);
 	}
 }

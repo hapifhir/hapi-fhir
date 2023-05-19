@@ -2,34 +2,35 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
+import ca.uhn.fhir.jpa.searchparam.nickname.NicknameServiceFactory;
+import ca.uhn.fhir.jpa.searchparam.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.rest.api.server.matcher.IMatcherFactory;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.EmptyFieldMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.ExtensionMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.HapiDateMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.HapiStringMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.IMdmFieldMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.IdentifierMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.MdmNameMatchModeEnum;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.NameMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.NicknameMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.NumericMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.PhoneticEncoderMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.fieldmatchers.SubstringStringMatcher;
-import ca.uhn.fhir.rest.api.server.matcher.models.MatchTypeEnum;
-import ca.uhn.fhir.rest.api.server.matcher.nickname.NicknameSvc;
+import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.EmptyFieldMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.ExtensionMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiDateMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiStringMatcher;
+import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.IdentifierMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.MdmNameMatchModeEnum;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NameMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NicknameMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NumericMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.PhoneticEncoderMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.SubstringStringMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 
 public class MdmMatcherFactory implements IMatcherFactory {
 
 	private final FhirContext myFhirContext;
 	private final IMdmSettings myMdmSettings;
 
-	private final NicknameSvc myNicknameSvc;
+	private final NicknameServiceFactory myNicknameSvcFactory;
 
-	public MdmMatcherFactory(FhirContext theFhirContext, IMdmSettings theSettings, NicknameSvc theNicknameSvc) {
+	public MdmMatcherFactory(FhirContext theFhirContext, IMdmSettings theSettings, NicknameServiceFactory theNicknameSvcFactory) {
 		myFhirContext = theFhirContext;
 		myMdmSettings = theSettings;
-		myNicknameSvc = theNicknameSvc;
+		myNicknameSvcFactory = theNicknameSvcFactory;
 	}
 
 	@Override
@@ -64,7 +65,7 @@ public class MdmMatcherFactory implements IMatcherFactory {
 				fieldMatcher = new PhoneticEncoderMatcher(PhoneticEncoderEnum.SOUNDEX);
 				break;
 			case NICKNAME:
-				fieldMatcher = new NicknameMatcher(myNicknameSvc);
+				fieldMatcher = new NicknameMatcher(myNicknameSvcFactory.getNicknameSvc());
 				break;
 			case STRING:
 				fieldMatcher = new HapiStringMatcher();
@@ -73,13 +74,13 @@ public class MdmMatcherFactory implements IMatcherFactory {
 				fieldMatcher = new SubstringStringMatcher();
 				break;
 			case DATE:
-				fieldMatcher = new HapiDateMatcher();
+				fieldMatcher = new HapiDateMatcher(myFhirContext);
 				break;
 			case NAME_ANY_ORDER:
-				fieldMatcher = new NameMatcher(MdmNameMatchModeEnum.ANY_ORDER);
+				fieldMatcher = new NameMatcher(myFhirContext, MdmNameMatchModeEnum.ANY_ORDER);
 				break;
 			case NAME_FIRST_AND_LAST:
-				fieldMatcher = new NameMatcher(MdmNameMatchModeEnum.FIRST_AND_LAST);
+				fieldMatcher = new NameMatcher(myFhirContext, MdmNameMatchModeEnum.FIRST_AND_LAST);
 				break;
 			case IDENTIFIER:
 				fieldMatcher = new IdentifierMatcher();

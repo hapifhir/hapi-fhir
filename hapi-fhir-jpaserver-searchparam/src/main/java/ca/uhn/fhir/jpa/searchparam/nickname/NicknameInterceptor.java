@@ -23,7 +23,6 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.server.matcher.nickname.NicknameSvc;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +36,10 @@ import java.util.Map;
 public class NicknameInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(NicknameInterceptor.class);
 
-	private final NicknameSvc myNicknameSvc;
+	private final NicknameServiceFactory myNicknameSvcFactory;
 
-	public NicknameInterceptor(NicknameSvc theNicknameSvc) {
-		myNicknameSvc = theNicknameSvc;
+	public NicknameInterceptor(NicknameServiceFactory theNicknameSvc) {
+		myNicknameSvcFactory = theNicknameSvc;
 	}
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
@@ -70,7 +69,7 @@ public class NicknameInterceptor {
 					toRemove.add(stringParam);
 					//First, attempt to expand as a formal name
 					String name = stringParam.getValue().toLowerCase(Locale.ROOT);
-					Collection<String> expansions = myNicknameSvc.getEquivalentNames(name);
+					Collection<String> expansions = myNicknameSvcFactory.getNicknameSvc().getEquivalentNames(name);
 					if (expansions == null) {
 						continue;
 					}

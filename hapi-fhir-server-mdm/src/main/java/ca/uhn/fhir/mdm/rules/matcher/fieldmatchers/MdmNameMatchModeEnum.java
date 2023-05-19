@@ -17,11 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
+package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-public class SubstringStringMatcher implements IMdmStringMatcher {
-	@Override
-	public boolean matches(String theLeftString, String theRightString) {
-		return theLeftString.startsWith(theRightString) || theRightString.startsWith(theLeftString);
-	}
+public enum MdmNameMatchModeEnum {
+	ANY_ORDER,
+	FIRST_AND_LAST
 }

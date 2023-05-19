@@ -21,10 +21,16 @@ package ca.uhn.fhir.mdm.rules.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
+import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.rest.api.server.matcher.IMatcherFactory;
+import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
+import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -49,15 +55,18 @@ public class MdmResourceFieldMatcher {
 	private final String myName;
 	private final boolean myIsFhirPathExpression;
 
-	private IMatcherFactory myIMatcherFactory;
+	private final IMatcherFactory myIMatcherFactory;
 
 	public MdmResourceFieldMatcher(
 		FhirContext theFhirContext,
+		IMatcherFactory theIMatcherFactory,
 		MdmFieldMatchJson theMdmFieldMatchJson,
 		MdmRulesJson theMdmRulesJson
 	) {
+		myIMatcherFactory = theIMatcherFactory;
+
 		myFhirContext = theFhirContext;
-//		myMdmFieldMatchJson = theMdmFieldMatchJson;
+		myMdmFieldMatchJson = theMdmFieldMatchJson;
 		myResourceType = theMdmFieldMatchJson.getResourceType();
 		myResourcePath = theMdmFieldMatchJson.getResourcePath();
 		myFhirPath = theMdmFieldMatchJson.getFhirPath();
@@ -101,8 +110,11 @@ public class MdmResourceFieldMatcher {
 	private MdmMatchEvaluation match(List<IBase> theLeftValues, List<IBase> theRightValues) {
 		MdmMatchEvaluation retval = new MdmMatchEvaluation(false, 0.0);
 
+		MdmMatcherJson matcherJson = myMdmFieldMatchJson.getMatcher();
+		IMdmFieldMatcher matcher = myIMatcherFactory.getFieldMatcherForEnum(matcherJson.getAlgorithm());
+
 		boolean isMatchingEmptyFieldValues = (theLeftValues.isEmpty() && theRightValues.isEmpty());
-		if (isMatchingEmptyFieldValues && myMdmFieldMatchJson.isMatcherSupportingEmptyFields()) {
+		if (isMatchingEmptyFieldValues && matcher.isMatchingEmptyFields()) {
 			return match((IBase) null, (IBase) null);
 		}
 
@@ -117,7 +129,25 @@ public class MdmResourceFieldMatcher {
 	}
 
 	private MdmMatchEvaluation match(IBase theLeftValue, IBase theRightValue) {
-		return myMdmFieldMatchJson.match(myFhirContext, theLeftValue, theRightValue);
+		MdmMatcherJson matcherJson = myMdmFieldMatchJson.getMatcher();
+
+		ExtraMatchParams params = new ExtraMatchParams();
+		params.setExactMatch(matcherJson.getExact());
+		params.setIdentificationSystem(matcherJson.getIdentifierSystem());
+		IMdmFieldMatcher matcher = myIMatcherFactory.getFieldMatcherForEnum(matcherJson.getAlgorithm());
+		if (matcher != null) {
+			boolean matches = matcher.matches(theLeftValue, theRightValue, params);
+			return new MdmMatchEvaluation(matches, matches ? 1.0 : 0.0);
+		}
+
+		MdmSimilarityJson similarity = myMdmFieldMatchJson.getSimilarity();
+		if (similarity != null) {
+			return similarity.match(myFhirContext, theLeftValue, theRightValue);
+		}
+
+		throw new InternalErrorException(Msg.code(1522) + "Field Match " + myName + " has neither a matcher nor a similarity.");
+
+//		return myMdmFieldMatchJson.match(myFhirContext, theLeftValue, theRightValue);
 	}
 
 	private void validate(IBaseResource theResource) {

@@ -6,6 +6,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Patient;
@@ -34,8 +35,11 @@ public abstract class BaseR4Test {
 		return patient;
 	}
 
-	protected MdmResourceMatcherSvc buildMatcher(MdmRulesJson theMdmRulesJson) {
-		return new MdmResourceMatcherSvc(ourFhirContext, new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever)).setMdmRules(theMdmRulesJson));
+	protected MdmResourceMatcherSvc buildMatcher(IMatcherFactory theMatcherFactory, MdmRulesJson theMdmRulesJson) {
+		return new MdmResourceMatcherSvc(ourFhirContext,
+			theMatcherFactory,
+			new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever)).setMdmRules(theMdmRulesJson)
+		);
 	}
 
 	protected void assertMatch(MdmMatchResultEnum theExpectedMatchEnum, MdmMatchOutcome theMatchResult) {

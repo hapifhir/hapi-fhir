@@ -22,6 +22,7 @@ package ca.uhn.fhir.mdm.rules.svc;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
@@ -48,16 +50,17 @@ public class MdmResourceMatcherSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	private final FhirContext myFhirContext;
+	private final IMatcherFactory myMatcherFactory;
 	private MdmRulesJson myMdmRulesJson;
 	private final List<MdmResourceFieldMatcher> myFieldMatchers = new ArrayList<>();
 
-	public MdmResourceMatcherSvc(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
+	public MdmResourceMatcherSvc(
+		FhirContext theFhirContext,
+		IMatcherFactory theIMatcherFactory,
+		IMdmSettings theMdmSettings
+	) {
 		myFhirContext = theFhirContext;
-
-		setMdmSettings(theMdmSettings);
-	}
-
-	public void setMdmSettings(IMdmSettings theMdmSettings) {
+		myMatcherFactory = theIMatcherFactory;
 		myMdmRulesJson = theMdmSettings.getMdmRules();
 
 		addFieldMatchers();
@@ -69,7 +72,7 @@ public class MdmResourceMatcherSvc {
 		}
 		myFieldMatchers.clear();
 		for (MdmFieldMatchJson matchFieldJson : myMdmRulesJson.getMatchFields()) {
-			myFieldMatchers.add(new MdmResourceFieldMatcher( myFhirContext, matchFieldJson, myMdmRulesJson));
+			myFieldMatchers.add(new MdmResourceFieldMatcher(myFhirContext, myMatcherFactory, matchFieldJson, myMdmRulesJson));
 		}
 	}
 
@@ -77,9 +80,8 @@ public class MdmResourceMatcherSvc {
 	 * Given two {@link IBaseResource}s, perform all comparisons on them to determine an {@link MdmMatchResultEnum}, indicating
 	 * to what level the two resources are considered to be matching.
 	 *
-	 * @param theLeftResource The first {@link IBaseResource}.
+	 * @param theLeftResource  The first {@link IBaseResource}.
 	 * @param theRightResource The second {@link IBaseResource}
-	 *
 	 * @return an {@link MdmMatchResultEnum} indicating the result of the comparison.
 	 */
 	public MdmMatchOutcome getMatchResult(IBaseResource theLeftResource, IBaseResource theRightResource) {
@@ -91,8 +93,8 @@ public class MdmResourceMatcherSvc {
 		MdmMatchResultEnum matchResultEnum = myMdmRulesJson.getMatchResult(matchResult.getVector());
 		matchResult.setMatchResultEnum(matchResultEnum);
 		if (ourLog.isDebugEnabled()) {
-				ourLog.debug("{} {}: {}", matchResult.getMatchResultEnum(), theRightResource.getIdElement().toUnqualifiedVersionless(), matchResult);
-			 if (ourLog.isTraceEnabled()) {
+			ourLog.debug("{} {}: {}", matchResult.getMatchResultEnum(), theRightResource.getIdElement().toUnqualifiedVersionless(), matchResult);
+			if (ourLog.isTraceEnabled()) {
 				ourLog.trace("Field matcher results:\n{}", myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.getVector()));
 			}
 		}
@@ -105,11 +107,11 @@ public class MdmResourceMatcherSvc {
 	 * start with a binary representation of the value 0 for long: 0000
 	 * first_name matches, so the value `1` is bitwise-ORed to the current value (0) in right-most position.
 	 * `0001`
-	 *
+	 * <p>
 	 * Next, we look at the second field comparator, and see if it matches. If it does, we left-shift 1 by the index
 	 * of the comparator, in this case also 1.
 	 * `0010`
-	 *
+	 * <p>
 	 * Then, we bitwise-or it with the current retval:
 	 * 0001|0010 = 0011
 	 * The binary string is now `0011`, which when you return it as a long becomes `3`.
@@ -147,10 +149,10 @@ public class MdmResourceMatcherSvc {
 	}
 
 
-		private boolean isValidResourceType(String theResourceType, String theFieldComparatorType) {
+	private boolean isValidResourceType(String theResourceType, String theFieldComparatorType) {
 		return (
 			theFieldComparatorType.equalsIgnoreCase(MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE)
-			|| theFieldComparatorType.equalsIgnoreCase(theResourceType)
+				|| theFieldComparatorType.equalsIgnoreCase(theResourceType)
 		);
 	}
 }

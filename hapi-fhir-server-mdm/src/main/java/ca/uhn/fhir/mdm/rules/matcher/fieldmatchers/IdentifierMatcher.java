@@ -17,25 +17,34 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
+package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.CanonicalIdentifier;
+import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
+import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.util.IdentifierUtil;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 
 public class IdentifierMatcher implements IMdmFieldMatcher {
+
+	private boolean isEmpty(StringDt theValue) {
+		if (theValue == null) {
+			return true;
+		}
+		return theValue.isEmpty();
+	}
+
 	/**
 	 * @return true if the two fhir identifiers are the same.  If @param theIdentifierSystem is not null, then the
 	 * matcher only returns true if the identifier systems also match this system.
 	 * @throws UnsupportedOperationException if either Base is not an Identifier instance
 	 */
 	@Override
-	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
+	public boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theParams) {
 		CanonicalIdentifier left = IdentifierUtil.identifierDtFromIdentifier(theLeftBase);
-		if (theIdentifierSystem != null) {
-			if (!theIdentifierSystem.equals(left.getSystemElement().getValueAsString())) {
+		if (theParams.getIdentificationSystem() != null) {
+			if (!theParams.getIdentificationSystem().equals(left.getSystemElement().getValueAsString())) {
 				return false;
 			}
 		}
@@ -44,12 +53,5 @@ public class IdentifierMatcher implements IMdmFieldMatcher {
 			return false;
 		}
 		return left.equals(right);
-	}
-
-	private boolean isEmpty(StringDt theValue) {
-		if (theValue == null) {
-			return true;
-		}
-		return theValue.isEmpty();
 	}
 }

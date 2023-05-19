@@ -17,26 +17,23 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.api.server.matcher.fieldmatchers;
+package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.rest.api.server.matcher.nickname.NicknameSvc;
+import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
+import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.jpa.searchparam.nickname.NicknameSvc;
+import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.Collection;
 import java.util.Locale;
 
-public class NicknameMatcher extends BaseHapiStringMetric {
+public class NicknameMatcher implements IMdmFieldMatcher {
 	private final NicknameSvc myNicknameSvc;
-
 
 	public NicknameMatcher(NicknameSvc theNicknameSvc) {
 		myNicknameSvc = theNicknameSvc;
-//		try {
-//			myNicknameSvc = new NicknameSvc();
-//		} catch (IOException e) {
-//			throw new ConfigurationException(Msg.code(2234) + "Unable to load nicknames", e);
-//		}
 	}
 
 	public boolean matches(String theLeftString, String theRightString) {
@@ -53,10 +50,10 @@ public class NicknameMatcher extends BaseHapiStringMetric {
 	}
 
 	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase) {
+	public boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theParams) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String leftString = extractString((IPrimitiveType<?>) theLeftBase, theExact);
-			String rightString = extractString((IPrimitiveType<?>) theRightBase, theExact);
+			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.isExactMatch());
+			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.isExactMatch());
 
 			return matches(leftString, rightString);
 		}

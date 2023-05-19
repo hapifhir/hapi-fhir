@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.api.server.matcher.models;
+package ca.uhn.fhir.mdm.rules.matcher.models;
 
 /**
  * Enum for holding all the known FHIR Element matchers that we support in HAPI.  The string matchers first
