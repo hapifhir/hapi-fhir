@@ -19,16 +19,20 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Subscription;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class CanonicalTopicSubscriptionFilter {
+	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
+
 	@JsonProperty("resourceType")
 	String myResourceType;
 
@@ -116,6 +120,18 @@ public class CanonicalTopicSubscriptionFilter {
 	}
 
 	public String asCriteriaString() {
-		return myResourceType + "?" + myFilterParameter + myComparator.toCode() + myValue;
+		String comparator = "=";
+		if (myComparator != null) {
+			switch (myComparator) {
+				case EQ:
+					comparator = "=";
+					break;
+				case NE:
+					comparator = ":not=";
+				default:
+					ourLog.warn("Unsupported comparator: {}", myComparator);
+			}
+		}
+		return myResourceType + "?" + myFilterParameter + comparator + myValue;
 	}
 }

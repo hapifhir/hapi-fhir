@@ -2,11 +2,14 @@ package ca.uhn.fhir.jpa.topic.filter;
 
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 
 public final class SubscriptionTopicFilterUtil {
+	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 	private SubscriptionTopicFilterUtil() {
 	}
 
@@ -18,8 +21,10 @@ public final class SubscriptionTopicFilterUtil {
 				}
 				if (!theSubscriptionTopicFilterMatcher.match(filter, theResource).matched()) {
 					match = false;
+					ourLog.debug("Resource {} did not match filter {}.  Skipping remaining filters.", theResource.getIdElement().toUnqualifiedVersionless().getValue(), filter.asCriteriaString());
 					break;
 				}
+				ourLog.debug("Resource {} matches filter {}", theResource.getIdElement().toUnqualifiedVersionless().getValue(), filter.asCriteriaString());
 		}
 		return match;
 	}

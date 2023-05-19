@@ -28,20 +28,21 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionTopicApplicationFhirJson() throws Exception {
+	public void testFilteredTopicSubscription() throws Exception {
 		//setup
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(Enumerations.EncounterStatus.PLANNED, Enumerations.EncounterStatus.COMPLETED, SubscriptionTopic.InteractionTrigger.CREATE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
-		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL, "Encounter?participation-type=PRPF");
+		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL, "Encounter?participant-type=PRPF");
 
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, getSystemProviderCount());
 
 		// execute
-		Encounter sentEncounter = sendEncounterWithStatus(Enumerations.EncounterStatus.COMPLETED, true);
+		Encounter badSentEncounter = sendEncounterWithStatus(Enumerations.EncounterStatus.COMPLETED, false);
+		Encounter goodSentEncounter = sendEncounterWithStatusAndParticipationType(Enumerations.EncounterStatus.COMPLETED, "PRPF", true);
 
 		// verify
 		Bundle receivedBundle = getLastSystemProviderBundle();
@@ -49,11 +50,11 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		assertEquals(2, resources.size());
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
-		validateSubscriptionStatus(subscription, sentEncounter, ss);
+		validateSubscriptionStatus(subscription, goodSentEncounter, ss);
 
 		Encounter encounter = (Encounter) resources.get(1);
 		assertEquals(Enumerations.EncounterStatus.COMPLETED, encounter.getStatus());
-		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
+		assertEquals(goodSentEncounter.getIdElement(), encounter.getIdElement());
 	}
 
 	private Subscription createTopicSubscription(String theTopicUrl, String... theFilters) throws InterruptedException {
@@ -81,6 +82,17 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 	private Encounter sendEncounterWithStatus(Enumerations.EncounterStatus theStatus, boolean theExpectDelivery) throws InterruptedException {
 		Encounter encounter = new Encounter();
 		encounter.setStatus(theStatus);
+
+		IIdType id = createResource(encounter, theExpectDelivery);
+		encounter.setId(id);
+		return encounter;
+	}
+
+
+	private Encounter sendEncounterWithStatusAndParticipationType(Enumerations.EncounterStatus theStatus, String theParticipantType, boolean theExpectDelivery) throws InterruptedException {
+		Encounter encounter = new Encounter();
+		encounter.setStatus(theStatus);
+		encounter.addParticipant().addType().addCoding().setCode(theParticipantType);
 
 		IIdType id = createResource(encounter, theExpectDelivery);
 		encounter.setId(id);
