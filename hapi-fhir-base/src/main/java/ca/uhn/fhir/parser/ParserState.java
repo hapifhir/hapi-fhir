@@ -149,7 +149,7 @@ class ParserState<T> {
 	}
 
 	boolean isToplevelResourceElement() {
-		return myState instanceof ParserState.ResourceStateHl7Org;
+		return myState instanceof ParserState.ResourceStateHl7Org || myState instanceof ParserState.ResourceStateHapi;
 	}
 
 	private Object newContainedDt(IResource theTarget) {
