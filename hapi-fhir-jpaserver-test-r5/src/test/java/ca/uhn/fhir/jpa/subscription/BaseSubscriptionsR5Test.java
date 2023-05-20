@@ -217,7 +217,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return createResource(theResource, theExpectDelivery, 1);
 	}
 
-	// WIP STR5 consolidate with lambda
+	// TODO KHS consolidate with lambda
 	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery, int theCount) throws InterruptedException {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		if (theExpectDelivery) {

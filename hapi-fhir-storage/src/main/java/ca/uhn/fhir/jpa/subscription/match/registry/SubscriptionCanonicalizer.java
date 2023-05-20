@@ -293,7 +293,6 @@ public class SubscriptionCanonicalizer {
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 			retVal.setChannelType(getChannelType(subscription));
 
-			// WIP STR5 set other topic subscription fields
 			for (org.hl7.fhir.r4.model.Extension next : subscription.getCriteriaElement().getExtension()) {
 				if (SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL.equals(next.getUrl())) {
 					List<CanonicalTopicSubscriptionFilter> filters = CanonicalTopicSubscriptionFilter.fromQueryUrl(next.getValue().primitiveValue());
@@ -395,8 +394,6 @@ public class SubscriptionCanonicalizer {
 			retVal.getTopicSubscription().setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 			retVal.setChannelType(getChannelType(subscription));
-
-			// WIP STR5 set other topic subscription fields
 		} else {
 			retVal.setCriteriaString(getCriteria(theSubscription));
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
