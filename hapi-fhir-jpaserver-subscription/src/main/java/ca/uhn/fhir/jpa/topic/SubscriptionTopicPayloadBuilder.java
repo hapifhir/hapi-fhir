@@ -77,7 +77,7 @@ public class SubscriptionTopicPayloadBuilder {
 				notificationStatus = buildSubscriptionStatus(theResources, theActiveSubscription, theTopicUrl);
 				break;
 			default:
-				throw new IllegalStateException(Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + fhirVersion);
+				throw unsupportedFhirVersionException(fhirVersion);
 		}
 
 		bundleBuilder.addCollectionEntry(notificationStatus);
@@ -113,8 +113,12 @@ public class SubscriptionTopicPayloadBuilder {
 				bundleBuilder.setType(Bundle.BundleType.SUBSCRIPTIONNOTIFICATION.toCode());
 				break;
 			default:
-				throw new IllegalStateException(Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + fhirVersion);
+				throw unsupportedFhirVersionException(fhirVersion);
 		}
+	}
+
+	private static IllegalStateException unsupportedFhirVersionException(FhirVersionEnum fhirVersion) {
+		return new IllegalStateException(Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + fhirVersion);
 	}
 
 	private SubscriptionStatus buildSubscriptionStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
