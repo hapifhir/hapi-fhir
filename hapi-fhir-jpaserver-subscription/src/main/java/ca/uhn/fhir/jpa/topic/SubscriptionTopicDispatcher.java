@@ -109,6 +109,7 @@ public class SubscriptionTopicDispatcher {
 				}
 			}
 		}
+		theActiveSubscription.incrementDeliveriesCount();
 		IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(theResources, theActiveSubscription, theTopicUrl, theRequestType);
 		bundlePayload.setId(UUID.randomUUID().toString());
 		SubscriptionDeliveryRequest subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(bundlePayload, theActiveSubscription, theRequestType, theRequestPartitionId, theTransactionId);

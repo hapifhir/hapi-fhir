@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -21,26 +20,32 @@ import java.util.UUID;
 public class R4NotificationStatusBuilder {
 	private static FhirContext ourFhirContext = null;
 
-	public static Parameters buildNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl, @Nonnull Integer theEventsSinceSubscriptionStart) {
+	public static Parameters buildNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
 		if (ourFhirContext == null) {
 			// Lazy load for non R4 context
 			ourFhirContext = FhirContext.forR4();
 		}
+		Long eventNumber = theActiveSubscription.getDeliveriesCount();
 
 		// See http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Parameters-r4-notification-status.json.html
+		// and http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/StructureDefinition-backport-subscription-status-r4.html
 		Parameters parameters = new Parameters();
 		parameters.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_STATUS);
 		parameters.setId(UUID.randomUUID().toString());
 		parameters.addParameter("subscription", new Reference(theActiveSubscription.getSubscription().getIdElement(ourFhirContext)));
+		parameters.addParameter("topic", new CanonicalType(theTopicUrl));
 		parameters.addParameter("status", new CodeType(Subscription.SubscriptionStatus.ACTIVE.toCode()));
 		parameters.addParameter("type", new CodeType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION.toCode()));
-		parameters.addParameter("topic", new CanonicalType(theTopicUrl));
-		// WIP STR5 count events since subscription start and set eventsSinceSubscriptionStart. store counts by subscription id
-		parameters.addParameter("events-since-subscription-start", theEventsSinceSubscriptionStart.toString());
+		// WIP STR5 events-since-subscription-start should be read from the database
+		parameters.addParameter("events-since-subscription-start", eventNumber.toString());
 		Parameters.ParametersParameterComponent notificationEvent = parameters.addParameter();
 		notificationEvent.setName("notification-event");
-		notificationEvent.addPart().setName("event-number").setValue(new StringType(theEventsSinceSubscriptionStart.toString()));
+		notificationEvent.addPart().setName("event-number").setValue(new StringType(eventNumber.toString()));
 		notificationEvent.addPart().setName("timestamp").setValue(new DateType(new Date()));
+		if (theResources.size() > 0) {
+			IBaseResource firstResource = theResources.get(0);
+			notificationEvent.addPart().setName("focus").setValue(new Reference(firstResource.getIdElement().toUnqualifiedVersionless()));
+		}
 
 		return parameters;
 	}

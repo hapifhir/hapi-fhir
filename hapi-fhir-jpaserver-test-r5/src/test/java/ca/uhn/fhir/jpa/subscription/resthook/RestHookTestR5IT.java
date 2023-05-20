@@ -87,7 +87,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		// Should see 1 subscription notification
 		awaitUntilReceivedTransactionCount(1);
 
-		Observation obs = assertBundleAndGetObservation(subscription, sentObservation);
+		Observation obs = assertBundleAndGetObservation(subscription, sentObservation, 1L);
 		assertEquals(Enumerations.ObservationStatus.FINAL, obs.getStatus());
 		assertEquals(sentObservation.getIdElement(), obs.getIdElement());
 	}
@@ -119,7 +119,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		// Should see 1 subscription notification
 		awaitUntilReceivedTransactionCount(1);
 
-		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
+		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 1L);
 
 		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 		Assertions.assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
@@ -139,7 +139,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		// Should see a second subscription notification
 		awaitUntilReceivedTransactionCount(2);
 
-		receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
+		receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 2L);
 
 		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 		Assertions.assertEquals("2", receivedObs.getIdElement().getVersionIdPart());
@@ -181,7 +181,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		// Send the transaction
 		sendTransaction(bundle, true);
 
-		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
+		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 1L);
 
 		MatcherAssert.assertThat(receivedObs.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
 	}
@@ -207,7 +207,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		Bundle responseBundle = sendTransaction(bundle, true);
 		awaitUntilReceivedTransactionCount(1);
 
-		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
+		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 1L);
 
 		Observation obs = myObservationDao.read(new IdType(responseBundle.getEntry().get(0).getResponse().getLocation()), mySrd);
 
@@ -233,7 +233,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		sendTransaction(bundle, true);
 		awaitUntilReceivedTransactionCount(2);
 
-		receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
+		receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 2L);
 		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless(), mySrd);
 
 		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
@@ -252,7 +252,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(100);
 		mySubscriptionDeliveredLatch.setExpectedCount(100);
-		// WIP STR5 I don't know the answer to this, but should we be bunching these up into a single delivery?
+		// WIP STR5 I don't know the answer to this, but should the server be bunching these up into a single delivery?
 		for (int i = 0; i < 100; i++) {
 			Observation observation = new Observation();
 			observation.getIdentifierFirstRep().setSystem("foo").setValue("ID" + i);
@@ -302,7 +302,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		awaitUntilReceivedTransactionCount(1);
 
-		Observation obs = assertBundleAndGetObservation(subscription, sentObservation);
+		Observation obs = assertBundleAndGetObservation(subscription, sentObservation, 1L);
 
 		// Should see 1 subscription notification
 		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
@@ -331,7 +331,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		awaitUntilReceivedTransactionCount(1);
 
-		Observation obs = assertBundleAndGetObservation(subscription, sentObservation1);
+		Observation obs = assertBundleAndGetObservation(subscription, sentObservation1, 1L);
 
 		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 
@@ -352,7 +352,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		awaitUntilReceivedTransactionCount(2);
 
-		Observation obs2 = assertBundleAndGetObservation(subscription, sentObservation2);
+		Observation obs2 = assertBundleAndGetObservation(subscription, sentObservation2, 2L);
 
 		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 
@@ -460,7 +460,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		ourLog.info(">>>3 Send obs");
 		Observation sentObservation1 = sendObservationExpectDelivery();
 		awaitUntilReceivedTransactionCount(1);
-		Observation receivedObs = assertBundleAndGetObservation(subscription1, sentObservation1);
+		Observation receivedObs = assertBundleAndGetObservation(subscription1, sentObservation1, 1L);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 
 		Assertions.assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
@@ -590,7 +590,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		// Should see 1 subscription notification
 		awaitUntilReceivedTransactionCount(1);
-		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation);
+		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 1L);
 		assertEquals(Constants.CT_FHIR_XML_NEW, getLastSystemProviderContentType());
 
 		ourLog.debug("Observation content: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(receivedObs));
@@ -695,7 +695,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		// Should see 1 subscription notification
 		awaitUntilReceivedTransactionCount(1);
-		assertBundleAndGetObservation(subscription, sentObservation);
+		assertBundleAndGetObservation(subscription, sentObservation, 1L);
 
 		// Disable
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.OFF);
@@ -798,14 +798,14 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("Catheter"));
 			createResource(observation, true);
 			awaitUntilReceivedTransactionCount(1);
-			assertBundleAndGetObservation(subscription, observation);
+			assertBundleAndGetObservation(subscription, observation, 1L);
 		}
 		{
 			Observation observation = new Observation();
 			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("PD Catheter"));
 			createResource(observation, true);
 			awaitUntilReceivedTransactionCount(2);
-			assertBundleAndGetObservation(subscription, observation);
+			assertBundleAndGetObservation(subscription, observation, 2L);
 		}
 		{
 			Observation observation = new Observation();
@@ -820,13 +820,13 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		}
 	}
 
-	private Observation assertBundleAndGetObservation(Subscription subscription, Observation sentObservation) {
+	private Observation assertBundleAndGetObservation(Subscription subscription, Observation sentObservation, Long theExpectedEventNumber) {
 		Bundle receivedBundle = getLastSystemProviderBundle();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
 		assertEquals(2, resources.size());
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
-		validateSubscriptionStatus(subscription, sentObservation, ss);
+		validateSubscriptionStatus(subscription, sentObservation, ss, theExpectedEventNumber);
 
 		return (Observation) resources.get(1);
 	}

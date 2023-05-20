@@ -294,7 +294,6 @@ public class SubscriptionCanonicalizer {
 			retVal.setChannelType(getChannelType(subscription));
 
 			// WIP STR5 set other topic subscription fields
-
 			for (org.hl7.fhir.r4.model.Extension next : subscription.getCriteriaElement().getExtension()) {
 				if (SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL.equals(next.getUrl())) {
 					List<CanonicalTopicSubscriptionFilter> filters = CanonicalTopicSubscriptionFilter.fromQueryUrl(next.getValue().primitiveValue());
@@ -471,8 +470,25 @@ public class SubscriptionCanonicalizer {
 
 		Enumerations.SubscriptionStatusCodes status = subscription.getStatus();
 		if (status != null) {
-			// WIP STR5 do all the codes map?
-			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
+			switch(status) {
+				case REQUESTED:
+					retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.REQUESTED);
+					break;
+				case ACTIVE:
+					retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.ACTIVE);
+					break;
+				case ERROR:
+					retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.ERROR);
+					break;
+				case OFF:
+					retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.OFF);
+					break;
+				case NULL:
+				case ENTEREDINERROR:
+				default:
+					ourLog.warn("Converting R5 Subscription status from {} to ERROR", status);
+					retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.ERROR);
+			}
 		}
 		retVal.getTopicSubscription().setContent(subscription.getContent());
 		retVal.setEndpointUrl(subscription.getEndpoint());

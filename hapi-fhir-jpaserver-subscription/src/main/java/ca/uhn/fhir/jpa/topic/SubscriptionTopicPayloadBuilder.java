@@ -49,10 +49,7 @@ public class SubscriptionTopicPayloadBuilder {
 	public IBaseBundle buildPayload(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl, RestOperationTypeEnum theRestOperationType) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-		// WIP STR5 get eventsSinceSubscriptionStart from the database
-		int eventsSinceSubscriptionStart = 1;
-
-		addNotificationStatus(theResources, theActiveSubscription, theTopicUrl, bundleBuilder, eventsSinceSubscriptionStart);
+		addNotificationStatus(theResources, theActiveSubscription, theTopicUrl, bundleBuilder);
 		addResources(bundleBuilder, theResources, theRestOperationType);
 		// WIP STR5 add support for notificationShape include, revinclude
 
@@ -64,20 +61,20 @@ public class SubscriptionTopicPayloadBuilder {
 		return retval;
 	}
 
-	private void addNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl, BundleBuilder bundleBuilder, int eventsSinceSubscriptionStart) {
+	private void addNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl, BundleBuilder bundleBuilder) {
 		IBaseResource notificationStatus;
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 
 		switch (fhirVersion) {
 			case R4:
-				notificationStatus = R4NotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl, eventsSinceSubscriptionStart);
+				notificationStatus = R4NotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
 				break;
 			case R4B:
-				SubscriptionStatus subscriptionStatus = buildSubscriptionStatus(theResources, theActiveSubscription, theTopicUrl, eventsSinceSubscriptionStart);
+				SubscriptionStatus subscriptionStatus = buildSubscriptionStatus(theResources, theActiveSubscription, theTopicUrl);
 				notificationStatus = VersionConvertorFactory_43_50.convertResource(subscriptionStatus);
 				break;
 			case R5:
-				notificationStatus = buildSubscriptionStatus(theResources, theActiveSubscription, theTopicUrl, eventsSinceSubscriptionStart);
+				notificationStatus = buildSubscriptionStatus(theResources, theActiveSubscription, theTopicUrl);
 				break;
 			default:
 				throw new IllegalStateException(Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + fhirVersion);
@@ -120,16 +117,17 @@ public class SubscriptionTopicPayloadBuilder {
 		}
 	}
 
-	private SubscriptionStatus buildSubscriptionStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl, int theEventsSinceSubscriptionStart) {
+	private SubscriptionStatus buildSubscriptionStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
+		long eventNumber = theActiveSubscription.getDeliveriesCount();
+
 		SubscriptionStatus subscriptionStatus = new SubscriptionStatus();
 		subscriptionStatus.setId(UUID.randomUUID().toString());
 		subscriptionStatus.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
 		subscriptionStatus.setType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION);
-		// WIP STR5 count events since subscription start and set eventsSinceSubscriptionStart
-		// store counts by subscription id
-		subscriptionStatus.setEventsSinceSubscriptionStart(theEventsSinceSubscriptionStart);
+		// WIP STR5 events-since-subscription-start should be read from the database
+		subscriptionStatus.setEventsSinceSubscriptionStart(eventNumber);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent event = subscriptionStatus.addNotificationEvent();
-		event.setEventNumber(theEventsSinceSubscriptionStart);
+		event.setEventNumber(eventNumber);
 		if (theResources.size() > 0) {
 			event.setFocus(new Reference(theResources.get(0).getIdElement()));
 		}

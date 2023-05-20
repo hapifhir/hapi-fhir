@@ -294,15 +294,15 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return retval;
 	}
 
-	protected static void validateSubscriptionStatus(Subscription subscription, IBaseResource sentResource, SubscriptionStatus ss) {
+	protected static void validateSubscriptionStatus(Subscription subscription, IBaseResource sentResource, SubscriptionStatus ss, Long theExpectedEventNumber) {
 		assertEquals(Enumerations.SubscriptionStatusCodes.ACTIVE, ss.getStatus());
 		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
-		assertEquals("1", ss.getEventsSinceSubscriptionStartElement().getValueAsString());
+		assertEquals(theExpectedEventNumber.toString(), ss.getEventsSinceSubscriptionStartElement().getValueAsString());
 
 		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
 		assertEquals(1, notificationEvents.size());
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
-		assertEquals(1, notificationEvent.getEventNumber());
+		assertEquals(theExpectedEventNumber, notificationEvent.getEventNumber());
 		assertEquals(sentResource.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
 
 		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());

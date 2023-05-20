@@ -34,7 +34,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		createEncounterSubscriptionTopic(Enumerations.EncounterStatus.PLANNED, Enumerations.EncounterStatus.COMPLETED, SubscriptionTopic.InteractionTrigger.CREATE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
-		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL, "Encounter?participant-type=PRPF");
+		Subscription subscription = createTopicSubscription("Encounter?participant-type=PRPF");
 
 		waitForActivatedSubscriptionCount(1);
 
@@ -50,15 +50,15 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		assertEquals(2, resources.size());
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
-		validateSubscriptionStatus(subscription, goodSentEncounter, ss);
+		validateSubscriptionStatus(subscription, goodSentEncounter, ss, 1L);
 
 		Encounter encounter = (Encounter) resources.get(1);
 		assertEquals(Enumerations.EncounterStatus.COMPLETED, encounter.getStatus());
 		assertEquals(goodSentEncounter.getIdElement(), encounter.getIdElement());
 	}
 
-	private Subscription createTopicSubscription(String theTopicUrl, String... theFilters) throws InterruptedException {
-		Subscription subscription = newTopicSubscription(theTopicUrl, Constants.CT_FHIR_JSON_NEW, theFilters);
+	private Subscription createTopicSubscription(String... theFilters) throws InterruptedException {
+		Subscription subscription = newTopicSubscription(BaseSubscriptionsR5Test.SUBSCRIPTION_TOPIC_TEST_URL, Constants.CT_FHIR_JSON_NEW, theFilters);
 		return postSubscription(subscription);
 	}
 
