@@ -99,7 +99,7 @@ public class JdbcUtils {
 
 					indexNames = indexNames
 						.stream()
-						.filter(Objects::nonNull)   // filter out the nulls first
+						.filter(Objects::nonNull)	// filter out the nulls first
 						.map(s -> s.toUpperCase(Locale.US)) // then convert the non-null entries to upper case
 						.collect(Collectors.toSet());
 
@@ -580,36 +580,6 @@ public class JdbcUtils {
 		public boolean equals(ColumnTypeEnum theTaskColumnType, Long theTaskColumnLength) {
 			ourLog.debug("Comparing existing {} {} to new {} {}", myColumnTypeEnum, myLength, theTaskColumnType, theTaskColumnLength);
 			return myColumnTypeEnum == theTaskColumnType && (theTaskColumnLength == null || theTaskColumnLength.equals(myLength));
-		}
-	}
-
-	public static class IndexDetails {
-		private boolean myUnique;
-		private List<String> myColumns = new ArrayList<>();
-		private String myName;
-
-		public boolean isUnique() {
-			return myUnique;
-		}
-
-		public void setUnique(boolean theUnique) {
-			myUnique = theUnique;
-		}
-
-		public List<String> getColumns() {
-			return myColumns;
-		}
-
-		public void addColumn(String theColumn) {
-			myColumns.add(theColumn);
-		}
-
-		public String getName() {
-			return myName;
-		}
-
-		public void setName(String theName) {
-			myName = theName;
 		}
 	}
 }
