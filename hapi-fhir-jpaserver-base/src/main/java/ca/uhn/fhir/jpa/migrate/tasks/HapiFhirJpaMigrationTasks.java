@@ -122,12 +122,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID", "TAG_VERSION", "TAG_USER_SELECTED");
 
 		version.onTable("HFJ_RES_VER_PROV")
-			.addIndex("20230510.1", "FK_RESVERPROV_RESVER_PID")
+			.addIndex("20230510.1", "IDX_RESVERPROV_RESVER_PID")
 			.unique(false)
-			.withColumns("RES_VER_PID");
+			.withColumns("RES_VER_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 		version.onTable("HFJ_RES_VER_PROV")
-			.addIndex("20230510.2", "FK_RESVERPROV_RES_PID")
+			.addIndex("20230510.2", "IDX_RESVERPROV_RES_PID")
 			.unique(false)
 			.withColumns("RES_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
