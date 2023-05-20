@@ -148,6 +148,10 @@ class ParserState<T> {
 		return myState.isPreResource();
 	}
 
+	boolean isToplevelResourceElement() {
+		return myState instanceof ParserState.ResourceStateHl7Org || myState instanceof ParserState.ResourceStateHapi;
+	}
+
 	private Object newContainedDt(IResource theTarget) {
 		return ReflectionUtil.newInstance(theTarget.getStructureFhirVersionEnum().getVersionImplementation().getContainedType());
 	}
