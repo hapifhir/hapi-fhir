@@ -86,7 +86,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			 * here. Until then though, this is safer.
 			 */
 
-			progress.updateInstance(instance);
+			progress.updateInstanceForReductionStep(instance);
 
 			instance.setReport(dataString);
 			instance.setStatus(StatusEnum.COMPLETED);

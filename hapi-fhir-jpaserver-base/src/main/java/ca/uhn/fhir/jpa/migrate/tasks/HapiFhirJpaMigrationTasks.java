@@ -45,6 +45,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import software.amazon.awssdk.utils.StringUtils;
 
+import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -110,7 +111,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
       .unique(false)
       .online(true)
       .withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
-    
+
 		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
 		tagDefTable.dropIndex("20230505.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
 
@@ -121,24 +122,35 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(false)
 			.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID", "TAG_VERSION", "TAG_USER_SELECTED");
 
-		version.onTable("HFJ_RES_VER_PROV")
-			.addIndex("20230510.1", "IDX_RESVERPROV_RES_VER_PID")
+		version
+			.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20230510.1", "IDX_RESVERPROV_RESVER_PID")
 			.unique(false)
-			.withColumns("RES_VER_PID")
-			.failureAllowed();
-		version.onTable("HFJ_RES_VER_PROV")
+			.withColumns("RES_VER_PID");
+
+		version
+			.onTable("HFJ_RES_VER_PROV")
 			.addIndex("20230510.2", "IDX_RESVERPROV_RES_PID")
 			.unique(false)
 			.withColumns("RES_PID");
 
-		version.onTable(ResourceHistoryTable.HFJ_RES_VER)
+		version
+			.onTable(ResourceHistoryTable.HFJ_RES_VER)
 			.addColumn("20230510.4", "SOURCE_URI")
 			.nullable()
 			.type(ColumnTypeEnum.STRING, 100);
-		version.onTable(ResourceHistoryTable.HFJ_RES_VER)
+		version
+			.onTable(ResourceHistoryTable.HFJ_RES_VER)
 			.addColumn("20230510.5", "REQUEST_ID")
 			.nullable()
 			.type(ColumnTypeEnum.STRING, 16);
+
+		version
+			.onTable("HFJ_RES_VER_PROV")
+			.addForeignKey("20230510.6", "FK_RESVERPROV_RES_PID")
+			.toColumn("RES_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
 	}
 
 	protected void init660() {
@@ -372,6 +384,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			linkTable.addForeignKey("20230424.5", "FK_RESLINK_TARGET")
 				.toColumn("TARGET_RESOURCE_ID").references("HFJ_RESOURCE", "RES_ID");
 		}
+
+		{
+			version.onTable("MPI_LINK")
+				.addIndex("20230504.1", "IDX_EMPI_GR_TGT")
+				.unique(false)
+				.withColumns("GOLDEN_RESOURCE_PID", "TARGET_PID");
+		}
+
 	}
 
 	protected void init640() {
@@ -920,11 +940,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("RES_ID");
 
-
 		theVersion.onTable("HFJ_RES_VER_PROV")
 			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID")
 			.unique(false)
 			.withColumns("RES_PID")
+			.doNothing() // This index is added below in a better form
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 		theVersion.onTable("HFJ_FORCED_ID")
@@ -1543,7 +1563,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resVerProv
 			.addForeignKey("20190921.15", "FK_RESVERPROV_RES_PID")
 			.toColumn("RES_PID")
-			.references("HFJ_RESOURCE", "RES_ID");
+			.references("HFJ_RESOURCE", "RES_ID")
+			.doNothing(); // Added below in a better form
 		resVerProv.addColumn("SOURCE_URI").nullable().type(ColumnTypeEnum.STRING, 100);
 		resVerProv.addColumn("REQUEST_ID").nullable().type(ColumnTypeEnum.STRING, 16);
 		resVerProv.addIndex("20190921.16", "IDX_RESVERPROV_SOURCEURI").unique(false).withColumns("SOURCE_URI");
