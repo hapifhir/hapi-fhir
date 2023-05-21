@@ -39,7 +39,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 
 	@BeforeEach
 	@Override
-	public void before() throws ServletException {
+	public void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(false);
 		myStorageSettings.setInlineResourceTextBelowSize(10000);

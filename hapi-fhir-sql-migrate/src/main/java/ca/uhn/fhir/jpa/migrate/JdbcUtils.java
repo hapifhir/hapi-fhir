@@ -173,6 +173,8 @@ public class JdbcUtils {
 						int dataType = indexes.getInt("DATA_TYPE");
 						Long length = indexes.getLong("COLUMN_SIZE");
 						switch (dataType) {
+							case Types.LONGVARCHAR:
+								return new ColumnType(ColumnTypeEnum.TEXT, length);
 							case Types.BIT:
 							case Types.BOOLEAN:
 								return new ColumnType(ColumnTypeEnum.BOOLEAN, length);

@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -43,6 +44,7 @@ import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
+@SuppressWarnings("SqlDialectInspection")
 @Entity
 @Immutable
 @Subselect("SELECT h.pid               as pid,            " +
@@ -83,7 +85,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	private Long myResourceVersion;
 	@Column(name = "PROV_REQUEST_ID", length = Constants.REQUEST_ID_LENGTH)
 	private String myProvenanceRequestId;
-	@Column(name = "PROV_SOURCE_URI", length = ResourceHistoryProvenanceEntity.SOURCE_URI_LENGTH)
+	@Column(name = "PROV_SOURCE_URI", length = ResourceHistoryTable.SOURCE_URI_LENGTH)
 	private String myProvenanceSourceUri;
 	@Column(name = "HAS_TAGS")
 	private boolean myHasTags;

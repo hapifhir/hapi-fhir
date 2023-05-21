@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.7.0-SNAPSHOT</version>
+		<version>6.7.3-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -238,5 +238,44 @@
             <artifactId>poi</artifactId>
         </dependency>
     </dependencies>
-
+	<profiles>
+		<profile>
+			<id>CI</id>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-enforcer-plugin</artifactId>
+							<executions>
+								<execution>
+									<id>enforce-no-snapshot-cr-dependencies</id>
+									<goals>
+										<goal>enforce</goal>
+									</goals>
+									<phase>verify</phase>
+									<configuration>
+										<rules>
+											<requireReleaseDeps>
+												<message>No Clinical Reasoning Snapshots Allowed!</message>
+												<excludes>
+													<exclude>*:*</exclude>
+												</excludes>
+												<includes>
+													<include>org.opencds.cqf:*</include>
+													<include>org.opencds.cqf.cql:*</include>
+													<include>org.opencds.cqf.fhir:*</include>
+													<include>info.cqframework:*</include>
+												</includes>
+											</requireReleaseDeps>
+										</rules>
+									</configuration>
+								</execution>
+							</executions>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
 </project>

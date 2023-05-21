@@ -26,10 +26,13 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -40,6 +43,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -59,6 +63,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,6 +137,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Nonnull
 	private Parameters reindexInTransaction(RequestDetails theRequestDetails, IIdType theResourceId) {
+		StopWatch sw = new StopWatch();
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResourceId.getResourceType());
 		ResourceTable entity = (ResourceTable) dao.readEntity(theResourceId, theRequestDetails);
 		IBaseResource resource = myJpaStorageResourceParser.toResource(entity, false);
@@ -144,16 +150,26 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		ResourceIndexedSearchParams existingParamsToPopulate = new ResourceIndexedSearchParams(entity);
 		existingParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 
-		dao.reindex(resource, entity);
+		List<String> messages = new ArrayList<>();
+
+		JpaPid pid = JpaPid.fromId(entity.getId());
+		ReindexOutcome outcome = dao.reindex(pid, new ReindexParameters(), theRequestDetails, new TransactionDetails());
+		messages.add("Reindex completed in " + sw);
+
+		for (String next : outcome.getWarnings()) {
+			messages.add("WARNING: " + next);
+		}
 
 		ResourceIndexedSearchParams newParamsToPopulate = new ResourceIndexedSearchParams(entity);
 		newParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 
-		return buildIndexResponse(existingParamsToPopulate, newParamsToPopulate, true);
+		return buildIndexResponse(existingParamsToPopulate, newParamsToPopulate, true, messages);
 	}
 
 	@Nonnull
 	private Parameters reindexDryRunInTransaction(RequestDetails theRequestDetails, IIdType theResourceId, RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails, Set<String> theParameters) {
+		StopWatch sw = new StopWatch();
+
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceId.getResourceType());
 		ResourceTable entity = (ResourceTable) dao.readEntity(theResourceId, theRequestDetails);
 		IBaseResource resource = myJpaStorageResourceParser.toResource(entity, false);
@@ -186,7 +202,8 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 			showAction = false;
 		}
 
-		return buildIndexResponse(existingParamsToPopulate, newParamsToPopulate, showAction);
+		String message = "Reindex dry-run completed in " + sw + ". No changes were committed to any stored data.";
+		return buildIndexResponse(existingParamsToPopulate, newParamsToPopulate, showAction, List.of(message));
 	}
 
 	@Nonnull
@@ -197,11 +214,15 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 
 	@Nonnull
 	@VisibleForTesting
-	Parameters buildIndexResponse(ResourceIndexedSearchParams theExistingParams, ResourceIndexedSearchParams theNewParams, boolean theShowAction) {
+	Parameters buildIndexResponse(ResourceIndexedSearchParams theExistingParams, ResourceIndexedSearchParams theNewParams, boolean theShowAction, List<String> theMessages) {
 		Parameters parameters = new Parameters();
 
 		Parameters.ParametersParameterComponent narrativeParameter = parameters.addParameter();
 		narrativeParameter.setName("Narrative");
+
+		for (String next : theMessages) {
+			parameters.addParameter("Message", new StringType(next));
+		}
 
 		// Normal indexes
 		addParamsNonMissing(parameters, "CoordinateIndexes", "Coords", theExistingParams.myCoordsParams, theNewParams.myCoordsParams, new CoordsParamPopulator(), theShowAction);

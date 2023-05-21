@@ -19,13 +19,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
-import javax.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -202,7 +201,7 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		return myOrganizationDao.search(map).size();
 	}
 
-	private IIdType createPatientWithVersion(Consumer<IBaseResource> theWithId) {
+	private IIdType createPatientWithVersion(ICreationArgument theWithId) {
 		Patient patient = new Patient();
 		patient.addName(new HumanName().setFamily("FAMILY"));
 		theWithId.accept(patient);
@@ -225,8 +224,8 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		public void cascadeDelete(RequestDetails theRequestDetails, DeleteConflictList theConflictList, IBaseResource theResource) throws InterruptedException {
 			myCalledLatch.call(theResource);
 			ourLog.info("Waiting to proceed with delete");
-			myWaitLatch.awaitExpected();
-			ourLog.info("Cascade Delete proceeding: {}", myWaitLatch.getLatchInvocationParameter());
+			List<HookParams> hookParams = myWaitLatch.awaitExpected();
+			ourLog.info("Cascade Delete proceeding: {}", PointcutLatch.getLatchInvocationParameter(hookParams));
 			myWaitLatch.setExpectedCount(1);
 		}
 

@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * is not mandatory for interceptor classes, but is added as a marker by convention.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 public @interface Interceptor {
 
@@ -41,7 +41,7 @@ public @interface Interceptor {
 
 	/**
 	 * The order that interceptors should be called in. Lower numbers happen before higher numbers. Default is 0
-	 * and allowable values can be positive or negative or 0.
+	 * and allowable values can be positive or negative or 0. Ignored when annotation is set on a method.
 	 */
 	int order() default DEFAULT_ORDER;
 }

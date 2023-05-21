@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
@@ -55,11 +56,7 @@ public class SubscriptionTopicPayloadBuilder {
 
 		if (fhirVersion == FhirVersionEnum.R4B) {
 			bundleBuilder.setType(Bundle.BundleType.HISTORY.toCode());
-			String serializedSubscriptionStatus = FhirContext.forR5Cached().newJsonParser().encodeResourceToString(subscriptionStatus);
-			subscriptionStatus = myFhirContext.newJsonParser().parseResource(org.hl7.fhir.r4b.model.SubscriptionStatus.class, serializedSubscriptionStatus);
-			// WIP STR5 VersionConvertorFactory_43_50 when it supports SubscriptionStatus
-			// track here: https://github.com/hapifhir/org.hl7.fhir.core/issues/1212
-//			subscriptionStatus = (SubscriptionStatus) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.SubscriptionStatus) subscriptionStatus);
+			subscriptionStatus = VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r5.model.SubscriptionStatus) subscriptionStatus);
 		} else if (fhirVersion == FhirVersionEnum.R5) {
 			bundleBuilder.setType(Bundle.BundleType.SUBSCRIPTIONNOTIFICATION.toCode());
 		} else {
