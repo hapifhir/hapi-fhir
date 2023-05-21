@@ -236,9 +236,6 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	@Override
 	@Transactional
 	public void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<JpaPid> theResourceIds, AtomicInteger theRemainingCount) {
-
-
-
 		List<Long> pids = JpaPid.toLongList(theResourceIds);
 
 		List<ResourceTable> resourcesToDelete = myResourceTableDao.findAllByIdAndLoadForcedIds(pids);
