@@ -31,7 +31,6 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
@@ -40,6 +39,7 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.Arrays;
 
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
@@ -119,7 +119,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 						hibernateQuery.setParameter(i, args[i - 1]);
 					}
 
-					ourLog.trace("About to execute SQL: {}", sql);
+					ourLog.trace("About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
 
 					/*
 					 * These settings help to ensure that we use a search cursor

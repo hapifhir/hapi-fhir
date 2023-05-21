@@ -34,7 +34,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGTH;
 
@@ -42,8 +41,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGT
 	@Index(name = "IDX_RESVERPROV_SOURCEURI", columnList = "SOURCE_URI"),
 	@Index(name = "IDX_RESVERPROV_REQUESTID", columnList = "REQUEST_ID"),
 	@Index(name = "IDX_RESVERPROV_RES_PID", columnList = "RES_PID"),
-	@Index(name = "IDX_RESVERPROV_RES_VER_PID", columnList = "RES_VER_PID")
-}, uniqueConstraints = {
+	@Index(name = "IDX_RESVERPROV_RESVER_PID", columnList = "RES_VER_PID")
 })
 @Entity
 public class ResourceHistoryProvenanceEntity extends BasePartitionable {

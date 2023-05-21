@@ -1121,7 +1121,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
 
-
 	@Test
 	public void testOperationEverything_SomeIncludedResourcesNotAuthorized() {
 		Patient pt1 = new Patient();

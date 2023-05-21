@@ -21,7 +21,6 @@ package ca.uhn.fhir.cr.dstu3.questionnaire;
  */
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
-import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.cr.dstu3.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -138,15 +137,13 @@ public class QuestionnaireOperationsProvider {
 	}
 
 	/**
-	 * Implements the <a href=
-	 * "https://build.fhir.org/ig/HL7/davinci-dtr/OperationDefinition-questionnaire-package.html">$questionnaire-package</a>
-	 * operation found in the
-	 * <a href="https://build.fhir.org/ig/HL7/davinci-dtr/index.html">Da Vinci Documents Templates and Rules (DTR) IG</a>.
+	 * Implements a $package operation following the <a href=
+	 * "https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
 	 *
 	 * @param theId             The id of the Questionnaire.
 	 * @param theCanonical      The canonical identifier for the questionnaire (optionally version-specific).
 	 * @param theRequestDetails The details (such as tenant) of this request. Usually
-	 *                          autopopulated HAPI.
+	 *                          autopopulated by HAPI.
 	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)

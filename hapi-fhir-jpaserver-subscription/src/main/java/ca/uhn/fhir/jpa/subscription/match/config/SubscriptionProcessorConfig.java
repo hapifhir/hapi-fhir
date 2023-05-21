@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicPayloadBuilder;
 import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -98,8 +99,8 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
-	public SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory() {
-		return new SubscriptionDeliveryHandlerFactory();
+	public SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory(ApplicationContext theApplicationContext, IEmailSender theEmailSender) {
+		return new SubscriptionDeliveryHandlerFactory(theApplicationContext, theEmailSender);
 	}
 
 	@Bean
