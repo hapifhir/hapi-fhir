@@ -49,7 +49,6 @@ public class PartitionedUrlListJobParameters extends PartitionedJobParameters {
 	public PartitionedUrlListJobParameters addUrl(@Nonnull String theUrl) {
 		PartitionedUrl partitionedUrl = new PartitionedUrl();
 		partitionedUrl.setUrl(theUrl);
-		partitionedUrl.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		return addPartitionedUrl(partitionedUrl);
 	}
 }

@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,7 +32,7 @@ public class DeleteCodeSystemVersionParameterValidator implements IJobParameters
 
 	@Nullable
 	@Override
-	public List<String> validate(@Nonnull TermCodeSystemDeleteVersionJobParameters theParameters) {
+	public List<String> validate(RequestDetails theRequestDetails, @Nonnull TermCodeSystemDeleteVersionJobParameters theParameters) {
 		ArrayList<String> errors = new ArrayList<>();
 		long versionPID = theParameters.getCodeSystemVersionPid();
 

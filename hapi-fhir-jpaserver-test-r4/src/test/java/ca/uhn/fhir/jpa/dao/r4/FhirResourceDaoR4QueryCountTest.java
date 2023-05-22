@@ -85,7 +85,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.util.comparator.ComparableComparator;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Id;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -784,7 +783,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Test
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(new ResourceIdListWorkChunkJson(pids), sink, "instance-id", "chunk-id");
+		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(new ResourceIdListWorkChunkJson(pids, null), sink, "instance-id", "chunk-id", false);
 
 		// Verify
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());

@@ -166,7 +166,7 @@ public class BulkDataExportProvider {
 		parameters.setPartitionId(partitionId);
 
 		// start job
-		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
+		Batch2JobStartResponse response = myJobRunner.startNewJob(theRequestDetails, parameters);
 
 		JobInfo info = new JobInfo();
 		info.setJobMetadataId(response.getInstanceId());

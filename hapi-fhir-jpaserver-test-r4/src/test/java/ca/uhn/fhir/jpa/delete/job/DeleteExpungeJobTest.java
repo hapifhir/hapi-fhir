@@ -134,8 +134,13 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// Validate
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
-		assertEquals(1000, outcome.getCombinedRecordsProcessed());
+		assertEquals(2, outcome.getCombinedRecordsProcessed());
+		assertDoesntExist(p1);
+		assertDoesntExist(o1);
+		assertNotGone(p2);
+		assertNotGone(o2);
 	}
+
 
 	@Test
 	public void testInvalidParams_NoSearchParams() {

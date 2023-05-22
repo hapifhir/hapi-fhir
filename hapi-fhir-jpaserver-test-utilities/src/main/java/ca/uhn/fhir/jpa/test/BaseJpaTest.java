@@ -26,6 +26,8 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -82,6 +84,8 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -149,6 +153,7 @@ import static java.util.stream.Collectors.joining;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -253,6 +258,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 	private List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
@@ -831,6 +838,43 @@ public abstract class BaseJpaTest extends BaseTest {
 			retVal.add(next.getCode());
 		}
 		return retVal;
+	}
+
+
+	/**
+	 * Asserts that the resource with {@literal theId} is deleted
+	 */
+	protected void assertGone(IIdType theId) {
+		try {
+			IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
+			dao.read(theId, mySrd);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+	}
+
+	/**
+	 * Asserts that the resource with {@literal theId} exists and is not deleted
+	 */
+	protected void assertNotGone(IIdType theId) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
+		assertNotNull(dao.read(theId, mySrd));
+	}
+
+	/**
+	 * Asserts that the resource with {@literal theId} does not exist (i.e. not that
+	 * it exists but that it was deleted, but rather that the ID doesn't exist at all).
+	 * This can be used to test that a resource was expunged.
+	 */
+	protected void assertDoesntExist(IIdType theId) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
+		try {
+			dao.read(theId, mySrd);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
 	}
 
 	public static void waitForSize(int theTarget, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {

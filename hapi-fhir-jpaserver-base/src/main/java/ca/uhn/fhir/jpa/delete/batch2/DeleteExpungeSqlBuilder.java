@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,9 +54,9 @@ public class DeleteExpungeSqlBuilder {
 
 
 	@Nonnull
-	List<String> convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids, boolean theCascade) {
-		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
+	DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids, boolean theCascade) {
 
+		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
 		validateOkToDeleteAndExpunge(pids, theCascade);
 
 		List<String> rawSql = new ArrayList<>();
@@ -72,7 +71,7 @@ public class DeleteExpungeSqlBuilder {
 		// Lastly we need to delete records from the resource table all of these other tables link to:
 		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
 		rawSql.add(deleteRecordsByColumnSql(pidListString, resourceTablePk));
-		return rawSql;
+		return new DeleteExpungeSqlResult(rawSql, pids.size());
 	}
 
 	public void validateOkToDeleteAndExpunge(Set<Long> thePids, boolean theCascade) {
@@ -128,4 +127,26 @@ public class DeleteExpungeSqlBuilder {
 	private String deleteRecordsByColumnSql(String thePidListString, ResourceForeignKey theResourceForeignKey) {
 		return "DELETE FROM " + theResourceForeignKey.table + " WHERE " + theResourceForeignKey.key + " IN " + thePidListString;
 	}
+
+
+	public static class DeleteExpungeSqlResult {
+
+
+		private final List<String> mySqlStatements;
+		private final int myRecordCount;
+
+		public DeleteExpungeSqlResult(List<String> theSqlStatments, int theRecordCount) {
+			mySqlStatements = theSqlStatments;
+			myRecordCount = theRecordCount;
+		}
+
+		public List<String> getSqlStatements() {
+			return mySqlStatements;
+		}
+
+		public int getRecordCount() {
+			return myRecordCount;
+		}
+	}
+
 }

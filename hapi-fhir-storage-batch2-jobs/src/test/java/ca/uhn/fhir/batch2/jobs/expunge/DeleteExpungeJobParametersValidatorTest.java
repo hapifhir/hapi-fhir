@@ -2,6 +2,8 @@ package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.batch2.jobs.parameters.IUrlListValidator;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +24,8 @@ public class DeleteExpungeJobParametersValidatorTest {
 	private IDeleteExpungeSvc<?> myDeleteExpungeSvc;
 	@Mock
 	private IUrlListValidator myUrlListValidator;
+	@Mock
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@InjectMocks
 	private DeleteExpungeJobParametersValidator mySvc;
 
@@ -35,7 +39,7 @@ public class DeleteExpungeJobParametersValidatorTest {
 		parameters.setCascade(true);
 
 		// Test
-		List<String> outcome = mySvc.validate(parameters);
+		List<String> outcome = mySvc.validate(new SystemRequestDetails(), parameters);
 
 		// Verify
 		assertThat(outcome.toString(), outcome, contains("Cascading delete is not supported on this server"));
@@ -51,7 +55,7 @@ public class DeleteExpungeJobParametersValidatorTest {
 		parameters.setCascade(true);
 
 		// Test
-		List<String> outcome = mySvc.validate(parameters);
+		List<String> outcome = mySvc.validate(new SystemRequestDetails(), parameters);
 
 		// Verify
 		assertThat(outcome, empty());

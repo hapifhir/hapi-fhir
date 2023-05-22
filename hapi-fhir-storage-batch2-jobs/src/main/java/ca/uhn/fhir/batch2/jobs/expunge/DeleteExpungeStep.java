@@ -19,19 +19,14 @@
  */
 package ca.uhn.fhir.batch2.jobs.expunge;
 
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.api.*;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,12 +59,17 @@ public class DeleteExpungeStep implements IJobStepWorker<DeleteExpungeJobParamet
 	}
 
 	@Nonnull
-	public RunOutcome doDeleteExpunge(ResourceIdListWorkChunkJson data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId, boolean theCascade) {
+	public RunOutcome doDeleteExpunge(ResourceIdListWorkChunkJson theData, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId, boolean theCascade) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(requestDetails, transactionDetails, new DeleteExpungeJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId, theCascade));
+		DeleteExpungeJob job = new DeleteExpungeJob(theData, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId, theCascade);
+		myHapiTransactionService
+			.withRequest(requestDetails)
+			.withTransactionDetails(transactionDetails)
+			.withRequestPartitionId(theData.getRequestPartitionId())
+			.execute(job);
 
-		return new RunOutcome(data.size());
+		return new RunOutcome(job.getRecordCount());
 	}
 
 	private class DeleteExpungeJob implements TransactionCallback<Void> {
@@ -80,6 +80,7 @@ public class DeleteExpungeStep implements IJobStepWorker<DeleteExpungeJobParamet
 		private final String myChunkId;
 		private final String myInstanceId;
 		private final boolean myCascade;
+		private int myRecordCount;
 
 		public DeleteExpungeJob(ResourceIdListWorkChunkJson theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId, boolean theCascade) {
 			myData = theData;
@@ -89,6 +90,10 @@ public class DeleteExpungeStep implements IJobStepWorker<DeleteExpungeJobParamet
 			myInstanceId = theInstanceId;
 			myChunkId = theChunkId;
 			myCascade = theCascade;
+		}
+
+		public int getRecordCount() {
+			return myRecordCount;
 		}
 
 		@Override
@@ -101,15 +106,13 @@ public class DeleteExpungeStep implements IJobStepWorker<DeleteExpungeJobParamet
 				return null;
 			}
 
-
 			ourLog.info("Starting delete expunge work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 
-			myDeleteExpungeSvc.deleteExpunge(persistentIds, myCascade);
+			myRecordCount = myDeleteExpungeSvc.deleteExpunge(persistentIds, myCascade);
 
 			return null;
 		}
 	}
-
 
 
 }

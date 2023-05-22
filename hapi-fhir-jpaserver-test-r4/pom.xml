@@ -96,8 +96,15 @@
 					<runOrder>alphabetical</runOrder>
 					<argLine>@{argLine} ${surefire_jvm_args} -XX:+HeapDumpOnOutOfMemoryError</argLine>
 					<forkCount>0.6C</forkCount>
-					<excludes>*StressTest*</excludes>
+					<perCoreThreadCount>false</perCoreThreadCount>
+					<reuseForks>true</reuseForks>
+					<parallel>classes</parallel>
+					<threadCount>1</threadCount>
 					<skip>${skipFailsafe}</skip>
+					<excludes>*StressTest*</excludes>
+					<includes>
+						<include>**/*Test.java</include>
+					</includes>
 				</configuration>
 			</plugin>
 			<plugin>

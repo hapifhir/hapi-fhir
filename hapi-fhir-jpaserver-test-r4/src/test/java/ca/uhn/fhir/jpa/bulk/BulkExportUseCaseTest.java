@@ -441,7 +441,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			myCaptureQueriesListener.clear();
 
-			Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 
 			assertNotNull(startResponse);
 
@@ -557,7 +557,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-			Batch2JobStartResponse job = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			Batch2JobStartResponse job = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
 			ourLog.debug("Job status after awaiting - {}", myJobRunner.getJobInfo(job.getInstanceId()).getStatus());
 			await()
@@ -1220,7 +1220,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 
 		assertNotNull(startResponse);
 
@@ -1241,7 +1241,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 
 		assertNotNull(startResponse);
 
