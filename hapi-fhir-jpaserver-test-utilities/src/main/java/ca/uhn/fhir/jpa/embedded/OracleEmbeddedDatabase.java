@@ -59,6 +59,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 	public void clearDatabase() {
 		dropTables();
 		dropSequences();
+		getJdbcTemplate().execute("PURGE RECYCLEBIN");
 	}
 
 	private void dropTables() {
