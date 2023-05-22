@@ -14,6 +14,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
@@ -99,6 +100,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -173,6 +175,61 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Pre-cache all StructureDefinitions so that query doesn't affect other counts
 		myValidationSupport.invalidateCaches();
 		myValidationSupport.fetchAllStructureDefinitions();
+	}
+
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@Test
+	public void testExpungeAllVersionsWithTagsDeletesRow() {
+		// Setup
+		// Create then delete
+		for (int i = 0; i < 5; i++) {
+			Patient p = new Patient();
+			p.setId("TEST" + i);
+			p.getMeta().addTag().setSystem("http://foo").setCode("bar");
+			p.setActive(true);
+			p.addName().setFamily("FOO");
+			myPatientDao.update(p).getId();
+
+			for (int j = 0; j < 5; j++) {
+				p.setActive(!p.getActive());
+				myPatientDao.update(p);
+			}
+
+			myPatientDao.delete(new IdType("Patient/TEST" + i));
+		}
+
+
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), not(empty())));
+
+		logAllResources();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		myPatientDao.expunge(new ExpungeOptions()
+			.setExpungeDeletedResources(true), null);
+
+		// Verify
+		/*
+		 * Note: $expunge is still pretty inefficient. We load all the HFJ_RESOURCE entities
+		 * in one shot, but we then load HFJ_RES_VER entities one by one and delete the FK
+		 * constraints on both HFJ_RESOURCE and HFJ_RES_VER one by one. This could definitely
+		 * stand to be optimized. The one gotcha is that we call an interceptor for each
+		 * version being deleted (I think so that MDM can do cleanup?) so we need to be careful
+		 * about any batch deletes.
+		 */
+		assertEquals(47, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(85, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), empty()));
+
 	}
 
 	/**

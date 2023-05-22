@@ -52,7 +52,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -412,11 +411,34 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	@Hook(Pointcut.STORAGE_INITIATE_BULK_EXPORT)
 	public void initiateBulkExport(RequestDetails theRequestDetails, BulkDataExportOptions theBulkExportOptions, Pointcut thePointcut) {
+//		RestOperationTypeEnum restOperationType = determineRestOperationTypeFromBulkExportOptions(theBulkExportOptions);
 		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+
 		if (theRequestDetails != null) {
 			theRequestDetails.setAttribute(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, theBulkExportOptions);
 		}
 		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
+	}
+
+	/**
+	 * TODO GGG This method should eventually be used when invoking the rules applier.....however we currently rely on the incorrect
+	 * behaviour of passing down `EXTENDED_OPERATION_SERVER`.
+	 */
+	private RestOperationTypeEnum determineRestOperationTypeFromBulkExportOptions(BulkDataExportOptions theBulkExportOptions) {
+		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+		BulkDataExportOptions.ExportStyle exportStyle = theBulkExportOptions.getExportStyle();
+		if (exportStyle.equals(BulkDataExportOptions.ExportStyle.SYSTEM)) {
+			restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+		} else if (exportStyle.equals(BulkDataExportOptions.ExportStyle.PATIENT)) {
+			if (theBulkExportOptions.getPatientIds().size() == 1) {
+				restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+			} else {
+				restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
+			}
+		} else if (exportStyle.equals(BulkDataExportOptions.ExportStyle.GROUP)) {
+			restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+		}
+		return restOperationType;
 	}
 
 	private void checkPointcutAndFailIfDeny(RequestDetails theRequestDetails, Pointcut thePointcut, @Nonnull IBaseResource theInputResource) {

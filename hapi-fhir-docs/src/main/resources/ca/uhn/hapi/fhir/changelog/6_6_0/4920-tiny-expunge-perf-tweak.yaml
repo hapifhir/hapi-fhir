@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 4920
+title: "The `$expunge` operation has been slightly optimized and should issue fewer SQL
+  statements to the database."

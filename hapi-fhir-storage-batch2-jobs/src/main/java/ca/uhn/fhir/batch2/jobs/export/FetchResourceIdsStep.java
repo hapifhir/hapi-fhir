@@ -71,10 +71,20 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setExpandMdm(params.isExpandMdm());
 		providerParams.setPartitionId(params.getPartitionId());
 
+		/*
+		 * we set all the requested resource types here so that
+		 * when we recursively fetch resource types for a given patient/group
+		 * we don't recurse for types that they did not request
+		 */
+		providerParams.setRequestedResourceTypes(params.getResourceTypes());
+
 		int submissionCount = 0;
 		try {
 			Set<BatchResourceId> submittedBatchResourceIds = new HashSet<>();
 
+			/*
+			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
+			 */
 			for (String resourceType : params.getResourceTypes()) {
 				providerParams.setResourceType(resourceType);
 

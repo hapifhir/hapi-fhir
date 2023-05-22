@@ -1003,7 +1003,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		for (Iterator<String> keyIter = theObject.keyIterator(); keyIter.hasNext(); ) {
 			String nextName = keyIter.next();
 			if ("resourceType".equals(nextName)) {
-				continue;
+				if (theState.isToplevelResourceElement()) {
+					continue;
+				}
 			} else if ("extension".equals(nextName)) {
 				BaseJsonLikeArray array = grabJsonArray(theObject, nextName, "extension");
 				parseExtension(theState, array, false);
