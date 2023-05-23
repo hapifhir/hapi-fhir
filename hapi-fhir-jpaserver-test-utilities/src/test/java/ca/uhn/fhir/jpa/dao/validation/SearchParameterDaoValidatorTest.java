@@ -153,8 +153,7 @@ public class SearchParameterDaoValidatorTest {
 	// SP of type combo composite unique,
 	public void testMethodValidate_allCompositeSpTypesWithComponentOfValidType_isValid(SearchParameter theSearchParameter) {
 
-
-		theSearchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent().setDefinition("SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN"));
+		theSearchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN));
 		// todo: add other valid sp types
 
 		mySvc.validate(theSearchParameter);
