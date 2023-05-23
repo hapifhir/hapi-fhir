@@ -48,7 +48,7 @@ public class DeleteExpungeProvider {
 	@Operation(name = ProviderConstants.OPERATION_DELETE_EXPUNGE, idempotent = false)
 	public IBaseParameters deleteExpunge(
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, typeName = "string", min = 1) List<IPrimitiveType<String>> theUrlsToDeleteExpunge,
-		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
+		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theBatchSize,
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_CASCADE, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theCascade,
 		RequestDetails theRequestDetails
 	) {
@@ -61,8 +61,8 @@ public class DeleteExpungeProvider {
 			.collect(Collectors.toList());
 
 		Integer batchSize = null;
-		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().intValue() > 0) {
-			batchSize = theBatchSize.getValue().intValue();
+		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue() > 0) {
+			batchSize = theBatchSize.getValue();
 		}
 
 		boolean cascase = false;
