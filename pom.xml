@@ -2289,9 +2289,18 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.0.0-M5</version>
+					<version>3.1.0</version>
 					<configuration>
+						<reuseForks>false</reuseForks>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+						<forkCount>1</forkCount>
+						<threadCount>1</threadCount>
+						<perCoreThreadCount>true</perCoreThreadCount>
+						<runOrder>alphabetical</runOrder>
+						<useModulePath>false</useModulePath>
+						<includes>
+							<include>**/*IT.java</include>
+						</includes>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -2315,9 +2324,19 @@
 					<version>3.0.0-M5</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
-						<runOrder>random</runOrder>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 						<trimStackTrace>true</trimStackTrace>
+						<runOrder>alphabetical</runOrder>
+						<argLine>@{argLine} ${surefire_jvm_args} -XX:+HeapDumpOnOutOfMemoryError</argLine>
+						<forkCount>0.6C</forkCount>
+						<threadCount>1</threadCount>
+						<perCoreThreadCount>false</perCoreThreadCount>
+						<reuseForks>true</reuseForks>
+						<parallel>classes</parallel>
+						<includes>
+							<include>**/*Test.java</include>
+						</includes>
+						<excludes>*StressTest*</excludes>
 					</configuration>
 				</plugin>
 				<plugin>
