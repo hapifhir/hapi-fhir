@@ -3,37 +3,44 @@ package ca.uhn.fhir.jpa.dao.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.jupiter.api.Assertions;
+import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.SearchParameter;
+import org.hl7.fhir.r5.model.SearchParameter.SearchParameterComponentComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.REFERENCE;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
+import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SearchParameterDaoValidatorTest {
 
 	@Spy
-	private FhirContext ourCtx = FhirContext.forR4Cached();
+	private FhirContext myFhirContext = FhirContext.forR4Cached();
 	@Mock
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Spy
@@ -41,128 +48,152 @@ public class SearchParameterDaoValidatorTest {
 	@InjectMocks
 	private SearchParameterDaoValidator mySvc;
 
-	private VersionCanonicalizer myVersionCanonicalizer = new VersionCanonicalizer(ourCtx);
+	private VersionCanonicalizer myVersionCanonicalizer = new VersionCanonicalizer(myFhirContext);
+
+	private SearchParameterCanonicalizer mySearchParameterCanonicalizer = new SearchParameterCanonicalizer(myFhirContext);
+
+	private RuntimeSearchParam myObservationPatientRuntimeSearchParam;
+	private RuntimeSearchParam myObservationCodeRuntimeSearchParam;
+
+	private static String SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN = "SearchParameter/observation-code";
+	private static String SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE = "SearchParameter/observation-patient";
 
 	@BeforeEach
 	public void before() {
-		RuntimeSearchParam observationCodeSearchParam = new RuntimeSearchParam(new IdDt("observation-code"),
-			null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN,
-			null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, List.of("Observation"));
 
-		lenient().when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("observation-code")))
-			.thenReturn(observationCodeSearchParam);
+		org.hl7.fhir.r5.model.SearchParameter observationCodeSp = createSearchParameter(TOKEN,"SearchParameter/observation-code", "observation-code", "Observation.code");
+		myObservationCodeRuntimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(observationCodeSp);
+
+		org.hl7.fhir.r5.model.SearchParameter observationPatientSp = createSearchParameter(REFERENCE, "SearchParameter/observation-patient", "observation-patient", "Observation.subject.where(resolve() is Patient");
+		myObservationPatientRuntimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(observationPatientSp);
+
 	}
 
 	@Test
 	public void testValidateSubscription() {
-		SearchParameter sp = new SearchParameter();
+		org.hl7.fhir.r4.model.SearchParameter sp = new org.hl7.fhir.r4.model.SearchParameter();
 		sp.setId("SearchParameter/patient-eyecolour");
 		sp.setUrl("http://example.org/SearchParameter/patient-eyecolour");
 		sp.addBase("Patient");
 		sp.setCode("eyecolour");
-		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		sp.setExpression("Patient.extension('http://foo')");
 		sp.addTarget("Patient");
 
-		org.hl7.fhir.r5.model.SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
+		SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
 		mySvc.validate(canonicalSp);
 	}
 
 	@Test
 	public void testValidateSubscriptionWithCustomType() {
-		SearchParameter sp = new SearchParameter();
+		org.hl7.fhir.r4.model.SearchParameter sp = new org.hl7.fhir.r4.model.SearchParameter();
 		sp.setId("SearchParameter/meal-chef");
 		sp.setUrl("http://example.org/SearchParameter/meal-chef");
 		sp.addBase("Meal");
 		sp.setCode("chef");
-		sp.setType(Enumerations.SearchParamType.REFERENCE);
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
+		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		sp.setExpression("Meal.chef");
 		sp.addTarget("Chef");
 
-		org.hl7.fhir.r5.model.SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
+		SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
 		mySvc.validate(canonicalSp);
 	}
 
-	@Test
-	public void validate_compositeSearchParameterWithInvalidComponentType_throwsException() {
-		RuntimeSearchParam observationPatientSearchParam = new RuntimeSearchParam(new IdDt("observation-patient"),
-			null, null, null, "Observation.subject.where(resolve() is Patient)", RestSearchParameterTypeEnum.REFERENCE,
-			null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, List.of("Observation"));
+	@ParameterizedTest
+	@MethodSource("extensionProvider")
+	public void testMethodValidate_nonUniqueComboAndCompositeSearchParamWithComponentOfTypeReference_isNotAllowed(Extension theExtension) {
 
-		lenient().when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("observation-patient")))
-			.thenReturn(observationPatientSearchParam);
+		//todo: define provide method getActiveSearchParamByComponentDefinition with appropriate tests
+		when(mySearchParamRegistry.getActiveSearchParamByComponentDefinition(eq(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN))).thenReturn(myObservationCodeRuntimeSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParamByComponentDefinition(eq(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE))).thenReturn(myObservationPatientRuntimeSearchParam);
 
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-code");
-		sp.setUrl("http://example.org/SearchParameter/patient-code");
-		sp.addBase("Observation");
-		sp.setCode("patient-code");
-		sp.setType(Enumerations.SearchParamType.COMPOSITE);
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.setExpression("Observation");
-		sp.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false)));
-		sp.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("SearchParameter/observation-code").setExpression("Observation"));
-		sp.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("SearchParameter/observation-patient").setExpression("Observation"));
+		SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/patient-code", "patient-code", "Observation");
+		sp.addExtension(theExtension);
 
-		org.hl7.fhir.r5.model.SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
+		sp.addComponent(new SearchParameterComponentComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN));
+		sp.addComponent(new SearchParameterComponentComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE));
 
-		UnprocessableEntityException thrown = assertThrows(UnprocessableEntityException.class, () -> mySvc.validate(canonicalSp));
-		assertTrue(thrown.getMessage().startsWith("HAPI-2347: "));
-		assertTrue(thrown.getMessage().contains("Invalid component search parameter type: REFERENCE in component.definition: SearchParameter/observation-patient"));
+		try {
+			mySvc.validate(sp);
+			fail();
+		} catch (UnprocessableEntityException ex){
+			assertTrue(ex.getMessage().startsWith("HAPI-2347: "));
+			assertTrue(ex.getMessage().contains("Invalid component search parameter type: REFERENCE in component.definition: SearchParameter/observation-patient"));
+		}
+
 	}
 
 	@Test
-	public void validate_compositeSearchParameterWithCorrectComponentTypes_doesNotThrowException() {
-		RuntimeSearchParam observationEffectiveSearchParam = new RuntimeSearchParam(new IdDt("observation-effective"),
-			null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE,
-			null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, List.of("Observation"));
+	public void testMethodValidate_uniqueComboSearchParamWithComponentOfTypeReference_isValid() {
 
-		lenient().when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("observation-effective")))
-			.thenReturn(observationEffectiveSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParamByComponentDefinition(eq(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN))).thenReturn(myObservationCodeRuntimeSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParamByComponentDefinition(eq(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE))).thenReturn(myObservationPatientRuntimeSearchParam);
 
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/code-effective");
-		sp.setUrl("http://example.org/SearchParameter/patient-code");
-		sp.addBase("Observation");
-		sp.setCode("code-effective");
-		sp.setType(Enumerations.SearchParamType.COMPOSITE);
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.setExpression("Observation");
-		sp.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false)));
-		sp.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("SearchParameter/observation-code").setExpression("Observation"));
-		sp.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("SearchParameter/observation-effective").setExpression("Observation"));
+		SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/patient-code", "patient-code", "Observation");
+		sp.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(true)));
 
-		org.hl7.fhir.r5.model.SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
-		Assertions.assertDoesNotThrow(() -> mySvc.validate(canonicalSp));
+		sp.addComponent(new SearchParameterComponentComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN));
+		sp.addComponent(new SearchParameterComponentComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE));
+
+		mySvc.validate(sp);
+
 	}
 
-	@Test
-	public void validate_compositeSearchParameterWithNonExistingComponent_doesNotThrowException() {
-		lenient().when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("observation-not-existing")))
-			.thenReturn(null);
+	@ParameterizedTest
+	@MethodSource("compositeSpProvider")
+	// we're testing for:
+	// SP of type composite,
+	// SP of type combo composite non-unique,
+	// SP of type combo composite unique,
+	public void testMethodValidate_allCompositeSpTypesWithComponentOfValidType_isValid(SearchParameter theSearchParameter) {
 
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/code-effective");
-		sp.setUrl("http://example.org/SearchParameter/patient-code");
-		sp.addBase("Observation");
-		sp.setCode("code-effective");
-		sp.setType(Enumerations.SearchParamType.COMPOSITE);
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.setExpression("Observation");
-		sp.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false)));
-		sp.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("SearchParameter/observation-code").setExpression("Observation"));
-		sp.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("SearchParameter/observation-not-existing").setExpression("Observation"));
 
-		org.hl7.fhir.r5.model.SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
-		Assertions.assertDoesNotThrow(() -> mySvc.validate(canonicalSp));
+		theSearchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent().setDefinition("SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN"));
+		// todo: add other valid sp types
+
+		mySvc.validate(theSearchParameter);
+
+	}
+
+	private static org.hl7.fhir.r5.model.SearchParameter createSearchParameter(Enumerations.SearchParamType theToken, String theId, String theCodeValue, String theExpression){
+
+		SearchParameter retVal = new SearchParameter();
+		retVal.setId(theId);
+		retVal.setUrl("http://example.org/" + theId);
+		retVal.addBase(OBSERVATION);
+		retVal.setCode(theCodeValue);
+		retVal.setType(COMPOSITE);
+		retVal.setStatus(ACTIVE);
+		retVal.setExpression(theExpression);
+
+		return retVal;
+	}
+
+	static Stream<Arguments> extensionProvider() {
+		return Stream.of(
+			Arguments.of(
+				new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false)), // composite SP of type combo with non-unique index
+				null) // composite SP
+		);
+	}
+
+	static Stream<Arguments> compositeSpProvider() {
+		return Stream.of(
+			Arguments.of(
+				createSearchParameter(Enumerations.SearchParamType.COMPOSITE, "SearchParameter/any-type", "any-type", "Observation")
+					.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false))), // composite SP of type combo with non-unique index
+
+				createSearchParameter(Enumerations.SearchParamType.COMPOSITE, "SearchParameter/any-type", "any-type", "Observation")
+					.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(true))), // composite SP of type combo with unique index
+
+				createSearchParameter(Enumerations.SearchParamType.COMPOSITE, "SearchParameter/any-type", "any-type", "Observation")) // composite SP
+		);
 	}
 
 }
