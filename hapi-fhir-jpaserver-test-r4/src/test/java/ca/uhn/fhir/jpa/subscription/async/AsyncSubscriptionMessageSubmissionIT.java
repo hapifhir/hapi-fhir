@@ -110,7 +110,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		assertThat(receivedObs.getStatus(), equalTo(Observation.ObservationStatus.CORRECTED));
 
 		// assert that all persisted resourceModifiedMessage were deleted, ie, were processed
-		assertThat(myResourceModifiedMessagePersistenceSvc.findAllPKs(), hasSize(0));
+		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(), hasSize(0));
 
 	}
 

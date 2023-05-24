@@ -20,17 +20,22 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface IResourceModifiedDao extends JpaRepository<ResourceModifiedEntity, ResourceModifiedEntityPK>, IHapiFhirJpaRepository {
+import java.util.List;
+
+public interface IResourceModifiedDao extends JpaRepository<ResourceModifiedEntity, PersistedResourceModifiedMessageEntityPK>, IHapiFhirJpaRepository {
+	@Query("SELECT r FROM ResourceModifiedEntity r ORDER BY r.myCreatedTime ASC")
+	List<IPersistedResourceModifiedMessage> findAllOrderedByCreatedTime();
 
 	@Modifying
 	@Query("delete from ResourceModifiedEntity r where r.myResourceModifiedEntityPK =:pk")
-	int removeById(@Param("pk") ResourceModifiedEntityPK thePK);
+	int removeById(@Param("pk") PersistedResourceModifiedMessageEntityPK thePK);
 
 }

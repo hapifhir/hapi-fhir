@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
@@ -69,8 +69,6 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	private final IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 	private final PlatformTransactionManager myTxManager;
 
-	private boolean myIgnoreOperationOnResourcesOrderForTesting = false;
-
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
 		if (!myStorageSettings.hasSupportedSubscriptionTypes()) {
@@ -108,33 +106,21 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	/**
 	 * @inheritDoc
 	 *
-	 * Synchronous processing with retry.
-	 *
 	 * Implementation of {@link IResourceModifiedConsumerWithRetries}
 	 */
 	@Override
-	public boolean submitResourceModified(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK) {
-
-		// we have a message and it's already persisted.  to respect the order of operations performed on resources, we can only submit <code>theResourceModifiedMessage</code>
-		// to the pipeline if there is no other messages needing submission before this one.
-		//
-		// in the event where we do have other messages needing submission, the message will get submitted asynchronously
-		// through the {@link AsyncResourceModifiedSubmitterSvc}.
-		if( hasOtherMessagesNeedingSubmission() && !myIgnoreOperationOnResourcesOrderForTesting) {
-			return false;
-		}
-
+	public boolean submitResourceModified(ResourceModifiedMessage theResourceModifiedMessage, IPersistedResourceModifiedMessagePK theResourceModifiedPK) {
 		return processResourceModifiedInTransaction(theResourceModifiedMessage, theResourceModifiedPK);
 	}
 
-	protected boolean processResourceModifiedInTransaction(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK){
+	protected boolean processResourceModifiedInTransaction(ResourceModifiedMessage theResourceModifiedMessage, IPersistedResourceModifiedMessagePK theResourceModifiedPK){
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		return (boolean) txTemplate.execute(doProcessResourceModifiedInTransaction(theResourceModifiedMessage, theResourceModifiedPK));
 	}
 
-	protected TransactionCallback doProcessResourceModifiedInTransaction(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK) {
+	protected TransactionCallback doProcessResourceModifiedInTransaction(ResourceModifiedMessage theResourceModifiedMessage, IPersistedResourceModifiedMessagePK theResourceModifiedPK) {
 		return theStatus -> {
 			boolean processed = true;
 
@@ -163,10 +149,6 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		};
 	}
 
-	private boolean hasOtherMessagesNeedingSubmission(){
-		return myResourceModifiedMessagePersistenceSvc.getMessagePersistedCount() > 1;
-	}
-
 	private ChannelProducerSettings getChannelProducerSettings() {
 		ChannelProducerSettings channelProducerSettings= new ChannelProducerSettings();
 		channelProducerSettings.setQualifyChannelName(myStorageSettings.isQualifySubscriptionMatchingChannelName());
@@ -177,11 +159,6 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	public IChannelProducer getProcessingChannelForUnitTest() {
 		startIfNeeded();
 		return (IChannelProducer) myMatchingChannel;
-	}
-
-	@VisibleForTesting
-	public void ignoreOperationOnResourcesOrderForTesting(){
-		myIgnoreOperationOnResourcesOrderForTesting = true;
 	}
 
 }

@@ -27,13 +27,13 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
-import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
+import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,13 +44,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK.with;
+import static ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK.with;
 
 /**
- * This implementer provides the capability to persist subscription messages before their submission
+ * This implementer provides the capability to persist subscription messages for asynchronous submission
  * to the subscription processing pipeline with the purpose of offering a retry mechanism
  * upon submission failure (see @link {@link AsyncResourceModifiedSubmitterSvc}).
  */
@@ -74,28 +72,20 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
-	public List<IResourceModifiedPK> findAllPKs() {
-		return myResourceModifiedDao
-			.findAll().stream()
-			.map(ResourceModifiedEntity::getResourceModifiedEntityPK)
-			.collect(Collectors.toList());
+	public List<IPersistedResourceModifiedMessage> findAllOrderedByCreatedTime() {
+		return myResourceModifiedDao.findAllOrderedByCreatedTime();
 	}
 
 	@Override
-	public IResourceModifiedPK persist(ResourceModifiedMessage theMsg) {
+	public IPersistedResourceModifiedMessage persist(ResourceModifiedMessage theMsg) {
 		ResourceModifiedEntity resourceModifiedEntity = createEntityFrom(theMsg);
-		return myResourceModifiedDao.save(resourceModifiedEntity).getResourceModifiedEntityPK();
+		return myResourceModifiedDao.save(resourceModifiedEntity);
 	}
 
 	@Override
-	public ResourceModifiedMessage findByPK(IResourceModifiedPK theResourceModifiedPK) {
-		Optional<ResourceModifiedEntity> optionalEntity = myResourceModifiedDao.findById((ResourceModifiedEntityPK) theResourceModifiedPK);
+	public ResourceModifiedMessage inflatePersistedResourceModifiedMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
 
-		if (optionalEntity.isEmpty()){
-			throw new ResourceNotFoundException(String.format("%s - Could not find entity with PK %s/%s",Msg.code(2300),theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion()));
-		}
-
-		return inflateResourceModifiedMessageFromEntity(optionalEntity.get());
+		return inflateResourceModifiedMessageFromEntity((ResourceModifiedEntity) thePersistedResourceModifiedMessage);
 	}
 
 	@Override
@@ -104,8 +94,8 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
-	public boolean deleteByPK(IResourceModifiedPK theResourceModifiedPK) {
-		int removedCount = myResourceModifiedDao.removeById((ResourceModifiedEntityPK) theResourceModifiedPK);
+	public boolean deleteByPK(IPersistedResourceModifiedMessagePK theResourceModifiedPK) {
+		int removedCount = myResourceModifiedDao.removeById((PersistedResourceModifiedMessageEntityPK) theResourceModifiedPK);
 
 		return removedCount == 1;
 	}

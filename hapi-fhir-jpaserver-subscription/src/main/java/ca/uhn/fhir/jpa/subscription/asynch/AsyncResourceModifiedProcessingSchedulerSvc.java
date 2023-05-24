@@ -27,14 +27,25 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
- * This service is responsible for scheduling a job that will process messages
- * where submission to the subscription pipeline previously failed.
+ * This service is responsible for scheduling a job that will submit messages
+ * to the subscription processing pipeline at a given interval.
  */
 public class AsyncResourceModifiedProcessingSchedulerSvc implements IHasScheduledJobs {
 
-	public static final long SECONDS = 5 * DateUtils.MILLIS_PER_SECOND;
+	public static final long DEFAULT_SUBMISSION_INTERVAL_IN_MS = 5000;
+
+	public  long mySubmissionIntervalInMilliSeconds;
+
+	public AsyncResourceModifiedProcessingSchedulerSvc() {
+		this(DEFAULT_SUBMISSION_INTERVAL_IN_MS);
+	}
+
+	public AsyncResourceModifiedProcessingSchedulerSvc(long theSubmissionIntervalInMilliSeconds) {
+		mySubmissionIntervalInMilliSeconds = theSubmissionIntervalInMilliSeconds;
+	}
 
 	@Override
 	public void scheduleJobs(ISchedulerService theSchedulerService) {
@@ -42,7 +53,7 @@ public class AsyncResourceModifiedProcessingSchedulerSvc implements IHasSchedule
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(AsyncResourceModifiedProcessingSchedulerSvc.Job.class);
 
-		theSchedulerService.scheduleClusteredJob(SECONDS, jobDetail);
+		theSchedulerService.scheduleClusteredJob(mySubmissionIntervalInMilliSeconds, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

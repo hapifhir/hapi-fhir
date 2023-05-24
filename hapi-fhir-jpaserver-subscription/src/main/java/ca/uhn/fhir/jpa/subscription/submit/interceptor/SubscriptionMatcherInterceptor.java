@@ -26,21 +26,17 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -62,8 +58,6 @@ public class SubscriptionMatcherInterceptor {
 	private StorageSettings myStorageSettings;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	@Autowired
-	private IResourceModifiedConsumerWithRetries myResourceModifiedSubmitterSvc;
 
 	@Autowired
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
@@ -119,24 +113,8 @@ public class SubscriptionMatcherInterceptor {
 			return;
 		}
 
-		IResourceModifiedPK resourceModifiedPK = myResourceModifiedMessagePersistenceSvc.persist(msg);
-
-		schedulePostCommitMessageSubmission(msg, resourceModifiedPK);
-
-	}
-
-	private void schedulePostCommitMessageSubmission(ResourceModifiedMessage theMsg, IResourceModifiedPK thePersistedResourceModifiedPK) {
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public int getOrder() {
-				return 0;
-			}
-
-			@Override
-			public void afterCommit() {
-				myResourceModifiedSubmitterSvc.submitResourceModified(theMsg, thePersistedResourceModifiedPK);
-			}
-		});
+		//	persist the message for async submission to the processing pipeline. see {@link AsyncResourceModifiedProcessingSchedulerSvc}
+		myResourceModifiedMessagePersistenceSvc.persist(msg);
 
 	}
 

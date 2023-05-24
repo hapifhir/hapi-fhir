@@ -64,11 +64,6 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 
-	@BeforeEach
-	public void beforeEach(){
-		myResourceModifiedSubmitterSvc.ignoreOperationOnResourcesOrderForTesting();
-	}
-
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
 		ourLog.info("@AfterEach");

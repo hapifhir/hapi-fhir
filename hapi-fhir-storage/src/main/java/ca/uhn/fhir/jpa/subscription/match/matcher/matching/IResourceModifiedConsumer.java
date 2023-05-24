@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
+import org.springframework.messaging.MessageDeliveryException;
 
 /**
  * The implementer of this interface should submit the result of an operation on a resource
@@ -29,8 +31,8 @@ public interface IResourceModifiedConsumer {
 
 	/**
 	 *  Process a message by submitting it to the processing pipeline.  The message is assumed to have been successfully
-	 *  submitted unless a MessageDeliveryException is thrown by the underlying support.  The exception should be allowed to
-	 *  propagate for client handling and potential re-submission through the {@link ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries}.
+	 *  submitted unless a {@link MessageDeliveryException} is thrown by the underlying support.  The exception should be allowed to
+	 *  propagate for client handling and potential re-submission through the {@link IResourceModifiedConsumerWithRetries}.
 	 *
 	 * @param theMsg The message to submit
 	 *

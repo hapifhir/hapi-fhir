@@ -20,7 +20,7 @@ package ca.uhn.fhir.subscription.api;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
@@ -39,9 +39,9 @@ public interface IResourceModifiedConsumerWithRetries {
 	 *
 	 *
 	 * @param theResourceModifiedMessage The message for submission
-	 * @param theResourceModifiedPK The primary key pointing to the <code>theResourceModifiedMessage</code> in its persisted form.
+	 * @param thePersistedResourceModifiedMessagePK The primary key pointing to the <code>theResourceModifiedMessage</code> in its persisted form
 	 * @return Whether the message was successfully submitted to the broker
 	 */
-	boolean submitResourceModified(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK);
+	boolean submitResourceModified(ResourceModifiedMessage theResourceModifiedMessage, IPersistedResourceModifiedMessagePK thePersistedResourceModifiedMessagePK);
 
 }

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.submit.svc;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
+import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
@@ -83,7 +83,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
+		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.TRUE));
@@ -99,7 +99,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(false);
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
+		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.TRUE));
@@ -118,7 +118,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myChannelProducer.send(any())).thenThrow(new MessageDeliveryException("sendingError"));
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new ResourceModifiedEntityPK());
+		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.FALSE));

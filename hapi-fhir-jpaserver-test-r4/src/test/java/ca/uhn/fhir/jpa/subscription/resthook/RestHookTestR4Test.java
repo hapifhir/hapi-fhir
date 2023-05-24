@@ -68,11 +68,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	@Autowired(required = false)
 	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 
-	@BeforeEach
-	public void beforeEach(){
-		myResourceModifiedSubmitterSvc.ignoreOperationOnResourcesOrderForTesting();
-	}
-
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
 		ourLog.info("@AfterEach");

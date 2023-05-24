@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.asynch;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
@@ -48,14 +48,15 @@ public class AsyncResourceModifiedSubmitterSvc {
 	}
 
 	public void runDeliveryPass() {
-		List<IResourceModifiedPK> allPKs = myResourceModifiedMessagePersistenceSvc.findAllPKs();
-		ourLog.info("Attempting to submit {} resources to consumer channel.", allPKs.size());
 
-		for (IResourceModifiedPK resourceModifiedPk : allPKs){
+		List<IPersistedResourceModifiedMessage> AllPersistedResourceModifiedMessages = myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime();
+		ourLog.info("Attempting to submit {} resources to consumer channel.", AllPersistedResourceModifiedMessages.size());
 
-			ResourceModifiedMessage modifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(resourceModifiedPk);
+		for (IPersistedResourceModifiedMessage persistedResourceModifiedMessage : AllPersistedResourceModifiedMessages){
 
-			boolean wasProcessed = myResourceModifiedConsumer.submitResourceModified(modifiedMessage, resourceModifiedPk);
+			ResourceModifiedMessage resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(persistedResourceModifiedMessage);
+
+			boolean wasProcessed = myResourceModifiedConsumer.submitResourceModified(resourceModifiedMessage, persistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk());
 
 			if(!wasProcessed){
 				break;

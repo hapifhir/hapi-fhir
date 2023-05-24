@@ -33,17 +33,17 @@ import java.util.Date;
  * This class describes how a resourceModifiedMessage is stored for later processing in the event where
  * submission to the subscription processing pipeline would fail.  The persisted message does not include a
  * payload (resource) as an in-memory version of the same message would.  Instead, it points to a payload
- * through the entity primary key {@link ResourceModifiedEntityPK} which is composed
+ * through the entity primary key {@link PersistedResourceModifiedMessageEntityPK} which is composed
  * of the resource Pid and current version.
  */
 @Entity
 @Table(name = "HFJ_RESOURCE_MODIFIED")
-public class ResourceModifiedEntity implements Serializable {
+public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage, Serializable {
 
 	public static final int MESSAGE_LENGTH = 4000;
 
 	@EmbeddedId
-	private ResourceModifiedEntityPK myResourceModifiedEntityPK;
+	private PersistedResourceModifiedMessageEntityPK myResourceModifiedEntityPK;
 
 	@Column(name = "PARTIAL_MESSAGE", length = MESSAGE_LENGTH)
 	private String myPartialResourceModifiedMessage;
@@ -54,11 +54,11 @@ public class ResourceModifiedEntity implements Serializable {
 	@Column(name = "RESOURCE_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
-	public ResourceModifiedEntityPK getResourceModifiedEntityPK() {
+	public PersistedResourceModifiedMessageEntityPK getResourceModifiedEntityPK() {
 		return myResourceModifiedEntityPK;
 	}
 
-	public ResourceModifiedEntity setResourceModifiedEntityPK(ResourceModifiedEntityPK theResourceModifiedEntityPK) {
+	public ResourceModifiedEntity setResourceModifiedEntityPK(PersistedResourceModifiedMessageEntityPK theResourceModifiedEntityPK) {
 		myResourceModifiedEntityPK = theResourceModifiedEntityPK;
 		return this;
 	}
@@ -87,6 +87,11 @@ public class ResourceModifiedEntity implements Serializable {
 	public ResourceModifiedEntity setPartialResourceModifiedMessage(String thePartialResourceModifiedMessage) {
 		myPartialResourceModifiedMessage = thePartialResourceModifiedMessage;
 		return this;
+	}
+
+	@Override
+	public IPersistedResourceModifiedMessagePK getPersistedResourceModifiedMessagePk() {
+		return myResourceModifiedEntityPK;
 	}
 }
 

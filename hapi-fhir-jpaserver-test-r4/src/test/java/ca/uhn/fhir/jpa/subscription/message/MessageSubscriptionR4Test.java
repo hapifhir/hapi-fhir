@@ -3,8 +3,9 @@ package ca.uhn.fhir.jpa.subscription.message;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
-import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
-import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
+import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -32,11 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
@@ -183,7 +179,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testMethodFindAllPKs_willReturnAllResourceModifiedPK(){
+	public void testMethodFindAllOrdered_willReturnAllPersistedResourceModifiedMessagesOrderedByCreatedTime(){
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 
 		// given
@@ -193,15 +189,15 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		ResourceModifiedMessage organizationResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, organization, BaseResourceMessage.OperationTypeEnum.CREATE);
 
-		IResourceModifiedPK patientPk = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
-		IResourceModifiedPK organizationPk = myResourceModifiedMessagePersistenceSvc.persist(organizationResourceModifiedMessage);
+		IPersistedResourceModifiedMessage patientPersistedMessage = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
+		IPersistedResourceModifiedMessage organizationPersistedMessage = myResourceModifiedMessagePersistenceSvc.persist(organizationResourceModifiedMessage);
 
 		// when
-		List<IResourceModifiedPK> allPKs = myResourceModifiedMessagePersistenceSvc.findAllPKs();
+		List<IPersistedResourceModifiedMessage> allPersisted = myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime();
 
 		// then
-		assertThat(allPKs, hasSize(2));
-		assertThat(allPKs, containsInAnyOrder(patientPk, organizationPk));
+		assertThat(allPersisted, hasSize(2));
+		assertThat(allPersisted, containsInAnyOrder(patientPersistedMessage, organizationPersistedMessage));
 
 	}
 
@@ -214,14 +210,14 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		Patient patient = sendPatient();
 
 		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
-		IResourceModifiedPK patientPk = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
+		IPersistedResourceModifiedMessage persistedResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
 
 		// when
-		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(patientPk));
+		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(persistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk()));
 
 		// then
 		assertThat(wasDeleted, is(Boolean.TRUE));
-		assertThat(myResourceModifiedMessagePersistenceSvc.findAllPKs(), hasSize(0));
+		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(), hasSize(0));
 	}
 
 	@Test
@@ -231,7 +227,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		// given
 		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
-		IResourceModifiedPK nonExistentResourceWithPk = ResourceModifiedEntityPK.with("one", "one");
+		IPersistedResourceModifiedMessagePK nonExistentResourceWithPk = PersistedResourceModifiedMessageEntityPK.with("one", "one");
 
 		// when
 		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(nonExistentResourceWithPk));
@@ -251,10 +247,10 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		transactionTemplate.execute(tx -> {
 
-				IResourceModifiedPK resourceModifiedPk = myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
+				IPersistedResourceModifiedMessage persistedResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
 
 				// when
-				ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(resourceModifiedPk);
+				ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(persistedResourceModifiedMessage);
 
 				// then
 				assertEquals(toJson(originalResourceModifiedMessage), toJson(restoredResourceModifiedMessage));

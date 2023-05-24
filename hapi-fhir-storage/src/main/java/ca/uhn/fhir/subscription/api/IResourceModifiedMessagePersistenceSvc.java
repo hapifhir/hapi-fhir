@@ -21,7 +21,8 @@ package ca.uhn.fhir.subscription.api;
  */
 
 
-import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
 import java.util.List;
@@ -30,40 +31,41 @@ import java.util.List;
  * An implementer of this interface will provide {@link ResourceModifiedMessage} persistence services.
  *
  * Client of this interface should persist ResourceModifiedMessage as part of the processing of an operation on
- * a resource.  Upon a successful submission to the subscription pipeline, the persisted message should be deleted
- * or left un-altered for re-submission at a later time when submission fails (see {@link IResourceModifiedConsumerWithRetries}.
+ * a resource.  Upon a successful submission to the subscription pipeline, the persisted message should be deleted.
+ * When submission fails, the message should be left un-altered for re-submission at a later time (see {@link IResourceModifiedConsumerWithRetries}).
  */
 public interface IResourceModifiedMessagePersistenceSvc {
 
 	/**
-	 * Find all persisted resourceModifiedMessage and return their primary keys.
+	 * Find all persistedResourceModifiedMessage sorted by ascending created dates (oldest to newest).
 	 *
-	 * @return List of primary keys of all persisted resourceModifiedMessage needing submission.
+	 * @return A sorted list of persistedResourceModifiedMessage needing submission.
 	 */
-	List<IResourceModifiedPK> findAllPKs();
+	List<IPersistedResourceModifiedMessage> findAllOrderedByCreatedTime();
 
 	/**
-	 * Delete a resourceModifiedMessage by it's primary key.
+	 * Delete a persistedResourceModifiedMessage by its primary key.
 	 *
-	 * @param theResourceModifiedPK The primary key of the resourceModifiedMessage to delete.
-	 * @return Whether the persisted resourceModifiedMessage pointed to by <code>theResourceModifiedPK</code> was deleted.
+	 * @param thePersistedResourceModifiedMessagePK The primary key of the persistedResourceModifiedMessage to delete.
+	 * @return Whether the persistedResourceModifiedMessage pointed to by <code>theResourceModifiedPK</code> was deleted.
 	 */
-	boolean deleteByPK(IResourceModifiedPK theResourceModifiedPK);
+	boolean deleteByPK(IPersistedResourceModifiedMessagePK thePersistedResourceModifiedMessagePK);
 
 	/**
-	 * Persisted a resourceModifiedMessage and return the resulting primary key.
+	 * Persist a resourceModifiedMessage and return its resulting persisted representation.
 	 *
 	 * @param theMsg The resourceModifiedMessage to persist.
-	 * @return The primary key resulting from persisting <code>theMsg</code>.
+	 * @return The persisted representation of <code>theMsg</code>.
 	 */
-	IResourceModifiedPK persist(ResourceModifiedMessage theMsg);
+	IPersistedResourceModifiedMessage persist(ResourceModifiedMessage theMsg);
 
 	/**
-	 * Find a persisted resourceModifiedMessage from its primary key.
-	 * @param theResourceModifiedPK The primary key of the resourceModifiedMessage to fetch from persistence.
-	 * @return The resourceModifiedMessage pointed to by <code>theResourceModifiedPK</code>.
+	 * Restore a resourceModifiedMessage to its pre persistence representation.
+	 *
+	 * @param thePersistedResourceModifiedMessage The message needing restoration.
+	 * @return The resourceModifiedMessage in its pre persistence form.
 	 */
-	ResourceModifiedMessage findByPK(IResourceModifiedPK theResourceModifiedPK);
+	ResourceModifiedMessage inflatePersistedResourceModifiedMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage);
 
 	/**
 	 *

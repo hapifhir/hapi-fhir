@@ -26,7 +26,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class ResourceModifiedEntityPK implements IResourceModifiedPK, Serializable {
+public class PersistedResourceModifiedMessageEntityPK implements IPersistedResourceModifiedMessagePK, Serializable {
 
 	@Column(name = "RES_ID", length = 256, nullable = false)
 	private String myResourcePid;
@@ -38,7 +38,7 @@ public class ResourceModifiedEntityPK implements IResourceModifiedPK, Serializab
 		return myResourcePid;
 	}
 
-	public ResourceModifiedEntityPK setResourcePid(String theResourcePid) {
+	public PersistedResourceModifiedMessageEntityPK setResourcePid(String theResourcePid) {
 		myResourcePid = theResourcePid;
 		return this;
 	}
@@ -47,20 +47,20 @@ public class ResourceModifiedEntityPK implements IResourceModifiedPK, Serializab
 		return myResourceVersion;
 	}
 
-	public ResourceModifiedEntityPK setResourceVersion(String theResourceVersion) {
+	public PersistedResourceModifiedMessageEntityPK setResourceVersion(String theResourceVersion) {
 		myResourceVersion = theResourceVersion;
 		return this;
 	}
 
-	public static ResourceModifiedEntityPK with(String theResourcePid, String theResourceVersion){
-		return new ResourceModifiedEntityPK().setResourcePid(theResourcePid).setResourceVersion(theResourceVersion);
+	public static PersistedResourceModifiedMessageEntityPK with(String theResourcePid, String theResourceVersion){
+		return new PersistedResourceModifiedMessageEntityPK().setResourcePid(theResourcePid).setResourceVersion(theResourceVersion);
 	}
 
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 		if (theO == null || getClass() != theO.getClass()) return false;
-		ResourceModifiedEntityPK that = (ResourceModifiedEntityPK) theO;
+		PersistedResourceModifiedMessageEntityPK that = (PersistedResourceModifiedMessageEntityPK) theO;
 		return myResourcePid.equals(that.myResourcePid) && myResourceVersion.equals(that.myResourceVersion);
 	}
 
