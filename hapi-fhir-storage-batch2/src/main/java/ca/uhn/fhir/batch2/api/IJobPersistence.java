@@ -111,10 +111,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
-	 *
 
-
-	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	/**
 	 * Updates the work chunk warning message
 	 *
 	 * @param theChunkId			 The chunk ID
@@ -122,6 +120,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	void updateWorkChunkWarningMessage(String theChunkId, String theWarningMessage);
 
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
 
 	/**
@@ -138,6 +137,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 		Validate.isTrue(false, "Dead path");
 		return null;
 	}
+
 	/**
 	 * Fetch all chunks for a given instance.
 	 *
@@ -243,8 +243,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	@Transactional(propagation = Propagation.MANDATORY)
 	void updateInstanceUpdateTime(String theInstanceId);
-
-
 
 	/*
 	 * State transition events for job instances.

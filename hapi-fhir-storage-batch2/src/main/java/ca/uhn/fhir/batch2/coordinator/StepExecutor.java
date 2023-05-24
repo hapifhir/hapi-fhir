@@ -94,9 +94,9 @@ public class StepExecutor {
 
 			WorkChunkCompletionEvent event = new WorkChunkCompletionEvent(chunkId, recordsProcessed, recoveredErrorCount);
 			myJobPersistence.onWorkChunkCompletion(event);
-				if (theDataSink.getRecoveredWarning() != null) {
-					myJobPersistence.updateWorkChunkWarningMessage(chunkId, theDataSink.getRecoveredWarning());
-				}
+			if (theDataSink.getRecoveredWarning() != null) {
+				myJobPersistence.updateWorkChunkWarningMessage(chunkId, theDataSink.getRecoveredWarning());
+			}
 		}
 
 		return true;

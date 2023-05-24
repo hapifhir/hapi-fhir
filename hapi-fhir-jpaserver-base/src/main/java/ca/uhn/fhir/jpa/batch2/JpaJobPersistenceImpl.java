@@ -390,7 +390,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 		// run the modification callback
 		boolean wasModified = theModifier.doUpdate(jobInstance);
-		instanceEntity.setWarningMessage(theInstance.getWarningMessage());
 
 		if (wasModified) {
 			// copy fields back for flush.

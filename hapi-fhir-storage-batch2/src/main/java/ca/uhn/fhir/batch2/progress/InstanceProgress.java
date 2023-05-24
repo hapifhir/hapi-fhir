@@ -52,7 +52,7 @@ public class InstanceProgress {
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
 	private final Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
-	private Set<String> myWarningMessage = new HashSet<>();
+	private final Set<String> myWarningMessage = new HashSet<>();
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
@@ -123,6 +123,7 @@ public class InstanceProgress {
 
 	public void updateInstance(JobInstance theInstance) {
 		updateInstance(theInstance, false);
+		myWarningMessage.remove(null);
 		if (myWarningMessage.size() > 0) {
 			theInstance.setWarningMessage(myWarningMessage.iterator().next());
 		}

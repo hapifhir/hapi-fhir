@@ -107,7 +107,6 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myWarningMessage = left(theWarningMessage, ERROR_MSG_MAX_LENGTH);
 	}
 
-
 	/**
 	 * Default constructor for Hibernate.
 	 */
@@ -120,7 +119,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	public Batch2WorkChunkEntity(String theId, int theSequence, String theJobDefinitionId, int theJobDefinitionVersion,
 										  String theInstanceId, String theTargetStepId, WorkChunkStatusEnum theStatus,
 										  Date theCreateTime, Date theStartTime, Date theUpdateTime, Date theEndTime,
-										  String theErrorMessage, int theErrorCount, Integer theRecordsProcessed) {
+										  String theErrorMessage, int theErrorCount, Integer theRecordsProcessed, String theWarningMessage) {
 		myId = theId;
 		mySequence = theSequence;
 		myJobDefinitionId = theJobDefinitionId;
@@ -135,6 +134,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myErrorMessage = theErrorMessage;
 		myErrorCount = theErrorCount;
 		myRecordsProcessed = theRecordsProcessed;
+		myWarningMessage = theWarningMessage;
 	}
 
 	public int getErrorCount() {
