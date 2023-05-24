@@ -13,4 +13,5 @@ hapi-fhir-storage/**/*.java @fil512
 hapi-fhir-storage-batch2/**/*.java @michaelabuckley @jamesagnew
 hapi-fhir-storage-batch2-jobs/**/*.java @michaelabuckley @jamesagnew
 
-
+hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.java @jamesagnew
+hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/consent/ConsentInterceptor.java @jamesagnew
