@@ -64,6 +64,17 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 		Pageable thePageable
 	);
 
+	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myStatus = :status")
+	List<Batch2JobInstanceEntity> findInstancesByJobStatus(
+		@Param("status") StatusEnum theState,
+		Pageable thePageable
+	);
+
+	@Query("SELECT count(b) from Batch2JobInstanceEntity b WHERE b.myStatus = :status")
+	Integer findTotalJobsOfStatus(
+		@Param("status") StatusEnum theState
+	);
+
 	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats ) AND b.myEndTime < :cutoff")
 	List<Batch2JobInstanceEntity> findInstancesByJobIdAndStatusAndExpiry(
 		@Param("defId") String theDefinitionId,

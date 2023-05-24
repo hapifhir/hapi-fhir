@@ -95,7 +95,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	 */
 	public AsyncMemoryQueueBackedFhirClientBalpSink(IGenericClient theClient) {
 		super(theClient);
-		myThreadPool = ThreadPoolUtil.newThreadPool(1, 1, "BalpClientSink-" + ourNextThreadId.getAndIncrement() + "-", 100);
+		myThreadPool = ThreadPoolUtil.newThreadPool(1, 1, "BalpClientSink-" + ourNextThreadId.getAndIncrement() + "-", Integer.MAX_VALUE);
 	}
 
 	@Override

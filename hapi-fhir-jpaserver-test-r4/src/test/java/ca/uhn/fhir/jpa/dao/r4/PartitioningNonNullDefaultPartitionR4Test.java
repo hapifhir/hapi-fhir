@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,7 +29,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 	@BeforeEach
 	@Override
-	public void before() throws ServletException {
+	public void before() throws Exception {
 		super.before();
 
 		myPartitionSettings.setDefaultPartitionId(1);

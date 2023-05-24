@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -44,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -181,7 +184,8 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 	private void verifyBulkExportResults(String theInstanceId, List<String> theContainedList, List<String> theExcludedList) {
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(theInstanceId).getReport();
+		Batch2JobInfo jobInfo = myJobRunner.getJobInfo(theInstanceId);
+		String report = jobInfo.getReport();
 		ourLog.debug("Export job {} report: {}", theInstanceId, report);
 		if (!theContainedList.isEmpty()) {
 			assertThat("report for instance " + theInstanceId + " is empty", report, not(emptyOrNullString()));
@@ -227,6 +231,10 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		for (String excludedString : theExcludedList) {
 			assertThat("export doesn't have expected ids", foundIds, not(hasItem(excludedString)));
 		}
+
+		assertThat(jobInfo.getCombinedRecordsProcessed(), equalTo(2));
+
+		ourLog.info("Job {} ok", theInstanceId);
 	}
 
 	private String startJob(BulkDataExportOptions theOptions) {

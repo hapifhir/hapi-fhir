@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4873
+title: "Previously, if the fhirId in ResourceTable happened to be set to an empty string, the resourceId would be missing when trying to generate the full ID string. This has now been fixed."
