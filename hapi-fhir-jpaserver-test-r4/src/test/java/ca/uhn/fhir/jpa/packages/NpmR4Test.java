@@ -28,6 +28,7 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -35,7 +36,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ImplementationGuide;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -163,6 +166,65 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(spec);
 	}
 
+	@Test
+	public void install_validateResourceAfterUkCoreIgInstallation_Success() {
+		// crate resource with UKCore profile
+		Patient patient = new Patient();
+		patient.setMeta(new Meta().addProfile("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient"));
+
+		// validate resource before loading IG to initiate validation caches
+		ValidationResult validationResultBefore = validateWithResult(patient);
+		assertFalse(validationResultBefore.isSuccessful());
+
+		// initiate jpaPackageCache for IG package loading
+		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
+		jpaPackageCache.getPackageServers().clear();
+		jpaPackageCache.addPackageServer(new PackageServer("https://packages.fhir.org"));
+
+		// install UK.Core package
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName("UK.Core.r4")
+			.setVersion("1.1.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
+
+		myPackageInstallerSvc.install(spec);
+
+		// validation after installation should be successful
+		ValidationResult validationResultAfter = validateWithResult(patient);
+		assertTrue(validationResultAfter.isSuccessful());
+	}
+
+	@Test
+	public void uninstall_validateResourceAfterUkCoreIgUninstallation_Failed() throws IOException {
+		// initiate jpaPackageCache for IG package loading
+		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
+		jpaPackageCache.getPackageServers().clear();
+		jpaPackageCache.addPackageServer(new PackageServer("https://packages.fhir.org"));
+
+		// install UK.Core package
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName("UK.Core.r4")
+			.setVersion("1.1.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
+
+		// install UK.Core package
+		myPackageInstallerSvc.install(spec);
+
+		// crate resource with UKCore profile
+		Patient patient = new Patient();
+		patient.setMeta(new Meta().addProfile("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient"));
+
+		// validate resource before uninstalling IG to initiate validation caches
+		ValidationResult validationResultBefore = validateWithResult(patient);
+		assertTrue(validationResultBefore.isSuccessful());
+
+		// install UK.Core package
+		myPackageInstallerSvc.uninstall(spec);
+
+		// validation after uninstallation should fail
+		ValidationResult validationResultAfter = validateWithResult(patient);
+		assertFalse(validationResultAfter.isSuccessful());
+	}
 
 	@Test
 	public void testCacheDstu3Package() throws Exception {
