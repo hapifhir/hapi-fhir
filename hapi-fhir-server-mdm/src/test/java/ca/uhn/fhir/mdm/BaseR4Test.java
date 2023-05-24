@@ -10,6 +10,7 @@ import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -20,6 +21,13 @@ import static org.mockito.Mockito.mock;
 public abstract class BaseR4Test {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4();
 	protected ISearchParamRegistry mySearchParamRetriever = mock(ISearchParamRegistry.class);
+
+	protected IMatcherFactory myIMatcherFactory;
+
+	@BeforeEach
+	public void before() {
+		myIMatcherFactory = mock(IMatcherFactory.class);
+	}
 
 	protected Patient buildJohn() {
 		Patient patient = new Patient();
@@ -35,9 +43,9 @@ public abstract class BaseR4Test {
 		return patient;
 	}
 
-	protected MdmResourceMatcherSvc buildMatcher(IMatcherFactory theMatcherFactory, MdmRulesJson theMdmRulesJson) {
+	protected MdmResourceMatcherSvc buildMatcher(MdmRulesJson theMdmRulesJson) {
 		return new MdmResourceMatcherSvc(ourFhirContext,
-			theMatcherFactory,
+			myIMatcherFactory,
 			new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever)).setMdmRules(theMdmRulesJson)
 		);
 	}

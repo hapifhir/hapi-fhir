@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
+import ca.uhn.fhir.jpa.searchparam.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -37,11 +38,15 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 	@Autowired
 	MatchUrlService myMatchUrlService;
 
+	@Autowired
+	NicknameServiceFactory myNicknameServiceFactory;
+
 	private NicknameInterceptor myNicknameInterceptor;
 
 	@BeforeEach
-	public void before() throws IOException {
-		myNicknameInterceptor = new NicknameInterceptor();
+	public void before() throws Exception {
+		super.before();
+		myNicknameInterceptor = new NicknameInterceptor(myNicknameServiceFactory);
 		myInterceptorRegistry.registerInterceptor(myNicknameInterceptor);
 	}
 

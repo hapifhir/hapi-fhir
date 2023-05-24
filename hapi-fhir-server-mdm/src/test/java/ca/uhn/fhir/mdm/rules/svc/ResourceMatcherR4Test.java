@@ -1,11 +1,14 @@
 package ca.uhn.fhir.mdm.rules.svc;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiStringMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.PhoneticEncoderMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
@@ -14,6 +17,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -56,13 +61,21 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	@Test
 	public void testMetaphoneMatchResult() {
 		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildNamePhoneRules(MatchTypeEnum.METAPHONE));
-			MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
-			assertMatchResult(MdmMatchResultEnum.MATCH, 7L, 3.0, false, false, result);
+		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.METAPHONE)))
+			.thenReturn(new PhoneticEncoderMatcher(PhoneticEncoderEnum.METAPHONE));
+		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.STRING)))
+			.thenReturn(new HapiStringMatcher());
+
+		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
+		assertMatchResult(MdmMatchResultEnum.MATCH, 7L, 3.0, false, false, result);
 	}
 
 	@Test
 	public void testStringMatchResult() {
 		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildNamePhoneRules(MatchTypeEnum.STRING));
+		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.STRING)))
+			.thenReturn(new HapiStringMatcher());
+
 		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
 		assertMatchResult(MdmMatchResultEnum.NO_MATCH, 5L, 2.0, false, false, result);
 	}

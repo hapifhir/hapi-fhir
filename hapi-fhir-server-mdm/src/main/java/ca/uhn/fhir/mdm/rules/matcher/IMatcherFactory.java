@@ -5,5 +5,8 @@ import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 
 public interface IMatcherFactory {
 
+	/**
+	 * Retrieves the field matcher for the given MatchTypeEnum
+	 */
 	IMdmFieldMatcher getFieldMatcherForEnum(MatchTypeEnum theMdmMatcherEnum);
 }

@@ -1,9 +1,10 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiDateMatcher;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.rest.api.server.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Calendar;
@@ -14,6 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DateMatcherR4Test extends BaseMatcherR4Test {
+
+	private HapiDateMatcher myDateMatcher;
+
+	@BeforeEach
+	public void before() {
+		super.before();
+		myDateMatcher = new HapiDateMatcher(ourFhirContext);
+	}
 
 	@Test
 	public void testExactDatePrecision() {
@@ -44,7 +53,8 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean dateMatch(Date theDate, Date theSameMonth, TemporalPrecisionEnum theTheDay) {
-		return MatchTypeEnum.DATE.match(ourFhirContext, new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), true, null);
+		myExtraMatchParams.setExactMatch(true);
+		return myDateMatcher.matches(new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), myExtraMatchParams);
 	}
 
 	@Test
@@ -88,12 +98,11 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean dateTimeMatch(Date theDate, Date theSecondDate, TemporalPrecisionEnum thePrecision, TemporalPrecisionEnum theSecondPrecision) {
-		return MatchTypeEnum.DATE.match(
-			ourFhirContext,
+		myExtraMatchParams.setExactMatch(true);
+		return myDateMatcher.matches(
 			new DateTimeType(theDate, thePrecision),
 			new DateTimeType(theSecondDate, theSecondPrecision),
-			true,
-			null
+			myExtraMatchParams
 		);
 	}
 }

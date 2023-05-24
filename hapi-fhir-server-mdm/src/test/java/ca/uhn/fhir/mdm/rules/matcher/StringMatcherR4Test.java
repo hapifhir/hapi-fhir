@@ -1,6 +1,12 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
-import ca.uhn.fhir.rest.api.server.matcher.models.MatchTypeEnum;
+import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
+import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiStringMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NumericMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.PhoneticEncoderMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.SubstringStringMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -10,13 +16,50 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class StringMatcherR4Test extends BaseMatcherR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(StringMatcherR4Test.class);
 	public static final String LEFT_NAME = "namadega";
 	public static final String RIGHT_NAME = "namaedga";
+
+	private @Nonnull IMdmFieldMatcher getFieldMatcher(MatchTypeEnum theMatchTypeEnum) {
+		switch (theMatchTypeEnum) {
+			case COLOGNE:
+				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.COLOGNE);
+			case DOUBLE_METAPHONE:
+				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.DOUBLE_METAPHONE);
+			case MATCH_RATING_APPROACH:
+				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.MATCH_RATING_APPROACH);
+			case METAPHONE:
+				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.METAPHONE);
+			case SOUNDEX:
+				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.SOUNDEX);
+			case CAVERPHONE1:
+				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE1);
+			case CAVERPHONE2:
+				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE2);
+			case NYSIIS:
+				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.NYSIIS);
+			case REFINED_SOUNDEX:
+				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.REFINED_SOUNDEX);
+			case STRING:
+				return new HapiStringMatcher();
+			case SUBSTRING:
+				return new SubstringStringMatcher();
+			case NUMERIC:
+				return new NumericMatcher();
+			default:
+				fail("String matcher " + theMatchTypeEnum.name() + " does not exist");
+		}
+
+		// so we don't have null pointer warnings - we'll never hit this point
+		return new HapiStringMatcher();
+	}
 
 	@Test
 	public void testNamadega() {
@@ -27,7 +70,6 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 		assertTrue(match(MatchTypeEnum.MATCH_RATING_APPROACH, left, right));
 		assertTrue(match(MatchTypeEnum.METAPHONE, left, right));
 		assertTrue(match(MatchTypeEnum.SOUNDEX, left, right));
-		assertTrue(match(MatchTypeEnum.METAPHONE, left, right));
 
 		assertFalse(match(MatchTypeEnum.CAVERPHONE1, left, right));
 		assertFalse(match(MatchTypeEnum.CAVERPHONE2, left, right));
@@ -83,25 +125,30 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 
 	@Test
 	public void testExactString() {
-		assertTrue(MatchTypeEnum.STRING.match(ourFhirContext, new StringType("Jilly"), new StringType("Jilly"), true, null));
+		myExtraMatchParams.setExactMatch(true);
 
-		assertFalse(MatchTypeEnum.STRING.match(ourFhirContext, new StringType("MCTAVISH"), new StringType("McTavish"), true, null));
-		assertFalse(MatchTypeEnum.STRING.match(ourFhirContext, new StringType("Durie"), new StringType("dury"), true, null));
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Jilly"), new StringType("Jilly"), myExtraMatchParams));
+
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("MCTAVISH"), new StringType("McTavish"), myExtraMatchParams));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Durie"), new StringType("dury"), myExtraMatchParams));
 	}
 
 	@Test
 	public void testExactBoolean() {
-		assertTrue(MatchTypeEnum.STRING.match(ourFhirContext, new BooleanType(true), new BooleanType(true), true, null));
+		myExtraMatchParams.setExactMatch(true);
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(true), myExtraMatchParams));
 
-		assertFalse(MatchTypeEnum.STRING.match(ourFhirContext, new BooleanType(true), new BooleanType(false), true, null));
-		assertFalse(MatchTypeEnum.STRING.match(ourFhirContext, new BooleanType(false), new BooleanType(true), true, null));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(false), myExtraMatchParams));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(false), new BooleanType(true), myExtraMatchParams));
 	}
 
 	@Test
 	public void testExactDateString() {
-		assertTrue(MatchTypeEnum.STRING.match(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-08-09"), true, null));
+		myExtraMatchParams.setExactMatch(true);
 
-		assertFalse(MatchTypeEnum.STRING.match(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-09-08"), true, null));
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-08-09"), myExtraMatchParams));
+
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-09-08"), myExtraMatchParams));
 	}
 
 
@@ -113,9 +160,11 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 		Enumeration<Enumerations.AdministrativeGender> female = new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
 		female.setValue(Enumerations.AdministrativeGender.FEMALE);
 
-		assertTrue(MatchTypeEnum.STRING.match(ourFhirContext, male, male, true, null));
+		myExtraMatchParams.setExactMatch(true);
 
-		assertFalse(MatchTypeEnum.STRING.match(ourFhirContext, male, female, true, null));
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(male, male, myExtraMatchParams));
+
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(male, female, myExtraMatchParams));
 	}
 
 	@Test
@@ -159,6 +208,7 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean match(MatchTypeEnum theMatcher, String theLeft, String theRight) {
-		return theMatcher.match(ourFhirContext, new StringType(theLeft), new StringType(theRight), false, null);
+		return getFieldMatcher(theMatcher)
+			.matches(new StringType(theLeft), new StringType(theRight), myExtraMatchParams);
 	}
 }

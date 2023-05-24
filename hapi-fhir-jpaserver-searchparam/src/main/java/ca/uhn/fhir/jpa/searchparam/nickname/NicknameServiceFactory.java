@@ -13,6 +13,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * A factory used to create NicknameSvc objects.
+ *
+ * Can be used to set custom name -> similar names map
+ * If no custom map exists, a default one will be used.
+ *
+ * See names.csv
+ */
 public class NicknameServiceFactory {
 
 	private NicknameSvc myNicknameSvc;
@@ -21,6 +29,9 @@ public class NicknameServiceFactory {
 
 	private Map<String, Collection<String>> myNameToNickname;
 
+	/**
+	 * Returns this factory's NicknameSvc
+	 */
 	public NicknameSvc getNicknameSvc() {
 		if (myNicknameSvc == null) {
 			createNicknameSvc();
@@ -28,6 +39,11 @@ public class NicknameServiceFactory {
 		return myNicknameSvc;
 	}
 
+	/**
+	 * Set a custom nickname -> list of alternative names map.
+	 *
+	 * This map (if populated) will be used instead of the defaults.
+	 */
 	public void setNicknameMap(Map<String, Collection<String>> theMap) {
 		myNameToNickname = theMap;
 	}

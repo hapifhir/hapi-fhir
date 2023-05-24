@@ -32,13 +32,6 @@ public class NumericMatcher implements IMdmFieldMatcher {
 	private final NumericEncoder encoder = new NumericEncoder();
 
 	@Override
-	public boolean matches(String theLeftString, String theRightString) {
-		String left = encoder.encode(theLeftString);
-		String right = encoder.encode(theRightString);
-		return left.equals(right);
-	}
-
-	@Override
 	public boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theParams) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
 			String left = encoder.encode(StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.isExactMatch()));

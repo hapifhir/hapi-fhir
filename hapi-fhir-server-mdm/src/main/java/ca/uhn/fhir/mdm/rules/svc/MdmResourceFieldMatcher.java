@@ -30,6 +30,7 @@ import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
+import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
@@ -110,11 +111,9 @@ public class MdmResourceFieldMatcher {
 	private MdmMatchEvaluation match(List<IBase> theLeftValues, List<IBase> theRightValues) {
 		MdmMatchEvaluation retval = new MdmMatchEvaluation(false, 0.0);
 
-		MdmMatcherJson matcherJson = myMdmFieldMatchJson.getMatcher();
-		IMdmFieldMatcher matcher = myIMatcherFactory.getFieldMatcherForEnum(matcherJson.getAlgorithm());
-
 		boolean isMatchingEmptyFieldValues = (theLeftValues.isEmpty() && theRightValues.isEmpty());
-		if (isMatchingEmptyFieldValues && matcher.isMatchingEmptyFields()) {
+		IMdmFieldMatcher matcher = getFieldMatcher();
+		if (isMatchingEmptyFieldValues && (matcher != null && matcher.isMatchingEmptyFields())) {
 			return match((IBase) null, (IBase) null);
 		}
 
@@ -129,14 +128,9 @@ public class MdmResourceFieldMatcher {
 	}
 
 	private MdmMatchEvaluation match(IBase theLeftValue, IBase theRightValue) {
-		MdmMatcherJson matcherJson = myMdmFieldMatchJson.getMatcher();
-
-		ExtraMatchParams params = new ExtraMatchParams();
-		params.setExactMatch(matcherJson.getExact());
-		params.setIdentificationSystem(matcherJson.getIdentifierSystem());
-		IMdmFieldMatcher matcher = myIMatcherFactory.getFieldMatcherForEnum(matcherJson.getAlgorithm());
+		IMdmFieldMatcher matcher = getFieldMatcher();
 		if (matcher != null) {
-			boolean matches = matcher.matches(theLeftValue, theRightValue, params);
+			boolean matches = matcher.matches(theLeftValue, theRightValue, getExtraMatcherParams());
 			return new MdmMatchEvaluation(matches, matches ? 1.0 : 0.0);
 		}
 
@@ -172,5 +166,31 @@ public class MdmResourceFieldMatcher {
 
 	public String getName() {
 		return myName;
+	}
+
+	private IMdmFieldMatcher getFieldMatcher() {
+		MdmMatcherJson matcherJson = myMdmFieldMatchJson.getMatcher();
+		MatchTypeEnum matchTypeEnum = null;
+		if (matcherJson != null) {
+			matchTypeEnum = matcherJson.getAlgorithm();
+		}
+		if (matchTypeEnum == null) {
+			// we didn't have a matchjson
+			// we can only match empty fields.
+			// this is the default for match factory,
+			// but we'll enforce it here
+			matchTypeEnum = MatchTypeEnum.EMPTY_FIELD;
+		}
+
+		return myIMatcherFactory.getFieldMatcherForEnum(matchTypeEnum);
+	}
+
+	private ExtraMatchParams getExtraMatcherParams() {
+		MdmMatcherJson matcherJson = myMdmFieldMatchJson.getMatcher();
+
+		ExtraMatchParams params = new ExtraMatchParams();
+		params.setExactMatch(matcherJson.getExact());
+		params.setIdentificationSystem(matcherJson.getIdentifierSystem());
+		return params;
 	}
 }

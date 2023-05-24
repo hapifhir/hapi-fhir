@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.searchparam.matcher;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 
 /**

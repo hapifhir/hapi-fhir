@@ -29,10 +29,10 @@ public class DateTimeWrapper {
 		} else if (theDate instanceof org.hl7.fhir.r4.model.BaseDateTimeType) {
 			myPrecision = ((org.hl7.fhir.r4.model.BaseDateTimeType) theDate).getPrecision();
 			myValueAsString = ((org.hl7.fhir.r4.model.BaseDateTimeType) theDate).getValueAsString();
+		} else {
+			// we should consider changing this error so we don't need the fhir context at all
+			throw new UnsupportedOperationException(Msg.code(1520) + "Version not supported: " + theFhirContext.getVersion().getVersion());
 		}
-
-		// we should consider changing this error so we don't need the fhir context at all
-		throw new UnsupportedOperationException(Msg.code(1520) + "Version not supported: " + theFhirContext.getVersion().getVersion());
 	}
 
 	public TemporalPrecisionEnum getPrecision() {
@@ -40,24 +40,12 @@ public class DateTimeWrapper {
 	}
 
 	public String getValueAsStringWithPrecision(TemporalPrecisionEnum thePrecision) {
-		// we are using an R4 DateTypes because all datetime strings are the same for all types
+		// we are using an R4 DateTypes because all datetime strings are the same for all fhir versions
 		// (and so it won't matter here)
-		switch (thePrecision) {
-			case YEAR:
-			case MONTH:
-			case DAY:
-				DateType dateType = new DateType(myValueAsString);
-				dateType.setPrecision(thePrecision);
-				return dateType.getValueAsString();
-			case MINUTE:
-			case SECOND:
-			case MILLI:
-				DateTimeType dateTimeType = new DateTimeType(myValueAsString);
-				dateTimeType.setPrecision(thePrecision);
-				return dateTimeType.getValueAsString();
-		}
-		// why would we fall out here?
-		return myValueAsString;
+		// we just want the string at a specific precision
+		DateTimeType dateTimeType = new DateTimeType(myValueAsString);
+		dateTimeType.setPrecision(thePrecision);
+		return dateTimeType.getValueAsString();
 	}
 
 	public String getValueAsString() {

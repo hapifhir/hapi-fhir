@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.searchparam.nickname;
 
-import ca.uhn.fhir.rest.api.server.NicknameMap;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
