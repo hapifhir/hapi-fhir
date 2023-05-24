@@ -1,6 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.extractor;
-
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -20,6 +17,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.extractor;
+
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -60,6 +59,7 @@ public final class ResourceIndexedSearchParams {
 	final public Collection<ResourceIndexedComboTokenNonUnique> myComboTokenNonUnique = new HashSet<>();
 	final public Collection<ResourceLink> myLinks = new HashSet<>();
 	final public Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
+	final public Collection<SearchParamPresentEntity> mySearchParamPresentEntities = new HashSet<>();
 	final public Collection<ResourceIndexedSearchParamComposite>  myCompositeParams = new HashSet<>();
 
 	public ResourceIndexedSearchParams() {
@@ -117,6 +117,7 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setParamsUriPopulated(myUriParams.isEmpty() == false);
 		theEntity.setParamsCoordsPopulated(myCoordsParams.isEmpty() == false);
 		theEntity.setParamsComboStringUniquePresent(myComboStringUniques.isEmpty() == false);
+		theEntity.setParamsComboTokensNonUniquePresent(myComboTokenNonUnique.isEmpty() == false);
 		theEntity.setHasLinks(myLinks.isEmpty() == false);
 	}
 
@@ -133,15 +134,15 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setResourceLinks(myLinks);
 	}
 
-	public void updateSpnamePrefixForIndexedOnContainedResource(String theContainingType, String theSpnamePrefix) {
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myNumberParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myQuantityParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myQuantityNormalizedParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myDateParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myUriParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myTokenParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myStringParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myCoordsParams, theSpnamePrefix);
+	public void updateSpnamePrefixForIndexOnUpliftedChain(String theContainingType, String theSpnamePrefix) {
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myNumberParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myQuantityParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myQuantityNormalizedParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myDateParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myUriParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myTokenParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myStringParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myCoordsParams, theSpnamePrefix);
 	}
 	
 	public void updateSpnamePrefixForLinksOnContainedResource(String theSpNamePrefix) {
@@ -176,7 +177,7 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
-	private void updateSpnamePrefixForIndexedOnContainedResource(String theContainingType, Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
+	private void updateSpnamePrefixForIndexOnUpliftedChain(String theContainingType, Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
 		
 		for (BaseResourceIndexedSearchParam param : theParams) {
 			param.setResourceType(theContainingType);

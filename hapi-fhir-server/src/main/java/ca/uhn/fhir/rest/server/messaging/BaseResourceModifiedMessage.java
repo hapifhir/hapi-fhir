@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.messaging;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.messaging;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -30,10 +29,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
@@ -50,6 +51,8 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	protected RequestPartitionId myPartitionId;
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
+	@JsonIgnore
+	protected transient String myPayloadType;
 
 	/**
 	 * Constructor
@@ -126,6 +129,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return retVal;
 	}
 
+	@Nullable
 	public IBaseResource getNewPayload(FhirContext theCtx) {
 		if (myPayloadDecoded == null && isNotBlank(myPayload)) {
 			myPayloadDecoded = theCtx.newJsonParser().parseResource(myPayload);
@@ -133,6 +137,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return myPayloadDecoded;
 	}
 
+	@Nullable
 	public IBaseResource getPayload(FhirContext theCtx) {
 		IBaseResource retVal = myPayloadDecoded;
 		if (retVal == null && isNotBlank(myPayload)) {
@@ -143,6 +148,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return retVal;
 	}
 
+	@Nonnull
 	public String getPayloadString() {
 		if (this.myPayload != null) {
 			return this.myPayload;
@@ -222,15 +228,33 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return true;
 	}
 
-
 	@Nullable
 	@Override
-	public String getMessageKeyOrNull() {
-		if (super.getMessageKeyOrNull() != null) {
-			return super.getMessageKeyOrNull();
-		}
-		return myPayloadId;
+	public String getMessageKeyOrDefault() {
+		return StringUtils.defaultString(super.getMessageKey(), myPayloadId);
 	}
 
+	public boolean hasPayloadType(FhirContext theFhirContext, @Nonnull String theResourceName) {
+		if (myPayloadType == null) {
+			myPayloadType = getPayloadType(theFhirContext);
+		}
+		return theResourceName.equals(myPayloadType);
+	}
+
+	@Nullable
+	public String getPayloadType(FhirContext theFhirContext) {
+		String retval = null;
+		IIdType payloadId = getPayloadId(theFhirContext);
+		if (payloadId != null) {
+			retval = payloadId.getResourceType();
+		}
+		if (isBlank(retval)) {
+			IBaseResource payload = getNewPayload(theFhirContext);
+			if (payload != null) {
+				retval = theFhirContext.getResourceType(payload);
+			}
+		}
+		return retval;
+	}
 }
 

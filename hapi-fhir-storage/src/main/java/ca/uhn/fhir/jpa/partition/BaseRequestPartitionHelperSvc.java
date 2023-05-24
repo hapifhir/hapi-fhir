@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.partition;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.partition;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -139,17 +138,26 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	public RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails) {
 		RequestPartitionId retVal = null;
 
-		if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequestDetails)) {
-			// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
-			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			retVal = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
-
-			if (retVal != null) {
-				retVal = validateNormalizeAndNotifyHooksForRead(retVal, theRequestDetails, null);
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			if (theRequestDetails instanceof SystemRequestDetails) {
+				SystemRequestDetails systemRequestDetails = (SystemRequestDetails) theRequestDetails;
+				retVal = systemRequestDetails.getRequestPartitionId();
 			}
+		}
 
+		if (retVal == null) {
+			if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequestDetails)) {
+				// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				retVal = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
+
+				if (retVal != null) {
+					retVal = validateNormalizeAndNotifyHooksForRead(retVal, theRequestDetails, null);
+				}
+
+			}
 		}
 
 		return retVal;

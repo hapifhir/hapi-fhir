@@ -1,21 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
-
-import ca.uhn.fhir.IHapiBootOrder;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
-
-import javax.annotation.PreDestroy;
-
-import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -35,16 +17,42 @@ import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.Subscription
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
+
+import ca.uhn.fhir.IHapiBootOrder;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicMatchingSubscriber;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegisteringSubscriber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
+
+import javax.annotation.PreDestroy;
+
+import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
 public class MatchingQueueSubscriberLoader {
 	protected IChannelReceiver myMatchingChannel;
 	private static final Logger ourLog = LoggerFactory.getLogger(MatchingQueueSubscriberLoader.class);
 	@Autowired
+	FhirContext myFhirContext;
+	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
+	@Autowired(required = false)
+	private SubscriptionTopicMatchingSubscriber mySubscriptionTopicMatchingSubscriber;
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
 	private SubscriptionRegisteringSubscriber mySubscriptionRegisteringSubscriber;
+	@Autowired(required = false)
+	private SubscriptionTopicRegisteringSubscriber mySubscriptionTopicRegisteringSubscriber;
 	@Autowired
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 	@Autowired
@@ -61,6 +69,13 @@ public class MatchingQueueSubscriberLoader {
 			myMatchingChannel.subscribe(mySubscriptionActivatingSubscriber);
 			myMatchingChannel.subscribe(mySubscriptionRegisteringSubscriber);
 			ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myMatchingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+			if (mySubscriptionTopicMatchingSubscriber != null) {
+				ourLog.info("Starting SubscriptionTopic Matching Subscriber");
+				myMatchingChannel.subscribe(mySubscriptionTopicMatchingSubscriber);
+			}
+			if (mySubscriptionTopicRegisteringSubscriber != null) {
+				myMatchingChannel.subscribe(mySubscriptionTopicRegisteringSubscriber);
+			}
 		}
 	}
 

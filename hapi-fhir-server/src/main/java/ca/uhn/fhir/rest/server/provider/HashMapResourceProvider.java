@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.provider;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -29,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -36,27 +36,27 @@ import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -66,15 +66,20 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -98,15 +103,15 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	private final Class<T> myResourceType;
 	private final FhirContext myFhirContext;
 	private final String myResourceName;
+	private final AtomicLong myDeleteCount = new AtomicLong(0);
+	private final AtomicLong myUpdateCount = new AtomicLong(0);
+	private final AtomicLong myCreateCount = new AtomicLong(0);
+	private final AtomicLong myReadCount = new AtomicLong(0);
 	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new LinkedHashMap<>();
 	protected Map<String, LinkedList<T>> myIdToHistory = new LinkedHashMap<>();
 	protected LinkedList<T> myTypeHistory = new LinkedList<>();
 	protected AtomicLong mySearchCount = new AtomicLong(0);
 	private long myNextId;
-	private final AtomicLong myDeleteCount = new AtomicLong(0);
-	private final AtomicLong myUpdateCount = new AtomicLong(0);
-	private final AtomicLong myCreateCount = new AtomicLong(0);
-	private final AtomicLong myReadCount = new AtomicLong(0);
 
 	/**
 	 * Constructor
@@ -252,7 +257,11 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Read(version = true)
-	public synchronized T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+	public T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+		return read(theId, theRequestDetails, false);
+	}
+
+	public synchronized T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(2247) + theId);
@@ -270,8 +279,10 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			retVal = versions.lastEntry().getValue();
 		}
 
-		if (retVal == null || ResourceMetadataKeyEnum.DELETED_AT.get(retVal) != null) {
-			throw new ResourceGoneException(Msg.code(2244) + theId);
+		if (retVal == null || retVal.isDeleted()) {
+			if (!theDeletedOk) {
+				throw new ResourceGoneException(Msg.code(2244) + theId);
+			}
 		}
 
 		myReadCount.incrementAndGet();
@@ -283,11 +294,47 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		return retVal;
 	}
 
-	@Search
-	public synchronized List<IBaseResource> searchAll(RequestDetails theRequestDetails) {
+	@Search(allowUnknownParams = true)
+	public synchronized IBundleProvider searchAll(RequestDetails theRequestDetails) {
 		mySearchCount.incrementAndGet();
-		List<T> retVal = getAllResources();
-		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
+		List<T> allResources = getAllResources();
+
+		if (theRequestDetails.getParameters().containsKey(Constants.PARAM_ID)) {
+			for (String nextParam : theRequestDetails.getParameters().get(Constants.PARAM_ID)) {
+				List<IdDt> wantIds = Arrays.stream(nextParam.split(","))
+					.map(StringUtils::trim)
+					.filter(StringUtils::isNotBlank)
+					.map(IdDt::new)
+					.collect(Collectors.toList());
+				for (Iterator<T> iter = allResources.iterator(); iter.hasNext(); ) {
+					T next = iter.next();
+					boolean found = wantIds
+						.stream()
+						.anyMatch(t -> resourceIdMatches(next, t));
+					if (!found) {
+						iter.remove();
+					}
+				}
+			}
+		}
+
+		return new SimpleBundleProvider(allResources) {
+			@SuppressWarnings("unchecked")
+			@Nonnull
+			@Override
+			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+
+				// Make sure that "from" isn't less than 0, "to" isn't more than the number available,
+				// and "from" <= "to"
+				int from = max(0, theFromIndex);
+				int to = min(theToIndex, allResources.size());
+				to = max(from, to);
+
+				List<IBaseResource> retVal = (List<IBaseResource>) allResources.subList(from, to);
+				retVal = fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
+				return retVal;
+			}
+		};
 	}
 
 	@Nonnull
@@ -298,7 +345,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			if (next.isEmpty() == false) {
 				T nextResource = next.lastEntry().getValue();
 				if (nextResource != null) {
-					if (ResourceMetadataKeyEnum.DELETED_AT.get(nextResource) == null) {
+					if (!nextResource.isDeleted()) {
 						// Clone the resource for search results so that the
 						// stored metadata doesn't appear in the results
 						T nextResourceClone = myFhirContext.newTerser().clone(nextResource);
@@ -309,44 +356,6 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		}
 
 		return retVal;
-	}
-
-	@Search
-	public synchronized List<IBaseResource> searchById(
-		@RequiredParam(name = "_id") TokenAndListParam theIds, RequestDetails theRequestDetails) {
-
-		List<T> retVal = new ArrayList<>();
-
-		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
-			if (next.isEmpty() == false) {
-				T nextResource = next.lastEntry().getValue();
-
-				boolean matches = true;
-				if (theIds != null && theIds.getValuesAsQueryTokens().size() > 0) {
-					for (TokenOrListParam nextIdAnd : theIds.getValuesAsQueryTokens()) {
-						matches = false;
-						for (TokenParam nextOr : nextIdAnd.getValuesAsQueryTokens()) {
-							if (nextOr.getValue().equals(nextResource.getIdElement().getIdPart())) {
-								matches = true;
-							}
-						}
-						if (!matches) {
-							break;
-						}
-					}
-				}
-
-				if (!matches) {
-					continue;
-				}
-
-				retVal.add(nextResource);
-			}
-		}
-
-		mySearchCount.incrementAndGet();
-
-		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 	}
 
 	@SuppressWarnings({"unchecked", "DataFlowIssue"})
@@ -386,10 +395,6 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		}
 
 		ourLog.info("Storing resource with ID: {}", id.getValue());
-
-		// Store to ID->version->resource map
-		TreeMap<Long, T> versionToResource = getVersionToResource(theIdPart);
-		versionToResource.put(theVersionIdPart, theResource);
 
 		if (theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster() != null) {
 			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
@@ -457,6 +462,10 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 			}
 		}
+
+		// Store to ID->version->resource map
+		TreeMap<Long, T> versionToResource = getVersionToResource(theIdPart);
+		versionToResource.put(theVersionIdPart, theResource);
 
 		// Store to type history map
 		myTypeHistory.addFirst(theResource);
@@ -541,6 +550,15 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			retVal.add(next.lastEntry().getValue());
 		}
 		return Collections.unmodifiableList(retVal);
+	}
+
+	private boolean resourceIdMatches(T theResource, IdDt theId) {
+		if (theId.getResourceType() == null || theId.getResourceType().equals(myFhirContext.getResourceType(theResource))) {
+			if (theResource.getIdElement().getIdPart().equals(theId.getIdPart())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static <T extends IBaseResource> T fireInterceptorsAndFilterAsNeeded(T theResource, RequestDetails theRequestDetails) {

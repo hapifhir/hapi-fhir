@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -50,6 +49,6 @@ public class JobStepExecutorFactory {
 	}
 
 	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutor<PT,IT,OT> newJobStepExecutor(@Nonnull JobInstance theInstance, WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
-		return new JobStepExecutor<>(myJobPersistence, myBatchJobSender, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc, myJobMaintenanceService, myJobDefinitionRegistry);
+		return new JobStepExecutor<>(myJobPersistence, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc, myJobMaintenanceService, myJobDefinitionRegistry);
 	}
 }

@@ -7,7 +7,8 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.5.4-SNAPSHOT</version>
+	<version>6.7.3-SNAPSHOT</version>
+
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -97,6 +98,7 @@
 		<module>hapi-fhir-serviceloaders</module>
 		<module>hapi-fhir-storage</module>
 		<module>hapi-fhir-storage-batch2</module>
+		<module>hapi-fhir-storage-batch2-test-utilities</module>
 		<module>hapi-fhir-storage-batch2-jobs</module>
 		<module>hapi-fhir-storage-cr</module>
 		<module>hapi-fhir-storage-mdm</module>
@@ -857,6 +859,30 @@
 		<developer>
 			<id>JorisHeadease</id>
 		</developer>
+		<developer>
+			<id>delopst</id>
+			<name>Primož Delopst</name>
+		</developer>
+		<developer>
+			<id>Zach Smith</id>
+			<name>zachdoctolib</name>
+			<organization>Doctolib</organization>
+		</developer>
+		<developer>
+			<id>alparodev</id>
+			<name>Aleksej Parovysnik</name>
+			<organization>Doctolib</organization>
+		</developer>
+		<developer>
+			<id>doumdoum</id>
+			<name>Dominique Villard</name>
+			<organization>Doctolib</organization>
+		</developer>
+		<developer>
+			<id>boereck</id>
+			<name>Max Bureck</name>
+			<organization>Fraunhofer FOKUS</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -867,7 +893,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>5.6.97</fhir_core_version>
+		<fhir_core_version>6.0.1</fhir_core_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -905,9 +931,9 @@
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
 		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
-		<jena_version>4.2.0</jena_version>
+		<jena_version>4.8.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
-        <jetty_version>10.0.13</jetty_version>
+		<jetty_version>10.0.14</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.9.1</junit_version>
 		<flexmark_version>0.50.40</flexmark_version>
@@ -921,8 +947,8 @@
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
-		<jackson_version>2.14.1</jackson_version>
-		<jackson_databind_version>2.14.1</jackson_databind_version>
+		<jackson_version>2.15.0</jackson_version>
+		<jackson_databind_version>2.15.0</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.10.0</okhttp_version>
@@ -937,10 +963,10 @@
 		<swagger_version>2.1.12</swagger_version>
 		<slf4j_version>2.0.3</slf4j_version>
 		<log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
-		<spring_version>5.3.23</spring_version>
+		<spring_version>5.3.27</spring_version>
 		<spring_data_bom_version>2021.2.2</spring_data_bom_version>
 		<spring_batch_version>4.3.3</spring_batch_version>
-		<spring_boot_version>2.7.5</spring_boot_version>
+		<spring_boot_version>2.7.12</spring_boot_version>
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
 		<stax2_api_version>3.1.4</stax2_api_version>
@@ -956,9 +982,7 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<cqframework.version>2.4.0</cqframework.version>
-		<cql-engine.version>2.3.0</cql-engine.version>
-		<cql-evaluator.version>2.3.0</cql-evaluator.version>
+		<clinical-reasoning.version>3.0.0-PRE2</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1046,12 +1070,12 @@
 			<dependency>
 				<groupId>com.jayway.jsonpath</groupId>
 				<artifactId>json-path</artifactId>
-				<version>2.5.0</version>
+				<version>2.8.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.jayway.jsonpath</groupId>
 				<artifactId>json-path-assert</artifactId>
-				<version>2.5.0</version>
+				<version>2.8.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.ben-manes.caffeine</groupId>
@@ -1059,9 +1083,14 @@
 				<version>${caffeine_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+				<artifactId>owasp-java-html-sanitizer</artifactId>
+				<version>20211018.2</version>
+			</dependency>
+			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>19.2</version>
+				<version>19.4</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
@@ -1287,6 +1316,11 @@
 				<version>${jaxb_api_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-impl</artifactId>
+				<version>${jaxb_api_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>${gson_version}</version>
@@ -1453,6 +1487,16 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-osgi</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-nio</artifactId>
 				<version>${httpcore_version}</version>
 			</dependency>
 			<dependency>
@@ -1674,8 +1718,8 @@
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
-				<artifactId>javax.el</artifactId>
-				<version>3.0.0</version>
+				<artifactId>jakarta.el</artifactId>
+				<version>3.0.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
@@ -1728,6 +1772,17 @@
 				<version>${hamcrest_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.exparity</groupId>
+				<artifactId>hamcrest-date</artifactId>
+				<version>2.0.8</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>*</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
 				<version>${hibernate_version}</version>
@@ -1769,6 +1824,16 @@
 						<artifactId>jboss-transaction-api_1.2_spec</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-envers</artifactId>
+				<version>${hibernate_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-envers</artifactId>
+				<version>${spring_boot_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
@@ -2252,7 +2317,6 @@
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-						<forkCount>1.0C</forkCount>
 						<trimStackTrace>true</trimStackTrace>
 					</configuration>
 				</plugin>
@@ -2319,7 +2383,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.8</version>
+					<version>0.8.9</version>
 					<configuration>
 						<excludes>
 							<exclude>ca/uhn/fhir/model/dstu2/**/*.class</exclude>
@@ -2415,7 +2479,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.3.0</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>
@@ -2878,9 +2942,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<forkCount>1</forkCount>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
@@ -2892,9 +2953,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<forkCount>2</forkCount>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
@@ -2972,14 +3030,13 @@
 		This profile is basically here to work around an IJ bug where the
 		<testSource> tag is ignored in IJ's compiler. See:
 		https://youtrack.jetbrains.com/issue/IDEA-85478
+		IntelliJ 2023.1 now supports this, so we removed the activation.
+		But if you want to run an older IntelliJ, activate the old-intellij profile in the Maven tab.
 		-->
 		<profile>
-			<id>ide</id>
+			<id>old-intellij</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
-				<property>
-					<name>idea.maven.embedder.version</name>
-				</property>
 			</activation>
 			<build>
 				<plugins>

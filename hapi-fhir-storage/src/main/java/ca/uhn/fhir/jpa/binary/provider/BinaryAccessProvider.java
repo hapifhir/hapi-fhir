@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.binary.provider;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.binary.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.provider;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -109,7 +108,6 @@ public class BinaryAccessProvider {
 
 		if (attachmentId.isPresent()) {
 
-			@SuppressWarnings("unchecked")
 			String blobId = attachmentId.get();
 
 			StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(theResourceId, blobId);
@@ -194,7 +192,7 @@ public class BinaryAccessProvider {
 				throw new IllegalStateException(Msg.code(2073) + "Input stream is empty! Ensure that you are uploading data, and if so, ensure that no interceptors are in use that may be consuming the input stream");
 			}
 			if (myBinaryStorageSvc.shouldStoreBlob(size, theResourceId, requestContentType)) {
-				StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, null, requestContentType, new ByteArrayInputStream(bytes));
+				StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, null, requestContentType, new ByteArrayInputStream(bytes), theRequestDetails);
 				size = storedDetails.getBytes();
 				blobId = storedDetails.getBlobId();
 				Validate.notBlank(blobId, "BinaryStorageSvc returned a null blob ID"); // should not happen
@@ -238,7 +236,7 @@ public class BinaryAccessProvider {
 	private IBinaryTarget findAttachmentForRequest(IBaseResource theResource, String thePath, ServletRequestDetails theRequestDetails) {
 		Optional<IBase> type = myCtx.newFluentPath().evaluateFirst(theResource, thePath, IBase.class);
 		String resType = this.myCtx.getResourceType(theResource);
-		if (!type.isPresent()) {
+		if (type.isEmpty()) {
 			String msg = this.myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownPath", resType, thePath);
 			throw new InvalidRequestException(Msg.code(1335) + msg);
 		}
@@ -246,7 +244,7 @@ public class BinaryAccessProvider {
 
 		Optional<IBinaryTarget> binaryTarget = toBinaryTarget(element);
 
-		if (binaryTarget.isPresent() == false) {
+		if (binaryTarget.isEmpty()) {
 			BaseRuntimeElementDefinition<?> def2 = myCtx.getElementDefinition(element.getClass());
 			String msg = this.myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownType", resType, thePath, def2.getName());
 			throw new InvalidRequestException(Msg.code(1336) + msg);

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -40,6 +39,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.model.api.IResource;
@@ -73,11 +73,11 @@ import java.util.Date;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaStorageResourceParser implements IJpaStorageResourceParser {
-	public static final LenientErrorHandler LENIENT_ERROR_HANDLER = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
+	public static final LenientErrorHandler LENIENT_ERROR_HANDLER = new LenientErrorHandler(false).disableAllErrors();
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageResourceParser.class);
 	@Autowired
 	private FhirContext myFhirContext;
@@ -351,19 +351,26 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				List<IBaseCoding> securityLabels = new ArrayList<>();
 				List<IdDt> profiles = new ArrayList<>();
 				for (BaseTag next : theTagList) {
-					switch (next.getTag().getTagType()) {
+					TagDefinition nextTag = next.getTag();
+					switch (nextTag.getTagType()) {
 						case PROFILE:
-							profiles.add(new IdDt(next.getTag().getCode()));
+							profiles.add(new IdDt(nextTag.getCode()));
 							break;
 						case SECURITY_LABEL:
 							IBaseCoding secLabel = (IBaseCoding) myFhirContext.getVersion().newCodingDt();
-							secLabel.setSystem(next.getTag().getSystem());
-							secLabel.setCode(next.getTag().getCode());
-							secLabel.setDisplay(next.getTag().getDisplay());
+							secLabel.setSystem(nextTag.getSystem());
+							secLabel.setCode(nextTag.getCode());
+							secLabel.setDisplay(nextTag.getDisplay());
+							// wipmb these technically support userSelected and version
 							securityLabels.add(secLabel);
 							break;
 						case TAG:
-							tagList.add(new Tag(next.getTag().getSystem(), next.getTag().getCode(), next.getTag().getDisplay()));
+							// wipmb check xml, etc.
+							Tag e = new Tag(nextTag.getSystem(), nextTag.getCode(), nextTag.getDisplay());
+							e.setVersion(nextTag.getVersion());
+							// careful! These are Boolean, not boolean.
+							e.setUserSelectedBoolean(nextTag.getUserSelected());
+							tagList.add(e);
 							break;
 					}
 				}
@@ -434,6 +441,13 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 						tag.setSystem(next.getTag().getSystem());
 						tag.setCode(next.getTag().getCode());
 						tag.setDisplay(next.getTag().getDisplay());
+						tag.setVersion(next.getTag().getVersion());
+						Boolean userSelected = next.getTag().getUserSelected();
+						// the tag is created with a null userSelected, but the api is primitive boolean.
+						// Only update if we are non-null.
+						if (nonNull(userSelected)) {
+							tag.setUserSelected(userSelected);
+						}
 						break;
 				}
 			}

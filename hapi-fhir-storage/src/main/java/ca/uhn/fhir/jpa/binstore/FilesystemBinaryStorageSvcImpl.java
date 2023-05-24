@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.binstore;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,11 +17,13 @@ package ca.uhn.fhir.jpa.binstore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +33,7 @@ import com.google.common.hash.HashingInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -76,9 +77,21 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		mkdir(myBasePath);
 	}
 
+	/**
+	 * This implementation prevents: \ / | .
+	 */
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
-		String id = super.provideIdForNewBlob(theBlobIdOrNull);
+	public boolean isValidBlobId(String theNewBlobId) {
+		return !StringUtils.containsAny(theNewBlobId, '\\', '/', '|', '.');
+
+	}
+
+	@Nonnull
+	@Override
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
+											 InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
+
+		String id = super.provideIdForNewBlob(theBlobIdOrNull, null, theRequestDetails, theContentType);
 		File storagePath = getStoragePath(id, true);
 
 		// Write binary file
@@ -128,11 +141,9 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		InputStream inputStream = getInputStream(theResourceId, theBlobId);
 
 		if (inputStream != null) {
-			try {
+			try (inputStream) {
 				IOUtils.copy(inputStream, theOutputStream);
 				theOutputStream.close();
-			} finally {
-				inputStream.close();
 			}
 		}
 
@@ -222,7 +233,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		try {
 			FileUtils.forceMkdir(theBasePath);
 		} catch (IOException e) {
-			throw new ConfigurationException(Msg.code(1328) + "Unable to create path " + myBasePath + ": " + e.toString());
+			throw new ConfigurationException(Msg.code(1328) + "Unable to create path " + myBasePath + ": " + e);
 		}
 	}
 }

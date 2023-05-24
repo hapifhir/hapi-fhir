@@ -4,19 +4,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
-import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
-import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
-import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
-import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
-import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
-import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
+import ca.uhn.fhir.jpa.cache.*;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
+import ca.uhn.fhir.jpa.searchparam.matcher.IndexedSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -24,11 +20,10 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +34,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.shaded.com.google.common.collect.Sets;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -48,29 +44,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 public class SearchParamRegistryImplTest {
+	public static final int TEST_SEARCH_PARAMS = 3;
 	private static final FhirContext ourFhirContext = FhirContext.forR4();
 	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext));
-
-	public static final int TEST_SEARCH_PARAMS = 3;
 	private static final List<ResourceTable> ourEntities;
 	private static final ResourceVersionMap ourResourceVersionMap;
-	private static int ourLastId;
 	private static final int ourBuiltinPatientSearchParamCount;
+	private static int ourLastId;
 
 	static {
 		ourEntities = new ArrayList<>();
@@ -85,8 +72,6 @@ public class SearchParamRegistryImplTest {
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
-	@Autowired
-	private ResourceChangeListenerCacheRefresherImpl myChangeListenerCacheRefresher;
 
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
@@ -98,66 +83,20 @@ public class SearchParamRegistryImplTest {
 	private SearchParamMatcher mySearchParamMatcher;
 	@MockBean
 	private MatchUrlService myMatchUrlService;
-
-	@Configuration
-	@Import(RegisteredResourceListenerFactoryConfig.class)
-	static class SpringConfig {
-		@Bean
-		FhirContext fhirContext() {
-			return ourFhirContext;
-		}
-
-		@Bean
-        StorageSettings storageSettings() {
-			StorageSettings storageSettings = new StorageSettings();
-			storageSettings.setDefaultSearchParamsCanBeOverridden(true);
-			return storageSettings;
-		}
-
-		@Bean
-        ISearchParamRegistry searchParamRegistry() {
-			return new SearchParamRegistryImpl();
-		}
-
-		@Bean
-		SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
-			return new SearchParameterCanonicalizer(theFhirContext);
-		}
-
-		@Bean
-		IResourceChangeListenerRegistry resourceChangeListenerRegistry(FhirContext theFhirContext, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory, InMemoryResourceMatcher theInMemoryResourceMatcher) {
-			return new ResourceChangeListenerRegistryImpl(theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
-		}
-
-		@Bean
-		ResourceChangeListenerCacheRefresherImpl resourceChangeListenerCacheRefresher() {
-			return new ResourceChangeListenerCacheRefresherImpl();
-		}
-
-		@Bean
-		InMemoryResourceMatcher inMemoryResourceMatcher() {
-			InMemoryResourceMatcher retval = mock(InMemoryResourceMatcher.class);
-			when(retval.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
-			return retval;
-		}
-
-		@Bean
-		IValidationSupport validationSupport() {
-			return mock(IValidationSupport.class);
-		}
-
-	}
+	@MockBean
+	private SearchParamExtractorService mySearchParamExtractorService;
+	@MockBean
+	private IndexedSearchParamExtractor myIndexedSearchParamExtractor;
+	private int myAnswerCount = 0;
 
 	@Nonnull
 	private static ResourceTable createEntity(long theId, int theVersion) {
 		ResourceTable searchParamEntity = new ResourceTable();
 		searchParamEntity.setResourceType("SearchParameter");
 		searchParamEntity.setId(theId);
-		searchParamEntity.setVersion(theVersion);
+		searchParamEntity.setVersionForUnitTest(theVersion);
 		return searchParamEntity;
 	}
-
-	private int myAnswerCount = 0;
 
 	@BeforeEach
 	public void before() {
@@ -260,7 +199,7 @@ public class SearchParamRegistryImplTest {
 
 		// Update the resource without changing anything that would affect our cache
 		ResourceTable lastEntity = newEntities.get(newEntities.size() - 1);
-		lastEntity.setVersion(2);
+		lastEntity.setVersionForUnitTest(2);
 		resetMock(Enumerations.PublicationStatus.ACTIVE, newEntities);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 1, 0);
@@ -338,6 +277,38 @@ public class SearchParamRegistryImplTest {
 		assertEquals("FOO", value.getValueAsString());
 	}
 
+	@Test
+	public void testUpliftRefchains() {
+		SearchParameter sp = new SearchParameter();
+		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name1"));
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
+		Extension upliftRefChain2 = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain2.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name2"));
+		sp.setCode("subject");
+		sp.setName("subject");
+		sp.setDescription("Modified Subject");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Encounter.subject");
+		sp.addBase("Encounter");
+		sp.addTarget("Patient");
+
+		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
+		newEntities.add(createEntity(99, 1));
+		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(newEntities);
+		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(newResourceVersionMap);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(sp));
+
+		mySearchParamRegistry.forceRefresh();
+
+		RuntimeSearchParam canonicalSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject");
+		assertEquals("Modified Subject", canonicalSp.getDescription());
+		assertTrue(canonicalSp.hasUpliftRefchain("name1"));
+		assertFalse(canonicalSp.hasUpliftRefchain("name99"));
+		assertEquals(Sets.newHashSet("name1", "name2"), canonicalSp.getUpliftRefchainCodes());
+	}
+
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
 		// Add a new search parameter entity
 		List<ResourceTable> newEntities = new ArrayList(ourEntities);
@@ -369,6 +340,55 @@ public class SearchParamRegistryImplTest {
 		searchParameter.addExtension("http://bar", null);
 		searchParameter.addExtension(null, new StringType("BAR"));
 		return searchParameter;
+	}
+
+	@Configuration
+	@Import(RegisteredResourceListenerFactoryConfig.class)
+	static class SpringConfig {
+		@Bean
+		FhirContext fhirContext() {
+			return ourFhirContext;
+		}
+
+		@Bean
+		StorageSettings storageSettings() {
+			StorageSettings storageSettings = new StorageSettings();
+			storageSettings.setDefaultSearchParamsCanBeOverridden(true);
+			return storageSettings;
+		}
+
+		@Bean
+		ISearchParamRegistry searchParamRegistry() {
+			return new SearchParamRegistryImpl();
+		}
+
+		@Bean
+		SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
+			return new SearchParameterCanonicalizer(theFhirContext);
+		}
+
+		@Bean
+		IResourceChangeListenerRegistry resourceChangeListenerRegistry(FhirContext theFhirContext, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory, InMemoryResourceMatcher theInMemoryResourceMatcher) {
+			return new ResourceChangeListenerRegistryImpl(theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
+		}
+
+		@Bean
+		ResourceChangeListenerCacheRefresherImpl resourceChangeListenerCacheRefresher() {
+			return new ResourceChangeListenerCacheRefresherImpl();
+		}
+
+		@Bean
+		InMemoryResourceMatcher inMemoryResourceMatcher() {
+			InMemoryResourceMatcher retval = mock(InMemoryResourceMatcher.class);
+			when(retval.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
+			return retval;
+		}
+
+		@Bean
+		IValidationSupport validationSupport() {
+			return mock(IValidationSupport.class);
+		}
+
 	}
 
 }

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.test;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -99,6 +98,7 @@ import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.NamingSystem;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationDefinition;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -413,6 +413,10 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@AfterEach
 	public void afterEachClearCaches() {
 		myJpaValidationSupportChainDstu3.invalidateCaches();
+	}
+
+	public void assertHasErrors(OperationOutcome theOperationOutcome) {
+		Dstu3ValidationTestUtil.assertHasErrors(theOperationOutcome);
 	}
 
 	/**

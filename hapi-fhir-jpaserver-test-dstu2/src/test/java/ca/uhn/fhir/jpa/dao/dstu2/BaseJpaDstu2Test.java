@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationAdministration;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
@@ -74,6 +75,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu2Config.class})
@@ -212,6 +216,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	private ValidationSupportChain myJpaValidationSupportChain;
 
+
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
@@ -263,5 +268,17 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
 		}
 		return retVal;
+	}
+
+	public void assertHasErrors(OperationOutcome theOperationOutcome) {
+		assertTrue(hasValidationErrors(theOperationOutcome), "Expected validation errors, found none");
+	}
+
+	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
+		assertFalse(hasValidationErrors(theOperationOutcome), "Expected no validation errors, found some");
+	}
+
+	private static boolean hasValidationErrors(OperationOutcome theOperationOutcome) {
+		return theOperationOutcome.getIssue().stream().anyMatch(t -> "error".equals(t.getSeverity()));
 	}
 }

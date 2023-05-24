@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.channel.subscription;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,23 +17,28 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.MessageHandler;
 
 import java.util.Optional;
 
 public class SubscriptionDeliveryHandlerFactory {
+
+	protected ApplicationContext myApplicationContext;
+
 	private IEmailSender myEmailSender;
 
-	@Autowired
-	private ApplicationContext myApplicationContext;
+	public SubscriptionDeliveryHandlerFactory(ApplicationContext theApplicationContext, IEmailSender theEmailSender) {
+		myApplicationContext = theApplicationContext;
+		myEmailSender = theEmailSender;
+	}
 
 	protected SubscriptionDeliveringEmailSubscriber newSubscriptionDeliveringEmailSubscriber(IEmailSender theEmailSender) {
 		return myApplicationContext.getBean(SubscriptionDeliveringEmailSubscriber.class, theEmailSender);
@@ -61,7 +64,4 @@ public class SubscriptionDeliveryHandlerFactory {
 		}
 	}
 
-	public void setEmailSender(IEmailSender theEmailSender) {
-		myEmailSender = theEmailSender;
-	}
 }

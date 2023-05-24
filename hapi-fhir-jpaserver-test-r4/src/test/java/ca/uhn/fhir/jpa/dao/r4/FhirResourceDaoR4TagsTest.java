@@ -495,16 +495,8 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	public void testInlineTags_Search_Security() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
-		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.setId("SearchParameter/resource-security");
-		for (String next : myFhirContext.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
-			searchParameter.addBase(next);
-		}
-		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
-		searchParameter.setCode("_security");
-		searchParameter.setName("Security");
-		searchParameter.setExpression("meta.security");
+		FhirContext fhirContext = myFhirContext;
+		SearchParameter searchParameter = createSecuritySearchParameter(fhirContext);
 		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
@@ -518,6 +510,21 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 
 		validatePatientSearchResultsForInlineTags(outcome);
+	}
+
+	@Nonnull
+	public static SearchParameter createSecuritySearchParameter(FhirContext fhirContext) {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("SearchParameter/resource-security");
+		for (String next : fhirContext.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+			searchParameter.addBase(next);
+		}
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setCode("_security");
+		searchParameter.setName("Security");
+		searchParameter.setExpression("meta.security");
+		return searchParameter;
 	}
 
 	private void validatePatientSearchResultsForInlineTags(Bundle outcome) {

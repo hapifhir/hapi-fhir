@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.model;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
@@ -34,16 +33,23 @@ import java.util.Date;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * Payload for step processing.
+ * Implements a state machine on {@link WorkChunkStatusEnum}.
+ *
+ * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
+ */
 public class WorkChunk implements IModelJson {
 
 	@JsonProperty("id")
 	private String myId;
 
 	@JsonProperty("sequence")
+	// TODO MB danger - these repeat with a job or even a single step.  They start at 0 for every parent chunk.  Review after merge.
 	private int mySequence;
 
 	@JsonProperty("status")
-	private StatusEnum myStatus;
+	private WorkChunkStatusEnum myStatus;
 
 	@JsonProperty("jobDefinitionId")
 	private String myJobDefinitionId;
@@ -135,11 +141,11 @@ public class WorkChunk implements IModelJson {
 		return this;
 	}
 
-	public StatusEnum getStatus() {
+	public WorkChunkStatusEnum getStatus() {
 		return myStatus;
 	}
 
-	public WorkChunk setStatus(StatusEnum theStatus) {
+	public WorkChunk setStatus(WorkChunkStatusEnum theStatus) {
 		myStatus = theStatus;
 		return this;
 	}

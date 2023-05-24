@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.models;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.models;
 
 import org.springframework.data.domain.Sort;
 
@@ -35,6 +34,8 @@ public class JobInstanceFetchRequest {
 	private int myBatchSize;
 
 	private Sort mySort;
+
+	private String myJobStatus;
 
 	public int getPageStart() {
 		return myPageStart;
@@ -59,4 +60,8 @@ public class JobInstanceFetchRequest {
 	public void setSort(Sort theSort) {
 		mySort = theSort;
 	}
+
+	public String getJobStatus() { return myJobStatus; }
+
+	public void setJobStatus(String theJobStatus) { myJobStatus = theJobStatus; }
 }

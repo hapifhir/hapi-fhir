@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.test;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -43,6 +42,7 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
@@ -53,6 +53,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityNormalizedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
@@ -103,7 +104,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
-import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -126,6 +126,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.CompartmentDefinition;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
@@ -153,6 +154,7 @@ import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
@@ -381,6 +383,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDao<Observation> myObservationDao;
 	@Autowired
+	@Qualifier("myCompositionDaoR4")
+	protected IFhirResourceDao<Composition> myCompositionDao;
+	@Autowired
 	@Qualifier("myOperationDefinitionDaoR4")
 	protected IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
 	@Autowired
@@ -413,6 +418,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired
+	protected IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
@@ -517,6 +524,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
+	@Autowired
+	protected IResourceSearchUrlDao myResourceSearchUrlDao;
 
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
@@ -530,6 +539,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
 		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -876,6 +887,18 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
 		String uuid = uuidParams[0];
 		return uuid;
+	}
+
+	public void assertHasErrors(OperationOutcome theOperationOutcome) {
+		R4ValidationTestUtil.assertHasErrors(theOperationOutcome);
+	}
+
+	public void assertHasWarnings(OperationOutcome theOperationOutcome) {
+		R4ValidationTestUtil.assertHasWarnings(theOperationOutcome);
+	}
+
+	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
+		R4ValidationTestUtil.assertHasNoErrors(theOperationOutcome);
 	}
 
 	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {

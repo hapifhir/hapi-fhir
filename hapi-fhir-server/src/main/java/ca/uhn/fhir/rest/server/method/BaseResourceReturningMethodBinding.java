@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -51,26 +70,6 @@ import java.util.Set;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-/*
- * #%L
- * HAPI FHIR - Server Framework
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
@@ -272,7 +271,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				}
 			}
 			if (offset != null && offset > 0) {
-				int start = Math.max(0, theOffset - pageSize);
+				int start = Math.max(0, offset - pageSize);
 				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), start, pageSize, theRequest.getParameters()));
 			}
 		} else if (isNotBlank(theResult.getCurrentPageId())) {

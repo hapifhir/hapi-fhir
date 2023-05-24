@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -87,7 +86,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private String mySerializedData;
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
-	private StatusEnum myStatus;
+	private WorkChunkStatusEnum myStatus;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "INSTANCE_ID", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_BT2WC_INSTANCE"))
 	private Batch2JobInstanceEntity myInstance;
@@ -106,6 +105,36 @@ public class Batch2WorkChunkEntity implements Serializable {
 
 	public void setWarningMessage(String theWarningMessage) {
 		myWarningMessage = left(theWarningMessage, ERROR_MSG_MAX_LENGTH);
+	}
+
+
+	/**
+	 * Default constructor for Hibernate.
+	 */
+	public Batch2WorkChunkEntity() {
+	}
+
+	/**
+	 * Projection constructor for no-data path.
+	 */
+	public Batch2WorkChunkEntity(String theId, int theSequence, String theJobDefinitionId, int theJobDefinitionVersion,
+										  String theInstanceId, String theTargetStepId, WorkChunkStatusEnum theStatus,
+										  Date theCreateTime, Date theStartTime, Date theUpdateTime, Date theEndTime,
+										  String theErrorMessage, int theErrorCount, Integer theRecordsProcessed) {
+		myId = theId;
+		mySequence = theSequence;
+		myJobDefinitionId = theJobDefinitionId;
+		myJobDefinitionVersion = theJobDefinitionVersion;
+		myInstanceId = theInstanceId;
+		myTargetStepId = theTargetStepId;
+		myStatus = theStatus;
+		myCreateTime = theCreateTime;
+		myStartTime = theStartTime;
+		myUpdateTime = theUpdateTime;
+		myEndTime = theEndTime;
+		myErrorMessage = theErrorMessage;
+		myErrorCount = theErrorCount;
+		myRecordsProcessed = theRecordsProcessed;
 	}
 
 	public int getErrorCount() {
@@ -208,11 +237,11 @@ public class Batch2WorkChunkEntity implements Serializable {
 		mySerializedData = theSerializedData;
 	}
 
-	public StatusEnum getStatus() {
+	public WorkChunkStatusEnum getStatus() {
 		return myStatus;
 	}
 
-	public void setStatus(StatusEnum theStatus) {
+	public void setStatus(WorkChunkStatusEnum theStatus) {
 		myStatus = theStatus;
 	}
 
@@ -253,4 +282,5 @@ public class Batch2WorkChunkEntity implements Serializable {
 			.append("warningMessage", myWarningMessage)
 			.toString();
 	}
+
 }

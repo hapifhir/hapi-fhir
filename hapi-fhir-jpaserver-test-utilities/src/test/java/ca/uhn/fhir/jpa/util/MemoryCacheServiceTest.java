@@ -47,13 +47,18 @@ class MemoryCacheServiceTest {
 		String system = "http://example.com";
 		TagTypeEnum type = TagTypeEnum.TAG;
 		String code = "t";
+		String version = "Ver 3.0";
+		Boolean userSelected = true;
 
-		MemoryCacheService.TagDefinitionCacheKey cacheKey = new MemoryCacheService.TagDefinitionCacheKey(type, system, code);
+		MemoryCacheService.TagDefinitionCacheKey cacheKey = new MemoryCacheService.TagDefinitionCacheKey(
+			type, system, code, version, userSelected);
 
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
 		assertThat(retVal, nullValue());
 
 		TagDefinition tagDef = new TagDefinition(type, system, code, "theLabel");
+		tagDef.setVersion(version);
+		tagDef.setUserSelected(userSelected);
 		mySvc.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey, tagDef);
 
 		retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.matcher;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,6 +17,9 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.matcher;
+
+import java.util.List;
 
 public class InMemoryMatchResult {
 	public static final String PARSE_FAIL = "Failed to translate parse query string";
@@ -77,6 +78,10 @@ public class InMemoryMatchResult {
 		return new InMemoryMatchResult(theUnsupportedParameter, theUnsupportedReason);
 	}
 
+	public static InMemoryMatchResult noMatch() {
+		return new InMemoryMatchResult(false);
+	}
+
 	public boolean supported() {
 		return mySupported;
 	}
@@ -99,4 +104,43 @@ public class InMemoryMatchResult {
 	public void setInMemory(boolean theInMemory) {
 		myInMemory = theInMemory;
 	}
+
+	public static InMemoryMatchResult and(InMemoryMatchResult theLeft, InMemoryMatchResult theRight) {
+		if (theLeft == null) {
+			return theRight;
+		}
+		if (theRight == null) {
+			return theLeft;
+		}
+		if (theLeft.supported() && theRight.supported()) {
+			return InMemoryMatchResult.fromBoolean(theLeft.matched() && theRight.matched());
+		}
+		if (!theLeft.supported() && !theRight.supported()) {
+			return InMemoryMatchResult.unsupportedFromReason(List.of(theLeft.getUnsupportedReason(), theRight.getUnsupportedReason()).toString());
+		}
+		if (!theLeft.supported()) {
+			return theLeft;
+		}
+		return theRight;
+	}
+
+	public static InMemoryMatchResult or(InMemoryMatchResult theLeft, InMemoryMatchResult theRight) {
+		if (theLeft == null) {
+			return theRight;
+		}
+		if (theRight == null) {
+			return theLeft;
+		}
+		if (theLeft.matched() || theRight.matched()) {
+			return InMemoryMatchResult.successfulMatch();
+		}
+		if (!theLeft.supported() && !theRight.supported()) {
+			return InMemoryMatchResult.unsupportedFromReason(List.of(theLeft.getUnsupportedReason(), theRight.getUnsupportedReason()).toString());
+		}
+		if (!theLeft.supported()) {
+			return theLeft;
+		}
+		return theRight;
+	}
+
 }

@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -41,26 +60,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
-
-/*
- * #%L
- * HAPI FHIR - Server Framework
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 class RuleImplOp extends BaseRule /* implements IAuthRule */ {
@@ -675,6 +674,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 
+	@Override
 	@Nonnull
 	protected ToStringBuilder toStringBuilder() {
 		ToStringBuilder builder = super.toStringBuilder();

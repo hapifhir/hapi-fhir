@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4736
+title: "When enabling both auto_create_placeholder_reference_targets and allow_inline_match_url_references, POSTing a bundle with a conditional create URL will fail with HAPI-0507.
+        This has now been fixed."

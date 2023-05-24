@@ -5,7 +5,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir-spring-boot</artifactId>
-		<version>6.5.4-SNAPSHOT</version>
+		<version>6.7.3-SNAPSHOT</version>
+
 	</parent>
 
 	<artifactId>hapi-fhir-spring-boot-samples</artifactId>

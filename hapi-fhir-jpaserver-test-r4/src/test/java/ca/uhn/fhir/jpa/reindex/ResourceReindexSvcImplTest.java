@@ -3,12 +3,16 @@ package ca.uhn.fhir.jpa.reindex;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -150,6 +154,5 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 
 	}
-
 
 }

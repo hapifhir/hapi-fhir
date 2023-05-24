@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -202,7 +201,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * @since 5.5.0
 	 */
-	protected ConformanceMethodBinding getServerConformanceMethod() {
+	public ConformanceMethodBinding getServerConformanceMethod() {
 		return myServerConformanceMethod;
 	}
 

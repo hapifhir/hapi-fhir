@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -111,11 +110,14 @@ public class StorageSettings {
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
+	private boolean myIndexOnUpliftedRefchains = false;
 	private boolean myIndexOnContainedResources = false;
 	private boolean myIndexOnContainedResourcesRecursively = false;
 	private boolean myAllowMdmExpansion = false;
 	private boolean myAutoSupportDefaultSearchParams = true;
 	private boolean myIndexIdentifierOfType = false;
+	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
+
 	/**
 	 * Since 6.4.0
 	 */
@@ -257,6 +259,53 @@ public class StorageSettings {
 	 */
 	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
 		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
+	}
+
+	/**
+	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
+	 * the server will not create search indexes for search parameters with no values in resources.
+	 * <p>
+	 * Disabling this feature means that the <code>:missing</code> search modifier will not be
+	 * supported on the server, but also means that storage and indexing (i.e. writes to the
+	 * database) may be much faster on servers which have lots of search parameters and need
+	 * to write quickly.
+	 * </p>
+	 * <p>
+	 * This feature may be enabled on servers where supporting the use of the :missing parameter is
+	 * of higher importance than raw write performance
+	 * </p>
+	 */
+	public IndexEnabledEnum getIndexMissingFields() {
+		return myIndexMissingFieldsEnabled;
+	}
+
+	/**
+	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
+	 * the server will not create search indexes for search parameters with no values in resources.
+	 * <p>
+	 * Disabling this feature means that the <code>:missing</code> search modifier will not be
+	 * supported on the server, but also means that storage and indexing (i.e. writes to the
+	 * database) may be much faster on servers which have lots of search parameters and need
+	 * to write quickly.
+	 * </p>
+	 * <p>
+	 * This feature may be enabled on servers where supporting the use of the :missing parameter is
+	 * of higher importance than raw write performance
+	 * </p>
+	 * <p>
+	 * Note that this setting also has an impact on sorting (i.e. using the
+	 * <code>_sort</code> parameter on searches): If the server is configured
+	 * to not index missing field.
+	 * </p>
+	 * <p>
+	 * The following index may need to be added into the indexed tables such as <code>HFJ_SPIDX_TOKEN</code>
+	 * to improve the search performance while <code>:missing</code> is enabled.
+	 * <code>RES_TYPE, SP_NAME, SP_MISSING</code>
+	 * </p>
+	 */
+	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
+		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");
+		myIndexMissingFieldsEnabled = theIndexMissingFields;
 	}
 
 	/**
@@ -1061,6 +1110,28 @@ public class StorageSettings {
 	}
 
 	/**
+	 * If enabled, "Uplifted Refchains" will be enabled. This feature causes
+	 * HAPI FHIR to generate indexes for stored resources that include the current
+	 * value of the target of a chained reference, such as "Encounter?subject.name".
+	 *
+	 * @since 6.6.0
+	 */
+	public boolean isIndexOnUpliftedRefchains() {
+		return myIndexOnUpliftedRefchains;
+	}
+
+	/**
+	 * If enabled, "Uplifted Refchains" will be enabled. This feature causes
+	 * HAPI FHIR to generate indexes for stored resources that include the current
+	 * value of the target of a chained reference, such as "Encounter?subject.name".
+	 *
+	 * @since 6.6.0
+	 */
+	public void setIndexOnUpliftedRefchains(boolean theIndexOnUpliftedRefchains) {
+		myIndexOnUpliftedRefchains = theIndexOnUpliftedRefchains;
+	}
+
+	/**
 	 * Should indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
 	 *
@@ -1091,7 +1162,7 @@ public class StorageSettings {
 	}
 
 	/**
-	 * Should indexing and searching on contained resources be enabled on this server.
+	 * Should recursive indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
 	 *
 	 * @since 5.6.0
@@ -1196,6 +1267,11 @@ public class StorageSettings {
 			}
 		}
 
+	}
+
+	public enum IndexEnabledEnum {
+		ENABLED,
+		DISABLED
 	}
 
 }

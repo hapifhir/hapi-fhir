@@ -4,11 +4,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
@@ -66,9 +66,10 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	@AfterEach
 	public void afterEach() {
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testLoadSynthea() throws Exception {
 		assertEquals(100, TestR4Config.getMaxThreads());

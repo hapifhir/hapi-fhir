@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.progress;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,10 +17,12 @@ package ca.uhn.fhir.batch2.progress;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -35,21 +35,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-class InstanceProgress {
+public class InstanceProgress {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private int myRecordsProcessed = 0;
+
+	// these 4 cover all chunks
 	private int myIncompleteChunkCount = 0;
-	private int myQueuedCount = 0;
 	private int myCompleteChunkCount = 0;
 	private int myErroredChunkCount = 0;
 	private int myFailedChunkCount = 0;
+
 	private int myErrorCountForAllStatuses = 0;
-	private Long myEarliestStartTime = null;
-	private Long myLatestEndTime = null;
+	private Date myEarliestStartTime = null;
+	private Date myLatestEndTime = null;
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
-	private Map<String, Map<StatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
+	private final Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
 	private Set<String> myWarningMessage = new HashSet<>();
 
 	public void addChunk(WorkChunk theChunk) {
@@ -64,7 +66,7 @@ class InstanceProgress {
 
 	private void updateCompletionStatus(WorkChunk theChunk) {
 		//Update the status map first.
-		Map<StatusEnum, Integer> statusToCountMap = myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
+		Map<WorkChunkStatusEnum, Integer> statusToCountMap = myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
 		statusToCountMap.put(theChunk.getStatus(), statusToCountMap.getOrDefault(theChunk.getStatus(), 0) + 1);
 
 		switch (theChunk.getStatus()) {
@@ -85,25 +87,19 @@ class InstanceProgress {
 				myFailedChunkCount++;
 				myErrormessage = theChunk.getErrorMessage();
 				break;
-			case CANCELLED:
-				break;
 		}
 		ourLog.trace("Chunk has status {} with errored chunk count {}", theChunk.getStatus(), myErroredChunkCount);
 	}
 
 	private void updateLatestEndTime(WorkChunk theChunk) {
-		if (theChunk.getEndTime() != null) {
-			if (myLatestEndTime == null || myLatestEndTime < theChunk.getEndTime().getTime()) {
-				myLatestEndTime = theChunk.getEndTime().getTime();
-			}
+		if (theChunk.getEndTime() != null && (myLatestEndTime == null || myLatestEndTime.before(theChunk.getEndTime()))) {
+			myLatestEndTime = theChunk.getEndTime();
 		}
 	}
 
 	private void updateEarliestTime(WorkChunk theChunk) {
-		if (theChunk.getStartTime() != null) {
-			if (myEarliestStartTime == null || myEarliestStartTime > theChunk.getStartTime().getTime()) {
-				myEarliestStartTime = theChunk.getStartTime().getTime();
-			}
+		if (theChunk.getStartTime() != null && (myEarliestStartTime == null || myEarliestStartTime.after(theChunk.getStartTime()))) {
+			myEarliestStartTime = theChunk.getStartTime();
 		}
 	}
 
@@ -113,71 +109,86 @@ class InstanceProgress {
 		}
 	}
 
+	/**
+	 * Signal to the progress calculator to skip the incomplete work chunk count when determining the completed percentage.
+	 * <p/>
+	 * This is a hack:  The reason we do this is to get around a race condition in which all work chunks are complete but
+	 * the last chunk is * still in QUEUED status and will only be marked COMPLETE later.
+	 *
+	 * @param theInstance The Batch 2 {@link JobInstance} that we're updating
+	 */
+	public void updateInstanceForReductionStep(JobInstance theInstance) {
+		updateInstance(theInstance, true);
+	}
+
 	public void updateInstance(JobInstance theInstance) {
-		if (myEarliestStartTime != null) {
-			theInstance.setStartTime(new Date(myEarliestStartTime));
-		}
-		theInstance.setErrorCount(myErrorCountForAllStatuses);
-		theInstance.setCombinedRecordsProcessed(myRecordsProcessed);
-
-		updateStatus(theInstance);
-
-		setEndTime(theInstance);
-
-		theInstance.setErrorMessage(myErrormessage);
-		myWarningMessage.remove(null);
+		updateInstance(theInstance, false);
 		if (myWarningMessage.size() > 0) {
 			theInstance.setWarningMessage(myWarningMessage.iterator().next());
 		}
 	}
 
-	private void setEndTime(JobInstance theInstance) {
-		if (myLatestEndTime != null) {
-			if (myFailedChunkCount > 0) {
-				theInstance.setEndTime(new Date(myLatestEndTime));
-			} else if (myCompleteChunkCount > 0 && myIncompleteChunkCount == 0 && myErroredChunkCount == 0) {
-				theInstance.setEndTime(new Date(myLatestEndTime));
-			}
+	/**
+	 * Update the job instance with status information.
+	 * We shouldn't read any values from theInstance here -- just write.
+	 *
+	 * @param theInstance the instance to update with progress statistics
+	 */
+	public void updateInstance(JobInstance theInstance, boolean theCalledFromReducer) {
+		ourLog.debug("updateInstance {}: {}", theInstance.getInstanceId(), this);
+		if (myEarliestStartTime != null) {
+			theInstance.setStartTime(myEarliestStartTime);
 		}
-	}
+		if (myLatestEndTime != null && hasNewStatus() && myNewStatus.isEnded()) {
+			theInstance.setEndTime(myLatestEndTime);
+		}
+		theInstance.setErrorCount(myErrorCountForAllStatuses);
+		theInstance.setCombinedRecordsProcessed(myRecordsProcessed);
 
-	private void updateStatus(JobInstance theInstance) {
-		ourLog.trace("Updating status for instance with errors: {}", myErroredChunkCount);
-		if (myCompleteChunkCount >= 1 || myErroredChunkCount >= 1) {
-
-			double percentComplete = (double) (myCompleteChunkCount) / (double) (myIncompleteChunkCount + myCompleteChunkCount + myFailedChunkCount + myErroredChunkCount);
+		if (getChunkCount() > 0) {
+			final int chunkCount = getChunkCount();
+			final int conditionalChunkCount = theCalledFromReducer ? (chunkCount - myIncompleteChunkCount) : chunkCount;
+			final double percentComplete = (double) (myCompleteChunkCount) / (double) conditionalChunkCount;
 			theInstance.setProgress(percentComplete);
+		}
 
-			if (jobSuccessfullyCompleted()) {
-				myNewStatus = StatusEnum.COMPLETED;
-			} else if (myErroredChunkCount > 0) {
-				myNewStatus = StatusEnum.ERRORED;
-			}
+		if (myEarliestStartTime != null && myLatestEndTime != null) {
+			long elapsedTime = myLatestEndTime.getTime() - myEarliestStartTime.getTime();
+			if (elapsedTime > 0) {
+				double throughput = StopWatch.getThroughput(myRecordsProcessed, elapsedTime, TimeUnit.SECONDS);
+				theInstance.setCombinedRecordsProcessedPerSecond(throughput);
 
-			ourLog.trace("Status is now {} with errored chunk count {}", myNewStatus, myErroredChunkCount);
-			if (myEarliestStartTime != null && myLatestEndTime != null) {
-				long elapsedTime = myLatestEndTime - myEarliestStartTime;
-				if (elapsedTime > 0) {
-					double throughput = StopWatch.getThroughput(myRecordsProcessed, elapsedTime, TimeUnit.SECONDS);
-					theInstance.setCombinedRecordsProcessedPerSecond(throughput);
-
-					String estimatedTimeRemaining = StopWatch.formatEstimatedTimeRemaining(myCompleteChunkCount, (myCompleteChunkCount + myIncompleteChunkCount), elapsedTime);
-					theInstance.setEstimatedTimeRemaining(estimatedTimeRemaining);
-				}
+				String estimatedTimeRemaining = StopWatch.formatEstimatedTimeRemaining(myCompleteChunkCount, getChunkCount(), elapsedTime);
+				theInstance.setEstimatedTimeRemaining(estimatedTimeRemaining);
 			}
 		}
+
+		theInstance.setErrorMessage(myErrormessage);
+
+		if (hasNewStatus()) {
+			ourLog.trace("Status will change for {}: {}", theInstance.getInstanceId(), myNewStatus);
+		}
+
+		ourLog.trace("Updating status for instance with errors: {}", myErroredChunkCount);
+		ourLog.trace("Statistics for job {}: complete/in-progress/errored/failed chunk count {}/{}/{}/{}",
+			theInstance.getInstanceId(), myCompleteChunkCount, myIncompleteChunkCount, myErroredChunkCount, myFailedChunkCount);
 	}
 
-	private boolean jobSuccessfullyCompleted() {
-		return myIncompleteChunkCount == 0 && myErroredChunkCount == 0 && myFailedChunkCount == 0;
+	private int getChunkCount() {
+		return myIncompleteChunkCount + myCompleteChunkCount + myFailedChunkCount + myErroredChunkCount;
 	}
 
-	public boolean failed() {
-		return myFailedChunkCount > 0;
-	}
-
-	public boolean changed() {
-		return (myIncompleteChunkCount + myCompleteChunkCount + myErroredChunkCount) >= 2 || myErrorCountForAllStatuses > 0;
+	/**
+	 * Transitions from IN_PROGRESS/ERRORED based on chunk statuses.
+	 */
+	public void calculateNewStatus() {
+		if (myFailedChunkCount > 0) {
+			myNewStatus = StatusEnum.FAILED;
+		} else if (myErroredChunkCount > 0) {
+			myNewStatus = StatusEnum.ERRORED;
+		} else if (myIncompleteChunkCount == 0 && myCompleteChunkCount > 0) {
+			myNewStatus = StatusEnum.COMPLETED;
+		}
 	}
 
 	@Override

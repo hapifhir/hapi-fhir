@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.tasks;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.tasks;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
@@ -33,15 +32,20 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
+import software.amazon.awssdk.utils.StringUtils;
 
+import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +56,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 
-@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
+@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection", "java:S1192"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
@@ -91,7 +95,62 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init610();
 		init620();
 		init640();
+		init640_after_20230126();
 		init660();
+		init680();
+	}
+
+	protected void init680() {
+		Builder version = forVersion(VersionEnum.V6_8_0);
+
+      // HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
+    Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
+
+    resourceTable
+      .addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
+      .unique(false)
+      .online(true)
+      .withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
+
+		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+		tagDefTable.dropIndex("20230505.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
+
+		tagDefTable.dropIndex("20230505.2", "IDX_TAG_DEF_TP_CD_SYS");
+		tagDefTable
+			.addIndex("20230505.3", "IDX_TAG_DEF_TP_CD_SYS")
+			.unique(false)
+			.online(false)
+			.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID", "TAG_VERSION", "TAG_USER_SELECTED");
+
+		version
+			.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20230510.1", "IDX_RESVERPROV_RESVER_PID")
+			.unique(false)
+			.withColumns("RES_VER_PID");
+
+		version
+			.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20230510.2", "IDX_RESVERPROV_RES_PID")
+			.unique(false)
+			.withColumns("RES_PID");
+
+		version
+			.onTable(ResourceHistoryTable.HFJ_RES_VER)
+			.addColumn("20230510.4", "SOURCE_URI")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 100);
+		version
+			.onTable(ResourceHistoryTable.HFJ_RES_VER)
+			.addColumn("20230510.5", "REQUEST_ID")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 16);
+
+		version
+			.onTable("HFJ_RES_VER_PROV")
+			.addForeignKey("20230510.6", "FK_RESVERPROV_RES_PID")
+			.toColumn("RES_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
 	}
 
 	protected void init660() {
@@ -108,17 +167,32 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("BT2_WORK_CHUNK")
 			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
 
-		// add warning message to batch job instance
-		version.onTable("BT2_WORK_CHUNK")
-			.addColumn("20230220.1", "WARNING_MSG")
-			.nullable()
-			.type(ColumnTypeEnum.STRING, 500);
+		{
+			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
 
-		version.onTable("BT2_JOB_INSTANCE")
-			.addColumn("20230220.2", "WARNING_MSG")
-			.nullable()
-			.type(ColumnTypeEnum.STRING, 500);
+			// add columns
+			tagDefTable
+				.addColumn("20230209.1", "TAG_VERSION")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 30);
+			tagDefTable
+				.addColumn("20230209.2", "TAG_USER_SELECTED")
+				.nullable()
+				.type(ColumnTypeEnum.BOOLEAN);
 
+			// Update indexing
+			tagDefTable.dropIndex("20230209.3", "IDX_TAGDEF_TYPESYSCODE");
+
+			tagDefTable.dropIndex("20230209.4", "IDX_TAGDEF_TYPESYSCODEVERUS");
+			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
+			addTagDefConstraint.put(DriverTypeEnum.H2_EMBEDDED, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.MARIADB_10_1, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.MSSQL_2012, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.MYSQL_5_7, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.ORACLE_12C, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.POSTGRES_9_4, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			version.executeRawSql("20230209.5", addTagDefConstraint);
+		}
 
 		version
 			.onTable(Search.HFJ_SEARCH)
@@ -135,6 +209,189 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20230215.3", BulkExportJobEntity.JOB_ID)
 			.nullable()
 			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
+
+
+		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1","HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
+
+		resSearchUrlTable.addColumn( "RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
+		resSearchUrlTable.addColumn( "RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+
+		resSearchUrlTable.addColumn( "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+		resSearchUrlTable.addIndex("20230227.2", "IDX_RESSEARCHURL_RES").unique(false).withColumns("RES_ID");
+		resSearchUrlTable.addIndex("20230227.3", "IDX_RESSEARCHURL_TIME").unique(false).withColumns("CREATED_TIME");
+
+		{
+			// string search index
+			Builder.BuilderWithTableName stringTable = version.onTable("HFJ_SPIDX_STRING");
+
+			// add res_id to indentity to speed up sorts.
+			stringTable
+				.addIndex("20230303.1", "IDX_SP_STRING_HASH_IDENT_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "RES_ID", "PARTITION_ID");
+			stringTable.dropIndexOnline("20230303.2", "IDX_SP_STRING_HASH_IDENT");
+
+			// add hash_norm to res_id to speed up joins on a second string.
+			stringTable
+				.addIndex("20230303.3", "IDX_SP_STRING_RESID_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_ID", "HASH_NORM_PREFIX", "PARTITION_ID");
+
+			// drop and recreate FK_SPIDXSTR_RESOURCE since it will be useing the old IDX_SP_STRING_RESID
+			stringTable.dropForeignKey("20230303.4", "FK_SPIDXSTR_RESOURCE", "HFJ_RESOURCE");
+			stringTable.dropIndexOnline("20230303.5", "IDX_SP_STRING_RESID");
+			stringTable.addForeignKey("20230303.6", "FK_SPIDXSTR_RESOURCE")
+				.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+
+		}
+
+		final String revColumnName = "REV";
+		final String enversRevisionTable = "HFJ_REVINFO";
+		final String enversMpiLinkAuditTable = "MPI_LINK_AUD";
+		final String revTstmpColumnName = "REVTSTMP";
+
+		{
+			version.addIdGenerator("20230306.1", "SEQ_HFJ_REVINFO");
+
+			final Builder.BuilderAddTableByColumns enversRevInfo = version.addTableByColumns("20230306.2", enversRevisionTable, revColumnName);
+
+			enversRevInfo.addColumn(revColumnName).nonNullable().type(ColumnTypeEnum.LONG);
+			enversRevInfo.addColumn(revTstmpColumnName).nullable().type(ColumnTypeEnum.LONG);
+
+			final Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20230306.6", enversMpiLinkAuditTable, "PID", revColumnName);
+
+			empiLink.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("REV").nonNullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("REVTYPE").nullable().type(ColumnTypeEnum.TINYINT);
+			empiLink.addColumn("PERSON_PID").nullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("GOLDEN_RESOURCE_PID").nullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, 40);
+			empiLink.addColumn("RULE_COUNT").nullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("TARGET_PID").nullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("MATCH_RESULT").nullable().type(ColumnTypeEnum.INT);
+			empiLink.addColumn("LINK_SOURCE").nullable().type(ColumnTypeEnum.INT);
+			empiLink.addColumn("CREATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			empiLink.addColumn("UPDATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			empiLink.addColumn("VERSION").nullable().type(ColumnTypeEnum.STRING, 16);
+			empiLink.addColumn("EID_MATCH").nullable().type(ColumnTypeEnum.BOOLEAN);
+			empiLink.addColumn("NEW_PERSON").nullable().type(ColumnTypeEnum.BOOLEAN);
+			empiLink.addColumn("VECTOR").nullable().type(ColumnTypeEnum.LONG);
+			empiLink.addColumn("SCORE").nullable().type(ColumnTypeEnum.FLOAT);
+
+			// N.B.  It's impossible to rename a foreign key in a Hibernate Envers audit table, and the schema migration unit test will fail if we try to drop and recreate it
+			empiLink.addForeignKey("20230306.7", "FKAOW7NXNCLOEC419ARS0FPP58M")
+				.toColumn(revColumnName)
+				.references(enversRevisionTable, revColumnName);
+		}
+
+		{
+			// The pre-release already contains the long version of this column
+			// We do this becausea doing a modifyColumn on Postgres (and possibly other RDBMS's) will fail with a nasty error:
+			// column "revtstmp" cannot be cast automatically to type timestamp without time zone Hint: You might need to specify "USING revtstmp::timestamp without time zone".
+			version
+				.onTable(enversRevisionTable)
+				.dropColumn("20230316.1", revTstmpColumnName);
+
+			version
+				.onTable(enversRevisionTable)
+				.addColumn("20230316.2", revTstmpColumnName)
+				.nullable()
+				.type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+			// New columns from AuditableBasePartitionable
+			version
+				.onTable(enversMpiLinkAuditTable)
+				.addColumn("20230316.3", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+			version
+				.onTable(enversMpiLinkAuditTable)
+			   .addColumn("20230316.4", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		}
+
+        version
+           .onTable(ResourceTable.HFJ_RESOURCE)
+           .addColumn("20230323.1", "SEARCH_URL_PRESENT")
+           .nullable()
+           .type(ColumnTypeEnum.BOOLEAN);
+
+
+		{
+			Builder.BuilderWithTableName uriTable = version.onTable("HFJ_SPIDX_URI");
+			uriTable
+				.addIndex("20230324.1", "IDX_SP_URI_HASH_URI_V2")
+				.unique(true)
+				.online(true)
+				.withColumns("HASH_URI","RES_ID","PARTITION_ID");
+			uriTable
+				.addIndex("20230324.2", "IDX_SP_URI_HASH_IDENTITY_V2")
+				.unique(true)
+				.online(true)
+				.withColumns("HASH_IDENTITY","SP_URI","RES_ID","PARTITION_ID");
+			uriTable.dropIndex("20230324.3", "IDX_SP_URI_RESTYPE_NAME");
+			uriTable.dropIndex("20230324.4", "IDX_SP_URI_UPDATED");
+			uriTable.dropIndex("20230324.5", "IDX_SP_URI");
+			uriTable.dropIndex("20230324.6", "IDX_SP_URI_HASH_URI");
+			uriTable.dropIndex("20230324.7", "IDX_SP_URI_HASH_IDENTITY");
+		}
+
+		version.onTable("HFJ_SPIDX_COORDS")
+			.dropIndex("20230325.1", "IDX_SP_COORDS_HASH");
+		version.onTable("HFJ_SPIDX_COORDS")
+			.addIndex("20230325.2", "IDX_SP_COORDS_HASH_V2")
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_LATITUDE", "SP_LONGITUDE", "RES_ID", "PARTITION_ID");
+
+
+		// Postgres tuning.
+		String postgresTuningStatementsAll = ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql");
+		List<String> postgresTuningStatements = Arrays
+			.stream(postgresTuningStatementsAll.split("\\n"))
+			.map(org.apache.commons.lang3.StringUtils::trim)
+			.filter(StringUtils::isNotBlank)
+			.filter(t -> !t.startsWith("--"))
+			.collect(Collectors.toList());
+		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, postgresTuningStatements));
+
+		// Use an unlimited length text column for RES_TEXT_VC
+		version
+			.onTable("HFJ_RES_VER")
+			.modifyColumn("20230421.1", "RES_TEXT_VC")
+			.nullable()
+			.failureAllowed()
+			.withType(ColumnTypeEnum.TEXT);
+
+		{
+			// add hash_norm to res_id to speed up joins on a second string.
+			Builder.BuilderWithTableName linkTable = version.onTable("HFJ_RES_LINK");
+			linkTable
+				.addIndex("20230424.1", "IDX_RL_TGT_v2")
+				.unique(false)
+				.online(true)
+				.withColumns("TARGET_RESOURCE_ID", "SRC_PATH", "SRC_RESOURCE_ID", "TARGET_RESOURCE_TYPE","PARTITION_ID");
+
+			// drop and recreate FK_SPIDXSTR_RESOURCE since it will be useing the old IDX_SP_STRING_RESID
+			linkTable.dropForeignKey("20230424.2", "FK_RESLINK_TARGET", "HFJ_RESOURCE");
+			linkTable.dropIndexOnline("20230424.3", "IDX_RL_TPATHRES");
+			linkTable.dropIndexOnline("20230424.4", "IDX_RL_DEST");
+			linkTable.addForeignKey("20230424.5", "FK_RESLINK_TARGET")
+				.toColumn("TARGET_RESOURCE_ID").references("HFJ_RESOURCE", "RES_ID");
+		}
+
+		{
+			version.onTable("MPI_LINK")
+				.addIndex("20230504.1", "IDX_EMPI_GR_TGT")
+				.unique(false)
+				.withColumns("GOLDEN_RESOURCE_PID", "TARGET_PID");
+		}
+
 	}
 
 	protected void init640() {
@@ -157,6 +414,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 	}
+
+	protected void init640_after_20230126() {
+		Builder version = forVersion(VersionEnum.V6_3_0);
+		{  //We added this constraint when userSelected and Version were added. It is no longer necessary.
+			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
+		}
+	}
+
 
 	private void init620() {
 		Builder version = forVersion(VersionEnum.V6_2_0);
@@ -674,11 +940,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("RES_ID");
 
-
 		theVersion.onTable("HFJ_RES_VER_PROV")
 			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID")
 			.unique(false)
 			.withColumns("RES_PID")
+			.doNothing() // This index is added below in a better form
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 		theVersion.onTable("HFJ_FORCED_ID")
@@ -1297,7 +1563,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resVerProv
 			.addForeignKey("20190921.15", "FK_RESVERPROV_RES_PID")
 			.toColumn("RES_PID")
-			.references("HFJ_RESOURCE", "RES_ID");
+			.references("HFJ_RESOURCE", "RES_ID")
+			.doNothing(); // Added below in a better form
 		resVerProv.addColumn("SOURCE_URI").nullable().type(ColumnTypeEnum.STRING, 100);
 		resVerProv.addColumn("REQUEST_ID").nullable().type(ColumnTypeEnum.STRING, 16);
 		resVerProv.addIndex("20190921.16", "IDX_RESVERPROV_SOURCEURI").unique(false).withColumns("SOURCE_URI");

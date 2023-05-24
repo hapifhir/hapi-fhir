@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4831
+title: "When performing a FHIR transaction containing both a conditional delete as well as a
+  conditional create/update for the same resource, the resource was left in an inconsistent
+  state. This has been corrected. Thanks to Laxman Singh for raising this issue."

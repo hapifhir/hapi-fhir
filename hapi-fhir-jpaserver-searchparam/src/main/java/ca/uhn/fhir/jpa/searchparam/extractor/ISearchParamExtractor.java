@@ -1,6 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.extractor;
-
-
 /*
  * #%L
  * HAPI FHIR Search Parameters
@@ -20,55 +17,91 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.extractor;
+
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.*;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public interface ISearchParamExtractor {
 
-//	SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource);
+	/**
+	 * Constant for the {@literal theSearchParamFilter} parameters on this interface
+	 * indicating that all search parameters should be indexed.
+	 */
+	ISearchParamFilter ALL_PARAMS = t -> t;
 
-	SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource);
+	/**
+	 * Constant for the {@literal theSearchParamFilter} parameters on this interface
+	 * indicating that no search parameters should be indexed.
+	 */
+	ISearchParamFilter NO_PARAMS = t -> Collections.emptyList();
 
-	SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource);
+	default SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
+		return extractSearchParamDates(theResource, ALL_PARAMS);
+	}
 
-	SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource);
+	SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
 
-	SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource);
+	default SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
+		return extractSearchParamNumber(theResource, ALL_PARAMS);
+	}
 
-	SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource);
+	SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
 
-	SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource);
+	default SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
+		return extractSearchParamQuantity(theResource, ALL_PARAMS);
+	}
 
-	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource);
+	SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
+
+	default SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource) {
+		return extractSearchParamQuantityNormalized(theResource, ALL_PARAMS);
+	}
+
+	SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
+
+	default SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
+		return extractSearchParamStrings(theResource, ALL_PARAMS);
+	}
+
+	SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
+
+	default SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource) {
+		return extractSearchParamComposites(theResource, ALL_PARAMS);
+	}
+
+	SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
+
+	default SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
+		return extractSearchParamTokens(theResource, ALL_PARAMS);
+	}
+
+	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
 
 	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, RuntimeSearchParam theSearchParam);
 
-	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource);
+	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
 
 	SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(String theResourceType, ResourceIndexedSearchParams theParams);
 
 	SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(String theResourceType, ResourceIndexedSearchParams theParams);
 
-	SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource);
+	default SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
+		return extractSearchParamUri(theResource, ALL_PARAMS);
+	}
+
+
+	SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
 
 	SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource, boolean theWantLocalReferences);
 
@@ -95,6 +128,20 @@ public interface ISearchParamExtractor {
 	List<IBase> getCodingsFromCodeableConcept(IBase theValue);
 
 	String getDisplayTextFromCodeableConcept(IBase theValue);
+
+	@FunctionalInterface
+	interface ISearchParamFilter {
+
+		/**
+		 * Given the list of search parameters for indexing, an implementation of this
+		 * interface may selectively remove any that it wants to remove (or can add if desired).
+		 * <p>
+		 * Implementations must not modify the list that is passed in. If changes are
+		 * desired, a new list must be created and returned.
+		 */
+		Collection<RuntimeSearchParam> filterSearchParams(Collection<RuntimeSearchParam> theSearchParams);
+
+	}
 
 	class SearchParamSet<T> extends HashSet<T> {
 

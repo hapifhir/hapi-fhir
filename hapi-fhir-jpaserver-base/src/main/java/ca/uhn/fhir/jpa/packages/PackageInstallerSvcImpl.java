@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -33,22 +32,21 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -61,14 +59,11 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,11 +89,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
-	private PlatformTransactionManager myTxManager;
+	private IHapiTransactionService myTxService;
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private ISearchParamRegistryController mySearchParamRegistryController;
 	@Autowired
@@ -134,6 +127,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
+	@Override
+	public PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theInstallationSpec) {
+		return myPackageCacheManager.uninstallPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+	}
+
 	/**
 	 * Loads and installs an IG from a file on disk or the Simplifier repo using
 	 * the {@link IPackageCacheManager}.
@@ -154,12 +152,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (enabled) {
 			try {
 
-				boolean exists = new TransactionTemplate(myTxManager).execute(tx -> {
+				boolean exists = myTxService.withSystemRequest().withRequestPartitionId(RequestPartitionId.defaultPartition()).execute(() -> {
 					Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(theInstallationSpec.getName(), theInstallationSpec.getVersion());
 					return existing.isPresent();
 				});
 				if (exists) {
-						ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
+					ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
 				}
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
@@ -269,8 +267,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					}
 
 				} catch (IOException e) {
-					throw new ImplementationGuideInstallationException(Msg.code(1287) + String.format(
-						"Cannot resolve dependency %s#%s", id, ver), e);
+					throw new ImplementationGuideInstallationException(Msg.code(1287) + String.format("Cannot resolve dependency %s#%s", id, ver), e);
 				}
 			}
 		}
@@ -280,8 +277,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * Asserts if package FHIR version is compatible with current FHIR version
 	 * by using semantic versioning rules.
 	 */
-	protected void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
-		throws ImplementationGuideInstallationException {
+	protected void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion) throws ImplementationGuideInstallationException {
 
 		FhirVersionEnum fhirVersionEnum = FhirVersionEnum.forVersionString(fhirVersion);
 		FhirVersionEnum currentFhirVersionEnum = FhirVersionEnum.forVersionString(currentFhirVersion);
@@ -292,9 +288,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			compatible = true;
 		}
 		if (!compatible) {
-			throw new ImplementationGuideInstallationException(Msg.code(1288) + String.format(
-				"Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)",
-				currentFhirVersion, fhirVersion));
+			throw new ImplementationGuideInstallationException(Msg.code(1288) + String.format("Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)", currentFhirVersion, fhirVersion));
 		}
 	}
 
@@ -338,26 +332,18 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					ourLog.info("Skipping update of existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
 				}
 			}
-		}
-		else{
+		} else {
 			ourLog.warn("Failed to upload resource of type {} with ID {} - Error: Resource failed validation", theResource.fhirType(), theResource.getIdElement().getValue());
 		}
 	}
 
 	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails requestDetails = newSystemRequestDetails();
-			return theDao.search(theMap, requestDetails);
-		} else {
-			return theDao.search(theMap);
-		}
+		return theDao.search(theMap, newSystemRequestDetails());
 	}
 
 	@Nonnull
 	private SystemRequestDetails newSystemRequestDetails() {
-		return
-			new SystemRequestDetails()
-				.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition());
 	}
 
 	private void createResource(IFhirResourceDao theDao, IBaseResource theResource) {
@@ -402,8 +388,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		if (!isValidResourceStatusForPackageUpload(theResource)) {
-			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.",
-				theResource.fhirType(), theResource.getIdElement().getValue());
+			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.", theResource.fhirType(), theResource.getIdElement().getValue());
 			return false;
 		}
 
@@ -460,8 +445,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		try {
 			return validationSupport.generateSnapshot(new ValidationSupportContext(validationSupport), sd, null, null, null);
 		} catch (Exception e) {
-			throw new ImplementationGuideInstallationException(Msg.code(1290) + String.format(
-				"Failure when generating snapshot of StructureDefinition: %s", sd.getIdElement()), e);
+			throw new ImplementationGuideInstallationException(Msg.code(1290) + String.format("Failure when generating snapshot of StructureDefinition: %s", sd.getIdElement()), e);
 		}
 	}
 

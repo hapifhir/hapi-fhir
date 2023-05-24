@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -79,6 +80,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		parameter.setType(Enumerations.SearchParamType.SPECIAL);
 		parameter.setExpression("Location.address.postalCode");
 		mySearchParameterDao.update(parameter, new SystemRequestDetails());
+		mySearchParamRegistry.forceRefresh();
 
 		//And given an OrganizationAffiliation->Location reference
 		Location location = new Location();

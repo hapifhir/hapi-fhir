@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.tx;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.tx;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.tx;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -50,10 +49,33 @@ public interface IHapiTransactionService {
 	IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails);
 
 	/**
+	 * Fluent builder for internal system requests with no external
+	 * requestdetails associated
+	 */
+	IExecutionBuilder withSystemRequest();
+
+	/**
+	 * Fluent builder for internal system requests with no external
+	 * {@link RequestDetails} associated and a pre-specified partition ID.
+	 * This method is sugar for
+	 * <pre>
+	 *    withSystemRequest()
+	 * 			.withRequestPartitionId(thePartitionId);
+	 * </pre>
+	 *
+	 * @since 6.6.0
+	 */
+	default IExecutionBuilder withSystemRequestOnPartition(RequestPartitionId theRequestPartitionId) {
+		return withSystemRequest()
+			.withRequestPartitionId(theRequestPartitionId);
+	}
+
+	/**
 	 * @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of this method, for increased visibility.
 	 */
 	@Deprecated
 	<T> T withRequest(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback);
+
 
 	interface IExecutionBuilder {
 

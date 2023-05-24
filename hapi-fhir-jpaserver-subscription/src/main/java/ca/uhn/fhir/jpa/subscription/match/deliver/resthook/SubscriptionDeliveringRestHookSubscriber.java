@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -27,13 +26,12 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
@@ -45,6 +43,9 @@ import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
+import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -71,9 +72,6 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private MatchUrlService myMatchUrlService;
-
 	/**
 	 * Constructor
 	 */
@@ -91,7 +89,9 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IClientExecutable<?, ?> operation;
 
-		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
+		if (theSubscription.isTopicSubscription()) {
+			operation = createDeliveryRequestTopic((IBaseBundle) thePayloadResource, theClient);
+		} else if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
 			operation = createDeliveryRequestTransaction(theSubscription, theClient, thePayloadResource);
 		} else if (thePayloadType != null) {
 			operation = createDeliveryRequestNormal(theMsg, theClient, thePayloadResource);
@@ -107,7 +107,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			}
 
 			String payloadId = thePayloadResource.getIdElement().toUnqualified().getValue();
-			ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
+			StopWatch sw = new StopWatch();
 
 			try {
 				operation.execute();
@@ -117,6 +117,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 				throw e;
 			}
 
+			Logs.getSubscriptionTroubleshootingLog().debug("Delivered {} rest-hook payload {} for {} in {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue(), sw);
 		}
 	}
 
@@ -144,39 +145,76 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		return theClient.transaction().withBundle(bundle);
 	}
 
-	public IBaseResource getResource(IIdType payloadId, RequestPartitionId thePartitionId, boolean theDeletedOK) throws ResourceGoneException {
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(payloadId.getResourceType());
-		SystemRequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(thePartitionId);
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceDef.getImplementingClass());
-		return dao.read(payloadId.toVersionless(), systemRequestDetails, theDeletedOK);
+	private IClientExecutable<?, ?> createDeliveryRequestTopic(IBaseBundle theBundle, IGenericClient theClient) {
+		return theClient.transaction().withBundle(theBundle);
 	}
 
+	public IBaseResource getResource(IIdType thePayloadId, RequestPartitionId thePartitionId, boolean theDeletedOK) throws ResourceGoneException {
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(thePayloadId.getResourceType());
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(thePartitionId);
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceDef.getImplementingClass());
+		return dao.read(thePayloadId.toVersionless(), systemRequestDetails, theDeletedOK);
+	}
 
+	/**
+	 * Perform operations on the payload based on various subscription extension settings such as deliver latest version,
+	 * delete and/or strip version id.
+	 * @param theMsg
+	 * @param theSubscription
+	 * @return
+	 */
 	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
 		IBaseResource payloadResource = theMsg.getPayload(myFhirContext);
 
-		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
-			IIdType payloadId = theMsg.getPayloadId(myFhirContext);
+		if (payloadResource instanceof IBaseBundle) {
+			return getAndMassageBundle(theMsg, (IBaseBundle) payloadResource, theSubscription);
+		} else {
+			return getAndMassageResource(theMsg, payloadResource, theSubscription);
+		}
+	}
 
+	private IBaseResource getAndMassageBundle(ResourceDeliveryMessage theMsg, IBaseBundle theBundle, CanonicalSubscription theSubscription) {
+		BundleUtil.processEntries(myFhirContext, theBundle, entry -> {
+			IBaseResource entryResource = entry.getResource();
+			if (entryResource != null) {
+				// SubscriptionStatus is a "virtual" resource type that is not stored in the repository
+				if (!"SubscriptionStatus".equals(myFhirContext.getResourceType(entryResource))) {
+					IBaseResource updatedResource = getAndMassageResource(theMsg, entryResource, theSubscription);
+					entry.setFullUrl(updatedResource.getIdElement().getValue());
+					entry.setResource(updatedResource);
+				}
+			}
+		});
+		return theBundle;
+	}
+
+	private IBaseResource getAndMassageResource(ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource, CanonicalSubscription theSubscription) {
+		if (thePayloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
+
+			IIdType payloadId = theMsg.getPayloadId(myFhirContext).toVersionless();
+			if (theSubscription.isTopicSubscription()) {
+				payloadId = thePayloadResource.getIdElement().toVersionless();
+			}
 			try {
 				if (payloadId != null) {
 					boolean deletedOK = theMsg.getOperationType() == BaseResourceModifiedMessage.OperationTypeEnum.DELETE;
-					payloadResource = getResource(payloadId.toVersionless(), theMsg.getRequestPartitionId(), deletedOK);
+					thePayloadResource = getResource(payloadId, theMsg.getRequestPartitionId(), deletedOK);
 				} else {
 					return null;
 				}
 			} catch (ResourceGoneException e) {
-				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(myFhirContext));
+				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId, theSubscription.getIdElement(myFhirContext));
 				return null;
 			}
 		}
 
-		IIdType resourceId = payloadResource.getIdElement();
+		IIdType resourceId = thePayloadResource.getIdElement();
 		if (theSubscription.getRestHookDetails().isStripVersionId()) {
 			resourceId = resourceId.toVersionless();
-			payloadResource.setId(resourceId);
+			thePayloadResource.setId(resourceId);
+			thePayloadResource.getMeta().setVersionId(null);
 		}
-		return payloadResource;
+		return thePayloadResource;
 	}
 
 	@Override

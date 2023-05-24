@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.provider;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;

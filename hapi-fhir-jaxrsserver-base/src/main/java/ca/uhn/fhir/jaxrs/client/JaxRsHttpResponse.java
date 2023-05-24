@@ -1,7 +1,3 @@
-package ca.uhn.fhir.jaxrs.client;
-
-import java.io.*;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -21,6 +17,9 @@ import java.io.*;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jaxrs.client;
+
+import java.io.*;
 
 import java.util.List;
 import java.util.Map;

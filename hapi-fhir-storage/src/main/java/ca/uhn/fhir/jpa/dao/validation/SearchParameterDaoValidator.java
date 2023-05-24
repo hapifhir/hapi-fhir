@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.validation;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -130,7 +129,10 @@ public class SearchParameterDaoValidator {
 	}
 
 	private boolean isCompositeWithoutBase(SearchParameter searchParameter) {
-		return ElementUtil.isEmpty(searchParameter.getBase()) && (searchParameter.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(searchParameter.getType().name()));
+		return
+			ElementUtil.isEmpty(searchParameter.getBase()) &&
+			ElementUtil.isEmpty(searchParameter.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE)) &&
+			(searchParameter.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(searchParameter.getType().name()));
 	}
 
 	private boolean isCompositeWithoutExpression(SearchParameter searchParameter) {

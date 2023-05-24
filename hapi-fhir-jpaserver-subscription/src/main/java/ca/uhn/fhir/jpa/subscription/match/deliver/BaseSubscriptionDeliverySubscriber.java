@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.deliver;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;

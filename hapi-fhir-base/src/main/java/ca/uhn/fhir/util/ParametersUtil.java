@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -128,6 +127,15 @@ public class ParametersUtil {
 
 	public static String getParameterPartValueAsString(FhirContext theCtx, IBase theParameter, String theParameterName) {
 		return getParameterPartValue(theCtx, theParameter, theParameterName).map(t -> (IPrimitiveType<?>) t).map(t -> t.getValueAsString()).orElse(null);
+	}
+
+	public static Optional<Integer> getParameterPartValueAsInteger(FhirContext theCtx, IBase theParameter, String theParameterName) {
+		return getParameterPartValue(theCtx, theParameter, theParameterName)
+			.filter(t -> IPrimitiveType.class.isAssignableFrom(t.getClass()))
+			.map(t -> (IPrimitiveType<?>) t)
+			.map(IPrimitiveType::getValue)
+			.filter(t -> Integer.class.isAssignableFrom(t.getClass()))
+			.map(t -> (Integer) t);
 	}
 
 	private static <T> List<T> extractNamedParameters(FhirContext theCtx, IBaseParameters theParameters, String theParameterName, Function<IPrimitiveType<?>, T> theMapper) {

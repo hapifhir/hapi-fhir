@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.delete.batch2;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.delete.batch2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.delete.batch2;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -40,9 +39,6 @@ import java.util.stream.Collectors;
 
 public class DeleteExpungeSqlBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSqlBuilder.class);
-	public static final String PROCESS_NAME = "Delete Expunging";
-	public static final String THREAD_PREFIX = "delete-expunge";
-	
 	private final ResourceTableFKProvider myResourceTableFKProvider;
 	private final JpaStorageSettings myStorageSettings;
 	private final IIdHelperService myIdHelper;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.batch2.clear;
-
 /*-
  * #%L
  * hapi-fhir-storage-mdm
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.batch2.clear;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.batch2.clear;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -35,9 +34,10 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.StopWatch;
@@ -108,26 +108,42 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 				return null;
 			}
 
-			ourLog.info("Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
+			// avoid double deletion of mdm links
+			MdmStorageInterceptor.setLinksDeletedBeforehand();
+
+			try {
+				performWork(persistentIds);
+
+			} finally {
+				MdmStorageInterceptor.resetLinksDeletedBeforehand();
+			}
+
+			return null;
+		}
+
+		private void performWork(List<JpaPid> thePersistentIds) {
+			ourLog.info("Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]", thePersistentIds.size(), myInstanceId, myChunkId);
 			StopWatch sw = new StopWatch();
 
-			myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(persistentIds);
+			myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(thePersistentIds);
+			ourLog.trace("Deleted {} mdm links in {}", thePersistentIds.size(), StopWatch.formatMillis(sw.getMillis()));
 
 			// We know the list is not empty, and that all resource types are the same, so just use the first one
 			String resourceName  = myData.getResourceType(0);
-			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceName);
+			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceName);
 
 			DeleteConflictList conflicts = new DeleteConflictList();
-			dao.deletePidList(ProviderConstants.OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);
+			dao.deletePidList(ProviderConstants.OPERATION_MDM_CLEAR, thePersistentIds, conflicts, myRequestDetails);
 			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, conflicts);
+			ourLog.trace("Deleted {} golden resources in {}", thePersistentIds.size(), StopWatch.formatMillis(sw.getMillis()));
 
-			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
+			dao.expunge(thePersistentIds, myRequestDetails);
+
+			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", thePersistentIds.size(), sw, sw.formatThroughput(thePersistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
 
 			if (ourClearCompletionCallbackForUnitTest != null) {
 				ourClearCompletionCallbackForUnitTest.run();
 			}
-
-			return null;
 		}
 	}
 

@@ -1,12 +1,15 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Account;
 import org.hl7.fhir.r4.model.AdverseEvent;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -45,6 +48,7 @@ import org.hl7.fhir.r4.model.FamilyMemberHistory;
 import org.hl7.fhir.r4.model.Flag;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.ImmunizationEvaluation;
@@ -62,6 +66,7 @@ import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.NutritionOrder;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -81,6 +86,7 @@ import org.hl7.fhir.r4.model.VisionPrescription;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -88,7 +94,9 @@ import java.util.TreeSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
@@ -1624,6 +1632,168 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
 		assertThat(actual, hasItem(medicationId));
 		assertThat(actual, hasItem(medicationAdministrationId));
+	}
+
+	@Test
+	public void everything_typeFilterWithRecursivelyRelatedResources_shouldReturnSameAsNonTypeFilteredEverything() {
+		String testBundle;
+		{
+			testBundle = """
+							{
+				       "resourceType": "Bundle",
+				       "type": "transaction",
+				       "entry": [
+				           {
+				               "fullUrl": "https://interop.providence.org:8000/Patient/385235",
+				               "resource": {
+				                   "resourceType": "Patient",
+				                   "id": "385235",
+				                   "active": true,
+				                   "name": [
+				                       {
+				                           "family": "TESTING",
+				                           "given": [
+				                               "TESTER",
+				                               "T"
+				                           ]
+				                       }
+				                   ],
+				                   "gender": "female"
+				               },
+				               "request": {
+				                   "method": "POST"
+				               }
+				           },
+				           {
+				               "fullUrl": "https://interop.providence.org:8000/Encounter/385236",
+				               "resource": {
+				                   "resourceType": "Encounter",
+				                   "id": "385236",
+				                   "subject": {
+				                       "reference": "Patient/385235"
+				                   }
+				               },
+				               "request": {
+				                   "method": "POST"
+				               }
+				           },
+				           {
+				               "fullUrl": "https://interop.providence.org:8000/Observation/385237",
+				               "resource": {
+				                   "resourceType": "Observation",
+				                   "id": "385237",
+				                   "subject": {
+				                       "reference": "Patient/385235"
+				                   },
+				                   "encounter": {
+				                       "reference": "Encounter/385236"
+				                   },
+				                   "performer": [
+				                       {
+				                           "reference": "Practitioner/79070"
+				                       },
+				                       {
+				                           "reference": "Practitioner/8454"
+				                       }
+				                   ],
+				                   "valueQuantity": {
+				                       "value": 100.9,
+				                       "unit": "%",
+				                       "system": "http://unitsofmeasure.org",
+				                       "code": "%"
+				                   }
+				               },
+				               "request": {
+				                   "method": "POST"
+				               }
+				           },
+				           {
+				               "fullUrl": "https://interop.providence.org:8000/Practitioner/8454",
+				               "resource": {
+				                   "resourceType": "Practitioner",
+				                   "id": "8454"
+				               },
+				               "request": {
+				                   "method": "POST"
+				               }
+				           },
+				           {
+				               "fullUrl": "https://interop.providence.org:8000/Practitioner/79070",
+				               "resource": {
+				                   "resourceType": "Practitioner",
+				                   "id": "79070",
+				                   "active": true
+				               },
+				               "request": {
+				                   "method": "POST"
+				               }
+				           }
+				       ]
+				   }
+				""";
+		}
+
+		IParser parser = myFhirContext.newJsonParser();
+		Bundle inputBundle = parser.parseResource(Bundle.class, testBundle);
+
+		int resourceCount = inputBundle.getEntry().size();
+		HashSet<String> resourceTypes = new HashSet<>();
+		for (Bundle.BundleEntryComponent entry : inputBundle.getEntry()) {
+			resourceTypes.add(entry.getResource().getResourceType().name());
+		}
+		// there are 2 practitioners in the bundle
+		assertEquals(4, resourceTypes.size());
+
+		// pre-seed the resources
+		Bundle responseBundle = myClient.transaction()
+			.withBundle(inputBundle)
+			.execute();
+		assertNotNull(responseBundle);
+		assertEquals(resourceCount, responseBundle.getEntry().size());
+
+		IIdType patientId = null;
+		for (Bundle.BundleEntryComponent entry : responseBundle.getEntry()) {
+			assertEquals("201 Created", entry.getResponse().getStatus());
+			if (entry.getResponse().getLocation().contains("Patient")) {
+				patientId = new IdType(entry.getResponse().getLocation());
+			}
+		}
+		assertNotNull(patientId);
+		assertNotNull(patientId.getIdPart());
+
+		ourLog.debug("------ EVERYTHING");
+		// test without types filter
+		{
+			Bundle response = myClient.operation()
+				.onInstance(String.format("Patient/%s", patientId.getIdPart()))
+				.named(JpaConstants.OPERATION_EVERYTHING)
+				.withNoParameters(Parameters.class)
+				.returnResourceType(Bundle.class)
+				.execute();
+			assertNotNull(response);
+			assertEquals(resourceCount, response.getEntry().size());
+			for (Bundle.BundleEntryComponent entry : response.getEntry()) {
+				assertTrue(resourceTypes.contains(entry.getResource().getResourceType().name()));
+			}
+		}
+
+		ourLog.debug("------- EVERYTHING WITH TYPES");
+		// test with types filter
+		{
+			Parameters parameters = new Parameters();
+			parameters.addParameter(Constants.PARAM_TYPE, String.join(",", resourceTypes));
+			Bundle response = myClient.operation()
+				.onInstance(String.format("Patient/%s", patientId.getIdPart()))
+				.named(JpaConstants.OPERATION_EVERYTHING)
+				.withParameters(parameters)
+				.returnResourceType(Bundle.class)
+				.execute();
+			assertNotNull(response);
+			assertEquals(resourceCount, response.getEntry().size());
+			for (Bundle.BundleEntryComponent entry : response.getEntry()) {
+				assertTrue(resourceTypes.contains(entry.getResource().getResourceType().name()));
+			}
+		}
 	}
 
 	private Set<String> getActualEverythingResultIds(String patientId) throws IOException {

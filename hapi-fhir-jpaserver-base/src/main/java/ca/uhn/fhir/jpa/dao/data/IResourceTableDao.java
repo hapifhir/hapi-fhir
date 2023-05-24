@@ -1,21 +1,3 @@
-package ca.uhn.fhir.jpa.dao.data;
-
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -35,6 +17,23 @@ import java.util.Optional;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
+
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Transactional(propagation = Propagation.MANDATORY)
 public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, IHapiFhirJpaRepository {
@@ -85,6 +84,10 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, I
 	@Modifying
 	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id")
 	void updateIndexStatus(@Param("id") Long theId, @Param("status") Long theIndexStatus);
+
+	@Modifying
+	@Query("UPDATE ResourceTable t SET t.myUpdated = :updated WHERE t.myId = :id")
+	void updateLastUpdated(@Param("id") Long theId, @Param("updated") Date theUpdated);
 
 	@Modifying
 	@Query("DELETE FROM ResourceTable t WHERE t.myId = :pid")
@@ -142,4 +145,7 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, I
 
 	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId IN (:partitionIds) AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionIds(@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
+
+	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myId IN :pids")
+	List<ResourceTable> findAllByIdAndLoadForcedIds(@Param("pids") List<Long> thePids);
 }

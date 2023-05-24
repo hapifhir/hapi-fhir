@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
@@ -174,6 +173,8 @@ public class JdbcUtils {
 						int dataType = indexes.getInt("DATA_TYPE");
 						Long length = indexes.getLong("COLUMN_SIZE");
 						switch (dataType) {
+							case Types.LONGVARCHAR:
+								return new ColumnType(ColumnTypeEnum.TEXT, length);
 							case Types.BIT:
 							case Types.BOOLEAN:
 								return new ColumnType(ColumnTypeEnum.BOOLEAN, length);

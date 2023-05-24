@@ -1,8 +1,3 @@
-package ca.uhn.fhir.util.jar;
-
-import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.ReflectionUtil;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +17,10 @@ import ca.uhn.fhir.util.ReflectionUtil;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util.jar;
+
+import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 public class DependencyLogFactory {
 	

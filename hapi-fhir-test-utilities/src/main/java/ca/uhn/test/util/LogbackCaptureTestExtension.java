@@ -1,5 +1,3 @@
-package ca.uhn.test.util;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,12 +17,12 @@ package ca.uhn.test.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.test.util;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -32,7 +30,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -113,12 +110,19 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 	 * Guts of beforeEach exposed for manual lifecycle.
 	 */
 	public void setUp() {
+		setUp(myLevel);
+	}
+
+	/**
+	 * Guts of beforeEach exposed for manual lifecycle.
+	 */
+	public void setUp(Level theLevel) {
 		myListAppender = new ListAppender<>();
 		myListAppender.start();
 		myLogger.addAppender(myListAppender);
-		if (myLevel != null) {
+		if (theLevel != null) {
 			mySavedLevel = myLogger.getLevel();
-			myLogger.setLevel(myLevel);
+			myLogger.setLevel(theLevel);
 		}
 	}
 
@@ -160,42 +164,11 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		return new LogbackEventMatcher(null, thePartialMessage);
 	}
 
-	/**
-	 * A Hamcrest matcher for junit assertions.
-	 * Matches on level and/or partial message.
-	 */
-	public static class LogbackEventMatcher extends CustomTypeSafeMatcher<ILoggingEvent> {
-		@Nullable
-		private final Level myLevel;
-		@Nullable
-		private final String myString;
-
-		public LogbackEventMatcher(@Nullable Level theLevel, @Nullable String thePartialString) {
-			this("log event", theLevel, thePartialString);
-		}
-
-		public LogbackEventMatcher(String description, @Nullable Level theLevel, @Nullable String thePartialString) {
-			super(makeDescription(description, theLevel, thePartialString));
-			myLevel = theLevel;
-			myString = thePartialString;
-		}
-		@Nonnull
-		private static String makeDescription(String description, Level theLevel, String thePartialString) {
-			String msg = description;
-			if (theLevel != null) {
-				msg = msg + " with level at least " + theLevel;
-			}
-			if (thePartialString != null) {
-				msg = msg + " containing string \"" + thePartialString + "\"";
-
-			}
-			return msg;
-		}
-
-		@Override
-		protected boolean matchesSafely(ILoggingEvent item) {
-			return (myLevel == null || item.getLevel().isGreaterOrEqual(myLevel)) &&
-				(myString == null || item.getFormattedMessage().contains(myString));
-		}
+	public static Matcher<ILoggingEvent> eventWithLevelAndMessageAndThrew(@Nonnull Level theLevel,
+																								 @Nonnull String thePartialMessage,
+																								 @Nonnull String theThrown)
+	{
+		return new LogbackEventMatcher(theLevel, thePartialMessage, theThrown);
 	}
+
 }

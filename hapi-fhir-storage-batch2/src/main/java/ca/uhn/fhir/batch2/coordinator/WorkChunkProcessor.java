@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -30,12 +29,10 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nullable;
 import java.util.Optional;

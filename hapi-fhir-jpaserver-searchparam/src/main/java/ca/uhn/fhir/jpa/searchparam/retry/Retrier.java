@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.retry;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.retry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.retry;
 
 import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.Validate;

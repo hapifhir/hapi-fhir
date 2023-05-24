@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.binary.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,14 +17,16 @@ package ca.uhn.fhir.jpa.binary.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.svc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.io.IOException;
+import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -35,6 +35,11 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	@Override
 	public long getMaximumBinarySize() {
 		return 0;
+	}
+
+	@Override
+	public boolean isValidBlobId(String theNewBlobId) {
+		return true;
 	}
 
 	@Override
@@ -62,8 +67,10 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		throw new UnsupportedOperationException(Msg.code(1345));
 	}
 
+	@Nonnull
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) {
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
+											 InputStream theInputStream, RequestDetails theRequestDetails) {
 		throw new UnsupportedOperationException(Msg.code(1346));
 	}
 
@@ -88,7 +95,7 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public byte[] fetchDataBlobFromBinary(IBaseBinary theResource) throws IOException {
+	public byte[] fetchDataBlobFromBinary(IBaseBinary theResource) {
 		throw new UnsupportedOperationException(Msg.code(1351));
 	}
 }

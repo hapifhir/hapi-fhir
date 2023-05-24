@@ -1,5 +1,3 @@
-package ca.uhn.fhir.parser;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -554,7 +553,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 
 
-			if (!extensions.isEmpty() || !modifierExtensions.isEmpty() || !comments.isEmpty()) {
+			if (!extensions.isEmpty() || !modifierExtensions.isEmpty() || (!comments.isEmpty() && isSupportsFhirComment())) {
 				if (inArray) {
 					// If this is a repeatable field, the extensions go in an array too
 					beginArray(theEventWriter, '_' + currentChildName);
@@ -725,78 +724,83 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		if (theResource instanceof IResource) {
-			IResource resource = (IResource) theResource;
-			// Object securityLabelRawObj =
-
-			List<BaseCodingDt> securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
-			List<? extends IIdType> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
-			profiles = super.getProfileTagsForEncoding(resource, profiles);
-
-			TagList tags = getMetaTagsForEncoding(resource, theEncodeContext);
-			InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-			IdDt resourceId = resource.getId();
-			String versionIdPart = resourceId.getVersionIdPart();
-			if (isBlank(versionIdPart)) {
-				versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
-			}
-			List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys = getExtensionMetadataKeys(resource);
-
-			if (super.shouldEncodeResourceMeta(resource) && (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) || !extensionMetadataKeys.isEmpty()) {
-				beginObject(theEventWriter, "meta");
-
-				if (shouldEncodePath(resource, "meta.versionId")) {
-					writeOptionalTagWithTextNode(theEventWriter, "versionId", versionIdPart);
-				}
-				if (shouldEncodePath(resource, "meta.lastUpdated")) {
-					writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", updated);
-				}
-
-				if (profiles != null && profiles.isEmpty() == false) {
-					beginArray(theEventWriter, "profile");
-					for (IIdType profile : profiles) {
-						if (profile != null && isNotBlank(profile.getValue())) {
-							theEventWriter.write(profile.getValue());
-						}
-					}
-					theEventWriter.endArray();
-				}
-
-				if (securityLabels.isEmpty() == false) {
-					beginArray(theEventWriter, "security");
-					for (BaseCodingDt securityLabel : securityLabels) {
-						theEventWriter.beginObject();
-						theEncodeContext.pushPath("security", false);
-						encodeCompositeElementChildrenToStreamWriter(resDef, resource, securityLabel, theEventWriter, theContainedResource, null, theEncodeContext);
-						theEncodeContext.popPath();
-						theEventWriter.endObject();
-					}
-					theEventWriter.endArray();
-				}
-
-				if (tags != null && tags.isEmpty() == false) {
-					beginArray(theEventWriter, "tag");
-					for (Tag tag : tags) {
-						if (tag.isEmpty()) {
-							continue;
-						}
-						theEventWriter.beginObject();
-						writeOptionalTagWithTextNode(theEventWriter, "system", tag.getScheme());
-						writeOptionalTagWithTextNode(theEventWriter, "code", tag.getTerm());
-						writeOptionalTagWithTextNode(theEventWriter, "display", tag.getLabel());
-						theEventWriter.endObject();
-					}
-					theEventWriter.endArray();
-				}
-
-				addExtensionMetadata(theResDef, theResource, theContainedResource, extensionMetadataKeys, resDef, theEventWriter, theEncodeContext);
-
-				theEventWriter.endObject(); // end meta
-			}
+			parseMetaForDSTU2(theResDef, theResource, theEventWriter, theContainedResource, theEncodeContext, resDef);
 		}
 
 		encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, theContainedResource, new CompositeChildElement(resDef, theEncodeContext), theEncodeContext);
 
 		theEventWriter.endObject();
+	}
+
+	private void parseMetaForDSTU2(RuntimeResourceDefinition theResDef, IBaseResource theResource, BaseJsonLikeWriter theEventWriter, boolean theContainedResource, EncodeContext theEncodeContext, RuntimeResourceDefinition resDef) throws IOException {
+		IResource resource = (IResource) theResource;
+		// Object securityLabelRawObj =
+
+		List<BaseCodingDt> securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
+		List<? extends IIdType> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
+		profiles = super.getProfileTagsForEncoding(resource, profiles);
+
+		TagList tags = getMetaTagsForEncoding(resource, theEncodeContext);
+		InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		IdDt resourceId = resource.getId();
+		String versionIdPart = resourceId.getVersionIdPart();
+		if (isBlank(versionIdPart)) {
+			versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
+		}
+		List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys = getExtensionMetadataKeys(resource);
+
+		if (super.shouldEncodeResourceMeta(resource) && (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) || !extensionMetadataKeys.isEmpty()) {
+			beginObject(theEventWriter, "meta");
+
+			if (shouldEncodePath(resource, "meta.versionId")) {
+				writeOptionalTagWithTextNode(theEventWriter, "versionId", versionIdPart);
+			}
+			if (shouldEncodePath(resource, "meta.lastUpdated")) {
+				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", updated);
+			}
+
+			if (profiles != null && profiles.isEmpty() == false) {
+				beginArray(theEventWriter, "profile");
+				for (IIdType profile : profiles) {
+					if (profile != null && isNotBlank(profile.getValue())) {
+						theEventWriter.write(profile.getValue());
+					}
+				}
+				theEventWriter.endArray();
+			}
+
+			if (securityLabels.isEmpty() == false) {
+				beginArray(theEventWriter, "security");
+				for (BaseCodingDt securityLabel : securityLabels) {
+					theEventWriter.beginObject();
+					theEncodeContext.pushPath("security", false);
+					encodeCompositeElementChildrenToStreamWriter(resDef, resource, securityLabel, theEventWriter, theContainedResource, null, theEncodeContext);
+					theEncodeContext.popPath();
+					theEventWriter.endObject();
+				}
+				theEventWriter.endArray();
+			}
+
+			if (tags != null && tags.isEmpty() == false) {
+				beginArray(theEventWriter, "tag");
+				for (Tag tag : tags) {
+					if (tag.isEmpty()) {
+						continue;
+					}
+					theEventWriter.beginObject();
+					writeOptionalTagWithTextNode(theEventWriter, "system", tag.getScheme());
+					writeOptionalTagWithTextNode(theEventWriter, "code", tag.getTerm());
+					writeOptionalTagWithTextNode(theEventWriter, "display", tag.getLabel());
+					// wipmb should we be writing the new properties here?  There must be another path.
+					theEventWriter.endObject();
+				}
+				theEventWriter.endArray();
+			}
+
+			addExtensionMetadata(theResDef, theResource, theContainedResource, extensionMetadataKeys, resDef, theEventWriter, theEncodeContext);
+
+			theEventWriter.endObject(); // end meta
+		}
 	}
 
 
@@ -999,7 +1003,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		for (Iterator<String> keyIter = theObject.keyIterator(); keyIter.hasNext(); ) {
 			String nextName = keyIter.next();
 			if ("resourceType".equals(nextName)) {
-				continue;
+				if (theState.isToplevelResourceElement()) {
+					continue;
+				}
 			} else if ("extension".equals(nextName)) {
 				BaseJsonLikeArray array = grabJsonArray(theObject, nextName, "extension");
 				parseExtension(theState, array, false);

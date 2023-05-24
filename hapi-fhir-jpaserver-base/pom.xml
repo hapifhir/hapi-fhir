@@ -5,7 +5,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.5.4-SNAPSHOT</version>
+		<version>6.7.3-SNAPSHOT</version>
+
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -314,7 +315,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
-			<artifactId>javax.el</artifactId>
+			<artifactId>jakarta.el</artifactId>
 		</dependency>
 
 		<!-- Note that we need this dependency to send log4j logging requests to slf4j -->
@@ -344,6 +345,14 @@
 		<dependency>
 			<groupId>org.hibernate.search</groupId>
 			<artifactId>hibernate-search-backend-elasticsearch-aws</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-envers</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-envers</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
@@ -417,12 +426,12 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.exparity</groupId>
+			<artifactId>hamcrest-date</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-
-
-	<properties>
-		<jackson.version>2.7.1</jackson.version>
-	</properties>
 
 	<build>
 		<plugins>
@@ -431,7 +440,6 @@
 				<artifactId>hibernate56-ddl-maven-plugin</artifactId>
 				<configuration>
 					<dialects>
-						<param>h2</param>
 						<param>derby_10_7</param>
 						<param>mysql57</param>
 						<param>mariadb</param>
@@ -439,6 +447,7 @@
 						<param>sqlserver2012</param>
 					</dialects>
 					<customDialects>
+						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect</customDialect>
 						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect</customDialect>
 						<customDialect>org.hibernate.dialect.CockroachDB201Dialect</customDialect>
 					</customDialects>
@@ -476,7 +485,47 @@
 						<artifactId>hibernate-core</artifactId>
 						<version>${hibernate_version}</version>
 					</dependency>
+					<dependency>
+						<groupId>org.hibernate</groupId>
+						<artifactId>hibernate-envers</artifactId>
+						<!-- N.B. Maven reacts badly if we omit the version for plugin dependencies, despite being defined in the parent pom's dependencyManagement section -->
+						<version>${hibernate_version}</version>
+					</dependency>
+					<dependency>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>${jaxb_api_version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+						<version>${jaxb_api_version}</version>
+					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<concat destfile="${project.basedir}/target/classes/ca/uhn/hapi/fhir/jpa/docs/database/hapifhirpostgres94-complete.sql" force="yes">
+									<fileset dir="${project.basedir}/target/classes/ca/uhn/hapi/fhir/jpa/docs/database">
+										<include name="hapifhirpostgres94.sql"/>
+									</fileset>
+									<fileset dir="${project.basedir}/src/main/resources/ca/uhn/fhir/jpa/docs/database">
+										<include name="hapifhirpostgres94-init01.sql"/>
+									</fileset>
+								</concat>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>

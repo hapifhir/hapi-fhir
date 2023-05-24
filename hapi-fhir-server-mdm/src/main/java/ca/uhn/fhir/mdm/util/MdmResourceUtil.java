@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.util;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.util;
 
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -127,7 +126,8 @@ public final class MdmResourceUtil {
 			tag.setSystem(theSystem);
 			tag.setCode(theCode);
 			tag.setDisplay(theDisplay);
-
+			tag.setUserSelected(false);
+			tag.setVersion("1");
 		}
 		return theGoldenResource;
 	}

@@ -1,4 +1,3 @@
-package ca.uhn.fhir.tinder;
 /*
  * #%L
  * HAPI FHIR Tinder Plug-In
@@ -18,7 +17,7 @@ package ca.uhn.fhir.tinder;
  * limitations under the License.
  * #L%
  */
-
+package ca.uhn.fhir.tinder;
 
 import ca.uhn.fhir.i18n.Msg;
 import java.io.File;

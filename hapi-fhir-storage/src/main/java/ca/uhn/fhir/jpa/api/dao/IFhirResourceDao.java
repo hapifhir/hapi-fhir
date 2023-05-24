@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.dao;
-
 /*
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -86,7 +85,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                           won't be indexed and searches won't work.
 	 * @param theRequestDetails  The request details including permissions and partitioning information
 	 */
-	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails);
+	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails);
 
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
 
@@ -112,17 +111,45 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
+	 *
+	 * @since 6.8.0
 	 */
-	DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
+	DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
 	 */
 	DeleteMethodOutcome deleteByUrl(String theString, RequestDetails theRequestDetails);
 
+	/**
+	 * @deprecated Deprecated in 6.8.0 - Use and implement {@link #deletePidList(String, Collection, DeleteConflictList, RequestDetails, TransactionDetails)}
+	 */
+	default <P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
+		return deletePidList(theUrl, theResourceIds, theDeleteConflicts, theRequest, new TransactionDetails());
+	}
+
+	/**
+	 * Delete a list of resource Pids
+	 * <p>
+	 * CAUTION: This list does not throw an exception if there are delete conflicts.  It should always be followed by
+	 * a call to DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(fhirContext, conflicts);
+	 * to actually throw the exception.  The reason this method doesn't do that itself is that it is expected to be
+	 * called repeatedly where an earlier conflict can be removed in a subsequent pass.
+	 *
+	 * @param theUrl             the original URL that triggered the deletion
+	 * @param theResourceIds     the ids of the resources to be deleted
+	 * @param theDeleteConflicts out parameter of conflicts preventing deletion
+	 * @param theRequestDetails         the request that initiated the request
+	 * @return response back to the client
+	 * @since 6.8.0
+	 */
+	<P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+
 	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
 
 	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
+
+	<P extends IResourcePersistentId> void expunge(Collection<P> theResourceIds, RequestDetails theRequest);
 
 	ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
@@ -234,8 +261,18 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *
 	 * @param theResource The FHIR resource object corresponding to the entity to reindex
 	 * @param theEntity   The storage entity to reindex
+	 * @deprecated Use {@link #reindex(IResourcePersistentId, ReindexParameters, RequestDetails, TransactionDetails)}
 	 */
+	@Deprecated
 	void reindex(T theResource, IBasePersistedResource theEntity);
+
+	/**
+	 * Reindex the given resource
+	 *
+	 * @param theResourcePersistentId The ID
+	 * @return
+	 */
+	ReindexOutcome reindex(IResourcePersistentId theResourcePersistentId, ReindexParameters theReindexParameters, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequestDetails);
 
@@ -315,26 +352,12 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * Not supported in DSTU1!
 	 *
 	 * @param theRequestDetails The request details including permissions and partitioning information
+	 * @return MethodOutcome even if the resource fails validation it should still successfully return with a response status of 200
 	 */
+
 	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails);
 
 	RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria);
-
-	/**
-	 * Delete a list of resource Pids
-	 * <p>
-	 * CAUTION: This list does not throw an exception if there are delete conflicts.  It should always be followed by
-	 * a call to DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(fhirContext, conflicts);
-	 * to actually throw the exception.  The reason this method doesn't do that itself is that it is expected to be
-	 * called repeatedly where an earlier conflict can be removed in a subsequent pass.
-	 *
-	 * @param theUrl             the original URL that triggered the delete
-	 * @param theResourceIds     the ids of the resources to be deleted
-	 * @param theDeleteConflicts out parameter of conflicts preventing deletion
-	 * @param theRequest         the request that initiated the request
-	 * @return response back to the client
-	 */
-	<P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest);
 
 	/**
 	 * @deprecated use #read(IIdType, RequestDetails) instead
@@ -343,10 +366,4 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 		return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();
 	}
 
-	/**
-	 * Reindex the given resource
-	 *
-	 * @param theResourcePersistentId The ID
-	 */
-	void reindex(IResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 }

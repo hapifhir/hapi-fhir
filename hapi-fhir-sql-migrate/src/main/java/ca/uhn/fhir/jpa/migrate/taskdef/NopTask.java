@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

@@ -1,5 +1,3 @@
-package org.hl7.fhir.instance.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package org.hl7.fhir.instance.model.api;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
 
 
 public interface IBaseXhtml extends IPrimitiveType<String> {

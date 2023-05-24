@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.registry;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -73,6 +72,10 @@ public class SubscriptionRegistry {
 
 	public synchronized Collection<ActiveSubscription> getAll() {
 		return myActiveSubscriptionCache.getAll();
+	}
+
+	public synchronized List<ActiveSubscription> getTopicSubscriptionsByTopic(String theTopic) {
+		return myActiveSubscriptionCache.getTopicSubscriptionsForTopic(theTopic);
 	}
 
 	private Optional<CanonicalSubscription> hasSubscription(IIdType theId) {
@@ -209,5 +212,9 @@ public class SubscriptionRegistry {
 
 	public int size() {
 		return myActiveSubscriptionCache.size();
+	}
+
+	public synchronized List<ActiveSubscription> getAllNonTopicSubscriptions() {
+		return myActiveSubscriptionCache.getAllNonTopicSubscriptions();
 	}
 }

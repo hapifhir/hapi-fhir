@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util.bundle;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util.bundle;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,5 +53,9 @@ public class ModifiableBundleEntry {
 
 	public void setFullUrl(String theFullUrl) {
 		myBundleEntryMutator.setFullUrl(theFullUrl);
+	}
+
+	public void setResource(IBaseResource theUpdatedResource) {
+		myBundleEntryMutator.setResource(theUpdatedResource);
 	}
 }

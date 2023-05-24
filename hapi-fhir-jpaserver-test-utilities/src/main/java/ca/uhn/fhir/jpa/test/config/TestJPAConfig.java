@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.test.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
@@ -31,6 +30,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.util.LoggingEmailSender;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -112,5 +113,10 @@ public class TestJPAConfig {
 	@Lazy
 	public IBinaryStorageSvc binaryStorage() {
 		return new MemoryBinaryStorageSvcImpl();
+	}
+
+	@Bean
+	public IEmailSender emailSender(){
+		return new LoggingEmailSender();
 	}
 }

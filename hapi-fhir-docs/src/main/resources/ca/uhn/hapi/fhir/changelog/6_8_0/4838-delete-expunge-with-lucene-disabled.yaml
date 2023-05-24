@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 4838
+title: "Two failures in the $delete-expunge operation were fixed:
+ <ul>
+ <li>Jobs could fail if hibernate search was loaded but not enabled.</li>
+ <li>Jobs could fail if the criteria included a <code>_lastUpdated=lt[date]</code> clause</li>
+ </ul>"

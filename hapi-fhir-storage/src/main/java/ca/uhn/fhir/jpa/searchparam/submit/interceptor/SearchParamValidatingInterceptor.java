@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -37,14 +36,17 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -54,7 +56,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamValidatingInterceptor {
 
 	public static final String SEARCH_PARAM = "SearchParameter";
-	public List<String> myUpliftExtensions;
 
 	private FhirContext myFhirContext;
 
@@ -74,14 +75,16 @@ public class SearchParamValidatingInterceptor {
 		validateSearchParamOnUpdate(theNewResource, theRequestDetails);
 	}
 
-	public void validateSearchParamOnCreate(IBaseResource theResource, RequestDetails theRequestDetails){
-		if(isNotSearchParameterResource(theResource)){
+	public void validateSearchParamOnCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
+		if (isNotSearchParameterResource(theResource)) {
 			return;
 		}
 		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
 		if (runtimeSearchParam == null) {
 			return;
 		}
+
+		validateSearchParamOnCreateAndUpdate(runtimeSearchParam);
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
 		if (searchParameterMap != null) {
@@ -89,21 +92,43 @@ public class SearchParamValidatingInterceptor {
 		}
 	}
 
+	private void validateSearchParamOnCreateAndUpdate(RuntimeSearchParam theRuntimeSearchParam) {
+
+		// Validate uplifted refchains
+		List<IBaseExtension<?, ?>> refChainExtensions = theRuntimeSearchParam.getExtensions(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		for (IBaseExtension<?, ?> nextExtension : refChainExtensions) {
+			List<? extends IBaseExtension> codeExtensions = nextExtension
+				.getExtension()
+				.stream()
+				.map(t->(IBaseExtension<?,?>)t)
+				.filter(t -> HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE.equals(t.getUrl()))
+				.collect(Collectors.toList());
+			if (codeExtensions.size() != 1) {
+				throw new UnprocessableEntityException(Msg.code(2283) + "Extension with URL " + HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN + " must have exactly one child extension with URL " + HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE);
+			}
+			if (codeExtensions.get(0).getValue() == null || !"code".equals(myFhirContext.getElementDefinition(codeExtensions.get(0).getValue().getClass()).getName())) {
+				throw new UnprocessableEntityException(Msg.code(2284) + "Extension with URL " + HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE + " must have a value of type 'code'");
+			}
+		}
+	}
+
 	private void validateStandardSpOnCreate(RequestDetails theRequestDetails, SearchParameterMap searchParameterMap) {
 		List<IResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
-		if( isNotEmpty(persistedIdList) ) {
+		if (isNotEmpty(persistedIdList)) {
 			throw new UnprocessableEntityException(Msg.code(2196) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 		}
 	}
 
-	public void validateSearchParamOnUpdate(IBaseResource theResource, RequestDetails theRequestDetails){
-		if(isNotSearchParameterResource(theResource)){
+	public void validateSearchParamOnUpdate(IBaseResource theResource, RequestDetails theRequestDetails) {
+		if (isNotSearchParameterResource(theResource)) {
 			return;
 		}
 		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
 		if (runtimeSearchParam == null) {
 			return;
 		}
+
+		validateSearchParamOnCreateAndUpdate(runtimeSearchParam);
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
 		if (searchParameterMap != null) {
@@ -114,14 +139,14 @@ public class SearchParamValidatingInterceptor {
 	private boolean isNewSearchParam(RuntimeSearchParam theSearchParam, Set<String> theExistingIds) {
 		return theExistingIds
 			.stream()
-			.noneMatch(resId -> resId.substring(resId.indexOf("/")+1).equals(theSearchParam.getId().getIdPart()));
+			.noneMatch(resId -> resId.substring(resId.indexOf("/") + 1).equals(theSearchParam.getId().getIdPart()));
 	}
 
 	private void validateStandardSpOnUpdate(RequestDetails theRequestDetails, RuntimeSearchParam runtimeSearchParam, SearchParameterMap searchParameterMap) {
 		List<IResourcePersistentId> pidList = getDao().searchForIds(searchParameterMap, theRequestDetails);
-		if(isNotEmpty(pidList)){
+		if (isNotEmpty(pidList)) {
 			Set<String> resolvedResourceIds = myIdHelperService.translatePidsToFhirResourceIds(new HashSet<>(pidList));
-			if(isNewSearchParam(runtimeSearchParam, resolvedResourceIds)) {
+			if (isNewSearchParam(runtimeSearchParam, resolvedResourceIds)) {
 				throwDuplicateError();
 			}
 		}
@@ -131,8 +156,8 @@ public class SearchParamValidatingInterceptor {
 		throw new UnprocessableEntityException(Msg.code(2125) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 	}
 
-	private boolean isNotSearchParameterResource(IBaseResource theResource){
-		return ! SEARCH_PARAM.equalsIgnoreCase(myFhirContext.getResourceType(theResource));
+	private boolean isNotSearchParameterResource(IBaseResource theResource) {
+		return !SEARCH_PARAM.equalsIgnoreCase(myFhirContext.getResourceType(theResource));
 	}
 
 	@Nullable
@@ -200,13 +225,4 @@ public class SearchParamValidatingInterceptor {
 		return retVal;
 	}
 
-	public List<String> getUpliftExtensions() {
-		if (myUpliftExtensions == null) {
-			myUpliftExtensions = new ArrayList<>();
-		}
-		return myUpliftExtensions;
-	}
-	public void addUpliftExtension(String theUrl) {
-		getUpliftExtensions().add(theUrl);
-	}
 }

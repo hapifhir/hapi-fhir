@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.imprt;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
@@ -19,7 +17,9 @@ package ca.uhn.fhir.batch2.jobs.imprt;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.imprt;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
@@ -52,6 +52,10 @@ public class BulkImportJobParameters implements IModelJson {
 	@Nullable
 	private Integer myMaxBatchResourceCount;
 
+	@JsonProperty(value = "partitionId", required = false)
+	@Nullable
+	private RequestPartitionId myPartitionId;
+
 	public List<String> getNdJsonUrls() {
 		if (myNdJsonUrls == null) {
 			myNdJsonUrls = new ArrayList<>();
@@ -81,6 +85,16 @@ public class BulkImportJobParameters implements IModelJson {
 	public BulkImportJobParameters addNdJsonUrl(String theUrl) {
 		Validate.notBlank(theUrl, "theUrl must not be blank or null");
 		getNdJsonUrls().add(theUrl);
+		return this;
+	}
+
+	@Nullable
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public BulkImportJobParameters setPartitionId(@Nullable RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 		return this;
 	}
 }

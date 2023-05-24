@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.common;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cr.common;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.common;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -38,7 +37,7 @@ public class HapiFhirDal implements FhirDal {
 	protected final RequestDetails myRequestDetails;
 
 	public HapiFhirDal(DaoRegistry theDaoRegistry) {
-		this(theDaoRegistry, null);
+		this(theDaoRegistry,null);
 	}
 
 	public HapiFhirDal(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
@@ -71,15 +70,15 @@ public class HapiFhirDal implements FhirDal {
 	@Override
 	public Iterable<IBaseResource> search(String theResourceType) {
 		var b = this.myDaoRegistry.getResourceDao(theResourceType)
-			.search(SearchParameterMap.newSynchronous(), myRequestDetails);
-		return TypedBundleProvider.fromBundleProvider(b).getAllResources();
+			.search(new SearchParameterMap(), myRequestDetails);
+		return new BundleIterable(myRequestDetails, b);
 	}
 
 	@Override
 	public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
-		var c = this.myDaoRegistry.getResourceDao(theResourceType)
-			.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)), myRequestDetails);
-		return TypedBundleProvider.fromBundleProvider(c).getAllResources();
+		var b = this.myDaoRegistry.getResourceDao(theResourceType)
+			.search(new SearchParameterMap().add("url", new UriParam(theUrl)), myRequestDetails);
+		return new BundleIterable(myRequestDetails, b);
 	}
 
 

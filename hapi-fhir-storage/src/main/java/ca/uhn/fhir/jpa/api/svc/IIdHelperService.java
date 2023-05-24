@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -134,7 +133,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 
 	Optional<String> translatePidIdToForcedIdWithCache(T theResourcePersistentId);
 
-	PersistentIdToForcedIdMap translatePidsToForcedIds(Set<T> theResourceIds);
+	PersistentIdToForcedIdMap<T> translatePidsToForcedIds(Set<T> theResourceIds);
 
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods

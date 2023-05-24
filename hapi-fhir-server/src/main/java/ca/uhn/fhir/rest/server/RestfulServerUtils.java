@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -1063,8 +1062,10 @@ public class RestfulServerUtils {
 
 	/**
 	 * Determines whether we should stream out Binary resource content based on the content-type. Logic is:
+	 * - If the binary was externalized and has not been reinflated upstream, return false.
 	 * - If they request octet-stream, return true;
 	 * - If the content-type happens to be a match, return true.
+	 *
 	 * - Construct an EncodingEnum out of the contentType. If this matches the responseEncoding, return true.
 	 * - Otherwise, return false.
 	 *
@@ -1074,6 +1075,9 @@ public class RestfulServerUtils {
 	 */
 	private static boolean shouldStreamContents(ResponseEncoding theResponseEncoding, IBaseBinary theBinary) {
 		String contentType = theBinary.getContentType();
+		if (theBinary.getContent() == null) {
+			return false;
+		}
 		if (theResponseEncoding == null) {
 			return true;
 		}

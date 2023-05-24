@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.tasks;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,11 +17,13 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.tasks;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class SchemaInitializationProvider implements ISchemaInitializationProvider {
 
@@ -72,18 +73,29 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 			}
 			// Assumes no escaped semicolons...
 			String sqlString = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8);
-			String sqlStringNoComments = preProcessSqlString(theDriverType, sqlString);
-			String[] statements = sqlStringNoComments.split("\\;");
-			for (String statement : statements) {
-				String cleanedStatement = preProcessSqlStatement(theDriverType, statement);
-				if (!isBlank(cleanedStatement)) {
-					retval.add(cleanedStatement);
-				}
-			}
+			parseSqlFileIntoIndividualStatements(theDriverType, retval, sqlString);
 		} catch (IOException e) {
 			throw new ConfigurationException(Msg.code(50) + "Error reading schema initialization script " + initScript, e);
 		}
 		return retval;
+	}
+
+	@VisibleForTesting
+	void parseSqlFileIntoIndividualStatements(DriverTypeEnum theDriverType, List<String> retval, String theSqlString) {
+		String sqlString = theSqlString.replaceAll("--.*", "");
+		
+		String sqlStringNoComments = preProcessSqlString(theDriverType, sqlString);
+		String[] statements = sqlStringNoComments.split("\\;");
+		for (String statement : statements) {
+			String cleanedStatement = preProcessSqlStatement(theDriverType, statement);
+			if (!isBlank(cleanedStatement)) {
+				String next = trim(cleanedStatement);
+				next = next.replace('\n', ' ');
+				next = next.replace('\r', ' ');
+				next = next.replaceAll(" +", " ");
+				retval.add(next);
+			}
+		}
 	}
 
 	protected String preProcessSqlString(DriverTypeEnum theDriverType, String sqlString) {

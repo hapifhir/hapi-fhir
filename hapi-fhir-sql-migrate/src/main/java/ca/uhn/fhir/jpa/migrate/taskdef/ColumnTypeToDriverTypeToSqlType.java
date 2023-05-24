@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
@@ -39,6 +38,14 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MSSQL_2012, "int");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.ORACLE_12C, "number(10,0)");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.POSTGRES_9_4, "int4");
+
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.H2_EMBEDDED, "tinyint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.DERBY_EMBEDDED, "smallint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.MARIADB_10_1, "tinyint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.MYSQL_5_7, "tinyint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.MSSQL_2012, "smallint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.ORACLE_12C, "number(3,0)");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.POSTGRES_9_4, "int2");
 
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.H2_EMBEDDED, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.DERBY_EMBEDDED, "float");
@@ -111,6 +118,14 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.ORACLE_12C, "clob");
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.POSTGRES_9_4, "oid"); // the PG driver will write oid into a `text` column
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
+
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "character varying");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.DERBY_EMBEDDED, "long varchar");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MARIADB_10_1, "longtext");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MYSQL_5_7, "longtext");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.ORACLE_12C, "long");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.POSTGRES_9_4, "text");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
 	}
 
 	public static Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> getColumnTypeToDriverTypeToSqlType() {

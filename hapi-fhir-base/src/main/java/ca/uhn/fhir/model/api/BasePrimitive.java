@@ -1,5 +1,3 @@
-package ca.uhn.fhir.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -124,7 +123,7 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 			myStringValue = null;
 		} else {
 			// NB this might be null
-			myStringValue = encode(myCoercedValue);
+ 			myStringValue = encode(myCoercedValue);
 		}
 	}
 

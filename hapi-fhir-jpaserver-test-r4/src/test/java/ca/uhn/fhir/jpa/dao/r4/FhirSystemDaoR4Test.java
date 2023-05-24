@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -12,12 +14,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.r4.SystemProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -36,7 +38,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
@@ -72,12 +74,16 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -97,7 +103,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -113,6 +121,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -124,16 +133,21 @@ import static org.mockito.Mockito.when;
 public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoR4Test.class);
+	private static final String TEST_IDENTIFIER_SYSTEM = "http://some-system.com";
 
 	@AfterEach
 	public void after() {
-		myStorageSettings.setAllowInlineMatchUrlReferences(false);
-		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
-		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-		myStorageSettings.setBundleBatchPoolSize(new JpaStorageSettings().getBundleBatchPoolSize());
-		myStorageSettings.setBundleBatchMaxPoolSize(new JpaStorageSettings().getBundleBatchMaxPoolSize());
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
-		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setAllowInlineMatchUrlReferences(defaults.isAllowInlineMatchUrlReferences());
+		myStorageSettings.setAllowMultipleDelete(defaults.isAllowMultipleDelete());
+		myStorageSettings.setNormalizedQuantitySearchLevel(defaults.getNormalizedQuantitySearchLevel());
+		myStorageSettings.setBundleBatchPoolSize(defaults.getBundleBatchPoolSize());
+		myStorageSettings.setBundleBatchMaxPoolSize(defaults.getBundleBatchMaxPoolSize());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaults.isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(defaults.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myStorageSettings.setAutoVersionReferenceAtPaths(defaults.getAutoVersionReferenceAtPaths());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaults.isAutoCreatePlaceholderReferenceTargets());
+
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
 
@@ -1101,6 +1115,25 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testTransactionCreateInlineMatchUrlWithAllowInlineMatchUrlReferencesSettingNotEnabled() {
+		Bundle request = new Bundle();
+
+		myStorageSettings.setAllowInlineMatchUrlReferences(false);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C");
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(2282) + "Inline match URLs are not supported on this server. Cannot process reference: \"Patient?identifier=urn%3Asystem%7C\"", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testTransactionMissingResourceForPost() {
 		Bundle request = new Bundle();
 		request.setType(BundleType.TRANSACTION);
@@ -1298,7 +1331,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
-
 	@Test
 	public void testTransactionUpdateTwoResourcesWithSameId() {
 		Bundle request = new Bundle();
@@ -1460,24 +1492,48 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		}
 	}
 
+	/**
+	 * This test is testing whether someone can sneakily figure out the existence of a resource
+	 * by creating a match URL that references it, even though the user doesn't have permission
+	 * to see that resource.
+	 * <p>
+	 * This security check requires a match URL that is too complex for the pre-fetching that
+	 * happens in {@link ca.uhn.fhir.jpa.dao.TransactionProcessor}'s preFetchConditionalUrl
+	 * method (see the javadoc on that method for more details).
+	 */
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithAuthorizationDenied() {
 		// setup
-		String methodName = "testTransactionCreateInlineMatchUrlWithAuthorizationDenied";
-		Bundle request = new Bundle();
-
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.setId("Patient/" + methodName);
-		IIdType id = myPatientDao.update(p, mySrd).getId();
-		ourLog.info("Created patient, got it: {}", id);
+		// Let's create a sensitive observation - Nobody must know we caught COVID!
+		Patient patient = new Patient();
+		patient.setId("J");
+		patient.addName().setFamily("Corona").addGiven("John");
+		myPatientDao.update(patient, mySrd);
 
-		Observation o = new Observation();
-		o.getCode().setText("Some Observation");
-		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + methodName);
-		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+		Observation obs = new Observation();
+		obs.setId("Observation/O");
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setSubject(new Reference("Patient/J"));
+		obs.getCode().addCoding()
+			.setSystem("http://loinc.org")
+			.setCode("94505-5")
+			.setDisplay("SARS-CoV-2 (COVID-19) IgG Ab [Units/volume] in Serum or Plasma by Immunoassay");
+		obs.setValue(new Quantity()
+			.setValue(284L)
+			.setCode("[arb'U]/ml")
+			.setSystem("http://unitsofmeasure.org"));
+		myObservationDao.update(obs, mySrd);
+
+		// Create a bundle that tries to sneakily link to the
+		// patient's covid test
+		Bundle request = new Bundle();
+
+		Observation sneakyObs = new Observation();
+		sneakyObs.setSubject(new Reference("Patient/J"));
+		sneakyObs.addHasMember(new Reference("Observation?patient=Patient/J&code=http://loinc.org|94505-5"));
+		request.addEntry().setResource(sneakyObs).getRequest().setMethod(HTTPVerb.POST);
 
 		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
 
@@ -1500,7 +1556,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			// verify
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1091) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithAuthorizationDenied\" - No resources match this search", e.getMessage());
+			assertEquals(Msg.code(1091) + "Invalid match URL \"Observation?patient=Patient/J&code=http://loinc.org|94505-5\" - No resources match this search", e.getMessage());
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
@@ -1686,6 +1742,82 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testTransactionWithConditionalUpdatesDoesExist() {
+		Practitioner newP = new Practitioner();
+		newP.addIdentifier().setSystem("http://foo").setValue("bar");
+
+		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(newP, new SystemRequestDetails());
+		IIdType id = daoMethodOutcome.getId();
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Practitioner p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Practitioner?identifier=http://foo|bar");
+
+		Observation o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.getPerformerFirstRep().setReference(p.getId());
+		request.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation/");
+
+		Bundle response = mySystemDao.transaction(null, request);
+
+		List<String> responseTypes = response
+			.getEntry()
+			.stream()
+			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
+			.collect(Collectors.toList());
+		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation"));
+	}
+
+	@Test
+	public void testTransactionWithConditionalUpdatesDoesNotExist() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Practitioner p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Practitioner?identifier=http://foo|bar");
+
+		Observation o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.getPerformerFirstRep().setReference(p.getId());
+		request.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation/");
+
+		Bundle response = mySystemDao.transaction(null, request);
+
+		List<String> responseTypes = response
+			.getEntry()
+			.stream()
+			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
+			.collect(Collectors.toList());
+		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation"));
+	}
+
+	@Test
 	public void testTransactionWithDuplicateConditionalUpdates() {
 		Bundle request = new Bundle();
 		request.setType(BundleType.TRANSACTION);
@@ -1800,7 +1932,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1092) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
+			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
 		}
 	}
 
@@ -1876,7 +2008,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 
@@ -2404,10 +2536,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(1, 2).get(0)));
-
+		assertTrue(history.getResources(0, 1).get(0).isDeleted());
+		assertFalse(history.getResources(1, 2).get(0).isDeleted());
 	}
 
 	@Test
@@ -3294,8 +3424,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionUpdateMatchUrlWithOneMatch() {
-		String methodName = "testTransactionUpdateMatchUrlWithOneMatch";
+	public void testTransactionUpdateMatchUrlWithOneMatchNoId() {
+		String methodName = "testTransactionUpdateMatchUrlWithOneMatchNoId";
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
@@ -3306,12 +3436,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().setFamily("Hello");
-		p.setId("Patient/" + methodName);
+		p.setId(IdType.newRandomUuid());
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
-		o.getSubject().setReference("Patient/" + methodName);
+		o.getSubject().setReference(id.getValue());
 		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
@@ -3331,6 +3461,72 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		nextEntry = resp.getEntry().get(1);
 		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
+
+	}
+
+	@Test
+	public void testTransactionUpdateMatchUrlWithOneMatchWithIdMatch() {
+		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithIdMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId(id);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference(id.getValue());
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(2, resp.getEntry().size());
+
+		BundleEntryComponent nextEntry = resp.getEntry().get(0);
+		assertEquals("200 OK", nextEntry.getResponse().getStatus());
+		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
+		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
+		assertNotEquals(id, p.getId());
+		assertThat(p.getId(), endsWith("/_history/2"));
+
+		nextEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", nextEntry.getResponse().getStatus());
+		assertThat(nextEntry.getResponse().getLocation(), not(emptyString()));
+
+		nextEntry = resp.getEntry().get(1);
+		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
+		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
+
+	}
+
+	@Test
+	public void testTransactionUpdateMatchUrlWithOneMatchWithNoIdMatch() {
+		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithNoIdMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId("Patient/" + methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("2279"));
+		}
 
 	}
 
@@ -3364,12 +3560,43 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithZeroMatch() {
+		String methodName = "testTransactionUpdateMatchUrlWithZeroMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId(IdType.newRandomUuid());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient/" + p.getId());
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(2, resp.getEntry().size());
+
+		BundleEntryComponent nextEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", nextEntry.getResponse().getStatus());
+		IdType patientId = new IdType(nextEntry.getResponse().getLocation());
+
+		assertThat(patientId.getValue(), endsWith("/_history/1"));
+
+		nextEntry = resp.getEntry().get(1);
+		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
+		assertEquals(patientId.toVersionless().getValue(), o.getSubject().getReference());
+
+	}
+
+	@Test
+	public void testTransactionUpdateMatchUrlWithZeroMatchWithId() {
 		String methodName = "testTransactionUpdateMatchUrlWithZeroMatch";
 		Bundle request = new Bundle();
 
@@ -3395,7 +3622,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", nextEntry.getResponse().getStatus());
 		IdType patientId = new IdType(nextEntry.getResponse().getLocation());
 
-		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
+		assertThat(nextEntry.getResponse().getLocation(), containsString(methodName));
 		assertNotEquals(id.toVersionless(), patientId.toVersionless());
 
 		assertThat(patientId.getValue(), endsWith("/_history/1"));
@@ -3879,9 +4106,44 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, bundle);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1092) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
+			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
 		}
 
+	}
+
+	@Test
+	public void testOrganizationOver100ReferencesFromBundleNoMultipleResourcesMatchError() throws IOException {
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+
+		// The bug involves a invalid Long equality comparison, so we need a generated organization ID much larger than 1.
+		IntStream.range(0, 150).forEach(myint -> {
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
+			myPatientDao.create(patient, mySrd);
+		});
+
+		final Organization organization = new Organization();
+		organization.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+			.setValue("9395b8cb-702c-3c5d-926e-1c3524fd6560");
+		organization.setName("PCP1401");
+		myOrganizationDao.create(organization, mySrd);
+
+		// This bundle needs to have over 100 resources, each referring to the same organization above.
+		// If there are 100 or less, then TransactionProcessor.preFetchConditionalUrls() will work off the same Long instance for the Organization JpaId
+		// and the Long == Long equality comparison will work
+		final InputStream resourceAsStream = getClass().getResourceAsStream("/bundle-refers-to-same-organization.json");
+		assertNotNull(resourceAsStream);
+		final String input = IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8);
+		final Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
+
+		try {
+			mySystemDao.transaction(mySrd, bundle);
+		} catch (PreconditionFailedException thePreconditionFailedException) {
+			if (thePreconditionFailedException.getMessage().contains(Msg.code(2207))) {
+				fail("This test has failed with HAPI-2207, exactly the condition we aim to prevent");
+			}
+			// else let the Exception bubble up
+		}
 	}
 
 	@Test
@@ -4074,6 +4336,252 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("200 OK", output2.getEntry().get(1).getResponse().getStatus());
 		assertEquals("200 OK", output2.getEntry().get(2).getResponse().getStatus());
 
+	}
+
+	 /**
+	  * See #4639
+	  */
+	@ParameterizedTest
+	@CsvSource({
+		// Observation.subject ref is an inline match URL that doesn't exist, so it'll be created
+		"Patient?identifier=http://nothing-matching|123" + "," + "Patient?identifier=http%3A%2F%2Facme.org|ID1" + "," + "Observation|Patient|Patient",
+		// Observation.subject ref is the same ref as a conditional update URL in the Bundle
+		"Patient?identifier=http%3A%2F%2Facme.org|ID1" +   "," + "Patient?identifier=http%3A%2F%2Facme.org|ID1" + "," + "Observation|Patient",
+		// Observation.subject ref is a placeholder UUID pointing to the Patient that is being conditionally created
+		"urn:uuid:8dba64a8-2aca-48fe-8b4e-8c7bf2ab695a" +  "," + "Patient?identifier=http%3A%2F%2Facme.org|ID1" + "," + "Observation|Patient"
+	})
+	public void testPlaceholderCreateTransactionRetry_NonMatchingPlaceholderReference(String theObservationSubjectReference, String thePatientRequestUrl, String theExpectedCreatedResourceTypes) {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		mySrd.setRetry(true);
+		mySrd.setMaxRetries(3);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		Patient pat = new Patient();
+		if (theObservationSubjectReference.startsWith("urn:")) {
+			pat.setId(theObservationSubjectReference);
+		}
+		pat.addIdentifier().setSystem("http://acme.org").setValue("ID1");
+		Observation obs = new Observation();
+		obs.setSubject(new Reference(theObservationSubjectReference));
+		obs.setIdentifier(List.of(new Identifier().setSystem("http://obs.org").setValue("ID2")));
+		bundle.addEntry().setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Fobs.org|ID2");
+		bundle.addEntry().setResource(pat)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl(thePatientRequestUrl);
+
+		AtomicInteger countdown = new AtomicInteger(1);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED, ((thePointcut, theArgs) -> {
+			if (countdown.get() > 0) {
+				countdown.decrementAndGet();
+				// fake out a tag creation error
+				throw new DataIntegrityViolationException("hfj_res_tag");
+			}
+		}));
+
+		runInTransaction(()->{
+			List<ResourceTable> all = myResourceTableDao.findAll();
+			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
+			assertThat(storedTypes, empty());
+		});
+
+
+		// execute
+		Bundle output = mySystemDao.transaction(mySrd, bundle);
+
+		// validate
+
+		String observationId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+		String patientId = new IdType(output.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+		Observation observation = myObservationDao.read(new IdType(observationId), mySrd);
+		String subjectReference = observation.getSubject().getReference();
+		ourLog.info("Obs: {}", observationId);
+		ourLog.info("Patient: {}", patientId);
+		ourLog.info("Ref: {}", subjectReference);
+		if (thePatientRequestUrl.equals(theObservationSubjectReference) || theObservationSubjectReference.startsWith("urn:")) {
+			assertEquals(patientId, subjectReference);
+		} else {
+			assertNotEquals(patientId, subjectReference);
+		}
+
+		assertEquals(0, countdown.get());
+		assertEquals("201 Created", output.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", output.getEntry().get(1).getResponse().getStatus());
+
+		ourLog.info("Assigned resource IDs:\n * " + output.getEntry().stream().map(t->t.getResponse().getLocation()).collect(Collectors.joining("\n * ")));
+
+		myCaptureQueriesListener.logInsertQueries(t -> t.getSql(false, false).contains(" into HFJ_RESOURCE "));
+
+		runInTransaction(()->{
+			List<ResourceTable> all = myResourceTableDao.findAll();
+			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
+			assertThat("Resources:\n * " + all.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")), storedTypes, contains(theExpectedCreatedResourceTypes.split("\\|")));
+		});
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_simpleIdentifier() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		// Test Passes when identifier.value = ID2
+		final String identifierValue = "ID2";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl(ResourceType.Patient.name());
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_simpleUrlWithIdentifier() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		final String identifierValue = "http://some-url-value";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl(ResourceType.Patient.name());
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_urlOrganizationAndObservation() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		final String identifierValue = "http://some-url-value/Observation/ID2";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl(ResourceType.Patient.name());
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
+	}
+
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues_OrganizationAndOrganization() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		// Test fails with Organization and Organization
+		final String identifierValue = "http://some-url-value/Organization/ID2";
+		final Patient patient = new Patient();
+		final Reference reference = new Reference()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Organization.name(), TEST_IDENTIFIER_SYSTEM, identifierValue))
+			.setIdentifier(new Identifier().setValue(identifierValue).setSystem(TEST_IDENTIFIER_SYSTEM));
+		patient.setManagingOrganization(reference);
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl(ResourceType.Patient.name());
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = organizationSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
+	}
+
+	@Test
+	public void testCreatePlaceholderWithMatchingInlineAndSubjectReferenceIdentifiersCreatesOnlyOne_withConditionalUrl() {
+		// setup
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		/*
+		 * Create an Observation that references a Patient
+		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
+		 */
+		final Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		String identifierValue = "http://something.something/b";
+		obsToCreate.getSubject()
+			.setReference(String.format("%s?identifier=%s|%s", ResourceType.Patient.name(), TEST_IDENTIFIER_SYSTEM, identifierValue));
+		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("http://something.something/b");
+
+		final Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(obsToCreate)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl(ResourceType.Observation.name());
+		// execute
+		final Bundle actual = mySystemDao.transaction(mySrd, bundle);
+		// validate
+		assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+		final IBundleProvider patientSearch = myPatientDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
+		final List<IBaseResource> allResources = patientSearch.getAllResources();
+		assertEquals(1, allResources.size());
+		assertEquals(ResourceType.Patient.name(), allResources.get(0).getIdElement().getResourceType());
+		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Patient.name()));
 	}
 
 	/**

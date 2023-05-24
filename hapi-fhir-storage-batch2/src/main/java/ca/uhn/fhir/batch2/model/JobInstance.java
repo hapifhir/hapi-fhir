@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.model;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,13 +17,14 @@ package ca.uhn.fhir.batch2.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -36,7 +35,13 @@ import java.util.Date;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class JobInstance extends JobInstanceStartRequest implements IModelJson, IJobInstance {
+public class JobInstance implements IModelJson, IJobInstance {
+
+	@JsonProperty(value = "jobDefinitionId")
+	private String myJobDefinitionId;
+
+	@JsonProperty(value = "parameters")
+	private String myParameters;
 
 	@JsonProperty(value = "jobDefinitionVersion")
 	private int myJobDefinitionVersion;
@@ -116,7 +121,8 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	 * Copy constructor
 	 */
 	public JobInstance(JobInstance theJobInstance) {
-		super(theJobInstance);
+		setJobDefinitionId(theJobInstance.getJobDefinitionId());
+		setParameters(theJobInstance.getParameters());
 		setCancelled(theJobInstance.isCancelled());
 		setFastTracking(theJobInstance.isFastTracking());
 		setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
@@ -137,6 +143,34 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
 		setWarningMessage(theJobInstance.getWarningMessage());
+	}
+
+
+	public String getJobDefinitionId() {
+		return myJobDefinitionId;
+	}
+
+	public void setJobDefinitionId(String theJobDefinitionId) {
+		myJobDefinitionId = theJobDefinitionId;
+	}
+
+	public String getParameters() {
+		return myParameters;
+	}
+
+	public void setParameters(String theParameters) {
+		myParameters = theParameters;
+	}
+
+	public <T extends IModelJson> T getParameters(Class<T> theType) {
+		if (myParameters == null) {
+			return null;
+		}
+		return JsonUtil.deserialize(myParameters, theType);
+	}
+
+	public void setParameters(IModelJson theParameters) {
+		myParameters = JsonUtil.serializeOrInvalidRequest(theParameters);
 	}
 
 	public void setUpdateTime(Date theUpdateTime) {
@@ -312,7 +346,6 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		myWarningMessage = theWarningMessage;
 		return this;
 	}
-
 	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
 		setJobDefinitionId(theJobDefinition.getJobDefinitionId());
 		setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
@@ -342,6 +375,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 			.append("jobDefinitionId", getJobDefinitionId() + "/" + myJobDefinitionVersion)
 			.append("instanceId", myInstanceId)
 			.append("status", myStatus)
+			.append("myCancelled", myCancelled)
 			.append("createTime", myCreateTime)
 			.append("startTime", myStartTime)
 			.append("endTime", myEndTime)
@@ -372,15 +406,15 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 
 		switch (getStatus()) {
 			case IN_PROGRESS:
+			case ERRORED:
 			case FINALIZE:
 				return true;
 			case COMPLETED:
-			case ERRORED:
 			case QUEUED:
 			case FAILED:
 			case CANCELLED:
 			default:
-				Logs.getBatchTroubleshootingLog().debug("Status {} is considered \"not running\"", getStatus().name());
+				Logs.getBatchTroubleshootingLog().debug("Status {} is considered \"not running\"", myStatus);
 		}
 		return false;
 	}

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.config;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,19 +17,29 @@ package ca.uhn.fhir.cr.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.config;
 
+import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
+import ca.uhn.fhir.cr.r4.measure.CareGapsService;
+import ca.uhn.fhir.cr.r4.measure.ISubmitDataService;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureService;
+import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
+import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 @Configuration
-public class CrR4Config extends BaseClinicalReasoningConfig {
+@Import(BaseClinicalReasoningConfig.class)
+public class CrR4Config {
 
 	@Bean
 	public Function<RequestDetails, MeasureService> r4MeasureServiceFactory(ApplicationContext theApplicationContext) {
@@ -52,4 +60,31 @@ public class CrR4Config extends BaseClinicalReasoningConfig {
 	public MeasureOperationsProvider r4measureOperationsProvider() {
 		return new MeasureOperationsProvider();
 	}
+
+	@Bean
+	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(Function<RequestDetails, MeasureService> theR4MeasureServiceFactory,
+																									  CrProperties theCrProperties,
+																									  DaoRegistry theDaoRegistry, Executor cqlExecutor) {
+		return r -> {
+			var ms = theR4MeasureServiceFactory.apply(r);
+			var cs = new CareGapsService(theCrProperties, ms, theDaoRegistry, cqlExecutor, r);
+			return cs;
+		};
+	}
+
+	@Bean
+	public CareGapsOperationProvider r4CareGapsProvider(Function<RequestDetails, CareGapsService> theCareGapsServiceFunction){
+		return new CareGapsOperationProvider(theCareGapsServiceFunction);
+	}
+
+	@Bean
+	public ISubmitDataService r4SubmitDataService(DaoRegistry theDaoRegistry){
+		return requestDetails -> new SubmitDataService(theDaoRegistry, requestDetails);
+	}
+
+	@Bean
+	public SubmitDataProvider r4SubmitDataProvider(ISubmitDataService theSubmitDataService){
+		return new SubmitDataProvider(theSubmitDataService);
+	}
+
 }

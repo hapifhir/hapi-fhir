@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,9 +17,11 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
@@ -47,8 +47,26 @@ public interface ISearchBuilder<T extends IResourcePersistentId> {
 
 	void loadResourcesByPid(Collection<T> thePids, Collection<T> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation, RequestDetails theDetails);
 
+	/**
+	 * Use the loadIncludes that takes a parameters object instead.
+	 */
+	@Deprecated
 	Set<T> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<T> theMatches, Collection<Include> theRevIncludes, boolean theReverseMode,
 														DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount);
+
+	default Set<T> loadIncludes(SearchBuilderLoadIncludesParameters<T> theParameters) {
+		return this.loadIncludes(
+			theParameters.getFhirContext(),
+			theParameters.getEntityManager(),
+			theParameters.getMatches(),
+			theParameters.getIncludeFilters(),
+			theParameters.isReverseMode(),
+			theParameters.getLastUpdated(),
+			theParameters.getSearchIdOrDescription(),
+			theParameters.getRequestDetails(),
+			theParameters.getMaxCount()
+		);
+	}
 
 	/**
 	 * How many results may be fetched at once

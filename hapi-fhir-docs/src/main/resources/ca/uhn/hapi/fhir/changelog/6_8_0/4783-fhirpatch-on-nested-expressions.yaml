@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4783
+title: "FHIR Patch operations on choice types in nested expressions did not work correctly.
+   Thanks to Zach Smith for the pull request!"

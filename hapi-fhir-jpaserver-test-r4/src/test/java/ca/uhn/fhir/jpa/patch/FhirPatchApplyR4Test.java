@@ -1,14 +1,19 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -16,9 +21,13 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.util.XmlExpectationsHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,6 +38,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirPatchApplyR4Test {
 
@@ -86,6 +96,35 @@ public class FhirPatchApplyR4Test {
 	}
 
 	@Test
+	public void testInsertToInvalidIndex_minimum() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Patient patient = new Patient();
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("insert"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.identifier"));
+		operation
+			.addPart()
+			.setName("index")
+			.setValue(new IntegerType(-1));
+
+		try {
+			svc.apply(patient, patch);
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(1270) + "Invalid insert index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testMoveFromInvalidIndex() {
 		FhirPatch svc = new FhirPatch(ourCtx);
 
@@ -115,6 +154,39 @@ public class FhirPatchApplyR4Test {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1268) + "Invalid move source index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testMoveFromInvalidIndex_minimum() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Patient patient = new Patient();
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("move"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.identifier"));
+		operation
+			.addPart()
+			.setName("source")
+			.setValue(new IntegerType(-1));
+		operation
+			.addPart()
+			.setName("destination")
+			.setValue(new IntegerType(1));
+
+		try {
+			svc.apply(patient, patch);
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(1268) + "Invalid move source index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
@@ -153,6 +225,40 @@ public class FhirPatchApplyR4Test {
 	}
 
 	@Test
+	public void testMoveToInvalidIndex_minimum() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("sys");
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("move"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.identifier"));
+		operation
+			.addPart()
+			.setName("source")
+			.setValue(new IntegerType(0));
+		operation
+			.addPart()
+			.setName("destination")
+			.setValue(new IntegerType(-1));
+
+		try {
+			svc.apply(patient, patch);
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(1269) + "Invalid move destination index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testDeleteItemWithExtension() {
 		FhirPatch svc = new FhirPatch(ourCtx);
 
@@ -175,7 +281,46 @@ public class FhirPatchApplyR4Test {
 
 		svc.apply(patient, patch);
 
+		assertEquals(1, patient.getIdentifier().size());
+
 		assertEquals("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
+
+	}
+
+	@Test
+	public void testDeleteExtensionFromListByFilter() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addExtension().setUrl("url1")
+			.addExtension(new Extension().setUrl("text").setValue(new StringType("first text")))
+			.addExtension(new Extension().setUrl("code").setValue(new CodeableConcept().addCoding(new Coding("sys", "123", "Abc"))));
+		patient.addExtension().setUrl("url2")
+			.addExtension(new Extension().setUrl("code").setValue(new CodeableConcept().addCoding(new Coding("sys", "234", "Def"))))
+			.addExtension(new Extension().setUrl("detail").setValue(new IntegerType(5)));
+		patient.addExtension().setUrl("url3")
+			.addExtension(new Extension().setUrl("text").setValue(new StringType("third text")))
+			.addExtension(new Extension().setUrl("code").setValue(new CodeableConcept().addCoding(new Coding("sys", "345", "Ghi"))))
+			.addExtension(new Extension().setUrl("detail").setValue(new IntegerType(12)));
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("delete"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.extension.where(url = 'url2')"));
+
+		svc.apply(patient, patch);
+
+		assertEquals(2, patient.getExtension().size());
+
+		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"url1\",\"extension\":[{\"url\":\"text\",\"valueString\":\"first text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"123\",\"display\":\"Abc\"}]}}]},{\"url\":\"url3\",\"extension\":[{\"url\":\"text\",\"valueString\":\"third text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"345\",\"display\":\"Ghi\"}]}},{\"url\":\"detail\",\"valueInteger\":12}]}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
 
 	}
 
@@ -344,7 +489,7 @@ public class FhirPatchApplyR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		//Given: We create a patch request to add a new active statuts
+		//Given: We create a patch request to add a new active status
 		BooleanType theValue = new BooleanType(false);
 		Parameters patch = new Parameters();
 		patch.addParameter(createPatchAddOperation("Patient", "active", theValue));
@@ -353,6 +498,37 @@ public class FhirPatchApplyR4Test {
 		svc.apply(patient, patch);
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		//TODO THIS SHOULD THROW AN EXCEPTION. you cannot `add` to a field that is already set.
+	}
+
+	@Test
+	public void testAddExtensionWithChoiceType() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent addOperation = createPatchAddOperation("Patient", "extension", null);
+		addOperation
+			.addPart()
+			.setName("value")
+			.addPart(
+				new Parameters.ParametersParameterComponent()
+					.setName("url")
+					.setValue(new UriType("http://foo/fhir/extension/foo"))
+			)
+			.addPart(
+				new Parameters.ParametersParameterComponent()
+					.setName("value")
+					.setValue(new StringType("foo"))
+			);
+		patch.addParameter(addOperation);
+
+		svc.apply(patient, patch);
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it adds the new extension correctly.
+		assertThat(patient.getExtension(), hasSize(1));
+		assertThat(patient.getExtension().get(0).getUrl(), is(equalTo("http://foo/fhir/extension/foo")));
+		assertThat(patient.getExtension().get(0).getValueAsPrimitive().getValueAsString(), is(equalTo("foo")));
 	}
 
 	private Parameters.ParametersParameterComponent createPatchAddOperation(String thePath, String theName, Type theValue) {
@@ -422,4 +598,49 @@ public class FhirPatchApplyR4Test {
 		}
 	}
 
+	// This implements the official HL7 test suite, as defined in http://hl7.org/fhir/R4/test-cases.zip. There may be some overlap with the cases above.
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		No Difference, <Patient xmlns="http://hl7.org/fhir"><birthDate value="1920-01-01"/></Patient>, <Parameters xmlns="http://hl7.org/fhir"></Parameters>, <Patient xmlns="http://hl7.org/fhir"><birthDate value="1920-01-01"/></Patient>
+		Replace Primitive, <Patient xmlns="http://hl7.org/fhir"><birthDate value="1920-01-01"/></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="replace"/></part><part><name value="path"/><valueString value="Patient.birthDate"/></part><part><name value="value"/><valueDate value="1930-01-01"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><birthDate value="1930-01-01"/></Patient>
+		Delete Primitive, <Patient xmlns="http://hl7.org/fhir"><birthDate value="1920-01-01"/></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="delete"/></part><part><name value="path"/><valueString value="Patient.birthDate"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"></Patient>
+		Add Primitive, <Patient xmlns="http://hl7.org/fhir"></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="add"/></part><part><name value="path"/><valueString value="Patient"/></part><part><name value="name"/><valueString value="birthDate"/></part><part><name value="value"/><valueDate value="1930-01-01"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><birthDate value="1930-01-01"/></Patient>
+		Delete Primitive #2, <Patient xmlns="http://hl7.org/fhir"><birthDate value="1920-01-01"/></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="delete"/></part><part><name value="path"/><valueString value="Patient.birthDate"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"></Patient>
+		Replace Nested Primitive #1, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="a name"/></name><gender value="male"/></contact></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="replace"/></part><part><name value="path"/><valueString value="Patient.contact[0].gender"/></part><part><name value="value"/><valueCode value="female"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="a name"/></name><gender value="female"/></contact></Patient>
+		Replace Nested Primitive #2, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="a name"/></name><gender value="male"/></contact></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="replace"/></part><part><name value="path"/><valueString value="Patient.contact[0].name.text"/></part><part><name value="value"/><valueString value="the name"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="the name"/></name><gender value="male"/></contact></Patient>
+		Delete Nested Primitive #1, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="a name"/></name><gender value="male"/></contact></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="delete"/></part><part><name value="path"/><valueString value="Patient.contact[0].gender"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="a name"/></name></contact></Patient>
+		Delete Nested Primitive #2, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="a name"/></name><gender value="male"/></contact></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="delete"/></part><part><name value="path"/><valueString value="Patient.contact[0].name.text"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><contact><gender value="male"/></contact></Patient>
+		Add Nested Primitive, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="a name"/></name></contact></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="add"/></part><part><name value="path"/><valueString value="Patient.contact[0]"/></part><part><name value="name"/><valueString value="gender"/></part><part><name value="value"/><valueCode value="male"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="a name"/></name><gender value="male"/></contact></Patient>
+		Add Complex, <Patient xmlns="http://hl7.org/fhir"></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="add"/></part><part><name value="path"/><valueString value="Patient"/></part><part><name value="name"/><valueString value="maritalStatus"/></part><part><name value="value"/><valueCodeableConcept><text value="married"/></valueCodeableConcept></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><maritalStatus><text value="married"/></maritalStatus></Patient>
+		Replace Complex, <Patient xmlns="http://hl7.org/fhir"><maritalStatus id="1"><text value="married"/></maritalStatus></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="replace"/></part><part><name value="path"/><valueString value="Patient.maritalStatus"/></part><part><name value="value"/><valueCodeableConcept id="2"><text value="not married"/></valueCodeableConcept></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><maritalStatus id="2"><text value="not married"/></maritalStatus></Patient>
+		Delete Complex, <Patient xmlns="http://hl7.org/fhir"><maritalStatus><text value="married"/></maritalStatus></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="delete"/></part><part><name value="path"/><valueString value="Patient.maritalStatus"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"></Patient>
+		Add Anonymous Type, <Patient xmlns="http://hl7.org/fhir"></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="add"/></part><part><name value="path"/><valueString value="Patient"/></part><part><name value="name"/><valueString value="contact"/></part><part><name value="value"/><part><name value="name"/><valueHumanName><text value="a name"/></valueHumanName></part></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="a name"/></name></contact></Patient>
+		Delete Anonymous Type, <Patient xmlns="http://hl7.org/fhir"><contact><name><text value="a name"/></name></contact></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="delete"/></part><part><name value="path"/><valueString value="Patient.contact[0]"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"></Patient>
+		List unchanged, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier></Patient>
+		List unchanged contents changed, <Patient xmlns="http://hl7.org/fhir"><identifier id="a"><system value="http://example.org"/><value value="value 1"/></identifier><identifier id="b"><system value="http://example.org"/><value value="value 2"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="replace"/></part><part><name value="path"/><valueString value="Patient.identifier[0].value"/></part><part><name value="value"/><valueString value="value 2"/></part></parameter><parameter><name value="operation"/><part><name value="type"/><valueCode value="replace"/></part><part><name value="path"/><valueString value="Patient.identifier[1].value"/></part><part><name value="value"/><valueString value="value 1"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier id="a"><system value="http://example.org"/><value value="value 2"/></identifier><identifier id="b"><system value="http://example.org"/><value value="value 1"/></identifier></Patient>
+		Add to list, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="insert"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="index"/><valueInteger value="2"/></part><part><name value="value"/><valueIdentifier><system value="http://example.org"/><value value="value 3"/></valueIdentifier></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier></Patient>
+		Insert in list #1, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="insert"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="index"/><valueInteger value="1"/></part><part><name value="value"/><valueIdentifier><system value="http://example.org"/><value value="value 3"/></valueIdentifier></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier></Patient>
+		Insert in list #2, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="insert"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="index"/><valueInteger value="0"/></part><part><name value="value"/><valueIdentifier><system value="http://example.org"/><value value="value 3"/></valueIdentifier></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier></Patient>
+		Delete from List #1, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="delete"/></part><part><name value="path"/><valueString value="Patient.identifier[0]"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier></Patient>
+		Delete from List #2, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="delete"/></part><part><name value="path"/><valueString value="Patient.identifier[1]"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier></Patient>
+		Delete from List #3, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="delete"/></part><part><name value="path"/><valueString value="Patient.identifier[2]"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier></Patient>
+		Reorder List #1, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 4"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="move"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="source"/><valueInteger value="3"/></part><part><name value="destination"/><valueInteger value="1"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 4"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier></Patient>
+		Reorder List #2, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 4"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="move"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="source"/><valueInteger value="3"/></part><part><name value="destination"/><valueInteger value="0"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 4"/></identifier><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier></Patient>
+		Reorder List #3, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 4"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="move"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="source"/><valueInteger value="3"/></part><part><name value="destination"/><valueInteger value="2"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 4"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier></Patient>
+		Reorder List #4, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 4"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="move"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="source"/><valueInteger value="0"/></part><part><name value="destination"/><valueInteger value="3"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 4"/></identifier><identifier><system value="http://example.org"/><value value="value 1"/></identifier></Patient>
+		Reorder List #5, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 4"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="move"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="source"/><valueInteger value="1"/></part><part><name value="destination"/><valueInteger value="0"/></part></parameter><parameter><name value="operation"/><part><name value="type"/><valueCode value="move"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="source"/><valueInteger value="2"/></part><part><name value="destination"/><valueInteger value="1"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 4"/></identifier></Patient>
+		Reorder List #6, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 1"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 4"/></identifier></Patient>, <Parameters xmlns="http://hl7.org/fhir"><parameter><name value="operation"/><part><name value="type"/><valueCode value="move"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="source"/><valueInteger value="3"/></part><part><name value="destination"/><valueInteger value="0"/></part></parameter><parameter><name value="operation"/><part><name value="type"/><valueCode value="move"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="source"/><valueInteger value="3"/></part><part><name value="destination"/><valueInteger value="1"/></part></parameter><parameter><name value="operation"/><part><name value="type"/><valueCode value="move"/></part><part><name value="path"/><valueString value="Patient.identifier"/></part><part><name value="source"/><valueInteger value="3"/></part><part><name value="destination"/><valueInteger value="2"/></part></parameter></Parameters>, <Patient xmlns="http://hl7.org/fhir"><identifier><system value="http://example.org"/><value value="value 4"/></identifier><identifier><system value="http://example.org"/><value value="value 3"/></identifier><identifier><system value="http://example.org"/><value value="value 2"/></identifier><identifier><system value="http://example.org"/><value value="value 1"/></identifier></Patient>
+		""")
+	public void testHL7Cases(String theName, String theInputResource, String thePatch, String theOutputResource) throws Exception {
+		IParser parser = ourCtx.newXmlParser();
+		Patient patient = parser.parseResource(Patient.class, theInputResource);
+		Parameters parameters = parser.parseResource(Parameters.class, thePatch);
+		Patient expectedPatient = parser.parseResource(Patient.class, theOutputResource);
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		svc.apply(patient, parameters);
+
+		new XmlExpectationsHelper().assertXmlEqual(theOutputResource, parser.encodeResourceToString(patient));
+		assertTrue(expectedPatient.equalsDeep(patient), theName);
+	}
 }

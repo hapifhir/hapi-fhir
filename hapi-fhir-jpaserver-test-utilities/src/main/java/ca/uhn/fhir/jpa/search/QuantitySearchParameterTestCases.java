@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
@@ -47,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSupport {
+public abstract class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSupport {
 
 	final Support myTestDataBuilder;
 	final TestDaoSearch myTestDaoSearch;

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -13,11 +14,14 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -37,6 +41,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -69,7 +74,39 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myStorageSettings.setAllowMultipleDelete(true);
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 	}
+
+	@Test
+	public void testIndexSearchParamPointingToResource() {
+		// Setup
+
+		myStorageSettings.setIndexOnContainedResources(true);
+
+		Bundle inputBundle = new Bundle();
+		inputBundle.setType(Bundle.BundleType.MESSAGE);
+
+		MessageHeader msgHeader = new MessageHeader();
+		msgHeader.setEvent(new Coding("http://foo", "bar", "blah"));
+		inputBundle.addEntry().setResource(msgHeader);
+
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message");
+		assertEquals("Bundle.entry[0].resource", sp.getPath());
+		assertThat(sp.getBase(), contains("Bundle"));
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
+
+		// Test
+		myBundleDao.create(inputBundle, mySrd);
+
+		// Verify - We'll check that the right indexes got written, but the main test is that
+		// the create step didn't crash
+		runInTransaction(()->{
+			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(1, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(0, myResourceLinkDao.count());
+		});
+	}
+
 
 	@Test
 	public void testShouldResolveATwoLinkChainWithStandAloneResourcesWithoutContainedResourceIndexing() throws Exception {
@@ -264,6 +301,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		}
 
 		String url = "/AuditEvent?patient.name=Smith";
+		logAllStringIndexes();
 
 		// execute
 		myCaptureQueriesListener.clear();
@@ -868,6 +906,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
+		logAllStringIndexes();
 
 		// execute
 		myCaptureQueriesListener.clear();
@@ -1527,7 +1566,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.partof.name=Smith", 7);
 
 		// If a reference in the chain has multiple potential target resource types, the number of subselects increases
-		countUnionStatementsInGeneratedQuery("/Observation?subject.name=Smith", 3);
+		// Note: This previously had 3 unions but 2 of the selects within were duplicates of each other
+		countUnionStatementsInGeneratedQuery("/Observation?subject.name=Smith", 2);
 
 		// If such a reference if qualified to restrict the type, the number goes back down
 		countUnionStatementsInGeneratedQuery("/Observation?subject:Location.name=Smith", 1);

@@ -40,6 +40,8 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -88,6 +90,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		}
 	}
 
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String theS) {
+		return null;
+	}
+
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String theS, String theS1) {
+		return null;
+	}
+
 
 	@Override
 	public List<String> getResourceNames() {
@@ -129,7 +141,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			}
 		}
 
-		return new ValidationResult(IssueSeverity.ERROR, null);
+		return new ValidationResult(IssueSeverity.ERROR, null, null);
 	}
 
 	@Override
@@ -168,7 +180,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			severity = IssueSeverity.fromCode(result.getSeverityCode());
 		}
 		ConceptDefinitionComponent definition = new ConceptDefinitionComponent().setCode(result.getCode());
-		return new ValidationResult(severity, result.getMessage(), theSystem, definition);
+		return new ValidationResult(severity, result.getMessage(), theSystem, definition, null, null);
 	}
 
 	@Override
@@ -187,11 +199,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
 			definition.setCode(theCode);
 			definition.setDisplay(outcome.getDisplay());
-			return new ValidationResult(theSystem, definition);
+			return new ValidationResult(theSystem, definition, null);
 		}
 
 		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" +
-			Constants.codeSystemWithDefaultDescription(theSystem) + "]");
+			Constants.codeSystemWithDefaultDescription(theSystem) + "]", null);
 	}
 
 	@Override
@@ -280,6 +292,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public StructureDefinition fetchTypeDefinition(String typeName) {
 		return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+	}
+
+	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String n) {
+		throw new UnsupportedOperationException(Msg.code(234));
 	}
 
 
@@ -378,8 +395,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
-		throw new UnsupportedOperationException(Msg.code(234));
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types) throws FileNotFoundException, IOException, FHIRException {
+		throw new UnsupportedOperationException(Msg.code(2328));
 	}
 
 	@Override

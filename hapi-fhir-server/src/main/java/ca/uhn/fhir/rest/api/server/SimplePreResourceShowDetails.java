@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.api.server;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,13 +17,16 @@ package ca.uhn.fhir.rest.api.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -75,6 +76,16 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 		Validate.isTrue(theIndex >= 0, "Invalid index %d - theIndex must not be < 0", theIndex);
 		Validate.isTrue(theIndex < myResources.length, "Invalid index {} - theIndex must be < %d", theIndex, myResources.length);
 		myResourceMarkedAsSubset[theIndex] = true;
+	}
+
+	@Override
+	public List<IBaseResource> getAllResources() {
+		ArrayList<IBaseResource> retVal = new ArrayList<>(myResources.length);
+		Arrays
+			.stream(myResources)
+			.filter(Objects::nonNull)
+			.forEach(retVal::add);
+		return Collections.unmodifiableList(retVal);
 	}
 
 	@Override

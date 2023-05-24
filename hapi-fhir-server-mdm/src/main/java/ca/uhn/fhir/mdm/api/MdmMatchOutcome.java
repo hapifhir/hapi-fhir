@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.api;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.api;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -30,7 +29,7 @@ public final class MdmMatchOutcome {
 	public static final MdmMatchOutcome POSSIBLE_DUPLICATE = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 	public static final MdmMatchOutcome NO_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.NO_MATCH);
 	public static final MdmMatchOutcome NEW_GOLDEN_RESOURCE_MATCH = new MdmMatchOutcome(null, 1.0).setMatchResultEnum(MdmMatchResultEnum.MATCH).setCreatedNewResource(true);
-	public static final MdmMatchOutcome EID_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.MATCH).setEidMatch(true);
+	public static final MdmMatchOutcome EID_MATCH = new MdmMatchOutcome(null, 1.0).setMatchResultEnum(MdmMatchResultEnum.MATCH).setEidMatch(true);
 	public static final MdmMatchOutcome POSSIBLE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 
 	/**
@@ -45,7 +44,7 @@ public final class MdmMatchOutcome {
 	private final Double score;
 
 	/**
-	 * Did the MDM match operation result in creating a new golden resource resource?
+	 * Did the MDM match operation result in creating a new golden resource?
 	 */
 	private boolean myCreatedNewResource;
 
@@ -76,7 +75,6 @@ public final class MdmMatchOutcome {
 	public boolean isPossibleMatch() {
 		 return myMatchResultEnum == MdmMatchResultEnum.POSSIBLE_MATCH;
 	}
-
 
 	public boolean isPossibleDuplicate() {
 		return myMatchResultEnum == MdmMatchResultEnum.POSSIBLE_DUPLICATE;
@@ -145,11 +143,8 @@ public final class MdmMatchOutcome {
 	 * 	Returns the normalized score
 	 */
 	public Double getNormalizedScore() {
-		if (myCreatedNewResource) {
-			// If we created a new golden resource from this match, the match score must be 1.00
-			return 1.0;
-		} else if (myMdmRuleCount == 0) {
-			return 0.0;
+		if (myMdmRuleCount == 0) {
+			return score;
 		}
 		return score / myMdmRuleCount;
 	}

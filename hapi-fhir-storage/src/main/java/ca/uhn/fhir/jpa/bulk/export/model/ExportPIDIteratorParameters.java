@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.export.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,17 +17,22 @@ package ca.uhn.fhir.jpa.bulk.export.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.model;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class ExportPIDIteratorParameters {
 	/**
-	 * Resource type
+	 * The primary resource type of interest
 	 */
 	private String myResourceType;
 
@@ -51,27 +54,42 @@ public class ExportPIDIteratorParameters {
 	 * (Batch jobs are stored in Persistence, to keep track
 	 * of results/status).
 	 */
-	private String myJobId;
-
+	private String myInstanceId;
+	private String myChunkId;
 	/**
 	 * The export style
 	 */
 	private BulkDataExportOptions.ExportStyle myExportStyle;
-
 	/**
 	 * the group id
 	 */
 	private String myGroupId;
-
 	/**
 	 * For group export - whether or not to expand mdm
 	 */
 	private boolean myExpandMdm;
-
 	/**
 	 * The patient id
 	 */
 	private List<String> myPatientIds;
+	/**
+	 * The partition id
+	 */
+	private RequestPartitionId myPartitionId;
+
+	/**
+	 * The list of resource types to recurse on.
+	 * This should always have at least one resource in it (the resource being requested)!
+	 */
+	private List<String> myRequestedResourceTypes;
+
+	public String getChunkId() {
+		return myChunkId;
+	}
+
+	public void setChunkId(String theChunkId) {
+		myChunkId = theChunkId;
+	}
 
 	public String getResourceType() {
 		return myResourceType;
@@ -97,12 +115,12 @@ public class ExportPIDIteratorParameters {
 		myFilters = theFilters;
 	}
 
-	public String getJobId() {
-		return myJobId;
+	public String getInstanceId() {
+		return myInstanceId;
 	}
 
-	public void setJobId(String theJobId) {
-		myJobId = theJobId;
+	public void setInstanceId(String theInstanceId) {
+		myInstanceId = theInstanceId;
 	}
 
 	public BulkDataExportOptions.ExportStyle getExportStyle() {
@@ -135,6 +153,32 @@ public class ExportPIDIteratorParameters {
 
 	public void setPatientIds(List<String> thePatientIds) {
 		myPatientIds = thePatientIds;
+	}
+
+	public RequestPartitionId getPartitionIdOrAllPartitions() {
+		if (myPartitionId != null) {
+			return myPartitionId;
+		} else {
+			return RequestPartitionId.allPartitions();
+		}
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
+
+	public List<String> getRequestedResourceTypes() {
+		if (myRequestedResourceTypes == null) {
+			myRequestedResourceTypes = new ArrayList<>();
+			if (!isBlank(myResourceType)) {
+				myRequestedResourceTypes.add(myResourceType);
+			}
+		}
+		return myRequestedResourceTypes;
+	}
+
+	public void setRequestedResourceTypes(List<String> theRequestedResourceTypes) {
+		myRequestedResourceTypes = theRequestedResourceTypes;
 	}
 
 	@Override

@@ -3,10 +3,12 @@
 			xmlns="http://maven.apache.org/POM/4.0.0"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.5.4-SNAPSHOT</version>
+		<version>6.7.3-SNAPSHOT</version>
+
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -50,7 +52,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
-			<artifactId>javax.el</artifactId>
+			<artifactId>jakarta.el</artifactId>
 		</dependency>
 
 		<!-- test -->

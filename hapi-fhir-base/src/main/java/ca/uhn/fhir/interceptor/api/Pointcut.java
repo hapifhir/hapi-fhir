@@ -1,5 +1,3 @@
-package ca.uhn.fhir.interceptor.api;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.interceptor.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.api;
 
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -1031,6 +1030,43 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.jpa.api.model.DeleteConflictList",
 		"org.hl7.fhir.instance.model.api.IBaseResource"
 	),
+
+	/**
+	 * <b>Subscription Topic Hook:</b>
+	 * Invoked whenever a persisted resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) is about to be checked for whether any subscription topics
+	 * were triggered as a result of the operation.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - Hooks may modify this parameter. This will affect the checking process.</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
+	 * returns <code>false</code>, processing will be aborted.
+	 * </p>
+	 */
+	SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+
+
+	/**
+	 * <b>Subscription Topic Hook:</b>
+	 * Invoked whenever a persisted resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) has been checked for whether any subscription topics
+	 * were triggered as a result of the operation.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
 
 
 	/**
@@ -2656,6 +2692,33 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.util.SqlQueryList"
 	),
+
+	/**
+	 * <b> Binary Blob Prefix Assigning Hook:</b>
+	 * <p>
+	 * Immediately before a binary blob is stored to its eventual data sink, this hook is called.
+	 * This hook allows implementers to provide a prefix to the binary blob's ID.
+	 * This is helpful in cases where you want to identify this blob for later retrieval outside of HAPI-FHIR. Note that allowable characters will depend on the specific storage sink being used.
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated.
+	 * </li>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseBinary - The binary resource that is about to be stored.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>String</code>, which represents the full prefix to be applied to the blob.
+	 * </p>
+	 */
+	STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX(String.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"org.hl7.fhir.instance.model.api.IBaseResource"
+	),
+
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or

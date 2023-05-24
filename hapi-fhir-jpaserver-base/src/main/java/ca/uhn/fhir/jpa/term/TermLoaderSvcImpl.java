@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -140,26 +159,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 
-/*
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
 	public static final String CUSTOM_HIERARCHY_FILE = "hierarchy.csv";
@@ -175,7 +174,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	private static final int LOG_INCREMENT = 1000;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermLoaderSvcImpl.class);
 	// FYI: Hardcoded to R4 because that's what the term svc uses internally
-	private final FhirContext myCtx = FhirContext.forR4();
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private final ITermDeferredStorageSvc myDeferredStorageSvc;
 	private final ITermCodeSystemStorageSvc myCodeSystemStorageSvc;
 
@@ -500,7 +499,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		CodeSystem imgthlaCs;
 		try {
 			String imgthlaCsString = IOUtils.toString(TermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
-			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
+			imgthlaCs = FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
 		} catch (IOException e) {
 			throw new InternalErrorException(Msg.code(869) + "Failed to load imgthla.xml", e);
 		}
@@ -603,7 +602,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			throw new InvalidRequestException(Msg.code(875) + "Did not find loinc.xml in the ZIP distribution.");
 		}
 
-		CodeSystem loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
+		CodeSystem loincCs = FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, loincCsString);
 		if (isNotBlank(loincCs.getVersion())) {
 			throw new InvalidRequestException(Msg.code(876) + "'loinc.xml' file must not have a version defined. To define a version use '" +
 				LOINC_CODESYSTEM_VERSION.getCode() + "' property of 'loincupload.properties' file");

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.dao;
-
 /*
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -89,8 +88,10 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	/**
 	 * Preload resources from the database in batch. This method is purely
 	 * a performance optimization and must be purely idempotent.
+	 *
+	 * @param thePreFetchIndexes Should resource indexes be loaded
 	 */
-	default <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds) {
+	default <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds, boolean thePreFetchIndexes) {
 		// nothing by default
 	}
 }

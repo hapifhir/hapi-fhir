@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.export.provider;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,12 +17,14 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
@@ -36,7 +36,9 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -45,12 +47,18 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier;
+import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ArrayUtil;
@@ -59,6 +67,8 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -97,6 +107,7 @@ public class BulkDataExportProvider {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
+
 	private Set<String> myCompartmentResources;
 
 	@Autowired
@@ -111,6 +122,9 @@ public class BulkDataExportProvider {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+
 	/**
 	 * $export
 	 */
@@ -120,12 +134,14 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_POST_FETCH_FILTER_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theExportId,
 		ServletRequestDetails theRequestDetails
 	) {
 		// JPA export provider
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
-		BulkDataExportOptions bulkDataExportOptions = buildSystemBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
+		BulkDataExportOptions bulkDataExportOptions = buildSystemBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theExportId, theTypePostFetchFilterUrl);
 
 		startJob(theRequestDetails, bulkDataExportOptions);
 	}
@@ -154,6 +170,11 @@ public class BulkDataExportProvider {
 			parameters.setResourceTypes(resourceTypes);
 		}
 
+		// Determine and validate partition permissions (if needed).
+		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+		parameters.setPartitionId(partitionId);
+
 		// start job
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
 
@@ -174,25 +195,7 @@ public class BulkDataExportProvider {
 	}
 
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
-		if (theRequestDetails.getCompleteUrl().contains(theRequestDetails.getServerBaseForRequest())) {
-			// Base URL not Fixed
 			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
-		} else {
-			// Base URL Fixed
-			int index = StringUtils.indexOf(theRequestDetails.getCompleteUrl(), theRequestDetails.getOperation());
-			if (index == -1) {
-				return null;
-			}
-			return theRequestDetails.getCompleteUrl().substring(0, index - 1);
-		}
-	}
-
-	private String getDefaultPartitionServerBase(ServletRequestDetails theRequestDetails) {
-		if (theRequestDetails.getTenantId() == null || theRequestDetails.getTenantId().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
-			return getServerBase(theRequestDetails);
-		} else {
-			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest().replace(theRequestDetails.getTenantId(), JpaConstants.DEFAULT_PARTITION_NAME), "/");
-		}
 	}
 
 	/**
@@ -205,18 +208,23 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_POST_FETCH_FILTER_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theExportIdentifier,
 		ServletRequestDetails theRequestDetails
 	) {
 		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
-		ourLog.debug("_type={}", theIdParam);
+		ourLog.debug("_type={}", theType);
 		ourLog.debug("_since={}", theSince);
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm={}", theMdm);
 
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
-		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
+		// verify the Group exists before starting the job
+		validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
+
+		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm, theExportIdentifier, theTypePostFetchFilterUrl);
 
 		if (isNotEmpty(bulkDataExportOptions.getResourceTypes())) {
 			validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
@@ -226,6 +234,24 @@ public class BulkDataExportProvider {
 		}
 
 		startJob(theRequestDetails, bulkDataExportOptions);
+	}
+
+	/**
+	 * Throw ResourceNotFound if the target resources don't exist.
+	 * Otherwise, we start a bulk-export job which then fails, reporting a 500.
+	 *
+	 * @param theRequestDetails     the caller details
+	 * @param theTargetResourceName the type of the target
+	 * @param theIdParams           the id(s) to verify exist
+	 */
+	private void validateTargetsExists(RequestDetails theRequestDetails, String theTargetResourceName, Iterable<IIdType> theIdParams) {
+		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequestDetails, theTargetResourceName, theIdParams.iterator().next());
+		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
+		for (IIdType nextId: theIdParams) {
+			myDaoRegistry.getResourceDao(theTargetResourceName)
+				.read(nextId, requestDetails);
+		}
+
 	}
 
 	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
@@ -258,11 +284,18 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_POST_FETCH_FILTER_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_PATIENT, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> thePatient,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theExportIdentifier,
 		ServletRequestDetails theRequestDetails
 	) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
-		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, thePatient);
+
+		if (thePatient != null) {
+			validateTargetsExists(theRequestDetails, "Patient", Lists.transform(thePatient, s -> new IdDt(s.getValue())));
+		}
+
+		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theExportIdentifier, thePatient, theTypePostFetchFilterUrl);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 
 		startJob(theRequestDetails, bulkDataExportOptions);
@@ -278,10 +311,15 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_POST_FETCH_FILTER_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theExportIdentifier,
 		ServletRequestDetails theRequestDetails
 	) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
-		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam);
+
+		validateTargetsExists(theRequestDetails, "Patient", List.of(theIdParam));
+
+		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theExportIdentifier, theIdParam, theTypePostFetchFilterUrl);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 
 		startJob(theRequestDetails, bulkDataExportOptions);
@@ -314,6 +352,15 @@ public class BulkDataExportProvider {
 			throw new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + theJobId + ". Please check if the input job ID is valid.");
 		}
 
+		if(info.getRequestPartitionId() != null) {
+			// Determine and validate permissions for partition (if needed)
+			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+			if(!info.getRequestPartitionId().equals(partitionId)){
+				throw new InvalidRequestException(Msg.code(2304) + "Invalid partition in request for Job ID " + theJobId);
+			}
+		}
+
 		switch (info.getStatus()) {
 			case COMPLETE:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
@@ -339,7 +386,7 @@ public class BulkDataExportProvider {
 						bulkResponseDocument.setMsg(results.getReportMsg());
 						bulkResponseDocument.setRequest(results.getOriginalRequestUrl());
 
-						String serverBase = getDefaultPartitionServerBase(theRequestDetails);
+						String serverBase = getServerBase(theRequestDetails);
 
 						for (Map.Entry<String, List<String>> entrySet : results.getResourceTypeToBinaryIds().entrySet()) {
 							String resourceType = entrySet.getKey();
@@ -370,7 +417,9 @@ public class BulkDataExportProvider {
 				response.getWriter().close();
 				break;
 			default:
+				// Deliberate fall through
 				ourLog.warn("Unrecognized status encountered: {}. Treating as BUILDING/SUBMITTED", info.getStatus().name());
+				//noinspection fallthrough
 			case BUILDING:
 			case SUBMITTED:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
@@ -413,12 +462,12 @@ public class BulkDataExportProvider {
 		}
 	}
 
-	private BulkDataExportOptions buildSystemBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter) {
-		return buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.SYSTEM);
+	private BulkDataExportOptions buildSystemBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, IPrimitiveType<String> theExportId, List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
+		return buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theExportId, BulkDataExportOptions.ExportStyle.SYSTEM, theTypePostFetchFilterUrl);
 	}
 
-	private BulkDataExportOptions buildGroupBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, IIdType theGroupId, IPrimitiveType<Boolean> theExpandMdm) {
-		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.GROUP);
+	private BulkDataExportOptions buildGroupBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, IIdType theGroupId, IPrimitiveType<Boolean> theExpandMdm, IPrimitiveType<String> theExportId, List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
+		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theExportId, BulkDataExportOptions.ExportStyle.GROUP, theTypePostFetchFilterUrl);
 		bulkDataExportOptions.setGroupId(theGroupId);
 
 		boolean mdm = false;
@@ -430,26 +479,26 @@ public class BulkDataExportProvider {
 		return bulkDataExportOptions;
 	}
 
-	private BulkDataExportOptions buildPatientBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, List<IPrimitiveType<String>> thePatientIds) {
+	private BulkDataExportOptions buildPatientBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, IPrimitiveType<String> theExportIdentifier, List<IPrimitiveType<String>> thePatientIds, List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
 		IPrimitiveType<String> type = theType;
 		if (type == null) {
 			// Type is optional, but the job requires it
 			type = new StringDt("Patient");
 		}
-		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, type, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.PATIENT);
+		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, type, theSince, theTypeFilter, theExportIdentifier, BulkDataExportOptions.ExportStyle.PATIENT, theTypePostFetchFilterUrl);
 		if (thePatientIds != null) {
 			bulkDataExportOptions.setPatientIds(thePatientIds.stream().map((pid) -> new IdType(pid.getValueAsString())).collect(Collectors.toSet()));
 		}
 		return bulkDataExportOptions;
 	}
 
-	private BulkDataExportOptions buildPatientBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, IIdType thePatientId) {
-		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.PATIENT);
+	private BulkDataExportOptions buildPatientBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, IPrimitiveType<String> theExportIdentifier, IIdType thePatientId, List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
+		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theExportIdentifier, BulkDataExportOptions.ExportStyle.PATIENT, theTypePostFetchFilterUrl);
 		bulkDataExportOptions.setPatientIds(Collections.singleton(thePatientId));
 		return bulkDataExportOptions;
 	}
 
-	private BulkDataExportOptions buildBulkDataExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, BulkDataExportOptions.ExportStyle theExportStyle) {
+	private BulkDataExportOptions buildBulkDataExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, IPrimitiveType<String> theExportIdentifier, BulkDataExportOptions.ExportStyle theExportStyle, List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
 		String outputFormat = theOutputFormat != null ? theOutputFormat.getValueAsString() : Constants.CT_FHIR_NDJSON;
 
 		Set<String> resourceTypes = null;
@@ -461,12 +510,19 @@ public class BulkDataExportProvider {
 		if (theSince != null) {
 			since = theSince.getValue();
 		}
+		String exportIdentifier = null;
+		if (theExportIdentifier != null) {
+			exportIdentifier = theExportIdentifier.getValueAsString();
+		}
 
 		Set<String> typeFilters = splitTypeFilters(theTypeFilter);
+		Set<String> typePostFetchFilterUrls = splitTypeFilters(theTypePostFetchFilterUrl);
 
 		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
 		bulkDataExportOptions.setFilters(typeFilters);
+		bulkDataExportOptions.setPostFetchFilterUrls(typePostFetchFilterUrls);
 		bulkDataExportOptions.setExportStyle(theExportStyle);
+		bulkDataExportOptions.setExportIdentifier(exportIdentifier);
 		bulkDataExportOptions.setSince(since);
 		bulkDataExportOptions.setResourceTypes(resourceTypes);
 		bulkDataExportOptions.setOutputFormat(outputFormat);
@@ -512,7 +568,7 @@ public class BulkDataExportProvider {
 	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
-		if (prefer.getRespondAsync() == false) {
+		if (!prefer.getRespondAsync()) {
 			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
 		}
 	}

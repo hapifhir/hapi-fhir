@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,10 +17,12 @@ package ca.uhn.fhir.mdm.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
@@ -46,6 +46,8 @@ public class MdmProviderLoader {
 	private IMdmSubmitSvc myMdmSubmitSvc;
 	@Autowired
 	private IMdmSettings myMdmSettings;
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	private BaseMdmProvider myMdmProvider;
 
@@ -59,6 +61,9 @@ public class MdmProviderLoader {
 						myMdmSubmitSvc,
 						myMdmSettings
 						));
+				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
+					myResourceProviderFactory.addSupplier(() -> new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc));
+				}
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());

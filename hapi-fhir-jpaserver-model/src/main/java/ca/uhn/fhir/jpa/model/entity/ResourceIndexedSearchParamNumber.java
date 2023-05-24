@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -129,9 +128,16 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
 		b.append(getHashIdentity(), obj.getHashIdentity());
-		b.append(getValue(), obj.getValue());
+		b.append(normalizeForEqualityComparison(getValue()), normalizeForEqualityComparison(obj.getValue()));
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
+	}
+
+	private Double normalizeForEqualityComparison(BigDecimal theValue) {
+		if (theValue == null) {
+			return null;
+		}
+		return theValue.doubleValue();
 	}
 
 	public void setHashIdentity(Long theHashIdentity) {
@@ -162,7 +168,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		b.append(getResourceType());
 		b.append(getParamName());
 		b.append(getHashIdentity());
-		b.append(getValue());
+		b.append(normalizeForEqualityComparison(getValue()));
 		b.append(isMissing());
 		return b.toHashCode();
 	}

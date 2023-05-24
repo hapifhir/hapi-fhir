@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.maintenance;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.maintenance;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -78,7 +77,7 @@ import java.util.concurrent.TimeUnit;
  * </p>
  */
 public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasScheduledJobs {
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	public static final int INSTANCES_PER_PASS = 100;
 	public static final String SCHEDULED_JOB_ID = JobMaintenanceScheduledJob.class.getName();
@@ -201,7 +200,10 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			return;
 		}
 		try {
+			ourLog.info("Maintenance pass starting.");
 			doMaintenancePass();
+		} catch (Exception e) {
+			ourLog.error("Maintenance pass failed", e);
 		} finally {
 			myRunMaintenanceSemaphore.release();
 		}
@@ -216,12 +218,17 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 			for (JobInstance instance : instances) {
 				String instanceId = instance.getInstanceId();
-				if (processedInstanceIds.add(instanceId)) {
-					myJobDefinitionRegistry.setJobDefinition(instance);
-					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
-						myBatchJobSender, instanceId, progressAccumulator, myReductionStepExecutorService, myJobDefinitionRegistry);
-					ourLog.debug("Triggering maintenance process for instance {} in status {}", instanceId, instance.getStatus().name());
-					jobInstanceProcessor.process();
+				if (myJobDefinitionRegistry.getJobDefinition(instance.getJobDefinitionId(),instance.getJobDefinitionVersion()).isPresent()) {
+					if (processedInstanceIds.add(instanceId)) {
+						myJobDefinitionRegistry.setJobDefinition(instance);
+						JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
+							myBatchJobSender, instanceId, progressAccumulator, myReductionStepExecutorService, myJobDefinitionRegistry);
+						ourLog.debug("Triggering maintenance process for instance {} in status {}", instanceId, instance.getStatus());
+						jobInstanceProcessor.process();
+					}
+				}
+				else {
+					ourLog.warn("Job definition {} for instance {} is currently unavailable", instance.getJobDefinitionId(), instanceId);
 				}
 			}
 

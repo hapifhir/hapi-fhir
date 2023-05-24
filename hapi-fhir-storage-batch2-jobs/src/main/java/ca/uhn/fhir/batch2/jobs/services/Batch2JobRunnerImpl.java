@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.services;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.services;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.services;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -26,6 +25,7 @@ import ca.uhn.fhir.batch2.jobs.export.BulkExportUtil;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 
@@ -45,8 +44,14 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	private static final Logger ourLog = getLogger(IBatch2JobRunner.class);
 
-	@Autowired
-	private IJobCoordinator myJobCoordinator;
+	private final IJobCoordinator myJobCoordinator;
+
+	private final FhirContext myFhirContext;
+
+	public Batch2JobRunnerImpl(IJobCoordinator theJobCoordinator, FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+		myJobCoordinator = theJobCoordinator;
+	}
 
 	@Override
 	public Batch2JobStartResponse startNewJob(Batch2BaseJobParameters theParameters) {
@@ -105,12 +110,19 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		info.setEndTime(theInstance.getEndTime());
 		info.setReport(theInstance.getReport());
 		info.setErrorMsg(theInstance.getErrorMessage());
+		info.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
+		if ( Batch2JobDefinitionConstants.BULK_EXPORT.equals(theInstance.getJobDefinitionId())) {
+			BulkExportJobParameters parameters = theInstance.getParameters(BulkExportJobParameters.class);
+			info.setRequestPartitionId(parameters.getPartitionId());
+		}
+
 		return info;
 	}
 
 	private Batch2JobStartResponse startBatch2BulkExportJob(BulkExportParameters theParameters) {
 		JobInstanceStartRequest request = createStartRequest(theParameters);
-		request.setParameters(BulkExportJobParameters.createFromExportJobParameters(theParameters));
+		BulkExportJobParameters parameters = BulkExportJobParameters.createFromExportJobParameters(theParameters);
+		request.setParameters(parameters);
 		return myJobCoordinator.startInstance(request);
 	}
 

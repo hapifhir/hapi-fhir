@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -177,7 +176,6 @@ public abstract class BaseApp {
 
 	protected List<BaseCommand> provideCommands() {
 		ArrayList<BaseCommand> commands = new ArrayList<>();
-		commands.add(new RunServerCommand());
 		commands.add(new ExampleDataUploader());
 		commands.add(new ValidateCommand());
 		commands.add(new ValidationDataUploader());

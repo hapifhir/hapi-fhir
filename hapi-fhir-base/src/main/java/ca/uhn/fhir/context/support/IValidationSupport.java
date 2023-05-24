@@ -1,5 +1,3 @@
-package ca.uhn.fhir.context.support;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context.support;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -124,6 +123,16 @@ public interface IValidationSupport {
 	 */
 	@Nullable
 	default List<IBaseResource> fetchAllConformanceResources() {
+		return null;
+	}
+
+	/**
+	 * Load and return all possible search parameters
+	 *
+	 * @since 6.6.0
+	 */
+	@Nullable
+	default <T extends IBaseResource> List<T> fetchAllSearchParameters() {
 		return null;
 	}
 

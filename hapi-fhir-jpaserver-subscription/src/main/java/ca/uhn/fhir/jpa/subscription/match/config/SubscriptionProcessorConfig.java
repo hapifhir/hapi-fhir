@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.config;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,7 +17,10 @@ package ca.uhn.fhir.jpa.subscription.match.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.config;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryChannelNamer;
@@ -34,11 +35,13 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.MatchingQueueSubscriberLoader;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegisteringSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -92,8 +95,13 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
-	public SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory() {
-		return new SubscriptionDeliveryHandlerFactory();
+	public SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory(ApplicationContext theApplicationContext, IEmailSender theEmailSender) {
+		return new SubscriptionDeliveryHandlerFactory(theApplicationContext, theEmailSender);
+	}
+
+	@Bean
+	public SubscriptionMatchDeliverer subscriptionMatchDeliverer(FhirContext theFhirContext, IInterceptorBroadcaster theInterceptorBroadcaster, SubscriptionChannelRegistry theSubscriptionChannelRegistry) {
+		return new SubscriptionMatchDeliverer(theFhirContext, theInterceptorBroadcaster, theSubscriptionChannelRegistry);
 	}
 
 	@Bean

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.email;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.email;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.deliver.email;
 
 import ca.uhn.fhir.rest.server.mail.IMailSvc;
 import ca.uhn.fhir.util.StopWatch;

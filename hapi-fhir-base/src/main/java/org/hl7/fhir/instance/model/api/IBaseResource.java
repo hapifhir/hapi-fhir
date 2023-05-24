@@ -1,14 +1,3 @@
-package org.hl7.fhir.instance.model.api;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.Include;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -28,6 +17,17 @@ import ca.uhn.fhir.model.api.Include;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * For now, this is a simple marker interface indicating that a class is a resource type. 
@@ -59,4 +59,10 @@ public interface IBaseResource extends IBase, IElement {
 
 	FhirVersionEnum getStructureFhirVersionEnum();
 
+	/**
+	 * @return <code>true</code> if this resource has been deleted
+	 */
+	default boolean isDeleted() {
+		return ResourceMetadataKeyEnum.DELETED_AT.get(this) != null;
+	}
 }

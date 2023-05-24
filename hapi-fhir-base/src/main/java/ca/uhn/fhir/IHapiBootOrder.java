@@ -1,5 +1,3 @@
-package ca.uhn.fhir;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir;
 
 /**
  * Spring bean initialization constants.

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.test.utilities;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,9 +17,9 @@ package ca.uhn.fhir.test.utilities;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -51,24 +49,33 @@ import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class RestServerDstu3Helper extends BaseRestServerHelper implements IPointcutLatch, BeforeEachCallback, AfterEachCallback {
 	protected final MyRestfulServer myRestServer;
 
 	public RestServerDstu3Helper() {
-		this(false);
+		this(false, false);
 	}
 
-	public RestServerDstu3Helper(boolean theInitialize) {
+	private RestServerDstu3Helper(boolean theInitialize, boolean theTransactionLatchEnabled) {
 		super(FhirContext.forDstu3());
-		myRestServer = new MyRestfulServer(myFhirContext);
-		if(theInitialize){
+		myRestServer = new MyRestfulServer(myFhirContext, theTransactionLatchEnabled);
+		if (theInitialize) {
 			try {
 				myRestServer.initialize();
 			} catch (ServletException e) {
-				throw new RuntimeException(Msg.code(2252)+"Failed to initialize server", e);
+				throw new RuntimeException(Msg.code(2252) + "Failed to initialize server", e);
 			}
 		}
+	}
+
+	public static RestServerDstu3Helper newInitialized() {
+		return new RestServerDstu3Helper(true, false);
+	}
+
+	public static RestServerDstu3Helper newWithTransactionLatch() {
+		return new RestServerDstu3Helper(false, true);
 	}
 
 	@Override
@@ -175,31 +182,55 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	public static class MyPlainProvider implements IPointcutLatch {
 		private final PointcutLatch myPointcutLatch = new PointcutLatch("Transaction Counting Provider");
 		private final List<IBaseBundle> myTransactions = Collections.synchronizedList(new ArrayList<>());
+		private boolean myTransactionLatchEnabled;
+
+		public MyPlainProvider(boolean theTransactionLatchEnabled) {
+			this.myTransactionLatchEnabled = theTransactionLatchEnabled;
+		}
 
 		@Transaction
 		public synchronized IBaseBundle transaction(@TransactionParam IBaseBundle theBundle) {
-			myPointcutLatch.call(theBundle);
+			if (myTransactionLatchEnabled) {
+				myPointcutLatch.call(theBundle);
+			}
 			myTransactions.add(theBundle);
 			return theBundle;
 		}
 
 		@Override
 		public void clear() {
+			if (!myTransactionLatchEnabled) {
+				throw new IllegalStateException("Can't call clear() on a provider that doesn't use a latch");
+			}
 			myPointcutLatch.clear();
 		}
 
 		@Override
 		public void setExpectedCount(int theCount) {
+			if (!myTransactionLatchEnabled) {
+				throw new IllegalStateException("Can't call clear() on a provider that doesn't use a latch");
+			}
 			myPointcutLatch.setExpectedCount(theCount);
 		}
 
 		@Override
 		public List<HookParams> awaitExpected() throws InterruptedException {
+			if (!myTransactionLatchEnabled) {
+				throw new IllegalStateException("Can't call clear() on a provider that doesn't use a latch");
+			}
 			return myPointcutLatch.awaitExpected();
 		}
 
 		public List<IBaseBundle> getTransactions() {
 			return Collections.unmodifiableList(new ArrayList<>(myTransactions));
+		}
+
+		public void setTransactionLatchEnabled(boolean theTransactionLatchEnabled) {
+			this.myTransactionLatchEnabled = theTransactionLatchEnabled;
+		}
+
+		public boolean isTransactionLatchEnabled() {
+			return myTransactionLatchEnabled;
 		}
 	}
 
@@ -210,13 +241,22 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
 		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
 		private MyPlainProvider myPlainProvider;
+		private final boolean myInitialTransactionLatchEnabled;
 
-		public MyRestfulServer(FhirContext theFhirContext) {
+		public MyRestfulServer(FhirContext theFhirContext, boolean theInitialTransactionLatchEnabled) {
 			super(theFhirContext);
+			myInitialTransactionLatchEnabled = theInitialTransactionLatchEnabled;
 		}
 
 		public MyPlainProvider getPlainProvider() {
 			return myPlainProvider;
+		}
+
+		public <T> T executeWithLatch(Supplier<T> theSupplier) throws InterruptedException {
+			myPlainProvider.setExpectedCount(1);
+			T retval = theSupplier.get();
+			myPlainProvider.awaitExpected();
+			return retval;
 		}
 
 		public void setFailNextPut(boolean theFailNextPut) {
@@ -230,7 +270,16 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 					provider.clearCounts();
 				}
 			}
-			myPlainProvider.clear();
+			if (isTransactionLatchEnabled()) {
+				getPlainProvider().clear();
+			}
+		}
+
+		private boolean isTransactionLatchEnabled() {
+			if (getPlainProvider() == null) {
+				return false;
+			}
+			return getPlainProvider().isTransactionLatchEnabled();
 		}
 
 		public void clearDataAndCounts() {
@@ -273,7 +322,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			myConceptMapResourceProvider = new MyHashMapResourceProvider(fhirContext, ConceptMap.class);
 			registerProvider(myConceptMapResourceProvider);
 
-			myPlainProvider = new MyPlainProvider();
+			myPlainProvider = new MyPlainProvider(myInitialTransactionLatchEnabled);
 			registerProvider(myPlainProvider);
 		}
 
@@ -294,7 +343,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			@Override
 			public MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 				if (myFailNextPut) {
-					throw new PreconditionFailedException(Msg.code(2251)+"Failed update operation");
+					throw new PreconditionFailedException(Msg.code(2251) + "Failed update operation");
 				}
 				return super.update(theResource, theConditional, theRequestDetails);
 			}

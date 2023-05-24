@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +39,7 @@ public class CountingInterceptor implements ChannelInterceptor {
 
 	@Override
 	public void afterSendCompletion(Message<?> theMessage, MessageChannel theChannel, boolean theSent, Exception theException) {
-		ourLog.info("Counting another instance: {}", theMessage);
+		ourLog.info("Send complete for message: {}", theMessage);
 		if (theSent) {
 			mySent.add(theMessage.toString());
 		}

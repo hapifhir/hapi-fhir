@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.export;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.export;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -48,8 +47,6 @@ import java.util.Set;
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
-	public static final int MAX_IDS_TO_BATCH = 900;
-
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
 
@@ -61,20 +58,33 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
 								 @Nonnull IJobDataSink<ResourceIdList> theDataSink) throws JobExecutionFailedException {
 		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
-		ourLog.info("Starting BatchExport job");
+		ourLog.info("Fetching resource IDs for bulk export job instance[{}]", theStepExecutionDetails.getInstance().getInstanceId());
 
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
+		providerParams.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId());
+		providerParams.setChunkId(theStepExecutionDetails.getChunkId());
 		providerParams.setFilters(params.getFilters());
-		providerParams.setStartDate(params.getStartDate());
+		providerParams.setStartDate(params.getSince());
 		providerParams.setExportStyle(params.getExportStyle());
 		providerParams.setGroupId(params.getGroupId());
 		providerParams.setPatientIds(params.getPatientIds());
 		providerParams.setExpandMdm(params.isExpandMdm());
+		providerParams.setPartitionId(params.getPartitionId());
+
+		/*
+		 * we set all the requested resource types here so that
+		 * when we recursively fetch resource types for a given patient/group
+		 * we don't recurse for types that they did not request
+		 */
+		providerParams.setRequestedResourceTypes(params.getResourceTypes());
 
 		int submissionCount = 0;
 		try {
 			Set<BatchResourceId> submittedBatchResourceIds = new HashSet<>();
 
+			/*
+			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
+			 */
 			for (String resourceType : params.getResourceTypes()) {
 				providerParams.setResourceType(resourceType);
 

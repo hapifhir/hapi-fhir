@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
@@ -165,10 +164,10 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 			case ORACLE_12C:
 				@Language("SQL") String findNullableConstraintSql =
 					"SELECT acc.owner, acc.table_name, acc.column_name, search_condition_vc " +
-						"FROM all_cons_columns acc, all_constraints ac " +
-						"WHERE acc.constraint_name = ac.constraint_name " +
-						"AND acc.table_name = ac.table_name " +
-						"AND ac.constraint_type = ? " +
+						"FROM all_cons_columns acc, user_constraints uc " +
+						"WHERE acc.constraint_name = uc.constraint_name " +
+						"AND acc.table_name = uc.table_name " +
+						"AND uc.constraint_type = ? " +
 						"AND acc.table_name = ? " +
 						"AND acc.column_name = ? " +
 						"AND search_condition_vc = ? ";
@@ -177,9 +176,8 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				params[1] = tableName.toUpperCase();
 				params[2] = columnName.toUpperCase();
 				params[3] = "\"" + columnName.toUpperCase() + "\" IS NOT NULL";
-				List<Map<String, Object>> queryResults = getConnectionProperties().getTxTemplate().execute(t -> {
-					return getConnectionProperties().newJdbcTemplate().query(findNullableConstraintSql, params, new ColumnMapRowMapper());
-				});
+				List<Map<String, Object>> queryResults = getConnectionProperties().getTxTemplate().execute(t ->
+					getConnectionProperties().newJdbcTemplate().query(findNullableConstraintSql, params, new ColumnMapRowMapper()));
 				// If this query returns a row then the existence of that row indicates that a NOT NULL constraint exists
 				// on this Column and we must override whatever result was previously calculated and set it to false
 				if (queryResults != null && queryResults.size() > 0 && queryResults.get(0) != null && !queryResults.get(0).isEmpty()) {

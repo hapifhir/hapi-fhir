@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.expunge;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.expunge;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -97,7 +96,7 @@ public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, R
 			List<JpaPid> persistentIds = myData.getResourcePersistentIds(myIdHelperService);
 
 			if (persistentIds.isEmpty()) {
-				ourLog.info("Starting delete expunge work chunk.  Ther are no resources to delete expunge - Instance[{}] Chunk[{}]", myInstanceId, myChunkId);
+				ourLog.info("Starting delete expunge work chunk.  There are no resources to delete expunge - Instance[{}] Chunk[{}]", myInstanceId, myChunkId);
 				return null;
 			}
 

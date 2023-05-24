@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -59,26 +78,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.substring;
-
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 public class FhirTerser {
 
@@ -761,6 +760,76 @@ public class FhirTerser {
 			}
 		}
 
+		class CompartmentOwnerVisitor implements ICompartmentOwnerVisitor {
+
+			private final String myWantRef;
+
+			public boolean isFound() {
+				return myFound;
+			}
+
+			private boolean myFound;
+
+			public CompartmentOwnerVisitor(String theWantRef) {
+				myWantRef = theWantRef;
+			}
+
+			@Override
+			public boolean consume(IIdType theCompartmentOwner) {
+				if (myWantRef.equals(theCompartmentOwner.toUnqualifiedVersionless().getValue())) {
+					myFound = true;
+				}
+				return !myFound;
+			}
+		}
+
+		CompartmentOwnerVisitor consumer = new CompartmentOwnerVisitor(wantRef);
+		visitCompartmentOwnersForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames, consumer);
+		return consumer.isFound();
+	}
+
+
+	/**
+	 * Returns the owners of the compartment in <code>theSource</code> is in the compartment named <code>theCompartmentName</code>.
+	 *
+	 * @param theCompartmentName                 The name of the compartment
+	 * @param theSource                          The potential member of the compartment
+	 * @param theAdditionalCompartmentParamNames If provided, search param names provided here will be considered as included in the given compartment for this comparison.
+	 */
+	@Nonnull
+	public List<IIdType> getCompartmentOwnersForResource(String theCompartmentName, IBaseResource theSource, Set<String> theAdditionalCompartmentParamNames) {
+		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
+		Validate.notNull(theSource, "theSource must not be null");
+
+		class CompartmentOwnerVisitor implements ICompartmentOwnerVisitor {
+
+			private final Set<String> myOwnersAdded = new HashSet<>();
+			private final List<IIdType> myOwners = new ArrayList<>(2);
+
+			public List<IIdType> getOwners() {
+				return myOwners;
+			}
+
+			@Override
+			public boolean consume(IIdType theCompartmentOwner) {
+				if (myOwnersAdded.add(theCompartmentOwner.getValue())) {
+					myOwners.add(theCompartmentOwner);
+				}
+				return true;
+			}
+		}
+
+		CompartmentOwnerVisitor consumer = new CompartmentOwnerVisitor();
+		visitCompartmentOwnersForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames, consumer);
+		return consumer.getOwners();
+	}
+
+
+	private void visitCompartmentOwnersForResource(String theCompartmentName, IBaseResource theSource, Set<String> theAdditionalCompartmentParamNames, ICompartmentOwnerVisitor theConsumer) {
+		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
+		Validate.notNull(theSource, "theSource must not be null");
+
+		RuntimeResourceDefinition sourceDef = myContext.getResourceDefinition(theSource);
 		List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(theCompartmentName);
 
 		// If passed an additional set of searchparameter names, add them for comparison purposes.
@@ -777,7 +846,6 @@ public class FhirTerser {
 				params.addAll(additionalParams);
 			}
 		}
-
 
 		for (RuntimeSearchParam nextParam : params) {
 			for (String nextPath : nextParam.getPathsSplit()) {
@@ -800,22 +868,20 @@ public class FhirTerser {
 
 				List<IBaseReference> values = getValues(theSource, nextPath, IBaseReference.class);
 				for (IBaseReference nextValue : values) {
-					IIdType nextTargetId = nextValue.getReferenceElement();
-					String nextRef = nextTargetId.toUnqualifiedVersionless().getValue();
+					IIdType nextTargetId = nextValue.getReferenceElement().toUnqualifiedVersionless();
 
 					/*
 					 * If the reference isn't an explicit resource ID, but instead is just
 					 * a resource object, we'll calculate its ID and treat the target
 					 * as that.
 					 */
-					if (isBlank(nextRef) && nextValue.getResource() != null) {
+					if (isBlank(nextTargetId.getValue()) && nextValue.getResource() != null) {
 						IBaseResource nextTarget = nextValue.getResource();
 						nextTargetId = nextTarget.getIdElement().toUnqualifiedVersionless();
 						if (!nextTargetId.hasResourceType()) {
 							String resourceType = myContext.getResourceType(nextTarget);
 							nextTargetId.setParts(null, resourceType, nextTargetId.getIdPart(), null);
 						}
-						nextRef = nextTargetId.getValue();
 					}
 
 					if (isNotBlank(wantType)) {
@@ -825,14 +891,18 @@ public class FhirTerser {
 						}
 					}
 
-					if (wantRef.equals(nextRef)) {
-						return true;
+					if (isNotBlank(nextTargetId.getValue())) {
+						boolean shouldContinue = theConsumer.consume(nextTargetId);
+						if (!shouldContinue) {
+							return;
+						}
 					}
+
 				}
+
 			}
 		}
 
-		return false;
 	}
 
 	private void visit(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor2 theCallback, List<IBase> theContainingElementPath,
@@ -1377,7 +1447,6 @@ public class FhirTerser {
 		return value;
 	}
 
-
 	/**
 	 * Adds and returns a new element at the given path within the given structure. The paths used here
 	 * are <b>not FHIRPath expressions</b> but instead just simple dot-separated path expressions.
@@ -1407,7 +1476,6 @@ public class FhirTerser {
 
 		return value;
 	}
-
 
 	/**
 	 * This method has the same semantics as {@link #addElement(IBase, String, String)} but adds
@@ -1453,7 +1521,6 @@ public class FhirTerser {
 		return target;
 	}
 
-
 	public enum OptionsEnum {
 
 		/**
@@ -1467,6 +1534,17 @@ public class FhirTerser {
 		 * subsequent calls are made.
 		 */
 		STORE_AND_REUSE_RESULTS
+	}
+
+
+	@FunctionalInterface
+	private interface ICompartmentOwnerVisitor {
+
+		/**
+		 * @return Returns true if we should keep looking for more
+		 */
+		boolean consume(IIdType theCompartmentOwner);
+
 	}
 
 	public static class ContainedResources {

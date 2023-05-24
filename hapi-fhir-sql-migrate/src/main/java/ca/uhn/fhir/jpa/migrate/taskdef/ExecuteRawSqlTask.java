@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.apache.commons.lang3.Validate;
@@ -32,6 +31,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ExecuteRawSqlTask extends BaseTask {
 
@@ -49,7 +50,13 @@ public class ExecuteRawSqlTask extends BaseTask {
 		Validate.notBlank(theSql);
 
 		List<String> list = myDriverToSqls.computeIfAbsent(theDriverType, t -> new ArrayList<>());
-		list.add(theSql);
+		String sql = trim(theSql);
+
+		// Trim the semicolon at the end if one is present
+		while (sql.endsWith(";")) {
+			sql = sql.substring(0, sql.length() - 1);
+		}
+		list.add(sql);
 
 		return this;
 	}

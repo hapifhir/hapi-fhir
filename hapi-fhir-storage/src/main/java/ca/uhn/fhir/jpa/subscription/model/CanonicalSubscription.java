@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -61,6 +60,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	@JsonProperty("status")
 	private Subscription.SubscriptionStatus myStatus;
 	@JsonProperty("triggerDefinition")
+	@Deprecated
 	private CanonicalEventDefinition myTrigger;
 	@JsonProperty("emailDetails")
 	private EmailDetails myEmailDetails;
@@ -78,6 +78,12 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private boolean myCrossPartitionEnabled;
 	@JsonProperty("sendDeleteMessages")
 	private boolean mySendDeleteMessages;
+	@JsonProperty("isTopicSubscription")
+	private boolean myIsTopicSubscription;
+
+	@JsonProperty("myTopicSubscription")
+	private CanonicalTopicSubscription myTopicSubscription;
+
 	/**
 	 * Constructor
 	 */
@@ -93,10 +99,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		myPayloadSearchCriteria = thePayloadSearchCriteria;
 	}
 
-	/**
-	 * For now we're using the R4 TriggerDefinition, but this
-	 * may change in the future when things stabilize
-	 */
+	@Deprecated
 	public void addTrigger(CanonicalEventDefinition theTrigger) {
 		myTrigger = theTrigger;
 	}
@@ -250,10 +253,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		this.myCrossPartitionEnabled = myCrossPartitionEnabled;
 	}
 
-	/**
-	 * For now we're using the R4 triggerdefinition, but this
-	 * may change in the future when things stabilize
-	 */
+	@Deprecated
 	public CanonicalEventDefinition getTrigger() {
 		return myTrigger;
 	}
@@ -290,6 +290,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		b.append(myChannelExtensions, that.myChannelExtensions);
 		b.append(mySendDeleteMessages, that.mySendDeleteMessages);
 		b.append(myPayloadSearchCriteria, that.myPayloadSearchCriteria);
+		b.append(myTopicSubscription, that.myTopicSubscription);
 		return b.isEquals();
 	}
 
@@ -337,19 +338,76 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
+		ToStringBuilder stringBuilder = new ToStringBuilder(this)
 			.append("myIdElement", myIdElement)
 			.append("myStatus", myStatus)
-			.append("myCriteriaString", myCriteriaString)
-			.append("myEndpointUrl", myEndpointUrl)
-			.append("myPayloadString", myPayloadString)
+			.append("myCriteriaString", myCriteriaString);
+//			.append("myEndpointUrl", myEndpointUrl)
+//			.append("myPayloadString", myPayloadString)
 //			.append("myHeaders", myHeaders)
-			.append("myChannelType", myChannelType)
+//			.append("myChannelType", myChannelType)
 //			.append("myTrigger", myTrigger)
 //			.append("myEmailDetails", myEmailDetails)
 //			.append("myRestHookDetails", myRestHookDetails)
 //			.append("myChannelExtensions", myChannelExtensions)
-			.toString();
+		if (isTopicSubscription()) {
+			stringBuilder.append("topic", myTopicSubscription.getTopic());
+		} else {
+			stringBuilder.append("criteriaString", myCriteriaString);
+		}
+
+		return stringBuilder.toString();
+	}
+
+	public void setTopicSubscription(boolean theTopicSubscription) {
+		myIsTopicSubscription = theTopicSubscription;
+	}
+
+	public boolean isTopicSubscription() {
+		return myIsTopicSubscription;
+	}
+
+	// PayloadString is called ContentType in R5
+	public String getContentType() {
+		assert isTopicSubscription();
+		return getPayloadString();
+	}
+
+	public CanonicalTopicSubscription getTopicSubscription() {
+		assert isTopicSubscription();
+		if (myTopicSubscription == null) {
+			myTopicSubscription = new CanonicalTopicSubscription();
+		}
+		return myTopicSubscription;
+	}
+
+	public void setTopicSubscription(CanonicalTopicSubscription theTopicSubscription) {
+		myTopicSubscription = theTopicSubscription;
+	}
+
+	public org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent getContent() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getContent();
+	}
+
+	public String getTopic() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getTopic();
+	}
+
+	public List<CanonicalTopicSubscriptionFilter> getFilters() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getFilters();
+	}
+
+	public int getHeartbeatPeriod() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getHeartbeatPeriod();
+	}
+
+	public int getMaxCount() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getMaxCount();
 	}
 
 	public static class EmailDetails implements IModelJson {
@@ -460,11 +518,13 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	}
 
+	@Deprecated
 	public static class CanonicalEventDefinition implements IModelJson {
 
 		/**
 		 * Constructor
 		 */
+		@Deprecated
 		public CanonicalEventDefinition() {
 			// nothing yet
 		}

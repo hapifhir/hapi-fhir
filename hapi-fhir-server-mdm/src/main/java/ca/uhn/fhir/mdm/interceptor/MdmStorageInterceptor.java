@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -49,6 +48,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmStorageInterceptor.class);
+
+	// Used to bypass trying to remove mdm links associated to a resource when running mdm-clear batch job, which
+	// deletes all links beforehand, and impacts performance for no action
+	private static final ThreadLocal<Boolean> ourLinksDeletedBeforehand = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
 	@Autowired
 	private IExpungeEverythingService myExpungeEverythingService;
@@ -125,10 +128,13 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
 	public void deleteMdmLinks(RequestDetails theRequest, IBaseResource theResource) {
-		if (!myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
+		if (ourLinksDeletedBeforehand.get()) {
 			return;
 		}
-		myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
+
+		if (myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
+			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
+		}
 	}
 
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {
@@ -220,4 +226,13 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		ourLog.debug("Expunging MdmLink records with reference to {}", theResource.getIdElement());
 		theCounter.addAndGet(myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource));
 	}
+
+	public static void setLinksDeletedBeforehand() {
+		ourLinksDeletedBeforehand.set(Boolean.TRUE);
+	}
+
+	public static void resetLinksDeletedBeforehand() {
+		ourLinksDeletedBeforehand.remove();
+	}
+
 }

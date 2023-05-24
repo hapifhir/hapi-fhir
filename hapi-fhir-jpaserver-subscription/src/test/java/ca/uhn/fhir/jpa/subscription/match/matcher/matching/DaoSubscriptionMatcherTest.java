@@ -12,7 +12,9 @@ import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,8 @@ public class DaoSubscriptionMatcherTest {
 	private IValidationSupport myValidationSupport;
 	@MockBean
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+	@MockBean
+	private SubscriptionQueryValidator mySubscriptionQueryValidator;
 
 	/**
 	 * Make sure that if we're only running the {@link SubscriptionSubmitterConfig}, we don't need
@@ -82,6 +86,10 @@ public class DaoSubscriptionMatcherTest {
 			return mock(IRequestPartitionHelperSvc.class);
 		}
 
+		@Bean
+		public IEmailSender emailSender(){
+			return mock(IEmailSender.class);
+		}
 	}
 
 }

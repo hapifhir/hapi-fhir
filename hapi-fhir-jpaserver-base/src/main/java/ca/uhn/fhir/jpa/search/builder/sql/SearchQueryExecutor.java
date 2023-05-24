@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.sql;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,13 +17,16 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
@@ -33,11 +34,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.Arrays;
 
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
@@ -109,7 +112,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					 * Note that we use the spring managed connection, and the expectation is that a transaction that
 					 * is managed by Spring has been started before this method is called.
 					 */
-					assert TransactionSynchronizationManager.isSynchronizationActive();
+					HapiTransactionService.requireTransaction();
 
 					Query nativeQuery = myEntityManager.createNativeQuery(sql);
 					org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
@@ -117,12 +120,27 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 						hibernateQuery.setParameter(i, args[i - 1]);
 					}
 
-					ourLog.trace("About to execute SQL: {}", sql);
+					ourLog.trace("About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
 
+					/*
+					 * These settings help to ensure that we use a search cursor
+					 * as opposed to loading all search results into memory
+					 */
+					hibernateQuery.setFetchSize(500000);
+					hibernateQuery.setCacheable(false);
+					hibernateQuery.setCacheMode(CacheMode.IGNORE);
+					hibernateQuery.setReadOnly(true);
+
+					// This tells hibernate not to flush when we call scroll(), but rather to wait until the transaction commits and
+					// only flush then.  We need to do this so that any exceptions that happen in the transaction happen when
+					// we try to commit the transaction, and not here.
+					// See the test called testTransaction_multiThreaded (in FhirResourceDaoR4ConcurrentWriteTest) which triggers
+					// the following exception if we don't set this flush mode:
+					// java.util.concurrent.ExecutionException: org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only
+					hibernateQuery.setFlushMode(FlushModeType.COMMIT);
 					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 					myResultSet = new ScrollableResultsIterator<>(scrollableResults);
 					myQueryInitialized = true;
-
 				}
 
 				if (myResultSet == null || !myResultSet.hasNext()) {
@@ -135,7 +153,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 			} catch (Exception e) {
 				ourLog.error("Failed to create or execute SQL query", e);
 				close();
-				throw new InternalErrorException(Msg.code(1262) + e);
+				throw new InternalErrorException(Msg.code(1262) + e, e);
 			}
 		}
 	}

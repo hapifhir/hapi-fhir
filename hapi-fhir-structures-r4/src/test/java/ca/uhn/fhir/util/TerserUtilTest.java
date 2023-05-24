@@ -468,6 +468,17 @@ class TerserUtilTest {
 		assertEquals(1, p2.getName().size());
 		assertEquals("Doe", p2.getName().get(0).getFamily());
 	}
+		@Test
+	public void testReplaceFieldByEmptyValue() {
+		Patient p1 = new Patient();
+		Patient p2 = new Patient();
+		p2.setActive(true);
+
+		TerserUtil.replaceField(ourFhirContext, "active", p1, p2);
+
+		// expect p2 to have 'active removed'
+		assertFalse(p2.hasActive());
+	}
 
 	@Test
 	public void testReplaceFieldsByPredicate() {

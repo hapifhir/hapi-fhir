@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
@@ -161,10 +160,8 @@ public class DropIndexTask extends BaseTableTask {
 			@Language("SQL") String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
 			findAndDropConstraint(findConstraintSql, dropConstraintSql);
 		} else if (getDriverType() == DriverTypeEnum.ORACLE_12C) {
-			@Language("SQL") String findConstraintSql = "SELECT DISTINCT constraint_name FROM user_cons_columns WHERE constraint_name = ? AND table_name = ?";
+			@Language("SQL") String findConstraintSql = "SELECT constraint_name FROM user_constraints WHERE constraint_name = ? AND table_name = ?";
 			@Language("SQL") String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
-			findAndDropConstraint(findConstraintSql, dropConstraintSql);
-			findConstraintSql = "SELECT DISTINCT constraint_name FROM all_constraints WHERE index_name = ? AND table_name = ?";
 			findAndDropConstraint(findConstraintSql, dropConstraintSql);
 		} else if (getDriverType() == DriverTypeEnum.MSSQL_2012) {
 			// Legacy deletion for SQL Server unique indexes

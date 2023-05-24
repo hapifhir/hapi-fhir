@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.binary.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,37 +17,47 @@ package ca.uhn.fhir.jpa.binary.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.svc;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteStreams;
 import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	public static long DEFAULT_MAXIMUM_BINARY_SIZE = Long.MAX_VALUE - 1;
+	public static String BLOB_ID_PREFIX_APPLIED = "blob-id-prefix-applied";
 
 	private final SecureRandom myRandom;
 	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -59,6 +67,9 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 
 	public BaseBinaryStorageSvcImpl() {
 		myRandom = new SecureRandom();
@@ -95,6 +106,14 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		return b.toString();
 	}
 
+	/**
+	 * Default implementation is to return true for any Blob ID.
+	 */
+	@Override
+	public boolean isValidBlobId(String theNewBlobId) {
+		return true;
+	}
+
 	@Override
 	public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
 		return theSize >= getMinimumBinarySize();
@@ -122,12 +141,52 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		};
 	}
 
+	@Deprecated(since = "6.6.0 - Maintained for interface backwards compatibility. Note that invokes interceptor pointcut with empty parameters", forRemoval = true)
 	protected String provideIdForNewBlob(String theBlobIdOrNull) {
-		String id = theBlobIdOrNull;
-		if (isBlank(theBlobIdOrNull)) {
-			id = newBlobId();
+		return isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId();
+	}
+
+	@Nonnull
+	protected String provideIdForNewBlob(String theBlobIdOrNull, byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
+		String blobId = isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId();
+
+		// make sure another pointcut didn't already apply a prefix to the blobId
+		if (isBlobIdPrefixApplied(theRequestDetails)) {
+			return blobId;
 		}
-		return id;
+
+		String blobPrefixFromHooksOrNull = callBlobIdPointcut(theBytes, theRequestDetails, theContentType);
+		String blobIdPrefixFromHooks = blobPrefixFromHooksOrNull == null ? "" : blobPrefixFromHooksOrNull;
+		return blobIdPrefixFromHooks + blobId;
+	}
+
+	protected boolean isBlobIdPrefixApplied(RequestDetails theRequestDetails) {
+		return theRequestDetails.getUserData().get(BLOB_ID_PREFIX_APPLIED) == Boolean.TRUE;
+	}
+
+	public static void setBlobIdPrefixApplied(RequestDetails theRequestDetails) {
+		theRequestDetails.getUserData().put(BLOB_ID_PREFIX_APPLIED, true);
+	}
+
+	/**
+	 * Invokes STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX pointcut if present
+	 * @return null if pointcut is not present
+	 */
+	@Nullable
+	private String callBlobIdPointcut(byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
+		// Interceptor call: STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX
+		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext)
+			.setContent(theBytes)
+			.setContentType(theContentType);
+
+		HookParams hookParams = new HookParams()
+			.add(RequestDetails.class, theRequestDetails)
+			.add(IBaseResource.class, binary);
+
+		setBlobIdPrefixApplied(theRequestDetails);
+
+		return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
+			myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, hookParams);
 	}
 
 	@Override
@@ -153,8 +212,18 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
 			.filter(t -> t.getValue() instanceof IPrimitiveType)
 			.map(t -> (IPrimitiveType<String>) t.getValue())
-			.map(t -> t.getValue())
-			.filter(t -> isNotBlank(t))
+			.map(IPrimitiveType::getValue)
+			.filter(StringUtils::isNotBlank)
 			.findFirst();
+	}
+
+	@VisibleForTesting
+	public void setInterceptorBroadcasterForTests(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	@VisibleForTesting
+	public void setFhirContextForTests(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
 	}
 }

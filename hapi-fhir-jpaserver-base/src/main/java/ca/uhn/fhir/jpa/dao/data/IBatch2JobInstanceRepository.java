@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.data;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -35,8 +34,8 @@ import java.util.Set;
 public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobInstanceEntity, String>, IHapiFhirJpaRepository {
 
 	@Modifying
-	@Query("UPDATE Batch2JobInstanceEntity e SET e.myStatus = :status WHERE e.myId = :id and e.myStatus <> :status")
-	int updateInstanceStatus(@Param("id") String theInstanceId, @Param("status") StatusEnum theStatus);
+	@Query("UPDATE Batch2JobInstanceEntity e SET e.myStatus = :status WHERE e.myId = :id and e.myStatus IN ( :prior_states )")
+	int updateInstanceStatusIfIn(@Param("id") String theInstanceId, @Param("status") StatusEnum theNewState, @Param("prior_states") Set<StatusEnum> thePriorStates);
 
 	@Modifying
 	@Query("UPDATE Batch2JobInstanceEntity e SET e.myUpdateTime = :updated WHERE e.myId = :id")
@@ -63,6 +62,17 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 		@Param("defId") String theDefinitionId,
 		@Param("params") String theParams,
 		Pageable thePageable
+	);
+
+	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myStatus = :status")
+	List<Batch2JobInstanceEntity> findInstancesByJobStatus(
+		@Param("status") StatusEnum theState,
+		Pageable thePageable
+	);
+
+	@Query("SELECT count(b) from Batch2JobInstanceEntity b WHERE b.myStatus = :status")
+	Integer findTotalJobsOfStatus(
+		@Param("status") StatusEnum theState
 	);
 
 	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats ) AND b.myEndTime < :cutoff")

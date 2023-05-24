@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4697
+title: "Added DSTU3 and R4 support for the FHIR Clinical Reasoning module operations ActivityDefinition/$apply and PlanDefinition/$apply.
+$apply allows for general workflow processing and is used in clinical decision support, prior authorization, quality reporting, and disease surveillance use cases."

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.parser;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IMutator;
@@ -26,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
@@ -146,6 +146,10 @@ class ParserState<T> {
 
 	boolean isPreResource() {
 		return myState.isPreResource();
+	}
+
+	boolean isToplevelResourceElement() {
+		return myState instanceof ParserState.ResourceStateHl7Org || myState instanceof ParserState.ResourceStateHapi;
 	}
 
 	private Object newContainedDt(IResource theTarget) {
@@ -584,10 +588,19 @@ class ParserState<T> {
 				return;
 			}
 
-			if ((child.getMax() == 0 || child.getMax() == 1) && !myParsedNonRepeatableNames.add(theChildName)) {
-				myErrorHandler.unexpectedRepeatingElement(null, theChildName);
-				push(new SwallowChildrenWholeState(getPreResourceState()));
-				return;
+			if ((child.getMax() == 0 || child.getMax() == 1)) {
+				String nameToCheck;
+				if (child instanceof RuntimeChildChoiceDefinition) {
+					RuntimeChildChoiceDefinition choiceChild = (RuntimeChildChoiceDefinition) child;
+					nameToCheck = choiceChild.getField().getName();
+				} else {
+					nameToCheck = theChildName;
+				}
+				if(!myParsedNonRepeatableNames.add(nameToCheck)) {
+					myErrorHandler.unexpectedRepeatingElement(null, nameToCheck);
+					push(new SwallowChildrenWholeState(getPreResourceState()));
+					return;
+				}
 			}
 
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);

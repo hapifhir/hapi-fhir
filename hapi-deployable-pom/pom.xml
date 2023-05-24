@@ -5,7 +5,8 @@
 	<parent>
 		 <groupId>ca.uhn.hapi.fhir</groupId>
 		 <artifactId>hapi-fhir</artifactId>
-		 <version>6.5.4-SNAPSHOT</version>
+		 <version>6.7.3-SNAPSHOT</version>
+
 		 <relativePath>../pom.xml</relativePath>
 	 </parent>
 
@@ -213,6 +214,7 @@
 								</goals>
 								<phase>process-sources</phase>
 								<configuration>
+									<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
 									<licenseName>apache_v2</licenseName>
 									<canUpdateDescription>true</canUpdateDescription>
 									<canUpdateCopyright>true</canUpdateCopyright>

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -116,6 +115,12 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		}
 
 		IBaseResource resourceToUpdate = getStorageResourceParser().toResource(entityToUpdate, false);
+		if (resourceToUpdate == null) {
+			// If this is null, we are presumably in a FHIR transaction bundle with both a create and a patch on the same
+			// resource. This is weird but not impossible.
+			resourceToUpdate = theTransactionDetails.getResolvedResource(resourceId);
+		}
+
 		IBaseResource destination;
 		switch (thePatchType) {
 			case JSON_PATCH:

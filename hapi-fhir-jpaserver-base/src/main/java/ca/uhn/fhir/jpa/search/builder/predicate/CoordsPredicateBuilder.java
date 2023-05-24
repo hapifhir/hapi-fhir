@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
@@ -28,16 +27,11 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.Location;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.SpecialParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hibernate.search.engine.spatial.GeoBoundingBox;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
@@ -54,6 +48,13 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		myColumnLongitude = getTable().addColumn("SP_LONGITUDE");
 	}
 
+	public DbColumn getColumnLatitude() {
+		return myColumnLatitude;
+	}
+
+	public DbColumn getColumnLongitude() {
+		return myColumnLongitude;
+	}
 
 	public Condition createPredicateCoords(SearchParameterMap theParams,
 														IQueryParameterType theParam,
@@ -61,47 +62,11 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 														RuntimeSearchParam theSearchParam,
 														CoordsPredicateBuilder theFrom,
 														RequestPartitionId theRequestPartitionId) {
-		String latitudeValue;
-		String longitudeValue;
-		double distanceKm = 0.0;
 
-		if (theParam instanceof TokenParam) { // DSTU3
-			TokenParam param = (TokenParam) theParam;
-			String value = param.getValue();
-			String[] parts = value.split(":");
-			if (parts.length != 2) {
-				throw new IllegalArgumentException(Msg.code(1228) + "Invalid position format '" + value + "'.  Required format is 'latitude:longitude'");
-			}
-			latitudeValue = parts[0];
-			longitudeValue = parts[1];
-			if (isBlank(latitudeValue) || isBlank(longitudeValue)) {
-				throw new IllegalArgumentException(Msg.code(1229) + "Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
-			}
-			QuantityParam distanceParam = theParams.getNearDistanceParam();
-			if (distanceParam != null) {
-				distanceKm = distanceParam.getValue().doubleValue();
-			}
-		} else if (theParam instanceof SpecialParam) { // R4
-			SpecialParam param = (SpecialParam) theParam;
-			String value = param.getValue();
-			String[] parts = value.split("\\|");
-			if (parts.length < 2 || parts.length > 4) {
-				throw new IllegalArgumentException(Msg.code(1230) + "Invalid position format '" + value + "'.  Required format is 'latitude|longitude' or 'latitude|longitude|distance' or 'latitude|longitude|distance|units'");
-			}
-			latitudeValue = parts[0];
-			longitudeValue = parts[1];
-			if (isBlank(latitudeValue) || isBlank(longitudeValue)) {
-				throw new IllegalArgumentException(Msg.code(1231) + "Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
-			}
-			if (parts.length >= 3) {
-				String distanceString = parts[2];
-				if (!isBlank(distanceString)) {
-					distanceKm = Double.parseDouble(distanceString);
-				}
-			}
-		} else {
-			throw new IllegalArgumentException(Msg.code(1232) + "Invalid position type: " + theParam.getClass());
-		}
+		ParsedLocationParam params = ParsedLocationParam.from(theParams, theParam);
+		double distanceKm = params.getDistanceKm();
+		double latitudeValue = params.getLatitudeValue();
+		double longitudeValue = params.getLongitudeValue();
 
 		Condition latitudePredicate;
 		Condition longitudePredicate;
@@ -113,10 +78,7 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		} else if (distanceKm > CoordCalculator.MAX_SUPPORTED_DISTANCE_KM) {
 			throw new IllegalArgumentException(Msg.code(1234) + "Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be <= " + CoordCalculator.MAX_SUPPORTED_DISTANCE_KM);
 		} else {
-			double latitudeDegrees = Double.parseDouble(latitudeValue);
-			double longitudeDegrees = Double.parseDouble(longitudeValue);
-
-			GeoBoundingBox box = CoordCalculator.getBox(latitudeDegrees, longitudeDegrees, distanceKm);
+			GeoBoundingBox box = CoordCalculator.getBox(latitudeValue, longitudeValue, distanceKm);
 			latitudePredicate = theFrom.createLatitudePredicateFromBox(box);
 			longitudePredicate = theFrom.createLongitudePredicateFromBox(box);
 		}
@@ -125,11 +87,11 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	}
 
 
-	public Condition createPredicateLatitudeExact(String theLatitudeValue) {
+	public Condition createPredicateLatitudeExact(double theLatitudeValue) {
 		return BinaryCondition.equalTo(myColumnLatitude, generatePlaceholder(theLatitudeValue));
 	}
 
-	public Condition createPredicateLongitudeExact(String theLongitudeValue) {
+	public Condition createPredicateLongitudeExact(double theLongitudeValue) {
 		return BinaryCondition.equalTo(myColumnLongitude, generatePlaceholder(theLongitudeValue));
 	}
 

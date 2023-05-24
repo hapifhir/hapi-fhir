@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -26,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -44,10 +44,11 @@ import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
+@SuppressWarnings("SqlDialectInspection")
 @Entity
 @Immutable
 @Subselect("SELECT h.pid               as pid,            " +
-	"               h.res_id            as res_id,         " +
+	"               r.res_id            as res_id,         " +
 	"               h.res_type          as res_type,       " +
 	"               h.res_version       as res_version,    " + // FHIR version
 	"               h.res_ver           as res_ver,        " + // resource version
@@ -84,7 +85,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	private Long myResourceVersion;
 	@Column(name = "PROV_REQUEST_ID", length = Constants.REQUEST_ID_LENGTH)
 	private String myProvenanceRequestId;
-	@Column(name = "PROV_SOURCE_URI", length = ResourceHistoryProvenanceEntity.SOURCE_URI_LENGTH)
+	@Column(name = "PROV_SOURCE_URI", length = ResourceHistoryTable.SOURCE_URI_LENGTH)
 	private String myProvenanceSourceUri;
 	@Column(name = "HAS_TAGS")
 	private boolean myHasTags;

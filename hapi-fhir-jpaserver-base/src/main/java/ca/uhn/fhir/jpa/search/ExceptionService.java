@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;

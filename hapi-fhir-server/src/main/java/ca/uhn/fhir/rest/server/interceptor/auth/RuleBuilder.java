@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -837,6 +836,16 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				return new RuleBuilderBulkExportWithTarget(rule);
 			}
 
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId) {
+				RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+				rule.setAppliesToPatientExport(theFocusResourceId);
+				rule.setMode(myRuleMode);
+				myRules.add(rule);
+
+				return new RuleBuilderBulkExportWithTarget(rule);
+			}
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnGroup(@Nonnull String theFocusResourceId) {
 				RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);

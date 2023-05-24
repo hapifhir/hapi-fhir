@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -153,7 +152,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 
 		if (retVal.size() == 1) {
 			T pid = retVal.iterator().next();
-			theTransactionDetails.addResolvedMatchUrl(matchUrl, pid);
+			theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, pid);
 			if (myStorageSettings.isMatchUrlCacheEnabled()) {
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
 			}
@@ -217,10 +216,15 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		Validate.notBlank(theMatchUrl);
 		Validate.notNull(theResourcePersistentId);
 		String matchUrl = massageForStorage(theResourceType, theMatchUrl);
-		theTransactionDetails.addResolvedMatchUrl(matchUrl, theResourcePersistentId);
+		theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, theResourcePersistentId);
 		if (myStorageSettings.isMatchUrlCacheEnabled()) {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, theResourcePersistentId);
 		}
 	}
 
+	public void unresolveMatchUrl(TransactionDetails theTransactionDetails, String theResourceType, String theMatchUrl) {
+		Validate.notBlank(theMatchUrl);
+		String matchUrl = massageForStorage(theResourceType, theMatchUrl);
+		theTransactionDetails.removeResolvedMatchUrl(matchUrl);
+	}
 }

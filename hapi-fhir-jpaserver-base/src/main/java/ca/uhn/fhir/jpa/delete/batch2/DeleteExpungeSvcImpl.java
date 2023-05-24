@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.delete.batch2;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.delete.batch2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.delete.batch2;
 
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -70,7 +69,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	 * This method clears the Hibernate Search index for the given resources.
 	 */
 	private void clearHibernateSearchIndex(List<JpaPid> thePersistentIds) {
-		if (myFullTextSearchSvc != null) {
+		if (myFullTextSearchSvc != null && !myFullTextSearchSvc.isDisabled()) {
 			List<Object> objectIds = thePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
 			myFullTextSearchSvc.deleteIndexedDocumentsByTypeAndId(ResourceTable.class, objectIds);
 			ourLog.info("Cleared Hibernate Search indexes.");

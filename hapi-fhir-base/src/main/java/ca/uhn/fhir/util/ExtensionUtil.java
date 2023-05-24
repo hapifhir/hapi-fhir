@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,16 +17,22 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -169,6 +173,25 @@ public class ExtensionUtil {
 	}
 
 	/**
+	 * Given a resource or other structure that can have direct extensions,
+	 * pulls out any extensions that have the given theExtensionUrl and a primitive value type,
+	 * and returns a list of the string version of the extension values.
+	 */
+	public static List<String> getExtensionPrimitiveValues(IBaseHasExtensions theBase, String theExtensionUrl) {
+		List<String> values = theBase
+			.getExtension()
+			.stream()
+			.filter(t -> theExtensionUrl.equals(t.getUrl()))
+			.filter(t -> t.getValue() instanceof IPrimitiveType<?>)
+			.map(t->(IPrimitiveType<?>)t.getValue())
+			.map(IPrimitiveType::getValueAsString)
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toList());
+		return values;
+	}
+
+
+	/**
 	 * Gets all extensions that match the specified filter predicate
 	 *
 	 * @param theBase   The resource to get the extension for
@@ -290,5 +313,33 @@ public class ExtensionUtil {
 	 */
 	public static boolean equals(IBaseExtension<?,?> theLeftExtension, IBaseExtension<?,?> theRightExtension) {
 		return TerserUtil.equals(theLeftExtension, theRightExtension);
+	}
+
+	/**
+	 * Given an extension, looks for the first child extension with the given URL of {@literal theChildExtensionUrl}
+	 * and a primitive datatype value, and returns the String version of that value. E.g. if the
+	 * value is a FHIR boolean, it would return the string "true" or "false. If the extension
+	 * has no value, or the value is not a primitive datatype, or the URL is not found, the method
+	 * will return {@literal null}.
+	 *
+	 * @param theExtension The parent extension. Must not be null.
+	 * @param theChildExtensionUrl The child extension URL. Must not be null or blank.
+	 * @since 6.6.0
+	 */
+	public static <D, T extends IBaseExtension<T, D>> String extractChildPrimitiveExtensionValue(@Nonnull IBaseExtension<T, D> theExtension, @Nonnull String theChildExtensionUrl) {
+		Validate.notNull(theExtension, "theExtension must not be null");
+		Validate.notBlank(theChildExtensionUrl, "theChildExtensionUrl must not be null or blank");
+
+		Optional<T> codeExtension = theExtension
+			.getExtension()
+			.stream()
+			.filter(t -> theChildExtensionUrl.equals(t.getUrl()))
+			.findFirst();
+		String retVal = null;
+		if (codeExtension.isPresent() && codeExtension.get().getValue() instanceof IPrimitiveType) {
+			IPrimitiveType<?> codeValue = (IPrimitiveType<?>) codeExtension.get().getValue();
+			retVal = codeValue.getValueAsString();
+		}
+		return retVal;
 	}
 }

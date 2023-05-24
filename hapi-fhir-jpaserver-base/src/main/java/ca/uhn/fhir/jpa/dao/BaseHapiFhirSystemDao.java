@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -15,6 +34,7 @@ import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -36,6 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
@@ -50,26 +71,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-/*
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseStorageDao implements IFhirSystemDao<T, MT> {
 
@@ -169,7 +170,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	@Override
-	public <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds) {
+	public <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds, boolean thePreFetchIndexes) {
 		HapiTransactionService.requireTransaction();
 		List<Long> pids = theResolvedIds
 			.stream()
@@ -195,47 +196,49 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 				List<Long> entityIds;
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsStringPopulated()).map(t -> t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "string", "myParamsString", null);
-				}
+				if (thePreFetchIndexes) {
+					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsStringPopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "string", "myParamsString", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsTokenPopulated()).map(t -> t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "token", "myParamsToken", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsTokenPopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "token", "myParamsToken", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).map(t -> t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "date", "myParamsDate", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsDatePopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "date", "myParamsDate", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsQuantityPopulated()).map(t -> t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "quantity", "myParamsQuantity", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsQuantityPopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "quantity", "myParamsQuantity", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasLinks()).map(t -> t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isHasLinks).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasTags()).map(t -> t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					myResourceTagDao.findByResourceIds(entityIds);
-					preFetchIndexes(entityIds, "tags", "myTags", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(BaseHasResource::isHasTags).map(ResourceTable::getId).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						myResourceTagDao.findByResourceIds(entityIds);
+						preFetchIndexes(entityIds, "tags", "myTags", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().map(t->t.getId()).collect(Collectors.toList());
-				if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
-					preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
+					entityIds = loadedResourceTableEntries.stream().map(ResourceTable::getId).collect(Collectors.toList());
+					if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
+						preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
+					}
 				}
 
 				new QueryChunker<ResourceTable>().chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {
 
 					Map<Long, ResourceTable> entities = entries
 						.stream()
-						.collect(Collectors.toMap(t -> t.getId(), t -> t));
+						.collect(Collectors.toMap(ResourceTable::getId, t -> t));
 
 					CriteriaBuilder b = myEntityManager.getCriteriaBuilder();
 					CriteriaQuery<ResourceHistoryTable> q = b.createQuery(ResourceHistoryTable.class);

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.svc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,13 +17,14 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
@@ -83,8 +82,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		IResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
 		IResourcePersistentId sourceResourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
-		// check if the golden resource and the source resource are in the same partition, throw error if not
-		myMdmPartitionHelper.validateResourcesInSamePartition(theGoldenResource, theSourceResource);
+		// check if the golden resource and the source resource are in the same partition if cross partition mdm is not allowed, throw error if not
+		myMdmPartitionHelper.validateMdmResourcesPartitionMatches(theGoldenResource, theSourceResource);
 
 		Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, sourceResourceId);
 		if (optionalMdmLink.isEmpty()) {
@@ -119,8 +118,11 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmContext.getResourceType());
 		if (theMatchResult == MdmMatchResultEnum.NO_MATCH) {
-			// Need to find a new Golden Resource to link this target to
-			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(theSourceResource, theMdmContext);
+			// We need to return no match for when a Golden Resource has already been found elsewhere
+			if (myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH).isEmpty()) {
+				// Need to find a new Golden Resource to link this target to
+				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(theSourceResource, theMdmContext);
+			}
 		}
 		return theGoldenResource;
 	}
