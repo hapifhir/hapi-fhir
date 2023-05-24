@@ -50,6 +50,7 @@ public class DeleteExpungeProvider {
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, typeName = "string", min = 1) List<IPrimitiveType<String>> theUrlsToDeleteExpunge,
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theBatchSize,
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_CASCADE, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theCascade,
+		@OperationParam(name = ProviderConstants.OPERATION_DELETE_CASCADE_MAX_ROUNDS, typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theCascadeMaxRounds,
 		RequestDetails theRequestDetails
 	) {
 		if (theUrlsToDeleteExpunge == null) {
@@ -70,7 +71,12 @@ public class DeleteExpungeProvider {
 			cascase = theCascade.getValue();
 		}
 
-		String jobId = myDeleteExpungeJobSubmitter.submitJob(batchSize, urls, cascase, theRequestDetails);
+		Integer cascadeMaxRounds = null;
+		if (theCascadeMaxRounds != null) {
+			cascadeMaxRounds = theCascadeMaxRounds.getValue();
+		}
+
+		String jobId = myDeleteExpungeJobSubmitter.submitJob(batchSize, urls, cascase, cascadeMaxRounds, theRequestDetails);
 
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersString(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobId);

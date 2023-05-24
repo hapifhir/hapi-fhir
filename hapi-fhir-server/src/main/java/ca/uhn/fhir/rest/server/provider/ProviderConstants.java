@@ -165,6 +165,10 @@ public class ProviderConstants {
 	 * Should we cascade the $delete-expunge operation
 	 */
 	public static final String OPERATION_DELETE_CASCADE = "cascade";
+	/**
+	 * How many rounds for the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_CASCADE_MAX_ROUNDS = "cascadeMaxRounds";
 
 	/**
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation

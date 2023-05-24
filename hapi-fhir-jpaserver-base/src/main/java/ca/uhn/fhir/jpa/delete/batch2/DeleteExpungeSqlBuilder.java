@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -89,10 +90,22 @@ public class DeleteExpungeSqlBuilder {
 		}
 
 		if (theCascade) {
-			for (ResourceLink next : conflictResourceLinks) {
-				thePids.add(next.getSourceResourcePid());
+			while (true) {
+				List<JpaPid> addedThisRound = new ArrayList<>();
+				for (ResourceLink next : conflictResourceLinks) {
+					Long nextPid = next.getSourceResourcePid();
+					if (thePids.add(nextPid)) {
+						addedThisRound.add(JpaPid.fromId(nextPid));
+					}
+				}
+
+				if (addedThisRound.isEmpty()) {
+					return;
+				}
+
+				conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
+				findResourceLinksWithTargetPidIn(addedThisRound, addedThisRound, conflictResourceLinks);
 			}
-			return;
 		}
 
 		ResourceLink firstConflict = conflictResourceLinks.get(0);

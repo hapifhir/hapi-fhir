@@ -112,6 +112,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCascade() {
+		// Setup
+
 		IIdType p1 = createPatient(withActiveTrue());
 		IIdType o1 = createObservation(withSubject(p1));
 		IIdType p2 = createPatient(withActiveTrue());
@@ -141,6 +143,40 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		assertNotGone(o2);
 	}
 
+
+	@Test
+	public void testCascade_MultiLevel() {
+		// Setup
+
+		// Create a chain of dependent references
+		IIdType p1 = createPatient(withActiveTrue());
+		IIdType o1 = createObservation(withSubject(p1));
+		IIdType o1b = createObservation(withReference("hasMember", o1));
+		IIdType o1c = createObservation(withReference("hasMember", o1b));
+
+		// validate precondition
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+
+		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
+		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
+		jobParameters.setCascade(true);
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setParameters(jobParameters);
+		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
+
+		// execute
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+
+		// Validate
+		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
+		assertEquals(4, outcome.getCombinedRecordsProcessed());
+		assertDoesntExist(p1);
+		assertDoesntExist(o1);
+		assertDoesntExist(o1b);
+		assertDoesntExist(o1c);
+	}
 
 	@Test
 	public void testInvalidParams_NoSearchParams() {

@@ -25,6 +25,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DeleteExpungeJobParameters extends PartitionedUrlListJobParameters {
 	@JsonProperty("cascade")
 	private boolean myCascade;
+	@JsonProperty("cascadeMaxRounds")
+	private Integer myCascadeMaxRounds;
+
+	public Integer getCascadeMaxRounds() {
+		return myCascadeMaxRounds;
+	}
+
+	public void setCascadeMaxRounds(Integer theCascadeMaxRounds) {
+		myCascadeMaxRounds = theCascadeMaxRounds;
+	}
 
 	public boolean isCascade() {
 		return myCascade;
