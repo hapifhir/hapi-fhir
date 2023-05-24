@@ -20,7 +20,7 @@
 	<properties>
 		<org.antlr-version>4.10.1</org.antlr-version>
 		<org.codelibs.xpp3-version>1.1.4c.0</org.codelibs.xpp3-version>
-		<spring-security-core.version>5.7.5</spring-security-core.version>
+		<spring-security-core.version>5.7.8</spring-security-core.version>
 	</properties>
 
 

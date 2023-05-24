@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public class H2EmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private String myUrl;
 
-	public H2EmbeddedDatabase(){
+	public H2EmbeddedDatabase() {
 		deleteDatabaseDirectoryIfExists();
 		String databasePath = DATABASE_DIRECTORY + SCHEMA_NAME;
 		myUrl = "jdbc:h2:" + new File(databasePath).getAbsolutePath();
@@ -51,6 +52,17 @@ public class H2EmbeddedDatabase extends JpaEmbeddedDatabase {
 	@Override
 	public void stop() {
 		deleteDatabaseDirectoryIfExists();
+	}
+
+
+	@Override
+	public void disableConstraints() {
+		getJdbcTemplate().execute("SET REFERENTIAL_INTEGRITY = FALSE");
+	}
+
+	@Override
+	public void enableConstraints() {
+		getJdbcTemplate().execute("SET REFERENTIAL_INTEGRITY = TRUE");
 	}
 
 	@Override
@@ -71,18 +83,22 @@ public class H2EmbeddedDatabase extends JpaEmbeddedDatabase {
 	}
 
 	private void dropTables() {
-		List<Map<String, Object>> tableResult = getJdbcTemplate().queryForList("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA = 'PUBLIC'");
-		for(Map<String, Object> result : tableResult){
+		List<String> sql = new ArrayList<>();
+		List<Map<String, Object>> tableResult = query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA = 'PUBLIC'");
+		for (Map<String, Object> result : tableResult) {
 			String tableName = result.get("TABLE_NAME").toString();
-			getJdbcTemplate().execute(String.format("DROP TABLE %s CASCADE", tableName));
+			sql.add(String.format("DROP TABLE %s CASCADE", tableName));
 		}
+		executeSqlAsBatch(sql);
 	}
 
 	private void dropSequences() {
-		List<Map<String, Object>> sequenceResult = getJdbcTemplate().queryForList("SELECT * FROM information_schema.sequences WHERE SEQUENCE_SCHEMA = 'PUBLIC'");
-		for(Map<String, Object> sequence : sequenceResult){
+		List<String> sql = new ArrayList<>();
+		List<Map<String, Object>> sequenceResult = query("SELECT * FROM information_schema.sequences WHERE SEQUENCE_SCHEMA = 'PUBLIC'");
+		for (Map<String, Object> sequence : sequenceResult) {
 			String sequenceName = sequence.get("SEQUENCE_NAME").toString();
-			getJdbcTemplate().execute(String.format("DROP SEQUENCE %s", sequenceName));
+			sql.add(String.format("DROP SEQUENCE %s", sequenceName));
 		}
+		executeSqlAsBatch(sql);
 	}
 }
