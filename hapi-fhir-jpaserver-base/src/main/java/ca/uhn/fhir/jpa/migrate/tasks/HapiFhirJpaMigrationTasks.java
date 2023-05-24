@@ -121,11 +121,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(false)
 			.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID", "TAG_VERSION", "TAG_USER_SELECTED");
 
+		// This migration is failing in Oracle because there is already an index created on column RES_VER_PID since it is a primary key.
+		// IDX_RESVERPROV_RESVER_PID is removed in 20230523.1
 		version
 			.onTable("HFJ_RES_VER_PROV")
 			.addIndex("20230510.1", "IDX_RESVERPROV_RESVER_PID")
 			.unique(false)
-			.withColumns("RES_VER_PID");
+			.withColumns("RES_VER_PID")
+			.failureAllowed();
 
 		version
 			.onTable("HFJ_RES_VER_PROV")
@@ -149,6 +152,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addForeignKey("20230510.6", "FK_RESVERPROV_RES_PID")
 			.toColumn("RES_PID")
 			.references("HFJ_RESOURCE", "RES_ID");
+
+		version
+			.onTable("HFJ_RES_VER_PROV")
+			.dropIndex("20230523.1", "IDX_RESVERPROV_RESVER_PID");
 
 		// add warning message to batch job instance
 		version
