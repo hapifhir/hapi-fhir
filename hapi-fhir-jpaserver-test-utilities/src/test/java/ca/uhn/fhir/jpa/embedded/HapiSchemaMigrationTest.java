@@ -9,7 +9,10 @@ import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.VersionEnum;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -17,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Properties;
 
@@ -63,14 +67,34 @@ public class HapiSchemaMigrationTest {
 		int lastVersion = allVersions.length - 1;
 		VersionEnum to = allVersions[lastVersion];
 
-		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.EMPTY_SET).getTaskList(from, to);
+		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getTaskList(from, to);
 		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(theDriverType);
-		assertTrue(schemaMigrator.createMigrationTableIfRequired());
+		schemaMigrator.createMigrationTableIfRequired();
 		schemaMigrator.migrate();
-
-		// Subsequent calls should not create the migration table
-		assertFalse(schemaMigrator.createMigrationTableIfRequired());
-		assertFalse(schemaMigrator.createMigrationTableIfRequired());
 	}
+
+
+	@Test
+	public void testCreateMigrationTableIfRequired() throws SQLException {
+		// Setup
+		BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setUrl("jdbc:h2:mem:no-tables");
+		dataSource.setUsername("SA");
+		dataSource.setPassword("SA");
+		dataSource.start();
+
+		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getTaskList(VersionEnum.V6_0_0, VersionEnum.V6_4_0);
+		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, DriverTypeEnum.H2_EMBEDDED, HAPI_FHIR_MIGRATION_TABLENAME);
+		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
+		schemaMigrator.setDriverType(DriverTypeEnum.H2_EMBEDDED);
+
+		// Test & Validate
+		assertTrue(schemaMigrator.createMigrationTableIfRequired());
+		assertFalse(schemaMigrator.createMigrationTableIfRequired());
+		assertFalse(schemaMigrator.createMigrationTableIfRequired());
+
+	}
+
 }
