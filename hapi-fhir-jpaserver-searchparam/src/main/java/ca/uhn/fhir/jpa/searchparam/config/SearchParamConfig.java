@@ -40,8 +40,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.IndexedSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
-import ca.uhn.fhir.jpa.searchparam.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
@@ -49,9 +47,13 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
+@Import({
+	NicknameServiceConfig.class
+})
 @Configuration
 public class SearchParamConfig {
 
@@ -143,17 +145,4 @@ public class SearchParamConfig {
 		return new SearchParameterHelper(searchParameterCanonicalizer(theFhirContext));
 	}
 
-	// Nickname svc stuff below here
-
-	// used in mongo and jpa
-	@Lazy
-	@Bean
-	public NicknameInterceptor nicknameInterceptor(NicknameServiceFactory theNicknameServiceFactory) {
-		return new NicknameInterceptor(theNicknameServiceFactory);
-	}
-
-	@Bean
-	public NicknameServiceFactory nicknameSvcFactory() {
-		return new NicknameServiceFactory();
-	}
 }

@@ -107,7 +107,6 @@ public class MdmResourceFieldMatcher {
 		return match(leftValues, rightValues);
 	}
 
-	@SuppressWarnings("rawtypes")
 	private MdmMatchEvaluation match(List<IBase> theLeftValues, List<IBase> theRightValues) {
 		MdmMatchEvaluation retval = new MdmMatchEvaluation(false, 0.0);
 
@@ -140,8 +139,6 @@ public class MdmResourceFieldMatcher {
 		}
 
 		throw new InternalErrorException(Msg.code(1522) + "Field Match " + myName + " has neither a matcher nor a similarity.");
-
-//		return myMdmFieldMatchJson.match(myFhirContext, theLeftValue, theRightValue);
 	}
 
 	private void validate(IBaseResource theResource) {
