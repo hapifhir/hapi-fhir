@@ -40,8 +40,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGT
 @Table(name = "HFJ_RES_VER_PROV", indexes = {
 	@Index(name = "IDX_RESVERPROV_SOURCEURI", columnList = "SOURCE_URI"),
 	@Index(name = "IDX_RESVERPROV_REQUESTID", columnList = "REQUEST_ID"),
-	@Index(name = "IDX_RESVERPROV_RES_PID", columnList = "RES_PID"),
-	@Index(name = "IDX_RESVERPROV_RESVER_PID", columnList = "RES_VER_PID")
+	@Index(name = "IDX_RESVERPROV_RES_PID", columnList = "RES_PID")
 })
 @Entity
 public class ResourceHistoryProvenanceEntity extends BasePartitionable {
