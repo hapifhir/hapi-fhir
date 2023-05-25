@@ -1,4 +1,4 @@
 ---
 type: fix
 issue: 4934
-title: "Fixed a problem where, after installing or uninstalling an implementation guide, resource validation caches weren't instantly updated."
+title: "Previously, installing or uninstalling an implementation guide does not refresh the validation cache. This problem has been fixed."
