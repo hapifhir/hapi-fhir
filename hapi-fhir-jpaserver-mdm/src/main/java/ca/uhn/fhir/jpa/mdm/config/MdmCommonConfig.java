@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatcherFactory;
+import ca.uhn.fhir.jpa.searchparam.config.NicknameServiceConfig;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
@@ -29,8 +30,10 @@ import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
+@Import(NicknameServiceConfig.class)
 @Configuration
 public class MdmCommonConfig {
 	@Bean
