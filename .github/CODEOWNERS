@@ -6,9 +6,9 @@ hapi-fhir-cli/**/*.java @nathandoef
 hapi-fhir-storage-cr/**/*.java @JPercival
 
 hapi-fhir-jpaserver-subscription/**/*.java @fil512
-hapi-fhir-jpaserver-mdm/**/*.java @fil512 @tadgh @adi1306
-hapi-fhir-storage-mdm/**/*.java @fil512 @tadgh @adi1306
-hapi-fhir-server-mdm/**/*.java @fil512 @tadgh @adi1306
+hapi-fhir-jpaserver-mdm/**/*.java @fil512 @tadgh @ad1306
+hapi-fhir-storage-mdm/**/*.java @fil512 @tadgh @ad1306
+hapi-fhir-server-mdm/**/*.java @fil512 @tadgh @ad1306
 
 hapi-fhir-storage/**/*.java @fil512
 
