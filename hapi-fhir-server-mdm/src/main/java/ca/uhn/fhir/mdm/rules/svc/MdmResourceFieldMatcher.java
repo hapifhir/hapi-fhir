@@ -184,8 +184,6 @@ public class MdmResourceFieldMatcher {
 		if (matcherJson != null) {
 			params.setExactMatch(matcherJson.getExact());
 			params.setIdentificationSystem(matcherJson.getIdentifierSystem());
-		} else {
-			System.out.println("hereherhehere");
 		}
 		return params;
 	}
