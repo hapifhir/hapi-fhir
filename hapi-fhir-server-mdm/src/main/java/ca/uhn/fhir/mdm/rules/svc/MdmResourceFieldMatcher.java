@@ -171,11 +171,7 @@ public class MdmResourceFieldMatcher {
 			matchTypeEnum = matcherJson.getAlgorithm();
 		}
 		if (matchTypeEnum == null) {
-			// we didn't have a matchjson
-			// we can only match empty fields.
-			// this is the default for match factory,
-			// but we'll enforce it here
-			matchTypeEnum = MatchTypeEnum.EMPTY_FIELD;
+			return null;
 		}
 
 		return myIMatcherFactory.getFieldMatcherForEnum(matchTypeEnum);
