@@ -87,7 +87,6 @@ public class MdmResourceFieldMatcher {
 	 * @param theRightResource the second {@link IBaseResource}
 	 * @return A boolean indicating whether they match.
 	 */
-	@SuppressWarnings("rawtypes")
 	public MdmMatchEvaluation match(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		validate(theLeftResource);
 		validate(theRightResource);
@@ -186,8 +185,12 @@ public class MdmResourceFieldMatcher {
 		MdmMatcherJson matcherJson = myMdmFieldMatchJson.getMatcher();
 
 		ExtraMatchParams params = new ExtraMatchParams();
-		params.setExactMatch(matcherJson.getExact());
-		params.setIdentificationSystem(matcherJson.getIdentifierSystem());
+		if (matcherJson != null) {
+			params.setExactMatch(matcherJson.getExact());
+			params.setIdentificationSystem(matcherJson.getIdentifierSystem());
+		} else {
+			System.out.println("hereherhehere");
+		}
 		return params;
 	}
 }

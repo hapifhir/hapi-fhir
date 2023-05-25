@@ -22,7 +22,6 @@ package ca.uhn.fhir.mdm.rules.svc;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
@@ -32,6 +31,7 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
@@ -51,8 +51,9 @@ public class MdmResourceMatcherSvc {
 
 	private final FhirContext myFhirContext;
 	private final IMatcherFactory myMatcherFactory;
-	private MdmRulesJson myMdmRulesJson;
 	private final List<MdmResourceFieldMatcher> myFieldMatchers = new ArrayList<>();
+
+	private MdmRulesJson myMdmRulesJson;
 
 	public MdmResourceMatcherSvc(
 		FhirContext theFhirContext,
@@ -148,11 +149,16 @@ public class MdmResourceMatcherSvc {
 		return retVal;
 	}
 
-
 	private boolean isValidResourceType(String theResourceType, String theFieldComparatorType) {
 		return (
 			theFieldComparatorType.equalsIgnoreCase(MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE)
 				|| theFieldComparatorType.equalsIgnoreCase(theResourceType)
 		);
+	}
+
+	@VisibleForTesting
+	public void setMdmRulesJson(MdmRulesJson theMdmRulesJson) {
+		myMdmRulesJson = theMdmRulesJson;
+		addFieldMatchers();
 	}
 }
