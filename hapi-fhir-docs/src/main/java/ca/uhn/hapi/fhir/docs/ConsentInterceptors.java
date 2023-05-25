@@ -58,6 +58,7 @@ public class ConsentInterceptors {
 				Observation obs = (Observation)theResource;
 				if (obs.getCategoryFirstRep().hasCoding("http://hl7.org/fhir/codesystem-observation-category.html", "laboratory")) {
 					return ConsentOutcome.REJECT;
+					//return ConsentOutcome.FORBID;
 				}
 			}
 
