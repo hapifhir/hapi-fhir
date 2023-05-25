@@ -104,9 +104,9 @@ public class HapiMigrationDao {
 		return myJdbcTemplate.queryForObject(highestKeyQuery, Integer.class);
 	}
 
-	public void createMigrationTableIfRequired() {
+	public boolean createMigrationTableIfRequired() {
 		if (migrationTableExists()) {
-			return;
+			return false;
 		}
 		ourLog.info("Creating table {}", myMigrationTablename);
 
@@ -120,6 +120,8 @@ public class HapiMigrationDao {
 
 		HapiMigrationEntity entity = HapiMigrationEntity.tableCreatedRecord();
 		myJdbcTemplate.update(myMigrationQueryBuilder.insertPreparedStatement(), entity.asPreparedStatementSetter());
+
+		return true;
 	}
 
 	private boolean migrationTableExists() {

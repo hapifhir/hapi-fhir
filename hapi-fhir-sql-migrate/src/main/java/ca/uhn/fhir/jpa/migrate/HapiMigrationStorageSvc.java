@@ -88,8 +88,8 @@ public class HapiMigrationStorageSvc {
 	 * Create the migration table if it does not already exist
 	 */
 
-	public void createMigrationTableIfRequired() {
-		myHapiMigrationDao.createMigrationTableIfRequired();
+	public boolean createMigrationTableIfRequired() {
+		return myHapiMigrationDao.createMigrationTableIfRequired();
 	}
 
 
