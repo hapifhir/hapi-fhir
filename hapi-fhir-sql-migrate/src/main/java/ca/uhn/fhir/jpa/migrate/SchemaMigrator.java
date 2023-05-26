@@ -111,7 +111,7 @@ public class SchemaMigrator {
 		myCallbacks = theCallbacks;
 	}
 
-	public void createMigrationTableIfRequired() {
-		myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+	public boolean createMigrationTableIfRequired() {
+		return myHapiMigrationStorageSvc.createMigrationTableIfRequired();
 	}
 }
