@@ -646,6 +646,17 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theValidationSupport.getFhirContext());
 		return new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(theValidationSupport), versionCanonicalizer);
 	}
+
+	@Override
+	public boolean isForPublication() {
+		return false;
+	}
+
+	@Override
+	public void setForPublication(boolean b) {
+		throw new UnsupportedOperationException(Msg.code(2350));
+
+	}
 }
 
 

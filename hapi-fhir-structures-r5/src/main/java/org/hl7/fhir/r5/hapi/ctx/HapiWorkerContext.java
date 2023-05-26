@@ -476,4 +476,15 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	public PEBuilder getProfiledElementBuilder(PEBuilder.PEElementPropertiesPolicy thePEElementPropertiesPolicy, boolean theB) {
 		throw new UnsupportedOperationException(Msg.code(2261));
 	}
+
+	@Override
+	public boolean isForPublication() {
+		return false;
+	}
+
+	@Override
+	public void setForPublication(boolean b) {
+		throw new UnsupportedOperationException(Msg.code(2350));
+
+	}
 }
