@@ -53,7 +53,7 @@ public interface ISearchParamRegistry {
 	/**
 	 * @return Returns active search parameter for the given component definition
 	 */
-	default RuntimeSearchParam getActiveSearchParameterByComponentDefinition(String componentDefinition) {
+	default RuntimeSearchParam getActiveSearchParameterByComponentDefinition(String theComponentDefinition) {
 		return null;
 	}
 

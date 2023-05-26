@@ -142,9 +142,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	@Override
-	public RuntimeSearchParam getActiveSearchParameterByComponentDefinition(String componentDefinition) {
+	public RuntimeSearchParam getActiveSearchParameterByComponentDefinition(String theComponentDefinition) {
 		return getActiveSearchParams().myUrlToParam.entrySet().stream()
-			.filter(e -> e.getKey().contains(componentDefinition))
+			.filter(e -> e.getKey().contains(theComponentDefinition))
 			.map(Map.Entry::getValue)
 			.findFirst().orElse(null);
 	}

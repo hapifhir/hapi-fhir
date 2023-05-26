@@ -240,7 +240,7 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@Test
-	public void testGetActiveSearchParameterByComponentDefinition_patientLanguage_returnsSp() {
+	public void testGetActiveSearchParameterByComponentDefinition_patientLanguage_returnsActiveSp() {
 		RuntimeSearchParam patientLanguageSp = mySearchParamRegistry.getActiveSearchParameterByComponentDefinition("SearchParameter/Patient-language");
 		assertNotNull(patientLanguageSp);
 		assertEquals(patientLanguageSp.getId().getIdPart(), "Patient-language");
