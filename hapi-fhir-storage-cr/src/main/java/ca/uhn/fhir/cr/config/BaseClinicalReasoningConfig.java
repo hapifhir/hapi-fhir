@@ -295,7 +295,7 @@ public abstract class BaseClinicalReasoningConfig {
 	public ExecutorService cqlExecutor() {
 		CqlThreadFactory factory = new CqlThreadFactory();
 		ExecutorService executor = Executors.
-			newFixedThreadPool(CrProperties.MeasureProperties.DEFAULT_THREADS_BATCH_SIZE
+			newFixedThreadPool(Runtime.getRuntime().availableProcessors()
 			,  factory);
 		executor = new DelegatingSecurityContextExecutorService(executor);
 

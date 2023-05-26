@@ -55,7 +55,6 @@ import javax.inject.Named;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 import static ca.uhn.fhir.cr.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
 import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
@@ -132,10 +131,6 @@ public class MeasureService implements IDaoRegistryUser {
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 
-	@Autowired
-	@Named("cqlExecutor")
-	private ExecutorService myCqlExecutor;
-
 	protected RequestDetails myRequestDetails;
 	/**
 	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
@@ -187,8 +182,6 @@ public class MeasureService implements IDaoRegistryUser {
 		Measure measure = read(theId, myRequestDetails);
 
 		TerminologyProvider terminologyProvider;
-
-		myMeasureEvaluationOptions.setMeasureExecutor(myCqlExecutor);
 
 		if (theTerminologyEndpoint != null) {
 			IGenericClient client = Clients.forEndpoint(getFhirContext(), theTerminologyEndpoint);
