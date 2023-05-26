@@ -211,7 +211,7 @@ public enum StatusEnum {
 
 		if (!canTransition) {
 			// we have a bug?
-			ourLog.warn("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
+			ourLog.debug("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
 		}
 		return canTransition;
 	}

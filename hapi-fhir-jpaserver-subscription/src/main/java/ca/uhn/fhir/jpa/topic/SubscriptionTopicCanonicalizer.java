@@ -31,7 +31,6 @@ public final class SubscriptionTopicCanonicalizer {
 	private SubscriptionTopicCanonicalizer() {
 	}
 
-	// WIP STR5 use elsewhere
 	public static SubscriptionTopic canonicalizeTopic(FhirContext theFhirContext, IBaseResource theSubscriptionTopic) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R4B:

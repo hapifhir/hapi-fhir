@@ -198,25 +198,6 @@ public class QueryParameterUtils {
 		return lastUpdatedPredicates;
 	}
 
-	public static List<JpaPid> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<JpaPid> thePids) {
-		if (thePids.isEmpty()) {
-			return Collections.emptyList();
-		}
-		CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
-
-		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
-		List<Long> longIds = thePids.stream().map(JpaPid::getId).collect(Collectors.toList());
-		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(longIds));
-
-		cq.where(toPredicateArray(lastUpdatedPredicates));
-		TypedQuery<Long> query = theEntityManager.createQuery(cq);
-
-		return query.getResultList().stream().map(JpaPid::fromId).collect(Collectors.toList());
-	}
-
 	public static void verifySearchHasntFailedOrThrowInternalErrorException(Search theSearch) {
 		if (theSearch.getStatus() == SearchStatusEnum.FAILED) {
 			Integer status = theSearch.getFailureCode();

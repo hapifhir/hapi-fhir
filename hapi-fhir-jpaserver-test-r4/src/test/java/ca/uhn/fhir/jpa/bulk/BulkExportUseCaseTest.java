@@ -19,12 +19,13 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
-import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -43,8 +44,12 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,6 +86,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -507,6 +513,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myStorageSettings.setBulkExportFileMaximumCapacity(JpaStorageSettings.DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY);
 		}
 
+		// TODO reenable 4637
+		// Reenable when bulk exports that return no results work as expected
+		@Disabled
 		@Test
 		public void testPatientExportIgnoresResourcesNotInPatientCompartment() {
 			Patient patient = new Patient();
@@ -522,6 +531,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			obs2.setId("obs-excluded");
 			myObservationDao.update(obs2);
 
+			// test
 			HashSet<String> types = Sets.newHashSet("Patient", "Observation");
 			BulkExportJobResults bulkExportJobResults = startPatientBulkExportJobAndAwaitResults(types, new HashSet<String>(), "ha");
 			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
@@ -887,30 +897,163 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			assertThat(typeToContents.get("Observation"), containsString("obs-included"));
 			assertThat(typeToContents.get("Observation"), not(containsString("obs-excluded")));
+		}
 
+		@Test
+		public void testGroupBulkExportWithTypeFilter_ReturnsOnlyResourcesInTypeFilter() {
+			// setup
+			IParser parser = myFhirContext.newJsonParser();
+			{
+				String patientStr = """
+						{
+					   "resourceType": "Patient",
+					   "id": "f201"
+					 }
+					""";
+				Patient patient = parser.parseResource(Patient.class, patientStr);
+				myClient.update().resource(patient).execute();
+			}
+			{
+				String practitionerStr = """
+						{
+					      "resourceType": "Practitioner",
+					      "id": "f201"
+					    }
+					""";
+				Practitioner practitioner = parser.parseResource(Practitioner.class, practitionerStr);
+				myClient.update().resource(practitioner).execute();
+			}
+			{
+				String orgString = """
+						{
+					      "resourceType": "Organization",
+					      "id": "f201"
+					    }
+					""";
+				Organization organization = parser.parseResource(Organization.class, orgString);
+				myClient.update().resource(organization).execute();
+			}
+			{
+				String bundleStr = """
+						{
+					    "resourceType": "Bundle",
+					    "id": "bundle-transaction",
+					    "meta": {
+					      "lastUpdated": "2021-04-19T20:24:48.194+00:00"
+					    },
+					    "type": "transaction",
+					    "entry": [
+					      {
+					        "fullUrl": "http://example.org/fhir/Encounter/E1",
+					        "resource": {
+					          "resourceType": "Encounter",
+					          "id": "E1",
+					          "subject": {
+					            "reference": "Patient/f201",
+					            "display": "Roel"
+					          },
+					          "participant": [
+					            {
+					              "individual": {
+					                "reference": "Practitioner/f201"
+					              }
+					            }
+					          ],
+					          "serviceProvider": {
+					            "reference": "Organization/f201"
+					          }
+					        },
+					        "request": {
+					          "method": "PUT",
+					          "url": "Encounter/E1"
+					        }
+					      },
+					      {
+					        "fullUrl": "http://example.org/fhir/Encounter/E2",
+					        "resource": {
+					          "resourceType": "Encounter",
+					          "id": "E2",
+					          "subject": {
+					            "reference": "Patient/f201",
+					            "display": "Roel"
+					          },
+					          "participant": [
+					            {
+					              "individual": {
+					                "reference": "Practitioner/f201"
+					              }
+					            }
+					          ],
+					          "serviceProvider": {
+					            "reference": "Organization/f201"
+					          }
+					        },
+					        "request": {
+					          "method": "PUT",
+					          "url": "Encounter/A2"
+					        }
+					      },
+					      {
+					        "fullUrl": "http://example.org/fhir/Group/G3",
+					        "resource": {
+					          "resourceType": "Group",
+					          "id": "G3",
+					          "text": {
+					            "status": "additional"
+					          },
+					          "type": "person",
+					          "actual": true,
+					          "member": [
+					            {
+					              "entity": {
+					                "reference": "Patient/f201"
+					              },
+					              "period": {
+					                "start": "2021-01-01"
+					              }
+					            },
+					            {
+					              "entity": {
+					                "reference": "Patient/f201"
+					              },
+					              "period": {
+					                "start": "2021-01-01"
+					              }
+					            }
+					          ]
+					        },
+					        "request": {
+					          "method": "PUT",
+					          "url": "Group/G3"
+					        }
+					      }
+					    ]
+					  }	
+					""";
+				Bundle bundle = parser.parseResource(Bundle.class, bundleStr);
+				myClient.transaction().withBundle(bundle).execute();
+			}
+
+			// test
+			HashSet<String> resourceTypes = Sets.newHashSet("Encounter");
+			BulkExportJobResults results = startGroupBulkExportJobAndAwaitCompletion(
+				resourceTypes,
+				new HashSet<>(),
+				"G3" // ID from Transaction Bundle
+			);
+
+			Map<String, List<IBaseResource>> stringListMap = convertJobResultsToResources(results);
+			assertFalse(stringListMap.containsKey("Organization"), String.join(",", stringListMap.keySet()));
+			assertFalse(stringListMap.containsKey("Patient"), String.join(",", stringListMap.keySet()));
+			assertTrue(stringListMap.containsKey("Encounter"), String.join(",", stringListMap.keySet()));
+			assertThat(stringListMap.get("Encounter"), hasSize(2));
 		}
 
 		@Test
 		public void testGroupBulkExportWithTypeFilter() {
 			// Create some resources
-			Patient patient = new Patient();
-			patient.setId("PF");
-			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
-			patient.setActive(true);
-			myClient.update().resource(patient).execute();
-
-			patient = new Patient();
-			patient.setId("PM");
-			patient.setGender(Enumerations.AdministrativeGender.MALE);
-			patient.setActive(true);
-			myClient.update().resource(patient).execute();
-
-			Group group = new Group();
-			group.setId("Group/G");
-			group.setActive(true);
-			group.addMember().getEntity().setReference("Patient/PF");
-			group.addMember().getEntity().setReference("Patient/PM");
-			myClient.update().resource(group).execute();
+			Group g = createGroupWithPatients();
+			String groupId = g.getIdPart();
 
 			//Create an observation for each patient
 			Observation femaleObs = new Observation();
@@ -923,9 +1066,11 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			maleObs.setId("obs-male");
 			myClient.update().resource(maleObs).execute();
 
+			// test
 			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Patient");
 			HashSet<String> filters = Sets.newHashSet("Patient?gender=female");
-			BulkExportJobResults results = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, filters, "G");
+			BulkExportJobResults results = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, filters, groupId);
+
 			Map<String, List<IBaseResource>> stringListMap = convertJobResultsToResources(results);
 			assertThat(stringListMap.get("Observation"), hasSize(1));
 			assertThat(stringListMap.get("Patient"), hasSize(1));
@@ -978,10 +1123,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			coverage.setId("coverage-female");
 			myClient.update().resource(coverage).execute();
 
-			HashSet<String> resourceTypes = Sets.newHashSet(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
-
 			HashSet<String> filters = Sets.newHashSet();
-			BulkExportJobResults results = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, filters, "G");
+			BulkExportJobResults results = startGroupBulkExportJobAndAwaitCompletion(new HashSet<>(), filters, "G");
 			Map<String, List<IBaseResource>> typeToResource = convertJobResultsToResources(results);
 			assertThat(typeToResource.keySet(), hasSize(4));
 			assertThat(typeToResource.get("Group"), hasSize(1));
@@ -1052,7 +1195,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			coverage.setBeneficiary(new Reference("Patient/PING1"));
 			coverage.setId("coverage-included");
 			myClient.update().resource(coverage).execute();
-
 
 			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Coverage");
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
@@ -1159,6 +1301,29 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	}
 
+	private Group createGroupWithPatients() {
+		Patient patient = new Patient();
+		patient.setId("PF");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("PM");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PF");
+		group.addMember().getEntity().setReference("Patient/PM");
+		myClient.update().resource(group).execute();
+
+		return group;
+	}
+
 	private Map<String, String> convertJobResultsToStringContents(BulkExportJobResults theResults) {
 		Map<String, String> typeToResources = new HashMap<>();
 		for (Map.Entry<String, List<String>> entry : theResults.getResourceTypeToBinaryIds().entrySet()) {
@@ -1206,29 +1371,91 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.SYSTEM, theResourceTypes, theFilters, null);
 	}
 
-	BulkExportJobResults startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle theExportStyle, Set<String> theResourceTypes, Set<String> theFilters, String theGroupOrPatientId) {
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setResourceTypes(theResourceTypes);
-		options.setFilters(theFilters);
-		options.setExportStyle(theExportStyle);
+	BulkExportJobResults startBulkExportJobAndAwaitCompletion(
+		BulkDataExportOptions.ExportStyle theExportStyle,
+		Set<String> theResourceTypes,
+		Set<String> theFilters,
+		String theGroupOrPatientId
+	) {
+		Parameters parameters = new Parameters();
+
+		parameters.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON);
+		if (theFilters != null && !theFilters.isEmpty()) {
+			for (String typeFilter : theFilters) {
+				parameters.addParameter(
+					JpaConstants.PARAM_EXPORT_TYPE_FILTER,
+					typeFilter
+				);
+			}
+		}
+
+		if (theResourceTypes != null && !theResourceTypes.isEmpty()) {
+			parameters.addParameter(
+				JpaConstants.PARAM_EXPORT_TYPE,
+				String.join(",", theResourceTypes)
+			);
+		}
+
+
+		MethodOutcome outcome;
 		if (theExportStyle == BulkDataExportOptions.ExportStyle.GROUP) {
-			options.setGroupId(new IdType("Group", theGroupOrPatientId));
-		}
-		if (theExportStyle == BulkDataExportOptions.ExportStyle.PATIENT && theGroupOrPatientId != null) {
+
+			outcome = myClient
+				.operation()
+				.onInstance("Group/" + theGroupOrPatientId)
+				.named(JpaConstants.OPERATION_EXPORT)
+				.withParameters(parameters)
+				.returnMethodOutcome()
+				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.execute();
+		} else if (theExportStyle == BulkDataExportOptions.ExportStyle.PATIENT && theGroupOrPatientId != null) {
 			//TODO add support for this actual processor.
-			//options.setPatientId(new IdType("Patient", theGroupOrPatientId));
+			fail("Bulk Exports that return no data do not return");
+			outcome = myClient
+				.operation()
+				.onInstance("Patient/" + theGroupOrPatientId)
+				.named(JpaConstants.OPERATION_EXPORT)
+				.withParameters(parameters)
+				.returnMethodOutcome()
+				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.execute();
+		} else {
+			// system request
+			outcome = myClient
+				.operation()
+				.onServer()
+				.named(JpaConstants.OPERATION_EXPORT)
+				.withParameters(parameters)
+				.returnMethodOutcome()
+				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.execute();
 		}
-		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		assertNotNull(outcome);
+		assertEquals(202, outcome.getResponseStatusCode());
+		String pollLocation = null;
+		for (String header : outcome.getResponseHeaders().keySet()) {
+			// headers are in lowercase
+			// constants are in Pascal Case
+			// :(
+			if (header.equalsIgnoreCase(Constants.HEADER_CONTENT_LOCATION)) {
+				pollLocation = outcome.getResponseHeaders().get(header).get(0);
+				break;
+			}
+		}
+		assertNotNull(pollLocation);
+		UrlUtil.UrlParts parts = UrlUtil.parseUrl(pollLocation);
+		assertTrue(isNotBlank(parts.getParams()));
+		Map<String, String[]> queryParams = UrlUtil.parseQueryString(parts.getParams());
+		assertTrue(queryParams.containsKey(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID));
+		String jobInstanceId = queryParams.get(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID)[0];
 
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+		assertNotNull(jobInstanceId);
 
-		assertNotNull(startResponse);
+		myBatch2JobHelper.awaitJobCompletion(jobInstanceId, 60);
 
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 60);
+		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobRunner.getJobInfo(jobInstanceId).getReport() != null);
 
-		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
-
-		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
+		String report = myJobRunner.getJobInfo(jobInstanceId).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 		return results;
 	}

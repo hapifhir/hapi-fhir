@@ -77,7 +77,6 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		createObservationSubscriptionTopic(OBS_CODE2);
 		waitForRegisteredSubscriptionTopicCount(2);
 
-		// WIP STR5 will likely require matching TopicSubscription
 		Subscription subscription1 = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE, Constants.CT_FHIR_XML_NEW);
 
 		Subscription subscription = postSubscription(subscription1);

@@ -121,7 +121,6 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		myJobParameterJsonValidator.validateJobParameters(theStartRequest, jobDefinition);
 
-
 		IJobPersistence.CreateResult instanceAndFirstChunk =
 			myTransactionService.withSystemRequest().execute(() ->
 				myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
