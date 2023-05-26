@@ -45,8 +45,8 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	}
 
 	@Override
-	public int deleteExpunge(List<JpaPid> theJpaPids, boolean theCascade) {
-		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult = myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids, theCascade);
+	public int deleteExpunge(List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
+		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult = myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids, theCascade, theCascadeMaxRounds);
 		List<String> sqlList = sqlResult.getSqlStatements();
 
 		ourLog.debug("Executing {} delete expunge sql commands", sqlList.size());

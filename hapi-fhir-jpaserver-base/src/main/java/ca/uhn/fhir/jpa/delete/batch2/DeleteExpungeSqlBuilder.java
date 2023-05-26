@@ -55,10 +55,10 @@ public class DeleteExpungeSqlBuilder {
 
 
 	@Nonnull
-	DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids, boolean theCascade) {
+	DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
 
 		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
-		validateOkToDeleteAndExpunge(pids, theCascade);
+		validateOkToDeleteAndExpunge(pids, theCascade, theCascadeMaxRounds);
 
 		List<String> rawSql = new ArrayList<>();
 
@@ -75,7 +75,7 @@ public class DeleteExpungeSqlBuilder {
 		return new DeleteExpungeSqlResult(rawSql, pids.size());
 	}
 
-	public void validateOkToDeleteAndExpunge(Set<Long> thePids, boolean theCascade) {
+	public void validateOkToDeleteAndExpunge(Set<Long> thePids, boolean theCascade, Integer theCascadeMaxRounds) {
 		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete()) {
 			ourLog.info("Referential integrity on delete disabled.  Skipping referential integrity check.");
 			return;
@@ -90,6 +90,16 @@ public class DeleteExpungeSqlBuilder {
 		}
 
 		if (theCascade) {
+			int cascadeMaxRounds = Integer.MAX_VALUE;
+			if (theCascadeMaxRounds != null) {
+				cascadeMaxRounds = theCascadeMaxRounds;
+			}
+			if (myStorageSettings.getMaximumDeleteConflictQueryCount() != null) {
+				if (myStorageSettings.getMaximumDeleteConflictQueryCount() < cascadeMaxRounds) {
+					cascadeMaxRounds = myStorageSettings.getMaximumDeleteConflictQueryCount();
+				}
+			}
+
 			while (true) {
 				List<JpaPid> addedThisRound = new ArrayList<>();
 				for (ResourceLink next : conflictResourceLinks) {
@@ -103,8 +113,13 @@ public class DeleteExpungeSqlBuilder {
 					return;
 				}
 
-				conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
-				findResourceLinksWithTargetPidIn(addedThisRound, addedThisRound, conflictResourceLinks);
+				if (--cascadeMaxRounds > 0) {
+					conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
+					findResourceLinksWithTargetPidIn(addedThisRound, addedThisRound, conflictResourceLinks);
+				} else {
+					// We'll proceed to below where we throw an exception
+					break;
+				}
 			}
 		}
 

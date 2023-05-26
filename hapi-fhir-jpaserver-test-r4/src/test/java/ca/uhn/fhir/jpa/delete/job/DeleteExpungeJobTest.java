@@ -145,7 +145,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 
 	@Test
-	public void testCascade_MultiLevel() {
+	public void testCascade_MultiLevel_Success() {
 		// Setup
 
 		// Create a chain of dependent references
@@ -161,6 +161,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
 		jobParameters.setCascade(true);
+		jobParameters.setCascadeMaxRounds(4);
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setParameters(jobParameters);
@@ -176,6 +177,41 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		assertDoesntExist(o1);
 		assertDoesntExist(o1b);
 		assertDoesntExist(o1c);
+	}
+
+	@Test
+	public void testCascade_MultiLevel_NotEnoughRounds() {
+		// Setup
+
+		// Create a chain of dependent references
+		IIdType p1 = createPatient(withActiveTrue());
+		IIdType o1 = createObservation(withSubject(p1));
+		IIdType o1b = createObservation(withReference("hasMember", o1));
+		IIdType o1c = createObservation(withReference("hasMember", o1b));
+
+		// validate precondition
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+
+		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
+		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
+		jobParameters.setCascade(true);
+		jobParameters.setCascadeMaxRounds(1);
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setParameters(jobParameters);
+		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
+
+		// execute
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+
+		// Validate
+		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(startResponse);
+		assertThat(outcome.getErrorMessage(), containsString("refers to it via the path"));
+		assertNotGone(p1);
+		assertNotGone(o1);
+		assertNotGone(o1b);
+		assertNotGone(o1c);
 	}
 
 	@Test

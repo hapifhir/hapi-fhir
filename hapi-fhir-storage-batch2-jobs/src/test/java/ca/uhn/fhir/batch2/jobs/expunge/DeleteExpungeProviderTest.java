@@ -7,6 +7,7 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,9 +60,10 @@ public class DeleteExpungeProviderTest {
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url1);
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url2);
 		input.addParameter(ProviderConstants.OPERATION_DELETE_CASCADE, new BooleanType(true));
-		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
+		input.addParameter(ProviderConstants.OPERATION_DELETE_CASCADE_MAX_ROUNDS, new IntegerType(44));
+		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new IntegerType(batchSize));
 
-		when(myDeleteExpungeJobSubmitter.submitJob(any(), any(), anyBoolean(), any())).thenReturn(TEST_JOB_ID);
+		when(myDeleteExpungeJobSubmitter.submitJob(any(), any(), anyBoolean(), any(), any())).thenReturn(TEST_JOB_ID);
 
 		// Test
 		Parameters response = myServer
@@ -80,6 +82,7 @@ public class DeleteExpungeProviderTest {
 			eq(2401),
 			eq(List.of(url1, url2)),
 			eq(true),
+			eq(44),
 			any()
 		);
 	}

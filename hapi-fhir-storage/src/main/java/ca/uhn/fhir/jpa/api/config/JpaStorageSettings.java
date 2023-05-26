@@ -1823,6 +1823,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * <p>
 	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
+	 * This can also be thought of as the maximum number of rounds of cascading deletion.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 60}.
@@ -1837,6 +1838,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * <p>
 	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
+	 * This can also be thought of as the maximum number of rounds of cascading deletion.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 60}.

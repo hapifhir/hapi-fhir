@@ -47,7 +47,7 @@ public class OldAuditEventPurgeService {
 
 		ourLog.info("Submitting an AuditEvent purge job with URL: {}", url);
 
-		myDeleteExpungeSubmitter.submitJob(1000, List.of(url), false, new SystemRequestDetails());
+		myDeleteExpungeSubmitter.submitJob(1000, List.of(url), false, null, new SystemRequestDetails());
 	}
 
 	public static class OldAuditEventPurgeServiceJob implements HapiJob {

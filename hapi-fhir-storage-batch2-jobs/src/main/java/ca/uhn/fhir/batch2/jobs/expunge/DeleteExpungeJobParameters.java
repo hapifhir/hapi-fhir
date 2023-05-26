@@ -28,6 +28,13 @@ public class DeleteExpungeJobParameters extends PartitionedUrlListJobParameters 
 	@JsonProperty("cascadeMaxRounds")
 	private Integer myCascadeMaxRounds;
 
+	/**
+	 * Constructor
+	 */
+	public DeleteExpungeJobParameters() {
+		super();
+	}
+
 	public Integer getCascadeMaxRounds() {
 		return myCascadeMaxRounds;
 	}
@@ -41,6 +48,6 @@ public class DeleteExpungeJobParameters extends PartitionedUrlListJobParameters 
 	}
 
 	public void setCascade(boolean theCascade) {
-		myCascade = true;
+		myCascade = theCascade;
 	}
 }
