@@ -117,7 +117,6 @@ public class StorageSettings {
 	private boolean myAutoSupportDefaultSearchParams = true;
 	private boolean myIndexIdentifierOfType = false;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
-	private boolean myTagStorageModeIsInline = false;
 
 	/**
 	 * Since 6.4.0
@@ -1256,26 +1255,7 @@ public class StorageSettings {
 		return myQualifySubscriptionMatchingChannelName;
 	}
 
-	/**
-	 * This setting indicates if the INLINE tag storage mode is enabled in the configuration.
-	 * Default is false.
-	 *
-	 * @return if INLINE tag is enabled.
-	 * @since 6.8.0
-	 */
-	public boolean getTagStorageModeIsInline() {
-		return myTagStorageModeIsInline;
-	}
 
-	/**
-	 * This sets the flag to indicate if INLINE tag storage mode is enabled in configuration.
-	 * Default is false.
-	 *
-	 * @since 6.8.0
-	 */
-	public void setTagStorageModeIsInline(boolean theTagStorageModeIsInline) {
-		myTagStorageModeIsInline = theTagStorageModeIsInline;
-	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");

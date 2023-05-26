@@ -349,7 +349,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// given
 		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
-		myStorageSettings.setTagStorageModeIsInline(true);
 
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("Organization");
@@ -406,7 +405,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// given
 		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
-		myStorageSettings.setTagStorageModeIsInline(true);
 
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("Organization");
@@ -463,7 +461,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// given
 		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
-		myStorageSettings.setTagStorageModeIsInline(true);
 
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("Organization");

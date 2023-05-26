@@ -25,8 +25,8 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -45,6 +45,7 @@ import java.util.function.Predicate;
 
 import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 public final class ResourceIndexedSearchParams {
 	final public Collection<ResourceIndexedSearchParamString> myStringParams = new ArrayList<>();
@@ -62,8 +63,6 @@ public final class ResourceIndexedSearchParams {
 	final public Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
 	final public Collection<SearchParamPresentEntity> mySearchParamPresentEntities = new HashSet<>();
 	final public Collection<ResourceIndexedSearchParamComposite>  myCompositeParams = new HashSet<>();
-
-	final private static Set<String> myIndexableResourceParams = Set.of(Constants.PARAM_TAG, Constants.PARAM_SECURITY, Constants.PARAM_PROFILE);
 
 	public ResourceIndexedSearchParams() {
 	}
@@ -351,61 +350,62 @@ public final class ResourceIndexedSearchParams {
 				continue;
 			}
 
-			if (!nextParamName.startsWith("_") ||
-				(myIndexableResourceParams.contains(nextParamName) && theStorageSettings.getTagStorageModeIsInline())) {
+			RuntimeSearchParam searchParam = activeSearchParams.get(nextParamName);
 
-				RuntimeSearchParam searchParam = activeSearchParams.get(nextParamName);
-				if (searchParam.getParamType() == type) {
-					boolean haveParam = false;
-					for (BaseResourceIndexedSearchParam nextParam : paramCollection) {
-						if (nextParam.getParamName().equals(nextParamName)) {
-							haveParam = true;
+			if (RuntimeSearchParamHelper.isResourceLevel(searchParam)) {
+				continue;
+			}
+
+			if (searchParam.getParamType() == type) {
+				boolean haveParam = false;
+				for (BaseResourceIndexedSearchParam nextParam : paramCollection) {
+					if (nextParam.getParamName().equals(nextParamName)) {
+						haveParam = true;
+						break;
+					}
+				}
+
+				if (!haveParam) {
+					BaseResourceIndexedSearchParam param;
+					switch (type) {
+						case DATE:
+							param = new ResourceIndexedSearchParamDate();
 							break;
-						}
-					}
-
-					if (!haveParam) {
-						BaseResourceIndexedSearchParam param;
-						switch (type) {
-							case DATE:
-								param = new ResourceIndexedSearchParamDate();
+						case NUMBER:
+							param = new ResourceIndexedSearchParamNumber();
+							break;
+						case QUANTITY:
+							param = new ResourceIndexedSearchParamQuantity();
+							break;
+						case STRING:
+							param = new ResourceIndexedSearchParamString()
+								.setStorageSettings(theStorageSettings);
+							break;
+						case TOKEN:
+							param = new ResourceIndexedSearchParamToken();
+							break;
+						case URI:
+							param = new ResourceIndexedSearchParamUri();
+							break;
+						case SPECIAL:
+							if (BaseSearchParamExtractor.COORDS_INDEX_PATHS.contains(searchParam.getPath())) {
+								param = new ResourceIndexedSearchParamCoords();
 								break;
-							case NUMBER:
-								param = new ResourceIndexedSearchParamNumber();
-								break;
-							case QUANTITY:
-								param = new ResourceIndexedSearchParamQuantity();
-								break;
-							case STRING:
-								param = new ResourceIndexedSearchParamString()
-									.setStorageSettings(theStorageSettings);
-								break;
-							case TOKEN:
-								param = new ResourceIndexedSearchParamToken();
-								break;
-							case URI:
-								param = new ResourceIndexedSearchParamUri();
-								break;
-							case SPECIAL:
-								if (BaseSearchParamExtractor.COORDS_INDEX_PATHS.contains(searchParam.getPath())) {
-									param = new ResourceIndexedSearchParamCoords();
-									break;
-								} else {
-									continue;
-								}
-							case COMPOSITE:
-							case HAS:
-							case REFERENCE:
-							default:
+							} else {
 								continue;
-						}
-						param.setPartitionSettings(thePartitionSettings);
-						param.setResource(theEntity);
-						param.setMissing(true);
-						param.setParamName(nextParamName);
-						param.calculateHashes();
-						paramCollection.add((RT) param);
+							}
+						case COMPOSITE:
+						case HAS:
+						case REFERENCE:
+						default:
+							continue;
 					}
+					param.setPartitionSettings(thePartitionSettings);
+					param.setResource(theEntity);
+					param.setMissing(true);
+					param.setParamName(nextParamName);
+					param.calculateHashes();
+					paramCollection.add((RT) param);
 				}
 			}
 		}
