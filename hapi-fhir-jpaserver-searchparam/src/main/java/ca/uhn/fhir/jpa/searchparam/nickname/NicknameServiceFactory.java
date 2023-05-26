@@ -35,7 +35,7 @@ public class NicknameServiceFactory {
 	/**
 	 * Returns this factory's NicknameSvc
 	 */
-	public NicknameSvc getNicknameSvc() {
+	public synchronized NicknameSvc getNicknameSvc() {
 		if (myNicknameSvc == null) {
 			createNicknameSvc();
 		}
@@ -47,8 +47,8 @@ public class NicknameServiceFactory {
 	 *
 	 * This map (if populated) will be used instead of the defaults.
 	 */
-	public void setNicknameMap(Map<String, Collection<String>> theMap) {
-		myNameToNickname = theMap;
+	public void setNicknameMap(Map<String, Collection<String>> theNameToNicknameListMap) {
+		myNameToNickname = theNameToNicknameListMap;
 
 		// we ideally never see this
 		// but in case someone wants to redefine the map after construction, we'll allow it
