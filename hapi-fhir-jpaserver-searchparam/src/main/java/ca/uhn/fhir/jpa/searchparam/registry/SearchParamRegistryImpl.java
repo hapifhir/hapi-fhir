@@ -57,6 +57,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -138,6 +139,14 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
 		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames);
+	}
+
+	@Override
+	public RuntimeSearchParam getActiveSearchParameterByComponentDefinition(String componentDefinition) {
+		return getActiveSearchParams().myUrlToParam.entrySet().stream()
+			.filter(e -> e.getKey().contains(componentDefinition))
+			.map(Map.Entry::getValue)
+			.findFirst().orElse(null);
 	}
 
 	@Nullable

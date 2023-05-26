@@ -240,6 +240,19 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@Test
+	public void testGetActiveSearchParameterByComponentDefinition_patientLanguage_returnsSp() {
+		RuntimeSearchParam patientLanguageSp = mySearchParamRegistry.getActiveSearchParameterByComponentDefinition("SearchParameter/Patient-language");
+		assertNotNull(patientLanguageSp);
+		assertEquals(patientLanguageSp.getId().getIdPart(), "Patient-language");
+	}
+
+	@Test
+	public void testGetActiveSearchParameterByComponentDefinition_nonExistingSp_returnsNull() {
+		RuntimeSearchParam nonExistingSp = mySearchParamRegistry.getActiveSearchParameterByComponentDefinition("SearchParameter/nonExistingSp");
+		assertNull(nonExistingSp);
+	}
+
+	@Test
 	public void testGetActiveSearchParamsRetries() {
 		AtomicBoolean retried = new AtomicBoolean(false);
 		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenAnswer(t -> {

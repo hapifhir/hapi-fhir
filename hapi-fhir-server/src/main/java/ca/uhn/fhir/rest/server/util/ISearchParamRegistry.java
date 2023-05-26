@@ -51,6 +51,13 @@ public interface ISearchParamRegistry {
 	ResourceSearchParams getActiveSearchParams(String theResourceName);
 
 	/**
+	 * @return Returns active search parameter for the given component definition
+	 */
+	default RuntimeSearchParam getActiveSearchParameterByComponentDefinition(String componentDefinition) {
+		return null;
+	}
+
+	/**
 	 * Request that the cache be refreshed now, in the current thread
 	 */
 	default void forceRefresh() {
