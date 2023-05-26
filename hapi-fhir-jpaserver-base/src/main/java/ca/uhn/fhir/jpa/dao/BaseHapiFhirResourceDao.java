@@ -423,7 +423,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
 		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
 		boolean resourceIdWasServerAssigned = theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
-		entity.setFhirId(resourceIdBeforeStorage);
+		if (resourceHadIdBeforeStorage) {
+			entity.setFhirId(resourceIdBeforeStorage);
+		}
 
 		HookParams hookParams;
 
@@ -1439,8 +1441,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			reindexOptimizeStorageHistoryEntity(entity, historyEntity);
 			if (theOptimizeStorageMode == ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS) {
 				int pageSize = 100;
-				for (int page = 0; ((long) page * pageSize) < entity.getVersion(); page++) {
-					Slice<ResourceHistoryTable> historyEntities = myResourceHistoryTableDao.findForResourceIdAndReturnEntities(PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
+				for (int page = 0; ((long)page * pageSize) < entity.getVersion(); page++) {
+					Slice<ResourceHistoryTable> historyEntities = myResourceHistoryTableDao.findForResourceIdAndReturnEntitiesAndFetchProvenance(PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
 					for (ResourceHistoryTable next : historyEntities) {
 						reindexOptimizeStorageHistoryEntity(entity, next);
 					}
@@ -1450,15 +1452,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private void reindexOptimizeStorageHistoryEntity(ResourceTable entity, ResourceHistoryTable historyEntity) {
+		boolean changed = false;
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC || historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
 			byte[] resourceBytes = historyEntity.getResource();
 			if (resourceBytes != null) {
 				String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
 				if (myStorageSettings.getInlineResourceTextBelowSize() > 0 && resourceText.length() < myStorageSettings.getInlineResourceTextBelowSize()) {
 					ourLog.debug("Storing text of resource {} version {} as inline VARCHAR", entity.getResourceId(), historyEntity.getVersion());
-					myResourceHistoryTableDao.setResourceTextVcForVersion(historyEntity.getId(), resourceText);
+					historyEntity.setResourceTextVc(resourceText);
+					historyEntity.setResource(null);
+					historyEntity.setEncoding(ResourceEncodingEnum.JSON);
+					changed = true;
 				}
 			}
+		}
+		if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
+			if (historyEntity.getProvenance() != null) {
+				historyEntity.setSourceUri(historyEntity.getProvenance().getSourceUri());
+				historyEntity.setRequestId(historyEntity.getProvenance().getRequestId());
+				changed = true;
+			}
+		}
+		if (changed) {
+			myResourceHistoryTableDao.save(historyEntity);
 		}
 	}
 

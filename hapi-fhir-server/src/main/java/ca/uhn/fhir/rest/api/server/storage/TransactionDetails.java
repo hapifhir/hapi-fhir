@@ -257,7 +257,7 @@ public class TransactionDetails {
 
 	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		if (myResolvedMatchUrls.containsKey(theConditionalUrl) && myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
-			return myResolvedMatchUrls.get(theConditionalUrl).getId() != thePersistentId.getId();
+			return ! myResolvedMatchUrls.get(theConditionalUrl).getId().equals(thePersistentId.getId());
 		}
 		return false;
 	}

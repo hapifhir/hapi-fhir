@@ -28,7 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings({"unchecked", "SqlDialectInspection"})
+@SuppressWarnings({"SqlDialectInspection"})
 public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 
 	@Autowired
@@ -125,7 +125,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 
 	@Test
 	public void testDryRunTypes_Number() {
-		IIdType id = createResource("ResearchStudy", withPrimitiveAttribute("recruitment.targetNumber", "3"));
+		IIdType id = createResource("ResearchStudy", withResourcePrimitiveAttribute("recruitment.targetNumber", "3"));
 
 		logAllNumberIndexes();
 
@@ -269,7 +269,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 
 	@Test
 	public void testDryRunTypes_Uri() {
-		IIdType id = createResource("CodeSystem", withPrimitiveAttribute("url", "http://foo"));
+		IIdType id = createResource("CodeSystem", withResourcePrimitiveAttribute("url", "http://foo"));
 
 		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));

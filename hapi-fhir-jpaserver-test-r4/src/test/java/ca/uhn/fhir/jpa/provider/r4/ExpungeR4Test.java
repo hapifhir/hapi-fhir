@@ -378,6 +378,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeAllVersionsWithTagsDeletesRow() {
+		// Setup
 		// Create then delete
 		Patient p = new Patient();
 		p.setId("TEST");
@@ -395,9 +396,17 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
 		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), not(empty())));
 
+		// Test
+		myCaptureQueriesListener.clear();
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
 			.setExpungeOldVersions(true), null);
+
+		// Verify
+		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(9, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));

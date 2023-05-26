@@ -103,6 +103,9 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	}
 
 	public List<String> getResourceTypes() {
+		if (myResourceTypes == null) {
+			myResourceTypes = new ArrayList<>();
+		}
 		return myResourceTypes;
 	}
 
