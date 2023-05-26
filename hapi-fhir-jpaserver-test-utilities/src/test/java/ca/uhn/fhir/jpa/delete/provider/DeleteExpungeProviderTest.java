@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -90,7 +91,7 @@ class DeleteExpungeProviderTest {
 		String url = myServer.getBaseUrl() +
 			"/" +
 			ProviderConstants.OPERATION_DELETE_EXPUNGE +
-			"?" + OPERATION_DELETE_EXPUNGE_URL + "=Patient?_id=123" +
+			"?" + OPERATION_DELETE_EXPUNGE_URL + "=" + UrlUtil.escapeUrlParam("Patient?_id=123") +
 			"&" + OPERATION_DELETE_CASCADE + "=true" +
 			"&" + OPERATION_DELETE_CASCADE_MAX_ROUNDS + "=2";
 		HttpPost post = new HttpPost(url);
