@@ -86,7 +86,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.util.comparator.ComparableComparator;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Id;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -396,7 +395,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			assertEquals(9, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(11, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(9, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(3, mySearchParamPresentDao.count());
 		});
@@ -419,7 +418,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			assertEquals(11, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(13, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(9, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(3, mySearchParamPresentDao.count());
 		});
@@ -442,7 +441,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			assertEquals(11, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(13, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(9, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(3, mySearchParamPresentDao.count());
 		});

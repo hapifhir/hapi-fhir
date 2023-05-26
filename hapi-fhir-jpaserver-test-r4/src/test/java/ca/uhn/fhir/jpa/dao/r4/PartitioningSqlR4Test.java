@@ -87,7 +87,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -442,7 +441,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			// HFJ_SPIDX_STRING
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);
 			ourLog.info("\n * {}", strings.stream().map(ResourceIndexedSearchParamString::toString).collect(Collectors.joining("\n * ")));
-			assertEquals(9, strings.size());
+			assertEquals(11, strings.size());
 			assertEquals(myPartitionId, strings.get(0).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, strings.get(0).getPartitionId().getPartitionDate());
 
@@ -527,9 +526,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);
 			String stringsDesc = strings.stream().map(ResourceIndexedSearchParamString::toString).sorted().collect(Collectors.joining("\n * "));
 			ourLog.info("\n * {}", stringsDesc);
-			assertThat(stringsDesc, not(containsString("_text")));
-			assertThat(stringsDesc, not(containsString("_content")));
-			assertEquals(9, strings.size(), stringsDesc);
+			assertThat(stringsDesc, containsString("_text"));
+			assertThat(stringsDesc, containsString("_content"));
+			assertEquals(11, strings.size(), stringsDesc);
 			assertEquals(null, strings.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, strings.get(0).getPartitionId().getPartitionDate());
 
@@ -736,7 +735,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			// HFJ_SPIDX_STRING
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);
 			ourLog.info("\n * {}", strings.stream().map(ResourceIndexedSearchParamString::toString).collect(Collectors.joining("\n * ")));
-			assertEquals(9, strings.size());
+			assertEquals(11, strings.size());
 			assertEquals(myPartitionId, strings.get(0).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, strings.get(0).getPartitionId().getPartitionDate());
 
