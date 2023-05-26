@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
+import ca.uhn.fhir.jpa.util.LoggingEmailSender;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhirtest.ScheduledSubscriptionDeleter;
@@ -113,8 +114,8 @@ public class CommonConfig {
 	}
 
 	@Bean
-	public IBalpAuditEventSink balpAuditEventSink(FhirContext theFhirContext) {
-		return new AsyncMemoryQueueBackedFhirClientBalpSink(theFhirContext, "http://localhost:8000/baseAudit");
+	public IBalpAuditEventSink balpAuditEventSink() {
+		return new AsyncMemoryQueueBackedFhirClientBalpSink(FhirContext.forR4Cached(), "http://localhost:8000/baseAudit");
 	}
 
 	@Bean

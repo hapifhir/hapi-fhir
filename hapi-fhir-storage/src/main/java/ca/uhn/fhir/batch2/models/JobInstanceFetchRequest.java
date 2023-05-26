@@ -35,6 +35,8 @@ public class JobInstanceFetchRequest {
 
 	private Sort mySort;
 
+	private String myJobStatus;
+
 	public int getPageStart() {
 		return myPageStart;
 	}
@@ -58,4 +60,8 @@ public class JobInstanceFetchRequest {
 	public void setSort(Sort theSort) {
 		mySort = theSort;
 	}
+
+	public String getJobStatus() { return myJobStatus; }
+
+	public void setJobStatus(String theJobStatus) { myJobStatus = theJobStatus; }
 }

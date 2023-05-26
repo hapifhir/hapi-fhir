@@ -2200,6 +2200,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public IValidationSupport.CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystemUrl, String theCode, String theDisplay, String theValueSetUrl) {
 		//TODO GGG TRY TO JUST AUTO_PASS HERE AND SEE WHAT HAPPENS.
 		invokeRunnableForUnitTest();
+		theOptions.setValidateDisplay(isNotBlank(theDisplay));
 
 		if (isNotBlank(theValueSetUrl)) {
 			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystemUrl, theCode, theDisplay);

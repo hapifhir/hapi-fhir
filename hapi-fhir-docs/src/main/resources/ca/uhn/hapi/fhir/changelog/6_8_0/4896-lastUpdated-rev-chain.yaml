@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4896
+title: "The _lastUpdated query parameter is no longer applied to _include or _revinclude search results."

@@ -257,7 +257,11 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Read(version = true)
-	public synchronized T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+	public T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+		return read(theId, theRequestDetails, false);
+	}
+
+	public synchronized T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(2247) + theId);
@@ -276,7 +280,9 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		}
 
 		if (retVal == null || retVal.isDeleted()) {
-			throw new ResourceGoneException(Msg.code(2244) + theId);
+			if (!theDeletedOk) {
+				throw new ResourceGoneException(Msg.code(2244) + theId);
+			}
 		}
 
 		myReadCount.incrementAndGet();
