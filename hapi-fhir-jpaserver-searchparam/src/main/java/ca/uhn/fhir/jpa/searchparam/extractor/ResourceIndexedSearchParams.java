@@ -45,7 +45,6 @@ import java.util.function.Predicate;
 
 import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.startsWith;
 
 public final class ResourceIndexedSearchParams {
 	final public Collection<ResourceIndexedSearchParamString> myStringParams = new ArrayList<>();
