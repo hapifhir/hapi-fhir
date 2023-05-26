@@ -45,6 +45,11 @@ class NicknameMap {
 		}
 	}
 
+	void clear() {
+		myFormalToNick.clear();
+		myNicknameToFormal.clear();
+	}
+
 	void add(String theKey, List<String> theValues) {
 		myFormalToNick.put(theKey, theValues);
 		for (String value : theValues) {

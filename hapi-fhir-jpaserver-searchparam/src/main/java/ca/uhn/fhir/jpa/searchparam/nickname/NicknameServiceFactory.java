@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.searchparam.nickname;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -22,6 +24,7 @@ import java.util.Map;
  * See names.csv
  */
 public class NicknameServiceFactory {
+	private static final Logger ourLog = LoggerFactory.getLogger(NicknameServiceFactory.class);
 
 	private NicknameSvc myNicknameSvc;
 
@@ -46,28 +49,41 @@ public class NicknameServiceFactory {
 	 */
 	public void setNicknameMap(Map<String, Collection<String>> theMap) {
 		myNameToNickname = theMap;
+
+		// we ideally never see this
+		// but in case someone wants to redefine the map after construction, we'll allow it
+		if (myNicknameSvc != null) {
+			ourLog.warn("Resetting Nickname map. Future calls to nickname service will use this new map");
+			myNicknameMap.clear();
+			populateNicknameMap();
+			myNicknameSvc.setNicknameMap(myNicknameMap);
+		}
 	}
 
 	private void createNicknameSvc() {
 		if (myNicknameSvc == null) {
-			if (myNameToNickname == null || myNameToNickname.isEmpty()) {
-				// default
-				try {
-					Resource nicknameCsvResource = new ClassPathResource("/nickname/names.csv");
-					try (InputStream inputStream = nicknameCsvResource.getInputStream()) {
-						try (Reader reader = new InputStreamReader(inputStream)) {
-							myNicknameMap.load(reader);
-						}
-					}
-				} catch (IOException e) {
-					throw new ConfigurationException(Msg.code(2234) + "Unable to load nicknames", e);
-				}
-			} else {
-				for (Map.Entry<String, Collection<String>> entry : myNameToNickname.entrySet()) {
-					myNicknameMap.add(entry.getKey(), new ArrayList<>(entry.getValue()));
-				}
-			}
+			populateNicknameMap();
 			myNicknameSvc = new NicknameSvc(myNicknameMap);
+		}
+	}
+
+	private void populateNicknameMap() {
+		if (myNameToNickname == null || myNameToNickname.isEmpty()) {
+			// default
+			try {
+				Resource nicknameCsvResource = new ClassPathResource("/nickname/names.csv");
+				try (InputStream inputStream = nicknameCsvResource.getInputStream()) {
+					try (Reader reader = new InputStreamReader(inputStream)) {
+						myNicknameMap.load(reader);
+					}
+				}
+			} catch (IOException e) {
+				throw new ConfigurationException(Msg.code(2234) + "Unable to load nicknames", e);
+			}
+		} else {
+			for (Map.Entry<String, Collection<String>> entry : myNameToNickname.entrySet()) {
+				myNicknameMap.add(entry.getKey(), new ArrayList<>(entry.getValue()));
+			}
 		}
 	}
 }

@@ -25,61 +25,6 @@ package ca.uhn.fhir.mdm.rules.matcher.models;
  * https://commons.apache.org/proper/commons-codec/userguide.html
  */
 public enum MatchTypeEnum {
-//
-//	CAVERPHONE1(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE1))),
-//	CAVERPHONE2(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE2))),
-//	COLOGNE(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.COLOGNE))),
-//	DOUBLE_METAPHONE(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.DOUBLE_METAPHONE))),
-//	MATCH_RATING_APPROACH(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.MATCH_RATING_APPROACH))),
-//	METAPHONE(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.METAPHONE))),
-//	NYSIIS(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.NYSIIS))),
-//	REFINED_SOUNDEX(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.REFINED_SOUNDEX))),
-//	SOUNDEX(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.SOUNDEX))),
-//	NICKNAME(new HapiStringMatcher(new NicknameMatcher())),
-//
-//	STRING(new HapiStringMatcher()),
-//	SUBSTRING(new HapiStringMatcher(new SubstringStringMatcher())),
-//
-//	DATE(new HapiDateMatcher()),
-//	NAME_ANY_ORDER(new NameMatcher(MdmNameMatchModeEnum.ANY_ORDER)),
-//	NAME_FIRST_AND_LAST(new NameMatcher(MdmNameMatchModeEnum.FIRST_AND_LAST)),
-//
-//	IDENTIFIER(new IdentifierMatcher()),
-//
-//	EMPTY_FIELD(new EmptyFieldMatcher()),
-//	EXTENSION_ANY_ORDER(new ExtensionMatcher()),
-//	NUMERIC(new HapiStringMatcher(new NumericMatcher()));
-//
-//	private final IMdmFieldMatcher myMdmFieldMatcher;
-//
-//	MdmMatcherEnum(IMdmFieldMatcher theMdmFieldMatcher) {
-//		myMdmFieldMatcher = theMdmFieldMatcher;
-//	}
-//
-//	/**
-//	 * Determines whether two FHIR elements match according using the provided {@link IMdmFieldMatcher}
-//	 *
-//	 * @param theFhirContext
-//	 * @param theLeftBase         left FHIR element to compare
-//	 * @param theRightBase        right FHIR element to compare
-//	 * @param theExact            used by String matchers.  If "false" then the string is normalized (case, accents) before comparing.  If "true" then an exact string comparison is performed.
-//	 * @param theIdentifierSystem used optionally by the IDENTIFIER matcher, when present, only matches the identifiers if they belong to this system.
-//	 * @return
-//	 */
-//	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
-//		return myMdmFieldMatcher.matches(theFhirContext, theLeftBase, theRightBase, theExact, theIdentifierSystem);
-//	}
-//
-//	/**
-//	 * Checks if this matcher supports checks on empty fields
-//	 *
-//	 * @return
-//	 * 		Returns true of this matcher supports empty fields and false otherwise
-//	 */
-//	public boolean isMatchingEmptyFields() {
-//		return this == EMPTY_FIELD;
-//	}
-
 
 	CAVERPHONE1,
 	CAVERPHONE2,

@@ -24,11 +24,13 @@ public class DateTimeWrapper {
 
 	public DateTimeWrapper(FhirContext theFhirContext, IBase theDate) {
 		if (theDate instanceof org.hl7.fhir.dstu3.model.BaseDateTimeType) {
-			myPrecision = ((org.hl7.fhir.dstu3.model.BaseDateTimeType) theDate).getPrecision();
-			myValueAsString = ((org.hl7.fhir.dstu3.model.BaseDateTimeType) theDate).getValueAsString();
+			org.hl7.fhir.dstu3.model.BaseDateTimeType dstu3Date = (org.hl7.fhir.dstu3.model.BaseDateTimeType) theDate;
+			myPrecision = dstu3Date.getPrecision();
+			myValueAsString = dstu3Date.getValueAsString();
 		} else if (theDate instanceof org.hl7.fhir.r4.model.BaseDateTimeType) {
-			myPrecision = ((org.hl7.fhir.r4.model.BaseDateTimeType) theDate).getPrecision();
-			myValueAsString = ((org.hl7.fhir.r4.model.BaseDateTimeType) theDate).getValueAsString();
+			org.hl7.fhir.r4.model.BaseDateTimeType r4Date = (org.hl7.fhir.r4.model.BaseDateTimeType) theDate;
+			myPrecision = r4Date.getPrecision();
+			myValueAsString = r4Date.getValueAsString();
 		} else {
 			// we should consider changing this error so we don't need the fhir context at all
 			throw new UnsupportedOperationException(Msg.code(1520) + "Version not supported: " + theFhirContext.getVersion().getVersion());

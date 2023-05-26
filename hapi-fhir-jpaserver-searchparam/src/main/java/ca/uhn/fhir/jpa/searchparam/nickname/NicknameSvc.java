@@ -26,10 +26,14 @@ import java.util.List;
 import java.util.Set;
 
 public class NicknameSvc {
-	private final NicknameMap myNicknameMap;
+	private NicknameMap myNicknameMap;
 
 	public NicknameSvc(@Nonnull NicknameMap theNicknamesMap) {
-		myNicknameMap = theNicknamesMap;
+		setNicknameMap(theNicknamesMap);
+	}
+
+	void setNicknameMap(@Nonnull NicknameMap theNicknameMap) {
+		myNicknameMap = theNicknameMap;
 	}
 
 	public int size() {

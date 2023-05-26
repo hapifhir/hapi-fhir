@@ -128,8 +128,8 @@ public class MdmResourceFieldMatcher {
 	private MdmMatchEvaluation match(IBase theLeftValue, IBase theRightValue) {
 		IMdmFieldMatcher matcher = getFieldMatcher();
 		if (matcher != null) {
-			boolean matches = matcher.matches(theLeftValue, theRightValue, getExtraMatcherParams());
-			return new MdmMatchEvaluation(matches, matches ? 1.0 : 0.0);
+			boolean isMatches = matcher.matches(theLeftValue, theRightValue, getExtraMatcherParams());
+			return new MdmMatchEvaluation(isMatches, isMatches ? 1.0 : 0.0);
 		}
 
 		MdmSimilarityJson similarity = myMdmFieldMatchJson.getSimilarity();
