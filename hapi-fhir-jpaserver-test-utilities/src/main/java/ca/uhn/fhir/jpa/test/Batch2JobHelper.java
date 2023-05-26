@@ -93,7 +93,13 @@ public class Batch2JobHelper {
 			await()
 				.atMost(theSecondsToWait, TimeUnit.SECONDS)
 				.until(() -> {
-					boolean inFinalStatus = hasStatus(theBatchJobId, StatusEnum.FAILED, StatusEnum.COMPLETED);
+					boolean inFinalStatus = false;
+					if (ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED) && !ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED)) {
+						inFinalStatus = hasStatus(theBatchJobId, StatusEnum.FAILED);
+					}
+					if (ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED) && !ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED)) {
+						inFinalStatus = hasStatus(theBatchJobId, StatusEnum.COMPLETED);
+					}
 					boolean retVal = checkStatusWithMaintenancePass(theBatchJobId, theExpectedStatus);
 					if (!retVal && inFinalStatus) {
 						// Fail fast - If we hit one of these statuses and it's not the one we want, abort

@@ -3,7 +3,11 @@ package ca.uhn.fhir.batch2.jobs.expunge;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -19,8 +23,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -34,6 +44,8 @@ public class DeleteExpungeProviderTest {
 
 	@RegisterExtension
 	public static RestfulServerExtension myServer = new RestfulServerExtension(ourCtx);
+	@RegisterExtension
+	private final HttpClientExtension myClient = new HttpClientExtension();
 
 	@Mock
 	private IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter;
@@ -48,6 +60,16 @@ public class DeleteExpungeProviderTest {
 	@AfterEach
 	public void afterEach() {
 		myServer.unregisterProvider(myProvider);
+	}
+
+	@Test
+	public void testSupplyingNoUrlsProvidesValidErrorMessage() throws IOException {
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_DELETE_EXPUNGE);
+		try(CloseableHttpResponse execute = myClient.execute(post)) {
+			String body = IOUtils.toString(execute.getEntity().getContent(), Charset.defaultCharset());
+			assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(400)));
+			assertThat(body, is(containsString("At least one `url` parameter to $delete-expunge must be provided.")));
+		}
 	}
 
 	@Test
