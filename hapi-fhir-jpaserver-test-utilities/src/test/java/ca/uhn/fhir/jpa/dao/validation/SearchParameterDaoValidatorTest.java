@@ -79,11 +79,11 @@ public class SearchParameterDaoValidatorTest {
 		SearchParameter observationQuantitySp = createSearchParameter(DATE, SP_COMPONENT_DEFINITION_OF_TYPE_DATE, "observation-date", "Observation.value.ofType(Quantity)");
 		RuntimeSearchParam observationQuantityRuntimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(observationQuantitySp);
 
-		lenient().when(mySearchParamRegistry.getActiveSearchParameterByComponentDefinition(eq(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN))).thenReturn(observationCodeRuntimeSearchParam);
-		lenient().when(mySearchParamRegistry.getActiveSearchParameterByComponentDefinition(eq(SP_COMPONENT_DEFINITION_OF_TYPE_QUANTITY))).thenReturn(observationQuantityRuntimeSearchParam);
-		lenient().when(mySearchParamRegistry.getActiveSearchParameterByComponentDefinition(eq(SP_COMPONENT_DEFINITION_OF_TYPE_STRING))).thenReturn(observationMarkdownRuntimeSearchParam);
-		lenient().when(mySearchParamRegistry.getActiveSearchParameterByComponentDefinition(eq(SP_COMPONENT_DEFINITION_OF_TYPE_DATE))).thenReturn(observationDateRuntimeSearchParam);
-		lenient().when(mySearchParamRegistry.getActiveSearchParameterByComponentDefinition(eq(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE))).thenReturn(observationPatientRuntimeSearchParam);
+		lenient().when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN))).thenReturn(observationCodeRuntimeSearchParam);
+		lenient().when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(SP_COMPONENT_DEFINITION_OF_TYPE_QUANTITY))).thenReturn(observationQuantityRuntimeSearchParam);
+		lenient().when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(SP_COMPONENT_DEFINITION_OF_TYPE_STRING))).thenReturn(observationMarkdownRuntimeSearchParam);
+		lenient().when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(SP_COMPONENT_DEFINITION_OF_TYPE_DATE))).thenReturn(observationDateRuntimeSearchParam);
+		lenient().when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE))).thenReturn(observationPatientRuntimeSearchParam);
 	}
 
 	@Test

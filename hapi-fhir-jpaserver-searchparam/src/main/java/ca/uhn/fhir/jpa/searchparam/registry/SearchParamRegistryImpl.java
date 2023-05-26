@@ -141,14 +141,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames);
 	}
 
-	@Override
-	public RuntimeSearchParam getActiveSearchParameterByComponentDefinition(String theComponentDefinition) {
-		return getActiveSearchParams().myUrlToParam.entrySet().stream()
-			.filter(e -> e.getKey().contains(theComponentDefinition))
-			.map(Map.Entry::getValue)
-			.findFirst().orElse(null);
-	}
-
 	@Nullable
 	@Override
 	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {

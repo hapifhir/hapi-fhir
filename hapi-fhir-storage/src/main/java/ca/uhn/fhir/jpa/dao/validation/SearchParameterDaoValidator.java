@@ -190,7 +190,7 @@ public class SearchParameterDaoValidator {
 	private void validateCompositeSearchParameterComponents(SearchParameter theSearchParameter, boolean theIsUniqueCombo) {
 		for (SearchParameter.SearchParameterComponentComponent nextComponent : theSearchParameter.getComponent()) {
 			if (nextComponent.getDefinition() != null) {
-				RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParameterByComponentDefinition(nextComponent.getDefinition());
+				RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParamByUrl(nextComponent.getDefinition());
 				if (componentSearchParam != null) {
 					RestSearchParameterTypeEnum componentSearchParamType = componentSearchParam.getParamType();
 					if (theIsUniqueCombo) {
