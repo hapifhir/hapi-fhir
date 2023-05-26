@@ -28,8 +28,11 @@ import com.google.common.base.Charsets;
 import com.helger.commons.collection.iterate.EmptyEnumeration;
 import org.apache.commons.collections4.iterators.IteratorEnumeration;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -146,6 +149,38 @@ public class ConsentInterceptorTest {
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+		}
+
+		verify(myConsentSvc, timeout(2000).times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, timeout(2000).times(0)).completeOperationFailure(any(), any(), any());
+	}
+
+	@Test
+	public void testConsentCanSeeResourceForbid() throws IOException {
+		Patient patientA = new Patient();
+		patientA.setId("PT-1-0");
+		patientA.setActive(true);
+		patientA.addName().setFamily("FAMILY").addGiven("GIVEN");
+		patientA.addIdentifier().setSystem("SYSTEM").setValue("VALUEA");
+
+		ourPatientProvider.store(patientA);
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.FORBID);
+
+		HttpPut httpPut = new HttpPut("http://localhost:" + myPort + "/Patient/PT-1-0");
+		httpPut.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+
+		httpPut.setEntity(new StringEntity("{\"resourceType\": \"Patient\",\"id\": \"PT-1-0\",\"text\": {\"status\": \"generated\",\"div\": \"<div><p>A valid patient resource for testing purposes</p></div>\"},\"gender\": \"male\"}"));
+
+		try (CloseableHttpResponse status = myClient.execute(httpPut)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			System.out.println("here");
+			ourLog.info("Response: {}", responseContent);
+			assertEquals(403, status.getStatusLine().getStatusCode());
+			//String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			System.out.println("here");
 			ourLog.info("Response: {}", responseContent);
 		}
 

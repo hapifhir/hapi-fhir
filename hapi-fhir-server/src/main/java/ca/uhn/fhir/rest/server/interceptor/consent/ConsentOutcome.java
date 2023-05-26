@@ -38,6 +38,11 @@ public class ConsentOutcome {
 	 */
 	public static final ConsentOutcome AUTHORIZED = new ConsentOutcome(ConsentOperationStatusEnum.AUTHORIZED);
 
+	/**
+	 * Convenience constant containing <code>new ConsentOutcome(ConsentOperationStatusEnum.FORBID)</code>
+	 */
+	public static final ConsentOutcome FORBID = new ConsentOutcome(ConsentOperationStatusEnum.FORBID);
+
 	private final ConsentOperationStatusEnum myStatus;
 	private final IBaseOperationOutcome myOperationOutcome;
 	private final IBaseResource myResource;
