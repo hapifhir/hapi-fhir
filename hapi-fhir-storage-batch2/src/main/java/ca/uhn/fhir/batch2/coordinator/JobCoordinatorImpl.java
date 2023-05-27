@@ -35,6 +35,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Logs;
@@ -90,7 +91,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	}
 
 	@Override
-	public Batch2JobStartResponse startInstance(JobInstanceStartRequest theStartRequest) {
+	public Batch2JobStartResponse startInstance(RequestDetails theRequestDetails, JobInstanceStartRequest theStartRequest) {
 		String paramsString = theStartRequest.getParameters();
 		if (isBlank(paramsString)) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
@@ -119,7 +120,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		JobDefinition<?> jobDefinition = myJobDefinitionRegistry
 			.getLatestJobDefinition(theStartRequest.getJobDefinitionId()).orElseThrow(() -> new IllegalArgumentException(Msg.code(2063) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
 
-		myJobParameterJsonValidator.validateJobParameters(theStartRequest, jobDefinition);
+		myJobParameterJsonValidator.validateJobParameters(theRequestDetails, theStartRequest, jobDefinition);
 
 		IJobPersistence.CreateResult instanceAndFirstChunk =
 			myTransactionService.withSystemRequest().execute(() ->

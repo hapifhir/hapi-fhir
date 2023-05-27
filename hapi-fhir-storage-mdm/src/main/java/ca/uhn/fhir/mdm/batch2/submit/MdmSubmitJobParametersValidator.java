@@ -23,14 +23,12 @@ import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +47,7 @@ public class MdmSubmitJobParametersValidator implements IJobParametersValidator<
 
 	@Nonnull
 	@Override
-	public List<String> validate(@Nonnull MdmSubmitJobParameters theParameters) {
+	public List<String> validate(RequestDetails theRequestDetails, @Nonnull MdmSubmitJobParameters theParameters) {
 		List<String> errorMsgs = new ArrayList<>();
 		for (PartitionedUrl partitionedUrl : theParameters.getPartitionedUrls()) {
 			String url = partitionedUrl.getUrl();

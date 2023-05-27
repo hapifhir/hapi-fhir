@@ -64,6 +64,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -118,7 +119,7 @@ public class BulkDataImportProviderTest {
 		String jobId = UUID.randomUUID().toString();
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId(jobId);
-		when(myJobCoordinator.startInstance(any()))
+		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(startResponse);
 
 		String requestUrl;
@@ -149,7 +150,7 @@ public class BulkDataImportProviderTest {
 			assertEquals("Use the following URL to poll for job status: " + requestUrl + "$import-poll-status?_jobId=" + jobId, oo.getIssue().get(1).getDiagnostics());
 		}
 
-		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
+		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
 		ourLog.info("Parameters: {}", startRequest.getParameters());
@@ -407,6 +408,7 @@ public class BulkDataImportProviderTest {
 			}
 		}
 
+		@Override
 		public void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
 			if (!myPartitionName.equals(theRequest.getTenantId()) && theRequest.getTenantId() != null) {
 				throw new ForbiddenOperationException("User does not have access to resources on the requested partition");

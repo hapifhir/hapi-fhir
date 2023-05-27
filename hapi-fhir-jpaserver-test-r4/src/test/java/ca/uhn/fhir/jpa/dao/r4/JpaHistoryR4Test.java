@@ -67,8 +67,16 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTypeHistory_CountAccurate() {
+		runInTransaction(()->{
+			assertEquals(0, myResourceHistoryTableDao.count());
+		});
+
 		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 		create20Patients();
+
+		runInTransaction(()->{
+			assertEquals(20, myResourceHistoryTableDao.count());
+		});
 
 		/*
 		 * Perform initial history

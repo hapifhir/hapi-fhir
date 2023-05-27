@@ -1,14 +1,12 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -40,7 +38,7 @@ public class ReindexJobParametersValidatorTest {
 		parameters.addUrl(theUrl);
 
 		// test
-		List<String> errors = myValidator.validate(parameters);
+		List<String> errors = myValidator.validate(null, parameters);
 
 		return errors;
 	}

@@ -66,7 +66,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
-	public String submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequestDetails) {
+	public String submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, boolean theCascade, Integer theCascadeMaxRounds, RequestDetails theRequestDetails) {
 		if (theBatchSize == null) {
 			theBatchSize = myStorageSettings.getExpungeBatchSize();
 		}
@@ -94,11 +94,13 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		// Also set toplevel partition in case there are no urls
 		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
 		deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
+		deleteExpungeJobParameters.setCascade(theCascade);
+		deleteExpungeJobParameters.setCascadeMaxRounds(theCascadeMaxRounds);
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(JOB_DELETE_EXPUNGE);
 		startRequest.setParameters(deleteExpungeJobParameters);
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(theRequestDetails, startRequest);
 		return startResponse.getInstanceId();
 	}
 }

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 
@@ -48,7 +47,7 @@ public class OldAuditEventPurgeService {
 
 		ourLog.info("Submitting an AuditEvent purge job with URL: {}", url);
 
-		myDeleteExpungeSubmitter.submitJob(1000, List.of(url), new SystemRequestDetails());
+		myDeleteExpungeSubmitter.submitJob(1000, List.of(url), false, null, new SystemRequestDetails());
 	}
 
 	public static class OldAuditEventPurgeServiceJob implements HapiJob {

@@ -117,24 +117,24 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 				totalIdsFound += submissionIds.size();
 				chunkCount++;
-				submitWorkChunk(submissionIds, theDataSink);
+				submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
 			}
 		}
 
 		totalIdsFound += idBuffer.size();
 		chunkCount++;
-		submitWorkChunk(idBuffer, theDataSink);
+		submitWorkChunk(idBuffer, requestPartitionId, theDataSink);
 
 		ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		return RunOutcome.SUCCESS;
 	}
 
-	private void submitWorkChunk(Collection<TypedPidJson> theTypedPids, IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) {
+	private void submitWorkChunk(Collection<TypedPidJson> theTypedPids, RequestPartitionId theRequestPartitionId, IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) {
 		if (theTypedPids.isEmpty()) {
 			return;
 		}
 		ourLog.info("Submitting work chunk with {} IDs", theTypedPids.size());
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(theTypedPids);
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(theTypedPids, theRequestPartitionId);
 		ourLog.debug("IDs are: {}", data);
 		theDataSink.accept(data);
 	}

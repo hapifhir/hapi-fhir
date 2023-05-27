@@ -263,7 +263,9 @@ public class Constants {
 	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
 	public static final String CAPABILITYSTATEMENT_WEBSOCKET_URL = "http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
 	public static final String PARAMETER_CASCADE_DELETE = "_cascade";
+	public static final String PARAMETER_CASCADE_DELETE_MAX_ROUNDS = "_maxRounds";
 	public static final String HEADER_CASCADE = "X-Cascade";
+	public static final String HEADER_CASCADE_MAX_ROUNDS = "max-rounds";
 	public static final String CASCADE_DELETE = "delete";
 	public static final int MAX_RESOURCE_NAME_LENGTH = 100;
 	public static final String CACHE_CONTROL_PRIVATE = "private";
