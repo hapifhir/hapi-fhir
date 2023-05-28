@@ -144,7 +144,14 @@ public class SubscriptionProcessorConfig {
 
 	@Bean
 	SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
-		return new SubscriptionTopicPayloadBuilder(theFhirContext);
+		switch(theFhirContext.getVersion().getVersion()) {
+			case R4:
+			case R4B:
+			case R5:
+				return new SubscriptionTopicPayloadBuilder(theFhirContext);
+			default:
+				return null;
+		}
 	}
 
 	@Bean
