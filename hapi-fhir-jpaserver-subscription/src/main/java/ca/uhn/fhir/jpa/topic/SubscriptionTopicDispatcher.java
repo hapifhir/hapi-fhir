@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionDeliveryRequest;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
@@ -36,8 +35,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
@@ -67,37 +64,6 @@ public class SubscriptionTopicDispatcher {
 	/**
 	 * Deliver a Subscription topic notification to all subscriptions for the given topic.
 	 *
-	 * @param theTopicUrl                       Deliver to subscriptions for this topic
-	 * @param theResources                      The list of resources to deliver.  The first resource will be the primary "focus" resource per the Subscription documentation.
-	 *                                          This list should _not_ include the SubscriptionStatus.  The SubscriptionStatus will be added as the first element to
-	 *                                          the delivered bundle.  The reason for this is that the SubscriptionStatus needs to reference the subscription ID, which is
-	 *                                          not known until the bundle is delivered.
-	 * @param theSubscriptionTopicFilterMatcher is used to match the primary "focus" resource against the subscription filters
-	 * @param theRequestType                    The type of request that led to this dispatch.  This determines the request type of the bundle entries
-	 * @param theInMemoryMatchResult            Information about the match event that led to this dispatch that is sent to SUBSCRIPTION_RESOURCE_MATCHED
-	 * @param theRequestPartitionId             The request partitions of the request, if any.  This is used by subscriptions that need to perform repository
-	 *                                          operations as a part of their delivery.  Those repository operations will be performed on the supplied request partitions
-	 * @param theTransactionId                  The transaction ID of the request, if any.  This is used for logging.
-	 * @return The number of subscription notifications that were successfully queued for delivery
-	 */
-	public int dispatch(@Nonnull String theTopicUrl, @Nonnull List<IBaseResource> theResources, @Nonnull ISubscriptionTopicFilterMatcher theSubscriptionTopicFilterMatcher, @Nonnull RestOperationTypeEnum theRequestType, @Nullable InMemoryMatchResult theInMemoryMatchResult, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theTransactionId) {
-		int count = 0;
-
-		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(theTopicUrl);
-		if (!topicSubscriptions.isEmpty()) {
-			for (ActiveSubscription activeSubscription : topicSubscriptions) {
-				boolean success = matchFiltersAndDeliver(theTopicUrl, theResources, theSubscriptionTopicFilterMatcher, theRequestType, theInMemoryMatchResult, theRequestPartitionId, theTransactionId, activeSubscription);
-				if (success) {
-					count++;
-				}
-			}
-		}
-		return count;
-	}
-
-	/**
-	 * Deliver a Subscription topic notification to all subscriptions for the given topic.
-	 *
 	 * @param theTopicUrl    Deliver to subscriptions for this topic
 	 * @param theResources   The list of resources to deliver.  The first resource will be the primary "focus" resource per the Subscription documentation.
 	 *                       This list should _not_ include the SubscriptionStatus.  The SubscriptionStatus will be added as the first element to
@@ -108,13 +74,40 @@ public class SubscriptionTopicDispatcher {
 	 */
 
 	public int dispatch(String theTopicUrl, List<IBaseResource> theResources, RestOperationTypeEnum theRequestType) {
-		return dispatch(theTopicUrl, theResources, (f, r) -> InMemoryMatchResult.successfulMatch(), theRequestType, null, null, null);
+		SubscriptionTopicDispatchRequest subscriptionTopicDispatchRequest = new SubscriptionTopicDispatchRequest(theTopicUrl, theResources, (f, r) -> InMemoryMatchResult.successfulMatch(), theRequestType, null, null, null);
+		return dispatch(subscriptionTopicDispatchRequest);
+	}
+
+	/**
+	 * Deliver a Subscription topic notification to all subscriptions for the given topic.
+	 *
+	 * @param theSubscriptionTopicDispatchRequest contains the topic URL, the list of resources to deliver, and the request type
+	 * @return The number of subscription notifications that were successfully queued for delivery
+	 */
+	public int dispatch(SubscriptionTopicDispatchRequest theSubscriptionTopicDispatchRequest) {
+		int count = 0;
+
+		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(theSubscriptionTopicDispatchRequest.getTopicUrl());
+		if (!topicSubscriptions.isEmpty()) {
+			for (ActiveSubscription activeSubscription : topicSubscriptions) {
+				boolean success = matchFiltersAndDeliver(theSubscriptionTopicDispatchRequest, activeSubscription);
+				if (success) {
+					count++;
+				}
+			}
+		}
+		return count;
 	}
 
 
-	private boolean matchFiltersAndDeliver(String theTopicUrl, List<IBaseResource> theResources, ISubscriptionTopicFilterMatcher theSubscriptionTopicFilterMatcher, RestOperationTypeEnum theRequestType, InMemoryMatchResult theInMemoryMatchResult, RequestPartitionId theRequestPartitionId, String theTransactionId, ActiveSubscription theActiveSubscription) {
-		if (theResources.size() > 0) {
-			IBaseResource firstResource = theResources.get(0);
+	private boolean matchFiltersAndDeliver(SubscriptionTopicDispatchRequest theSubscriptionTopicDispatchRequest, ActiveSubscription theActiveSubscription) {
+
+		String topicUrl = theSubscriptionTopicDispatchRequest.getTopicUrl();
+		List<IBaseResource> resources = theSubscriptionTopicDispatchRequest.getResources();
+		ISubscriptionTopicFilterMatcher subscriptionTopicFilterMatcher = theSubscriptionTopicDispatchRequest.getSubscriptionTopicFilterMatcher();
+
+		if (resources.size() > 0) {
+			IBaseResource firstResource = resources.get(0);
 			String resourceType = myFhirContext.getResourceType(firstResource);
 			CanonicalSubscription subscription = theActiveSubscription.getSubscription();
 			CanonicalTopicSubscription topicSubscription = subscription.getTopicSubscription();
@@ -123,15 +116,15 @@ public class SubscriptionTopicDispatcher {
 					topicSubscription.getFilters().size(),
 					subscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 
-				if (!SubscriptionTopicFilterUtil.matchFilters(firstResource, resourceType, theSubscriptionTopicFilterMatcher, topicSubscription)) {
+				if (!SubscriptionTopicFilterUtil.matchFilters(firstResource, resourceType, subscriptionTopicFilterMatcher, topicSubscription)) {
 					return false;
 				}
 			}
 		}
 		theActiveSubscription.incrementDeliveriesCount();
-		IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(theResources, theActiveSubscription, theTopicUrl, theRequestType);
+		IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(resources, theActiveSubscription, topicUrl, theSubscriptionTopicDispatchRequest.getRequestType());
 		bundlePayload.setId(UUID.randomUUID().toString());
-		SubscriptionDeliveryRequest subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(bundlePayload, theActiveSubscription, theRequestType, theRequestPartitionId, theTransactionId);
-		return mySubscriptionMatchDeliverer.deliverPayload(subscriptionDeliveryRequest, theInMemoryMatchResult);
+		SubscriptionDeliveryRequest subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(bundlePayload, theActiveSubscription, theSubscriptionTopicDispatchRequest);
+		return mySubscriptionMatchDeliverer.deliverPayload(subscriptionDeliveryRequest, theSubscriptionTopicDispatchRequest.getInMemoryMatchResult());
 	}
 }

@@ -128,6 +128,7 @@ public class CanonicalTopicSubscriptionFilter {
 					break;
 				case NE:
 					comparator = ":not=";
+					break;
 				default:
 					ourLog.warn("Unsupported comparator: {}", myComparator);
 			}
