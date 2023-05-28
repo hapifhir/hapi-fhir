@@ -48,6 +48,7 @@ import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 
@@ -142,6 +143,7 @@ public class SubscriptionProcessorConfig {
 		return new CompositeInMemoryDaoSubscriptionMatcher(theDaoSubscriptionMatcher, theInMemorySubscriptionMatcher);
 	}
 
+	@Lazy
 	@Bean
 	SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
 		switch(theFhirContext.getVersion().getVersion()) {
