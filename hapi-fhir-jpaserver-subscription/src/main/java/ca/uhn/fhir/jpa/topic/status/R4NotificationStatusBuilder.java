@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.topic;
+package ca.uhn.fhir.jpa.topic.status;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
@@ -17,14 +17,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public class R4NotificationStatusBuilder {
-	private static FhirContext ourFhirContext = null;
+public class R4NotificationStatusBuilder implements INotificationStatusBuilder<Parameters> {
+	private final FhirContext myFhirContext;
 
-	public static Parameters buildNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
-		if (ourFhirContext == null) {
-			// Lazy load for non R4 context
-			ourFhirContext = FhirContext.forR4();
-		}
+	public R4NotificationStatusBuilder(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
+
+	public Parameters buildNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
 		Long eventNumber = theActiveSubscription.getDeliveriesCount();
 
 		// See http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Parameters-r4-notification-status.json.html
@@ -32,7 +32,7 @@ public class R4NotificationStatusBuilder {
 		Parameters parameters = new Parameters();
 		parameters.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_STATUS);
 		parameters.setId(UUID.randomUUID().toString());
-		parameters.addParameter("subscription", new Reference(theActiveSubscription.getSubscription().getIdElement(ourFhirContext)));
+		parameters.addParameter("subscription", new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
 		parameters.addParameter("topic", new CanonicalType(theTopicUrl));
 		parameters.addParameter("status", new CodeType(Subscription.SubscriptionStatus.ACTIVE.toCode()));
 		parameters.addParameter("type", new CodeType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION.toCode()));
