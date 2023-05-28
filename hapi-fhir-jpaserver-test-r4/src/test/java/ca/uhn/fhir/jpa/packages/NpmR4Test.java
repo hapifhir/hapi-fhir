@@ -117,7 +117,9 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		int port = JettyUtil.getPortForStartedServer(myServer);
 		jpaPackageCache.getPackageServers().clear();
-		jpaPackageCache.addPackageServer(new PackageServer("http://localhost:" + port));
+		String url = "http://localhost:" + port;
+		ourLog.info("Package server is at base: {}", url);
+		jpaPackageCache.addPackageServer(new PackageServer(url));
 
 		myFakeNpmServlet.responses.clear();
 	}

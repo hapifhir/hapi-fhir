@@ -31,12 +31,14 @@ import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -225,13 +227,22 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			throw new MethodNotAllowedException(Msg.code(963) + "_expunge is not enabled on this server: " + getStorageSettings().cannotDeleteExpungeReason());
 		}
 
-		if (theUrl.contains(Constants.PARAMETER_CASCADE_DELETE) || (theRequest.getHeader(Constants.HEADER_CASCADE) != null && theRequest.getHeader(Constants.HEADER_CASCADE).equals(Constants.CASCADE_DELETE))) {
-			throw new InvalidRequestException(Msg.code(964) + "_expunge cannot be used with _cascade");
+		RestfulServerUtils.DeleteCascadeDetails cascadeDelete = RestfulServerUtils.extractDeleteCascadeParameter(theRequest);
+		boolean cascade = false;
+		Integer cascadeMaxRounds = null;
+		if (cascadeDelete.getMode() == DeleteCascadeModeEnum.DELETE) {
+			cascade = true;
+			cascadeMaxRounds = cascadeDelete.getMaxRounds();
+			if (cascadeMaxRounds == null) {
+				cascadeMaxRounds = myStorageSettings.getMaximumDeleteConflictQueryCount();
+			} else if (myStorageSettings.getMaximumDeleteConflictQueryCount() != null && myStorageSettings.getMaximumDeleteConflictQueryCount() < cascadeMaxRounds) {
+				cascadeMaxRounds = myStorageSettings.getMaximumDeleteConflictQueryCount();
+			}
 		}
 
 		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
 		try {
-			String jobId = getDeleteExpungeJobSubmitter().submitJob(getStorageSettings().getExpungeBatchSize(), urlsToDeleteExpunge, theRequest);
+			String jobId = getDeleteExpungeJobSubmitter().submitJob(getStorageSettings().getExpungeBatchSize(), urlsToDeleteExpunge, cascade, cascadeMaxRounds, theRequest);
 			return new DeleteMethodOutcome(createInfoOperationOutcome("Delete job submitted with id " + jobId));
 		} catch (InvalidRequestException e) {
 			throw new InvalidRequestException(Msg.code(965) + "Invalid Delete Expunge Request: " + e.getMessage(), e);

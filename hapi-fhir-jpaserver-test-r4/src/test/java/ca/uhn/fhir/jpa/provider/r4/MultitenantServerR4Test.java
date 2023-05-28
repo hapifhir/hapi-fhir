@@ -69,6 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -672,7 +673,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 			Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 			startResponse.setInstanceId(jobId);
-			when(myJobRunner.startNewJob(any()))
+			when(myJobRunner.startNewJob(isNotNull(), any()))
 				.thenReturn(startResponse);
 			when(myJobRunner.getJobInfo(anyString()))
 				.thenReturn(jobInfo);

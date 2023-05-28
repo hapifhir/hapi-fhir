@@ -711,7 +711,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	private JobInstance verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 
 		assertNotNull(startResponse);
 		assertFalse(startResponse.isUsesCachedResult());
@@ -781,7 +781,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// Test
 		try {
-			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -800,7 +800,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// Test
 		try {
-			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -819,7 +819,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// Test
 		try {
-			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -838,7 +838,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// Test
 		try {
-			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -857,7 +857,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// Test
 		try {
-			myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 			fail();
 		} catch (InvalidRequestException e) {
 

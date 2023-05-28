@@ -240,7 +240,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	private String startJob(BulkDataExportOptions theOptions) {
 		BulkExportParameters startRequest = BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions);
 		startRequest.setUseExistingJobsFirst(false);
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(startRequest);
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(null, startRequest);
 		assertNotNull(startResponse);
 		return startResponse.getInstanceId();
 	}
