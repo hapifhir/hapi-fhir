@@ -41,7 +41,7 @@ public class SubscriptionTopicPayloadBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicPayloadBuilder.class);
 	private final FhirContext myFhirContext;
 	private final FhirVersionEnum myFhirVersion;
-	private final INotificationStatusBuilder myNotificationStatusBuilder;
+	private final INotificationStatusBuilder<? extends IBaseResource> myNotificationStatusBuilder;
 
 	public SubscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -100,8 +100,6 @@ public class SubscriptionTopicPayloadBuilder {
 	private void setBundleType(BundleBuilder bundleBuilder) {
 		switch (myFhirVersion) {
 			case R4:
-				bundleBuilder.setType(Bundle.BundleType.HISTORY.toCode());
-				break;
 			case R4B:
 				bundleBuilder.setType(Bundle.BundleType.HISTORY.toCode());
 				break;
