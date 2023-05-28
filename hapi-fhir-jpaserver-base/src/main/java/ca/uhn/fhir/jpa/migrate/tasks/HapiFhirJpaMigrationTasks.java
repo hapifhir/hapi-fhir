@@ -45,6 +45,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import software.amazon.awssdk.utils.StringUtils;
 
+import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;

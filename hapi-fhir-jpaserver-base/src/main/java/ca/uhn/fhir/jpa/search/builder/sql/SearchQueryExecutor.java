@@ -31,6 +31,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
