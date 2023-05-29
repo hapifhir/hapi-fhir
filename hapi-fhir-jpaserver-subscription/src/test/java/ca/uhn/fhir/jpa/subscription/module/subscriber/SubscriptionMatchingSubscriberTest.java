@@ -16,7 +16,6 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
@@ -77,7 +76,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(2, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(1);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
 		assertEquals(1, ourContentTypes.size());
@@ -100,7 +101,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(2, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(1);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
 		assertEquals(1, ourContentTypes.size());
@@ -118,7 +121,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		assertEquals(1, mySubscriptionRegistry.size());
 		ourObservationListener.setExpectedCount(1);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendResource(observation);
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
 		assertEquals(1, ourContentTypes.size());
@@ -142,7 +147,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		mySubscriptionAfterDelivery.setExpectedCount(1);
 		ourObservationListener.setExpectedCount(0);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.clear();
 		mySubscriptionAfterDelivery.awaitExpected();
 
@@ -169,7 +176,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(3, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(2);
+		mySubscriptionResourceMatched.setExpectedCount(2);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
 		assertEquals(2, ourContentTypes.size());
@@ -402,7 +411,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription modifiedSubscription = subscription.copy();
 		// the original partition info was the request info, but we need the actual storage partition.
 		modifiedSubscription.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
-		when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any(RequestDetails.class))).thenReturn(modifiedSubscription);
+		when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any(), eq(true))).thenReturn(modifiedSubscription);
 	}
 
 	@Nested

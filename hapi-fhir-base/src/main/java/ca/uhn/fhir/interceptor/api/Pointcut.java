@@ -2122,7 +2122,7 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.context.RuntimeResourceDefinition - the resource type being accessed
+	 * ca.uhn.fhir.context.RuntimeResourceDefinition - The resource type being accessed, or {@literal null} if no specific type is associated with the request.
 	 * </li>
 	 * </ul>
 	 * <p>

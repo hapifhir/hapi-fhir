@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import javax.annotation.Nonnull;
@@ -32,8 +33,8 @@ public class HomogeneousResourcePidList extends BaseResourcePidList {
 	@Nonnull
 	final String myResourceType;
 
-	public HomogeneousResourcePidList(String theResourceType, Collection<IResourcePersistentId> theIds, Date theLastDate) {
-		super(theIds, theLastDate);
+	public HomogeneousResourcePidList(String theResourceType, Collection<IResourcePersistentId> theIds, Date theLastDate, RequestPartitionId theRequestPartitionId) {
+		super(theIds, theLastDate, theRequestPartitionId);
 		myResourceType = theResourceType;
 	}
 

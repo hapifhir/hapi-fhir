@@ -30,14 +30,15 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.Logs;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SubscriptionTopicValidatingInterceptor {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicValidatingInterceptor.class);
+	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
+
 	private final FhirContext myFhirContext;
 	private final SubscriptionQueryValidator mySubscriptionQueryValidator;
 
@@ -69,7 +70,7 @@ public class SubscriptionTopicValidatingInterceptor {
 			return;
 		}
 
-		SubscriptionTopic subscriptionTopic = SubscriptionTopicCanonicalizer.canonicalize(myFhirContext, theSubscription);
+		SubscriptionTopic subscriptionTopic = SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theSubscription);
 
 		boolean finished = false;
 		if (subscriptionTopic.getStatus() == null) {
@@ -86,7 +87,8 @@ public class SubscriptionTopicValidatingInterceptor {
 
 		// WIP STR5 add cross-partition support like in SubscriptionValidatingInterceptor
 
-		// WIP STR5 warn if can't be evaluated in memory?
+		// WIP STR5 warn if the SubscriptionTopic criteria can't be evaluated in memory?  Do we want to annotate the
+		//  strategy with an extension like Subscription?
 
 		if (!finished) {
 			subscriptionTopic.getResourceTrigger().stream()

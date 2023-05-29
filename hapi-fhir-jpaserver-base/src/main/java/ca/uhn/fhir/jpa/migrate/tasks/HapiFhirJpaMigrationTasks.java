@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -44,6 +45,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import software.amazon.awssdk.utils.StringUtils;
 
+import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +55,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
-import static org.apache.commons.lang3.StringUtils.trim;
 
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection", "java:S1192"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
@@ -94,7 +95,69 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init610();
 		init620();
 		init640();
+		init640_after_20230126();
 		init660();
+		init680();
+	}
+
+	protected void init680() {
+		Builder version = forVersion(VersionEnum.V6_8_0);
+
+      // HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
+    Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
+
+    resourceTable
+      .addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
+      .unique(false)
+      .online(true)
+      .withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
+
+		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+		tagDefTable.dropIndex("20230505.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
+
+		tagDefTable.dropIndex("20230505.2", "IDX_TAG_DEF_TP_CD_SYS");
+		tagDefTable
+			.addIndex("20230505.3", "IDX_TAG_DEF_TP_CD_SYS")
+			.unique(false)
+			.online(false)
+			.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID", "TAG_VERSION", "TAG_USER_SELECTED");
+
+		// This migration is failing in Oracle because there is already an index created on column RES_VER_PID since it is a primary key.
+		// IDX_RESVERPROV_RESVER_PID is removed in 20230523.1
+		version
+			.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20230510.1", "IDX_RESVERPROV_RESVER_PID")
+			.unique(false)
+			.withColumns("RES_VER_PID")
+			.failureAllowed();
+
+		version
+			.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20230510.2", "IDX_RESVERPROV_RES_PID")
+			.unique(false)
+			.withColumns("RES_PID");
+
+		version
+			.onTable(ResourceHistoryTable.HFJ_RES_VER)
+			.addColumn("20230510.4", "SOURCE_URI")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 100);
+		version
+			.onTable(ResourceHistoryTable.HFJ_RES_VER)
+			.addColumn("20230510.5", "REQUEST_ID")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 16);
+
+		version
+			.onTable("HFJ_RES_VER_PROV")
+			.addForeignKey("20230510.6", "FK_RESVERPROV_RES_PID")
+			.toColumn("RES_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		version
+			.onTable("HFJ_RES_VER_PROV")
+			.dropIndex("20230523.1", "IDX_RESVERPROV_RESVER_PID");
+
 	}
 
 	protected void init660() {
@@ -337,6 +400,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			linkTable.addForeignKey("20230424.5", "FK_RESLINK_TARGET")
 				.toColumn("TARGET_RESOURCE_ID").references("HFJ_RESOURCE", "RES_ID");
 		}
+
+		{
+			version.onTable("MPI_LINK")
+				.addIndex("20230504.1", "IDX_EMPI_GR_TGT")
+				.unique(false)
+				.withColumns("GOLDEN_RESOURCE_PID", "TARGET_PID");
+		}
+
 	}
 
 	protected void init640() {
@@ -359,6 +430,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 	}
+
+	protected void init640_after_20230126() {
+		Builder version = forVersion(VersionEnum.V6_3_0);
+		{  //We added this constraint when userSelected and Version were added. It is no longer necessary.
+			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+			tagDefTable.dropIndex("20230503.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
+		}
+	}
+
 
 	private void init620() {
 		Builder version = forVersion(VersionEnum.V6_2_0);
@@ -876,11 +956,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("RES_ID");
 
-
 		theVersion.onTable("HFJ_RES_VER_PROV")
 			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID")
 			.unique(false)
 			.withColumns("RES_PID")
+			.doNothing() // This index is added below in a better form
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 		theVersion.onTable("HFJ_FORCED_ID")
@@ -1499,7 +1579,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resVerProv
 			.addForeignKey("20190921.15", "FK_RESVERPROV_RES_PID")
 			.toColumn("RES_PID")
-			.references("HFJ_RESOURCE", "RES_ID");
+			.references("HFJ_RESOURCE", "RES_ID")
+			.doNothing(); // Added below in a better form
 		resVerProv.addColumn("SOURCE_URI").nullable().type(ColumnTypeEnum.STRING, 100);
 		resVerProv.addColumn("REQUEST_ID").nullable().type(ColumnTypeEnum.STRING, 16);
 		resVerProv.addIndex("20190921.16", "IDX_RESVERPROV_SOURCEURI").unique(false).withColumns("SOURCE_URI");

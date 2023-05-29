@@ -20,28 +20,15 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import org.springframework.context.annotation.Bean;
 
 public class SubscriptionTopicConfig {
 	@Bean
-	SubscriptionMatchDeliverer subscriptionMatchDeliverer(FhirContext theFhirContext, IInterceptorBroadcaster theInterceptorBroadcaster, SubscriptionChannelRegistry theSubscriptionChannelRegistry) {
-		return new SubscriptionMatchDeliverer(theFhirContext, theInterceptorBroadcaster, theSubscriptionChannelRegistry);
-	}
-
-	@Bean
 	SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
 		return new SubscriptionTopicMatchingSubscriber(theFhirContext);
-	}
-
-	@Bean
-	SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
-		return new SubscriptionTopicPayloadBuilder(theFhirContext);
 	}
 
 	@Bean

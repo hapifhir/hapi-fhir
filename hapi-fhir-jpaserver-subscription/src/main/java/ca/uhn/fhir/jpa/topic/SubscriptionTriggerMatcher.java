@@ -24,23 +24,26 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
+import ca.uhn.fhir.storage.PreviousVersionReader;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SubscriptionTriggerMatcher {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggerMatcher.class);
+	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
+
 	private final SubscriptionTopicSupport mySubscriptionTopicSupport;
 	private final BaseResourceMessage.OperationTypeEnum myOperation;
 	private final SubscriptionTopic.SubscriptionTopicResourceTriggerComponent myTrigger;
 	private final String myResourceName;
 	private final IBaseResource myResource;
 	private final IFhirResourceDao myDao;
+	private final PreviousVersionReader myPreviousVersionReader;
 	private final SystemRequestDetails mySrd;
 
 	public SubscriptionTriggerMatcher(SubscriptionTopicSupport theSubscriptionTopicSupport, ResourceModifiedMessage theMsg, SubscriptionTopic.SubscriptionTopicResourceTriggerComponent theTrigger) {
@@ -50,6 +53,7 @@ public class SubscriptionTriggerMatcher {
 		myResourceName = myResource.fhirType();
 		myDao = mySubscriptionTopicSupport.getDaoRegistry().getResourceDao(myResourceName);
 		myTrigger = theTrigger;
+		myPreviousVersionReader = new PreviousVersionReader(myDao);
 		mySrd = new SystemRequestDetails();
 	}
 
@@ -82,12 +86,10 @@ public class SubscriptionTriggerMatcher {
 		if (previousCriteria != null) {
 			if (myOperation == ResourceModifiedMessage.OperationTypeEnum.UPDATE ||
 				myOperation == ResourceModifiedMessage.OperationTypeEnum.DELETE) {
-				Long currentVersion = myResource.getIdElement().getVersionIdPartAsLong();
-				if (currentVersion > 1) {
-					IIdType previousVersionId = myResource.getIdElement().withVersion("" + (currentVersion - 1));
-					// WIP STR5 should we use the partition id from the resource?  Ideally we should have a "previous version" service we can use for this
-					IBaseResource previousVersion = myDao.read(previousVersionId, new SystemRequestDetails());
-					previousMatches = matchResource(previousVersion, previousCriteria);
+
+				Optional<IBaseResource> oPreviousVersion = myPreviousVersionReader.readPreviousVersion(myResource);
+				if (oPreviousVersion.isPresent()) {
+					previousMatches = matchResource(oPreviousVersion.get(), previousCriteria);
 				} else {
 					ourLog.warn("Resource {} has a version of 1, which should not be the case for a create or delete operation", myResource.getIdElement().toUnqualifiedVersionless());
 				}

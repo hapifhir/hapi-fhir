@@ -28,6 +28,8 @@ public class Logs {
 
 	private static final Logger ourSubscriptionTroubleshootingLog = LoggerFactory.getLogger("ca.cdr.log.subscription_troubleshooting");
 
+	private static final Logger ourSubscriptionTopicLog = LoggerFactory.getLogger("ca.uhn.fhir.log.subscription_topic_troubleshooting");
+
 	public static Logger getBatchTroubleshootingLog() {
 		return ourBatchTroubleshootingLog;
 	}
@@ -38,5 +40,9 @@ public class Logs {
 
 	public static Logger getSubscriptionTroubleshootingLog() {
 		return ourSubscriptionTroubleshootingLog;
+	}
+
+	public static Logger getSubscriptionTopicLog() {
+		return ourSubscriptionTopicLog;
 	}
 }

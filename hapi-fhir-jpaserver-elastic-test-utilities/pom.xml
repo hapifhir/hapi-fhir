@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.7.0-SNAPSHOT</version>
+		<version>6.7.3-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -212,16 +212,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<!--<useManifestOnlyJar>false</useManifestOnlyJar>-->
-					<forkCount>1</forkCount>
-					<reuseForks>false</reuseForks>
-					<runOrder>alphabetical</runOrder>
-					<includes>
-						<include>**/*IT.java</include>
-					</includes>
-					<useModulePath>false</useModulePath>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -242,11 +232,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<runOrder>alphabetical</runOrder>
 					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-					<forkCount>0.6C</forkCount>
-					<excludes>*StressTest*</excludes>
-					<skip>${skipFailsafe}</skip>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -283,9 +269,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<runOrder>alphabetical</runOrder>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>

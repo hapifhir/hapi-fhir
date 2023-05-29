@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.r4.SystemProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -39,7 +38,6 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -107,6 +105,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -122,6 +121,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -2536,10 +2536,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(1, 2).get(0)));
-
+		assertTrue(history.getResources(0, 1).get(0).isDeleted());
+		assertFalse(history.getResources(1, 2).get(0).isDeleted());
 	}
 
 	@Test
@@ -4111,6 +4109,41 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
 		}
 
+	}
+
+	@Test
+	public void testOrganizationOver100ReferencesFromBundleNoMultipleResourcesMatchError() throws IOException {
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+
+		// The bug involves a invalid Long equality comparison, so we need a generated organization ID much larger than 1.
+		IntStream.range(0, 150).forEach(myint -> {
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
+			myPatientDao.create(patient, mySrd);
+		});
+
+		final Organization organization = new Organization();
+		organization.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+			.setValue("9395b8cb-702c-3c5d-926e-1c3524fd6560");
+		organization.setName("PCP1401");
+		myOrganizationDao.create(organization, mySrd);
+
+		// This bundle needs to have over 100 resources, each referring to the same organization above.
+		// If there are 100 or less, then TransactionProcessor.preFetchConditionalUrls() will work off the same Long instance for the Organization JpaId
+		// and the Long == Long equality comparison will work
+		final InputStream resourceAsStream = getClass().getResourceAsStream("/bundle-refers-to-same-organization.json");
+		assertNotNull(resourceAsStream);
+		final String input = IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8);
+		final Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
+
+		try {
+			mySystemDao.transaction(mySrd, bundle);
+		} catch (PreconditionFailedException thePreconditionFailedException) {
+			if (thePreconditionFailedException.getMessage().contains(Msg.code(2207))) {
+				fail("This test has failed with HAPI-2207, exactly the condition we aim to prevent");
+			}
+			// else let the Exception bubble up
+		}
 	}
 
 	@Test

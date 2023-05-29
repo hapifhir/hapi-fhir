@@ -5,12 +5,15 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -23,6 +26,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
@@ -36,10 +40,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -67,6 +73,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 	@Autowired(required = false)
 	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+	@Autowired
+	SubscriptionTopicDispatcher mySubscriptionTopicDispatcher;
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
@@ -129,7 +137,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
 
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 	}
 
 	@Test
@@ -153,7 +161,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getMeta().getVersionId());
 		assertEquals("http://source-system.com", ourObservationProvider.getStoredResources().get(0).getMeta().getSource());
@@ -174,7 +182,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(2);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getMeta().getVersionId());
 		assertEquals("http://other-source", ourObservationProvider.getStoredResources().get(0).getMeta().getSource());
@@ -245,7 +253,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getMeta().getVersionId());
 		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
@@ -270,7 +278,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(2);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getMeta().getVersionId());
 		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
@@ -358,7 +366,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		// Send a meta-add
 		ourLog.info("Sending a meta-add");
@@ -411,7 +419,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		// Send a meta-add
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
@@ -461,7 +469,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		// Send an update with no changes
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
@@ -494,7 +502,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		IdType idElement = ourObservationProvider.getStoredResources().get(0).getIdElement();
 		assertEquals(observation1.getIdElement().getIdPart(), idElement.getIdPart());
@@ -516,7 +524,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(2);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
 
 		idElement = ourObservationProvider.getResourceUpdates().get(1).getIdElement();
 		assertEquals(observation2.getIdElement().getIdPart(), idElement.getIdPart());
@@ -659,7 +667,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 
@@ -739,7 +747,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 
@@ -891,10 +899,10 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Should see 1 subscription notification for each type
 		ourObservationProvider.waitForCreateCount(0);
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		ourPatientProvider.waitForCreateCount(0);
 		ourPatientProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
 
 	}
 
@@ -918,10 +926,10 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Should see 1 subscription notification for each type
 		ourObservationProvider.waitForCreateCount(0);
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		ourPatientProvider.waitForCreateCount(0);
 		ourPatientProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
 		ourOrganizationProvider.waitForCreateCount(0);
 		ourOrganizationProvider.waitForUpdateCount(0);
 
@@ -1081,7 +1089,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Foo: FOO"));
 		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Bar: BAR"));
 	}
@@ -1296,4 +1304,39 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	}
 
+	@Test
+	public void testTopicSubscription() throws Exception {
+		Subscription subscription = SubscriptionTestDataHelper.buildR4TopicSubscription();
+		subscription.setIdElement(null);
+		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
+		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
+		channel.setPayload(CT_FHIR_JSON_NEW);
+		channel.setEndpoint(ourRestfulServer.getBaseUrl());
+
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
+		mySubscriptionIds.add(methodOutcome.getId());
+		waitForActivatedSubscriptionCount(1);
+
+		String patientId = "topic-test-patient-id";
+		Patient patient = new Patient();
+		patient.setId(patientId);
+		patient.setActive(true);
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+
+		int count = mySubscriptionTopicDispatcher.dispatch(SubscriptionTestDataHelper.TEST_TOPIC, List.of(patient), RestOperationTypeEnum.CREATE);
+		assertEquals(1, count);
+
+		waitForQueueToDrain();
+
+		ourTransactionProvider.waitForTransactionCount(1);
+
+		Bundle bundle = ourTransactionProvider.getTransactions().get(0);
+		assertEquals(2, bundle.getEntry().size());
+		Parameters parameters = (Parameters) bundle.getEntry().get(0).getResource();
+		// WIP STR5 assert parameters contents
+		Patient bundlePatient = (Patient) bundle.getEntry().get(1).getResource();
+		assertTrue(bundlePatient.getActive());
+		assertEquals(Enumerations.AdministrativeGender.FEMALE, bundlePatient.getGender());
+	}
 }

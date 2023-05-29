@@ -257,12 +257,11 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testReferenceExpansionQuietlyFailsOnMissingMdmMatches() {
+	public void testReferenceExpansionQuietlyFailsOnMissingMdmMatches() throws InterruptedException {
 		myStorageSettings.setAllowMdmExpansion(true);
 		Patient patient = buildJanePatient();
 		patient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
-		DaoMethodOutcome daoMethodOutcome = myMdmHelper.doCreateResource(patient, true);
-		String id = daoMethodOutcome.getId().getIdPart();
+		String id = myMdmHelper.executeWithLatch(() -> myMdmHelper.doCreateResource(patient, true)).getId().getIdPart();
 		createObservationWithSubject(id);
 
 		//Even though the user has NO mdm links, that should not cause a request failure.

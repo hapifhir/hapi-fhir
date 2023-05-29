@@ -25,15 +25,15 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
+import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -41,11 +41,11 @@ import org.springframework.messaging.MessagingException;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicMatchingSubscriber.class);
+	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 
 	private final FhirContext myFhirContext;
 	@Autowired
@@ -60,6 +60,10 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	SubscriptionTopicPayloadBuilder mySubscriptionTopicPayloadBuilder;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private SubscriptionTopicDispatcher mySubscriptionTopicDispatcher;
+	@Autowired
+	private InMemoryTopicFilterMatcher myInMemoryTopicFilterMatcher;
 
 	public SubscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -97,24 +101,18 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 			SubscriptionTopicMatcher matcher = new SubscriptionTopicMatcher(mySubscriptionTopicSupport, topic);
 			InMemoryMatchResult result = matcher.match(theMsg);
 			if (result.matched()) {
-				ourLog.info("Matched topic {} to message {}", topic.getUrl(), theMsg);
-				deliverToTopicSubscriptions(theMsg, topic, result);
+				int deliveries = deliverToTopicSubscriptions(theMsg, topic, result);
+				ourLog.info("Matched topic {} to message {}.  Notifications sent to {} subscriptions for delivery.", topic.getUrl(), theMsg, deliveries);
 			}
 		}
 	}
 
-	private void deliverToTopicSubscriptions(ResourceModifiedMessage theMsg, SubscriptionTopic topic, InMemoryMatchResult result) {
-		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(topic.getUrl());
-		if (!topicSubscriptions.isEmpty()) {
-			IBaseResource matchedResource = theMsg.getNewPayload(myFhirContext);
+	private int deliverToTopicSubscriptions(ResourceModifiedMessage theMsg, SubscriptionTopic theSubscriptionTopic, InMemoryMatchResult theInMemoryMatchResult) {
+		String topicUrl = theSubscriptionTopic.getUrl();
+		IBaseResource matchedResource = theMsg.getNewPayload(myFhirContext);
+		List<IBaseResource> matchedResourceList = Collections.singletonList(matchedResource);
+		RestOperationTypeEnum restOperationType = theMsg.getOperationType().asRestOperationType();
 
-			for (ActiveSubscription activeSubscription : topicSubscriptions) {
-				// WIP STR5 apply subscription filters
-				IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(matchedResource, theMsg, activeSubscription, topic);
-				// WIP STR5 do we need to add a total?  If so can do that with R5BundleFactory
-				bundlePayload.setId(UUID.randomUUID().toString());
-				mySubscriptionMatchDeliverer.deliverPayload(bundlePayload, theMsg, activeSubscription, result);
-			}
-		}
+		return mySubscriptionTopicDispatcher.dispatch(new SubscriptionTopicDispatchRequest(topicUrl, matchedResourceList, myInMemoryTopicFilterMatcher, restOperationType, theInMemoryMatchResult, theMsg.getPartitionId(), theMsg.getTransactionId()));
 	}
 }

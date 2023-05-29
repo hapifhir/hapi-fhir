@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.jobs.export.BulkExportUtil;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
@@ -32,10 +33,10 @@ import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 
@@ -44,15 +45,21 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	private static final Logger ourLog = getLogger(IBatch2JobRunner.class);
 
-	@Autowired
-	private IJobCoordinator myJobCoordinator;
+	private final IJobCoordinator myJobCoordinator;
+
+	private final FhirContext myFhirContext;
+
+	public Batch2JobRunnerImpl(IJobCoordinator theJobCoordinator, FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+		myJobCoordinator = theJobCoordinator;
+	}
 
 	@Override
-	public Batch2JobStartResponse startNewJob(Batch2BaseJobParameters theParameters) {
+	public Batch2JobStartResponse startNewJob(RequestDetails theRequestDetails, Batch2BaseJobParameters theParameters) {
 		switch (theParameters.getJobDefinitionId()) {
 			case Batch2JobDefinitionConstants.BULK_EXPORT:
 				if (theParameters instanceof BulkExportParameters) {
-					return startBatch2BulkExportJob((BulkExportParameters) theParameters);
+					return startBatch2BulkExportJob(theRequestDetails, (BulkExportParameters) theParameters);
 				}
 				else {
 					ourLog.error("Invalid parameters for " + Batch2JobDefinitionConstants.BULK_EXPORT);
@@ -104,6 +111,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		info.setEndTime(theInstance.getEndTime());
 		info.setReport(theInstance.getReport());
 		info.setErrorMsg(theInstance.getErrorMessage());
+		info.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
 		if ( Batch2JobDefinitionConstants.BULK_EXPORT.equals(theInstance.getJobDefinitionId())) {
 			BulkExportJobParameters parameters = theInstance.getParameters(BulkExportJobParameters.class);
 			info.setRequestPartitionId(parameters.getPartitionId());
@@ -112,10 +120,11 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		return info;
 	}
 
-	private Batch2JobStartResponse startBatch2BulkExportJob(BulkExportParameters theParameters) {
+	private Batch2JobStartResponse startBatch2BulkExportJob(RequestDetails theRequestDetails, BulkExportParameters theParameters) {
 		JobInstanceStartRequest request = createStartRequest(theParameters);
-		request.setParameters(BulkExportJobParameters.createFromExportJobParameters(theParameters));
-		return myJobCoordinator.startInstance(request);
+		BulkExportJobParameters parameters = BulkExportJobParameters.createFromExportJobParameters(theParameters);
+		request.setParameters(parameters);
+		return myJobCoordinator.startInstance(theRequestDetails, request);
 	}
 
 	private JobInstanceStartRequest createStartRequest(Batch2BaseJobParameters theParameters) {

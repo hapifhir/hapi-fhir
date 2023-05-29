@@ -166,7 +166,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
@@ -247,6 +246,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 
+	protected final CodingSpy myCodingSpy = new CodingSpy();
+
 	@VisibleForTesting
 	public void setExternallyStoredResourceServiceRegistryForUnitTest(ExternallyStoredResourceServiceRegistry theExternallyStoredResourceServiceRegistry) {
 		myExternallyStoredResourceServiceRegistry = theExternallyStoredResourceServiceRegistry;
@@ -283,7 +284,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (tagList != null) {
 			for (Tag next : tagList) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(),
-					next.getLabel(), next.getVersion(), next.getUserSelected());
+					next.getLabel(), next.getVersion(), myCodingSpy.getBooleanObject(next));
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -323,7 +324,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (tagList != null) {
 			for (IBaseCoding next : tagList) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(),
-					next.getDisplay(), next.getVersion(), next.getUserSelected());
+					next.getDisplay(), next.getVersion(), myCodingSpy.getBooleanObject(next));
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -335,7 +336,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IBaseCoding> securityLabels = theResource.getMeta().getSecurity();
 		if (securityLabels != null) {
 			for (IBaseCoding next : securityLabels) {
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay(), null, null);
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay(), next.getVersion(),  myCodingSpy.getBooleanObject(next));
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -394,7 +395,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		MemoryCacheService.TagDefinitionCacheKey key = toTagDefinitionMemoryCacheKey(theTagType, theScheme, theTerm, theVersion, theUserSelected);
 
 		TagDefinition retVal = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, key);
-
 		if (retVal == null) {
 			HashMap<MemoryCacheService.TagDefinitionCacheKey, TagDefinition> resolvedTagDefinitions = theTransactionDetails
 				.getOrCreateUserData(HapiTransactionService.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS, HashMap::new);
@@ -425,6 +425,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 													 String theVersion, Boolean theUserSelected) {
 
 		TypedQuery<TagDefinition> q = buildTagQuery(theTagType, theScheme, theTerm, theVersion, theUserSelected);
+		q.setMaxResults(1);
 
 		TransactionTemplate template = new TransactionTemplate(myTransactionManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -525,9 +526,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			? builder.isNull(from.get("myVersion"))
 			: builder.equal(from.get("myVersion"), theVersion));
 
-		predicates.add( isNull(theUserSelected) || isFalse(theUserSelected)
-			? builder.isFalse(from.get("myUserSelected"))
-			: builder.isTrue(from.get("myUserSelected")));
+		predicates.add( isNull(theUserSelected)
+			? builder.isNull(from.get("myUserSelected"))
+			: builder.equal(from.get("myUserSelected"), theUserSelected));
 
 		cq.where(predicates.toArray(new Predicate[0]));
 		return myEntityManager.createQuery(cq);
@@ -535,20 +536,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 
 	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
-		String newVersion;
-		long newVersionLong;
 		if (theResourceId == null || theResourceId.getVersionIdPart() == null) {
-			newVersion = "1";
-			newVersionLong = 1;
+			theSavedEntity.initializeVersion();
 		} else {
-			newVersionLong = theResourceId.getVersionIdPartAsLong() + 1;
-			newVersion = Long.toString(newVersionLong);
+			theSavedEntity.markVersionUpdatedInCurrentTransaction();
 		}
 
 		assert theResourceId != null;
+		String newVersion = Long.toString(theSavedEntity.getVersion());
 		IIdType newId = theResourceId.withVersion(newVersion);
 		theResource.getIdElement().setValue(newId.getValue());
-		theSavedEntity.setVersion(newVersionLong);
 	}
 
 	public boolean isLogicalReference(IIdType theId) {
@@ -817,12 +814,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// Update the resource to contain the old tags
 		allTagsOld.forEach(tag -> {
-			theResource.getMeta()
+			IBaseCoding iBaseCoding = theResource.getMeta()
 				.addTag()
 				.setCode(tag.getTag().getCode())
 				.setSystem(tag.getTag().getSystem())
-				.setVersion(tag.getTag().getVersion())
-				.setUserSelected(tag.getTag().getUserSelected());
+				.setVersion(tag.getTag().getVersion());
+				if (tag.getTag().getUserSelected() != null) {
+					iBaseCoding.setUserSelected(tag.getTag().getUserSelected());
+				}
 		});
 
 		theEntity.setHasTags(!allTagsNew.isEmpty());
@@ -962,7 +961,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * This should be the very first thing..
 		 */
 		if (theResource != null) {
-			if (thePerformIndexing) {
+			if (thePerformIndexing && theDeletedTimestampOrNull == null) {
 				if (!ourValidationDisabledForUnitTest) {
 					validateResourceForStorage((T) theResource, entity);
 				}
@@ -1058,7 +1057,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						verifyMatchUrlForConditionalCreate(theResource, entity.getCreatedByMatchUrl(), newParams, theRequest);
 					}
 
-					entity.setUpdated(theTransactionDetails.getTransactionDate());
+					if (CURRENTLY_REINDEXING.get(theResource) != Boolean.TRUE) {
+						entity.setUpdated(theTransactionDetails.getTransactionDate());
+					}
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
@@ -1087,9 +1088,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return entity;
 		}
 
-		if (theUpdateVersion) {
-			long newVersion = entity.getVersion() + 1;
-			entity.setVersion(newVersion);
+		if (entity.getId() != null && theUpdateVersion) {
+			entity.markVersionUpdatedInCurrentTransaction();
 		}
 
 		/*
@@ -1153,6 +1153,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (thePerformIndexing) {
 			if (newParams == null) {
 				myExpungeService.deleteAllSearchParams(JpaPid.fromId(entity.getId()));
+				entity.clearAllParamsPopulated();
 			} else {
 
 				// Synchronize search param indexes
@@ -1292,6 +1293,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	private void createHistoryEntry(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, EncodedResource theChanged) {
 		boolean versionedTags = getStorageSettings().getTagStorageMode() == JpaStorageSettings.TagStorageModeEnum.VERSIONED;
+
 		final ResourceHistoryTable historyEntry = theEntity.toHistory(versionedTags);
 		historyEntry.setEncoding(theChanged.getEncoding());
 		historyEntry.setResource(theChanged.getResourceBinary());
@@ -1334,10 +1336,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			provenance.setResourceTable(theEntity);
 			provenance.setPartitionId(theEntity.getPartitionId());
 			if (haveRequestId) {
-				provenance.setRequestId(left(requestId, Constants.REQUEST_ID_LENGTH));
+				String persistedRequestId = left(requestId, Constants.REQUEST_ID_LENGTH);
+				provenance.setRequestId(persistedRequestId);
+				historyEntry.setRequestId(persistedRequestId);
 			}
 			if (haveSource) {
-				provenance.setSourceUri(source);
+				String persistedSource = left(source, ResourceHistoryTable.SOURCE_URI_LENGTH);
+				provenance.setSourceUri(persistedSource);
+				historyEntry.setSourceUri(persistedSource);
 			}
 			if (theResource != null) {
 				MetaUtil.populateResourceSource(myFhirContext,  shouldStoreSource ? source : null, shouldStoreRequestId ? requestId : null , theResource);
@@ -1408,11 +1414,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myJpaStorageResourceParser.populateResourceMetadata(entity, false, tagList, version, theResource);
 
 		boolean wasDeleted = false;
-		// NB If this if-else ever gets collapsed, make sure to account for possible null (will happen in mass-ingestion mode)
-		if (theOldResource instanceof IResource) {
-			wasDeleted = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) theOldResource) != null;
-		} else if (theOldResource instanceof IAnyResource) {
-			wasDeleted = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) theOldResource) != null;
+		if (theOldResource != null) {
+			wasDeleted = theOldResource.isDeleted();
 		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, theResource, theMatchUrl, theOperationType).setCreated(wasDeleted);

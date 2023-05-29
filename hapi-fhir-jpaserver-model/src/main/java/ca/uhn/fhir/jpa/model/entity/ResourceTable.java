@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Session;
@@ -47,6 +48,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 import org.hibernate.tuple.ValueGenerator;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.InstantType;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -59,6 +61,7 @@ import javax.persistence.Index;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -67,38 +70,39 @@ import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
+@Indexed(routingBinder = @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(name = ResourceTable.HFJ_RESOURCE, uniqueConstraints = {}, indexes = {
 	// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
 	@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
 	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
+	@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID,RES_UPDATED,PARTITION_ID"),
 })
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
-	private static final int MAX_LANGUAGE_LENGTH = 20;
-	private static final long serialVersionUID = 1L;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
 	public static final String RES_TYPE = "RES_TYPE";
-
+	private static final int MAX_LANGUAGE_LENGTH = 20;
+	private static final long serialVersionUID = 1L;
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 * Note the extra config needed in HS6 for indexing transient props:
 	 * https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#indexed-transient-requires-configuration
-	 *
+	 * <p>
 	 * Note that we depend on `myVersion` updated for this field to be indexed.
 	 */
 	@Transient
 	@FullTextField(name = "myContentText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
-	@FullTextField(name = "myContentTextEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
-	@FullTextField(name = "myContentTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
-	@FullTextField(name = "myContentTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
+	@FullTextField(name = "myContentTextEdgeNGram", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteEdgeAnalyzer")
+	@FullTextField(name = "myContentTextNGram", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteNGramAnalyzer")
+	@FullTextField(name = "myContentTextPhonetic", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myContentText;
@@ -132,9 +136,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 */
 	@Transient()
 	@FullTextField(name = "myNarrativeText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
-	@FullTextField(name = "myNarrativeTextEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
-	@FullTextField(name = "myNarrativeTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
-	@FullTextField(name = "myNarrativeTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
+	@FullTextField(name = "myNarrativeTextEdgeNGram", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteEdgeAnalyzer")
+	@FullTextField(name = "myNarrativeTextNGram", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteNGramAnalyzer")
+	@FullTextField(name = "myNarrativeTextPhonetic", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myNarrativeText;
@@ -175,7 +179,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Column(name = "SP_QUANTITY_PRESENT")
 	@OptimisticLock(excluded = true)
 	private boolean myParamsQuantityPopulated;
-	
+
 	/**
 	 * Added to support UCUM conversion
 	 * since 5.3.0
@@ -183,9 +187,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamQuantityNormalized> myParamsQuantityNormalized;
-	
+
 	/**
-	 * Added to support UCUM conversion, 
+	 * Added to support UCUM conversion,
 	 * NOTE : use Boolean class instead of boolean primitive, in order to set the existing rows to null
 	 * since 5.3.0
 	 */
@@ -277,18 +281,17 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
 
-
 	/**
 	 * The id of the Resource.
 	 * Will contain either the client-assigned id, or the sequence value.
 	 * Will be null during insert time until the first read.
-	 *
 	 */
-	@Column(name= "FHIR_ID",
+	@Column(name = "FHIR_ID",
 		// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
 		length = 64,
 		// we never update this after insert, and the Generator will otherwise "dirty" the object.
 		updatable = false)
+
 	// inject the pk for server-assigned sequence ids.
 	@GeneratorType(when = GenerationTime.INSERT, type = FhirIdGenerator.class)
 	// Make sure the generator doesn't bump the history version.
@@ -304,29 +307,20 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Column(name = "SEARCH_URL_PRESENT", nullable = true)
 	private Boolean mySearchUrlPresent = false;
 
-	/**
-	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
-	 * We eat this complexity during insert to simplify query time with a uniform column.
-	 * Server-assigned sequence ids aren't available until just before insertion.
-	 * Hibernate calls insert Generators after the pk has been assigned, so we can use myId safely here.
-	 */
-	public static final class FhirIdGenerator implements ValueGenerator<String> {
-		@Override
-		public String generateValue(Session session, Object owner) {
-			ResourceTable that = (ResourceTable) owner;
-			return that.myFhirId != null ? that.myFhirId : that.myId.toString();
-		}
-	}
-
 	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
-
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
 
 	@Transient
 	private transient ResourceHistoryTable myCurrentVersionEntity;
+
+	@Transient
+	private transient ResourceHistoryTable myNewVersionEntity;
+
+	@Transient
+	private transient boolean myVersionUpdatedInCurrentTransaction;
 
 	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
 	@OptimisticLock(excluded = true)
@@ -342,6 +336,39 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		super();
 	}
 
+	/**
+	 * Setting this flag is an indication that we're making changes and the version number will
+	 * be incremented in the current transaction. When this is set, calls to {@link #getVersion()}
+	 * will be incremented by one.
+	 * This flag is cleared in {@link #postPersist()} since at that time the new version number
+	 * should be reflected.
+	 */
+	public void markVersionUpdatedInCurrentTransaction() {
+		if (!myVersionUpdatedInCurrentTransaction) {
+			/*
+			 * Note that modifying this number doesn't actually directly affect what
+			 * gets stored in the database since this is a @Version field and the
+			 * value is therefore managed by Hibernate. So in other words, if the
+			 * row in the database is updated, it doesn't matter what we set
+			 * this field to, hibernate will increment it by one. However, we still
+			 * increment it for two reasons:
+			 * 1. The value gets used for the version attribute in the ResourceHistoryTable
+			 *    entity we create for each new version.
+			 * 2. For updates to existing resources, there may actually not be any other
+			 *    changes to this entity so incrementing this is a signal to
+			 *    Hibernate that something changed and we need to force an entity
+			 *    update.
+			 */
+			myVersion++;
+			this.myVersionUpdatedInCurrentTransaction = true;
+		}
+	}
+
+	@PostPersist
+	public void postPersist() {
+		myVersionUpdatedInCurrentTransaction = false;
+	}
+
 	@Override
 	public ResourceTag addTag(TagDefinition theTag) {
 		for (ResourceTag next : getTags()) {
@@ -353,7 +380,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		getTags().add(tag);
 		return tag;
 	}
-
 
 	public String getHashSha256() {
 		return myHashSha256;
@@ -557,6 +583,26 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myVersion;
 	}
 
+	/**
+	 * Sets the version on this entity to {@literal 1}. This should only be called
+	 * on resources that are not yet persisted. After that time the version number
+	 * is managed by hibernate.
+	 */
+	public void initializeVersion() {
+		assert myId == null;
+		myVersion = 1;
+	}
+
+	/**
+	 * Don't call this in any JPA environments, the version will be ignored
+	 * since this field is managed by hibernate
+	 */
+	@VisibleForTesting
+	public void setVersionForUnitTest(long theVersion) {
+		myVersion = theVersion;
+	}
+
+
 	@Override
 	public boolean isDeleted() {
 		return getDeleted() != null;
@@ -567,16 +613,29 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		setDeleted(null);
 	}
 
-	public void setVersion(long theVersion) {
-		myVersion = theVersion;
-	}
-
 	public boolean isHasLinks() {
 		return myHasLinks;
 	}
 
 	public void setHasLinks(boolean theHasLinks) {
 		myHasLinks = theHasLinks;
+	}
+
+	/**
+	 * Clears all the index population flags, e.g. {@link #isParamsStringPopulated()}
+	 *
+	 * @since 6.8.0
+	 */
+	public void clearAllParamsPopulated() {
+		myParamsTokenPopulated = false;
+		myParamsCoordsPopulated = false;
+		myParamsDatePopulated = false;
+		myParamsNumberPopulated = false;
+		myParamsStringPopulated = false;
+		myParamsQuantityPopulated = false;
+		myParamsQuantityNormalizedPopulated = false;
+		myParamsUriPopulated = false;
+		myHasLinks = false;
 	}
 
 	public boolean isParamsComboStringUniquePresent() {
@@ -632,7 +691,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public void setParamsQuantityPopulated(boolean theParamsQuantityPopulated) {
 		myParamsQuantityPopulated = theParamsQuantityPopulated;
 	}
-	
+
 	public Boolean isParamsQuantityNormalizedPopulated() {
 		if (myParamsQuantityNormalizedPopulated == null)
 			return Boolean.FALSE;
@@ -688,12 +747,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myUnchangedInCurrentOperation = theUnchangedInCurrentOperation;
 	}
 
-	public void setContentText(String theContentText) {
-		myContentText = theContentText;
-	}
-
 	public String getContentText() {
 		return myContentText;
+	}
+
+	public void setContentText(String theContentText) {
+		myContentText = theContentText;
 	}
 
 	public void setNarrativeText(String theNarrativeText) {
@@ -708,12 +767,27 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		mySearchUrlPresent = theSearchUrlPresent;
 	}
 
+	/**
+	 * This method creates a new history entity, or might reuse the current one if we've
+	 * already created one in the current transaction. This is because we can only increment
+	 * the version once in a DB transaction (since hibernate manages that number) so creating
+	 * multiple {@link ResourceHistoryTable} entities will result in a constraint error.
+	 */
 	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
-		ResourceHistoryTable retVal = new ResourceHistoryTable();
+		boolean createVersionTags = theCreateVersionTags;
+
+		ResourceHistoryTable retVal = myNewVersionEntity;
+		if (retVal == null) {
+			retVal = new ResourceHistoryTable();
+			myNewVersionEntity = retVal;
+		} else {
+			// Tags should already be set
+			createVersionTags = false;
+		}
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
-		retVal.setVersion(myVersion);
+		retVal.setVersion(getVersion());
 		retVal.setTransientForcedId(getTransientForcedId());
 
 		retVal.setPublished(getPublishedDate());
@@ -724,10 +798,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setForcedId(getForcedId());
 		retVal.setPartitionId(getPartitionId());
 
-		retVal.getTags().clear();
-
 		retVal.setHasTags(isHasTags());
-		if (isHasTags() && theCreateVersionTags) {
+		if (isHasTags() && createVersionTags) {
 			for (ResourceTag next : getTags()) {
 				retVal.addTag(next);
 			}
@@ -747,7 +819,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		}
 		b.append("lastUpdated", getUpdated().getValueAsString());
 		if (getDeleted() != null) {
-			b.append("deleted");
+			b.append("deleted", new InstantType(getDeleted()).getValueAsString());
 		}
 		return b.build();
 	}
@@ -771,16 +843,16 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * This is a convenience to avoid loading the version a second time within a single transaction. It is
 	 * not persisted.
 	 */
-	public void setCurrentVersionEntity(ResourceHistoryTable theCurrentVersionEntity) {
-		myCurrentVersionEntity = theCurrentVersionEntity;
+	public ResourceHistoryTable getCurrentVersionEntity() {
+		return myCurrentVersionEntity;
 	}
 
 	/**
 	 * This is a convenience to avoid loading the version a second time within a single transaction. It is
 	 * not persisted.
 	 */
-	public ResourceHistoryTable getCurrentVersionEntity() {
-		return myCurrentVersionEntity;
+	public void setCurrentVersionEntity(ResourceHistoryTable theCurrentVersionEntity) {
+		myCurrentVersionEntity = theCurrentVersionEntity;
 	}
 
 	@Override
@@ -798,15 +870,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myForcedId = theForcedId;
 	}
 
-
-
 	@Override
 	public IdDt getIdDt() {
 		IdDt retVal = new IdDt();
 		populateId(retVal);
 		return retVal;
 	}
-
 
 	public IIdType getIdType(FhirContext theContext) {
 		IIdType retVal = theContext.getVersion().newIdType();
@@ -815,7 +884,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
-		if (myFhirId != null) {
+		if (myFhirId != null && !myFhirId.isEmpty()) {
 			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
@@ -829,12 +898,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		}
 	}
 
-	public void setCreatedByMatchUrl(String theCreatedByMatchUrl) {
-		myCreatedByMatchUrl = theCreatedByMatchUrl;
-	}
-
 	public String getCreatedByMatchUrl() {
 		return myCreatedByMatchUrl;
+	}
+
+	public void setCreatedByMatchUrl(String theCreatedByMatchUrl) {
+		myCreatedByMatchUrl = theCreatedByMatchUrl;
 	}
 
 	public void setLuceneIndexData(ExtendedHSearchIndexData theLuceneIndexData) {
@@ -860,5 +929,19 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setFhirId(String theFhirId) {
 		myFhirId = theFhirId;
+	}
+
+	/**
+	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
+	 * We eat this complexity during insert to simplify query time with a uniform column.
+	 * Server-assigned sequence ids aren't available until just before insertion.
+	 * Hibernate calls insert Generators after the pk has been assigned, so we can use myId safely here.
+	 */
+	public static final class FhirIdGenerator implements ValueGenerator<String> {
+		@Override
+		public String generateValue(Session session, Object owner) {
+			ResourceTable that = (ResourceTable) owner;
+			return that.myFhirId != null ? that.myFhirId : that.myId.toString();
+		}
 	}
 }

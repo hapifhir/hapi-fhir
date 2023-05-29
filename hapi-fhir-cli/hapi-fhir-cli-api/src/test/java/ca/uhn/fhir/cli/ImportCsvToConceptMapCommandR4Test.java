@@ -50,7 +50,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 
 
 	@RegisterExtension
-	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
+	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newInitialized();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4380
+title: "The `@Interceptor` annotation can now be placed at the method level. This is used only
+  as a marker, and does not change the behaviour or interceptors in any way. Thanks to
+  Dominique Villard for the pull request!"

@@ -104,7 +104,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -121,28 +120,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myStorageSettings.setTreatReferencesAsLogical(new JpaStorageSettings().getTreatReferencesAsLogical());
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
 		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
-	}
-
-	private void assertGone(IIdType theId) {
-		try {
-			assertNotGone(theId);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-	}
-
-	/**
-	 * This gets called from assertGone too! Careful about exceptions...
-	 */
-	private void assertNotGone(IIdType theId) {
-		if ("Patient".equals(theId.getResourceType())) {
-			myPatientDao.read(theId, mySrd);
-		} else if ("Organization".equals(theId.getResourceType())) {
-			myOrganizationDao.read(theId, mySrd);
-		} else {
-			fail("No type");
-		}
 	}
 
 	@BeforeEach
@@ -693,7 +670,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(4 + initialHistory, history.sizeOrThrowNpe());
 		List<IBaseResource> resources = history.getResources(0, 4);
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) resources.get(0)));
+		assertTrue(resources.get(0).isDeleted());
 
 		try {
 			myPatientDao.delete(id2, mySrd);
@@ -796,10 +773,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 1).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 1).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(1, 2).get(0)));
-
+		assertTrue(history.getResources(0, 1).get(0).isDeleted());
+		assertFalse(history.getResources(1, 2).get(0).isDeleted());
 	}
 
 	@Test
@@ -1206,13 +1181,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals(id.withVersion("2"), entries.get(1).getIdElement());
 		assertEquals(id.withVersion("1"), entries.get(2).getIdElement());
 
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) entries.get(0)));
+		assertFalse(entries.get(0).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.PUT, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IResource) entries.get(0)));
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) entries.get(1)));
+		assertTrue(entries.get(1).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.DELETE, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IResource) entries.get(1)));
 
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) entries.get(2)));
+		assertFalse(entries.get(2).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.POST, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IResource) entries.get(2)));
 	}
 

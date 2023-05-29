@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4819
+title: "Tags no longer provide a default `false` value for `userSelected`."

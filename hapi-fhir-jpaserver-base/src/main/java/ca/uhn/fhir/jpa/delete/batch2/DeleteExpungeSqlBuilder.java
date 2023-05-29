@@ -34,14 +34,13 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DeleteExpungeSqlBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSqlBuilder.class);
-	public static final String PROCESS_NAME = "Delete Expunging";
-	public static final String THREAD_PREFIX = "delete-expunge";
-	
 	private final ResourceTableFKProvider myResourceTableFKProvider;
 	private final JpaStorageSettings myStorageSettings;
 	private final IIdHelperService myIdHelper;
@@ -56,10 +55,10 @@ public class DeleteExpungeSqlBuilder {
 
 
 	@Nonnull
-	List<String> convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids) {
-		List<Long> pids = JpaPid.toLongList(theJpaPids);
+	DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
 
-		validateOkToDeleteAndExpunge(pids);
+		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
+		validateOkToDeleteAndExpunge(pids, theCascade, theCascadeMaxRounds);
 
 		List<String> rawSql = new ArrayList<>();
 
@@ -73,10 +72,10 @@ public class DeleteExpungeSqlBuilder {
 		// Lastly we need to delete records from the resource table all of these other tables link to:
 		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
 		rawSql.add(deleteRecordsByColumnSql(pidListString, resourceTablePk));
-		return rawSql;
+		return new DeleteExpungeSqlResult(rawSql, pids.size());
 	}
 
-	public void validateOkToDeleteAndExpunge(List<Long> thePids) {
+	public void validateOkToDeleteAndExpunge(Set<Long> thePids, boolean theCascade, Integer theCascadeMaxRounds) {
 		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete()) {
 			ourLog.info("Referential integrity on delete disabled.  Skipping referential integrity check.");
 			return;
@@ -88,6 +87,40 @@ public class DeleteExpungeSqlBuilder {
 
 		if (conflictResourceLinks.isEmpty()) {
 			return;
+		}
+
+		if (theCascade) {
+			int cascadeMaxRounds = Integer.MAX_VALUE;
+			if (theCascadeMaxRounds != null) {
+				cascadeMaxRounds = theCascadeMaxRounds;
+			}
+			if (myStorageSettings.getMaximumDeleteConflictQueryCount() != null) {
+				if (myStorageSettings.getMaximumDeleteConflictQueryCount() < cascadeMaxRounds) {
+					cascadeMaxRounds = myStorageSettings.getMaximumDeleteConflictQueryCount();
+				}
+			}
+
+			while (true) {
+				List<JpaPid> addedThisRound = new ArrayList<>();
+				for (ResourceLink next : conflictResourceLinks) {
+					Long nextPid = next.getSourceResourcePid();
+					if (thePids.add(nextPid)) {
+						addedThisRound.add(JpaPid.fromId(nextPid));
+					}
+				}
+
+				if (addedThisRound.isEmpty()) {
+					return;
+				}
+
+				if (--cascadeMaxRounds > 0) {
+					conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
+					findResourceLinksWithTargetPidIn(addedThisRound, addedThisRound, conflictResourceLinks);
+				} else {
+					// We'll proceed to below where we throw an exception
+					break;
+				}
+			}
 		}
 
 		ResourceLink firstConflict = conflictResourceLinks.get(0);
@@ -122,4 +155,26 @@ public class DeleteExpungeSqlBuilder {
 	private String deleteRecordsByColumnSql(String thePidListString, ResourceForeignKey theResourceForeignKey) {
 		return "DELETE FROM " + theResourceForeignKey.table + " WHERE " + theResourceForeignKey.key + " IN " + thePidListString;
 	}
+
+
+	public static class DeleteExpungeSqlResult {
+
+
+		private final List<String> mySqlStatements;
+		private final int myRecordCount;
+
+		public DeleteExpungeSqlResult(List<String> theSqlStatments, int theRecordCount) {
+			mySqlStatements = theSqlStatments;
+			myRecordCount = theRecordCount;
+		}
+
+		public List<String> getSqlStatements() {
+			return mySqlStatements;
+		}
+
+		public int getRecordCount() {
+			return myRecordCount;
+		}
+	}
+
 }
