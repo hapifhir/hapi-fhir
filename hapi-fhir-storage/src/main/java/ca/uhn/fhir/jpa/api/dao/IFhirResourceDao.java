@@ -239,13 +239,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	T read(IIdType theId, RequestDetails theRequestDetails);
 
 	/**
-	 * @param theRequestPartitionId The request partition object with partitioning information
-	 * @throws ResourceNotFoundException If the ID is not known to the server
-	 * @throws ResourceGoneException     If the resource has been deleted
-	 */
-	T read(IIdType theId, RequestPartitionId theRequestPartitionId);
-
-	/**
 	 * Should deleted resources be returned successfully. This should be false for
 	 * a normal FHIR read.
 	 *

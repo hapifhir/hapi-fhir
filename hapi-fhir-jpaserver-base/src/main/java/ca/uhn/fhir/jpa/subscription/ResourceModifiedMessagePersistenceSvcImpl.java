@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
@@ -34,6 +33,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -105,12 +105,12 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		String resourceVersion = theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
 		String resourceType = theResourceModifiedEntity.getResourceType();
 		ResourceModifiedMessage retVal = getPayloadLessMessageFromString(theResourceModifiedEntity.getPartialResourceModifiedMessage());
-		RequestPartitionId requestPartitionId = retVal.getPartitionId();
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(retVal.getPartitionId());
 
 		IdDt resourceIdDt = new IdDt(resourceType, resourcePid, resourceVersion);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
 
-		IBaseResource iBaseResource = dao.read(resourceIdDt, requestPartitionId);
+		IBaseResource iBaseResource = dao.read(resourceIdDt, systemRequestDetails);
 
 		retVal.setNewPayload(myFhirContext, iBaseResource);
 
