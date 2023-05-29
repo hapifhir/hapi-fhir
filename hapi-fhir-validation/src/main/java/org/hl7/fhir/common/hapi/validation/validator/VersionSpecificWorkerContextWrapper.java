@@ -654,7 +654,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public void setForPublication(boolean b) {
-		throw new UnsupportedOperationException(Msg.code(2350));
+		throw new UnsupportedOperationException(Msg.code(2351));
 
 	}
 }
