@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatchRequest;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -30,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class SubscriptionDeliveryRequest {
 	// One of these two will be populated
@@ -41,13 +41,13 @@ public class SubscriptionDeliveryRequest {
 	private final RequestPartitionId myRequestPartitionId;
 	private final String myTransactionId;
 
-	public SubscriptionDeliveryRequest(@Nonnull IBaseBundle theBundlePayload, @Nonnull ActiveSubscription theActiveSubscription, @Nonnull RestOperationTypeEnum theOperationType, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theTransactionId) {
+	public SubscriptionDeliveryRequest(IBaseBundle theBundlePayload, ActiveSubscription theActiveSubscription, SubscriptionTopicDispatchRequest theSubscriptionTopicDispatchRequest) {
 		myPayload = theBundlePayload;
 		myPayloadId = null;
 		myActiveSubscription = theActiveSubscription;
-		myRestOperationType = theOperationType;
-		myRequestPartitionId = theRequestPartitionId;
-		myTransactionId = theTransactionId;
+		myRestOperationType = theSubscriptionTopicDispatchRequest.getRequestType();
+		myRequestPartitionId = theSubscriptionTopicDispatchRequest.getRequestPartitionId();
+		myTransactionId = theSubscriptionTopicDispatchRequest.getTransactionId();
 	}
 
 	public SubscriptionDeliveryRequest(@Nonnull IBaseResource thePayload, @Nonnull ResourceModifiedMessage theMsg, @Nonnull ActiveSubscription theActiveSubscription) {
@@ -67,6 +67,8 @@ public class SubscriptionDeliveryRequest {
 		myRequestPartitionId = theMsg.getPartitionId();
 		myTransactionId = theMsg.getTransactionId();
 	}
+
+
 
 	public IBaseResource getPayload() {
 		return myPayload;
