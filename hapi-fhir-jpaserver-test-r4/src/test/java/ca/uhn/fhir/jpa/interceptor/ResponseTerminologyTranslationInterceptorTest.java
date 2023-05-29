@@ -204,7 +204,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 
 		assertNotNull(startResponse);
 

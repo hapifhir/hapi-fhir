@@ -177,6 +177,6 @@ public class CascadingDeleteInterceptor {
 	 */
 	@Nonnull
 	protected DeleteCascadeModeEnum shouldCascade(@Nullable RequestDetails theRequest) {
-		return RestfulServerUtils.extractDeleteCascadeParameter(theRequest);
+		return RestfulServerUtils.extractDeleteCascadeParameter(theRequest).getMode();
 	}
 }

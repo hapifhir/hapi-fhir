@@ -257,7 +257,7 @@ If there are any duplication between results returned by a combination of golden
 ### Example Use
 
 ```url
-http://example.com/$mdm-link-history?goldenResourceId=1553&sourceResourceId=1552
+http://example.com/$mdm-link-history?goldenResourceId=1553&resourceId=1552
 ```
 
 ```json

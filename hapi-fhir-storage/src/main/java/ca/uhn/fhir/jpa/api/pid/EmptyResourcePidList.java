@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -32,6 +33,11 @@ import java.util.List;
  * An empty resource pid list
  */
 public class EmptyResourcePidList implements IResourcePidList {
+	@Override
+	public RequestPartitionId getRequestPartitionId() {
+		return null;
+	}
+
 	@Override
 	public Date getLastDate() {
 		return null;

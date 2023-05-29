@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public interface IBatch2JobRunner {
 
@@ -31,7 +32,7 @@ public interface IBatch2JobRunner {
 	 * @param theParameters
 	 * @return returns the job id
 	 */
-	Batch2JobStartResponse startNewJob(Batch2BaseJobParameters theParameters);
+	Batch2JobStartResponse startNewJob(RequestDetails theRequestDetails, Batch2BaseJobParameters theParameters);
 
 	/**
 	 * Returns information about a provided job.

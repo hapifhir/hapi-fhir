@@ -23,50 +23,67 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.topic.status.INotificationStatusBuilder;
+import ca.uhn.fhir.jpa.topic.status.R4BNotificationStatusBuilder;
+import ca.uhn.fhir.jpa.topic.status.R4NotificationStatusBuilder;
+import ca.uhn.fhir.jpa.topic.status.R5NotificationStatusBuilder;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.Reference;
-import org.hl7.fhir.r5.model.SubscriptionStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.UUID;
 
 public class SubscriptionTopicPayloadBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicPayloadBuilder.class);
 	private final FhirContext myFhirContext;
+	private final FhirVersionEnum myFhirVersion;
+	private final INotificationStatusBuilder<? extends IBaseResource> myNotificationStatusBuilder;
 
 	public SubscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
+		myFhirVersion = myFhirContext.getVersion().getVersion();
+
+		switch (myFhirVersion) {
+			case R4:
+				myNotificationStatusBuilder = new R4NotificationStatusBuilder(myFhirContext);
+				break;
+			case R4B:
+				myNotificationStatusBuilder = new R4BNotificationStatusBuilder(myFhirContext);
+				break;
+			case R5:
+				myNotificationStatusBuilder = new R5NotificationStatusBuilder(myFhirContext);
+				break;
+			default:
+				throw unsupportedFhirVersionException();
+		}
 	}
 
 	public IBaseBundle buildPayload(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl, RestOperationTypeEnum theRestOperationType) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-		// WIP STR5 set eventsSinceSubscriptionStart from the database
-		int eventsSinceSubscriptionStart = 1;
-		IBaseResource subscriptionStatus = buildSubscriptionStatus(theResources, theActiveSubscription, theTopicUrl, eventsSinceSubscriptionStart);
+		IBaseResource notificationStatus = myNotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
+		bundleBuilder.addCollectionEntry(notificationStatus);
 
-		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
-
+		addResources(bundleBuilder, theResources, theRestOperationType);
 		// WIP STR5 add support for notificationShape include, revinclude
 
-		if (fhirVersion == FhirVersionEnum.R4B) {
-			bundleBuilder.setType(Bundle.BundleType.HISTORY.toCode());
-			subscriptionStatus = VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r5.model.SubscriptionStatus) subscriptionStatus);
-		} else if (fhirVersion == FhirVersionEnum.R5) {
-			bundleBuilder.setType(Bundle.BundleType.SUBSCRIPTIONNOTIFICATION.toCode());
-		} else {
-			throw new IllegalStateException(Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + fhirVersion);
+		// Note we need to set the bundle type after we add the resources since adding the resources automatically sets the bundle type
+		setBundleType(bundleBuilder);
+		IBaseBundle retval = bundleBuilder.getBundle();
+		if (ourLog.isDebugEnabled()) {
+			String bundle = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(retval);
+			ourLog.debug("Bundle: {}", bundle);
 		}
-		// WIP STR5 is this the right type of entry? see http://hl7.org/fhir/subscriptionstatus-examples.html
-		// WIP STR5 Also see http://hl7.org/fhir/R4B/notification-full-resource.json.html need to conform to these
-		bundleBuilder.addCollectionEntry(subscriptionStatus);
+		return retval;
+	}
+
+	private static void addResources(BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
 		for (IBaseResource resource : theResources) {
-			switch(theRestOperationType) {
+			switch (theRestOperationType) {
 				case CREATE:
 					bundleBuilder.addTransactionCreateEntry(resource);
 					break;
@@ -78,27 +95,23 @@ public class SubscriptionTopicPayloadBuilder {
 					break;
 			}
 		}
-
-		return bundleBuilder.getBundle();
 	}
 
-
-	private SubscriptionStatus buildSubscriptionStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl, int theEventsSinceSubscriptionStart) {
-		SubscriptionStatus subscriptionStatus = new SubscriptionStatus();
-		subscriptionStatus.setId(UUID.randomUUID().toString());
-		subscriptionStatus.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
-		subscriptionStatus.setType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION);
-		// WIP STR5 count events since subscription start and set eventsSinceSubscriptionStart
-		// store counts by subscription id
-		subscriptionStatus.setEventsSinceSubscriptionStart(theEventsSinceSubscriptionStart);
-		SubscriptionStatus.SubscriptionStatusNotificationEventComponent event = subscriptionStatus.addNotificationEvent();
-		event.setEventNumber(theEventsSinceSubscriptionStart);
-		if (theResources.size() > 0) {
-			event.setFocus(new Reference(theResources.get(0).getIdElement()));
+	private void setBundleType(BundleBuilder bundleBuilder) {
+		switch (myFhirVersion) {
+			case R4:
+			case R4B:
+				bundleBuilder.setType(Bundle.BundleType.HISTORY.toCode());
+				break;
+			case R5:
+				bundleBuilder.setType(Bundle.BundleType.SUBSCRIPTIONNOTIFICATION.toCode());
+				break;
+			default:
+				throw unsupportedFhirVersionException();
 		}
-		subscriptionStatus.setSubscription(new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
-		subscriptionStatus.setTopic(theTopicUrl);
-		return subscriptionStatus;
 	}
 
+	private IllegalStateException unsupportedFhirVersionException() {
+		return new IllegalStateException(Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + myFhirVersion);
+	}
 }

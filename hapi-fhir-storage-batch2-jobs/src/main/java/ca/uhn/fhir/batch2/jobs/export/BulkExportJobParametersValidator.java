@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +55,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 
 	@Nullable
 	@Override
-	public List<String> validate(@Nonnull BulkExportJobParameters theParameters) {
+	public List<String> validate(RequestDetails theRequestDetails, @Nonnull BulkExportJobParameters theParameters) {
 		List<String> errorMsgs = new ArrayList<>();
 
 		// initial validation

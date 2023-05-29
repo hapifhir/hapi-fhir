@@ -79,6 +79,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -160,7 +161,7 @@ public class BulkDataExportProviderTest {
 
 	private BulkExportParameters verifyJobStart() {
 		ArgumentCaptor<Batch2BaseJobParameters> startJobCaptor = ArgumentCaptor.forClass(Batch2BaseJobParameters.class);
-		verify(myJobRunner).startNewJob(startJobCaptor.capture());
+		verify(myJobRunner).startNewJob(isNotNull(), startJobCaptor.capture());
 		Batch2BaseJobParameters sp = startJobCaptor.getValue();
 		assertTrue(sp instanceof BulkExportParameters);
 		return (BulkExportParameters) sp;
@@ -197,7 +198,7 @@ public class BulkDataExportProviderTest {
 		String practitionerResource = "Practitioner";
 		String filter = "Patient?identifier=foo";
 		String postFetchFilter = "Patient?_tag=foo";
-		when(myJobRunner.startNewJob(any()))
+		when(myJobRunner.startNewJob(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 
 		InstantType now = InstantType.now();
@@ -249,7 +250,7 @@ public class BulkDataExportProviderTest {
 
 	@Test
 	public void testOmittingOutputFormatDefaultsToNdjson() throws IOException {
-		when(myJobRunner.startNewJob(any()))
+		when(myJobRunner.startNewJob(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 
 		Parameters input = new Parameters();
@@ -270,7 +271,7 @@ public class BulkDataExportProviderTest {
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testSuccessfulInitiateBulkRequest_GetWithPartitioning(boolean partitioningEnabled) throws IOException {
-		when(myJobRunner.startNewJob(any())).thenReturn(createJobStartResponse());
+		when(myJobRunner.startNewJob(isNotNull(), any())).thenReturn(createJobStartResponse());
 
 		InstantType now = InstantType.now();
 
@@ -307,7 +308,7 @@ public class BulkDataExportProviderTest {
 
 	@Test
 	public void testSuccessfulInitiateBulkRequest_Get_MultipleTypeFilters() throws IOException {
-		when(myJobRunner.startNewJob(any()))
+		when(myJobRunner.startNewJob(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 
 		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT
@@ -583,7 +584,7 @@ public class BulkDataExportProviderTest {
 	@Test
 	public void testSuccessfulInitiateGroupBulkRequest_Post() throws IOException {
 		// when
-		when(myJobRunner.startNewJob(any()))
+		when(myJobRunner.startNewJob(isNotNull(), any()))
 			.thenReturn(createJobStartResponse(G_JOB_ID));
 
 		InstantType now = InstantType.now();
@@ -624,7 +625,7 @@ public class BulkDataExportProviderTest {
 	@Test
 	public void testSuccessfulInitiateGroupBulkRequest_Get() throws IOException {
 		// when
-		when(myJobRunner.startNewJob(any())).thenReturn(createJobStartResponse(G_JOB_ID));
+		when(myJobRunner.startNewJob(isNotNull(), any())).thenReturn(createJobStartResponse(G_JOB_ID));
 
 		InstantType now = InstantType.now();
 
@@ -713,7 +714,7 @@ public class BulkDataExportProviderTest {
 	@Test
 	public void testInitiateGroupExportWithNoResourceTypes() throws IOException {
 		// when
-		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
+		when(myJobRunner.startNewJob(isNotNull(), any(Batch2BaseJobParameters.class)))
 			.thenReturn(createJobStartResponse());
 
 		// test
@@ -739,7 +740,7 @@ public class BulkDataExportProviderTest {
 	@Test
 	public void testInitiateWithPostAndMultipleTypeFilters() throws IOException {
 		// when
-		when(myJobRunner.startNewJob(any())).thenReturn(createJobStartResponse());
+		when(myJobRunner.startNewJob(isNotNull(), any())).thenReturn(createJobStartResponse());
 
 		Parameters input = new Parameters();
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
@@ -771,7 +772,7 @@ public class BulkDataExportProviderTest {
 	@Test
 	public void testInitiateBulkExportOnPatient_noTypeParam_addsTypeBeforeBulkExport() throws IOException {
 		// when
-		when(myJobRunner.startNewJob(any()))
+		when(myJobRunner.startNewJob(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 
 		Parameters input = new Parameters();
@@ -797,7 +798,7 @@ public class BulkDataExportProviderTest {
 	@Test
 	public void testInitiatePatientExportRequest() throws IOException {
 		// when
-		when(myJobRunner.startNewJob(any()))
+		when(myJobRunner.startNewJob(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 
 		InstantType now = InstantType.now();
@@ -836,7 +837,7 @@ public class BulkDataExportProviderTest {
 		startResponse.setUsesCachedResult(true);
 
 		// when
-		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
+		when(myJobRunner.startNewJob(isNotNull(), any(Batch2BaseJobParameters.class)))
 			.thenReturn(startResponse);
 
 		Parameters input = new Parameters();
@@ -870,7 +871,7 @@ public class BulkDataExportProviderTest {
 		myStorageSettings.setEnableBulkExportJobReuse(false);
 
 		// when
-		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
+		when(myJobRunner.startNewJob(isNotNull(), any(Batch2BaseJobParameters.class)))
 			.thenReturn(startResponse);
 
 		Parameters input = new Parameters();
@@ -900,7 +901,7 @@ public class BulkDataExportProviderTest {
 		Batch2JobStartResponse startResponse = createJobStartResponse();
 		startResponse.setUsesCachedResult(true);
 		startResponse.setInstanceId(A_JOB_ID);
-		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
+		when(myJobRunner.startNewJob(isNotNull(), any(Batch2BaseJobParameters.class)))
 			.thenReturn(startResponse);
 
 		// when
@@ -994,7 +995,7 @@ public class BulkDataExportProviderTest {
 	@Test
 	public void testGetBulkExport_outputFormat_FhirNdJson_inHeader() throws IOException {
 		// when
-		when(myJobRunner.startNewJob(any()))
+		when(myJobRunner.startNewJob(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 
 		// call
@@ -1017,7 +1018,7 @@ public class BulkDataExportProviderTest {
 	@Test
 	public void testGetBulkExport_outputFormat_FhirNdJson_inUrl() throws IOException {
 		// when
-		when(myJobRunner.startNewJob(any()))
+		when(myJobRunner.startNewJob(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 
 		// call
