@@ -1,0 +1,8 @@
+---
+type: add
+issue: 4913
+title: "Added support for Topic Subscription Filters.  In R4B and R5, SubscriptionTopic notifications
+will interpret subscription filters as FHIR Search Parameters and perform an in-memory match of the focus resource
+against the search parameters.  For R4 or user-generated event notifications, the caller can specify a custom
+implementation of ISubscriptionTopicFilterMatcher on the call to SubscriptionTopicDispatcher.dispatch() to provide
+custom filter matching logic."
