@@ -118,7 +118,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theChunkId			 The chunk ID
 	 * @param theWarningMessage The warning message
 	 */
-	void updateWorkChunkWarningMessage(String theChunkId, String theWarningMessage);
+	default void updateWorkChunkWarningMessage(String theChunkId, String theWarningMessage) {
+	}
 
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);

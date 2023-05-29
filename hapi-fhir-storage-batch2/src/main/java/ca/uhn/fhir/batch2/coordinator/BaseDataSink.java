@@ -22,7 +22,6 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
@@ -56,7 +55,7 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 
 	private void recoverWarning(String theMessage) {
 		// save non-fatal error as warning, current only support unique search param reindexing error on existing duplicates
-		if (theMessage.contains(Msg.code(1093))) {
+		if (theMessage.contains("Can not create resource") && theMessage.contains("it would create a duplicate unique index matching query")) {
 			String searchParamName = theMessage.substring(theMessage.indexOf("SearchParameter"), theMessage.length() - 1);
 			myRecoveredWarning = "Failed to reindex resource because unique search parameter " + searchParamName + " could not be enforced.";
 		}

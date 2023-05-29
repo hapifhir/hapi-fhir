@@ -99,14 +99,6 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "WARNING_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
 	private String myWarningMessage;
 
-	public String getWarningMessage() {
-		return myWarningMessage;
-	}
-
-	public void setWarningMessage(String theWarningMessage) {
-		myWarningMessage = left(theWarningMessage, ERROR_MSG_MAX_LENGTH);
-	}
-
 	/**
 	 * Default constructor for Hibernate.
 	 */
@@ -151,6 +143,14 @@ public class Batch2WorkChunkEntity implements Serializable {
 
 	public void setErrorMessage(String theErrorMessage) {
 		myErrorMessage = left(theErrorMessage, ERROR_MSG_MAX_LENGTH);
+	}
+
+	public String getWarningMessage() {
+		return myWarningMessage;
+	}
+
+	public void setWarningMessage(String theWarningMessage) {
+		myWarningMessage = left(theWarningMessage, ERROR_MSG_MAX_LENGTH);
 	}
 
 	public int getSequence() {
