@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import static org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.DATE;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.QUANTITY;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.REFERENCE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.STRING;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
@@ -76,7 +77,7 @@ public class SearchParameterDaoValidatorTest {
 		SearchParameter observationDateSp = createSearchParameter(DATE, SP_COMPONENT_DEFINITION_OF_TYPE_DATE, "observation-date", "Observation.value.ofType(dateTime)");
 		RuntimeSearchParam observationDateRuntimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(observationDateSp);
 
-		SearchParameter observationQuantitySp = createSearchParameter(DATE, SP_COMPONENT_DEFINITION_OF_TYPE_DATE, "observation-date", "Observation.value.ofType(Quantity)");
+		SearchParameter observationQuantitySp = createSearchParameter(QUANTITY, SP_COMPONENT_DEFINITION_OF_TYPE_DATE, "observation-quantity", "Observation.value.ofType(Quantity)");
 		RuntimeSearchParam observationQuantityRuntimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(observationQuantitySp);
 
 		lenient().when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN))).thenReturn(observationCodeRuntimeSearchParam);
@@ -132,7 +133,7 @@ public class SearchParameterDaoValidatorTest {
 			fail();
 		} catch (UnprocessableEntityException ex) {
 			assertTrue(ex.getMessage().startsWith("HAPI-2347: "));
-			assertTrue(ex.getMessage().contains("Invalid component search parameter type: REFERENCE in component.definition: SearchParameter/observation-patient"));
+			assertTrue(ex.getMessage().contains("Invalid component search parameter type: REFERENCE in component.definition: http://example.org/SearchParameter/observation-patient"));
 		}
 	}
 

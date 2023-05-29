@@ -35,6 +35,7 @@ import org.hl7.fhir.r5.model.SearchParameter;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -108,17 +109,6 @@ public class SearchParameterDaoValidator {
 
 		} else {
 
-			if (isUnique) {
-				if (searchParameter.getComponent().size() == 0) {
-					throw new UnprocessableEntityException(Msg.code(1115) + "SearchParameter is marked as unique but has no components");
-				}
-				for (SearchParameter.SearchParameterComponentComponent next : searchParameter.getComponent()) {
-					if (isBlank(next.getDefinition())) {
-						throw new UnprocessableEntityException(Msg.code(1116) + "SearchParameter is marked as unique but is missing component.definition");
-					}
-				}
-			}
-
 			FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 			if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
 				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
@@ -127,37 +117,48 @@ public class SearchParameterDaoValidator {
 				if (myStorageSettings.isValidateSearchParameterExpressionsOnSave()) {
 
 					validateExpressionPath(searchParameter);
+					validateExpressionIsParsable(searchParameter);
+				}
+			}
+		}
 
-					String expression = getExpression(searchParameter);
-
-					try {
-						myFhirContext.newFhirPath().parse(expression);
-					} catch (Exception exception) {
-						throw new UnprocessableEntityException(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"" + expression + "\": " + exception.getMessage());
-					}
+		if (isCompositeSpForUniqueIndexing(searchParameter)) {
+			if (!searchParameter.hasComponent()) {
+				throw new UnprocessableEntityException(Msg.code(1115) + "SearchParameter is marked as unique but has no components");
+			}
+			for (SearchParameter.SearchParameterComponentComponent next : searchParameter.getComponent()) {
+				if (isBlank(next.getDefinition())) {
+					throw new UnprocessableEntityException(Msg.code(1116) + "SearchParameter is marked as unique but is missing component.definition");
 				}
 			}
 		}
 
 		if (isCompositeWithComponent(searchParameter)) {
-			validateCompositeSearchParameterComponents(searchParameter, isUnique);
+			validateCompositeSearchParameterComponents(searchParameter);
 		}
+	}
+
+	private boolean isCompositeSp(SearchParameter theSearchParameter) {
+		return theSearchParameter.getType() != null && theSearchParameter.getType().equals(Enumerations.SearchParamType.COMPOSITE);
 	}
 
 	private boolean isCompositeWithoutBase(SearchParameter searchParameter) {
 		return
 			ElementUtil.isEmpty(searchParameter.getBase()) &&
-			ElementUtil.isEmpty(searchParameter.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE)) &&
-			(searchParameter.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(searchParameter.getType().name()));
+				ElementUtil.isEmpty(searchParameter.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE)) &&
+				!isCompositeSp(searchParameter);
 	}
 
 	private boolean isCompositeWithoutExpression(SearchParameter searchParameter) {
-		return searchParameter.getType() != null && searchParameter.getType().name().equals(Enumerations.SearchParamType.COMPOSITE.name()) && isBlank(searchParameter.getExpression());
+		return isCompositeSp(searchParameter) && isBlank(searchParameter.getExpression());
 	}
 
 	private boolean isCompositeWithComponent(SearchParameter theSearchParameter) {
-		return theSearchParameter.hasType() && theSearchParameter.getType().equals(Enumerations.SearchParamType.COMPOSITE) &&
-			theSearchParameter.hasComponent();
+		return isCompositeSp(theSearchParameter) && theSearchParameter.hasComponent();
+	}
+
+	private boolean isCompositeSpForUniqueIndexing(SearchParameter theSearchParameter) {
+		return isCompositeSp(theSearchParameter) && hasAnyExtensionUniqueSetTo(theSearchParameter, true);
 	}
 
 	private void validateExpressionPath(SearchParameter theSearchParameter) {
@@ -174,6 +175,16 @@ public class SearchParameterDaoValidator {
 		}
 	}
 
+	private void validateExpressionIsParsable(SearchParameter theSearchParameter) {
+		String expression = getExpression(theSearchParameter);
+
+		try {
+			myFhirContext.newFhirPath().parse(expression);
+		} catch (Exception exception) {
+			throw new UnprocessableEntityException(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"" + expression + "\": " + exception.getMessage());
+		}
+	}
+
 	private String getExpression(SearchParameter theSearchParameter) {
 		return theSearchParameter.getExpression().trim();
 	}
@@ -187,28 +198,26 @@ public class SearchParameterDaoValidator {
 			.anyMatch(t -> theValueAsString.equals(t.getValueAsPrimitive().getValueAsString()));
 	}
 
-	private void validateCompositeSearchParameterComponents(SearchParameter theSearchParameter, boolean theIsUniqueCombo) {
-		for (SearchParameter.SearchParameterComponentComponent nextComponent : theSearchParameter.getComponent()) {
-			if (nextComponent.getDefinition() != null) {
-				RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParamByUrl(nextComponent.getDefinition());
-				if (componentSearchParam != null) {
-					RestSearchParameterTypeEnum componentSearchParamType = componentSearchParam.getParamType();
-					if (theIsUniqueCombo) {
-						checkComponentSearchParameterType(nextComponent.getDefinition(), componentSearchParamType, ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES);
-					} else {
-						checkComponentSearchParameterType(nextComponent.getDefinition(), componentSearchParamType, ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES);
-					}
-				}
-			}
+	private void validateCompositeSearchParameterComponents(SearchParameter theSearchParameter) {
+		theSearchParameter.getComponent().stream()
+			.filter(SearchParameter.SearchParameterComponentComponent::hasDefinition)
+			.map(SearchParameter.SearchParameterComponentComponent::getDefinition)
+			.filter(Objects::nonNull)
+			.map(mySearchParamRegistry::getActiveSearchParamByUrl)
+			.filter(Objects::nonNull)
+			.forEach(theRuntimeSp -> validateComponentSpTypeAgainstWhiteList(theRuntimeSp, getAllowedSearchParameterTypes(theSearchParameter)));
+	}
+
+	private void validateComponentSpTypeAgainstWhiteList(RuntimeSearchParam theRuntimeSearchParam,
+																		  Collection<RestSearchParameterTypeEnum> allowedSearchParamTypes) {
+		if (!allowedSearchParamTypes.contains(theRuntimeSearchParam.getParamType())) {
+			throw new UnprocessableEntityException(String.format("%sInvalid component search parameter type: %s in component.definition: %s, supported types: %s",
+				Msg.code(2347), theRuntimeSearchParam.getParamType().name(), theRuntimeSearchParam.getUri(),
+				allowedSearchParamTypes.stream().map(Enum::name).collect(Collectors.joining(", "))));
 		}
 	}
 
-	private void checkComponentSearchParameterType(String theComponentDefinition, RestSearchParameterTypeEnum theComponentSearchParamType,
-																  Collection<RestSearchParameterTypeEnum> allowedSearchParamTypes) {
-		if (!allowedSearchParamTypes.contains(theComponentSearchParamType)) {
-			throw new UnprocessableEntityException(String.format("%sInvalid component search parameter type: %s in component.definition: %s, supported types: %s",
-				Msg.code(2347), theComponentSearchParamType.name(), theComponentDefinition,
-				allowedSearchParamTypes.stream().map(Enum::name).collect(Collectors.joining(", "))));
-		}
+	private Set<RestSearchParameterTypeEnum> getAllowedSearchParameterTypes(SearchParameter theSearchParameter) {
+		return hasAnyExtensionUniqueSetTo(theSearchParameter, true) ? ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES : ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES;
 	}
 }

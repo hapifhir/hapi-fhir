@@ -2,4 +2,5 @@
 type: fix
 issue: 4888
 jira: SMILE-6047
-title: "Added validation for creating a Composite SearchParameter with referenced \"component\" elements."
+title: "Previously, it was possible to create composite SP with any types of SP as components. 
+This has been fixed by limiting the component SP types to be String, Token, Date, or Quantity."
