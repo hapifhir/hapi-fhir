@@ -111,7 +111,6 @@
 					<classpathDependencyExcludes>
 						<dependencyExclude>org.slf4j:slf4j-android</dependencyExclude>
 					</classpathDependencyExcludes>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 				</configuration>
 				<executions>
 					<execution>

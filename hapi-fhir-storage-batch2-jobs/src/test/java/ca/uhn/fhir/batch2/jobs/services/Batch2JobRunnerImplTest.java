@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -35,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -70,7 +72,7 @@ public class Batch2JobRunnerImplTest {
 		ourLog.setLevel(Level.ERROR);
 
 		// test
-		myJobRunner.startNewJob(new Batch2BaseJobParameters(jobId));
+		myJobRunner.startNewJob(new SystemRequestDetails(), new Batch2BaseJobParameters(jobId));
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
@@ -87,7 +89,7 @@ public class Batch2JobRunnerImplTest {
 		ourLog.setLevel(Level.ERROR);
 
 		// test
-		myJobRunner.startNewJob(new Batch2BaseJobParameters(Batch2JobDefinitionConstants.BULK_EXPORT));
+		myJobRunner.startNewJob(new SystemRequestDetails(), new Batch2BaseJobParameters(Batch2JobDefinitionConstants.BULK_EXPORT));
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
@@ -115,12 +117,12 @@ public class Batch2JobRunnerImplTest {
 		when(myJobCoordinator.getInstance(eq(jobInstanceId))).thenReturn(mockJobInstance);
 
 		// test
-		myJobRunner.startNewJob(parameters);
+		myJobRunner.startNewJob(new SystemRequestDetails(), parameters);
 
 		// verify
 		ArgumentCaptor<JobInstanceStartRequest> captor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
 		verify(myJobCoordinator)
-			.startInstance(captor.capture());
+			.startInstance(isNotNull(), captor.capture());
 		JobInstanceStartRequest val = captor.getValue();
 		// we need to verify something in the parameters
 		ourLog.info(val.getParameters());
@@ -175,12 +177,12 @@ public class Batch2JobRunnerImplTest {
 		when(myJobCoordinator.getInstance(eq(jobInstanceId))).thenReturn(mockJobInstance);
 
 		// test
-		myJobRunner.startNewJob(parameters);
+		myJobRunner.startNewJob(new SystemRequestDetails(), parameters);
 
 		// verify
 		ArgumentCaptor<JobInstanceStartRequest> captor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
 		verify(myJobCoordinator)
-			.startInstance(captor.capture());
+			.startInstance(isNotNull(), captor.capture());
 		JobInstanceStartRequest val = captor.getValue();
 		// we need to verify something in the parameters
 		ourLog.info(val.getParameters());

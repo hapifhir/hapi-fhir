@@ -83,7 +83,7 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 	}
 
 	private BulkExportJobResults getBulkExportJobResults(BulkDataExportOptions theOptions) {
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 
 		assertNotNull(startResponse);
 

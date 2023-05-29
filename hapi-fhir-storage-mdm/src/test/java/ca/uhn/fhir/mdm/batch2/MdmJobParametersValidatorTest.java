@@ -38,7 +38,7 @@ class MdmClearJobParametersValidatorTest {
 		MdmClearJobParameters parameters = new MdmClearJobParameters();
 
 		// execute
-		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(null, parameters);
 
 		// verify
 		assertThat(result, hasSize(1));
@@ -52,7 +52,7 @@ class MdmClearJobParametersValidatorTest {
 		when(myMdmSettings.isEnabled()).thenReturn(true);
 
 		// execute
-		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(null, parameters);
 
 		// verify
 		assertThat(result, hasSize(1));
@@ -69,7 +69,7 @@ class MdmClearJobParametersValidatorTest {
 		when(myMdmSettings.getMdmRules()).thenReturn(rules);
 
 		// execute
-		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(null, parameters);
 
 		// verify
 		assertThat(result, hasSize(2));
@@ -88,7 +88,7 @@ class MdmClearJobParametersValidatorTest {
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
 		// execute
-		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(null, parameters);
 
 		// verify
 		assertThat(result, hasSize(0));

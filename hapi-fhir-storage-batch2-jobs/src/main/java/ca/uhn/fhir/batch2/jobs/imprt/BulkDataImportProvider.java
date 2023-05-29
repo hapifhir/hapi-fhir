@@ -179,7 +179,7 @@ public class BulkDataImportProvider {
 
 		ourLog.info("Requesting Bulk Import Job ($import by Manifest) with {} urls", typeAndUrls.size());
 
-		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(theRequestDetails, request);
 		String jobId = jobStartResponse.getInstanceId();
 
 		IBaseOperationOutcome response = OperationOutcomeUtil.newInstance(myFhirCtx);

@@ -50,17 +50,8 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 		}
 	}
 
-	private void assertGone(IIdType theId) {
-		try {
-			getDao(theId).read(theId);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-	}
-
 	private void assertStillThere(IIdType theId) {
-		getDao(theId).read(theId);
+		assertNotGone(theId);
 	}
 
 	@Override

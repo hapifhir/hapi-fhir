@@ -405,6 +405,11 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		return myTopicSubscription.getHeartbeatPeriod();
 	}
 
+	public int getTimeout() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getTimeout();
+	}
+
 	public int getMaxCount() {
 		assert isTopicSubscription();
 		return myTopicSubscription.getMaxCount();

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4931
+title: "The `$delete-expunge` operation has a new parameter `cascade` that can be used to
+   request that resources with indexed references to other resources being deleted should also
+   be deleted."

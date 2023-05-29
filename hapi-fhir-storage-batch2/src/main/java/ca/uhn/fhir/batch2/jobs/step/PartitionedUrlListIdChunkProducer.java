@@ -48,7 +48,11 @@ public class PartitionedUrlListIdChunkProducer implements IIdChunkProducer<Parti
 			return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, theRequestPartitionId, null);
 		} else {
 			ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", partitionedUrl.getUrl(), theNextStart, theEnd);
-			return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, partitionedUrl.getRequestPartitionId(), partitionedUrl.getUrl());
+			RequestPartitionId requestPartitionId = partitionedUrl.getRequestPartitionId();
+			if (requestPartitionId == null) {
+				requestPartitionId = theRequestPartitionId;
+			}
+			return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, requestPartitionId, partitionedUrl.getUrl());
 		}
 	}
 }

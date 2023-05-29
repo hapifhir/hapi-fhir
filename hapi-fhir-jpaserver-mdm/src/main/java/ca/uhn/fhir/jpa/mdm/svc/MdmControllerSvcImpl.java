@@ -220,7 +220,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(MdmClearAppCtx.JOB_MDM_CLEAR);
 		request.setParameters(params);
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, request);
 		String id = response.getInstanceId();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
@@ -244,7 +244,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		request.setParameters(params);
 		request.setJobDefinitionId(MdmSubmitAppCtx.MDM_SUBMIT_JOB);
 
-		Batch2JobStartResponse batch2JobStartResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse batch2JobStartResponse = myJobCoordinator.startInstance(theRequestDetails, request);
 		String id = batch2JobStartResponse.getInstanceId();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
