@@ -97,8 +97,6 @@ public class SearchParameterDaoValidator {
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 
-		boolean isUnique = hasAnyExtensionUniqueSetTo(searchParameter, true);
-
 		if (isCompositeWithoutExpression(searchParameter)) {
 
 			// this is ok
