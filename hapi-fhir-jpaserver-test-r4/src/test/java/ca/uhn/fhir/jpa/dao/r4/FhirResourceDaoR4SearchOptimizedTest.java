@@ -1125,7 +1125,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		ourLog.info("** Done performing write");
 
-		assertEquals(28, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(26, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 
 		/*

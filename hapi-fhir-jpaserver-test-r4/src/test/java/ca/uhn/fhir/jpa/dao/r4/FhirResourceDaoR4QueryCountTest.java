@@ -395,7 +395,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			assertEquals(11, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(9, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(9, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(3, mySearchParamPresentDao.count());
 		});
@@ -418,7 +418,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			assertEquals(13, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(11, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(9, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(3, mySearchParamPresentDao.count());
 		});
@@ -441,7 +441,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			assertEquals(13, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(11, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(9, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(3, mySearchParamPresentDao.count());
 		});
