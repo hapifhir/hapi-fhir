@@ -156,6 +156,7 @@ public class SubscriptionProcessorConfig {
 		}
 	}
 
+	@Lazy
 	@Bean
 	SubscriptionTopicDispatcher subscriptionTopicDispatcher(FhirContext theFhirContext, SubscriptionRegistry theSubscriptionRegistry, SubscriptionMatchDeliverer theSubscriptionMatchDeliverer, SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
 		return new SubscriptionTopicDispatcher(theFhirContext, theSubscriptionRegistry, theSubscriptionMatchDeliverer, theSubscriptionTopicPayloadBuilder);
