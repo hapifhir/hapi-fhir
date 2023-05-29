@@ -251,7 +251,7 @@ public class OperationParameter implements IParameter {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		List<Object> matchingParamValues = new ArrayList<Object>();
+		List<Object> matchingParamValues = new ArrayList<>();
 
 		OperationMethodBinding method = (OperationMethodBinding) theMethodBinding;
 

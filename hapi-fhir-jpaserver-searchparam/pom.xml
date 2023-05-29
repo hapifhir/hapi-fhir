@@ -183,10 +183,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<runOrder>alphabetical</runOrder>
 					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-					<forkCount>0.6C</forkCount>
-					<excludes>*StressTest*</excludes>
 				</configuration>
 			</plugin>
 		</plugins>

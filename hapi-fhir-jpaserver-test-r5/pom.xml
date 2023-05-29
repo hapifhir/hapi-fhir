@@ -41,16 +41,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<!--<useManifestOnlyJar>false</useManifestOnlyJar>-->
-					<forkCount>1</forkCount>
-					<reuseForks>false</reuseForks>
-					<runOrder>alphabetical</runOrder>
-					<includes>
-						<include>**/*IT.java</include>
-					</includes>
-					<useModulePath>false</useModulePath>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -71,11 +61,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<runOrder>alphabetical</runOrder>
 					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-					<forkCount>0.6C</forkCount>
-					<excludes>*StressTest*</excludes>
-					<skip>${skipFailsafe}</skip>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -100,20 +86,6 @@
 							<excludes>
 								<exclude>**/stresstest/*</exclude>
 							</excludes>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>CI</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<runOrder>alphabetical</runOrder>
 						</configuration>
 					</plugin>
 				</plugins>

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -147,9 +148,11 @@ public class SubscriptionValidatingInterceptor {
 		if (!finished) {
 
 			if (subscription.isTopicSubscription()) {
-				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getTopic());
-				if (!oTopic.isPresent()) {
-					throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: " + subscription.getTopic());
+				if (myFhirContext.getVersion().getVersion() != FhirVersionEnum.R4) { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic resource
+					Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getTopic());
+					if (!oTopic.isPresent()) {
+						throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: " + subscription.getTopic());
+					}
 				}
 			} else {
 				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
