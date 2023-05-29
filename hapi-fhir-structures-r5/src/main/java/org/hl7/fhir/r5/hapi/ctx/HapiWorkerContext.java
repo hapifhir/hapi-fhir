@@ -29,7 +29,7 @@ import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.profilemodel.PEBuilder;
-import org.hl7.fhir.r5.terminologies.ValueSetExpander;
+import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpansionOutcome;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
 import org.hl7.fhir.utilities.TimeTracker;
@@ -163,7 +163,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ValueSet theValueSet, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
+	public ValueSetExpansionOutcome expandVS(ValueSet theValueSet, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
 		return null;
 	}
 
@@ -180,7 +180,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			severity = IssueSeverity.fromCode(result.getSeverityCode());
 		}
 		ConceptDefinitionComponent definition = new ConceptDefinitionComponent().setCode(result.getCode());
-		return new ValidationResult(severity, result.getMessage(), theSystem, definition, null, null);
+		return new ValidationResult(severity, result.getMessage(), theSystem, theVersion, definition, null, null);
 	}
 
 	@Override
@@ -199,7 +199,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
 			definition.setCode(theCode);
 			definition.setDisplay(outcome.getDisplay());
-			return new ValidationResult(theSystem, definition, null);
+			return new ValidationResult(theSystem, theVersion, definition, null);
 		}
 
 		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" +
@@ -223,17 +223,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical) {
+	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical) {
 		throw new UnsupportedOperationException(Msg.code(2128));
 	}
 
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical, boolean theNoInactive) throws TerminologyServiceException {
+	public ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical, boolean theNoInactive) throws TerminologyServiceException {
 		ValueSet input = new ValueSet();
 		input.getCompose().setInactive(!theNoInactive); //TODO GGG/DO is this valid?
 		input.getCompose().addInclude(theInc);
 		IValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
-		return new ValueSetExpander.ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
+		return new ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
 	}
 
 	@Override
@@ -368,7 +368,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandVS(Resource src,ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHierarchical) throws FHIRException {
+	public ValueSetExpansionOutcome expandVS(Resource src,ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHierarchical) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(230));
 	}
 
