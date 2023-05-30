@@ -285,7 +285,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional
 	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theEvent.getChunkId(), new Date(), theEvent.getRecordsProcessed(), theEvent.getRecoveredErrorCount(), WorkChunkStatusEnum.COMPLETED);
+		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theEvent.getChunkId(), new Date(), theEvent.getRecordsProcessed(), theEvent.getRecoveredErrorCount(), WorkChunkStatusEnum.COMPLETED, theEvent.getRecoveredWarningMessage());
 	}
 
 	@Nullable
@@ -310,12 +310,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		for (List<String> idList : listOfListOfIds) {
 			myWorkChunkRepository.updateAllChunksForInstanceStatusClearDataAndSetError(idList, new Date(), theStatus, errorMessage);
 		}
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void updateWorkChunkWarningMessage(String theChunkId, String theWarningMessage) {
-		myWorkChunkRepository.updateWorkChunkWarningMessage(theChunkId, theWarningMessage);
 	}
 
 	@Override

@@ -59,10 +59,11 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, " +
-		"e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null " +
+		"e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, " +
+		"e.myWarningMessage = CASE WHEN e.myWarningMessage is null THEN :warningMessage ELSE CONCAT(e.myWarningMessage, '\\n', :warningMessage) END " +
 		"WHERE e.myId = :id")
 	void updateChunkStatusAndClearDataForEndSuccess(@Param("id") String theChunkId, @Param("et") Date theEndTime,
-		@Param("rp") int theRecordsProcessed, @Param("errorRetries") int theErrorRetries, @Param("status") WorkChunkStatusEnum theInProgress);
+		@Param("rp") int theRecordsProcessed, @Param("errorRetries") int theErrorRetries, @Param("status") WorkChunkStatusEnum theInProgress, @Param("warningMessage") String theWarningMessage);
 
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
@@ -79,10 +80,6 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 	@Modifying
 	@Query("DELETE FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId")
 	int deleteAllForInstance(@Param("instanceId") String theInstanceId);
-
-	@Modifying
-	@Query("UPDATE Batch2WorkChunkEntity e SET e.myWarningMessage = :wm WHERE e.myId = :id")
-	void updateWorkChunkWarningMessage(@Param("id") String theChunkId, @Param("wm") String theWarningMessage);
 
 	@Query("SELECT e.myId from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus = :status")
 	List<String> fetchAllChunkIdsForStepWithStatus(@Param("instanceId")String theInstanceId, @Param("stepId")String theStepId, @Param("status") WorkChunkStatusEnum theStatus);

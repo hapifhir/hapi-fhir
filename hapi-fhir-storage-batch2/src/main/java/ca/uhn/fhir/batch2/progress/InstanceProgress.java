@@ -28,6 +28,7 @@ import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,12 +53,13 @@ public class InstanceProgress {
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
 	private final Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
-	private final Set<String> myWarningMessage = new HashSet<>();
+	private final Set<String> myWarningMessages = new HashSet<>();
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
-		myWarningMessage.add(theChunk.getWarningMessage());
-
+		if (!(theChunk.getWarningMessage() == null)) {
+			myWarningMessages.addAll(Arrays.asList(theChunk.getWarningMessage().split("\\n")));
+		}
 		updateRecordsProcessed(theChunk);
 		updateEarliestTime(theChunk);
 		updateLatestEndTime(theChunk);
@@ -123,10 +125,10 @@ public class InstanceProgress {
 
 	public void updateInstance(JobInstance theInstance) {
 		updateInstance(theInstance, false);
-		myWarningMessage.remove(null);
-		if (myWarningMessage.size() > 0) {
-			theInstance.setWarningMessage(myWarningMessage.iterator().next());
-		}
+		myWarningMessages.remove(null);
+
+		String newWarningMessage = String.join("\\n", myWarningMessages);
+		theInstance.setWarningMessage(newWarningMessage);
 	}
 
 	/**
