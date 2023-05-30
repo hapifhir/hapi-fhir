@@ -45,11 +45,22 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class SearchParameterDaoValidator {
 
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
-	private static final Set<RestSearchParameterTypeEnum> ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES = Set.of(RestSearchParameterTypeEnum.STRING,
+	private static final Set<RestSearchParameterTypeEnum> ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_JPA = Set.of(RestSearchParameterTypeEnum.STRING,
 		RestSearchParameterTypeEnum.TOKEN, RestSearchParameterTypeEnum.DATE, RestSearchParameterTypeEnum.QUANTITY);
 
-	private static final Set<RestSearchParameterTypeEnum> ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES =
-		new HashSet<>(ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES) {{
+	private static final Set<RestSearchParameterTypeEnum> ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_H_SEARCH =
+		new HashSet<>(ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_JPA) {{
+		add(RestSearchParameterTypeEnum.NUMBER);
+		add(RestSearchParameterTypeEnum.URI);
+	}};
+
+	private static final Set<RestSearchParameterTypeEnum> ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES_JPA =
+		new HashSet<>(ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_JPA) {{
+			add(RestSearchParameterTypeEnum.REFERENCE);
+		}};
+
+	private static final Set<RestSearchParameterTypeEnum> ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES_H_SEARCH =
+		new HashSet<>(ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_H_SEARCH) {{
 			add(RestSearchParameterTypeEnum.REFERENCE);
 		}};
 
@@ -224,6 +235,11 @@ public class SearchParameterDaoValidator {
 	}
 
 	private Set<RestSearchParameterTypeEnum> getAllowedSearchParameterTypes(SearchParameter theSearchParameter) {
-		return hasAnyExtensionUniqueSetTo(theSearchParameter, true) ? ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES : ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES;
+		boolean isUniqueComposite = hasAnyExtensionUniqueSetTo(theSearchParameter, true);
+		if (myStorageSettings.isAdvancedHSearchIndexing()) {
+			return isUniqueComposite ? ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES_H_SEARCH : ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_H_SEARCH;
+		} else {
+			return isUniqueComposite ? ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES_JPA : ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_JPA;
+		}
 	}
 }
