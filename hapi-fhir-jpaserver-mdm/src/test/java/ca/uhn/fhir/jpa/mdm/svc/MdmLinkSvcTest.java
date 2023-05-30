@@ -200,4 +200,12 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		assertEquals(1, targets.size());
 		assertEquals(requestPartitionId.getFirstPartitionIdOrNull(), targets.get(0).getPartitionId().getPartitionId());
 	}
+
+	// TODO:  need to build a test that:
+	// 1) Uses the MDM rules as defined in the issue or a slim approximation
+	// 2) POSTs the first bundle
+	// 3) POSTs the second bundle
+	// 4) $query-links to very 2 sources to one golden resource
+	// 5) $mdm-clear or equivalent
+	// 6) $query-links a second time
 }
