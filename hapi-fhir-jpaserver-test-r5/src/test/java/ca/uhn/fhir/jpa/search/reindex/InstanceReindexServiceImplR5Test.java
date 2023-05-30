@@ -72,6 +72,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 			.sorted()
 			.toList();
 		assertThat(indexInstances.toString(), indexInstances, contains(
+			"_id NO_CHANGE Token true",
 			"active NO_CHANGE Token true",
 			"address NO_CHANGE String true",
 			"address-city NO_CHANGE String true",

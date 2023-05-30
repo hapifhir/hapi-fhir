@@ -25,7 +25,9 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -61,6 +63,8 @@ public final class ResourceIndexedSearchParams {
 	final public Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
 	final public Collection<SearchParamPresentEntity> mySearchParamPresentEntities = new HashSet<>();
 	final public Collection<ResourceIndexedSearchParamComposite>  myCompositeParams = new HashSet<>();
+
+	private static final Set<String> myIgnoredParams = Set.of(Constants.PARAM_TEXT, Constants.PARAM_CONTENT);
 
 	public ResourceIndexedSearchParams() {
 	}
@@ -344,11 +348,15 @@ public final class ResourceIndexedSearchParams {
 	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(PartitionSettings thePartitionSettings, StorageSettings theStorageSettings, ResourceTable theEntity, ResourceSearchParams activeSearchParams, RestSearchParameterTypeEnum type,
 																												Collection<RT> paramCollection) {
 		for (String nextParamName : activeSearchParams.getSearchParamNames()) {
-			if (nextParamName == null || nextParamName.startsWith("_")) {
+			if (nextParamName == null || myIgnoredParams.contains(nextParamName)) {
 				continue;
 			}
 
 			RuntimeSearchParam searchParam = activeSearchParams.get(nextParamName);
+			if (RuntimeSearchParamHelper.isResourceLevel(searchParam)) {
+				continue;
+			}
+
 			if (searchParam.getParamType() == type) {
 				boolean haveParam = false;
 				for (BaseResourceIndexedSearchParam nextParam : paramCollection) {

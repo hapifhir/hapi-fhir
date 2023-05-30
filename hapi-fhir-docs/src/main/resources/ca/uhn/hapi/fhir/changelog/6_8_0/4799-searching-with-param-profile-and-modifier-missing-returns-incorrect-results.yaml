@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4799
+jira: SMILE-6669
+title: "There is an issue where searching on paramName '_profile' with modifier 'missing' will not provide the correct search result.  This has been fixed."
