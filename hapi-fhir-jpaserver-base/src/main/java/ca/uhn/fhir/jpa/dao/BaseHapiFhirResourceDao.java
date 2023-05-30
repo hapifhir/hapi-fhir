@@ -1318,11 +1318,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	}
 
-	@Override
-	public T read(IIdType theId, RequestPartitionId theRequestPartitionId) {
-		return read(theId, null, theRequestPartitionId, true);
-	}
-
 	private T read(IIdType theId, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, boolean theDeletedOk) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
