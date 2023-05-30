@@ -129,7 +129,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Override
 	public PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theInstallationSpec) {
-		return myPackageCacheManager.uninstallPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+		PackageDeleteOutcomeJson outcome = myPackageCacheManager.uninstallPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+		validationSupport.invalidateCaches();
+		return outcome;
 	}
 
 	/**
@@ -177,6 +179,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					// If any SearchParameters were installed, let's load them right away
 					mySearchParamRegistryController.refreshCacheIfNecessary();
 				}
+
+				validationSupport.invalidateCaches();
 
 			} catch (IOException e) {
 				throw new ImplementationGuideInstallationException(Msg.code(1285) + "Could not load NPM package " + theInstallationSpec.getName() + "#" + theInstallationSpec.getVersion(), e);

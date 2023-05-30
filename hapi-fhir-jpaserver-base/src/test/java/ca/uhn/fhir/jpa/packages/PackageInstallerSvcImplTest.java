@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -63,6 +64,8 @@ public class PackageInstallerSvcImplTest {
 	private DaoRegistry myDaoRegistry;
 	@Mock
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	@Mock
+	private IValidationSupport myIValidationSupport;
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
 	@Spy
