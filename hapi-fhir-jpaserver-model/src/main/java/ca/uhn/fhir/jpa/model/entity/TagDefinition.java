@@ -38,6 +38,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -158,6 +159,7 @@ public class TagDefinition implements Serializable {
 
 	/**
 	 * Warning - this is nullable, while IBaseCoding getUserSelected isn't.
+	 * wipmb maybe rename?
 	 */
 	public Boolean getUserSelected() {
 		return myUserSelected;
