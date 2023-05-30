@@ -536,7 +536,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return outcome;
 	}
 
-
 	private void createForcedIdIfNeeded(ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds) {
 		if (isNotBlank(theResourceId) && theEntity.getForcedId() == null) {
 			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theResourceId)) {
@@ -1059,7 +1058,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.withRequestPartitionId(requestPartitionId)
 			.execute(() -> {
 				IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
-				BaseHasResource entity = readEntity(id, true, requestPartitionId);
+				BaseHasResource entity = readEntity(id, true, theRequest, requestPartitionId);
 
 				return myPersistedJpaBundleProviderFactory.history(theRequest, myResourceName, entity.getId(), theSince, theUntil, theOffset, requestPartitionId);
 			});
@@ -1079,7 +1078,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.withRequestPartitionId(requestPartitionId)
 			.execute(() -> {
 				IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
-				BaseHasResource entity = readEntity(id, true, requestPartitionId);
+				BaseHasResource entity = readEntity(id, true, theRequest, requestPartitionId);
 
 				return myPersistedJpaBundleProviderFactory.history(theRequest, myResourceName, entity.getId(),
 					theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
@@ -1302,7 +1301,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 */
 	@Override
 	public T read(IIdType theId) {
-		return read(theId, (RequestDetails) null);
+		return read(theId, null);
 	}
 
 	@Override
@@ -1312,27 +1311,23 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public T read(IIdType theId, RequestDetails theRequest, boolean theDeletedOk) {
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequest, myResourceName, theId);
-
-		return read(theId, theRequest, requestPartitionId, theDeletedOk);
-
-	}
-
-	private T read(IIdType theId, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, boolean theDeletedOk) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
+		TransactionDetails transactionDetails = new TransactionDetails();
+
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequest, myResourceName, theId);
 
 		return myTransactionService
 			.withRequest(theRequest)
-			.withTransactionDetails(new TransactionDetails())
-			.withRequestPartitionId(theRequestPartitionId)
-			.execute(() -> doReadInTransaction(theId, theRequest, theDeletedOk, theRequestPartitionId));
+			.withTransactionDetails(transactionDetails)
+			.withRequestPartitionId(requestPartitionId)
+			.execute(() -> doReadInTransaction(theId, theRequest, theDeletedOk, requestPartitionId));
 	}
 
 	private T doReadInTransaction(IIdType theId, RequestDetails theRequest, boolean theDeletedOk, RequestPartitionId theRequestPartitionId) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theId, true, theRequestPartitionId);
+		BaseHasResource entity = readEntity(theId, true, theRequest, theRequestPartitionId);
 		validateResourceType(entity);
 
 		T retVal = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
@@ -1367,7 +1362,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 			.withRequest(theRequest)
 			.withRequestPartitionId(requestPartitionId)
-			.execute(() -> readEntity(theId, true, requestPartitionId));
+			.execute(() -> readEntity(theId, true, theRequest, requestPartitionId));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1483,7 +1478,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestPartitionId requestPartitionId) {
+	private BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest, RequestPartitionId requestPartitionId) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		BaseHasResource entity;
