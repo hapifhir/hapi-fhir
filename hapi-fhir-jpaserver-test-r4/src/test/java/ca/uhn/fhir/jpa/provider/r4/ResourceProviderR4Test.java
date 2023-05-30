@@ -3,10 +3,13 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -28,6 +31,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -200,11 +204,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -336,6 +342,61 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(output, containsString("Unknown search parameter &quot;a&quot;"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
+	}
+
+	@Test
+	public void testSearchResourcesOnProfile_whenProfileIsMissing_returnsResourcesWithMissingProfile(){
+		// given
+		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.addBase("Organization");
+		searchParameter.setCode("_profile");
+		searchParameter.setType(Enumerations.SearchParamType.URI);
+		searchParameter.setExpression("meta.profile");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
+		searchParameterDao.create(searchParameter, (RequestDetails) null);
+
+		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
+		Organization organizationWithNoProfile = new Organization();
+		organizationWithNoProfile.setName("noProfile");
+		organizationDao.create(organizationWithNoProfile);
+
+		Organization organizationWithProfile = new Organization();
+		organizationWithProfile.setName("withProfile");
+		organizationWithProfile.getMeta().addProfile("http://foo");
+		organizationDao.create(organizationWithProfile);
+
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamUri> matched = myResourceIndexedSearchParamUriDao.findAll().stream()
+				.filter(theRow -> theRow.getResourceType().equals("Organization"))
+				.filter(theRow -> theRow.getParamName().equals("_profile"))
+				.collect(Collectors.toList());
+
+			assertThat(matched, hasSize(2));
+			assertThat(matched, hasItems(
+				hasProperty("uri", is(nullValue())),
+				hasProperty("uri", is("http://foo"))
+			));
+		});
+
+		// when
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamUri> matched = myResourceIndexedSearchParamUriDao.findAll().stream()
+				.filter(theRow -> theRow.getResourceType().equals("Organization"))
+				.filter(theRow -> theRow.getParamName().equals("_profile"))
+				.filter(theRow -> theRow.isMissing() == true)
+				.collect(Collectors.toList());
+
+			// then
+			assertThat(matched, hasSize(1));
+			assertThat(matched, hasItem(
+				hasProperty("uri", is(nullValue()))
+			));
+		});
 	}
 
 	@Test
