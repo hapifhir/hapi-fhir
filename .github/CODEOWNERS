@@ -1,14 +1,12 @@
 
 migrate/ @hapifhir/data-migrations
 
-hapi-fhir-cli/**/*.java @nathandoef
+hapi-fhir-cli/**/*.java @nathandoef @tadgh @jamesagnew
 
-hapi-fhir-storage-cr/**/*.java @JPercival
+hapi-fhir-storage-cr/**/*.java @JPercival @tadgh
 
-hapi-fhir-jpaserver-subscription/**/*.java @fil512
+hapi-fhir-jpaserver-subscription/**/*.java @fil512 @tadgh @jamesagnew
 hapi-fhir-jpaserver-mdm/**/*.java @fil512 @tadgh
-
-hapi-fhir-storage/**/*.java @fil512
 
 hapi-fhir-storage-batch2/**/*.java @michaelabuckley @jamesagnew
 hapi-fhir-storage-batch2-jobs/**/*.java @michaelabuckley @jamesagnew
