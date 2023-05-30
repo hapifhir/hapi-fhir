@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
-import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import org.hl7.fhir.instance.model.api.IBase;
 
 public class EmptyFieldMatcher implements IMdmFieldMatcher {
@@ -29,7 +29,7 @@ public class EmptyFieldMatcher implements IMdmFieldMatcher {
 	}
 
 	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theParams) {
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
 		for (IBase b : new IBase[] {theLeftBase, theRightBase}) {
 			if (b != null && !b.isEmpty()) {
 				return false;

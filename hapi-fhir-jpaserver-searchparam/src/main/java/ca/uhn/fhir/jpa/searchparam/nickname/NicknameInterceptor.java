@@ -38,8 +38,8 @@ public class NicknameInterceptor {
 
 	private final NicknameServiceFactory myNicknameSvcFactory;
 
-	public NicknameInterceptor(NicknameServiceFactory theNicknameSvc) {
-		myNicknameSvcFactory = theNicknameSvc;
+	public NicknameInterceptor(NicknameServiceFactory theNicknameSvcFactory) {
+		myNicknameSvcFactory = theNicknameSvcFactory;
 	}
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)

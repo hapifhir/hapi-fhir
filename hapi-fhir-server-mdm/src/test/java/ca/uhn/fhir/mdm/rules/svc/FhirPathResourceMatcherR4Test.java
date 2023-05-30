@@ -6,7 +6,6 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.EmptyFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiStringMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.HumanName;
@@ -67,7 +66,7 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 		myRight.setId("Patient/2");
 		HapiStringMatcher stringMatcher = new HapiStringMatcher();
 
-		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.STRING)))
+		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.STRING)))
 			.thenReturn(stringMatcher);
 
 		// test
@@ -95,7 +94,7 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	public void testStringMatchResult() {
 		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildOrderedGivenNameRules(MatchTypeEnum.STRING));
 		HapiStringMatcher stringMatcher = new HapiStringMatcher();
-		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.STRING)))
+		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.STRING)))
 			.thenReturn(stringMatcher);
 		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
 		assertMatchResult(MdmMatchResultEnum.NO_MATCH, 0L, 0.0, false, false, result);

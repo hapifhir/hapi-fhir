@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
-import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -28,10 +28,10 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 public class SubstringStringMatcher implements IMdmFieldMatcher {
 
 	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theParams) {
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String left = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.isExactMatch());
-			String right = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.isExactMatch());
+			String left = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.getExact());
+			String right = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
 			return left.startsWith(right) || right.startsWith(left);
 		}
 		return false;

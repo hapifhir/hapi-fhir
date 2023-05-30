@@ -61,9 +61,9 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	@Test
 	public void testMetaphoneMatchResult() {
 		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildNamePhoneRules(MatchTypeEnum.METAPHONE));
-		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.METAPHONE)))
+		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.METAPHONE)))
 			.thenReturn(new PhoneticEncoderMatcher(PhoneticEncoderEnum.METAPHONE));
-		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.STRING)))
+		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.STRING)))
 			.thenReturn(new HapiStringMatcher());
 
 		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
@@ -73,7 +73,7 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	@Test
 	public void testStringMatchResult() {
 		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildNamePhoneRules(MatchTypeEnum.STRING));
-		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.STRING)))
+		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.STRING)))
 			.thenReturn(new HapiStringMatcher());
 
 		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);

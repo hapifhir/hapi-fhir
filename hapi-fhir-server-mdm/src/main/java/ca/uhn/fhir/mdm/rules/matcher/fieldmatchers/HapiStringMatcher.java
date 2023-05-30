@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
-import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -31,10 +31,10 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 public class HapiStringMatcher implements IMdmFieldMatcher {
 
 	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theExtraMatchParams) {
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theExtraMatchParams) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExtraMatchParams.isExactMatch());
-			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExtraMatchParams.isExactMatch());
+			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExtraMatchParams.getExact());
+			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExtraMatchParams.getExact());
 
 			return leftString.equals(rightString);
 		}

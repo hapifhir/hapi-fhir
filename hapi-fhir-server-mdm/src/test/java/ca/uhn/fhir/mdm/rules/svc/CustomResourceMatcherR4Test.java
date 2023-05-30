@@ -46,7 +46,7 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	public void testExactNameAnyOrder() {
 		MdmResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(MatchTypeEnum.NAME_ANY_ORDER, true));
 		NameMatcher nameMatcher = new NameMatcher(ourFhirContext, MdmNameMatchModeEnum.ANY_ORDER);
-		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.NAME_ANY_ORDER)))
+		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.NAME_ANY_ORDER)))
 			.thenReturn(nameMatcher);
 
 		assertMatch(MdmMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
@@ -63,7 +63,7 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	public void testNormalizedNameAnyOrder() {
 		NameMatcher nameMatcher = new NameMatcher(ourFhirContext, MdmNameMatchModeEnum.ANY_ORDER);
 		MdmResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(MatchTypeEnum.NAME_ANY_ORDER, false));
-		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.NAME_ANY_ORDER)))
+		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.NAME_ANY_ORDER)))
 			.thenReturn(nameMatcher);
 
 		assertMatch(MdmMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
@@ -80,7 +80,7 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	public void testExactNameFirstAndLast() {
 		NameMatcher nameMatcher = new NameMatcher(ourFhirContext, MdmNameMatchModeEnum.FIRST_AND_LAST);
 		MdmResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(MatchTypeEnum.NAME_FIRST_AND_LAST, true));
-		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.NAME_FIRST_AND_LAST)))
+		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.NAME_FIRST_AND_LAST)))
 			.thenReturn(nameMatcher);
 
 		assertMatch(MdmMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
@@ -98,7 +98,7 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	public void testNormalizedNameFirstAndLast() {
 		NameMatcher nameMatcher = new NameMatcher(ourFhirContext, MdmNameMatchModeEnum.FIRST_AND_LAST);
 		MdmResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(MatchTypeEnum.NAME_FIRST_AND_LAST, false));
-		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.NAME_FIRST_AND_LAST)))
+		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.NAME_FIRST_AND_LAST)))
 			.thenReturn(nameMatcher);
 
 		assertMatch(MdmMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));

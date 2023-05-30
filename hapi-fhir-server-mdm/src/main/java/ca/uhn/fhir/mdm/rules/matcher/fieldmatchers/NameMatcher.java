@@ -20,8 +20,8 @@
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
-import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.util.NameUtil;
 import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +45,7 @@ public class NameMatcher implements IMdmFieldMatcher {
 	}
 
 	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theParams) {
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
 		String leftFamilyName = NameUtil.extractFamilyName(myFhirContext, theLeftBase);
 		String rightFamilyName = NameUtil.extractFamilyName(myFhirContext, theRightBase);
 		if (StringUtils.isEmpty(leftFamilyName) || StringUtils.isEmpty(rightFamilyName)) {
@@ -57,7 +57,7 @@ public class NameMatcher implements IMdmFieldMatcher {
 		List<String> leftGivenNames = NameUtil.extractGivenNames(myFhirContext, theLeftBase);
 		List<String> rightGivenNames = NameUtil.extractGivenNames(myFhirContext, theRightBase);
 
-		if (!theParams.isExactMatch()) {
+		if (!theParams.getExact()) {
 			leftFamilyName = StringUtil.normalizeStringForSearchIndexing(leftFamilyName);
 			rightFamilyName = StringUtil.normalizeStringForSearchIndexing(rightFamilyName);
 			leftGivenNames = leftGivenNames.stream().map(StringUtil::normalizeStringForSearchIndexing).collect(Collectors.toList());

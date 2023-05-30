@@ -57,13 +57,6 @@ public class MdmCommonConfig {
 		IMdmSettings theSettings,
 		NicknameServiceFactory theNicknameServiceFactory
 	) {
-		/*
-		 * If we do not like injecting the factory just to set the nicknamemap
-		 * we can also have another bean (that can be null) that just provides
-		 * a map.
-		 * If that bean is provided, we will use it (inside the nicknamefactory).
-		 * Otherwise, we will not and default to the default nickname list.
-		 */
 		theNicknameServiceFactory.setNicknameMap(theSettings.nicknameMap());
 		return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameServiceFactory);
 	}

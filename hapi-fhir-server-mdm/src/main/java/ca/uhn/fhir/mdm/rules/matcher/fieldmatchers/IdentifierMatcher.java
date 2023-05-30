@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
-import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.util.IdentifierUtil;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.CanonicalIdentifier;
@@ -41,10 +41,10 @@ public class IdentifierMatcher implements IMdmFieldMatcher {
 	 * @throws UnsupportedOperationException if either Base is not an Identifier instance
 	 */
 	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, ExtraMatchParams theParams) {
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
 		CanonicalIdentifier left = IdentifierUtil.identifierDtFromIdentifier(theLeftBase);
-		if (theParams.getIdentificationSystem() != null) {
-			if (!theParams.getIdentificationSystem().equals(left.getSystemElement().getValueAsString())) {
+		if (theParams.getIdentifierSystem() != null) {
+			if (!theParams.getIdentifierSystem().equals(left.getSystemElement().getValueAsString())) {
 				return false;
 			}
 		}

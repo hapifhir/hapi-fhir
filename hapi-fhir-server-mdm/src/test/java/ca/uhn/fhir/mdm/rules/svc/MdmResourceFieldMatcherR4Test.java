@@ -55,7 +55,7 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 			myGivenNameMatchField,
 			myMdmRulesJson
 		);
-		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.EMPTY_FIELD)))
+		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.EMPTY_FIELD)))
 			.thenReturn(new EmptyFieldMatcher());
 
 		assertFalse(myComparator.match(myJohn, myJohny).match);
@@ -106,10 +106,6 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 	// and falls through to similarity check
 	@Test
 	public void testMatch() {
-//		myGivenNameMatchField.setMatcher(new MdmMatcherJson().setAlgorithm(MatchTypeEnum.NAME_ANY_ORDER));
-//		when(myIMatcherFactory.getFieldMatcherForEnum(eq(MatchTypeEnum.NAME_ANY_ORDER)))
-//			.thenReturn(new NameMatcher(ourFhirContext, MdmNameMatchModeEnum.ANY_ORDER));
-
 		assertTrue(myComparator.match(myJohn, myJohny).match);
 	}
 }

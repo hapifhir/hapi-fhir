@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
-import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -36,7 +36,7 @@ public class MdmMatcherFactory implements IMatcherFactory {
 	}
 
 	@Override
-	public IMdmFieldMatcher getFieldMatcherForEnum(MatchTypeEnum theMdmMatcherEnum) {
+	public IMdmFieldMatcher getFieldMatcherForMatchType(MatchTypeEnum theMdmMatcherEnum) {
 		String matchTypeName;
 		if (theMdmMatcherEnum != null) {
 			switch (theMdmMatcherEnum) {

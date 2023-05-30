@@ -53,8 +53,8 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean dateMatch(Date theDate, Date theSameMonth, TemporalPrecisionEnum theTheDay) {
-		myExtraMatchParams.setExactMatch(true);
-		return myDateMatcher.matches(new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), myExtraMatchParams);
+		myMdmMatcherJson.setExact(true);
+		return myDateMatcher.matches(new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), myMdmMatcherJson);
 	}
 
 	@Test
@@ -98,11 +98,11 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean dateTimeMatch(Date theDate, Date theSecondDate, TemporalPrecisionEnum thePrecision, TemporalPrecisionEnum theSecondPrecision) {
-		myExtraMatchParams.setExactMatch(true);
+		myMdmMatcherJson.setExact(true);
 		return myDateMatcher.matches(
 			new DateTimeType(theDate, thePrecision),
 			new DateTimeType(theSecondDate, theSecondPrecision),
-			myExtraMatchParams
+			myMdmMatcherJson
 		);
 	}
 }

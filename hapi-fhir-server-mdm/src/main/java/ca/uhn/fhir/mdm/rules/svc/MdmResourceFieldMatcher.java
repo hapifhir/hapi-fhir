@@ -22,14 +22,13 @@ package ca.uhn.fhir.mdm.rules.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
-import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
@@ -128,7 +127,7 @@ public class MdmResourceFieldMatcher {
 	private MdmMatchEvaluation match(IBase theLeftValue, IBase theRightValue) {
 		IMdmFieldMatcher matcher = getFieldMatcher();
 		if (matcher != null) {
-			boolean isMatches = matcher.matches(theLeftValue, theRightValue, getExtraMatcherParams());
+			boolean isMatches = matcher.matches(theLeftValue, theRightValue, myMdmFieldMatchJson.getMatcher());
 			return new MdmMatchEvaluation(isMatches, isMatches ? 1.0 : 0.0);
 		}
 
@@ -174,17 +173,6 @@ public class MdmResourceFieldMatcher {
 			return null;
 		}
 
-		return myIMatcherFactory.getFieldMatcherForEnum(matchTypeEnum);
-	}
-
-	private ExtraMatchParams getExtraMatcherParams() {
-		MdmMatcherJson matcherJson = myMdmFieldMatchJson.getMatcher();
-
-		ExtraMatchParams params = new ExtraMatchParams();
-		if (matcherJson != null) {
-			params.setExactMatch(matcherJson.getExact());
-			params.setIdentificationSystem(matcherJson.getIdentifierSystem());
-		}
-		return params;
+		return myIMatcherFactory.getFieldMatcherForMatchType(matchTypeEnum);
 	}
 }

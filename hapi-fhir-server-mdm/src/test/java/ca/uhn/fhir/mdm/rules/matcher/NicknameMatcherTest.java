@@ -1,7 +1,7 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
-import ca.uhn.fhir.jpa.searchparam.matcher.ExtraMatchParams;
-import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NicknameMatcher;
 import org.hl7.fhir.r4.model.StringType;
@@ -41,8 +41,8 @@ class NicknameMatcherTest {
 	}
 
 	private boolean match(String theFirst, String theSecond) {
-		ExtraMatchParams params = new ExtraMatchParams();
-		params.setExactMatch(true);
-		return matcher.matches(new StringType(theFirst), new StringType(theSecond), params);
+		MdmMatcherJson json = new MdmMatcherJson();
+		json.setExact(true);
+		return matcher.matches(new StringType(theFirst), new StringType(theSecond), json);
 	}
 }

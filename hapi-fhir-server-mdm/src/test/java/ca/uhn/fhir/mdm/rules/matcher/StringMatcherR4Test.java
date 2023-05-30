@@ -1,11 +1,11 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
-import ca.uhn.fhir.jpa.searchparam.matcher.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiStringMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NumericMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.PhoneticEncoderMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.SubstringStringMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateType;
@@ -125,30 +125,31 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 
 	@Test
 	public void testExactString() {
-		myExtraMatchParams.setExactMatch(true);
+		myMdmMatcherJson.setExact(true);
 
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Jilly"), new StringType("Jilly"), myExtraMatchParams));
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Jilly"), new StringType("Jilly"), myMdmMatcherJson));
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("MCTAVISH"), new StringType("McTavish"), myExtraMatchParams));
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Durie"), new StringType("dury"), myExtraMatchParams));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("MCTAVISH"), new StringType("McTavish"), myMdmMatcherJson));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Durie"), new StringType("dury"), myMdmMatcherJson));
 	}
 
 	@Test
 	public void testExactBoolean() {
-		myExtraMatchParams.setExactMatch(true);
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(true), myExtraMatchParams));
+		myMdmMatcherJson.setExact(true);
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(false), myExtraMatchParams));
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(false), new BooleanType(true), myExtraMatchParams));
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(true), myMdmMatcherJson));
+
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(false), myMdmMatcherJson));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(false), new BooleanType(true), myMdmMatcherJson));
 	}
 
 	@Test
 	public void testExactDateString() {
-		myExtraMatchParams.setExactMatch(true);
+		myMdmMatcherJson.setExact(true);
 
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-08-09"), myExtraMatchParams));
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-08-09"), myMdmMatcherJson));
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-09-08"), myExtraMatchParams));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-09-08"), myMdmMatcherJson));
 	}
 
 
@@ -160,11 +161,11 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 		Enumeration<Enumerations.AdministrativeGender> female = new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
 		female.setValue(Enumerations.AdministrativeGender.FEMALE);
 
-		myExtraMatchParams.setExactMatch(true);
+		myMdmMatcherJson.setExact(true);
 
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(male, male, myExtraMatchParams));
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(male, male, myMdmMatcherJson));
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(male, female, myExtraMatchParams));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(male, female, myMdmMatcherJson));
 	}
 
 	@Test
@@ -209,6 +210,6 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 
 	private boolean match(MatchTypeEnum theMatcher, String theLeft, String theRight) {
 		return getFieldMatcher(theMatcher)
-			.matches(new StringType(theLeft), new StringType(theRight), myExtraMatchParams);
+			.matches(new StringType(theLeft), new StringType(theRight), myMdmMatcherJson);
 	}
 }

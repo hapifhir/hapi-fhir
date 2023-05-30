@@ -55,7 +55,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier left = new Identifier().setSystem(MATCHING_SYSTEM);
 		Identifier right = new Identifier().setSystem(MATCHING_SYSTEM);
 
-		myExtraMatchParams.setIdentificationSystem(MATCHING_SYSTEM);
+		myMdmMatcherJson.setIdentifierSystem(MATCHING_SYSTEM);
 
 		assertFalse(match(left, right));
 	}
@@ -65,7 +65,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier left = new Identifier().setSystem(MATCHING_SYSTEM).setValue(MATCHING_VALUE);
 		Identifier right = new Identifier().setSystem(MATCHING_SYSTEM).setValue(MATCHING_VALUE);
 
-		myExtraMatchParams.setIdentificationSystem(MATCHING_SYSTEM);
+		myMdmMatcherJson.setIdentifierSystem(MATCHING_SYSTEM);
 
 		assertTrue(match(left, right));
 	}
@@ -75,12 +75,12 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier left = new Identifier().setSystem(OTHER_SYSTEM).setValue(MATCHING_VALUE);
 		Identifier right = new Identifier().setSystem(OTHER_SYSTEM).setValue(MATCHING_VALUE);
 
-		myExtraMatchParams.setIdentificationSystem(MATCHING_SYSTEM);
+		myMdmMatcherJson.setIdentifierSystem(MATCHING_SYSTEM);
 
 		assertFalse(match(left, right));
 	}
 
 	private boolean match(IBase theFirst, IBase theSecond) {
-		return myIdentifierMatcher.matches(theFirst, theSecond, myExtraMatchParams);
+		return myIdentifierMatcher.matches(theFirst, theSecond, myMdmMatcherJson);
 	}
 }

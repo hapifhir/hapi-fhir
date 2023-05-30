@@ -89,6 +89,6 @@ public class ExtensionMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean match(IBase theFirst, IBase theSecond) {
-		return myExtensionMatcher.matches(theFirst, theSecond, myExtraMatchParams);
+		return myExtensionMatcher.matches(theFirst, theSecond, myMdmMatcherJson);
 	}
 }
