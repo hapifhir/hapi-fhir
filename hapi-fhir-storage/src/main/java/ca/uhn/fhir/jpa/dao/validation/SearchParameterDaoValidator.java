@@ -68,7 +68,7 @@ public class SearchParameterDaoValidator {
 		 * If overriding built-in SPs is disabled on this server, make sure we aren't
 		 * doing that
 		 */
-		if (myStorageSettings.isDefaultSearchParamsCanBeOverridden() == false) {
+		if (!myStorageSettings.isDefaultSearchParamsCanBeOverridden()) {
 			for (IPrimitiveType<?> nextBaseType : searchParameter.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
 				RuntimeSearchParam existingSearchParam = mySearchParamRegistry.getActiveSearchParam(nextBase, searchParameter.getCode());
@@ -93,7 +93,7 @@ public class SearchParameterDaoValidator {
 			return;
 		}
 
-		if (isCompositeWithoutBase(searchParameter)) {
+		if (isNotCompositeWithoutBase(searchParameter)) {
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 
@@ -111,28 +111,10 @@ public class SearchParameterDaoValidator {
 			if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
 				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
 			} else {
-
-				if (myStorageSettings.isValidateSearchParameterExpressionsOnSave()) {
-
-					validateExpressionPath(searchParameter);
-					validateExpressionIsParsable(searchParameter);
-				}
+				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
+				maybeValidateCompositeSpForUniqueIndexing(searchParameter);
+				maybeValidateCompositeWithComponent(searchParameter);
 			}
-		}
-
-		if (isCompositeSpForUniqueIndexing(searchParameter)) {
-			if (!searchParameter.hasComponent()) {
-				throw new UnprocessableEntityException(Msg.code(1115) + "SearchParameter is marked as unique but has no components");
-			}
-			for (SearchParameter.SearchParameterComponentComponent next : searchParameter.getComponent()) {
-				if (isBlank(next.getDefinition())) {
-					throw new UnprocessableEntityException(Msg.code(1116) + "SearchParameter is marked as unique but is missing component.definition");
-				}
-			}
-		}
-
-		if (isCompositeWithComponent(searchParameter)) {
-			validateCompositeSearchParameterComponents(searchParameter);
 		}
 	}
 
@@ -140,7 +122,7 @@ public class SearchParameterDaoValidator {
 		return theSearchParameter.getType() != null && theSearchParameter.getType().equals(Enumerations.SearchParamType.COMPOSITE);
 	}
 
-	private boolean isCompositeWithoutBase(SearchParameter searchParameter) {
+	private boolean isNotCompositeWithoutBase(SearchParameter searchParameter) {
 		return
 			ElementUtil.isEmpty(searchParameter.getBase()) &&
 				ElementUtil.isEmpty(searchParameter.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE)) &&
@@ -157,6 +139,26 @@ public class SearchParameterDaoValidator {
 
 	private boolean isCompositeSpForUniqueIndexing(SearchParameter theSearchParameter) {
 		return isCompositeSp(theSearchParameter) && hasAnyExtensionUniqueSetTo(theSearchParameter, true);
+	}
+
+	private void maybeValidateCompositeSpForUniqueIndexing(SearchParameter theSearchParameter) {
+		if (isCompositeSpForUniqueIndexing(theSearchParameter)) {
+			if (!theSearchParameter.hasComponent()) {
+				throw new UnprocessableEntityException(Msg.code(1115) + "SearchParameter is marked as unique but has no components");
+			}
+			for (SearchParameter.SearchParameterComponentComponent next : theSearchParameter.getComponent()) {
+				if (isBlank(next.getDefinition())) {
+					throw new UnprocessableEntityException(Msg.code(1116) + "SearchParameter is marked as unique but is missing component.definition");
+				}
+			}
+		}
+	}
+
+	private void maybeValidateSearchParameterExpressionsOnSave(SearchParameter theSearchParameter) {
+		if (myStorageSettings.isValidateSearchParameterExpressionsOnSave()) {
+			validateExpressionPath(theSearchParameter);
+			validateExpressionIsParsable(theSearchParameter);
+		}
 	}
 
 	private void validateExpressionPath(SearchParameter theSearchParameter) {
@@ -194,6 +196,12 @@ public class SearchParameterDaoValidator {
 			.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.stream()
 			.anyMatch(t -> theValueAsString.equals(t.getValueAsPrimitive().getValueAsString()));
+	}
+
+	private void maybeValidateCompositeWithComponent(SearchParameter theSearchParameter) {
+		if (isCompositeWithComponent(theSearchParameter)) {
+			validateCompositeSearchParameterComponents(theSearchParameter);
+		}
 	}
 
 	private void validateCompositeSearchParameterComponents(SearchParameter theSearchParameter) {
