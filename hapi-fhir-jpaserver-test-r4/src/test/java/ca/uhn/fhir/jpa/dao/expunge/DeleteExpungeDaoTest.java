@@ -6,9 +6,10 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -20,9 +21,9 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -52,38 +53,72 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteCascadeExpungeReturns400() {
-		// Create new organization
-		Organization organization = new Organization();
-		organization.setName("FOO");
-		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
+	public void testCascade_MultiLevel_Success() {
+		// Setup
 
-		Patient patient = new Patient();
-		patient.setManagingOrganization(new Reference(organizationId));
-		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		// Create a chain of dependent references
+		IIdType p1 = createPatient(withActiveTrue());
+		IIdType o1 = createObservation(withSubject(p1));
+		IIdType o1b = createObservation(withReference("hasMember", o1));
+		IIdType o1c = createObservation(withReference("hasMember", o1b));
 
-		// Try to delete _cascade and _expunge on the organization
-		BaseServerResponseException e = assertThrows(BaseServerResponseException.class, () -> {
-			myOrganizationDao
-				.deleteByUrl("Organization?" + "_cascade=delete&" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-		});
+		// validate precondition
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
-		// Get not implemented HTTP 400 error
-		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, e.getStatusCode());
-		assertEquals(Msg.code(964) + "_expunge cannot be used with _cascade", e.getMessage());
+		// execute
+		String url = "Patient?" +
+			JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
+		when(mySrd.getParameters()).thenReturn(Map.of(
+			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
+			JpaConstants.PARAM_DELETE_EXPUNGE, new String[]{"true"},
+			Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS, new String[]{"10"}
+		));
+		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl(url, mySrd);
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
 
-
-		// Try to delete with header 'X-Cascade' = delete
-		when(mySrd.getHeader(Constants.HEADER_CASCADE)).thenReturn(Constants.CASCADE_DELETE);
-		e = assertThrows(BaseServerResponseException.class, () -> {
-			myOrganizationDao
-				.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-		});
-
-		// Get not implemented HTTP 400 error
-		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, e.getStatusCode());
-		assertEquals(Msg.code(964) + "_expunge cannot be used with _cascade", e.getMessage());
+		// Validate
+		assertEquals(4, job.getCombinedRecordsProcessed());
+		assertDoesntExist(p1);
+		assertDoesntExist(o1);
+		assertDoesntExist(o1b);
+		assertDoesntExist(o1c);
 	}
+
+	@Test
+	public void testCascade_MultiLevel_NotEnoughRounds() {
+		// Setup
+
+		// Create a chain of dependent references
+		IIdType p1 = createPatient(withActiveTrue());
+		IIdType o1 = createObservation(withSubject(p1));
+		IIdType o1b = createObservation(withReference("hasMember", o1));
+		IIdType o1c = createObservation(withReference("hasMember", o1b));
+
+		// validate precondition
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+
+		String url = "Patient?" +
+			JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
+		when(mySrd.getParameters()).thenReturn(Map.of(
+			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
+			JpaConstants.PARAM_DELETE_EXPUNGE, new String[]{"true"},
+			Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS, new String[]{"2"}
+		));
+		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl(url, mySrd);
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		JobInstance job = myBatch2JobHelper.awaitJobFailure(jobId);
+
+		// Validate
+		assertThat(job.getErrorMessage(), containsString("Unable to delete"));
+		assertNotGone(p1);
+		assertNotGone(o1);
+		assertNotGone(o1b);
+		assertNotGone(o1c);
+	}
+
 
 	@Test
 	public void testDeleteExpungeThrowExceptionIfForeignKeyLinksExists() {

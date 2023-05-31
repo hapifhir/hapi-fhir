@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class ActiveSubscription {
 
 	private SubscriptionCriteriaParser.SubscriptionCriteria myCriteria;
@@ -34,6 +36,7 @@ public class ActiveSubscription {
 	private boolean flagForDeletion;
 
 	private ChannelRetryConfiguration myRetryConfigurationParameters;
+	private final AtomicLong myDeliveriesCount = new AtomicLong();
 
 	public ActiveSubscription(CanonicalSubscription theSubscription, String theChannelName) {
 		myChannelName = theChannelName;
@@ -80,5 +83,13 @@ public class ActiveSubscription {
 
 	public ChannelRetryConfiguration getRetryConfigurationParameters() {
 		return myRetryConfigurationParameters;
+	}
+
+	public long getDeliveriesCount() {
+		return myDeliveriesCount.get();
+	}
+
+	public long incrementDeliveriesCount() {
+		return myDeliveriesCount.incrementAndGet();
 	}
 }

@@ -87,7 +87,8 @@ public class SubscriptionTopicValidatingInterceptor {
 
 		// WIP STR5 add cross-partition support like in SubscriptionValidatingInterceptor
 
-		// WIP STR5 warn if can't be evaluated in memory?
+		// WIP STR5 warn if the SubscriptionTopic criteria can't be evaluated in memory?  Do we want to annotate the
+		//  strategy with an extension like Subscription?
 
 		if (!finished) {
 			subscriptionTopic.getResourceTrigger().stream()

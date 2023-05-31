@@ -178,30 +178,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myStorageSettings.setMassIngestionMode(false);
 	}
 
-	private void assertGone(IIdType theId) {
-		try {
-			assertNotGone(theId);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-	}
-
-	/**
-	 * This gets called from assertGone too! Careful about exceptions...
-	 */
-	private void assertNotGone(IIdType theId) {
-		if ("Patient".equals(theId.getResourceType())) {
-			myPatientDao.read(theId, mySrd);
-		} else if ("Organization".equals(theId.getResourceType())) {
-			myOrganizationDao.read(theId, mySrd);
-		} else if ("CodeSystem".equals(theId.getResourceType())) {
-			myCodeSystemDao.read(theId, mySrd);
-		} else {
-			fail("Can't handle type: " + theId.getResourceType());
-		}
-	}
-
 	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);

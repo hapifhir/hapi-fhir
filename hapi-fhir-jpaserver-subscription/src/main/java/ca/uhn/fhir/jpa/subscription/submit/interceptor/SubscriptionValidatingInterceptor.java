@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -90,21 +91,6 @@ public class SubscriptionValidatingInterceptor {
 		myFhirContext = theFhirContext;
 	}
 
-	// This will be deleted once the next snapshot (6.3.15) is published
-	@Deprecated
-	public void validateSubmittedSubscription(IBaseResource theSubscription) {
-		validateSubmittedSubscription(theSubscription, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
-	}
-
-	// This will be deleted once the next snapshot (6.3.15) is published
-	@Deprecated(since="6.3.14")
-	public void validateSubmittedSubscription(IBaseResource theSubscription,
-															RequestDetails theRequestDetails,
-															RequestPartitionId theRequestPartitionId) {
-
-		validateSubmittedSubscription(theSubscription, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
-	}
-
 	@VisibleForTesting
 	void validateSubmittedSubscription(IBaseResource theSubscription,
 												  RequestDetails theRequestDetails,
@@ -147,9 +133,11 @@ public class SubscriptionValidatingInterceptor {
 		if (!finished) {
 
 			if (subscription.isTopicSubscription()) {
-				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getTopic());
-				if (!oTopic.isPresent()) {
-					throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: " + subscription.getTopic());
+				if (myFhirContext.getVersion().getVersion() != FhirVersionEnum.R4) { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic resource
+					Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getTopic());
+					if (!oTopic.isPresent()) {
+						throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: " + subscription.getTopic());
+					}
 				}
 			} else {
 				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");

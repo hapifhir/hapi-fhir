@@ -122,28 +122,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
 	}
 
-	private void assertGone(IIdType theId) {
-		try {
-			assertNotGone(theId);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-	}
-
-	/**
-	 * This gets called from assertGone too! Careful about exceptions...
-	 */
-	private void assertNotGone(IIdType theId) {
-		if ("Patient".equals(theId.getResourceType())) {
-			myPatientDao.read(theId, mySrd);
-		} else if ("Organization".equals(theId.getResourceType())) {
-			myOrganizationDao.read(theId, mySrd);
-		} else {
-			fail("No type");
-		}
-	}
-
 	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);

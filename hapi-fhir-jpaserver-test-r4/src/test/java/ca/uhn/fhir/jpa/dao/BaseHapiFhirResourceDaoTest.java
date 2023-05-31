@@ -44,6 +44,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -207,7 +208,7 @@ class BaseHapiFhirResourceDaoTest {
 		mySvc.requestReindexForRelatedResources(false, base, new ServletRequestDetails());
 
 		ArgumentCaptor<JobInstanceStartRequest> requestCaptor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
-		Mockito.verify(myJobCoordinator).startInstance(requestCaptor.capture());
+		Mockito.verify(myJobCoordinator).startInstance(isNotNull(), requestCaptor.capture());
 
 		JobInstanceStartRequest actualRequest = requestCaptor.getValue();
 		assertNotNull(actualRequest);
@@ -228,7 +229,7 @@ class BaseHapiFhirResourceDaoTest {
 		mySvc.requestReindexForRelatedResources(false, base, new ServletRequestDetails());
 
 		ArgumentCaptor<JobInstanceStartRequest> requestCaptor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
-		Mockito.verify(myJobCoordinator).startInstance(requestCaptor.capture());
+		Mockito.verify(myJobCoordinator).startInstance(isNotNull(), requestCaptor.capture());
 
 		JobInstanceStartRequest actualRequest = requestCaptor.getValue();
 		assertNotNull(actualRequest);
