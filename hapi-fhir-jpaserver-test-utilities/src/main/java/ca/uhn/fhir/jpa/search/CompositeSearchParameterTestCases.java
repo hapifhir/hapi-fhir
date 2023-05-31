@@ -19,15 +19,28 @@
  */
 package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.RiskAssessment;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -167,43 +180,20 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 	@Test
 	void searchUriNumber_onSameResource_found() {
 		// Combine existing SPs to test uri + number
-		createResourceFromJson("""
-{
-  "resourceType": "SearchParameter",
-  "name": "uri-number-compound-test",
-  "status": "active",
-  "description": "dummy to exercise uri + number",
-  "code": "uri-number-compound-test",
-  "base": [ "RiskAssessment" ],
-  "type": "composite",
-  "expression": "RiskAssessment",
-  "component": [ {
-      "definition": "http://hl7.org/fhir/SearchParameter/Resource-source",
-      "expression": "meta.source"
-    }, {
-      "definition": "http://hl7.org/fhir/SearchParameter/RiskAssessment-probability",
-      "expression": "prediction.probability"
-    } ]
- }""");
+		SearchParameter searchParameter = createCompositeSearchParameter("uri-number-compound-test", "RiskAssessment");
+		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
+			.setDefinition("http://hl7.org/fhir/SearchParameter/Resource-source").setExpression("meta.source"));
+		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
+			.setDefinition("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability").setExpression("prediction.probability"));
+		doCreateResource(searchParameter);
+
 		// enable this sp.
 		myTestDaoSearch.getSearchParamRegistry().forceRefresh();
 
-		IIdType raId = createResourceFromJson("""
-			{
-			  "resourceType": "RiskAssessment",
-			  "meta": {
-			     "source": "https://example.com/ourSource"
-			     },
-			  "prediction": [
-			      {
-			        "outcome": {
-			          "text": "Heart Attack"
-			        },
-			        "probabilityDecimal": 0.02
-			      }
-			  ]
-			}
-			""");
+		RiskAssessment riskAssessment = new RiskAssessment();
+		riskAssessment.setMeta(new Meta().setSource("https://example.com/ourSource"));
+		riskAssessment.addPrediction(new RiskAssessment.RiskAssessmentPredictionComponent().setProbability(new DecimalType(0.02)));
+		IIdType raId = doCreateResource(riskAssessment);
 
 		// verify config
 		myTestDaoSearch.assertSearchFinds("simple uri search works", "RiskAssessment?_source=https://example.com/ourSource", raId);
@@ -212,6 +202,78 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		myTestDaoSearch.assertSearchFinds("composite uri + number", "RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.02", raId);
 		myTestDaoSearch.assertSearchNotFound("both params must match ", "RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.08", raId);
 		myTestDaoSearch.assertSearchNotFound("both params must match ", "RiskAssessment?uri-number-compound-test=https://example.com/otherUrI$0.02", raId);
+		//verify combo query
+		myTestDaoSearch.assertSearchFinds("composite uri + number", "RiskAssessment?_source=https://example.com/ourSource&probability=0.02", raId);
 	}
 
+	@ParameterizedTest
+	@MethodSource("extensionProvider")
+	void searchTokenNumberCombo_onSameResource_found(Extension theExtension) {
+		// Combine existing SPs to test Token + number
+		SearchParameter searchParameter = createCompositeSearchParameter("token-number-combo-test", "RiskAssessment");
+		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
+			.setDefinition("http://hl7.org/fhir/SearchParameter/RiskAssessment-method").setExpression("RiskAssessment"));
+		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
+			.setDefinition("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability").setExpression("RiskAssessment"));
+		searchParameter.setExtension(List.of(theExtension));
+		doCreateResource(searchParameter);
+
+		// enable this sp.
+		myTestDaoSearch.getSearchParamRegistry().forceRefresh();
+
+		RiskAssessment riskAssessment = new RiskAssessment();
+		riskAssessment.setMethod(new CodeableConcept(new Coding(null, "BRCAPRO", null)));
+		riskAssessment.addPrediction(new RiskAssessment.RiskAssessmentPredictionComponent().setProbability(new DecimalType(0.02)));
+		IIdType raId = doCreateResource(riskAssessment);
+
+		// verify combo query
+		myTestDaoSearch.assertSearchFinds("composite uri + number", "RiskAssessment?method=BRCAPRO&probability=0.02", raId);
+	}
+
+	@ParameterizedTest
+	@MethodSource("extensionProvider")
+	void searchUriStringCombo_onSameResource_found(Extension theExtension) {
+		//Combine existing SPs to test URI + String
+		SearchParameter searchParameter = createCompositeSearchParameter("uri-string-combo-test", "Device");
+		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
+			.setDefinition("http://hl7.org/fhir/SearchParameter/Device-url").setExpression("Device"));
+		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
+			.setDefinition("http://hl7.org/fhir/SearchParameter/Device-model").setExpression("Device"));
+		searchParameter.setExtension(List.of(theExtension));
+		doCreateResource(searchParameter);
+
+		// enable this sp.
+		myTestDaoSearch.getSearchParamRegistry().forceRefresh();
+
+		Device device = new Device();
+		device.setUrl("http://deviceUrl");
+		device.setModelNumber("modelNumber");
+
+		IIdType deviceId = doCreateResource(device);
+
+		// verify combo query
+		myTestDaoSearch.assertSearchFinds("combo uri + string", "Device?url=http://deviceUrl&model=modelNumber", deviceId);
+	}
+
+	private static SearchParameter createCompositeSearchParameter(String theCodeValue, String theBase) {
+		SearchParameter retVal = new SearchParameter();
+		retVal.setId(theCodeValue);
+		retVal.setUrl("http://example.org/" + theCodeValue);
+		retVal.addBase(theBase);
+		retVal.setCode(theCodeValue);
+		retVal.setType(Enumerations.SearchParamType.COMPOSITE);
+		retVal.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		retVal.setExpression(theBase);
+
+		return retVal;
+	}
+
+	static Stream<Arguments> extensionProvider() {
+		return Stream.of(
+			Arguments.of(
+				new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false))), // composite SP of type combo with non-unique index
+			Arguments.of(
+				new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(true))) // composite SP of type combo with non-unique index
+		);
+	}
 }
