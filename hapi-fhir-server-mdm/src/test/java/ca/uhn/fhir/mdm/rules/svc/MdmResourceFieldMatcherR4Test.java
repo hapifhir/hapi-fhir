@@ -55,8 +55,6 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 			myGivenNameMatchField,
 			myMdmRulesJson
 		);
-		when(myIMatcherFactory.getFieldMatcherForMatchType(eq(MatchTypeEnum.EMPTY_FIELD)))
-			.thenReturn(new EmptyFieldMatcher());
 
 		assertFalse(myComparator.match(myJohn, myJohny).match);
 
