@@ -119,15 +119,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private void assertGone(IIdType theId) {
-		try {
-			getDao(theId).read(theId);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-	}
-
 	private void assertStillThere(IIdType theId) {
 		getDao(theId).read(theId);
 	}

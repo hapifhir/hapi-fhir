@@ -61,7 +61,7 @@ class ResourcePidListBuilderTest {
 	@Test
 	public void testHomogeneousSingleChunk() {
 		// setup
-		IResourcePidList chunk = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END);
+		IResourcePidList chunk = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END, null);
 		List<IResourcePidList> chunks = List.of(chunk);
 
 		// execute
@@ -74,7 +74,7 @@ class ResourcePidListBuilderTest {
 	@Test
 	public void testHomogeneousDoubleChunk() {
 		// setup
-		IResourcePidList chunk = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END);
+		IResourcePidList chunk = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END, null);
 		List<IResourcePidList> chunks = List.of(chunk, chunk);
 
 		// execute
@@ -87,9 +87,9 @@ class ResourcePidListBuilderTest {
 	@Test
 	public void testHomogeneousDoubleChunkDift() {
 		// setup
-		IResourcePidList chunk1 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END);
+		IResourcePidList chunk1 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END, null);
 
-		IResourcePidList chunk2 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_3, PID_4), END);
+		IResourcePidList chunk2 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_3, PID_4), END, null);
 
 		List<IResourcePidList> chunks = List.of(chunk1, chunk2);
 
@@ -107,9 +107,9 @@ class ResourcePidListBuilderTest {
 	@Test
 	public void testHomogeneousDoubleChunkDiftResourceType() {
 		// setup
-		IResourcePidList chunk1 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END);
+		IResourcePidList chunk1 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END, null);
 
-		IResourcePidList chunk2 = new HomogeneousResourcePidList(OTHER_RESOURCE_TYPE, List.of(PID_5, PID_6), END);
+		IResourcePidList chunk2 = new HomogeneousResourcePidList(OTHER_RESOURCE_TYPE, List.of(PID_5, PID_6), END, null);
 
 		List<IResourcePidList> chunks = List.of(chunk1, chunk2);
 
@@ -130,7 +130,7 @@ class ResourcePidListBuilderTest {
 	@Test
 	public void testMixedChunkDiftResourceType() {
 		// setup
-		IResourcePidList chunk = new MixedResourcePidList(List.of(RESOURCE_TYPE, OTHER_RESOURCE_TYPE), List.of(PID_1, PID_5), END);
+		IResourcePidList chunk = new MixedResourcePidList(List.of(RESOURCE_TYPE, OTHER_RESOURCE_TYPE), List.of(PID_1, PID_5), END, null);
 
 		List<IResourcePidList> chunks = List.of(chunk, chunk);
 

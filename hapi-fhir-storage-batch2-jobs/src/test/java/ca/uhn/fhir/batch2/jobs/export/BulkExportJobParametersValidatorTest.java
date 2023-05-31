@@ -53,7 +53,7 @@ public class BulkExportJobParametersValidatorTest {
 			.thenReturn(true);
 
 		// test
-		List<String> result = myValidator.validate(parameters);
+		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(result);
@@ -69,7 +69,7 @@ public class BulkExportJobParametersValidatorTest {
 		when(myDaoRegistry.isResourceTypeSupported(anyString()))
 			.thenReturn(true);
 		when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(false);
-		List<String> errors = myValidator.validate(parameters);
+		List<String> errors = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(errors);
@@ -86,7 +86,7 @@ public class BulkExportJobParametersValidatorTest {
 			.thenReturn(true);
 
 		when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(true);
-		List<String> errors = myValidator.validate(parameters);
+		List<String> errors = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(errors);
@@ -103,7 +103,7 @@ public class BulkExportJobParametersValidatorTest {
 			.thenReturn(true);
 
 		// test
-		List<String> result = myValidator.validate(parameters);
+		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(result);
@@ -119,7 +119,7 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setResourceTypes(Collections.singletonList(resourceType));
 
 		// test
-		List<String> result = myValidator.validate(parameters);
+		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(result);
@@ -140,7 +140,7 @@ public class BulkExportJobParametersValidatorTest {
 			.thenReturn(true);
 
 		// test
-		List<String> result = myValidator.validate(parameters);
+		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(result);
@@ -154,7 +154,7 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 
 		// test
-		List<String> result = myValidator.validate(parameters);
+		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(result);
@@ -169,7 +169,7 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setResourceTypes(null);
 
 		// test
-		List<String> results = myValidator.validate(parameters);
+		List<String> results = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(results);
@@ -185,7 +185,7 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		// test
-		List<String> errors = myValidator.validate(parameters);
+		List<String> errors = myValidator.validate(null, parameters);
 
 		// validate
 		assertNotNull(errors);
@@ -201,7 +201,7 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setOutputFormat("json");
 
 		// test
-		List<String> errors = myValidator.validate(parameters);
+		List<String> errors = myValidator.validate(null, parameters);
 
 		// validate
 		assertNotNull(errors);

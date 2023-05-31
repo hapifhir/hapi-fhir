@@ -109,7 +109,7 @@ public class LoadIdsStepTest {
 		for (long i = idLow; i < idHigh; i++) {
 			ids.add(JpaPid.fromId(i));
 		}
-		IResourcePidList chunk = new HomogeneousResourcePidList("Patient", ids, lastDate);
+		IResourcePidList chunk = new HomogeneousResourcePidList("Patient", ids, lastDate, null);
 		return chunk;
 	}
 
