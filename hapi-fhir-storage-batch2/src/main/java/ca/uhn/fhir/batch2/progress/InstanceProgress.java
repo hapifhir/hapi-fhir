@@ -56,7 +56,7 @@ public class InstanceProgress {
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
-		if (!(theChunk.getWarningMessage() == null)) {
+		if (theChunk.getWarningMessage() != null) {
 			myWarningMessages.add(theChunk.getWarningMessage());
 		}
 		updateRecordsProcessed(theChunk);

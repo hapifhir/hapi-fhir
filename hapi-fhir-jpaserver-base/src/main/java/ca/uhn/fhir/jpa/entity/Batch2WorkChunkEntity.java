@@ -96,7 +96,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private String myErrorMessage;
 	@Column(name = "ERROR_COUNT", nullable = false)
 	private int myErrorCount;
-	@Column(name = "WARNING_MSG", nullable = true)
+	@Column(name = "WARNING_MSG", columnDefinition="TEXT", nullable = true)
 	private String myWarningMessage;
 
 	/**

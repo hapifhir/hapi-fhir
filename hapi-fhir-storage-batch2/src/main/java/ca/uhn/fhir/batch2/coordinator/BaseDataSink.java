@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IWarningProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -33,7 +34,7 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	private final JobWorkCursor<PT, IT, OT> myJobWorkCursor;
 	private int myRecoveredErrorCount;
 	protected final String myJobDefinitionId;
-	private String myRecoveredWarning;
+	private IWarningProcessor myWarningProcessor;
 
 	protected BaseDataSink(String theInstanceId,
 								  JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
@@ -49,16 +50,14 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	@Override
 	public void recoveredError(String theMessage) {
 		ourLog.error("Error during job[{}] step[{}]: {}", myInstanceId, myJobWorkCursor.getCurrentStepId(), theMessage);
-		recoverWarning(theMessage);
+		if (myWarningProcessor != null) {
+			myWarningProcessor.recoverWarningMessage(theMessage);
+		}
 		myRecoveredErrorCount++;
 	}
 
-	private void recoverWarning(String theMessage) {
-		// save non-fatal error as warning, current only support unique search param reindexing error on existing duplicates
-		if (theMessage.contains("Can not create resource") && theMessage.contains("it would create a duplicate unique index matching query")) {
-			String searchParamName = theMessage.substring(theMessage.indexOf("SearchParameter"), theMessage.length() - 1);
-			myRecoveredWarning = "Failed to reindex resource because unique search parameter " + searchParamName + " could not be enforced.";
-		}
+	public void setWarningProcessor(IWarningProcessor theWarningProcessor) {
+		myWarningProcessor = theWarningProcessor;
 	}
 
 	public int getRecoveredErrorCount() {
@@ -66,7 +65,10 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	}
 
 	public String getRecoveredWarning() {
-		return myRecoveredWarning;
+		if (myWarningProcessor != null) {
+			return myWarningProcessor.getRecoveredWarningMessage();
+		}
+		return null;
 	}
 
 	public abstract int getWorkChunkCount();
