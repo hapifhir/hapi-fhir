@@ -240,16 +240,11 @@ public class SearchParameterDaoValidator {
 		// combo unique search parameter
 		if (hasAnyExtensionUniqueSetTo(theSearchParameter, true)) {
 			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER, REFERENCE);
-			// combo non-unique search parameter
-		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false)) {
+			        // combo non-unique search parameter or composite Search Parameter with HSearch indexing
+		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false) || myStorageSettings.isAdvancedHSearchIndexing()) {
 			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER);
-		} else { // composite Search Parameter with HSearch indexing
-			if (myStorageSettings.isAdvancedHSearchIndexing()) {
-				return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER);
-			} else {
-				// composite Search Parameter (JPA only)
+		} else { // composite Search Parameter (JPA only)
 				return Set.of(STRING, TOKEN, DATE, QUANTITY);
-			}
 		}
 	}
 }
