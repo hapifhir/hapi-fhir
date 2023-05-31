@@ -34,35 +34,23 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.NUMBER;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.QUANTITY;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.STRING;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.TOKEN;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.URI;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParameterDaoValidator {
 
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
-	private static final Set<RestSearchParameterTypeEnum> ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_JPA = Set.of(RestSearchParameterTypeEnum.STRING,
-		RestSearchParameterTypeEnum.TOKEN, RestSearchParameterTypeEnum.DATE, RestSearchParameterTypeEnum.QUANTITY);
-
-	private static final Set<RestSearchParameterTypeEnum> ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_H_SEARCH =
-		new HashSet<>(ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_JPA) {{
-		add(RestSearchParameterTypeEnum.NUMBER);
-		add(RestSearchParameterTypeEnum.URI);
-	}};
-
-	private static final Set<RestSearchParameterTypeEnum> ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES_JPA =
-		new HashSet<>(ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_JPA) {{
-			add(RestSearchParameterTypeEnum.REFERENCE);
-		}};
-
-	private static final Set<RestSearchParameterTypeEnum> ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES_H_SEARCH =
-		new HashSet<>(ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_H_SEARCH) {{
-			add(RestSearchParameterTypeEnum.REFERENCE);
-		}};
 
 	private final FhirContext myFhirContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -226,20 +214,42 @@ public class SearchParameterDaoValidator {
 	}
 
 	private void validateComponentSpTypeAgainstWhiteList(RuntimeSearchParam theRuntimeSearchParam,
-																		  Collection<RestSearchParameterTypeEnum> allowedSearchParamTypes) {
-		if (!allowedSearchParamTypes.contains(theRuntimeSearchParam.getParamType())) {
+																		  Collection<RestSearchParameterTypeEnum> theAllowedSearchParamTypes) {
+		if (!theAllowedSearchParamTypes.contains(theRuntimeSearchParam.getParamType())) {
 			throw new UnprocessableEntityException(String.format("%sInvalid component search parameter type: %s in component.definition: %s, supported types: %s",
 				Msg.code(2347), theRuntimeSearchParam.getParamType().name(), theRuntimeSearchParam.getUri(),
-				allowedSearchParamTypes.stream().map(Enum::name).collect(Collectors.joining(", "))));
+				theAllowedSearchParamTypes.stream().map(Enum::name).collect(Collectors.joining(", "))));
 		}
 	}
 
+	/*
+	 * Returns allowed Search Parameter Types for given composite or combo search parameter
+	 * This allows to prevent creation of Search Parameters which would fail in runtime (during GET request)
+	 * Below you can find references to runtime usages for each parameters type:
+	 *
+	 * For Composite Search Parameters without HSearch indexing enabled (JPA only):
+	 * @see QueryStack#createPredicateCompositePart() and SearchBuilder#createCompositeSort()
+	 *
+	 * For Composite Search Parameters with HSearch indexing enabled:
+	 * @see HSearchCompositeSearchIndexDataImpl#writeIndexEntry()
+	 *
+	 * For Combo Search Parameters:
+	 * @see BaseSearchParamExtractor.extractParameterCombinationsForComboParam()
+	 */
 	private Set<RestSearchParameterTypeEnum> getAllowedSearchParameterTypes(SearchParameter theSearchParameter) {
-		boolean isUniqueComposite = hasAnyExtensionUniqueSetTo(theSearchParameter, true);
-		if (myStorageSettings.isAdvancedHSearchIndexing()) {
-			return isUniqueComposite ? ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES_H_SEARCH : ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_H_SEARCH;
-		} else {
-			return isUniqueComposite ? ALLOWED_UNIQUE_COMBO_SEARCH_PARAMETER_TYPES_JPA : ALLOWED_COMPOSITE_SEARCH_PARAMETER_TYPES_JPA;
+		// combo unique search parameter
+		if (hasAnyExtensionUniqueSetTo(theSearchParameter, true)) {
+			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER, REFERENCE);
+			// combo non-unique search parameter
+		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false)) {
+			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER);
+		} else { // composite Search Parameter with HSearch indexing
+			if (myStorageSettings.isAdvancedHSearchIndexing()) {
+				return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER);
+			} else {
+				// composite Search Parameter (JPA only)
+				return Set.of(STRING, TOKEN, DATE, QUANTITY);
+			}
 		}
 	}
 }
