@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.searchparam.config;
 
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
-import ca.uhn.fhir.jpa.searchparam.nickname.NicknameServiceFactory;
+import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;

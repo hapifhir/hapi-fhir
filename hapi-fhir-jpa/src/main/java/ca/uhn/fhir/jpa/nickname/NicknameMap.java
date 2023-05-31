@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.searchparam.nickname;
+package ca.uhn.fhir.jpa.nickname;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;

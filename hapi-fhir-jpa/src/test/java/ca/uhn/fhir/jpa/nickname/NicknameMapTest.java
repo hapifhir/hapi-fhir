@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.searchparam.nickname;
+package ca.uhn.fhir.jpa.nickname;
 
 import org.junit.jupiter.api.Test;
 

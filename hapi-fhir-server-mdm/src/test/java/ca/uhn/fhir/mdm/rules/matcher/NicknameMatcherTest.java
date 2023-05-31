@@ -2,7 +2,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
-import ca.uhn.fhir.jpa.searchparam.nickname.NicknameServiceFactory;
+import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NicknameMatcher;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Assertions;

@@ -2,8 +2,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
-import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
-import ca.uhn.fhir.jpa.searchparam.nickname.NicknameServiceFactory;
+import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
@@ -18,6 +17,7 @@ import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NicknameMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NumericMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.PhoneticEncoderMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.SubstringStringMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.slf4j.Logger;
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.nickname;
 
+import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.junit.jupiter.api.Test;

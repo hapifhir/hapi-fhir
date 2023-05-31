@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.searchparam.nickname;
+package ca.uhn.fhir.jpa.nickname;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
