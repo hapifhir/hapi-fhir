@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.mdm.svc.MdmMatcherFactory;
+import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherFactory;
 import ca.uhn.fhir.jpa.searchparam.config.NicknameServiceConfig;
 import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.mdm.api.IMdmSettings;

@@ -1,10 +1,7 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
-import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
-import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiStringMatcher;
-import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NumericMatcher;
-import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.PhoneticEncoderMatcher;
-import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.SubstringStringMatcher;
+import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -12,6 +9,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,45 +18,32 @@ import javax.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 public class StringMatcherR4Test extends BaseMatcherR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(StringMatcherR4Test.class);
 	public static final String LEFT_NAME = "namadega";
 	public static final String RIGHT_NAME = "namaedga";
 
-	private @Nonnull IMdmFieldMatcher getFieldMatcher(MatchTypeEnum theMatchTypeEnum) {
-		switch (theMatchTypeEnum) {
-			case COLOGNE:
-				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.COLOGNE);
-			case DOUBLE_METAPHONE:
-				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.DOUBLE_METAPHONE);
-			case MATCH_RATING_APPROACH:
-				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.MATCH_RATING_APPROACH);
-			case METAPHONE:
-				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.METAPHONE);
-			case SOUNDEX:
-				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.SOUNDEX);
-			case CAVERPHONE1:
-				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE1);
-			case CAVERPHONE2:
-				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE2);
-			case NYSIIS:
-				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.NYSIIS);
-			case REFINED_SOUNDEX:
-				return new PhoneticEncoderMatcher(PhoneticEncoderEnum.REFINED_SOUNDEX);
-			case STRING:
-				return new HapiStringMatcher();
-			case SUBSTRING:
-				return new SubstringStringMatcher();
-			case NUMERIC:
-				return new NumericMatcher();
-			default:
-				fail("String matcher " + theMatchTypeEnum.name() + " does not exist");
-		}
+	private IMatcherFactory myIMatcherFactory;
 
-		// so we don't have null pointer warnings - we'll never hit this point
-		return new HapiStringMatcher();
+	private IMdmSettings myMdmSettings;
+
+	@BeforeEach
+	public void before() {
+		super.before();
+
+		myMdmSettings = mock(IMdmSettings.class);
+
+		myIMatcherFactory = new MdmMatcherFactory(
+			ourFhirContext,
+			myMdmSettings,
+			new NicknameServiceFactory()
+		);
+	}
+
+	private @Nonnull IMdmFieldMatcher getFieldMatcher(MatchTypeEnum theMatchTypeEnum) {
+		return myIMatcherFactory.getFieldMatcherForMatchType(theMatchTypeEnum);
 	}
 
 	@Test

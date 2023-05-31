@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.mdm.svc;
+package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
@@ -29,7 +29,11 @@ public class MdmMatcherFactory implements IMatcherFactory {
 
 	private final NicknameServiceFactory myNicknameSvcFactory;
 
-	public MdmMatcherFactory(FhirContext theFhirContext, IMdmSettings theSettings, NicknameServiceFactory theNicknameSvcFactory) {
+	public MdmMatcherFactory(
+		FhirContext theFhirContext,
+		IMdmSettings theSettings,
+		NicknameServiceFactory theNicknameSvcFactory
+	) {
 		myFhirContext = theFhirContext;
 		myMdmSettings = theSettings;
 		myNicknameSvcFactory = theNicknameSvcFactory;
