@@ -107,8 +107,8 @@ public class JobInstance implements IModelJson, IJobInstance {
 	private String myEstimatedTimeRemaining;
 	@JsonProperty(value = "report", access = JsonProperty.Access.READ_WRITE)
 	private String myReport;
-	@JsonProperty(value = "warningMessage", access = JsonProperty.Access.READ_ONLY)
-	private String myWarningMessage;
+	@JsonProperty(value = "warningMessages", access = JsonProperty.Access.READ_ONLY)
+	private String myWarningMessages;
 
 	/**
 	 * Constructor
@@ -142,7 +142,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
-		setWarningMessage(theJobInstance.getWarningMessage());
+		setWarningMessages(theJobInstance.getWarningMessages());
 	}
 
 
@@ -338,12 +338,12 @@ public class JobInstance implements IModelJson, IJobInstance {
 		return this;
 	}
 
-	public String getWarningMessage() {
-		return myWarningMessage;
+	public String getWarningMessages() {
+		return myWarningMessages;
 	}
 
-	public JobInstance setWarningMessage(String theWarningMessage) {
-		myWarningMessage = theWarningMessage;
+	public JobInstance setWarningMessages(String theWarningMessages) {
+		myWarningMessages = theWarningMessages;
 		return this;
 	}
 	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
@@ -389,7 +389,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 			.append("errorCount", myErrorCount)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
 			.append("report", myReport)
-			.append("warningMessage", myWarningMessage)
+			.append("warningMessages", myWarningMessages)
 			.toString();
 	}
 

@@ -96,7 +96,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private String myErrorMessage;
 	@Column(name = "ERROR_COUNT", nullable = false)
 	private int myErrorCount;
-	@Column(name = "WARNING_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
+	@Column(name = "WARNING_MSG", nullable = true)
 	private String myWarningMessage;
 
 	/**
@@ -150,7 +150,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	}
 
 	public void setWarningMessage(String theWarningMessage) {
-		myWarningMessage = left(theWarningMessage, ERROR_MSG_MAX_LENGTH);
+		myWarningMessage = theWarningMessage;
 	}
 
 	public int getSequence() {

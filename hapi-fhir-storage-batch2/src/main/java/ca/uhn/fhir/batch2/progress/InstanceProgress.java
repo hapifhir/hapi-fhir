@@ -28,7 +28,6 @@ import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,7 +57,7 @@ public class InstanceProgress {
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
 		if (!(theChunk.getWarningMessage() == null)) {
-			myWarningMessages.addAll(Arrays.asList(theChunk.getWarningMessage().split("\\n")));
+			myWarningMessages.add(theChunk.getWarningMessage());
 		}
 		updateRecordsProcessed(theChunk);
 		updateEarliestTime(theChunk);
@@ -125,10 +124,9 @@ public class InstanceProgress {
 
 	public void updateInstance(JobInstance theInstance) {
 		updateInstance(theInstance, false);
-		myWarningMessages.remove(null);
 
-		String newWarningMessage = String.join("\\n", myWarningMessages);
-		theInstance.setWarningMessage(newWarningMessage);
+		String newWarningMessage = String.join("\n", myWarningMessages);
+		theInstance.setWarningMessages(newWarningMessage);
 	}
 
 	/**

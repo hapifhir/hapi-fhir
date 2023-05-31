@@ -60,7 +60,7 @@ class JobInstanceUtil {
 		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
 		retVal.setReport(theEntity.getReport());
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
-		retVal.setWarningMessage(theEntity.getWarningMessage());
+		retVal.setWarningMessages(theEntity.getWarningMessages());
 		return retVal;
 	}
 
@@ -92,7 +92,7 @@ class JobInstanceUtil {
 		theJobInstanceEntity.setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		theJobInstanceEntity.setReport(theJobInstance.getReport());
 		theJobInstanceEntity.setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
-		theJobInstanceEntity.setWarningMessage(theJobInstance.getWarningMessage());
+		theJobInstanceEntity.setWarningMessages(theJobInstance.getWarningMessages());
 	}
 
 	/**

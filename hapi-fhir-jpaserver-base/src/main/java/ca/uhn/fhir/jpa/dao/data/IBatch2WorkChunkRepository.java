@@ -60,8 +60,7 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, " +
 		"e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, " +
-		"e.myWarningMessage = CASE WHEN e.myWarningMessage is null THEN :warningMessage ELSE CONCAT(e.myWarningMessage, '\\n', :warningMessage) END " +
-		"WHERE e.myId = :id")
+		"e.myWarningMessage = :warningMessage WHERE e.myId = :id")
 	void updateChunkStatusAndClearDataForEndSuccess(@Param("id") String theChunkId, @Param("et") Date theEndTime,
 		@Param("rp") int theRecordsProcessed, @Param("errorRetries") int theErrorRetries, @Param("status") WorkChunkStatusEnum theInProgress, @Param("warningMessage") String theWarningMessage);
 
