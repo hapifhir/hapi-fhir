@@ -149,7 +149,7 @@ public class SearchParameterDaoValidatorTest {
 
 	@ParameterizedTest
 	@MethodSource("comboSpProvider")
-	public void testMethodValidate_uniqueNonUniqueComboSearchParamsWithNumberUriComponents_isValid(SearchParameter theSearchParameter) {
+	public void testMethodValidate_comboSearchParamsWithNumberUriComponents_isValid(SearchParameter theSearchParameter) {
 		theSearchParameter.addComponent(new SearchParameterComponentComponent()
 			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_URI));
 		theSearchParameter.addComponent(new SearchParameterComponentComponent()

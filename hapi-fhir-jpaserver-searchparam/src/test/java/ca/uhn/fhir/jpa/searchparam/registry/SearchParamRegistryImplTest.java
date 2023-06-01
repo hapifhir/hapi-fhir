@@ -240,14 +240,14 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@Test
-	public void testGetActiveSearchParamByUrl_patientLanguage_returnsActiveSp() {
+	public void testGetActiveSearchParamByUrl_whenSPExists_returnsActiveSp() {
 		RuntimeSearchParam patientLanguageSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/Patient-language");
 		assertNotNull(patientLanguageSp);
 		assertEquals(patientLanguageSp.getId().getIdPart(), "Patient-language");
 	}
 
 	@Test
-	public void testGetActiveSearchParamByUrl_nonExistingSp_returnsNull() {
+	public void testGetActiveSearchParamByUrl_whenSPNotExist_returnsNull() {
 		RuntimeSearchParam nonExistingSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/nonExistingSp");
 		assertNull(nonExistingSp);
 	}

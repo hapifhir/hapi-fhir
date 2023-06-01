@@ -67,7 +67,7 @@ public class SearchParameterDaoValidator {
 		 * If overriding built-in SPs is disabled on this server, make sure we aren't
 		 * doing that
 		 */
-		if (!myStorageSettings.isDefaultSearchParamsCanBeOverridden()) {
+		if (myStorageSettings.isDefaultSearchParamsCanBeOverridden() == false) {
 			for (IPrimitiveType<?> nextBaseType : searchParameter.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
 				RuntimeSearchParam existingSearchParam = mySearchParamRegistry.getActiveSearchParam(nextBase, searchParameter.getCode());
@@ -92,7 +92,7 @@ public class SearchParameterDaoValidator {
 			return;
 		}
 
-		if (isNotCompositeWithoutBase(searchParameter)) {
+		if (isCompositeWithoutBase(searchParameter)) {
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 
@@ -110,8 +110,8 @@ public class SearchParameterDaoValidator {
 			if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
 				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
 			} else {
-				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
 				maybeValidateCompositeSpForUniqueIndexing(searchParameter);
+				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
 				maybeValidateCompositeWithComponent(searchParameter);
 			}
 		}
@@ -121,7 +121,7 @@ public class SearchParameterDaoValidator {
 		return theSearchParameter.getType() != null && theSearchParameter.getType().equals(Enumerations.SearchParamType.COMPOSITE);
 	}
 
-	private boolean isNotCompositeWithoutBase(SearchParameter searchParameter) {
+	private boolean isCompositeWithoutBase(SearchParameter searchParameter) {
 		return
 			ElementUtil.isEmpty(searchParameter.getBase()) &&
 				ElementUtil.isEmpty(searchParameter.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE)) &&
@@ -223,9 +223,9 @@ public class SearchParameterDaoValidator {
 	}
 
 	/*
-	 * Returns allowed Search Parameter Types for given composite or combo search parameter
-	 * This allows to prevent creation of Search Parameters which would fail in runtime (during GET request)
-	 * Below you can find references to runtime usages for each parameters type:
+	 * Returns allowed Search Parameter Types for a given composite or combo search parameter
+	 * This prevents the creation of search parameters that would fail during runtime (during a GET request)
+	 * Below you can find references to runtime usage for each parameter type:
 	 *
 	 * For Composite Search Parameters without HSearch indexing enabled (JPA only):
 	 * @see QueryStack#createPredicateCompositePart() and SearchBuilder#createCompositeSort()
@@ -241,7 +241,8 @@ public class SearchParameterDaoValidator {
 		if (hasAnyExtensionUniqueSetTo(theSearchParameter, true)) {
 			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER, REFERENCE);
 			        // combo non-unique search parameter or composite Search Parameter with HSearch indexing
-		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false) || myStorageSettings.isAdvancedHSearchIndexing()) {
+		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false) || // combo non-unique search parameter
+			myStorageSettings.isAdvancedHSearchIndexing()) { // composite Search Parameter with HSearch indexing
 			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER);
 		} else { // composite Search Parameter (JPA only)
 				return Set.of(STRING, TOKEN, DATE, QUANTITY);

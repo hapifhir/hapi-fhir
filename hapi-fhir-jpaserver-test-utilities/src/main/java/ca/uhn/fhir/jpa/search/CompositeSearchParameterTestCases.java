@@ -203,18 +203,16 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		myTestDaoSearch.assertSearchNotFound("both params must match ", "RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.08", raId);
 		myTestDaoSearch.assertSearchNotFound("both params must match ", "RiskAssessment?uri-number-compound-test=https://example.com/otherUrI$0.02", raId);
 		//verify combo query
-		myTestDaoSearch.assertSearchFinds("composite uri + number", "RiskAssessment?_source=https://example.com/ourSource&probability=0.02", raId);
+		myTestDaoSearch.assertSearchFinds("combo uri + number", "RiskAssessment?_source=https://example.com/ourSource&probability=0.02", raId);
 	}
 
 	@ParameterizedTest
 	@MethodSource("extensionProvider")
-	void searchTokenNumberCombo_onSameResource_found(Extension theExtension) {
+	void testComboSearch_withTokenAndNumber_returnsMatchingResources(Extension theExtension) {
 		// Combine existing SPs to test Token + number
 		SearchParameter searchParameter = createCompositeSearchParameter("token-number-combo-test", "RiskAssessment");
-		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("http://hl7.org/fhir/SearchParameter/RiskAssessment-method").setExpression("RiskAssessment"));
-		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability").setExpression("RiskAssessment"));
+		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/RiskAssessment-method", "RiskAssessment"));
+		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability", "RiskAssessment"));
 		searchParameter.setExtension(List.of(theExtension));
 		doCreateResource(searchParameter);
 
@@ -226,19 +224,24 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		riskAssessment.addPrediction(new RiskAssessment.RiskAssessmentPredictionComponent().setProbability(new DecimalType(0.02)));
 		IIdType raId = doCreateResource(riskAssessment);
 
+		RiskAssessment riskAssessmentNonMatch = new RiskAssessment();
+		riskAssessmentNonMatch.setMethod(new CodeableConcept(new Coding(null, "NOT_FOUND_CODE", null)));
+		riskAssessmentNonMatch.addPrediction(new RiskAssessment.RiskAssessmentPredictionComponent().setProbability(new DecimalType(0.03)));
+		doCreateResource(riskAssessmentNonMatch);
+
 		// verify combo query
-		myTestDaoSearch.assertSearchFinds("composite uri + number", "RiskAssessment?method=BRCAPRO&probability=0.02", raId);
+		myTestDaoSearch.assertSearchFinds("combo uri + number", "RiskAssessment?method=BRCAPRO&probability=0.02", raId);
+		myTestDaoSearch.assertSearchNotFound("both params must match", "RiskAssessment?method=CODE&probability=0.02", raId);
+		myTestDaoSearch.assertSearchNotFound("both params must match", "RiskAssessment?method=BRCAPRO&probability=0.09", raId);
 	}
 
 	@ParameterizedTest
 	@MethodSource("extensionProvider")
-	void searchUriStringCombo_onSameResource_found(Extension theExtension) {
+	void testComboSearch_withUriAndString_returnsMatchingResources(Extension theExtension) {
 		//Combine existing SPs to test URI + String
 		SearchParameter searchParameter = createCompositeSearchParameter("uri-string-combo-test", "Device");
-		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("http://hl7.org/fhir/SearchParameter/Device-url").setExpression("Device"));
-		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("http://hl7.org/fhir/SearchParameter/Device-model").setExpression("Device"));
+		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/Device-url", "Device"));
+		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/Device-model", "Device"));
 		searchParameter.setExtension(List.of(theExtension));
 		doCreateResource(searchParameter);
 
@@ -251,8 +254,14 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 
 		IIdType deviceId = doCreateResource(device);
 
+		Device deviceNonMatch = new Device();
+		deviceNonMatch.setUrl("http://someurl");
+		deviceNonMatch.setModelNumber("someModelNumber");
+
 		// verify combo query
 		myTestDaoSearch.assertSearchFinds("combo uri + string", "Device?url=http://deviceUrl&model=modelNumber", deviceId);
+		myTestDaoSearch.assertSearchNotFound("both params must match", "Device?url=http://wrongUrl&model=modelNumber", deviceId);
+		myTestDaoSearch.assertSearchNotFound("both params must match", "Device?url=http://deviceUrl&model=wrongModel", deviceId);
 	}
 
 	private static SearchParameter createCompositeSearchParameter(String theCodeValue, String theBase) {
@@ -266,6 +275,10 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		retVal.setExpression(theBase);
 
 		return retVal;
+	}
+
+	private SearchParameter.SearchParameterComponentComponent componentFrom(String theDefinition, String theExpression) {
+		return new SearchParameter.SearchParameterComponentComponent().setDefinition(theDefinition).setExpression(theExpression);
 	}
 
 	static Stream<Arguments> extensionProvider() {
