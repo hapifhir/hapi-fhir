@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class NicknameMap {
+public class NicknameMap {
 	private final Map<String, List<String>> myFormalToNick = new HashMap<>();
 	private final Map<String, List<String>> myNicknameToFormal = new HashMap<>();
 
@@ -45,12 +45,12 @@ class NicknameMap {
 		}
 	}
 
-	void clear() {
+	public void clear() {
 		myFormalToNick.clear();
 		myNicknameToFormal.clear();
 	}
 
-	void add(String theKey, List<String> theValues) {
+	public void add(String theKey, List<String> theValues) {
 		myFormalToNick.put(theKey, theValues);
 		for (String value : theValues) {
 			myNicknameToFormal.putIfAbsent(value, new ArrayList<>());
@@ -58,18 +58,22 @@ class NicknameMap {
 		}
 	}
 
-	int size() {
+	public int size() {
 		return myFormalToNick.size();
 	}
 
+	public boolean isEmpty() {
+		return size() > 0;
+	}
+
 	@Nonnull
-	List<String> getNicknamesFromFormalName(String theName) {
+	public List<String> getNicknamesFromFormalName(String theName) {
 		List<String> result = myFormalToNick.get(theName);
 		return result == null ? new ArrayList<>() : result;
 	}
 
 	@Nonnull
-	List<String> getFormalNamesFromNickname(String theNickname) {
+	public List<String> getFormalNamesFromNickname(String theNickname) {
 		List<String> result = myNicknameToFormal.get(theNickname);
 		return result == null ? new ArrayList<>() : result;
 	}

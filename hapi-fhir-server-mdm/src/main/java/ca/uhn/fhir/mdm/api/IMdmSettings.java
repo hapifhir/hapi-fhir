@@ -19,11 +19,9 @@
  */
 package ca.uhn.fhir.mdm.api;
 
+import ca.uhn.fhir.jpa.nickname.NicknameMap;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public interface IMdmSettings {
@@ -68,7 +66,7 @@ public interface IMdmSettings {
 	/**
 	 * Returns a map of names -> list of related names
 	 */
-	default Map<String, Collection<String>> getNicknameMap() {
-		return new HashMap<>();
+	default NicknameMap getNicknameMap() {
+		return new NicknameMap();
 	};
 }

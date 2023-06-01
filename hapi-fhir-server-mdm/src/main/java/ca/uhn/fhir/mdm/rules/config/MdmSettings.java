@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.mdm.rules.config;
 
+import ca.uhn.fhir.jpa.nickname.NicknameMap;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -27,11 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Component
 public class MdmSettings implements IMdmSettings {
@@ -50,7 +46,7 @@ public class MdmSettings implements IMdmSettings {
 	/**
 	 * Map of name -> set of related nicknames
 	 */
-	private Map<String, Collection<String>> myNickNameMap = new HashMap<>();
+	private final NicknameMap myNickNameMap = new NicknameMap();
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -170,7 +166,7 @@ public class MdmSettings implements IMdmSettings {
 	}
 
 	@Override
-	public Map<String, Collection<String>> getNicknameMap() {
+	public NicknameMap getNicknameMap() {
 		return myNickNameMap;
 	}
 }
