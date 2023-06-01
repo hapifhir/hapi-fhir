@@ -162,13 +162,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.onTable("BT2_WORK_CHUNK")
 			.addColumn("20230524.1", "WARNING_MSG")
 			.nullable()
-			.type(ColumnTypeEnum.TEXT);
+			.type(ColumnTypeEnum.CLOB);
 
 		version
 			.onTable("BT2_JOB_INSTANCE")
 			.addColumn("20230524.2", "WARNING_MSG")
 			.nullable()
-			.type(ColumnTypeEnum.TEXT);
+			.type(ColumnTypeEnum.CLOB);
 	}
 
 	protected void init660() {

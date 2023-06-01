@@ -113,7 +113,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 	private String myEstimatedTimeRemaining;
 	@Column(name = "CUR_GATED_STEP_ID", length = ID_MAX_LENGTH, nullable = true)
 	private String myCurrentGatedStepId;
-	@Column(name = "WARNING_MSG", columnDefinition="TEXT", nullable = true)
+	@Lob
+	@Column(name = "WARNING_MSG", nullable = true)
 	private String myWarningMessages;
 
 	/**
