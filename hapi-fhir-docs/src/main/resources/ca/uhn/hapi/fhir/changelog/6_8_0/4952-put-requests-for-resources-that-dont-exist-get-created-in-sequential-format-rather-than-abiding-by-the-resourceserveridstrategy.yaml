@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4952
+title: "Previously sending a PUT request of a non-existing resource without specifying id will cause the id be set 
+using a sequential numeric even when ResourceServerIdStrategy is set to UUID. This is now fixed."

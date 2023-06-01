@@ -1894,7 +1894,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					}
 				}
 			} else {
-				DaoMethodOutcome outcome = doCreateForPostOrPut(theRequest, resource, theMatchUrl, false, thePerformIndexing, theRequestPartitionId, update, theTransactionDetails);
+				// create the resource if no match found
+				DaoMethodOutcome outcome = doCreateForPost(theResource, theMatchUrl, thePerformIndexing, theTransactionDetails, theRequest, theRequestPartitionId);
 
 				// Pre-cache the match URL
 				if (outcome.getPersistentId() != null) {

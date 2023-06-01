@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -21,6 +22,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.apache.derby.impl.store.access.btree.index.B2INoLocking;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -1152,6 +1154,29 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	void testUpdateWithUuidServerResourceStrategy_NonExistingResourceWithoutProvidedId() {
+		// setup
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://my-lab-system").setValue("123");
+		p.addName().setFamily("FAM");
+		String theMatchUrl = "Patient?identifier=http://my-lab-system|123";
+
+		// execute
+		String result = myPatientDao
+			.update(p, theMatchUrl, mySrd)
+			.getId().getValueAsString()
+			.replace("Patient/", "")
+			.replace("/_history/1", "");
+
+		// verify
+		try {
+			UUID.fromString(result);
+		} catch (IllegalArgumentException exception){
+			fail("Result id is not a UUID");
+		}
+	}
 
 
 }
