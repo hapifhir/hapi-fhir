@@ -76,6 +76,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetches any existing jobs matching provided request parameters
+	 *
 	 */
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize);
@@ -97,18 +98,19 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetch all job instances for a given job definition id
+	 *
 	 */
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 
 	/**
 	 * Fetches all job instances based on the JobFetchRequest
+	 *
 	 * @param theRequest - the job fetch request
 	 * @return - a page of job instances
 	 */
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
-
 
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
@@ -130,6 +132,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetch all chunks for a given instance.
+	 *
 	 * @param theInstanceId - instance id
 	 * @param theWithData - whether or not to include the data
 	 * @return - an iterator for fetching work chunks
@@ -232,8 +235,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	@Transactional(propagation = Propagation.MANDATORY)
 	void updateInstanceUpdateTime(String theInstanceId);
-
-
 
 	/*
 	 * State transition events for job instances.

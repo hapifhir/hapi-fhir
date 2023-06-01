@@ -94,6 +94,9 @@ public class WorkChunk implements IModelJson {
 	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
 	private int myErrorCount;
 
+	@JsonProperty(value = "warningMessage", access = JsonProperty.Access.READ_ONLY)
+	private String myWarningMessage;
+
 	/**
 	 * Constructor
 	 */
@@ -246,6 +249,15 @@ public class WorkChunk implements IModelJson {
 		myUpdateTime = theUpdateTime;
 	}
 
+	public String getWarningMessage() {
+		return myWarningMessage;
+	}
+
+	public WorkChunk setWarningMessage(String theWarningMessage) {
+		myWarningMessage = theWarningMessage;
+		return this;
+	}
+
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this);
@@ -267,6 +279,9 @@ public class WorkChunk implements IModelJson {
 		}
 		if (myErrorCount > 0) {
 			b.append("ErrorCount", myErrorCount);
+		}
+		if (isNotBlank(myWarningMessage)) {
+			b.append("WarningMessage", myWarningMessage);
 		}
 		return b.toString();
 	}
