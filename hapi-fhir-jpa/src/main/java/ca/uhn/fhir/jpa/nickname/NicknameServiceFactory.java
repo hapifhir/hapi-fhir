@@ -43,14 +43,13 @@ public class NicknameServiceFactory {
 	 * This map (if populated) will be used instead of the defaults.
 	 */
 	public void setNicknameMap(NicknameMap theNameToNicknameListMap) {
-		myNicknameMap = theNameToNicknameListMap;
+		// not technically necessary; but we'll enforce it to keep nicknamesvc
+		// a singleton. If that changes, we can remove this
+		assert myNicknameSvc == null : "Nickname service is already defined! You cannot alter the map now";
 
-		// we ideally never see this
-		// but in case someone wants to redefine the map after construction, we'll allow it
-		if (myNicknameSvc != null) {
-			ourLog.warn("Resetting Nickname map. Future calls to nickname service will use this new map");
-			populateNicknameMap();
-			myNicknameSvc.setNicknameMap(myNicknameMap);
+		// we must always have nicknames map. If it's empty, we will not add it
+		if (theNameToNicknameListMap != null && !theNameToNicknameListMap.isEmpty()) {
+			myNicknameMap = theNameToNicknameListMap;
 		}
 	}
 
@@ -64,6 +63,7 @@ public class NicknameServiceFactory {
 	private void populateNicknameMap() {
 		if (myNicknameMap == null) {
 			myNicknameMap = new NicknameMap();
+
 			// default
 			try {
 				Resource nicknameCsvResource = new ClassPathResource("/nickname/names.csv");
