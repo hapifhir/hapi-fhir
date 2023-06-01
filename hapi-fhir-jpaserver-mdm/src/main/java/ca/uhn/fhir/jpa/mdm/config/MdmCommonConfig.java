@@ -57,7 +57,7 @@ public class MdmCommonConfig {
 		IMdmSettings theSettings,
 		NicknameServiceFactory theNicknameServiceFactory
 	) {
-		theNicknameServiceFactory.setNicknameMap(theSettings.nicknameMap());
+		theNicknameServiceFactory.setNicknameMap(theSettings.getNicknameMap());
 		return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameServiceFactory);
 	}
 }

@@ -68,7 +68,7 @@ public interface IMdmSettings {
 	/**
 	 * Returns a map of names -> list of related names
 	 */
-	default Map<String, Collection<String>> nicknameMap() {
+	default Map<String, Collection<String>> getNicknameMap() {
 		return new HashMap<>();
 	};
 }

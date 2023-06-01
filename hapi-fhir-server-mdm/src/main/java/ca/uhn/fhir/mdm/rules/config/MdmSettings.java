@@ -170,7 +170,7 @@ public class MdmSettings implements IMdmSettings {
 	}
 
 	@Override
-	public Map<String, Collection<String>> nicknameMap() {
+	public Map<String, Collection<String>> getNicknameMap() {
 		return myNickNameMap;
 	}
 }
