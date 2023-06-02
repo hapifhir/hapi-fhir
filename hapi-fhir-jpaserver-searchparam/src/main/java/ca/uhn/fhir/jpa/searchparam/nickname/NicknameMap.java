@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.nickname;
+package ca.uhn.fhir.jpa.searchparam.nickname;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
@@ -33,30 +33,19 @@ class NicknameMap {
 	private final Map<String, List<String>> myFormalToNick = new HashMap<>();
 	private final Map<String, List<String>> myNicknameToFormal = new HashMap<>();
 
-	private final List<String> myBadRows = new ArrayList<>();
-
 	void load(Reader theReader) throws IOException {
 		try (BufferedReader reader = new BufferedReader(theReader)) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] parts = line.split(",");
-				if (parts.length > 1) {
-					String key = parts[0];
-					List<String> values = new ArrayList<>(Arrays.asList(parts).subList(1, parts.length));
-					add(key, values);
-				} else {
-					myBadRows.add(line);
-				}
+				String key = parts[0];
+				List<String> values = new ArrayList<>(Arrays.asList(parts).subList(1, parts.length));
+				add(key, values);
 			}
 		}
 	}
 
-	void clear() {
-		myFormalToNick.clear();
-		myNicknameToFormal.clear();
-	}
-
-	void add(String theKey, List<String> theValues) {
+	private void add(String theKey, List<String> theValues) {
 		myFormalToNick.put(theKey, theValues);
 		for (String value : theValues) {
 			myNicknameToFormal.putIfAbsent(value, new ArrayList<>());
@@ -68,22 +57,14 @@ class NicknameMap {
 		return myFormalToNick.size();
 	}
 
-	boolean isEmpty() {
-		return size() == 0;
-	}
-
-	List<String> getBadRows() {
-		return myBadRows;
-	}
-
 	@Nonnull
-	public List<String> getNicknamesFromFormalName(String theName) {
+	List<String> getNicknamesFromFormalName(String theName) {
 		List<String> result = myFormalToNick.get(theName);
 		return result == null ? new ArrayList<>() : result;
 	}
 
 	@Nonnull
-	public List<String> getFormalNamesFromNickname(String theNickname) {
+	List<String> getFormalNamesFromNickname(String theNickname) {
 		List<String> result = myNicknameToFormal.get(theNickname);
 		return result == null ? new ArrayList<>() : result;
 	}
