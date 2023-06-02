@@ -1894,7 +1894,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					}
 				}
 			} else {
-				// check if provided id
+				// assign UUID if no id provided in the request (numeric id mode is handled in doCreateForPostOrPut)
 				if (!theResource.getIdElement().hasIdPart() && getStorageSettings().getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
 					theResource.setId(UUID.randomUUID().toString());
 					theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
