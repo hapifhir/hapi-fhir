@@ -2,6 +2,8 @@ package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.EmptyFieldMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.junit.jupiter.api.Test;
 
@@ -16,16 +18,16 @@ public class EmptyFieldMatcherTest extends BaseMatcherR4Test {
 		StringDt leftEmpty = new StringDt("");
 		StringDt rightEmpty = new StringDt("");
 		StringDt right = new StringDt("a value");
-		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MdmMatcherEnum.EMPTY_FIELD);
-		MdmFieldMatchJson fieldMatch = new MdmFieldMatchJson().setMatcher(matcher);
 
-		assertTrue(fieldMatch.match(ourFhirContext, null, null).match);
-		assertTrue(fieldMatch.match(ourFhirContext, null, rightEmpty).match);
-		assertTrue(fieldMatch.match(ourFhirContext, leftEmpty, null).match);
-		assertTrue(fieldMatch.match(ourFhirContext, leftEmpty, rightEmpty).match);
-		assertFalse(fieldMatch.match(ourFhirContext, null, right).match);
-		assertFalse(fieldMatch.match(ourFhirContext, left, null).match);
-		assertFalse(fieldMatch.match(ourFhirContext, left, right).match);
+		EmptyFieldMatcher fieldMatch = new EmptyFieldMatcher();
+
+		assertTrue(fieldMatch.matches(null, null, null));
+		assertTrue(fieldMatch.matches(null, rightEmpty, null));
+		assertTrue(fieldMatch.matches(leftEmpty, null, null));
+		assertTrue(fieldMatch.matches(leftEmpty, rightEmpty, null));
+		assertFalse(fieldMatch.matches(null, right, null));
+		assertFalse(fieldMatch.matches(left, null, null));
+		assertFalse(fieldMatch.matches(left, right, null));
 	}
 
 
