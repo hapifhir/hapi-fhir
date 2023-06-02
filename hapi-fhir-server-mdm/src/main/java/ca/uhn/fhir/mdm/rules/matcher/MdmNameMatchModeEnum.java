@@ -17,37 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher.models;
+package ca.uhn.fhir.mdm.rules.matcher;
 
-/**
- * Enum for holding all the known FHIR Element matchers that we support in HAPI.  The string matchers first
- * encode the string using an Apache Encoder before comparing them.
- * https://commons.apache.org/proper/commons-codec/userguide.html
- */
-public enum MatchTypeEnum {
-
-	CAVERPHONE1,
-	CAVERPHONE2,
-	COLOGNE,
-	DOUBLE_METAPHONE,
-	MATCH_RATING_APPROACH,
-	METAPHONE,
-	NYSIIS,
-	REFINED_SOUNDEX,
-	SOUNDEX,
-	NICKNAME,
-
-	STRING,
-	SUBSTRING,
-
-	DATE,
-	NAME_ANY_ORDER,
-	NAME_FIRST_AND_LAST,
-
-	IDENTIFIER,
-
-	EMPTY_FIELD,
-	EXTENSION_ANY_ORDER,
-	NUMERIC;
-
+public enum MdmNameMatchModeEnum {
+	ANY_ORDER,
+	FIRST_AND_LAST
 }

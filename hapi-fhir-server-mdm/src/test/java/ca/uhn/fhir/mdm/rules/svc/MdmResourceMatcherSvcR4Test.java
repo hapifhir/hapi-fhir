@@ -36,6 +36,7 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 	public void testCompareFirstNameMatch() {
 		MdmMatchOutcome result = myMdmResourceMatcherSvc.match(myJohn, myJohny);
 		assertMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH, 1L, 0.816, false, false, result);
+
 	}
 
 	@Test

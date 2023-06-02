@@ -17,11 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
+package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
-import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.util.NameUtil;
 import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -37,27 +35,24 @@ public class NameMatcher implements IMdmFieldMatcher {
 
 	private final MdmNameMatchModeEnum myMatchMode;
 
-	private final FhirContext myFhirContext;
-
-	public NameMatcher(FhirContext theFhirContext, MdmNameMatchModeEnum theMatchMode) {
+	public NameMatcher(MdmNameMatchModeEnum theMatchMode) {
 		myMatchMode = theMatchMode;
-		myFhirContext = theFhirContext;
 	}
 
 	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-		String leftFamilyName = NameUtil.extractFamilyName(myFhirContext, theLeftBase);
-		String rightFamilyName = NameUtil.extractFamilyName(myFhirContext, theRightBase);
+	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
+		String leftFamilyName = NameUtil.extractFamilyName(theFhirContext, theLeftBase);
+		String rightFamilyName = NameUtil.extractFamilyName(theFhirContext, theRightBase);
 		if (StringUtils.isEmpty(leftFamilyName) || StringUtils.isEmpty(rightFamilyName)) {
 			return false;
 		}
 
 		boolean match = false;
 
-		List<String> leftGivenNames = NameUtil.extractGivenNames(myFhirContext, theLeftBase);
-		List<String> rightGivenNames = NameUtil.extractGivenNames(myFhirContext, theRightBase);
+		List<String> leftGivenNames = NameUtil.extractGivenNames(theFhirContext, theLeftBase);
+		List<String> rightGivenNames = NameUtil.extractGivenNames(theFhirContext, theRightBase);
 
-		if (!theParams.getExact()) {
+		if (!theExact) {
 			leftFamilyName = StringUtil.normalizeStringForSearchIndexing(leftFamilyName);
 			rightFamilyName = StringUtil.normalizeStringForSearchIndexing(rightFamilyName);
 			leftGivenNames = leftGivenNames.stream().map(StringUtil::normalizeStringForSearchIndexing).collect(Collectors.toList());

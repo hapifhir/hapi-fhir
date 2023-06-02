@@ -4,7 +4,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
-import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -37,15 +37,11 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 	@Autowired
 	MatchUrlService myMatchUrlService;
 
-	@Autowired
-	NicknameSvc myNicknameSvc;
-
 	private NicknameInterceptor myNicknameInterceptor;
 
 	@BeforeEach
-	public void before() throws Exception {
-		super.before();
-		myNicknameInterceptor = new NicknameInterceptor(myNicknameSvc);
+	public void before() throws IOException {
+		myNicknameInterceptor = new NicknameInterceptor();
 		myInterceptorRegistry.registerInterceptor(myNicknameInterceptor);
 	}
 

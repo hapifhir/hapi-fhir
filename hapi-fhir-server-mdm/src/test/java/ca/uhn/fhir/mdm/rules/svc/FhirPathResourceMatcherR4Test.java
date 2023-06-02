@@ -6,7 +6,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
+import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,9 +46,10 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 		}
 	}
 
+
 	@Test
 	public void testFhirPathOrderedMatches() {
-		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildOrderedGivenNameRules(MatchTypeEnum.STRING));
+		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildOrderedGivenNameRules(MdmMatcherEnum.STRING));
 
 		myLeft = new Patient();
 		HumanName name = myLeft.addName();
@@ -62,7 +63,6 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 		name2.addGiven("Gary");
 		myRight.setId("Patient/2");
 
-		// test
 		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
 		assertMatchResult(MdmMatchResultEnum.NO_MATCH, 0L, 0.0, false, false, result);
 
@@ -85,12 +85,12 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 
 	@Test
 	public void testStringMatchResult() {
-		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildOrderedGivenNameRules(MatchTypeEnum.STRING));
+		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildOrderedGivenNameRules(MdmMatcherEnum.STRING));
 		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
 		assertMatchResult(MdmMatchResultEnum.NO_MATCH, 0L, 0.0, false, false, result);
 	}
 
-	protected MdmRulesJson buildOrderedGivenNameRules(MatchTypeEnum theMatcherEnum) {
+	protected MdmRulesJson buildOrderedGivenNameRules(MdmMatcherEnum theMatcherEnum) {
 		MdmFieldMatchJson firstGivenNameMatchField = new MdmFieldMatchJson()
 			.setName(PATIENT_GIVEN_FIRST)
 			.setResourceType("Patient")

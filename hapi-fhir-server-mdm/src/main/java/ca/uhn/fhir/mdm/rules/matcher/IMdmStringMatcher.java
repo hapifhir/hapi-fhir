@@ -17,9 +17,8 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
+package ca.uhn.fhir.mdm.rules.matcher;
 
-public enum MdmNameMatchModeEnum {
-	ANY_ORDER,
-	FIRST_AND_LAST
+public interface IMdmStringMatcher {
+	boolean matches(String theLeftString, String theRightString);
 }
