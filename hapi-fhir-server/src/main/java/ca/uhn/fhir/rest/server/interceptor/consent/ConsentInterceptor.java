@@ -244,7 +244,6 @@ public class ConsentInterceptor {
 						skipSubsequentServices = true;
 						break;
 					case REJECT:
-						authorizedResources.put(nextResource, Boolean.FALSE);
 						thePreResourceAccessDetails.setDontReturnResourceAtIndex(resourceIdx);
 						skipSubsequentServices = true;
 						break;
@@ -300,6 +299,7 @@ public class ConsentInterceptor {
 						}
 						continue;
 					case FORBID:
+						throw toForbiddenOperationException(nextOutcome);
 					case REJECT:
 						if (nextOutcome.getOperationOutcome() != null) {
 							IBaseOperationOutcome newOperationOutcome = nextOutcome.getOperationOutcome();

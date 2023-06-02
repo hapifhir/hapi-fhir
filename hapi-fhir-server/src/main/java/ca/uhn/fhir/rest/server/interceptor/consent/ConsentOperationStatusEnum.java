@@ -42,7 +42,8 @@ public enum ConsentOperationStatusEnum {
 
 	/**
 	 * The requested operation cannot proceed, and an operation outcome suitable for
-	 * the user is available
+	 * the user is forbidden. This was added to allow for 403 forbidden error from
+	 * ConsentServices.
 	 */
 	FORBID
 
