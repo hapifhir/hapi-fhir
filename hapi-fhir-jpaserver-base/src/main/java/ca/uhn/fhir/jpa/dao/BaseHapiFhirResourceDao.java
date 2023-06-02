@@ -1894,8 +1894,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					}
 				}
 			} else {
-				// create the resource if no match found
-				DaoMethodOutcome outcome = doCreateForPost(theResource, theMatchUrl, thePerformIndexing, theTransactionDetails, theRequest, theRequestPartitionId);
+				// check if provided id
+				if (!theResource.getIdElement().hasIdPart() && getStorageSettings().getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
+					theResource.setId(UUID.randomUUID().toString());
+					theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
+				}
+				DaoMethodOutcome outcome = doCreateForPostOrPut(theRequest, resource, theMatchUrl, false, thePerformIndexing, theRequestPartitionId, update, theTransactionDetails);
 
 				// Pre-cache the match URL
 				if (outcome.getPersistentId() != null) {
