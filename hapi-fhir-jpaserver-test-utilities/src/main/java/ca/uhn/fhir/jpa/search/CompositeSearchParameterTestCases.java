@@ -181,10 +181,8 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 	void searchUriNumber_onSameResource_found() {
 		// Combine existing SPs to test uri + number
 		SearchParameter searchParameter = createCompositeSearchParameter("uri-number-compound-test", "RiskAssessment");
-		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("http://hl7.org/fhir/SearchParameter/Resource-source").setExpression("meta.source"));
-		searchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability").setExpression("prediction.probability"));
+		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/Resource-source", "meta.source"));
+		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability", "prediction.probability"));
 		doCreateResource(searchParameter);
 
 		// enable this sp.
