@@ -17,32 +17,23 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.similarity;
+package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
-import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-/**
- * Similarity measure for two IBase fields whose similarity can be measured by their String representations.
- */
-public class HapiStringSimilarity implements IMdmFieldSimilarity {
-	private final NormalizedStringSimilarity myStringSimilarity;
-
-	public HapiStringSimilarity(NormalizedStringSimilarity theStringSimilarity) {
-		myStringSimilarity = theStringSimilarity;
-	}
+public class SubstringStringMatcher implements IMdmFieldMatcher {
 
 	@Override
-	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExact);
-			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExact);
-
-			return myStringSimilarity.similarity(leftString, rightString);
+			String left = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.getExact());
+			String right = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
+			return left.startsWith(right) || right.startsWith(left);
 		}
-		return 0.0;
+		return false;
 	}
 }

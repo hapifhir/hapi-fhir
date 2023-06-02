@@ -17,11 +17,29 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-public class SubstringStringMatcher implements IMdmStringMatcher {
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
+import org.hl7.fhir.instance.model.api.IBase;
+
+public class EmptyFieldMatcher implements IMdmFieldMatcher {
+
+	public EmptyFieldMatcher() {
+	}
+
 	@Override
-	public boolean matches(String theLeftString, String theRightString) {
-		return theLeftString.startsWith(theRightString) || theRightString.startsWith(theLeftString);
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+		for (IBase b : new IBase[] {theLeftBase, theRightBase}) {
+			if (b != null && !b.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean isMatchingEmptyFields() {
+		return true;
 	}
 }
