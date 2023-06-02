@@ -149,7 +149,7 @@ public class ConsentInterceptorTest {
 	}
 
 	@Test
-	public void testOutcomeForbidden() throws IOException {
+	public void testContentService_whenForbiddingOperationOnServerIncomingRequestPreHande_returnsForbidden() throws IOException {
 		Patient patientA = new Patient();
 		patientA.setId("PT-1-0");
 		patientA.setActive(true);
@@ -157,8 +157,7 @@ public class ConsentInterceptorTest {
 		patientA.addIdentifier().setSystem("SYSTEM").setValue("VALUEA");
 		ourPatientProvider.store(patientA);
 
-		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.FORBID);
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.FORBID);
 
 		HttpPut httpPut = new HttpPut("http://localhost:" + myPort + "/Patient/PT-1-0");
 		httpPut.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -167,6 +166,52 @@ public class ConsentInterceptorTest {
 		httpPut.setEntity(new StringEntity("{\"resourceType\": \"Patient\", \"id\": \"PT-1-0\",\"text\": {\"status\": \"generated\",\"div\": \"<div><p>A valid patient resource for testing purposes</p></div>\" },\"gender\": \"male\"}"));
 
 		try (CloseableHttpResponse status = myClient.execute(httpPut)) {
+			ourLog.info("RESULT {}", status);
+			assertEquals(403, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+		}
+	}
+
+	@Test
+	public void testContentService_whenForbiddingOperationOnStoragePreaccessResources_returnsForbidden() throws IOException {
+		Patient patientA = new Patient();
+		patientA.setId("PT-1-0");
+		patientA.setActive(true);
+		patientA.addName().setFamily("FAMILY").addGiven("GIVEN");
+		patientA.addIdentifier().setSystem("SYSTEM").setValue("VALUEA");
+		ourPatientProvider.store(patientA);
+
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.FORBID);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/PT-1-0");
+		httpGet.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+		httpGet.setHeader("Authorization", "ingestfa_client iaamSmile123");
+
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+			ourLog.info("RESULT {}", status);
+			assertEquals(403, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+		}
+	}
+
+	@Test
+	public void testContentService_whenForbiddingOperationOnStoragePreShowResources_returnsForbidden() throws IOException {
+		Patient patientA = new Patient();
+		patientA.setId("PT-1-0");
+		patientA.setActive(true);
+		patientA.addName().setFamily("FAMILY").addGiven("GIVEN");
+		patientA.addIdentifier().setSystem("SYSTEM").setValue("VALUEA");
+		ourPatientProvider.store(patientA);
+
+		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.FORBID);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/PT-1-0");
+		httpGet.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+		httpGet.setHeader("Authorization", "ingestfa_client iaamSmile123");
+
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			ourLog.info("RESULT {}", status);
 			assertEquals(403, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
