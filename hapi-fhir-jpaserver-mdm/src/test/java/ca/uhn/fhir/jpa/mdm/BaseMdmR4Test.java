@@ -76,12 +76,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {
-	MdmSubmitterConfig.class,
-	MdmConsumerConfig.class,
-	TestMdmConfigR4.class,
-	SubscriptionProcessorConfig.class
-})
+@ContextConfiguration(classes = {MdmSubmitterConfig.class, MdmConsumerConfig.class, TestMdmConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected static final String PARTITION_1 = "PART-1";

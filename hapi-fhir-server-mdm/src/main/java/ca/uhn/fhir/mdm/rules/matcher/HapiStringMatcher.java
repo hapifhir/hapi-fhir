@@ -17,26 +17,33 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
+package ca.uhn.fhir.mdm.rules.matcher;
 
-import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
-import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
-import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
  * Similarity measure for two IBase fields whose similarity can be measured by their String representations.
  */
-public class HapiStringMatcher implements IMdmFieldMatcher {
+public class HapiStringMatcher extends BaseHapiStringMetric implements IMdmFieldMatcher {
+	private final IMdmStringMatcher myStringMatcher;
+
+	public HapiStringMatcher(IMdmStringMatcher theStringMatcher) {
+		myStringMatcher = theStringMatcher;
+	}
+
+	public HapiStringMatcher() {
+		myStringMatcher = String::equals;
+	}
 
 	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theExtraMatchParams) {
+	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExtraMatchParams.getExact());
-			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExtraMatchParams.getExact());
+			String leftString = extractString((IPrimitiveType<?>) theLeftBase, theExact);
+			String rightString = extractString((IPrimitiveType<?>) theRightBase, theExact);
 
-			return leftString.equals(rightString);
+			return myStringMatcher.matches(leftString, rightString);
 		}
 		return false;
 	}

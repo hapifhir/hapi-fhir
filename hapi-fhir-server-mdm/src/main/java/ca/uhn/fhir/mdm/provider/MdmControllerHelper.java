@@ -139,7 +139,7 @@ public class MdmControllerHelper {
 	public IBaseBundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType, RequestDetails theRequestDetails) {
 		RequestPartitionId requestPartitionId;
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(theResourceType, null, null);
-		if (myMdmSettings.getSearchAllPartitionForMatch()) {
+		if (myMdmSettings.getSearchAllPartitionForMatch()){
 			requestPartitionId = RequestPartitionId.allPartitions();
 		} else {
 			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.mdm.api;
 
+import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 
 import java.util.stream.Collectors;
