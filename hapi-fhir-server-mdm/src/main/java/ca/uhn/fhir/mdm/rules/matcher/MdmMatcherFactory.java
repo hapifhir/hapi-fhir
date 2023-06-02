@@ -2,10 +2,9 @@ package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
-import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
+import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.EmptyFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.ExtensionMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiDateMatcher;
@@ -27,16 +26,16 @@ public class MdmMatcherFactory implements IMatcherFactory {
 	private final FhirContext myFhirContext;
 	private final IMdmSettings myMdmSettings;
 
-	private final NicknameServiceFactory myNicknameSvcFactory;
+	private final NicknameSvc myNicknameSvc;
 
 	public MdmMatcherFactory(
 		FhirContext theFhirContext,
 		IMdmSettings theSettings,
-		NicknameServiceFactory theNicknameSvcFactory
+		NicknameSvc theNicknameSvc
 	) {
 		myFhirContext = theFhirContext;
 		myMdmSettings = theSettings;
-		myNicknameSvcFactory = theNicknameSvcFactory;
+		myNicknameSvc = theNicknameSvc;
 	}
 
 	@Override
@@ -63,7 +62,7 @@ public class MdmMatcherFactory implements IMatcherFactory {
 				case SOUNDEX:
 					return new PhoneticEncoderMatcher(PhoneticEncoderEnum.SOUNDEX);
 				case NICKNAME:
-					return new NicknameMatcher(myNicknameSvcFactory.getNicknameSvc());
+					return new NicknameMatcher(myNicknameSvc);
 				case STRING:
 					return new HapiStringMatcher();
 				case SUBSTRING:

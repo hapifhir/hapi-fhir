@@ -29,28 +29,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NicknameMap {
+class NicknameMap {
 	private final Map<String, List<String>> myFormalToNick = new HashMap<>();
 	private final Map<String, List<String>> myNicknameToFormal = new HashMap<>();
+
+	private final List<String> myBadRows = new ArrayList<>();
 
 	void load(Reader theReader) throws IOException {
 		try (BufferedReader reader = new BufferedReader(theReader)) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] parts = line.split(",");
-				String key = parts[0];
-				List<String> values = new ArrayList<>(Arrays.asList(parts).subList(1, parts.length));
-				add(key, values);
+				if (parts.length > 1) {
+					String key = parts[0];
+					List<String> values = new ArrayList<>(Arrays.asList(parts).subList(1, parts.length));
+					add(key, values);
+				} else {
+					myBadRows.add(line);
+				}
 			}
 		}
 	}
 
-	public void clear() {
+	void clear() {
 		myFormalToNick.clear();
 		myNicknameToFormal.clear();
 	}
 
-	public void add(String theKey, List<String> theValues) {
+	void add(String theKey, List<String> theValues) {
 		myFormalToNick.put(theKey, theValues);
 		for (String value : theValues) {
 			myNicknameToFormal.putIfAbsent(value, new ArrayList<>());
@@ -58,12 +64,16 @@ public class NicknameMap {
 		}
 	}
 
-	public int size() {
+	int size() {
 		return myFormalToNick.size();
 	}
 
-	public boolean isEmpty() {
+	boolean isEmpty() {
 		return size() == 0;
+	}
+
+	List<String> getBadRows() {
+		return myBadRows;
 	}
 
 	@Nonnull

@@ -19,25 +19,55 @@
  */
 package ca.uhn.fhir.jpa.nickname;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
 import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Nickname service is used to load nicknames
+ * via a file that contains rows of comma separated names that are
+ * "similar" or nicknames of each other.
+ * -
+ * If no nickname resource is provided, nicknames/names.csv will be used instead.
+ * -
+ * If one is to be provided, it must be provided before nickname svc is invoked
+ */
 public class NicknameSvc {
+	private static final Logger ourLog = LoggerFactory.getLogger(NicknameSvc.class);
+
 	private NicknameMap myNicknameMap;
 
-	public NicknameSvc(@Nonnull NicknameMap theNicknamesMap) {
-		setNicknameMap(theNicknamesMap);
+	private Resource myNicknameResource;
+
+	public NicknameSvc() {
+
 	}
 
-	void setNicknameMap(@Nonnull NicknameMap theNicknameMap) {
-		myNicknameMap = theNicknameMap;
+	public void setNicknameResource(Resource theNicknameResource) {
+		myNicknameResource = theNicknameResource;
 	}
 
 	public int size() {
+		ensureMapInitialized();
 		return myNicknameMap.size();
+	}
+
+	public List<String> getBadRows() {
+		ensureMapInitialized();
+		return myNicknameMap.getBadRows();
 	}
 
 	public Collection<String> getEquivalentNames(String theName) {
@@ -56,11 +86,34 @@ public class NicknameSvc {
 
 	@Nonnull
 	List<String> getNicknamesFromFormalName(String theName) {
+		ensureMapInitialized();
 		return myNicknameMap.getNicknamesFromFormalName(theName);
 	}
 
 	@Nonnull
 	List<String> getFormalNamesFromNickname(String theNickname) {
+		ensureMapInitialized();
 		return myNicknameMap.getFormalNamesFromNickname(theNickname);
+	}
+
+	private void ensureMapInitialized() {
+		if (myNicknameResource == null) {
+			myNicknameResource = new ClassPathResource("/nickname/names.csv");
+		}
+
+		if (myNicknameMap == null) {
+			myNicknameMap = new NicknameMap();
+		}
+		if (myNicknameMap.isEmpty()) {
+			try {
+				try (InputStream inputStream = myNicknameResource.getInputStream()) {
+					try (Reader reader = new InputStreamReader(inputStream)) {
+						myNicknameMap.load(reader);
+					}
+				}
+			} catch (IOException e) {
+				throw new ConfigurationException(Msg.code(2234) + "Unable to load nicknames", e);
+			}
+		}
 	}
 }

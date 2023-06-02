@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.mdm.rules.config;
 
-import ca.uhn.fhir.jpa.nickname.NicknameMap;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -42,11 +41,6 @@ public class MdmSettings implements IMdmSettings {
 	private boolean myPreventEidUpdates;
 	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
-
-	/**
-	 * Map of name -> set of related nicknames
-	 */
-	private final NicknameMap myNickNameMap = new NicknameMap();
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -163,10 +157,5 @@ public class MdmSettings implements IMdmSettings {
 	@Override
 	public void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch) {
 		mySearchAllPartitionForMatch = theSearchAllPartitionForMatch;
-	}
-
-	@Override
-	public NicknameMap getNicknameMap() {
-		return myNickNameMap;
 	}
 }

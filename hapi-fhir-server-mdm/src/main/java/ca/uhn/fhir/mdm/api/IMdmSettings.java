@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.jpa.nickname.NicknameMap;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 
 import java.util.stream.Collectors;
@@ -62,11 +61,4 @@ public interface IMdmSettings {
 	boolean getSearchAllPartitionForMatch();
 
 	void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch);
-
-	/**
-	 * Returns a map of names -> list of related names
-	 */
-	default NicknameMap getNicknameMap() {
-		return new NicknameMap();
-	};
 }

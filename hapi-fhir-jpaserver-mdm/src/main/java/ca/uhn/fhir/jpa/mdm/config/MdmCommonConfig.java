@@ -20,10 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherFactory;
 import ca.uhn.fhir.jpa.searchparam.config.NicknameServiceConfig;
-import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
@@ -49,15 +46,5 @@ public class MdmCommonConfig {
 	@Bean
 	MdmLinkDeleteSvc mdmLinkDeleteSvc() {
 		return new MdmLinkDeleteSvc();
-	}
-
-	@Bean
-	public MdmMatcherFactory matcherFactory(
-		FhirContext theFhirContext,
-		IMdmSettings theSettings,
-		NicknameServiceFactory theNicknameServiceFactory
-	) {
-		theNicknameServiceFactory.setNicknameMap(theSettings.getNicknameMap());
-		return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameServiceFactory);
 	}
 }
