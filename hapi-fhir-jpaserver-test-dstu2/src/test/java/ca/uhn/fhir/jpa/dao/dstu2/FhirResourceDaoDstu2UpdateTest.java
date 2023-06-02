@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -348,6 +350,31 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		assertEquals("Patient/123abc", p.getId().toUnqualifiedVersionless().getValue());
 		assertEquals("Hello", p.getName().get(0).getFamily().get(0).getValue());
 
+	}
+
+
+	@Test
+	void testUpdateWithUuidServerResourceStrategy_NonExistingResourceWithoutProvidedId() {
+		// setup
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://my-lab-system").setValue("123");
+		p.addName().addFamily("FAM");
+		String theMatchUrl = "Patient?identifier=http://my-lab-system|123";
+
+		// execute
+		String result = myPatientDao
+			.update(p, theMatchUrl, mySrd)
+			.getId().getValueAsString()
+			.replace("Patient/", "")
+			.replace("/_history/1", "");
+
+		// verify
+		try {
+			UUID.fromString(result);
+		} catch (IllegalArgumentException exception){
+			fail("Result id is not a UUID");
+		}
 	}
 
 }

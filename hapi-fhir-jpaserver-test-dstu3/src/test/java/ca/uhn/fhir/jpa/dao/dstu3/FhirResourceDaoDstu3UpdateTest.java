@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -825,6 +826,30 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		assertEquals("Patient/123abc", p.getIdElement().toUnqualifiedVersionless().getValue());
 		assertEquals("Hello", p.getName().get(0).getFamily());
 
+	}
+
+	@Test
+	void testUpdateWithUuidServerResourceStrategy_NonExistingResourceWithoutProvidedId() {
+		// setup
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://my-lab-system").setValue("123");
+		p.addName().setFamily("FAM");
+		String theMatchUrl = "Patient?identifier=http://my-lab-system|123";
+
+		// execute
+		String result = myPatientDao
+			.update(p, theMatchUrl, mySrd)
+			.getId().getValueAsString()
+			.replace("Patient/", "")
+			.replace("/_history/1", "");
+
+		// verify
+		try {
+			UUID.fromString(result);
+		} catch (IllegalArgumentException exception){
+			fail("Result id is not a UUID");
+		}
 	}
 
 }
