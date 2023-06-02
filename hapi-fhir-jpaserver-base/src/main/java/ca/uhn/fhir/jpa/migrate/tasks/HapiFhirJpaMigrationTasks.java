@@ -45,7 +45,6 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import software.amazon.awssdk.utils.StringUtils;
 
-import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -103,14 +102,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init680() {
 		Builder version = forVersion(VersionEnum.V6_8_0);
 
-      // HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
-    Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
+		// HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
+		Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
 
-    resourceTable
-      .addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
-      .unique(false)
-      .online(true)
-      .withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
+		resourceTable
+			.addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
+			.unique(false)
+			.online(true)
+			.withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
 
 		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
 		tagDefTable.dropIndex("20230505.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
@@ -158,6 +157,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.onTable("HFJ_RES_VER_PROV")
 			.dropIndex("20230523.1", "IDX_RESVERPROV_RESVER_PID");
 
+		// add warning message to batch job instance
+		version
+			.onTable("BT2_WORK_CHUNK")
+			.addColumn("20230524.1", "WARNING_MSG")
+			.nullable()
+			.type(ColumnTypeEnum.CLOB);
+
+		version
+			.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20230524.2", "WARNING_MSG")
+			.nullable()
+			.type(ColumnTypeEnum.CLOB);
 	}
 
 	protected void init660() {
@@ -218,12 +229,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
 
 
-		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1","HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
+		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1", "HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
 
-		resSearchUrlTable.addColumn( "RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
-		resSearchUrlTable.addColumn( "RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		resSearchUrlTable.addColumn("RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
+		resSearchUrlTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
 
-		resSearchUrlTable.addColumn( "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		resSearchUrlTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 
 		resSearchUrlTable.addIndex("20230227.2", "IDX_RESSEARCHURL_RES").unique(false).withColumns("RES_ID");
 		resSearchUrlTable.addIndex("20230227.3", "IDX_RESSEARCHURL_TIME").unique(false).withColumns("CREATED_TIME");
@@ -317,16 +328,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 			version
 				.onTable(enversMpiLinkAuditTable)
-			   .addColumn("20230316.4", "PARTITION_DATE")
+				.addColumn("20230316.4", "PARTITION_DATE")
 				.nullable()
 				.type(ColumnTypeEnum.DATE_ONLY);
 		}
 
-        version
-           .onTable(ResourceTable.HFJ_RESOURCE)
-           .addColumn("20230323.1", "SEARCH_URL_PRESENT")
-           .nullable()
-           .type(ColumnTypeEnum.BOOLEAN);
+		version
+			.onTable(ResourceTable.HFJ_RESOURCE)
+			.addColumn("20230323.1", "SEARCH_URL_PRESENT")
+			.nullable()
+			.type(ColumnTypeEnum.BOOLEAN);
 
 
 		{
@@ -335,12 +346,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20230324.1", "IDX_SP_URI_HASH_URI_V2")
 				.unique(true)
 				.online(true)
-				.withColumns("HASH_URI","RES_ID","PARTITION_ID");
+				.withColumns("HASH_URI", "RES_ID", "PARTITION_ID");
 			uriTable
 				.addIndex("20230324.2", "IDX_SP_URI_HASH_IDENTITY_V2")
 				.unique(true)
 				.online(true)
-				.withColumns("HASH_IDENTITY","SP_URI","RES_ID","PARTITION_ID");
+				.withColumns("HASH_IDENTITY", "SP_URI", "RES_ID", "PARTITION_ID");
 			uriTable.dropIndex("20230324.3", "IDX_SP_URI_RESTYPE_NAME");
 			uriTable.dropIndex("20230324.4", "IDX_SP_URI_UPDATED");
 			uriTable.dropIndex("20230324.5", "IDX_SP_URI");
@@ -382,7 +393,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20230424.1", "IDX_RL_TGT_v2")
 				.unique(false)
 				.online(true)
-				.withColumns("TARGET_RESOURCE_ID", "SRC_PATH", "SRC_RESOURCE_ID", "TARGET_RESOURCE_TYPE","PARTITION_ID");
+				.withColumns("TARGET_RESOURCE_ID", "SRC_PATH", "SRC_RESOURCE_ID", "TARGET_RESOURCE_TYPE", "PARTITION_ID");
 
 			// drop and recreate FK_SPIDXSTR_RESOURCE since it will be useing the old IDX_SP_STRING_RESID
 			linkTable.dropForeignKey("20230424.2", "FK_RESLINK_TARGET", "HFJ_RESOURCE");

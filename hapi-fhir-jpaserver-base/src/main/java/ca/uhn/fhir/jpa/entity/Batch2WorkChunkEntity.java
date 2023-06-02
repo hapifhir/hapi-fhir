@@ -96,7 +96,9 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private String myErrorMessage;
 	@Column(name = "ERROR_COUNT", nullable = false)
 	private int myErrorCount;
-
+	@Lob
+	@Column(name = "WARNING_MSG", nullable = true)
+	private String myWarningMessage;
 
 	/**
 	 * Default constructor for Hibernate.
@@ -110,7 +112,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	public Batch2WorkChunkEntity(String theId, int theSequence, String theJobDefinitionId, int theJobDefinitionVersion,
 										  String theInstanceId, String theTargetStepId, WorkChunkStatusEnum theStatus,
 										  Date theCreateTime, Date theStartTime, Date theUpdateTime, Date theEndTime,
-										  String theErrorMessage, int theErrorCount, Integer theRecordsProcessed) {
+										  String theErrorMessage, int theErrorCount, Integer theRecordsProcessed, String theWarningMessage) {
 		myId = theId;
 		mySequence = theSequence;
 		myJobDefinitionId = theJobDefinitionId;
@@ -125,6 +127,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myErrorMessage = theErrorMessage;
 		myErrorCount = theErrorCount;
 		myRecordsProcessed = theRecordsProcessed;
+		myWarningMessage = theWarningMessage;
 	}
 
 	public int getErrorCount() {
@@ -141,6 +144,14 @@ public class Batch2WorkChunkEntity implements Serializable {
 
 	public void setErrorMessage(String theErrorMessage) {
 		myErrorMessage = left(theErrorMessage, ERROR_MSG_MAX_LENGTH);
+	}
+
+	public String getWarningMessage() {
+		return myWarningMessage;
+	}
+
+	public void setWarningMessage(String theWarningMessage) {
+		myWarningMessage = theWarningMessage;
 	}
 
 	public int getSequence() {
@@ -269,6 +280,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 			.append("serializedData", mySerializedData)
 			.append("status", myStatus)
 			.append("errorMessage", myErrorMessage)
+			.append("warningMessage", myWarningMessage)
 			.toString();
 	}
 
