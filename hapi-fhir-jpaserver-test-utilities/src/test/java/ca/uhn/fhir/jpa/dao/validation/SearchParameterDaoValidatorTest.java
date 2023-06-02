@@ -158,6 +158,22 @@ public class SearchParameterDaoValidatorTest {
 		mySvc.validate(theSearchParameter);
 	}
 
+	@Test
+	public void testMethodValidate_compositeSearchParamsWithNumberUriComponents_isNotAllowed() {
+		SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/component-value-uri-number", "component-value-uri-number", "Observation");
+
+		sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_URI));
+		sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_NUMBER));
+
+		try {
+			mySvc.validate(sp);
+			fail();
+		} catch (UnprocessableEntityException ex) {
+			assertTrue(ex.getMessage().startsWith("HAPI-2347: "));
+			assertTrue(ex.getMessage().contains("Invalid component search parameter type: URI in component.definition: http://example.org/SearchParameter/component-value-canonical"));
+		}
+	}
+
 	@ParameterizedTest
 	@MethodSource("compositeSpProvider")
 	// we're testing for:
