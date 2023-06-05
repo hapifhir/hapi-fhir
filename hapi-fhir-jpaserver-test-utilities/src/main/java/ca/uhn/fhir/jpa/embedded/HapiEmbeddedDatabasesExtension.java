@@ -95,8 +95,8 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		myDatabaseInitializerHelper.initializePersistenceSchema(getEmbeddedDatabase(theDriverType));
 	}
 
-	public void insertPersistenceTestData(DriverTypeEnum theDriverType) {
-		myDatabaseInitializerHelper.insertPersistenceTestData(getEmbeddedDatabase(theDriverType));
+	public void insertPersistenceTestData(DriverTypeEnum theDriverType, VersionEnum theVersion) {
+		myDatabaseInitializerHelper.insertPersistenceTestData(getEmbeddedDatabase(theDriverType), theVersion);
 	}
 
 	public String getSqlFromResourceFile(String theFileName) {
