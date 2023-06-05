@@ -115,6 +115,26 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	}
 
 	@Test
+	public void testValidateCodeOperationOnCodeSystem_byCodingAndUrlWhereCodeSystemIsUnknown_returnsFalse() {
+		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
+		logAllConcepts();
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_VALIDATE_CODE)
+			.withParameter(Parameters.class, "coding", new Coding()
+				.setSystem("http://terminology.hl7.org/CodeSystem/uknown-value-set").setCode("P"))
+			.andParameter("url", new UriType("http://terminology.hl7.org/CodeSystem/uknown-value-set"))
+			.execute();
+
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals(false, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
+	}
+
+	@Test
 	public void testValidateCodeOperationOnValueSet_ByUrlAndSystem_UsingBuiltInCodeSystems() {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
@@ -161,6 +181,26 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 
 		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
 		assertEquals(DISPLAY_BODY_MASS_INDEX, respParam.getParameterValue("display").toString());
+	}
+
+	@Test
+	public void testValidateCodeOperationOnValueSet_byCodingAndUrlWhereValueSetIsUnknown_returnsFalse() {
+		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
+		logAllConcepts();
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named(JpaConstants.OPERATION_VALIDATE_CODE)
+			.withParameter(Parameters.class, "coding", new Coding()
+				.setSystem("http://terminology.hl7.org/CodeSystem/list-example-use-codes").setCode("alerts"))
+			.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/uknown-value-set"))
+			.execute();
+
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals(false, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {
