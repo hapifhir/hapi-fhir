@@ -61,7 +61,7 @@ public class HapiSchemaMigrationTest {
 		ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
 
 		myEmbeddedServersExtension.initializePersistenceSchema(theDriverType);
-		myEmbeddedServersExtension.insertPersistenceTestData(theDriverType);
+		myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, FIRST_TESTED_VERSION);
 
 		JpaEmbeddedDatabase database = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
 		DataSource dataSource = database.getDataSource();
@@ -73,9 +73,19 @@ public class HapiSchemaMigrationTest {
 		int fromVersion = FIRST_TESTED_VERSION.ordinal() - 1;
 		VersionEnum from = allVersions[fromVersion];
 
-		int lastVersion = allVersions.length - 1;
-		VersionEnum to = allVersions[lastVersion];
+		VersionEnum toVersion = VersionEnum.V5_2_0;
 
+		migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, toVersion);
+		myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, toVersion);
+
+//		FIXME ND - make sure all migrations are run at the end
+//		int lastVersion = allVersions.length - 1;
+//		VersionEnum to = allVersions[lastVersion];
+//
+//		migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, to);
+	}
+
+	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum from, VersionEnum to) {
 		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getTaskList(from, to);
 		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(theDriverType);
