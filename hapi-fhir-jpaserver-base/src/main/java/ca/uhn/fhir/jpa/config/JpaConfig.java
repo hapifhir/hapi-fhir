@@ -183,7 +183,6 @@ import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInter
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -252,8 +251,8 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public ThreadSafeResourceDeleterSvc safeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService hapiTransactionService) {
-		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
+	public ThreadSafeResourceDeleterSvc safeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService theHapiTransactionService) {
+		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, theHapiTransactionService);
 	}
 
 	@Lazy
@@ -845,7 +844,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IResourceModifiedMessagePersistenceSvc subscriptionMessagePersistence(FhirContext theFhirContext, IResourceModifiedDao theIResourceModifiedDao, DaoRegistry theDaoRegistry){
-		return new ResourceModifiedMessagePersistenceSvcImpl(theFhirContext, theIResourceModifiedDao, theDaoRegistry, new ObjectMapper());
+	public IResourceModifiedMessagePersistenceSvc subscriptionMessagePersistence(FhirContext theFhirContext, IResourceModifiedDao theIResourceModifiedDao, DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService){
+		return new ResourceModifiedMessagePersistenceSvcImpl(theFhirContext, theIResourceModifiedDao, theDaoRegistry, theHapiTransactionService);
 	}
 }

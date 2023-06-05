@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +41,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -196,8 +196,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		List<IPersistedResourceModifiedMessage> allPersisted = myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime();
 
 		// then
-		assertThat(allPersisted, hasSize(2));
-		assertThat(allPersisted, containsInAnyOrder(patientPersistedMessage, organizationPersistedMessage));
+		assertOnPksAndOrder(allPersisted, List.of(patientPersistedMessage, organizationPersistedMessage));
 
 	}
 
@@ -305,4 +304,20 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		}
 	}
 
+	private static void assertOnPksAndOrder(List<IPersistedResourceModifiedMessage> theFetchedResourceModifiedMessageList, List<IPersistedResourceModifiedMessage> theCompareToList ){
+		assertThat(theFetchedResourceModifiedMessageList, hasSize(theCompareToList.size()));
+
+		List<IPersistedResourceModifiedMessagePK> fetchedPks = theFetchedResourceModifiedMessageList
+			.stream()
+			.map(IPersistedResourceModifiedMessage::getPersistedResourceModifiedMessagePk)
+			.collect(Collectors.toList());
+
+		List<IPersistedResourceModifiedMessagePK> compareToPks = theCompareToList
+			.stream()
+			.map(IPersistedResourceModifiedMessage::getPersistedResourceModifiedMessagePk)
+			.collect(Collectors.toList());
+
+		Assertions.assertEquals(fetchedPks, compareToPks);
+
+	}
 }

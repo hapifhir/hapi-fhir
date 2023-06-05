@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
@@ -62,18 +63,23 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	private final ObjectMapper myObjectMapper;
 
+	private final HapiTransactionService myHapiTransactionService;
+
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedMessagePersistenceSvcImpl.class);
 
-	public ResourceModifiedMessagePersistenceSvcImpl(FhirContext theFhirContext, IResourceModifiedDao theResourceModifiedDao, DaoRegistry theDaoRegistry, ObjectMapper theObjectMapper) {
+	public ResourceModifiedMessagePersistenceSvcImpl(FhirContext theFhirContext, IResourceModifiedDao theResourceModifiedDao, DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
 		myFhirContext = theFhirContext;
 		myResourceModifiedDao = theResourceModifiedDao;
 		myDaoRegistry = theDaoRegistry;
-		myObjectMapper = theObjectMapper;
+		myHapiTransactionService = theHapiTransactionService;
+		myObjectMapper = new ObjectMapper();
 	}
 
 	@Override
 	public List<IPersistedResourceModifiedMessage> findAllOrderedByCreatedTime() {
-		return myResourceModifiedDao.findAllOrderedByCreatedTime();
+		return myHapiTransactionService
+			.withSystemRequest()
+			.execute(myResourceModifiedDao::findAllOrderedByCreatedTime);
 	}
 
 	@Override
