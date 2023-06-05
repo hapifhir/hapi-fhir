@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.subscription.submit.config;
 
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedProcessingSchedulerSvc;
 import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
@@ -39,7 +40,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * This Spring config should be imported by a system that submits resources to the
@@ -50,12 +50,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class SubscriptionSubmitterConfig {
 
 	@Bean
-	public ResourceModifiedSubmitterSvc resourceModifiedSvc(PlatformTransactionManager theTxManager,
+	public ResourceModifiedSubmitterSvc resourceModifiedSvc(IHapiTransactionService theHapiTransactionService,
 																			  IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
 																			  SubscriptionChannelFactory theSubscriptionChannelFactory,
 																			  StorageSettings theStorageSettings){
 
-		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theTxManager);
+		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theHapiTransactionService);
 
 	}
 

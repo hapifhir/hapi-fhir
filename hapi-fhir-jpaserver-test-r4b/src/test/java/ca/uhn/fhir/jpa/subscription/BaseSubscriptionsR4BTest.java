@@ -104,12 +104,12 @@ public abstract class BaseSubscriptionsR4BTest extends BaseResourceProviderR4BTe
 			waitForActivatedSubscriptionCount(0);
 		}
 
+		myCountingInterceptor = new CountingInterceptor();
+
 		LinkedBlockingChannel processingChannel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
+
 		if (processingChannel != null) {
 			processingChannel.clearInterceptorsForUnitTest();
-		}
-		myCountingInterceptor = new CountingInterceptor();
-		if (processingChannel != null) {
 			processingChannel.addInterceptor(myCountingInterceptor);
 		}
 	}

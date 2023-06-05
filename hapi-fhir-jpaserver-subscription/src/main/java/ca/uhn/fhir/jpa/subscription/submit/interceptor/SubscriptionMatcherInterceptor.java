@@ -118,7 +118,7 @@ public class SubscriptionMatcherInterceptor {
 
 	}
 
-	private ResourceModifiedMessage createResourceModifiedMessage(IBaseResource theNewResource, BaseResourceMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	protected ResourceModifiedMessage createResourceModifiedMessage(IBaseResource theNewResource, BaseResourceMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		// Even though the resource is being written, the subscription will be interacting with it by effectively "reading" it so we set the RequestPartitionId as a read request
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
 		return new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);

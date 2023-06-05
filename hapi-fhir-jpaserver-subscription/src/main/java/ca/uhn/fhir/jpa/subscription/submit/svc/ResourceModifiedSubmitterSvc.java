@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -32,7 +33,6 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterc
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +40,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
@@ -67,7 +65,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	private final StorageSettings myStorageSettings;
 	private final SubscriptionChannelFactory mySubscriptionChannelFactory;
 	private final IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
-	private final PlatformTransactionManager myTxManager;
+	private final IHapiTransactionService myHapiTransactionService;
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
@@ -80,11 +78,11 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		}
 	}
 
-	public ResourceModifiedSubmitterSvc(StorageSettings theStorageSettings, SubscriptionChannelFactory theSubscriptionChannelFactory, IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc, PlatformTransactionManager theTxManager) {
+	public ResourceModifiedSubmitterSvc(StorageSettings theStorageSettings, SubscriptionChannelFactory theSubscriptionChannelFactory, IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc, IHapiTransactionService theHapiTransactionService) {
 		myStorageSettings = theStorageSettings;
 		mySubscriptionChannelFactory = theSubscriptionChannelFactory;
 		myResourceModifiedMessagePersistenceSvc = theResourceModifiedMessagePersistenceSvc;
-		myTxManager = theTxManager;
+		myHapiTransactionService = theHapiTransactionService;
 	}
 
 	/**
@@ -114,12 +112,23 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	protected boolean processResourceModifiedInTransaction(ResourceModifiedMessage theResourceModifiedMessage, IPersistedResourceModifiedMessagePK theResourceModifiedPK){
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-		return (boolean) txTemplate.execute(doProcessResourceModifiedInTransaction(theResourceModifiedMessage, theResourceModifiedPK));
+		return (boolean) myHapiTransactionService
+			.withSystemRequest()
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(doProcessResourceModifiedInTransaction(theResourceModifiedMessage, theResourceModifiedPK));
+
 	}
 
+	/**
+	 * This method is the cornerstone in the submit and retry upon failure mechanism for messages needing submission to the subscription processing pipeline.
+	 * It requires execution in a transaction for rollback of deleting the persistedResourceModifiedMessage pointed to by <code>theResourceModifiedPK<code/>
+	 * in the event where submission would fail.
+	 *
+	 * @param theResourceModifiedMessage the message for submission to the subscription processing pipeline
+	 * @param theResourceModifiedPK the primary key pointing to the persisted version (IPersistedResourceModifiedMessage) of theResourceModifiedMessage needing submission
+	 * @return true upon successful submission, false otherwise.
+	 */
 	protected TransactionCallback doProcessResourceModifiedInTransaction(ResourceModifiedMessage theResourceModifiedMessage, IPersistedResourceModifiedMessagePK theResourceModifiedPK) {
 		return theStatus -> {
 			boolean processed = true;
@@ -132,6 +141,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 					// the PK did exist and we were able to deleted it, ie, we are the only one processing the message
 					submitResourceModified(theResourceModifiedMessage);
 				} else {
+					ourLog.warn("theResourceModifiedPK with {} and version {} could not be deleted as it may have already been deleted.", theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion());
 					// we were not able to delete the pk.  this implies that someone else did read/delete the PK and processed the message
 					// successfully before we did.  still, we return true as the message was processed.
 				}
@@ -155,7 +165,6 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		return channelProducerSettings;
 	}
 
-	@VisibleForTesting
 	public IChannelProducer getProcessingChannelForUnitTest() {
 		startIfNeeded();
 		return (IChannelProducer) myMatchingChannel;
