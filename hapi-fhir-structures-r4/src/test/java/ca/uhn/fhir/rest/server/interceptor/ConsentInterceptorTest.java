@@ -223,6 +223,7 @@ public class ConsentInterceptorTest {
 		patientA.addIdentifier().setSystem("SYSTEM").setValue("VALUEA");
 		ourPatientProvider.store(patientA);
 
+		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.FORBID);
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/PT-1-0");
