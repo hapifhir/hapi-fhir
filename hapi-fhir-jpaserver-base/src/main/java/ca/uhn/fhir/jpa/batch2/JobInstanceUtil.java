@@ -60,6 +60,7 @@ class JobInstanceUtil {
 		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
 		retVal.setReport(theEntity.getReport());
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
+		retVal.setWarningMessages(theEntity.getWarningMessages());
 		return retVal;
 	}
 
@@ -91,6 +92,7 @@ class JobInstanceUtil {
 		theJobInstanceEntity.setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		theJobInstanceEntity.setReport(theJobInstance.getReport());
 		theJobInstanceEntity.setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
+		theJobInstanceEntity.setWarningMessages(theJobInstance.getWarningMessages());
 	}
 
 	/**
@@ -118,6 +120,7 @@ class JobInstanceUtil {
 		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
 		// note: may be null out if queried NoData
 		retVal.setData(theEntity.getSerializedData());
+		retVal.setWarningMessage(theEntity.getWarningMessage());
 		return retVal;
 	}
 }

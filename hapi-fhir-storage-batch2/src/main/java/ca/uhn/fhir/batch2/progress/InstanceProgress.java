@@ -30,7 +30,9 @@ import org.slf4j.Logger;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class InstanceProgress {
@@ -50,10 +52,13 @@ public class InstanceProgress {
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
 	private final Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
+	private final Set<String> myWarningMessages = new HashSet<>();
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
-
+		if (theChunk.getWarningMessage() != null) {
+			myWarningMessages.add(theChunk.getWarningMessage());
+		}
 		updateRecordsProcessed(theChunk);
 		updateEarliestTime(theChunk);
 		updateLatestEndTime(theChunk);
@@ -119,6 +124,9 @@ public class InstanceProgress {
 
 	public void updateInstance(JobInstance theInstance) {
 		updateInstance(theInstance, false);
+
+		String newWarningMessage = String.join("\n", myWarningMessages);
+		theInstance.setWarningMessages(newWarningMessage);
 	}
 
 	/**

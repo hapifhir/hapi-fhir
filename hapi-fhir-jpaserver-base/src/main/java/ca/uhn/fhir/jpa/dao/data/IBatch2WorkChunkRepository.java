@@ -47,7 +47,7 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 	@Query("SELECT new Batch2WorkChunkEntity(" +
 		"e.myId, e.mySequence, e.myJobDefinitionId, e.myJobDefinitionVersion, e.myInstanceId, e.myTargetStepId, e.myStatus," +
 		"e.myCreateTime, e.myStartTime, e.myUpdateTime, e.myEndTime," +
-		"e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed" +
+		"e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed, e.myWarningMessage" +
 		") FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC, e.myId ASC")
 	List<Batch2WorkChunkEntity> fetchChunksNoData(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
 
@@ -59,10 +59,10 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, " +
-		"e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null " +
-		"WHERE e.myId = :id")
+		"e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, " +
+		"e.myWarningMessage = :warningMessage WHERE e.myId = :id")
 	void updateChunkStatusAndClearDataForEndSuccess(@Param("id") String theChunkId, @Param("et") Date theEndTime,
-		@Param("rp") int theRecordsProcessed, @Param("errorRetries") int theErrorRetries, @Param("status") WorkChunkStatusEnum theInProgress);
+		@Param("rp") int theRecordsProcessed, @Param("errorRetries") int theErrorRetries, @Param("status") WorkChunkStatusEnum theInProgress, @Param("warningMessage") String theWarningMessage);
 
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")

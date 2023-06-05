@@ -26,7 +26,6 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +75,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetches any existing jobs matching provided request parameters
+	 *
 	 */
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize);
@@ -97,61 +97,38 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetch all job instances for a given job definition id
+	 *
 	 */
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 
 	/**
 	 * Fetches all job instances based on the JobFetchRequest
+	 *
 	 * @param theRequest - the job fetch request
 	 * @return - a page of job instances
 	 */
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
 
-
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
 
 	/**
-	 * Fetches all chunks for a given instance, without loading the data
-	 *
-	 * TODO MB this seems to only be used by tests.  Can we use the iterator instead?
-	 * @param theInstanceId The instance ID
-	 * @param thePageSize   The page size
-	 * @param thePageIndex  The page index
-	 */
-	default List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
-		// for back-compat
-		// wipmb delete after merge.
-		Validate.isTrue(false, "Dead path");
-		return null;
-	}
-
-	/**
 	 * Fetch all chunks for a given instance.
+	 *
 	 * @param theInstanceId - instance id
 	 * @param theWithData - whether or not to include the data
 	 * @return - an iterator for fetching work chunks
 	 */
-	default Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
-		// for back-compat
-		// wipmb delete after merge.
-		Validate.isTrue(false, "Dead path");
-		return null;
-	}
+	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
 	 * Fetch all chunks with data for a given instance for a given step id - read-only.
 	 *
 	 * @return - a stream for fetching work chunks
 	 */
-	default Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId) {
-		// for back-compat
-		// wipmb delete after merge.
-		Validate.isTrue(false, "Dead path");
-		return null;
-	}
+	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
 	/**
 	 * Callback to update a JobInstance within a locked transaction.
@@ -198,27 +175,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId);
 
-	/**
-	 * Marks an instance as being complete
-	 *
-	 * @param theInstanceId The instance ID
-	 * @return true if the instance status changed
-	 */
-	default boolean markInstanceAsCompleted(String theInstanceId) {
-		// for back-compat
-		// wipmb delete after merge.
-		Validate.isTrue(false, "Dead path");
-		return false;
-	}
-
-	default boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
-		// wipmb delete after merge.
-		// for back-compat
-		Validate.isTrue(false, "Dead path");
-		return false;
-	}
-
-
 	@Transactional(propagation = Propagation.MANDATORY)
 	boolean markInstanceAsStatusWhenStatusIn(String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates);
 
@@ -232,8 +188,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	@Transactional(propagation = Propagation.MANDATORY)
 	void updateInstanceUpdateTime(String theInstanceId);
-
-
 
 	/*
 	 * State transition events for job instances.

@@ -10,6 +10,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -367,6 +368,23 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(50));
 	}
 
+	@Test
+	public void testReindex_DuplicateResourceBeforeEnforceUniqueShouldSaveWarning() {
+		myReindexTestHelper.createObservationWithCode();
+		myReindexTestHelper.createObservationWithCode();
+
+		DaoMethodOutcome searchParameter = myReindexTestHelper.createUniqueCodeSearchParameter();
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(new ReindexJobParameters());
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
+
+		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
+		assertNotNull(myJob.getWarningMessages());
+		assertTrue(myJob.getWarningMessages().contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString()));
+	}
 
 	@Test
 	public void testReindex_ExceptionThrownDuringWrite() {
