@@ -70,10 +70,11 @@ public class StepExecutor {
 			return false;
 		} catch (Exception e) {
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				ourLog.error("Failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId, e);
+				ourLog.debug("Temporary failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId);
 				WorkChunkErrorEvent parameters = new WorkChunkErrorEvent(chunkId, e.getMessage());
 				WorkChunkStatusEnum newStatus = myJobPersistence.onWorkChunkError(parameters);
 				if (newStatus == WorkChunkStatusEnum.FAILED) {
+					ourLog.error("Exhausted retries:  Failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId, e);
 					return false;
 				}
 			} else {
