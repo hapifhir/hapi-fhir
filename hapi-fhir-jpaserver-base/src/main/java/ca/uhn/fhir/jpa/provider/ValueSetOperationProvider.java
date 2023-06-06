@@ -53,6 +53,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.Optional;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValueSetOperationProvider extends BaseJpaProvider {
@@ -138,8 +140,21 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 				String theDisplayString = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.getValueAsString() : null;
 				String theValueSetUrlString = (theValueSetUrl != null && theValueSetUrl.hasValue()) ?
 					theValueSetUrl.getValueAsString() : null;
-				result = myValidationSupportChain.validateCode(new ValidationSupportContext(myValidationSupportChain),
-					new ConceptValidationOptions(), theSystemString, theCodeString, theDisplayString, theValueSetUrlString);
+				if (theCoding != null) {
+					if (isNotBlank(theCoding.getSystem())) {
+						if (theSystemString != null && !theSystemString.equalsIgnoreCase(theCoding.getSystem())) {
+							throw new InvalidRequestException(Msg.code(2352) + "Coding.system '" + theCoding.getSystem() +
+								"' does not equal param system '" + theSystemString + "'. Unable to validate-code.");
+						}
+						theSystemString = theCoding.getSystem();
+						theCodeString = theCoding.getCode();
+						theDisplayString = theCoding.getDisplay();
+					}
+				}
+
+				Optional<IValidationSupport.CodeValidationResult> resultOptional =
+					validateCodeWithTerminologyService(theSystemString, theCodeString, theDisplayString, theValueSetUrlString);
+				result = resultOptional.isEmpty() ? generateUnableToValidateResult(theSystemString, theCodeString, theValueSetUrlString) : resultOptional.get();
 			} else {
 				// Otherwise, use the local DAO layer to validate the code
 				IFhirResourceDaoValueSet<IBaseResource> dao = getDao();
@@ -163,6 +178,17 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	private Optional<IValidationSupport.CodeValidationResult> validateCodeWithTerminologyService(String theSystemString, String theCodeString,
+																																String theDisplayString, String theValueSetUrlString) {
+		return Optional.ofNullable(myValidationSupportChain.validateCode(new ValidationSupportContext(myValidationSupportChain),
+			new ConceptValidationOptions(), theSystemString, theCodeString, theDisplayString, theValueSetUrlString));
+	}
+
+	private IValidationSupport.CodeValidationResult generateUnableToValidateResult(String theSystemString, String theCodeString, String theValueSetUrlString) {
+		return new IValidationSupport.CodeValidationResult().setMessage("Validator is unable to provide validation for " +
+			theCodeString + "#" + theSystemString + " - Unknown or unusable ValueSet[" + theValueSetUrlString + "]");
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_INVALIDATE_EXPANSION, idempotent = false, typeName = "ValueSet", returnParameters = {

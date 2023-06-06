@@ -37,7 +37,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /*
  * This set of Unit Tests instantiates and injects an instance of
@@ -115,7 +117,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	}
 
 	@Test
-	public void testValidateCodeOperationOnCodeSystem_byCodingAndUrlWhereCodeSystemIsUnknown_returnsFalse() {
+	public void testValidateCodeOperationOnCodeSystem_ByCodingAndUrlWhereCodeSystemIsUnknown_ReturnsFalse() {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 		logAllConcepts();
 
@@ -131,7 +133,26 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(false, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertEquals("Terminology service was unable to provide validation for http://terminology.hl7.org/CodeSystem/uknown-value-set" +
+			"#P", respParam.getParameterValue("message").toString());
+	}
+
+	@Test
+	public void testValidateCodeOperationOnValueSet_ByCodingAndUrlWhereSystemIsDifferent_ThrowsException() {
+		try {
+			myClient.operation()
+				.onType(ValueSet.class)
+				.named(JpaConstants.OPERATION_VALIDATE_CODE)
+				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0247").setCode("P"))
+				.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/list-example-codes"))
+				.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/INVALID-CODESYSTEM"))
+				.execute();
+			fail();
+		} catch (InvalidRequestException exception) {
+			assertEquals("HTTP 400 Bad Request: HAPI-2352: Coding.system 'http://terminology.hl7.org/CodeSystem/v2-0247' " +
+				"does not equal param system 'http://terminology.hl7.org/CodeSystem/INVALID-CODESYSTEM'. Unable to validate-code.", exception.getMessage());
+		}
 	}
 
 	@Test
@@ -184,7 +205,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	}
 
 	@Test
-	public void testValidateCodeOperationOnValueSet_byCodingAndUrlWhereValueSetIsUnknown_returnsFalse() {
+	public void testValidateCodeOperationOnValueSet_ByCodingAndUrlWhereValueSetIsUnknown_ReturnsFalse() {
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
 		logAllConcepts();
 
@@ -200,7 +221,9 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(false, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertEquals("Validator is unable to provide validation for alerts#http://terminology.hl7.org/CodeSystem/list-example-use-codes" +
+			" - Unknown or unusable ValueSet[http://hl7.org/fhir/ValueSet/uknown-value-set]", respParam.getParameterValue("message").toString());
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {

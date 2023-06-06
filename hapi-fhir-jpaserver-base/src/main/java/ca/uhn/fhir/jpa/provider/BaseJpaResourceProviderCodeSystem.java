@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.toValidateCodeResult;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -159,9 +160,8 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 						String code = theCoding.getCode();
 						String display = theCoding.getDisplay();
 
-						result = myValidationSupportChain.validateCode(
-							new ValidationSupportContext(myValidationSupportChain), new ConceptValidationOptions(),
-							codeSystemUrl, code, display, null);
+						Optional<IValidationSupport.CodeValidationResult> resultOptional = validateCodeWithTerminologyService(codeSystemUrl, code, display);
+						result = resultOptional.isEmpty() ? generateUnableToValidateResult(codeSystemUrl, code) : resultOptional.get();
 					}
 				}
 			} else {
@@ -174,5 +174,14 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 			endRequest(theServletRequest);
 		}
 
+	}
+
+	private Optional<IValidationSupport.CodeValidationResult> validateCodeWithTerminologyService(String theCodeSystemUrl, String theCode, String theDisplay) {
+		return Optional.ofNullable(myValidationSupportChain.validateCode(new ValidationSupportContext(myValidationSupportChain),
+			new ConceptValidationOptions(), theCodeSystemUrl, theCode, theDisplay, null));
+	}
+
+	private IValidationSupport.CodeValidationResult generateUnableToValidateResult(String theCodeSystemUrl, String theCode) {
+		return new IValidationSupport.CodeValidationResult().setMessage("Terminology service was unable to provide validation for " + theCodeSystemUrl + "#" + theCode);
 	}
 }
