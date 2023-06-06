@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
-import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
@@ -54,7 +53,7 @@ import javax.persistence.EntityManagerFactory;
 
 @Configuration
 @Import({
-	SubscriptionSubmitterConfig.class,
+	TestSubscriptionSubmitterConfig.class,
 	SubscriptionProcessorConfig.class,
 	SubscriptionChannelConfig.class,
 	SearchParamSubmitterConfig.class,
@@ -95,12 +94,6 @@ public class TestJPAConfig {
 	@Primary
 	public SubscriptionDeliveringRestHookSubscriber stoppableSubscriptionDeliveringRestHookSubscriber() {
 		return new StoppableSubscriptionDeliveringRestHookSubscriber();
-	}
-
-	@Bean
-	@Primary
-	public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor(IResourceModifiedConsumer theResourceModifiedConsumer){
-		return new SynchronousSubscriptionMatcherInterceptor(theResourceModifiedConsumer);
 	}
 
 	@Bean

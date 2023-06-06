@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedProcessingSchedu
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -16,11 +17,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatcherInterceptor {
 
-	private final IResourceModifiedConsumer myResourceModifiedConsumer;
-
-	public SynchronousSubscriptionMatcherInterceptor(IResourceModifiedConsumer theResourceModifiedConsumer) {
-		myResourceModifiedConsumer = theResourceModifiedConsumer;
-	}
+	@Autowired
+	private IResourceModifiedConsumer myResourceModifiedConsumer;
 
 	@Override
 	protected void processResourceModifiedMessage(ResourceModifiedMessage theResourceModifiedMessage) {

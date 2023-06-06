@@ -2,35 +2,42 @@ package ca.uhn.fhir.jpa.subscription.async;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
-import ca.uhn.fhir.jpa.subscription.SimulateNetworkFailureOnChannelInterceptor;
+import ca.uhn.fhir.jpa.subscription.SynchronousSubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.message.TestQueueConsumerHandler;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.ContextConfiguration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+@ContextConfiguration(classes = {AsyncSubscriptionMessageSubmissionIT.SpringConfig.class})
 public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Test {
 
-	@Autowired
-	ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
+	@SpyBean
+	IResourceModifiedConsumer myResourceModifiedConsumer;
 
 	@Autowired
 	AsyncResourceModifiedSubmitterSvc myAsyncResourceModifiedSubmitterSvc;
@@ -38,11 +45,11 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	@Autowired
 	private SubscriptionChannelFactory myChannelFactory;
 
-	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> handler;
+	@Autowired SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 
-	private SimulateNetworkFailureOnChannelInterceptor mySimulateNetworkFailureChannelInterceptor = new SimulateNetworkFailureOnChannelInterceptor();
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> myQueueConsumerHandler;
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
@@ -56,65 +63,56 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	public void beforeRegisterRestHookListenerAndSchedulePoisonPillInterceptor() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		// register poison pill interceptor
-		myResourceModifiedSubmitterSvc.startIfNeeded();
-		myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest().addInterceptor(mySimulateNetworkFailureChannelInterceptor);
-
 		IChannelReceiver receiver = myChannelFactory.newMatchingReceivingChannel("my-queue-name", new ChannelConsumerSettings());
-		handler = new TestQueueConsumerHandler();
-		receiver.subscribe(handler);
+		myQueueConsumerHandler = new TestQueueConsumerHandler();
+		receiver.subscribe(myQueueConsumerHandler);
 
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 	}
 
 	@Test
-	// the purpose of this test is to assert that a resource matching a given subscription will still
-	// be delivered despite a processing channel encountering issues accessing the underlying broker.
+	public void testSpringInjects_BeanOfTypeSubscriptionMatchingInterceptor_whenBeanDeclarationIsOverwrittenLocally(){
+		assertFalse(mySubscriptionMatcherInterceptor instanceof SynchronousSubscriptionMatcherInterceptor);
+	}
+
+	@Test
+	// the purpose of this test is to assert that a resource matching a given subscription is
+	// delivered asynchronously to the subscription processing pipeline.
 	public void testAsynchronousDeliveryOfResourceMatchingASubscription_willSucceed() throws Exception {
-
-		createSubscriptionWithCriteria("[Observation]");
-
+		String aCode = "zoop";
+		String aSystem = "SNOMED-CT";
+		// given
+		createAndSubmitSubscriptionWithCriteria("[Observation]");
 		waitForActivatedSubscriptionCount(1);
 
-		Observation obs = sendObservation("zoop", "SNOMED-CT");
+		// when
+		Observation obs = sendObservation(aCode, aSystem);
 
-		// Should see 1 subscription notification
-		waitForQueueToDrain();
+		assertCountOfResourcesNeedingSubmission(2);  // the subscription and the observation
+		assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(0);
 
-		//Should receive at our queue receiver
-		IBaseResource resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
-		assertThat(resource, instanceOf(Observation.class));
-
-		// simulate a network link failure for the upcoming resource update
-		mySimulateNetworkFailureChannelInterceptor.simulateNetworkOutage();
-
-		obs.setStatus(Observation.ObservationStatus.CORRECTED);
-
-		myObservationDao.update(obs, new SystemRequestDetails());
-
-		// the observation was updated but the resourceModifiedMessage did not reach the queue due to the network outage
-		assertThat(getQueueCount(), equalTo(0));
-
-		// simulate network operational
-		mySimulateNetworkFailureChannelInterceptor.simulateNetWorkOperational();
-
-		// perform asynchronous delivery of message
+		// since scheduled tasks are disabled during tests, let's trigger a submission
+		// just like the AsyncResourceModifiedProcessingSchedulerSvc would.
 		myAsyncResourceModifiedSubmitterSvc.runDeliveryPass();
 
+		//then
 		waitForQueueToDrain();
+		assertCountOfResourcesNeedingSubmission(0);
+		assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(1);
 
-		//Should receive at our queue receiver
-		resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
-		assertThat(resource, instanceOf(Observation.class));
-		Observation receivedObs = (Observation) resource;
-		assertThat(receivedObs.getStatus(), equalTo(Observation.ObservationStatus.CORRECTED));
+		Observation observation = (Observation) fetchSingleResourceFromSubscriptionTerminalEndpoint();
+		Coding coding = observation.getCode().getCodingFirstRep();
 
-		// assert that all persisted resourceModifiedMessage were deleted, ie, were processed
-		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(), hasSize(0));
+		assertThat(coding.getCode(), equalTo(aCode));
+		assertThat(coding.getSystem(), equalTo(aSystem));
 
 	}
 
-	private Subscription createSubscriptionWithCriteria(String theCriteria) {
+	private void assertCountOfResourcesNeedingSubmission(int theExpectedCount) {
+		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(), hasSize(theExpectedCount));
+	}
+
+	private Subscription createAndSubmitSubscriptionWithCriteria(String theCriteria) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -127,20 +125,35 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 		subscription.setChannel(channel);
 		postOrPutSubscription(subscription);
+
+		myAsyncResourceModifiedSubmitterSvc.runDeliveryPass();
+
 		return subscription;
 	}
 
+
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(handler.getMessages().size(), is(equalTo(1)));
-		ResourceModifiedJsonMessage resourceModifiedJsonMessage = handler.getMessages().get(0);
+		assertThat(myQueueConsumerHandler.getMessages().size(), is(equalTo(1)));
+		ResourceModifiedJsonMessage resourceModifiedJsonMessage = myQueueConsumerHandler.getMessages().get(0);
 		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
-		handler.clearMessages();
+		myQueueConsumerHandler.clearMessages();
 		return resource;
 	}
 
-	private int getQueueCount(){
-		return handler.getMessages().size();
+	private void assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(int expectedCount) {
+		assertThat(myQueueConsumerHandler.getMessages(), hasSize(expectedCount));
 	}
+
+	@Configuration
+	public static class SpringConfig {
+
+		@Primary
+		@Bean
+		public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor() {
+			return new SubscriptionMatcherInterceptor();
+		}
+	}
+
 }
