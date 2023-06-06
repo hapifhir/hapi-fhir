@@ -54,6 +54,16 @@ public class H2EmbeddedDatabase extends JpaEmbeddedDatabase {
 		deleteDatabaseDirectoryIfExists();
 	}
 
+	private List<String> getAllTableNames() {
+		List<String> allTableNames = new ArrayList<>();
+		List<Map<String, Object>> queryResults = query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA = 'PUBLIC'");
+		for (Map<String, Object> row : queryResults) {
+			String tableName = row.get("TABLE_NAME").toString();
+			allTableNames.add(tableName);
+		}
+		return allTableNames;
+	}
+
 
 	@Override
 	public void disableConstraints() {
@@ -62,7 +72,11 @@ public class H2EmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	@Override
 	public void enableConstraints() {
-		getJdbcTemplate().execute("SET REFERENTIAL_INTEGRITY = TRUE");
+		List<String> sql = new ArrayList<>();
+		for (String tableName : getAllTableNames()) {
+			sql.add(String.format("ALTER TABLE \"%s\" SET REFERENTIAL_INTEGRITY TRUE CHECK", tableName));
+		}
+		executeSqlAsBatch(sql);
 	}
 
 	@Override
@@ -84,9 +98,7 @@ public class H2EmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private void dropTables() {
 		List<String> sql = new ArrayList<>();
-		List<Map<String, Object>> tableResult = query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA = 'PUBLIC'");
-		for (Map<String, Object> result : tableResult) {
-			String tableName = result.get("TABLE_NAME").toString();
+		for (String tableName : getAllTableNames()) {
 			sql.add(String.format("DROP TABLE %s CASCADE", tableName));
 		}
 		executeSqlAsBatch(sql);
