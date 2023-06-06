@@ -48,6 +48,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
+import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -205,8 +206,12 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmResourceMatcherSvc mdmResourceComparatorSvc(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
-		return new MdmResourceMatcherSvc(theFhirContext, theMdmSettings);
+	MdmResourceMatcherSvc mdmResourceComparatorSvc(
+		FhirContext theFhirContext,
+		IMatcherFactory theIMatcherFactory,
+		IMdmSettings theMdmSettings
+	) {
+		return new MdmResourceMatcherSvc(theFhirContext, theIMatcherFactory, theMdmSettings);
 	}
 
 	@Bean
