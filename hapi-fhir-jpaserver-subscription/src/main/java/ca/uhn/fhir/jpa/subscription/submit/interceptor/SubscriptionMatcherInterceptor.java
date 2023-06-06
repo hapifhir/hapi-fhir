@@ -72,13 +72,13 @@ public class SubscriptionMatcherInterceptor {
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 	public void resourceCreated(IBaseResource theResource, RequestDetails theRequest) {
 
-		processResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE, theRequest);
+		processResourceModifiedEvent(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE, theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
 	public void resourceDeleted(IBaseResource theResource, RequestDetails theRequest) {
 
-		processResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
+		processResourceModifiedEvent(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
@@ -90,7 +90,7 @@ public class SubscriptionMatcherInterceptor {
 			return;
 		}
 
-		processResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
+		processResourceModifiedEvent(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
 	}
 
 	/**
@@ -100,7 +100,7 @@ public class SubscriptionMatcherInterceptor {
 	 * subscription pipeline after the resource was committed.  The message is persisted to provide asynchronous submission
 	 * in the event where submission would fail.
 	 */
-	protected void processResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	protected void processResourceModifiedEvent(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 
 		ResourceModifiedMessage msg = createResourceModifiedMessage(theNewResource, theOperationType, theRequest);
 
@@ -113,9 +113,13 @@ public class SubscriptionMatcherInterceptor {
 			return;
 		}
 
-		//	persist the message for async submission to the processing pipeline. see {@link AsyncResourceModifiedProcessingSchedulerSvc}
-		myResourceModifiedMessagePersistenceSvc.persist(msg);
+		processResourceModifiedMessage(msg);
 
+	}
+
+	protected void processResourceModifiedMessage(ResourceModifiedMessage theResourceModifiedMessage){
+		//	persist the message for async submission to the processing pipeline. see {@link AsyncResourceModifiedProcessingSchedulerSvc}
+		myResourceModifiedMessagePersistenceSvc.persist(theResourceModifiedMessage);
 	}
 
 	protected ResourceModifiedMessage createResourceModifiedMessage(IBaseResource theNewResource, BaseResourceMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {

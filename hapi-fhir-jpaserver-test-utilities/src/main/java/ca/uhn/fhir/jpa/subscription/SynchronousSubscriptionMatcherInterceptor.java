@@ -4,15 +4,14 @@ import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedProcessingSchedu
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * The purpose of this interceptor is to provide the capability to submit ResourceModifiedMessage to the
- * subscription processing pipeline.  It is ment to replace the SubscriptionMatcherInterceptor in
- * integrated tests where scheduling is disabled.  See {@link AsyncResourceModifiedProcessingSchedulerSvc}
+ * The purpose of this interceptor is to synchronously submit ResourceModifiedMessage to the
+ * subscription processing pipeline, ie, as part of processing the operation on a resource.
+ * It is meant to replace the SubscriptionMatcherInterceptor in integrated tests where
+ * scheduling is disabled.  See {@link AsyncResourceModifiedProcessingSchedulerSvc}
  * for further details on asynchronous submissions.
  */
 public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatcherInterceptor {
@@ -24,9 +23,7 @@ public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatch
 	}
 
 	@Override
-	protected void processResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
-		ResourceModifiedMessage msg = createResourceModifiedMessage(theNewResource, theOperationType, theRequest);
-
+	protected void processResourceModifiedMessage(ResourceModifiedMessage theResourceModifiedMessage) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
@@ -36,14 +33,12 @@ public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatch
 
 				@Override
 				public void afterCommit() {
-					myResourceModifiedConsumer.submitResourceModified(msg);
+					myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
 				}
 			});
 		} else {
-			myResourceModifiedConsumer.submitResourceModified(msg);
+			myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
 		}
-
 	}
-
 
 }
