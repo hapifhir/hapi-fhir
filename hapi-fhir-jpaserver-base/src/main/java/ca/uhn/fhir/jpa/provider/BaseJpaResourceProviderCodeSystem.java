@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
@@ -142,7 +143,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 		RequestDetails theRequestDetails
 	) {
 
-		IValidationSupport.CodeValidationResult result = null;
+		CodeValidationResult result = null;
 		startRequest(theServletRequest);
 		try {
 			// TODO: JA why not just always just the chain here? and we can then get rid of the corresponding DAO method entirely
@@ -160,7 +161,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 						String code = theCoding.getCode();
 						String display = theCoding.getDisplay();
 
-						Optional<IValidationSupport.CodeValidationResult> resultOptional = validateCodeWithTerminologyService(codeSystemUrl, code, display);
+						Optional<CodeValidationResult> resultOptional = validateCodeWithTerminologyService(codeSystemUrl, code, display);
 						result = resultOptional.isEmpty() ? generateUnableToValidateResult(codeSystemUrl, code) : resultOptional.get();
 					}
 				}
@@ -176,12 +177,12 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 
 	}
 
-	private Optional<IValidationSupport.CodeValidationResult> validateCodeWithTerminologyService(String theCodeSystemUrl, String theCode, String theDisplay) {
+	private Optional<CodeValidationResult> validateCodeWithTerminologyService(String theCodeSystemUrl, String theCode, String theDisplay) {
 		return Optional.ofNullable(myValidationSupportChain.validateCode(new ValidationSupportContext(myValidationSupportChain),
 			new ConceptValidationOptions(), theCodeSystemUrl, theCode, theDisplay, null));
 	}
 
-	private IValidationSupport.CodeValidationResult generateUnableToValidateResult(String theCodeSystemUrl, String theCode) {
-		return new IValidationSupport.CodeValidationResult().setMessage("Terminology service was unable to provide validation for " + theCodeSystemUrl + "#" + theCode);
+	private CodeValidationResult generateUnableToValidateResult(String theCodeSystemUrl, String theCode) {
+		return new CodeValidationResult().setMessage("Terminology service was unable to provide validation for " + theCodeSystemUrl + "#" + theCode);
 	}
 }

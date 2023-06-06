@@ -1,6 +1,4 @@
 ---
 type: fix
 issue: 4957
-title: "Previously, with remote-terminology service enabled, for $validate-code operations, the server responded
-with a HTTP 500 and NullPointerException instead of an HTTP 200 and a useful error message if an unknown CodeSystem or unknown ValueSet is provided.
-This problem has been fixed."
+title: "Previously, performing a $validate-code operation with a remote terminology service on an invalid CodeSystem or ValueSet returned 500. This problem has been fixed."

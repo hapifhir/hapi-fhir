@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -130,7 +131,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		RequestDetails theRequestDetails
 	) {
 
-		IValidationSupport.CodeValidationResult result;
+		CodeValidationResult result;
 		startRequest(theServletRequest);
 		try {
 			// If a Remote Terminology Server has been configured, use it
@@ -152,7 +153,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 					}
 				}
 
-				Optional<IValidationSupport.CodeValidationResult> resultOptional =
+				Optional<CodeValidationResult> resultOptional =
 					validateCodeWithTerminologyService(theSystemString, theCodeString, theDisplayString, theValueSetUrlString);
 				result = resultOptional.isEmpty() ? generateUnableToValidateResult(theSystemString, theCodeString, theValueSetUrlString) : resultOptional.get();
 			} else {
@@ -180,15 +181,15 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		}
 	}
 
-	private Optional<IValidationSupport.CodeValidationResult> validateCodeWithTerminologyService(String theSystemString, String theCodeString,
-																																String theDisplayString, String theValueSetUrlString) {
+	private Optional<CodeValidationResult> validateCodeWithTerminologyService(String theSystem, String theCode,
+																									  String theDisplay, String theValueSetUrl) {
 		return Optional.ofNullable(myValidationSupportChain.validateCode(new ValidationSupportContext(myValidationSupportChain),
-			new ConceptValidationOptions(), theSystemString, theCodeString, theDisplayString, theValueSetUrlString));
+			new ConceptValidationOptions(), theSystem, theCode, theDisplay, theValueSetUrl));
 	}
 
-	private IValidationSupport.CodeValidationResult generateUnableToValidateResult(String theSystemString, String theCodeString, String theValueSetUrlString) {
-		return new IValidationSupport.CodeValidationResult().setMessage("Validator is unable to provide validation for " +
-			theCodeString + "#" + theSystemString + " - Unknown or unusable ValueSet[" + theValueSetUrlString + "]");
+	private CodeValidationResult generateUnableToValidateResult(String theSystem, String theCode, String theValueSetUrl) {
+		return new CodeValidationResult().setMessage("Validator is unable to provide validation for " +
+			theCode + "#" + theSystem + " - Unknown or unusable ValueSet[" + theValueSetUrl + "]");
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_INVALIDATE_EXPANSION, idempotent = false, typeName = "ValueSet", returnParameters = {
@@ -254,7 +255,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		return options;
 	}
 
-	public static IBaseParameters toValidateCodeResult(FhirContext theContext, IValidationSupport.CodeValidationResult theResult) {
+	public static IBaseParameters toValidateCodeResult(FhirContext theContext, CodeValidationResult theResult) {
 		IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 
 		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", theResult.isOk());
