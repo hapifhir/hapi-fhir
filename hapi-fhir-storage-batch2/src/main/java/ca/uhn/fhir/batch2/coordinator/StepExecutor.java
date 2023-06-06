@@ -70,7 +70,7 @@ public class StepExecutor {
 			return false;
 		} catch (Exception e) {
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				ourLog.debug("Temporary failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId);
+				ourLog.info("Temporary problem executing job {} step {}, marking chunk {} as retriable ERRORED", jobDefinitionId, targetStepId, chunkId);
 				WorkChunkErrorEvent parameters = new WorkChunkErrorEvent(chunkId, e.getMessage());
 				WorkChunkStatusEnum newStatus = myJobPersistence.onWorkChunkError(parameters);
 				if (newStatus == WorkChunkStatusEnum.FAILED) {
