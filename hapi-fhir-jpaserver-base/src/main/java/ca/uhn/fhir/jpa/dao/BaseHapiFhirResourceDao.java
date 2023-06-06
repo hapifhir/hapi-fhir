@@ -162,6 +162,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static java.util.Objects.isNull;
 
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
 
@@ -1740,9 +1741,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.withRequestPartitionId(requestPartitionId)
 			.execute(() -> {
 
-				if (theParams.getLoadSynchronousUpTo() != null) {
-					theParams.setLoadSynchronousUpTo(Math.min(myStorageSettings.getInternalSynchronousSearchSize(), theParams.getLoadSynchronousUpTo()));
-				} else {
+				if(isNull(theParams.getLoadSynchronousUpTo())){
 					theParams.setLoadSynchronousUpTo(myStorageSettings.getInternalSynchronousSearchSize());
 				}
 

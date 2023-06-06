@@ -289,7 +289,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	 */
 	@PostConstruct
 	public void registerListener() {
- 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
+		SearchParameterMap spMap = SearchParameterMap.newSynchronous();
+		spMap.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
+ 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", spMap, this, REFRESH_INTERVAL);
 	}
 
 	@PreDestroy

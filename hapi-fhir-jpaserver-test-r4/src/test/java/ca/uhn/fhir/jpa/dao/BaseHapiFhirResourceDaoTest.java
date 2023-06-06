@@ -12,13 +12,17 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.r4.MockHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -45,6 +49,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -237,6 +244,37 @@ class BaseHapiFhirResourceDaoTest {
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
 		assertEquals(0, actualParameters.getPartitionedUrls().size());
+	}
+
+	@Test
+	void TestSearchForIds_DoesNotSetLoadSynchronousUpTo_WhenAlreadyExists(){
+		// setup
+		SearchParameterMap mySearchParamMap = Mockito.mock(SearchParameterMap.class);
+		RequestDetails myRequestDetails = Mockito.mock(RequestDetails.class);
+		RequestPartitionId partitionId = Mockito.mock(RequestPartitionId.class);
+		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(myTransactionService);
+
+		// mock
+		when(mySearchParamMap.getLoadSynchronousUpTo()).thenReturn(10000);
+
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+			Mockito.any(),
+			Mockito.any(),
+			Mockito.any(),
+			Mockito.any()
+		)).thenReturn(partitionId);
+
+		// execute
+		try {
+		mySvc.searchForIds(mySearchParamMap, myRequestDetails, null);
+		} catch (InternalErrorException e){
+			// ok
+		}
+
+		// verify
+		verify(mySearchParamMap, only()).getLoadSynchronousUpTo();
+		verify(mySearchParamMap, never()).setLoadSynchronousUpTo(Mockito.anyInt());
 	}
 
 	static class TestResourceDao extends BaseHapiFhirResourceDao<Patient> {
