@@ -309,6 +309,17 @@ public class SearchParamRegistryImplTest {
 		assertEquals(Sets.newHashSet("name1", "name2"), canonicalSp.getUpliftRefchainCodes());
 	}
 
+	@Test
+	public void testRegisterListener_ResourceChangeListenerCache_LoadSynchronousUpTo() {
+		// Execute
+		mySearchParamRegistry.registerListener();
+
+		// verify
+		int expected = mySearchParamRegistry.getMaxManagedParamCountForUnitTest();
+		int actual = mySearchParamRegistry.getResourceChangeListenerCacheForUnitTest().getSearchParameterMap().getLoadSynchronousUpTo();
+		assertEquals(expected, actual);
+	}
+
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
 		// Add a new search parameter entity
 		List<ResourceTable> newEntities = new ArrayList(ourEntities);
