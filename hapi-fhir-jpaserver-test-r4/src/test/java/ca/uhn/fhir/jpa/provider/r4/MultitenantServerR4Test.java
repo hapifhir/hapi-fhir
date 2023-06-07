@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -87,9 +88,15 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 	@Test
 	public void testFetchCapabilityStatement() {
+		myStorageSettings.setAllowPartitionListinCapabilityStatement(true);
+
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
+		List<Extension> extensions = cs.getExtensionsByUrl("http://hapifhir.io/fhir/StructureDefinition/partition-list");
+		assertEquals(1, extensions.size());
+		List<String> listOfPartitions = extensions.get(0).getExtension().stream().map(extension -> extension.getValue().toString()).toList();
 
+		assertTrue(listOfPartitions.containsAll(List.of(TENANT_A, TENANT_B)));
 		assertEquals("HAPI FHIR Server", cs.getSoftware().getName());
 		assertEquals(myServerBase + "/TENANT-A/metadata", myCapturingInterceptor.getLastRequest().getUri());
 	}
