@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.subscription.submit.svc;
 
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,11 +16,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
@@ -40,16 +40,12 @@ public class ResourceModifiedSubmitterTest {
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Mock
 	IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
-	@Mock
-	PlatformTransactionManager myTxManager;
-	@InjectMocks
-	ResourceModifiedSubmitterSvc myUnitUnderTest;
 	@Captor
 	ArgumentCaptor<ChannelProducerSettings> myArgumentCaptor;
-
 	@Mock
 	IChannelProducer myChannelProducer;
-	
+
+	ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
 	TransactionStatus myCapturingTransactionStatus;
 
 	@BeforeEach
@@ -57,7 +53,14 @@ public class ResourceModifiedSubmitterTest {
 		myCapturingTransactionStatus = new SimpleTransactionStatus();
 		lenient().when(myStorageSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
 		lenient().when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(myChannelProducer);
-		lenient().when(myTxManager.getTransaction(any())).thenReturn(myCapturingTransactionStatus);
+
+		IHapiTransactionService hapiTransactionService = new MockHapiTransactionService(myCapturingTransactionStatus);
+		myResourceModifiedSubmitterSvc = new ResourceModifiedSubmitterSvc(
+			myStorageSettings,
+			mySubscriptionChannelFactory,
+			myResourceModifiedMessagePersistenceSvc,
+			hapiTransactionService);
+
 	}
 
 	@ParameterizedTest
@@ -68,7 +71,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myStorageSettings.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
 
 		// when
-		myUnitUnderTest.startIfNeeded();
+		myResourceModifiedSubmitterSvc.startIfNeeded();
 
 		// then
 		ChannelProducerSettings capturedChannelProducerSettings = getCapturedChannelProducerSettings();
@@ -83,7 +86,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
+		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.TRUE));
@@ -99,7 +102,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(false);
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
+		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.TRUE));
@@ -118,7 +121,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myChannelProducer.send(any())).thenThrow(new MessageDeliveryException("sendingError"));
 
 		// when
-		boolean wasProcessed = myUnitUnderTest.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
+		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.FALSE));

@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
@@ -88,6 +89,9 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 		private PlatformTransactionManager myPlatformTransactionManager;
 		@MockBean
 		private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+		@MockBean
+		private IHapiTransactionService myHapiTransactionService;
+
 	}
 
 
