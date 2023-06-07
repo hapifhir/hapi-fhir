@@ -38,6 +38,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -734,6 +736,62 @@ public class BulkDataExportProviderTest {
 				() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Group")),
 				() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Device"))
 			);
+		}
+	}
+
+	@Test
+	public void testInitiateGroupExportWithTypeAllergyIntolerance() throws IOException {
+		// when
+		when(myJobRunner.startNewJob(isNotNull(), any(Batch2BaseJobParameters.class)))
+			.thenReturn(createJobStartResponse());
+
+		// http://localhost:8000/Group/1370/$export?_type=AllergyIntolerance
+		final String url = String.format("%s/%s/%s/%s?%s=%s",
+			myServer.getBaseUrl(),
+			ResourceType.Group.name(),
+			"123",
+			JpaConstants.OPERATION_EXPORT,
+			JpaConstants.PARAM_EXPORT_TYPE,
+			ResourceType.AllergyIntolerance.name());
+
+		final HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (final CloseableHttpResponse execute = myClient.execute(get)) {
+			// verify
+			assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(202)));
+
+			final BulkExportParameters bulkExportParameters = verifyJobStart();
+
+			assertEquals(Collections.singletonList(ResourceType.AllergyIntolerance.name()), bulkExportParameters.getResourceTypes());
+		}
+	}
+
+	@Test
+	public void testInitiateGroupExportWithTypeFilterAllergyIntolerance() throws IOException {
+		// when
+		when(myJobRunner.startNewJob(isNotNull(), any(Batch2BaseJobParameters.class)))
+			.thenReturn(createJobStartResponse());
+
+		// http://localhost:8000/Group/1370/$export?_typeFilter=AllergyIntolerance?category=food
+		final String url = String.format("%s/%s/%s/%s?%s=%s?%s=%s",
+			myServer.getBaseUrl(),
+			ResourceType.Group.name(),
+			"123",
+			JpaConstants.OPERATION_EXPORT,
+			JpaConstants.PARAM_EXPORT_TYPE_FILTER,
+			ResourceType.AllergyIntolerance.name(),
+			"category",
+			"food");
+
+		final HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (final CloseableHttpResponse execute = myClient.execute(get)) {
+
+			// verify
+			assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(202)));
+			final BulkExportParameters bulkExportParameters = verifyJobStart();
+
+			assertEquals(Collections.singletonList(ResourceType.AllergyIntolerance.name()), bulkExportParameters.getResourceTypes());
 		}
 	}
 
