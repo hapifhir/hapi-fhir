@@ -17,9 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.util.ExtensionUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -30,7 +31,7 @@ import java.util.List;
 public class ExtensionMatcher implements IMdmFieldMatcher {
 
 	@Override
-	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
 		if (!(theLeftBase instanceof IBaseHasExtensions && theRightBase instanceof IBaseHasExtensions)) {
 			return false;
 		}

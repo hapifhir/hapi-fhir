@@ -44,6 +44,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3UpdateTest.class);
 
+	@AfterEach
+	public void afterEach(){
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.SEQUENTIAL_NUMERIC);
+	}
+
 	@Test
 	public void testReCreateMatchResource() {
 
