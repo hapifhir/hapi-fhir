@@ -52,7 +52,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -71,6 +70,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 		myStorageSettings.setResourceServerIdStrategy(new JpaStorageSettings().getResourceServerIdStrategy());
 		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.SEQUENTIAL_NUMERIC);
 	}
 
 
@@ -1152,6 +1152,24 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	void testCreateWithConditionalUpdate_withUuidAsServerResourceStrategyAndNoIdProvided_uuidAssignedAsResourceId() {
+		// setup
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://my-lab-system").setValue("123");
+		p.addName().setFamily("FAM");
+		String theMatchUrl = "Patient?identifier=http://my-lab-system|123";
 
+		// execute
+		String result = myPatientDao.update(p, theMatchUrl, mySrd).getId().getIdPart();
+
+		// verify
+		try {
+			UUID.fromString(result);
+		} catch (IllegalArgumentException exception){
+			fail("Result id is not a UUID. Instead, it was: " + result);
+		}
+	}
 
 }

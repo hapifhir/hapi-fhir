@@ -1894,6 +1894,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					}
 				}
 			} else {
+				// assign UUID if no id provided in the request (numeric id mode is handled in doCreateForPostOrPut)
+				if (!theResource.getIdElement().hasIdPart() && getStorageSettings().getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
+					theResource.setId(UUID.randomUUID().toString());
+					theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
+				}
 				DaoMethodOutcome outcome = doCreateForPostOrPut(theRequest, resource, theMatchUrl, false, thePerformIndexing, theRequestPartitionId, update, theTransactionDetails);
 
 				// Pre-cache the match URL
