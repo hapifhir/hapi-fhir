@@ -17,28 +17,25 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher;
+package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.searchparam.nickname.NicknameSvc;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
+import ca.uhn.fhir.jpa.nickname.NicknameSvc;
+import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Locale;
 
-public class NicknameMatcher implements IMdmStringMatcher {
+public class NicknameMatcher implements IMdmFieldMatcher {
 	private final NicknameSvc myNicknameSvc;
 
-	public NicknameMatcher() {
-		try {
-			myNicknameSvc = new NicknameSvc();
-		} catch (IOException e) {
-			throw new ConfigurationException(Msg.code(2234) + "Unable to load nicknames", e);
-		}
+	public NicknameMatcher(NicknameSvc theNicknameSvc) {
+		myNicknameSvc = theNicknameSvc;
 	}
 
-	@Override
 	public boolean matches(String theLeftString, String theRightString) {
 		String leftString = theLeftString.toLowerCase(Locale.ROOT);
 		String rightString = theRightString.toLowerCase(Locale.ROOT);
@@ -50,5 +47,16 @@ public class NicknameMatcher implements IMdmStringMatcher {
 
 		Collection<String> rightNames = myNicknameSvc.getEquivalentNames(rightString);
 		return rightNames.contains(leftString);
+	}
+
+	@Override
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
+			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.getExact());
+			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
+
+			return matches(leftString, rightString);
+		}
+		return false;
 	}
 }
