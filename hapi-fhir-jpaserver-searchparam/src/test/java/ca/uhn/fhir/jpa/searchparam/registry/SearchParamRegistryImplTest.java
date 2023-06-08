@@ -310,7 +310,7 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@Test
-	public void testRegisterListener_ResourceChangeListenerCache_LoadSynchronousUpTo() {
+	public void testRegisterListener_LoadSynchronousUpToIsSetToMaxManagedParamCountInSPMapOfResourceChangeListenerCache() {
 		// Execute
 		mySearchParamRegistry.registerListener();
 

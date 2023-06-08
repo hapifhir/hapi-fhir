@@ -247,7 +247,7 @@ class BaseHapiFhirResourceDaoTest {
 	}
 
 	@Test
-	void TestSearchForIds_DoesNotSetLoadSynchronousUpTo_WhenAlreadyExists(){
+	void TestSearchForIds_DoesNotSetLoadSynchronousUpToWhenItAlreadyExists(){
 		// setup
 		SearchParameterMap mySearchParamMap = Mockito.mock(SearchParameterMap.class);
 		RequestDetails myRequestDetails = Mockito.mock(RequestDetails.class);
