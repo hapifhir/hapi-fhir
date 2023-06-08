@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -22,7 +21,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.apache.derby.impl.store.access.btree.index.B2INoLocking;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -54,7 +52,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -1155,7 +1152,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testUpdateWithUuidServerResourceStrategy_NonExistingResourceWithoutProvidedId() {
+	void testCreateWithConditionalUpdate_withUuidAsServerResourceStrategyAndNoIdProvided_uuidAssignedAsResourceId() {
 		// setup
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		Patient p = new Patient();
@@ -1164,19 +1161,14 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		String theMatchUrl = "Patient?identifier=http://my-lab-system|123";
 
 		// execute
-		String result = myPatientDao
-			.update(p, theMatchUrl, mySrd)
-			.getId().getValueAsString()
-			.replace("Patient/", "")
-			.replace("/_history/1", "");
+		String result = myPatientDao.update(p, theMatchUrl, mySrd).getId().getIdPart();
 
 		// verify
 		try {
 			UUID.fromString(result);
 		} catch (IllegalArgumentException exception){
-			fail("Result id is not a UUID");
+			fail("Result id is not a UUID. Instead, it was: " + result);
 		}
 	}
-
 
 }

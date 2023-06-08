@@ -829,7 +829,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	void testUpdateWithUuidServerResourceStrategy_NonExistingResourceWithoutProvidedId() {
+	void testCreateWithConditionalUpdate_withUuidAsServerResourceStrategyAndNoIdProvided_uuidAssignedAsResourceId() {
 		// setup
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		Patient p = new Patient();
@@ -838,17 +838,13 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		String theMatchUrl = "Patient?identifier=http://my-lab-system|123";
 
 		// execute
-		String result = myPatientDao
-			.update(p, theMatchUrl, mySrd)
-			.getId().getValueAsString()
-			.replace("Patient/", "")
-			.replace("/_history/1", "");
+		String result = myPatientDao.update(p, theMatchUrl, mySrd).getId().getIdPart();
 
 		// verify
 		try {
 			UUID.fromString(result);
 		} catch (IllegalArgumentException exception){
-			fail("Result id is not a UUID");
+			fail("Result id is not a UUID. Instead, it was: " + result);
 		}
 	}
 
