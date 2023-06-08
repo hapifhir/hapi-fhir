@@ -3,8 +3,14 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.util.FhirTerser;
+import java.util.List;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,8 +131,14 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 			return false;
 		}
 		IBaseResource codeSystem = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
+
 		if (codeSystem != null) {
-			return false;
+			FhirTerser fhirTerser = new FhirTerser(myCtx);
+			PrimitiveType<String> content = (PrimitiveType<String>) fhirTerser.getValues(codeSystem, "content").get(0);
+			if  (!content.getValue().equals(CodeSystem.CodeSystemContentMode.NOTPRESENT) &&
+					!content.getValue().equals(CodeSystem.CodeSystemContentMode.EXAMPLE)) {
+				return false;
+			}
 		}
 		return true;
 	}
