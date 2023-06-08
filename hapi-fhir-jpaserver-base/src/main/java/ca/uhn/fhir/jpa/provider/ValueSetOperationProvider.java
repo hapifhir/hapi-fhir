@@ -55,6 +55,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import javax.servlet.http.HttpServletRequest;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -153,9 +154,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 					}
 				}
 
-				Optional<CodeValidationResult> resultOptional =
-					validateCodeWithTerminologyService(theSystemString, theCodeString, theDisplayString, theValueSetUrlString);
-				result = resultOptional.isEmpty() ? generateUnableToValidateResult(theSystemString, theCodeString, theValueSetUrlString) : resultOptional.get();
+				result = validateCodeWithTerminologyService(theSystemString, theCodeString, theDisplayString, theValueSetUrlString)
+					.orElseGet(supplyUnableToValidateResult(theSystemString, theCodeString, theValueSetUrlString));
 			} else {
 				// Otherwise, use the local DAO layer to validate the code
 				IFhirResourceDaoValueSet<IBaseResource> dao = getDao();
@@ -187,8 +187,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			new ConceptValidationOptions(), theSystem, theCode, theDisplay, theValueSetUrl));
 	}
 
-	private CodeValidationResult generateUnableToValidateResult(String theSystem, String theCode, String theValueSetUrl) {
-		return new CodeValidationResult().setMessage("Validator is unable to provide validation for " +
+	private Supplier<CodeValidationResult> supplyUnableToValidateResult(String theSystem, String theCode, String theValueSetUrl) {
+		return () -> new CodeValidationResult().setMessage("Validator is unable to provide validation for " +
 			theCode + "#" + theSystem + " - Unknown or unusable ValueSet[" + theValueSetUrl + "]");
 	}
 
