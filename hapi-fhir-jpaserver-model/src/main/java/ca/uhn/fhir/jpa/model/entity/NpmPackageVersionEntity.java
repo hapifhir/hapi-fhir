@@ -48,7 +48,9 @@ import java.util.List;
 @Entity()
 @Table(name = "NPM_PACKAGE_VER", uniqueConstraints = {
 }, indexes = {
-	@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true)
+	@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true),
+	@Index(name = "FK_NPM_PKV_PKG", columnList = "PACKAGE_PID"),
+	@Index(name = "FK_NPM_PKV_RESID", columnList = "BINARY_RES_ID")
 })
 public class NpmPackageVersionEntity {
 

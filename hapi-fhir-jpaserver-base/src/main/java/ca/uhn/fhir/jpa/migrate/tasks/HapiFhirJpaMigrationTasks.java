@@ -169,6 +169,89 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20230524.2", "WARNING_MSG")
 			.nullable()
 			.type(ColumnTypeEnum.CLOB);
+
+		// adding indexes to foreign keys
+		// this makes our table scans more efficient,
+		// but it also makes us more stable
+		// Oracle does not like unindexed foreign keys
+		version.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20230609.1", "IDX_RESVERPROV_RES_VER_PID")
+			.unique(false)
+			.withColumns("RES_VER_PID");
+
+		version.onTable("HFJ_HISTORY_TAG")
+			.addIndex("20230609.1", "IDX_RESHISTTAG_TAGID")
+			.unique(true)
+			.withColumns("TAG_ID");
+
+		version.onTable("NPM_PACKAGE_VER")
+			.addIndex("20230609.1", "FK_NPM_PKV_PKG")
+			.unique(false)
+			.withColumns("PACKAGE_PID");
+		version.onTable("NPM_PACKAGE_VER")
+			.addIndex("20230609.1", "FK_NPM_PKV_RESID")
+			.unique(false)
+			.withColumns("BINARY_RES_ID");
+
+		version.onTable("NPM_PACKAGE_VER_RES")
+				.addIndex("20230609.1", "FK_NPM_PACKVERRES_PACKVER")
+					.unique(false)
+						.withColumns("PACKVER_PID");
+		version.onTable("NPM_PACKAGE_VER_RES")
+				.addIndex("20230609.1", "FK_NPM_PKVR_RESID")
+					.unique(false)
+						.withColumns("BINARY_RES_ID");
+
+		version.onTable("MPI_LINK")
+			.addIndex("20230609.1", "FK_EMPI_LINK_TARGET")
+			.unique(true)
+			.withColumns("TARGET_PID");
+
+		version.onTable("TRM_CODESYSTEM")
+				.addIndex("20230609.1", "FK_TRMCODESYSTEM_RES")
+					.unique(false)
+						.withColumns("RES_ID");
+		version.onTable("TRM_CODESYSTEM")
+				.addIndex("20230609.1", "FK_TRMCODESYSTEM_CURVER")
+					.unique(false)
+						.withColumns("CURRENT_VERSION_PID");
+
+		version.onTable("TRM_CODESYSTEM_VER")
+				.addIndex("20230609.1", "FK_CODESYSVER_RES_ID")
+					.unique(false)
+						.withColumns("RES_ID");
+		version.onTable("TRM_CODESYSTEM_VER")
+				.addIndex("20230609.1", "FK_CODESYSVER_CS_ID")
+					.unique(true)
+						.withColumns("CODESYSTEM_PID");
+
+
+		version.onTable("TRM_VALUESET")
+			.addIndex("20230609.1", "FK_TRMVALUESET_RES")
+			.unique(false)
+			.withColumns("RES_ID");
+
+		version.onTable("TERM_CONCEPT")
+			.addIndex("20230609.1", "FK_CONCEPT_PID_CS_PID")
+			.unique(false)
+			.withColumns("CODESYSTEM_PID");
+
+		version.onTable("TERM_CONCEPT_MAP")
+			.addIndex("20230609.1", "FK_TRMCONCEPTMAP_RES")
+			.unique(false)
+			.withColumns("RES_ID");
+
+		version.onTable("TRM_CONCEPT_DESIG")
+			.addIndex("20230609.1", "FK_CONCEPTDESIG_CSV")
+			.unique(false)
+			.withColumns("CS_VER_PID");
+
+		version.onTable("TRM_CONCEPT_MAP_GROUP")
+			.addIndex("20230609.1", "FK_TCMGROUP_CONCEPTMAP")
+			.unique(false)
+			.withColumns("CONCEPT_MAP_PID");
+
+
 	}
 
 	protected void init660() {
