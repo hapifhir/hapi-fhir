@@ -985,6 +985,34 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	}
 
 	@Test
+	public void testExpandValueSet_withWrongVersionOfCodeSystem_throwsException() throws IOException {
+		loadAndPersistCodeSystem();
+
+		// Store Value Set
+		ValueSet vs = new ValueSet();
+		vs.setId("ValueSet/vs-with-invalid-cs");
+		vs.setUrl("http://vs-with-invalid-cs");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://acme.org").setVersion("3.6.0");
+		myValueSetDao.update(vs);
+
+		// In memory expansion
+		try {
+			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+			fail();
+		} catch (InternalErrorException e) {
+			//TODO: Check exception message
+		}
+
+		// Perform Pre-Expansion
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Make sure it's done and failed
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findByUrl("http://vs-with-invalid-cs").orElseThrow(() -> new IllegalStateException()).getExpansionStatus()));
+	}
+
+	@Test
 	public void testExpandTermValueSetAndChildrenWithOffsetAndCountWithClientAssignedId() throws Exception {
 		myStorageSettings.setPreExpandValueSets(true);
 
