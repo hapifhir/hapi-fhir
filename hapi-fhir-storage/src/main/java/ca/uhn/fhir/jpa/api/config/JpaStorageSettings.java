@@ -321,6 +321,8 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public JpaStorageSettings() {
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
+//				setReindexThreadCount(1);
+//		setExpungeThreadCount(1);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
 		setBundleTypesAllowedForStorage(DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE);

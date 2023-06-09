@@ -41,6 +41,8 @@ import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
+import ca.uhn.fhir.jpa.bulk.mdm.IMdmClearHelperSvc;
+import ca.uhn.fhir.jpa.bulk.mdm.MDMClearHelperSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
@@ -830,5 +832,10 @@ public class JpaConfig {
 	@Bean
 	public ISearchUrlJobMaintenanceSvc searchUrlJobMaintenanceSvc(ResourceSearchUrlSvc theResourceSearchUrlSvc){
 		return new SearchUrlJobMaintenanceSvcImpl(theResourceSearchUrlSvc);
+	}
+
+	@Bean
+	public IMdmClearHelperSvc helperSvc() {
+		return new MDMClearHelperSvcImpl();
 	}
 }

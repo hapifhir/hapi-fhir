@@ -91,6 +91,9 @@ public class JpaModelScannerAndVerifier {
 		"FK_SEARCHINC_SEARCH"
 	);
 	private static Set<String> ourReservedWords;
+
+
+
 	public JpaModelScannerAndVerifier() {
 		super();
 	}
@@ -264,7 +267,12 @@ public class JpaModelScannerAndVerifier {
 		scanClassOrSuperclass(theNames, theClazz.getSuperclass(), true, columnNameToLength);
 	}
 
-	private void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass, boolean theIsView) {
+	private void scan(
+		AnnotatedElement theAnnotatedElement,
+		Set<String> theNames,
+		boolean theIsSuperClass,
+		boolean theIsView
+	) {
 		Table table = theAnnotatedElement.getAnnotation(Table.class);
 		if (table != null) {
 

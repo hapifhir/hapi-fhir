@@ -81,7 +81,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({MdmCommonConfig.class, MdmBatch2Config.class})
+@Import({
+	MdmCommonConfig.class,
+	MdmBatch2Config.class
+})
 public class MdmConsumerConfig {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 

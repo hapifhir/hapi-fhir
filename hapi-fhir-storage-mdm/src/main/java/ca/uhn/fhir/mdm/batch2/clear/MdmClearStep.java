@@ -30,7 +30,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.bulk.mdm.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -67,6 +69,9 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 	FhirContext myFhirContext;
 	@Autowired
 	IMdmLinkDao myMdmLinkSvc;
+
+	@Autowired
+	IMdmClearHelperSvc myIMdmClearHelperSvc;
 
 	@Nonnull
 	@Override
@@ -126,10 +131,16 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			StopWatch sw = new StopWatch();
 
 			myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(thePersistentIds);
-			ourLog.trace("Deleted {} mdm links in {}", thePersistentIds.size(), StopWatch.formatMillis(sw.getMillis()));
+			ourLog.info("Deleted {} mdm links in {}", thePersistentIds.size(), StopWatch.formatMillis(sw.getMillis()));
 
 			// We know the list is not empty, and that all resource types are the same, so just use the first one
 			String resourceName  = myData.getResourceType(0);
+//			IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeService();
+//			deleteExpungeSvc.deleteExpunge(
+//				thePersistentIds,
+//				false,
+//				null
+//			);
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceName);
 
 			DeleteConflictList conflicts = new DeleteConflictList();

@@ -49,10 +49,10 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult = myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids, theCascade, theCascadeMaxRounds);
 		List<String> sqlList = sqlResult.getSqlStatements();
 
-		ourLog.debug("Executing {} delete expunge sql commands", sqlList.size());
+		ourLog.info("Executing {} delete expunge sql commands", sqlList.size());
 		long totalDeleted = 0;
 		for (String sql : sqlList) {
-			ourLog.trace("Executing sql " + sql);
+			ourLog.info("Executing sql " + sql);
 			totalDeleted += myEntityManager.createNativeQuery(sql).executeUpdate();
 		}
 
