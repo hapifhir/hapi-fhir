@@ -41,7 +41,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-//@ExtendWith(MockitoExtension.class)
 public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	public static final String ORGANIZATION_DUMMY = "Organization/dummy";
 	protected Practitioner myPractitioner;
