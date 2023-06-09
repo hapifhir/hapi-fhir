@@ -14,7 +14,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
@@ -198,70 +197,6 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 				.or(containsString(Msg.code(488) + "Failed to parse match URL")));// Sync case
 		}
 	}
-
-
-	@ParameterizedTest
-	@MethodSource("requestTypes")
-	public void testUpdatingResource_WithoutMdmSubmit_ThrowsException(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
-		assertLinkCount(3);
-		StringType criteria = null;
-
-//		myPatient.setGender(Enumerations.AdministrativeGender.FEMALE);
-		myPatient.setId("ID.PAUL.456.2");
-		createPatientAndUpdateLinks(myPatient);
-
-		assertLinkCount(4);
-
-		clearMdmLinks();
-
-		myPatient.setGender(Enumerations.AdministrativeGender.MALE);
-		updatePatientAndUpdateLinks(myPatient);
-		assertLinkCount(1);
-		myPatient.getNameFirstRep().addGiven("Paula");
-		updatePatientAndUpdateLinks(myPatient);
-		assertLinkCount(1);
-
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchOnAllSourceResources(new StringType("Medication"), criteria, null, theSyncOrAsyncRequest));
-
-
-
-//		try (MockedStatic<Logs> logs = mockStatic(Logs.class)) {
-//			logs.when(Logs::getMdmTroubleshootingLog)
-//				.thenReturn(mockLogger);
-//		}
-//
-//		ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
-//		// first warning log
-//		verify(mockLogger)
-//			.error(logCaptor.capture());
-//		assertEquals(1, logCaptor.getAllValues().size());
-//		List<String> values = logCaptor.getAllValues();
-//		assertTrue(values.get(0).contains("No keyset provided"));
-
-	}
-
-//	@ParameterizedTest
-//	@MethodSource("requestTypes")
-//	public void testUpdatingResource_WithoutMdmSubmit_ThrowsException(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
-//		assertLinkCount(3);
-//		StringType criteria = null;
-//		clearMdmLinks();
-//		try {
-//			myPatient.setGender(Enumerations.AdministrativeGender.FEMALE);
-//			updatePatientAndUpdateLinks(myPatient);
-//			fail();
-//		} catch(IllegalStateException e) {
-//			//todo jdjd change code number
-//			String expectedMsg = "HAPI-0123: Existing resource cannot be updated: $mdm-submit should be performed after a $mdm-clear operation.";
-//			assertEquals(expectedMsg, e.getMessage());
-//		}
-//		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPatientType(criteria, null, theSyncOrAsyncRequest));
-//		assertLinkCount(1);
-//		updatePatientAndUpdateLinks(myPatient);
-//		Patient readPatient = myPatientDao.read(myPatient.getIdElement(), myRequestDetails);
-//		assertEquals(Enumerations.AdministrativeGender.FEMALE, readPatient.getGender());
-//		assertEquals(NAME_GIVEN_PAUL, readPatient.getNameFirstRep().getGiven().get(0).toString());
-//	}
 
 	@Test
 	public void testClearAndUpdateResource_WithoutMdmSubmit_LogsError() {
