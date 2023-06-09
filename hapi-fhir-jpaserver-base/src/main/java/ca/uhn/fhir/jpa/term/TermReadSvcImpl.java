@@ -878,6 +878,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			? theCs.getCurrentVersion()
 			: myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCs.getPid(), includeOrExcludeVersion);
 
+		isNotNullOrThrowInternalErrorExceptionForNotFoundCodeSystem(termCodeSystemVersion, theCs.getCodeSystemUri(), includeOrExcludeVersion);
+
 		/*
 		 * If FullText searching is not enabled, we can handle only basic expansions
 		 * since we're going to do it without the database.
@@ -1482,6 +1484,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private void throwInvalidRequestForValueOnProperty(String theValue, String theProperty) {
 		throw new InvalidRequestException(Msg.code(898) + "Don't know how to handle value=" + theValue + " on property " + theProperty);
+	}
+
+	private void isNotNullOrThrowInternalErrorExceptionForNotFoundCodeSystem(TermCodeSystemVersion theTermCodeSystemVersion,
+																									 String theCodeSystemUri, String theCodeSystemVersion) {
+		if (theTermCodeSystemVersion == null) {
+			throw new InternalErrorException((Msg.code(2361) + "Unable to expand ValueSet because CodeSystem could not be found: " + theCodeSystemUri + "|" + theCodeSystemVersion));
+		}
 	}
 
 	private void expandWithoutHibernateSearch(IValueSetConceptAccumulator theValueSetCodeAccumulator, TermCodeSystemVersion theVersion, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, String theSystem, boolean theAdd) {

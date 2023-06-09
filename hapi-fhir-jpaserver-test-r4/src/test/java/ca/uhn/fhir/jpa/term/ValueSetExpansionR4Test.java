@@ -1001,7 +1001,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 			fail();
 		} catch (InternalErrorException e) {
-			//TODO: Check exception message
+			assertEquals(Msg.code(2361) + "Unable to expand ValueSet because CodeSystem could not be found: http://acme.org|3.6.0", e.getMessage());
 		}
 
 		// Perform Pre-Expansion
@@ -1009,7 +1009,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		// Make sure it's done and failed
-		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findByUrl("http://vs-with-invalid-cs").orElseThrow(() -> new IllegalStateException()).getExpansionStatus()));
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND,
+			myTermValueSetDao.findByUrl("http://vs-with-invalid-cs").orElseThrow(() -> new IllegalStateException()).getExpansionStatus()));
 	}
 
 	@Test
