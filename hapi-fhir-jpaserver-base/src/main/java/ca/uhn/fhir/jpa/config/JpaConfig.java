@@ -150,7 +150,6 @@ import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
-import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
@@ -201,7 +200,6 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.Date;
 
 @Configuration
@@ -773,12 +771,6 @@ public class JpaConfig {
 	@Bean
 	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport(FhirContext theFhirContext) {
 		return new UnknownCodeSystemWarningValidationSupport(theFhirContext);
-	}
-
-	@Lazy
-	@Bean
-	public NicknameInterceptor nicknameInterceptor() throws IOException {
-		return new NicknameInterceptor();
 	}
 
 	@Bean

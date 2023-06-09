@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -52,6 +53,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -128,7 +132,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		RequestDetails theRequestDetails
 	) {
 
-		IValidationSupport.CodeValidationResult result;
+		CodeValidationResult result;
 		startRequest(theServletRequest);
 		try {
 			// If a Remote Terminology Server has been configured, use it
@@ -138,8 +142,20 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 				String theDisplayString = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.getValueAsString() : null;
 				String theValueSetUrlString = (theValueSetUrl != null && theValueSetUrl.hasValue()) ?
 					theValueSetUrl.getValueAsString() : null;
-				result = myValidationSupportChain.validateCode(new ValidationSupportContext(myValidationSupportChain),
-					new ConceptValidationOptions(), theSystemString, theCodeString, theDisplayString, theValueSetUrlString);
+				if (theCoding != null) {
+					if (isNotBlank(theCoding.getSystem())) {
+						if (theSystemString != null && !theSystemString.equalsIgnoreCase(theCoding.getSystem())) {
+							throw new InvalidRequestException(Msg.code(2352) + "Coding.system '" + theCoding.getSystem() +
+								"' does not equal param system '" + theSystemString + "'. Unable to validate-code.");
+						}
+						theSystemString = theCoding.getSystem();
+						theCodeString = theCoding.getCode();
+						theDisplayString = theCoding.getDisplay();
+					}
+				}
+
+				result = validateCodeWithTerminologyService(theSystemString, theCodeString, theDisplayString, theValueSetUrlString)
+					.orElseGet(supplyUnableToValidateResult(theSystemString, theCodeString, theValueSetUrlString));
 			} else {
 				// Otherwise, use the local DAO layer to validate the code
 				IFhirResourceDaoValueSet<IBaseResource> dao = getDao();
@@ -163,6 +179,17 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	private Optional<CodeValidationResult> validateCodeWithTerminologyService(String theSystem, String theCode,
+																									  String theDisplay, String theValueSetUrl) {
+		return Optional.ofNullable(myValidationSupportChain.validateCode(new ValidationSupportContext(myValidationSupportChain),
+			new ConceptValidationOptions(), theSystem, theCode, theDisplay, theValueSetUrl));
+	}
+
+	private Supplier<CodeValidationResult> supplyUnableToValidateResult(String theSystem, String theCode, String theValueSetUrl) {
+		return () -> new CodeValidationResult().setMessage("Validator is unable to provide validation for " +
+			theCode + "#" + theSystem + " - Unknown or unusable ValueSet[" + theValueSetUrl + "]");
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_INVALIDATE_EXPANSION, idempotent = false, typeName = "ValueSet", returnParameters = {
@@ -228,7 +255,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		return options;
 	}
 
-	public static IBaseParameters toValidateCodeResult(FhirContext theContext, IValidationSupport.CodeValidationResult theResult) {
+	public static IBaseParameters toValidateCodeResult(FhirContext theContext, CodeValidationResult theResult) {
 		IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 
 		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", theResult.isOk());
