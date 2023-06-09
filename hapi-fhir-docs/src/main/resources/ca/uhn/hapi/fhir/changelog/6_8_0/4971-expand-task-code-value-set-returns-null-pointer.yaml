@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4971
+title: "Previously, performing a $expand operation for task-code ValueSet after seeding base validation resources returned 500. This problem has been fixed."
