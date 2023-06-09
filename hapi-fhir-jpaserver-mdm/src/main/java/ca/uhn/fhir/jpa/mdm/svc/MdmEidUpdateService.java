@@ -126,6 +126,10 @@ public class MdmEidUpdateService {
 		myMdmLinkSvc.deleteLink(theOldGoldenResource, theResource, theMdmTransactionContext);
 		myMdmLinkSvc.updateLink(theNewGoldenResource, theResource, theMatchResult, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
+		if (theOldGoldenResource == null) {
+			ourLog.error("Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.");
+			return;
+		}
 		myMdmLinkSvc.updateLink(theNewGoldenResource, theOldGoldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 
