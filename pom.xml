@@ -110,6 +110,7 @@
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-sql-migrate</module>
 		<module>hapi-fhir-jpaserver-ips</module>
+		<module>hapi-fhir-jpaserver-fql</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
 		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
@@ -122,7 +123,7 @@
 		<module>tests/hapi-fhir-base-test-mindeps-server</module>
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
-    </modules>
+	</modules>
 
 	<dependencies>
 		<dependency>

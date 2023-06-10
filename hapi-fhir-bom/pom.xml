@@ -86,6 +86,11 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-fql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-jpaserver-mdm</artifactId>
 				<version>${project.version}</version>
 			</dependency>
