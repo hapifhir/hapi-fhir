@@ -30,7 +30,7 @@ import java.util.Map;
 
 /**
  * Implementations of this interface represent a response back to the client from the server. It is
- * conceptually similar to {@link javax.servlet.http.HttpServletResponse} but intended to be agnostic
+ * conceptually similar to {@link jakarta.servlet.http.HttpServletResponse} but intended to be agnostic
  * of the server framework being used.
  * <p>
  * This class is a bit of an awkward abstraction given the two styles of servers it supports.

@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.reindex.Batch2DaoSvcImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class Batch2SupportConfig {
 

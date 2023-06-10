@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.test;
 
-//import javax.persistence.EntityManagerFactory;
+//import jakarta.persistence.EntityManagerFactory;
 
 //import org.hibernate.jpa.HibernatePersistenceProvider;
 

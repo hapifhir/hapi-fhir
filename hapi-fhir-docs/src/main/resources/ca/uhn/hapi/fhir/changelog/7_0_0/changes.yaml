@@ -1,0 +1,19 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+        <li>Spring Framework (JPA): 5.3.27 -&gt; 6.0.9</li>
+        <li>Spring Data BOM (JPA): 2021.2.2 -&gt; 2023.0.0</li>
+        <li>Hibernate (JPA): 5.6.15.Final -&gt; 6.2.4.Final</li>
+        <li>Hibernate Validator (JPA): 6.1.5.Final -&gt; 8.0.0.Final</li>
+        <li>Spring Boot (Boot+Starter): 2.7.12 -&gt; 3.1.0</li>
+        <li>Jetty (CLI): 10.0.14 -&gt; 11.0.15</li>
+    </ul>"
+- item:
+     type: "change"
+     title: "HAPI FHIR JPA now requires PostgreSQL 10+. Previously Postgres 9.4 
+             was supported but this version has been dropped."
+
+FIXME: Make sure to test RES_TEXT_VC types on each DB

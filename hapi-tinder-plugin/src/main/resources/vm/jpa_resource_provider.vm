@@ -40,8 +40,8 @@ public class ${className}ResourceProvider extends
 
 	@Search(allowUnknownParams=true)
 	public ca.uhn.fhir.rest.api.server.IBundleProvider search(
-			javax.servlet.http.HttpServletRequest theServletRequest,
-			javax.servlet.http.HttpServletResponse theServletResponse,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletResponse theServletResponse,
 
 			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
 

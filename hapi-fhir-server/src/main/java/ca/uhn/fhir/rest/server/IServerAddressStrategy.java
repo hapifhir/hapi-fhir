@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Provides the server base for a given incoming request. This can be used to account for

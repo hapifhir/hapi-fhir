@@ -39,7 +39,7 @@
 					<artifactId>woodstox-core</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>javax.servlet</groupId>
+					<groupId>jakarta.servlet</groupId>
 					<artifactId>servlet-api</artifactId>
 				</exclusion>
 			</exclusions>

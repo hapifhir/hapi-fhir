@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server.servlet;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

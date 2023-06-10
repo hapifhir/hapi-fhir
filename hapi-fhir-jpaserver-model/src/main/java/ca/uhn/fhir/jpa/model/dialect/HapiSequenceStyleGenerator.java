@@ -29,7 +29,9 @@ import org.hibernate.boot.model.relational.SqlStringGenerationContext;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.BulkInsertionCapableIdentifierGenerator;
 import org.hibernate.id.IdentifierGenerator;
+import org.hibernate.id.OptimizableGenerator;
 import org.hibernate.id.PersistentIdentifierGenerator;
+import org.hibernate.id.enhanced.Optimizer;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.id.enhanced.StandardOptimizerDescriptor;
 import org.hibernate.service.ServiceRegistry;
@@ -86,9 +88,9 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 		Validate.notBlank(myGeneratorName, "No generator name found");
 
 		Properties props = new Properties(theParams);
-		props.put(SequenceStyleGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
-		props.put(SequenceStyleGenerator.INITIAL_PARAM, "1");
-		props.put(SequenceStyleGenerator.INCREMENT_PARAM, "50");
+		props.put(OptimizableGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
+		props.put(OptimizableGenerator.INITIAL_PARAM, "1");
+		props.put(OptimizableGenerator.INCREMENT_PARAM, "50");
 
 		myGen.configure(theType, props, theServiceRegistry);
 
@@ -110,4 +112,8 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 		return myGen.supportsJdbcBatchInserts();
 	}
 
+	@Override
+	public Optimizer getOptimizer() {
+		return myGen.getOptimizer();
+	}
 }

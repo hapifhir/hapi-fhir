@@ -19,11 +19,9 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.base.Strings;
 import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.query.criteria.LiteralHandlingMode;
+import org.hibernate.query.criteria.ValueHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.orm.hibernate5.SpringBeanContainer;
@@ -52,8 +50,8 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 
 		// SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
-		if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {
-			retVal.put(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE, LiteralHandlingMode.BIND);
+		if (!retVal.containsKey(AvailableSettings.CRITERIA_VALUE_HANDLING_MODE)) {
+			retVal.put(AvailableSettings.CRITERIA_VALUE_HANDLING_MODE, ValueHandlingMode.BIND);
 		}
 
 		if (!retVal.containsKey(AvailableSettings.CONNECTION_HANDLING)) {

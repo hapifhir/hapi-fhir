@@ -38,6 +38,13 @@
 			</exclusions>
 		</dependency>
 
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+
 		<!--
 		Test dependencies on other optional parts of HAPI 
 		-->
@@ -65,17 +72,6 @@
 			<optional>true</optional>
 		</dependency>
 		
-		<!-- 
-		The JPA project uses a newer API but we'll try to hold to this version
-		as much as possible. See #283.
-		-->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
@@ -220,8 +216,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>javax.activation-api</artifactId>
+			<groupId>jakarta.activation</groupId>
+			<artifactId>jakarta.activation-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -287,7 +283,7 @@
 						</Fragment-Host>
 						-->
 						<Import-Package>
-							javax.servlet*;resolution:=optional,
+							jakarta.servlet*;resolution:=optional,
 							*
 						</Import-Package>
 					</instructions>

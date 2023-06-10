@@ -35,7 +35,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.jboss.logging.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Set;

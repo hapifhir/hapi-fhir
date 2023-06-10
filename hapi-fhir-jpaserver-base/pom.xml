@@ -258,8 +258,8 @@
 		Dependencies that need to be added since JDK9
 		-->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -347,7 +347,7 @@
 			<artifactId>hibernate-search-backend-elasticsearch-aws</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
+			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-envers</artifactId>
 		</dependency>
 		<dependency>
@@ -481,12 +481,12 @@
 						<version>${project.version}</version>
 					</dependency>
 					<dependency>
-						<groupId>org.hibernate</groupId>
+						<groupId>org.hibernate.orm</groupId>
 						<artifactId>hibernate-core</artifactId>
 						<version>${hibernate_version}</version>
 					</dependency>
 					<dependency>
-						<groupId>org.hibernate</groupId>
+						<groupId>org.hibernate.orm</groupId>
 						<artifactId>hibernate-envers</artifactId>
 						<!-- N.B. Maven reacts badly if we omit the version for plugin dependencies, despite being defined in the parent pom's dependencyManagement section -->
 						<version>${hibernate_version}</version>

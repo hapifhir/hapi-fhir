@@ -30,7 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;

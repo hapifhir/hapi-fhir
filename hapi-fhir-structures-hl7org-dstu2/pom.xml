@@ -32,6 +32,13 @@
 			<version>${fhir_core_version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+
 		<!--
 		Test dependencies on other optional parts of HAPI 
 		-->
@@ -56,17 +63,6 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
 			<version>${project.version}</version>
-			<optional>true</optional>
-		</dependency>
-
-		<!-- 
-		The JPA project uses a newer API but we'll try to hold to this version
-		as much as possible. See #283.
-		-->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -163,8 +159,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>javax.activation-api</artifactId>
+			<groupId>jakarta.activation</groupId>
+			<artifactId>jakarta.activation-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -298,7 +294,7 @@
 						</Fragment-Host>
 						-->
 						<Import-Package>
-							javax.servlet*;resolution:=optional,
+							jakarta.servlet*;resolution:=optional,
 							*
 						</Import-Package>
 					</instructions>

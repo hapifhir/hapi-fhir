@@ -51,9 +51,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;

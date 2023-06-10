@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 

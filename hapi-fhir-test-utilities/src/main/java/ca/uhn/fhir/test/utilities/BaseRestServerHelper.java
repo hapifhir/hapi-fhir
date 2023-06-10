@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 import java.security.KeyStore;
 import java.util.List;
 

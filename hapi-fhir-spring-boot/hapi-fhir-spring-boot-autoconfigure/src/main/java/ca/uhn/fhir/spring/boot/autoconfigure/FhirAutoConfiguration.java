@@ -74,8 +74,8 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.EntityManagerFactory;
-import javax.servlet.ServletException;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.servlet.ServletException;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
