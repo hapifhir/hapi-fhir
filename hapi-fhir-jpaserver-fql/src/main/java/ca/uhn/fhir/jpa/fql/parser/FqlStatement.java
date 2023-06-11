@@ -10,6 +10,7 @@ public class FqlStatement {
 	private final List<WhereClause> myWhereClauses = new ArrayList<>();
 	private final List<WhereClause> mySearchClauses = new ArrayList<>();
 	private String myFromResourceName;
+	private Integer myLimit;
 
 	public List<SelectClause> getSelectClauses() {
 		return mySelectClauses;
@@ -26,6 +27,7 @@ public class FqlStatement {
 	public SelectClause addSelectClause(String theClause) {
 		SelectClause clause = new SelectClause();
 		clause.setClause(theClause);
+		clause.setAlias(theClause);
 		mySelectClauses.add(clause);
 		return clause;
 	}
@@ -50,6 +52,15 @@ public class FqlStatement {
 		return mySearchClauses;
 	}
 
+	@Nullable
+	public Integer getLimit() {
+		return myLimit;
+	}
+
+	public void setLimit(Integer theLimit) {
+		myLimit = theLimit;
+	}
+
 	public enum WhereClauseOperator {
 		EQUALS,
 		IN
@@ -57,15 +68,13 @@ public class FqlStatement {
 
 	public static class SelectClause {
 		private String myClause;
-		@Nullable
 		private String myAlias;
 
-		@Nullable
 		public String getAlias() {
 			return myAlias;
 		}
 
-		public void setAlias(@Nullable String theAlias) {
+		public void setAlias(String theAlias) {
 			myAlias = theAlias;
 		}
 

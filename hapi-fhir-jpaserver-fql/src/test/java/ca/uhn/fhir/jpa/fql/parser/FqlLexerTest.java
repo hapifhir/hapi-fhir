@@ -7,7 +7,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
-public class LexerTest {
+public class FqlLexerTest {
 
 	@Test
 	public void testSimpleStatement() {
@@ -17,7 +17,7 @@ public class LexerTest {
 					   name.given[0],
 					   name.family
 			""";
-		List<String> allTokens = new Lexer(input).allTokens();
+		List<String> allTokens = new FqlLexer(input).allTokens();
 		assertThat(allTokens, contains(
 			"from", "Patient", "select", "name.given[0]", ",", "name.family"
 		));
@@ -34,7 +34,7 @@ public class LexerTest {
 			  name.given[0],\s
 			  name.family
 			  """;
-		List<String> allTokens = new Lexer(input).allTokens();
+		List<String> allTokens = new FqlLexer(input).allTokens();
 		assertThat(allTokens, contains(
 			"from", "Patient", "where",
 			"name.given", "=", "'Foo ' Chalmers'",
@@ -53,7 +53,7 @@ public class LexerTest {
 			    Name: name,
 			    URL: url
 			""";
-		List<String> allTokens = new Lexer(input).allTokens();
+		List<String> allTokens = new FqlLexer(input).allTokens();
 		assertThat(allTokens, contains(
 			"from", "StructureDefinition", "where",
 			"url", "in", "(", "'foo'", "|", "'bar'", ")",

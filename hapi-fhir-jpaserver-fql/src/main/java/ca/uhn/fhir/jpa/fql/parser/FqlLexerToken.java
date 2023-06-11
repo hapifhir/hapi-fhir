@@ -1,21 +1,19 @@
 package ca.uhn.fhir.jpa.fql.parser;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.annotation.Nonnull;
 import java.util.Locale;
 
-import static org.apache.commons.lang3.StringUtils.endsWith;
-import static org.apache.commons.lang3.StringUtils.startsWith;
-
-class Token {
+class FqlLexerToken {
 
 	@Nonnull
 	public final String myToken;
 	private final int myLine;
 	private final int myColumn;
 
-	Token(@Nonnull String theToken, int theLine, int theColumn) {
+	FqlLexerToken(@Nonnull String theToken, int theLine, int theColumn) {
 		myToken = theToken;
 		myLine = theLine;
 		myColumn = theColumn;
@@ -55,5 +53,14 @@ class Token {
 
 	public boolean isQuotedString() {
 		return StringUtils.startsWith(myToken, "'") && StringUtils.endsWith(myToken, "'");
+	}
+
+	@Override
+	public String toString() {
+		return myToken;
+	}
+
+	public Integer asInteger() throws NumberFormatException {
+		return Integer.parseInt(getToken());
 	}
 }

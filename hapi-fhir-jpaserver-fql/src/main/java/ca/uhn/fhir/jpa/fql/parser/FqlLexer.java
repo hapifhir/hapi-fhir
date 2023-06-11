@@ -10,7 +10,7 @@ import java.util.List;
 import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Character.isWhitespace;
 
-class Lexer {
+class FqlLexer {
 
 	private final char[] myInput;
 	private final StringBuilder myBuffer = new StringBuilder();
@@ -22,7 +22,7 @@ class Lexer {
 	private int myNextTokenLine;
 	private int myNextTokenColumn;
 
-	public Lexer(String theInput) {
+	public FqlLexer(String theInput) {
 		myInput = theInput.toCharArray();
 	}
 
@@ -30,10 +30,10 @@ class Lexer {
 	 * Returns <code>null</code> when no tokens remain
 	 */
 	@Nonnull
-	public Token getNextToken() {
+	public FqlLexerToken getNextToken() {
 		lexNextToken();
 		Validate.notBlank(myNextToken, "No next token is available");
-		Token token = new Token(myNextToken, myNextTokenLine, myNextTokenColumn);
+		FqlLexerToken token = new FqlLexerToken(myNextToken, myNextTokenLine, myNextTokenColumn);
 		myNextToken = null;
 		return token;
 	}
@@ -165,7 +165,7 @@ class Lexer {
 	public List<String> allTokens() {
 		ArrayList<String> retVal = new ArrayList<>();
 		while (hasNextToken()) {
-			retVal.add(getNextToken().getToken());
+			retVal.add(getNextToken().toString());
 		}
 		return retVal;
 	}
@@ -180,12 +180,12 @@ class Lexer {
 		myNextToken = null;
 	}
 
-	public Token peekNextToken() {
+	public FqlLexerToken peekNextToken() {
 		lexNextToken();
 		if (myNextToken == null) {
 			return null;
 		}
-		return new Token(myNextToken, myNextTokenLine, myNextTokenColumn);
+		return new FqlLexerToken(myNextToken, myNextTokenLine, myNextTokenColumn);
 	}
 
 	private enum LexerState {
