@@ -83,12 +83,12 @@ public class MdmEidUpdateService {
 			IAnyResource theOldGoldenResource = updateContext.getExistingGoldenResource();
 			if (theOldGoldenResource == null) {
 				ourLog.error("Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.");
-				return;
-			}
-			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), theOldGoldenResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			} else {
+				linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), theOldGoldenResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 
-			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
-			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
+				myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+				myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
+			}
 		}
 	}
 
