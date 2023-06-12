@@ -110,15 +110,16 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toSet());
 
-		DriverTypeEnum.ConnectionProperties connectionProperties = driverType.newConnectionProperties(url, username, password);
-		HapiMigrator migrator = new HapiMigrator(myMigrationTableName, connectionProperties.getDataSource(), driverType);
+		try (DriverTypeEnum.ConnectionProperties connectionProperties = driverType.newConnectionProperties(url, username, password)) {
+			HapiMigrator migrator = new HapiMigrator(myMigrationTableName, connectionProperties.getDataSource(), driverType);
 
-		migrator.createMigrationTableIfRequired();
-		migrator.setDryRun(dryRun);
-		migrator.setNoColumnShrink(noColumnShrink);
-		String skipVersions = theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);
-		addTasks(migrator, skipVersions);
-		migrator.migrate();
+			migrator.createMigrationTableIfRequired();
+			migrator.setDryRun(dryRun);
+			migrator.setNoColumnShrink(noColumnShrink);
+			String skipVersions = theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);
+			addTasks(migrator, skipVersions);
+			migrator.migrate();
+		}
 	}
 
 	protected abstract void addTasks(HapiMigrator theMigrator, String theSkippedVersions);
