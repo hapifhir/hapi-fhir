@@ -39,9 +39,7 @@ import java.io.Serializable;
 @Table(name = "HFJ_HISTORY_TAG", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_RESHISTTAG_TAGID", columnNames = {"RES_VER_PID", "TAG_ID"}),
 }, indexes = {
-	@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID"),
-	// TODO - why doesn't this work for query? does it work in general?
-	@Index(name = "IDX_RESHISTTAG_TAGID", columnList = "TAG_ID", unique = true)
+	@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID")
 })
 public class ResourceHistoryTag extends BaseTag implements Serializable {
 

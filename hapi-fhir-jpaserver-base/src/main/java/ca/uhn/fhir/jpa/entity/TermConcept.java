@@ -77,9 +77,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 	@UniqueConstraint(name = "IDX_CONCEPT_CS_CODE", columnNames = {"CODESYSTEM_PID", "CODEVAL"})
 }, indexes = {
 	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
-	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED"),
-	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
-	@Index(name = "FK_CONCEPT_PID_CS_PID", columnList = "CODESYSTEM_PID")
+	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
 })
 public class TermConcept implements Serializable {
 	public static final int MAX_CODE_LENGTH = 500;

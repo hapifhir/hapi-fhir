@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -81,7 +80,7 @@ public class HapiSchemaMigrationTest {
 			// 3 Oracle doesn't run on everyone's machine (and is difficult to do so)
 			// 4 Postgres is generally the fastest/least terrible relational db supported
 			new HapiForeignKeyIndexHelper()
-				.ensureAllForeignKeysAreIndexed((PostgresEmbeddedDatabase) database);
+				.ensureAllForeignKeysAreIndexed(dataSource);
 		}
 	}
 

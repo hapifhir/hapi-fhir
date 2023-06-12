@@ -174,11 +174,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// this makes our table scans more efficient,
 		// but it also makes us more stable
 		// Oracle does not like unindexed foreign keys
-		version.onTable("HFJ_HISTORY_TAG")
-			.addIndex("20230609.2", "IDX_RESHISTTAG_TAGID")
-			.unique(true)
-			.withColumns("TAG_ID");
-
 		version.onTable("NPM_PACKAGE_VER")
 			.addIndex("20230609.3", "FK_NPM_PKV_PKG")
 			.unique(false)
@@ -221,14 +216,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("CODESYSTEM_PID");
 
 		version.onTable("TRM_CONCEPT_PC_LINK")
-				.addIndex("20230609.12", "FK_TERM_CONCEPTPC_CS")
-					.unique(false)
-						.withColumns("CODESYSTEM_PID");
+			.addIndex("20230609.12", "FK_TERM_CONCEPTPC_CS")
+			.unique(false)
+			.withColumns("CODESYSTEM_PID");
 
 		version.onTable("TRM_CONCEPT_PROPERTY")
-				.addIndex("20230609.13", "FK_CONCEPTPROP_CSV")
-					.unique(true)
-						.withColumns("CS_VER_PID");
+			.addIndex("20230609.13", "FK_CONCEPTPROP_CSV")
+			.unique(false)
+			.withColumns("CS_VER_PID");
 
 		version.onTable("TRM_VALUESET")
 			.addIndex("20230609.14", "FK_TRMVALUESET_RES")
@@ -239,11 +234,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addIndex("20230609.15", "FK_TRM_VSCD_VS_PID")
 			.unique(false)
 			.withColumns("VALUESET_PID");
-
-		version.onTable("TRM_CONCEPT")
-			.addIndex("20230609.16", "FK_CONCEPT_PID_CS_PID")
-			.unique(false)
-			.withColumns("CODESYSTEM_PID");
 
 		version.onTable("TRM_CONCEPT_MAP")
 			.addIndex("20230609.17", "FK_TRMCONCEPTMAP_RES")
