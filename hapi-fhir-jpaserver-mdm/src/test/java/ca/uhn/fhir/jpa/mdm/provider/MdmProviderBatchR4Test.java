@@ -231,6 +231,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 			myMdmProvider.mdmBatchPatientType(null , null, theSyncOrAsyncRequest);
 		});
 
+		// Then
 		updatePatientAndUpdateLinks(janePatient);
 		updatePatientAndUpdateLinks(janePatient2);
 		assertLinkCount(3);
