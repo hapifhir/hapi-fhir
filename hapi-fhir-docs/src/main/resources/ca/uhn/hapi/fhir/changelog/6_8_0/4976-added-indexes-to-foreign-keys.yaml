@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 4976
+title: "Added a test to verify that all Foreign Key constraints are explicitly
+      indexed as well.
+      Added indexes to a number of tables that declared foreign keys
+      that weren't explicitly indexed.
+      This should not only make many of these queries (including $mdm-clear operations)
+      much faster, it will prevent deadlocks in Oracle and other databases that require
+      foreign keys to be indexed.
+"
