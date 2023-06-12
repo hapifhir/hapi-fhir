@@ -5,14 +5,13 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
@@ -33,10 +32,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithLevelAndMessageContains;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -208,11 +207,13 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		clearMdmLinks();
 
 		updatePatientAndUpdateLinks(janePatient);
-		updatePatientAndUpdateLinks(janePatient2);
-
-		// Then
-		assertLinkCount(1);
-		String expectedMsg = "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.";
-		assertThat(myLogCapture.getLogEvents(), Matchers.hasItem(eventWithLevelAndMessageContains(Level.ERROR, expectedMsg)));
+		try {
+			updatePatientAndUpdateLinks(janePatient2);
+		} catch (InternalErrorException e) {
+			// Then
+			assertLinkCount(1);
+			String expectedMsg = Msg.code(2362) + "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.";
+			assertEquals(expectedMsg, e.getMessage());
+		}
 	}
 }
