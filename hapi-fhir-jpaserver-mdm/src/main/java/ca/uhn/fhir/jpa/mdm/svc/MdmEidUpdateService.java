@@ -80,7 +80,12 @@ public class MdmEidUpdateService {
 		} else {
 			//This is a new linking scenario. we have to break the existing link and link to the new Golden Resource. For now, we create duplicate.
 			//updated patient has an EID that matches to a new candidate. Link them, and set the Golden Resources possible duplicates
-			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			IAnyResource theOldGoldenResource = updateContext.getExistingGoldenResource();
+			if (theOldGoldenResource == null) {
+				ourLog.error("Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.");
+				return;
+			}
+			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), theOldGoldenResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 
 			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
@@ -126,10 +131,6 @@ public class MdmEidUpdateService {
 		myMdmLinkSvc.deleteLink(theOldGoldenResource, theResource, theMdmTransactionContext);
 		myMdmLinkSvc.updateLink(theNewGoldenResource, theResource, theMatchResult, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-		if (theOldGoldenResource == null) {
-			ourLog.error("Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.");
-			return;
-		}
 		myMdmLinkSvc.updateLink(theNewGoldenResource, theOldGoldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 
