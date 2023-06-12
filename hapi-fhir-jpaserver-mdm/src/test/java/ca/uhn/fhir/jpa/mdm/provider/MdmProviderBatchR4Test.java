@@ -211,7 +211,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		updatePatientAndUpdateLinks(janePatient2);
 
 		// Then
-		assertLinkCount(2);
+		assertLinkCount(1);
 		String expectedMsg = "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.";
 		assertThat(myLogCapture.getLogEvents(), Matchers.hasItem(eventWithLevelAndMessageContains(Level.ERROR, expectedMsg)));
 	}
