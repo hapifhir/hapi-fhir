@@ -194,13 +194,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("BINARY_RES_ID");
 
 		version.onTable("NPM_PACKAGE_VER_RES")
-				.addIndex("20230609.1", "FK_NPM_PACKVERRES_PACKVER")
-					.unique(false)
-						.withColumns("PACKVER_PID");
+			.addIndex("20230609.1", "FK_NPM_PACKVERRES_PACKVER")
+			.unique(false)
+			.withColumns("PACKVER_PID");
 		version.onTable("NPM_PACKAGE_VER_RES")
-				.addIndex("20230609.1", "FK_NPM_PKVR_RESID")
-					.unique(false)
-						.withColumns("BINARY_RES_ID");
+			.addIndex("20230609.1", "FK_NPM_PKVR_RESID")
+			.unique(false)
+			.withColumns("BINARY_RES_ID");
 
 		version.onTable("MPI_LINK")
 			.addIndex("20230609.1", "FK_EMPI_LINK_TARGET")
@@ -208,35 +208,49 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("TARGET_PID");
 
 		version.onTable("TRM_CODESYSTEM")
-				.addIndex("20230609.1", "FK_TRMCODESYSTEM_RES")
-					.unique(false)
-						.withColumns("RES_ID");
+			.addIndex("20230609.1", "FK_TRMCODESYSTEM_RES")
+			.unique(false)
+			.withColumns("RES_ID");
 		version.onTable("TRM_CODESYSTEM")
-				.addIndex("20230609.1", "FK_TRMCODESYSTEM_CURVER")
-					.unique(false)
-						.withColumns("CURRENT_VERSION_PID");
+			.addIndex("20230609.1", "FK_TRMCODESYSTEM_CURVER")
+			.unique(false)
+			.withColumns("CURRENT_VERSION_PID");
 
 		version.onTable("TRM_CODESYSTEM_VER")
-				.addIndex("20230609.1", "FK_CODESYSVER_RES_ID")
-					.unique(false)
-						.withColumns("RES_ID");
+			.addIndex("20230609.1", "FK_CODESYSVER_RES_ID")
+			.unique(false)
+			.withColumns("RES_ID");
 		version.onTable("TRM_CODESYSTEM_VER")
-				.addIndex("20230609.1", "FK_CODESYSVER_CS_ID")
-					.unique(true)
+			.addIndex("20230609.1", "FK_CODESYSVER_CS_ID")
+			.unique(true)
+			.withColumns("CODESYSTEM_PID");
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+				.addIndex("20230609.1", "FK_TERM_CONCEPTPC_CS")
+					.unique(false)
 						.withColumns("CODESYSTEM_PID");
 
+		version.onTable("TRM_CONCEPT_PROPERTY")
+				.addIndex("20230609.1", "FK_CONCEPTPROP_CSV")
+					.unique(true)
+						.withColumns("CS_VER_PID");
 
 		version.onTable("TRM_VALUESET")
 			.addIndex("20230609.1", "FK_TRMVALUESET_RES")
 			.unique(false)
 			.withColumns("RES_ID");
 
-		version.onTable("TERM_CONCEPT")
+		version.onTable("TRM_VALUESET_C_DESIGNATION")
+			.addIndex("20230609.1", "FK_TRM_VSCD_VS_PID")
+			.unique(false)
+			.withColumns("VALUESET_PID");
+
+		version.onTable("TRM_CONCEPT")
 			.addIndex("20230609.1", "FK_CONCEPT_PID_CS_PID")
 			.unique(false)
 			.withColumns("CODESYSTEM_PID");
 
-		version.onTable("TERM_CONCEPT_MAP")
+		version.onTable("TRM_CONCEPT_MAP")
 			.addIndex("20230609.1", "FK_TRMCONCEPTMAP_RES")
 			.unique(false)
 			.withColumns("RES_ID");
@@ -251,7 +265,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("CONCEPT_MAP_PID");
 
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+			.addIndex("20230609.1", "FK_TCMGELEMENT_GROUP")
+			.unique(false)
+			.withColumns("CONCEPT_MAP_GROUP_PID");
 
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+			.addIndex("20230609.1", "FK_TCMGETARGET_ELEMENT")
+			.unique(false)
+			.withColumns("CONCEPT_MAP_GRP_ELM_PID");
 	}
 
 	protected void init660() {
