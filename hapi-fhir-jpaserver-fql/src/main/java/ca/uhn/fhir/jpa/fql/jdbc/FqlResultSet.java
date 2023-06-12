@@ -50,7 +50,7 @@ class FqlResultSet implements ResultSet {
 	@Override
 	public boolean next() throws SQLException {
 		if (myResult.hasNext()) {
-			myNextRow = myResult.getNextRowAsStrings();
+			myNextRow = myResult.getNextRow().values();
 			myRowCount++;
 			return true;
 		}

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
 import ca.uhn.fhir.jpa.fql.executor.IFqlResult;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -12,17 +14,26 @@ class FqlStatement implements Statement {
 	private int myMaxRows;
 	private final FqlConnection myConnection;
 
+	private int myFetchSize;
+
 	public FqlStatement(FqlConnection theConnection) {
 		myConnection = theConnection;
 	}
 
 	@Override
 	public ResultSet executeQuery(String sql) throws SQLException {
-		String serverUrl = myConnection.getServerUrl();
+		if (getFetchSize() > 0) {
+			// FIXME: move to client#execute method
+			myConnection.getClient().setFetchSize(getFetchSize());
+		}
 
+		Integer limit = null;
+		if (getMaxRows() > 0) {
+			limit = getMaxRows();
+		}
+		IFqlResult result = myConnection.getClient().execute(sql, limit);
 
-		IFqlResult fqlResult = null;
-		return new FqlResultSet(fqlResult, this);
+		return new FqlResultSet(result, this);
 	}
 
 	@Override
@@ -121,13 +132,13 @@ class FqlStatement implements Statement {
 	}
 
 	@Override
-	public void setFetchSize(int rows) throws SQLException {
-		// ignored
+	public void setFetchSize(int theFetchSize) throws SQLException {
+		myFetchSize = theFetchSize;
 	}
 
 	@Override
 	public int getFetchSize() throws SQLException {
-		return 0;
+		return myFetchSize;
 	}
 
 	@Override

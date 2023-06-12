@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.fql.executor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.fql.provider.FqlRestProviderTest;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -27,6 +26,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,19 +60,24 @@ public class FqlExecutorTest {
 					select name.given[1], name.family
 			""";
 
-		IFqlResult result = myFqlExecutor.execute(statement, null, mySrd);
+		IFqlResult.Row nextRow;
+		IFqlResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getColumnNames(), contains(
 			"name.given[1]", "name.family"
 		));
 		assertTrue(result.hasNext());
-		assertThat(result.getNextRowAsStrings(), contains("Jay", "Simpson"));
+		nextRow = result.getNextRow();
+		assertEquals(0, nextRow.searchRowNumber());
+		assertThat(nextRow.values(), contains("Jay", "Simpson"));
 		assertTrue(result.hasNext());
-		assertThat(result.getNextRowAsStrings(), contains("El Barto", "Simpson"));
+		nextRow = result.getNextRow();
+		assertEquals(1, nextRow.searchRowNumber());
+		assertThat(nextRow.values(), contains("El Barto", "Simpson"));
 		assertFalse(result.hasNext());
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		// Default count
-		assertEquals(1000, mySearchParameterMapCaptor.getValue().getCount());
+		assertNull(mySearchParameterMapCaptor.getValue().getCount());
 	}
 
 	@Test
@@ -82,16 +87,18 @@ public class FqlExecutorTest {
 
 		String statement = """
 					from Patient
-					where name.given in ('Foo' | 'Homer')
+					where name.given in ('Foo' | 'Bart')
 					select Given:name.given[1], Family:name.family
 			""";
 
-		IFqlResult result = myFqlExecutor.execute(statement, null, mySrd);
+		IFqlResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getColumnNames(), contains(
 			"Given", "Family"
 		));
 		assertTrue(result.hasNext());
-		assertThat(result.getNextRowAsStrings(), contains("Jay", "Simpson"));
+		IFqlResult.Row nextRow = result.getNextRow();
+		assertEquals(1, nextRow.searchRowNumber());
+		assertThat(nextRow.values(), contains("El Barto", "Simpson"));
 		assertFalse(result.hasNext());
 
 	}
@@ -107,12 +114,14 @@ public class FqlExecutorTest {
 					select Given:name.given[1], Family:name.family
 			""";
 
-		IFqlResult result = myFqlExecutor.execute(statement, null, mySrd);
+		IFqlResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getColumnNames(), contains(
 			"Given", "Family"
 		));
 		assertTrue(result.hasNext());
-		assertThat(result.getNextRowAsStrings(), contains("Jay", "Simpson"));
+		IFqlResult.Row row = result.getNextRow();
+		assertEquals(0, row.searchRowNumber());
+		assertThat(row.values(), contains("Jay", "Simpson"));
 		assertFalse(result.hasNext());
 
 	}
@@ -133,7 +142,7 @@ public class FqlExecutorTest {
 			""";
 
 		assertEquals("Invalid FROM statement. Unknown resource type 'Foo' at position: [line=0, column=5]",
-			assertThrows(DataFormatException.class, () -> myFqlExecutor.execute(input, null, mySrd)).getMessage());
+			assertThrows(DataFormatException.class, () -> myFqlExecutor.executeInitialSearch(input, null, mySrd)).getMessage());
 	}
 
 	@SuppressWarnings("unchecked")

@@ -1,15 +1,23 @@
 package ca.uhn.fhir.jpa.fql.parser;
 
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FqlStatement {
+public class FqlStatement implements IModelJson {
 
-	private final List<SelectClause> mySelectClauses = new ArrayList<>();
-	private final List<WhereClause> myWhereClauses = new ArrayList<>();
-	private final List<WhereClause> mySearchClauses = new ArrayList<>();
+	@JsonProperty("selectClauses")
+	private List<SelectClause> mySelectClauses = new ArrayList<>();
+	@JsonProperty("whereClauses")
+	private List<WhereClause> myWhereClauses = new ArrayList<>();
+	@JsonProperty("searchClauses")
+	private List<WhereClause> mySearchClauses = new ArrayList<>();
+	@JsonProperty("fromResourceName")
 	private String myFromResourceName;
+	@JsonProperty("limit")
 	private Integer myLimit;
 
 	public List<SelectClause> getSelectClauses() {
@@ -66,8 +74,10 @@ public class FqlStatement {
 		IN
 	}
 
-	public static class SelectClause {
+	public static class SelectClause implements IModelJson {
+		@JsonProperty("clause")
 		private String myClause;
+		@JsonProperty("alias")
 		private String myAlias;
 
 		public String getAlias() {
@@ -87,11 +97,14 @@ public class FqlStatement {
 		}
 	}
 
-	public static class WhereClause {
+	public static class WhereClause implements IModelJson{
 
-		private final List<String> myRight = new ArrayList<>();
+		@JsonProperty("left")
 		private String myLeft;
+		@JsonProperty("operator")
 		private WhereClauseOperator myOperator;
+		@JsonProperty("right")
+		private List<String> myRight = new ArrayList<>();
 
 		public WhereClauseOperator getOperator() {
 			return myOperator;

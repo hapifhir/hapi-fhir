@@ -21,7 +21,10 @@ public class FqlDriver implements Driver {
 		String serverUrl = theUrl.substring(URL_PREFIX.length());
 
 //		URLConnection connection = new URLConnection(new URL(serverUrl + "/$"));
-		return new FqlConnection(serverUrl);
+		FqlConnection connection = new FqlConnection(serverUrl);
+		connection.setUsername(theProperties.getProperty("user", null));
+		connection.setPassword(theProperties.getProperty("password", null));
+		return connection;
 	}
 
 	@Override

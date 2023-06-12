@@ -22,9 +22,13 @@ import java.util.concurrent.Executor;
 class FqlConnection implements Connection {
 	private final String myServerUrl;
 	private boolean myClosed;
+	private FqlRestClient myClient;
+	private String myUsername;
+	private String myPassword;
 
 	public FqlConnection(String theServerUrl) {
 		myServerUrl = theServerUrl;
+		myClient = new FqlRestClient(myServerUrl, myUsername, myPassword);
 	}
 
 	@Override
@@ -299,5 +303,17 @@ class FqlConnection implements Connection {
 
 	String getServerUrl() {
 		return myServerUrl;
+	}
+
+	public FqlRestClient getClient() {
+		return myClient;
+	}
+
+	public void setUsername(String theUsername) {
+		myUsername = theUsername;
+	}
+
+	public void setPassword(String thePassword) {
+		myPassword = thePassword;
 	}
 }
