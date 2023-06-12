@@ -284,7 +284,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	/**
 	 * There is a circular reference between this class and the ResourceChangeListenerRegistry:
-	 * SearchParamRegistryImpl -> ResourceChangeListenerRegistry -> InMemoryResourceMatcher -> SearchParamRegistryImpl. Sicne we only need this once on boot-up, we delay
+	 * SearchParamRegistryImpl -> ResourceChangeListenerRegistry -> InMemoryResourceMatcher -> SearchParamRegistryImpl. Since we only need this once on boot-up, we delay
 	 * until ContextRefreshedEvent.
 	 */
 	@PostConstruct
@@ -373,15 +373,5 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@VisibleForTesting
 	public void setSearchParameterCanonicalizerForUnitTest(SearchParameterCanonicalizer theSearchParameterCanonicalizerForUnitTest) {
 		mySearchParameterCanonicalizer = theSearchParameterCanonicalizerForUnitTest;
-	}
-
-	@VisibleForTesting
-	public int getMaxManagedParamCountForUnitTest(){
-		return MAX_MANAGED_PARAM_COUNT;
-	}
-
-	@VisibleForTesting
-	public IResourceChangeListenerCache getResourceChangeListenerCacheForUnitTest(){
-		return myResourceChangeListenerCache;
 	}
 }

@@ -12,11 +12,11 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.r4.MockHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.MockHapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -56,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -100,46 +101,6 @@ class BaseHapiFhirResourceDaoTest {
 
 	@InjectMocks
 	private TestResourceDao mySvc;
-
-
-	private static class TrivialResultIterator implements IResultIterator<JpaPid> {
-
-		private final List<JpaPid> myList;
-
-		private int index;
-
-		public TrivialResultIterator(List<JpaPid> theList) {
-			myList = theList;
-		}
-
-		@Override
-		public int getSkippedCount() {
-			return 0;
-		}
-
-		@Override
-		public int getNonSkippedCount() {
-			return 0;
-		}
-
-		@Override
-		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
-			return null;
-		}
-
-		@Override
-		public void close() {}
-
-		@Override
-		public boolean hasNext() {
-			return index < myList.size();
-		}
-
-		@Override
-		public JpaPid next() {
-			return myList.get(index++);
-		}
-	}
 
 	@BeforeEach
 	public void init() {
@@ -307,12 +268,11 @@ class BaseHapiFhirResourceDaoTest {
 		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
 		mySvc.setTransactionService(myTransactionService);
 
-		RequestPartitionId partitionId = Mockito.mock(RequestPartitionId.class);
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(partitionId);
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(mock(RequestPartitionId.class));
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(myISearchBuilder);
-		when(myISearchBuilder.createQuery(any(), any(), any(), any())).thenReturn(new TrivialResultIterator(new ArrayList<>()));
+		when(myISearchBuilder.createQuery(any(), any(), any(), any())).thenReturn(mock(IResultIterator.class));
 
-		lenient().when(myStorageSettings.getInternalSynchronousSearchSize()).thenReturn(10000);
+		lenient().when(myStorageSettings.getInternalSynchronousSearchSize()).thenReturn(5000);
 
 		// execute
 		mySvc.searchForIds(theSearchParameterMap, new SystemRequestDetails(), null);
@@ -326,7 +286,7 @@ class BaseHapiFhirResourceDaoTest {
 	static Stream<Arguments> searchParameterMapProvider() {
 		return Stream.of(
 			Arguments.of(new SearchParameterMap().setLoadSynchronousUpTo(1000), 1000),
-			Arguments.of(new SearchParameterMap(), 10000)
+			Arguments.of(new SearchParameterMap(), 5000)
 		);
 	}
 
