@@ -216,4 +216,23 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 			assertEquals(expectedMsg, e.getMessage());
 		}
 	}
+
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testUpdateResource_WithClearAndSubmit_Succeeds(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
+		// Given
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
+		assertLinkCount(5);
+
+		// When
+		clearMdmLinks();
+		afterMdmLatch.runWithExpectedCount(3, () -> {
+			myMdmProvider.mdmBatchPatientType(null , null, theSyncOrAsyncRequest);
+		});
+
+		updatePatientAndUpdateLinks(janePatient);
+		updatePatientAndUpdateLinks(janePatient2);
+		assertLinkCount(3);
+	}
 }
