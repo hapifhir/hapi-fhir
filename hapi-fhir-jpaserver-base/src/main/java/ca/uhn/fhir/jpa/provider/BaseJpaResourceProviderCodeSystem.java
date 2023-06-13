@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
@@ -41,6 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.toValidateCodeResult;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -141,7 +144,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 		RequestDetails theRequestDetails
 	) {
 
-		IValidationSupport.CodeValidationResult result = null;
+		CodeValidationResult result = null;
 		startRequest(theServletRequest);
 		try {
 			// TODO: JA why not just always just the chain here? and we can then get rid of the corresponding DAO method entirely
@@ -159,9 +162,8 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 						String code = theCoding.getCode();
 						String display = theCoding.getDisplay();
 
-						result = myValidationSupportChain.validateCode(
-							new ValidationSupportContext(myValidationSupportChain), new ConceptValidationOptions(),
-							codeSystemUrl, code, display, null);
+						result = validateCodeWithTerminologyService(codeSystemUrl, code, display)
+							.orElseGet(supplyUnableToValidateResult(codeSystemUrl, code));
 					}
 				}
 			} else {
@@ -174,5 +176,14 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 			endRequest(theServletRequest);
 		}
 
+	}
+
+	private Optional<CodeValidationResult> validateCodeWithTerminologyService(String theCodeSystemUrl, String theCode, String theDisplay) {
+		return Optional.ofNullable(myValidationSupportChain.validateCode(new ValidationSupportContext(myValidationSupportChain),
+			new ConceptValidationOptions(), theCodeSystemUrl, theCode, theDisplay, null));
+	}
+
+	private Supplier<CodeValidationResult> supplyUnableToValidateResult(String theCodeSystemUrl, String theCode) {
+		return () -> new CodeValidationResult().setMessage("Terminology service was unable to provide validation for " + theCodeSystemUrl + "#" + theCode);
 	}
 }

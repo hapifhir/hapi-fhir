@@ -37,7 +37,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /*
  * This set of Unit Tests instantiates and injects an instance of
@@ -51,6 +53,9 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	private static final String DISPLAY = "DISPLAY";
 	private static final String DISPLAY_BODY_MASS_INDEX = "Body mass index (BMI) [Ratio]";
 	private static final String CODE_BODY_MASS_INDEX = "39156-5";
+	private static final String CODE_SYSTEM_V2_0247_URI = "http://terminology.hl7.org/CodeSystem/v2-0247";
+	private static final String INVALID_CODE_SYSTEM_URI = "http://terminology.hl7.org/CodeSystem/INVALID-CODESYSTEM";
+	private static final String UNKNOWN_VALUE_SYSTEM_URI = "http://hl7.org/fhir/ValueSet/unknown-value-set";
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private MyCodeSystemProvider myCodeSystemProvider = new MyCodeSystemProvider();
 	private MyValueSetProvider myValueSetProvider = new MyValueSetProvider();
@@ -79,20 +84,20 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	}
 
 	@Test
-	public void testValidateCodeOperationOnCodeSystem_ByCodingAndUrlWhereSystemIsDifferent_ThrowsException() {
+	public void testValidateCodeOperationOnCodeSystem_byCodingAndUrlWhereSystemIsDifferent_throwsException() {
 		assertThrows(InvalidRequestException.class, () -> {
 			Parameters respParam = myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_VALIDATE_CODE)
-				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0247").setCode("P"))
-				.andParameter("url", new UriType("http://terminology.hl7.org/CodeSystem/INVALID-CODESYSTEM"))
+				.withParameter(Parameters.class, "coding", new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
+				.andParameter("url", new UriType(INVALID_CODE_SYSTEM_URI))
 				.execute();
 		});
 	}
 
 	@Test
-	public void testValidateCodeOperationOnCodeSystem_ByCodingAndUrl_UsingBuiltInCodeSystems() {
+	public void testValidateCodeOperationOnCodeSystem_byCodingAndUrl_usingBuiltInCodeSystems() {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/v2-0247"));
 		createNextCodeSystemReturnParameters(true, DISPLAY, null);
@@ -103,8 +108,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_VALIDATE_CODE)
-			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0247").setCode("P"))
-			.andParameter("url", new UriType("http://terminology.hl7.org/CodeSystem/v2-0247"))
+			.withParameter(Parameters.class, "coding", new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
+			.andParameter("url", new UriType(CODE_SYSTEM_V2_0247_URI))
 			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -115,7 +120,45 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	}
 
 	@Test
-	public void testValidateCodeOperationOnValueSet_ByUrlAndSystem_UsingBuiltInCodeSystems() {
+	public void testValidateCodeOperationOnCodeSystem_byCodingAndUrlWhereCodeSystemIsUnknown_returnsFalse() {
+		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_VALIDATE_CODE)
+			.withParameter(Parameters.class, "coding", new Coding()
+				.setSystem(INVALID_CODE_SYSTEM_URI).setCode("P"))
+			.andParameter("url", new UriType(INVALID_CODE_SYSTEM_URI))
+			.execute();
+
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertEquals("Terminology service was unable to provide validation for " + INVALID_CODE_SYSTEM_URI +
+			"#P", respParam.getParameterValue("message").toString());
+	}
+
+	@Test
+	public void testValidateCodeOperationOnValueSet_byCodingAndUrlWhereSystemIsDifferent_throwsException() {
+		try {
+			myClient.operation()
+				.onType(ValueSet.class)
+				.named(JpaConstants.OPERATION_VALIDATE_CODE)
+				.withParameter(Parameters.class, "coding", new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
+				.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/list-example-codes"))
+				.andParameter("system", new UriType(INVALID_CODE_SYSTEM_URI))
+				.execute();
+			fail();
+		} catch (InvalidRequestException exception) {
+			assertEquals("HTTP 400 Bad Request: HAPI-2352: Coding.system '" + CODE_SYSTEM_V2_0247_URI + "' " +
+				"does not equal param system '" + INVALID_CODE_SYSTEM_URI + "'. Unable to validate-code.", exception.getMessage());
+		}
+	}
+
+	@Test
+	public void testValidateCodeOperationOnValueSet_byUrlAndSystem_usingBuiltInCodeSystems() {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
@@ -140,7 +183,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	}
 
 	@Test
-	public void testValidateCodeOperationOnValueSet_ByUrlSystemAndCode() {
+	public void testValidateCodeOperationOnValueSet_byUrlSystemAndCode() {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
@@ -161,6 +204,27 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 
 		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
 		assertEquals(DISPLAY_BODY_MASS_INDEX, respParam.getParameterValue("display").toString());
+	}
+
+	@Test
+	public void testValidateCodeOperationOnValueSet_byCodingAndUrlWhereValueSetIsUnknown_returnsFalse() {
+		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named(JpaConstants.OPERATION_VALIDATE_CODE)
+			.withParameter(Parameters.class, "coding", new Coding()
+				.setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
+			.andParameter("url", new UriType(UNKNOWN_VALUE_SYSTEM_URI))
+			.execute();
+
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertEquals("Validator is unable to provide validation for P#" + CODE_SYSTEM_V2_0247_URI +
+			" - Unknown or unusable ValueSet[" + UNKNOWN_VALUE_SYSTEM_URI + "]", respParam.getParameterValue("message").toString());
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {
