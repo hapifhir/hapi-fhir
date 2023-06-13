@@ -188,9 +188,6 @@ public class HapiForeignKeyIndexHelper {
 		ourTableToColumnsWhitelist.put("HFJ_BLK_EXPORT_COLLECTION", "JOB_PID");
 
 		// TODO - LS - entries below here require further investigation
-		// HFJ_HISTORY_TAG - TAG_ID has a uniqueness constraint and is therefore not
-//		ourTableToColumnsWhitelist.put("HFJ_HISTORY_TAG", "TAG_ID");
-
 		// MPI_LINK
 //		ourTableToColumnsWhitelist.put("MPI_LINK", "TARGET_PID");
 
