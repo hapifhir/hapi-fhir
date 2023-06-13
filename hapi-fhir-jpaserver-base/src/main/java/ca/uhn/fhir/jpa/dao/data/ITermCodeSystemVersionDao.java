@@ -44,6 +44,9 @@ public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemV
 		"WHERE tcs.myCodeSystemUri = :code_system_uri AND tcsv.myCodeSystemVersionId = :codesystem_version_id")
 	TermCodeSystemVersion findByCodeSystemUriAndVersion(@Param("code_system_uri") String theCodeSystemUri, @Param("codesystem_version_id") String theCodeSystemVersionId);
 
+	@Query("SELECT tcsv FROM TermCodeSystemVersion tcsv INNER JOIN FETCH TermCodeSystem tcs on tcs.myCurrentVersionPid = tcsv.myId WHERE tcs.myCodeSystemUri = :code_system_uri")
+	TermCodeSystemVersion findCurrentVersionByCodeSystemUri(@Param("code_system_uri") String theCodeSystemUri);
+
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid AND cs.myCodeSystemVersionId IS NULL")
 	TermCodeSystemVersion findByCodeSystemPidVersionIsNull(@Param("codesystem_pid") Long theCodeSystemPid);
 

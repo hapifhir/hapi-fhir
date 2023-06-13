@@ -799,7 +799,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 			ourLog.debug("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
 
-			Optional<TermCodeSystemVersion> termCodeSystemVersion = optionalFindTermCodeSystemVersion(theExpansionOptions,theIncludeOrExclude);
+			Optional<TermCodeSystemVersion> termCodeSystemVersion = optionalFindTermCodeSystemVersion(theIncludeOrExclude);
 			if (termCodeSystemVersion.isPresent()) {
 
 				expandValueSetHandleIncludeOrExcludeUsingDatabase(theExpansionOptions, theValueSetCodeAccumulator,
@@ -858,22 +858,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	}
 
-	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(ValueSetExpansionOptions theExpansionOptions,
-																									  ValueSet.ConceptSetComponent theIncludeOrExclude) {
-		TermCodeSystem termCodeSystem = myCodeSystemDao.findByCodeSystemUri(theIncludeOrExclude.getSystem());
-		if (termCodeSystem != null) {
-			TermCodeSystemVersion termCodeSystemVersion = isEmpty(theIncludeOrExclude.getVersion()) ?
-				termCodeSystem.getCurrentVersion() :
-				myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theIncludeOrExclude.getSystem(), theIncludeOrExclude.getVersion());
-			if (termCodeSystemVersion == null && (theExpansionOptions == null || theExpansionOptions.isFailOnMissingCodeSystem())) {
-				String codeSystemUrl = theIncludeOrExclude.getSystem() + (theIncludeOrExclude.getVersion() != null ? OUR_PIPE_CHARACTER + theIncludeOrExclude.getVersion() : "");
-				throw new InternalErrorException(Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: " + codeSystemUrl);
-			} else {
-				return Optional.ofNullable(termCodeSystemVersion);
-			}
-		} else {
-			return Optional.empty();
-		}
+	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(ValueSet.ConceptSetComponent theIncludeOrExclude) {
+		TermCodeSystemVersion termCodeSystemVersion = isEmpty(theIncludeOrExclude.getVersion()) ?
+			myCodeSystemVersionDao.findCurrentVersionByCodeSystemUri(theIncludeOrExclude.getSystem()) :
+			myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theIncludeOrExclude.getSystem(), theIncludeOrExclude.getVersion());
+		return Optional.ofNullable(termCodeSystemVersion);
 	}
 
 	private boolean isHibernateSearchEnabled() {

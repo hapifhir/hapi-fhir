@@ -1003,7 +1003,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			fail();
 		} catch (InternalErrorException e) {
 			// then
-			assertEquals(Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://acme.org|3.6.0", e.getMessage());
+			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " +
+				Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://acme.org|3.6.0", e.getMessage());
 		}
 	}
 
