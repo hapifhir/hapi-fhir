@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.slf4j.Logger;
@@ -47,7 +46,6 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
@@ -985,32 +983,28 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	}
 
 	@Test
-	public void testExpandValueSet_withWrongVersionOfCodeSystem_throwsException() throws IOException {
-		loadAndPersistCodeSystem();
-
-		// Store Value Set
+	public void testExpandValueSet_withUnknownCodeSystemVersion_throwsException() throws IOException {
+		// given
 		ValueSet vs = new ValueSet();
-		vs.setId("ValueSet/vs-with-invalid-cs");
-		vs.setUrl("http://vs-with-invalid-cs");
+		vs.setId("ValueSet/vs-with-unknown-cs-version");
+		vs.setUrl("http://vs-with-unknown-cs-version");
 		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		vs.getCompose().addInclude().setSystem("http://acme.org").setVersion("3.6.0");
-		myValueSetDao.update(vs);
+		loadAndPersistCodeSystem();
 
-		// In memory expansion
+		// direct expansion
+		vs = myTermSvc.expandValueSet(new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs);
+		assertNotNull(vs);
+		assertEquals(0, vs.getExpansion().getContains().size());
+
+		// when
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(2361) + "Unable to expand ValueSet because CodeSystem could not be found: http://acme.org|3.6.0", e.getMessage());
+			// then
+			assertEquals(Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://acme.org|3.6.0", e.getMessage());
 		}
-
-		// Perform Pre-Expansion
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-
-		// Make sure it's done and failed
-		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND,
-			myTermValueSetDao.findByUrl("http://vs-with-invalid-cs").orElseThrow(() -> new IllegalStateException()).getExpansionStatus()));
 	}
 
 	@Test

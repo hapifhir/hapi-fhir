@@ -44,7 +44,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 import static org.awaitility.Awaitility.await;
@@ -54,7 +53,6 @@ import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -909,31 +907,6 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertEquals(1, expanded.getExpansion().getContains().size());
 	}
 
-	@Test
-	public void testExpandValueSet_withCodeSystemPreLoad_returnsExpandedVs() {
-		// pre-load task-code CodeSystem to emulate execution seedBaseValidationResources()
-		CodeSystem cs = new CodeSystem();
-		cs.setId("cs1");
-		cs.setUrl("http://hl7.org/fhir/CodeSystem/task-code");
-		cs.setVersion("4.0.1");
-		List<String> codes = List.of("approve", "fulfill", "abort", "replace", "change", "suspend", "resume");
-		codes.forEach(code -> cs.addConcept().setCode(code));
-		myCodeSystemDao.update(cs);
-
-		Parameters respParam = myClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("expand")
-			.withParameter(Parameters.class, "url", new UriType("http://hl7.org/fhir/ValueSet/task-code"))
-			.execute();
-
-		assertEquals(1, respParam.getParameter().size());
-		ValueSet valueSet = (ValueSet) respParam.getParameter().get(0).getResource();
-		assertThat(valueSet, is(not(nullValue())));
-		List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
-		assertNotNull(expansions);
-		assertTrue(expansions.stream().map(ValueSet.ValueSetExpansionContainsComponent::getCode).toList().containsAll(codes));
-	}
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansion() throws Exception {
