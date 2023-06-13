@@ -116,7 +116,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		IdDt resourceIdDt = new IdDt(resourceType, resourcePid, resourceVersion);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
 
-		IBaseResource iBaseResource = dao.read(resourceIdDt, systemRequestDetails);
+		IBaseResource iBaseResource = dao.read(resourceIdDt, systemRequestDetails, true);
 
 		retVal.setNewPayload(myFhirContext, iBaseResource);
 
