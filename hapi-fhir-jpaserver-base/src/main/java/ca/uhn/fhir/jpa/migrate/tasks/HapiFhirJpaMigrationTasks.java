@@ -194,7 +194,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable("MPI_LINK")
 			.addIndex("20230609.7", "FK_EMPI_LINK_TARGET")
-			.unique(true)
+			.unique(false)
 			.withColumns("TARGET_PID");
 
 		version.onTable("TRM_CODESYSTEM")
@@ -212,7 +212,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("RES_ID");
 		version.onTable("TRM_CODESYSTEM_VER")
 			.addIndex("20230609.11", "FK_CODESYSVER_CS_ID")
-			.unique(true)
+			.unique(false)
 			.withColumns("CODESYSTEM_PID");
 
 		version.onTable("TRM_CONCEPT_PC_LINK")

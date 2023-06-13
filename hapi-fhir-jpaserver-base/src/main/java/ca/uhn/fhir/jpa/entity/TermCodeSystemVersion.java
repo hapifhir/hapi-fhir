@@ -54,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 },
 indexes = {
 	@Index(name = "FK_CODESYSVER_RES_ID", columnList = "RES_ID"),
-	@Index(name = "FK_CODESYSVER_CS_ID", columnList = "CODESYSTEM_PID", unique = true)
+	@Index(name = "FK_CODESYSVER_CS_ID", columnList = "CODESYSTEM_PID")
 })
 @Entity()
 public class TermCodeSystemVersion implements Serializable {

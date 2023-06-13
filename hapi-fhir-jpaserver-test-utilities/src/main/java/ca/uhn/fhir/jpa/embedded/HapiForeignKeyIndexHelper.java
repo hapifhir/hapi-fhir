@@ -152,7 +152,6 @@ public class HapiForeignKeyIndexHelper {
 		       JOIN fk_table_stats USING (fkoid)
 		   WHERE issue = 'no index'
 		   ORDER BY issue_sort, table_mb DESC, table_name, fk_name;
-		   
 		""";
 
 	// columns
@@ -166,20 +165,19 @@ public class HapiForeignKeyIndexHelper {
 
 	protected static final Multimap<String, String> ourTableToColumnsWhitelist = HashMultimap.create();
 
-	private static final String WARNING_MSG = "\nUnindexed foreign key detected!\nTable: %s, Column: %s, FKIndex Name: %s, Parent Table: %s, Issue: %s";
+	private static final String MESSAGE = "\nUnindexed foreign key detected!\nTable: %s, Column: %s, FKIndex Name: %s, Parent Table: %s, Issue: %s";
 
 	public HapiForeignKeyIndexHelper() {
 		populateWhiteList();
 	}
 
 	/**
-	 * This method populates a whitelist of tablename -> column name
+	 * This method populates a whitelist of table name -> column name
 	 * for foreign key constraints that do not have proper indexes.
-	 *
+	 * --
 	 * Any whitelisted table:column pairing should be documented why it
-	 * doesn't require indexing.
+	 * doesn't require indexing, or be provided an explicit index.
 	 */
-	// TODO - LS tagging unknown columns for future cleanup
 	protected void populateWhiteList() {
 		// HFJ_BLK_EXPORT_COLFILE - deprecated table
 		ourTableToColumnsWhitelist.put("HFJ_BLK_EXPORT_COLFILE", "COLLECTION_PID");
@@ -212,10 +210,7 @@ public class HapiForeignKeyIndexHelper {
 					for (String col : columns) {
 						boolean isWhitelisted = whitelistColumns.contains(col.toUpperCase());
 						if (!isWhitelisted) {
-							ourLog.warn("-------");
-							// TODO - add the parent table
-							// we want to index anything liked to hfj_ (resource)
-							ourLog.warn(String.format(WARNING_MSG,
+							ourLog.error(String.format(MESSAGE,
 								tableName,
 								col,
 								fkConstraintName,
@@ -230,4 +225,5 @@ public class HapiForeignKeyIndexHelper {
 			}
 		}
 	}
+
 }
