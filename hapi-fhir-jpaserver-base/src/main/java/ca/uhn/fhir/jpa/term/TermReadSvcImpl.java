@@ -859,10 +859,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(ValueSet.ConceptSetComponent theIncludeOrExclude) {
-		TermCodeSystemVersion termCodeSystemVersion = isEmpty(theIncludeOrExclude.getVersion()) ?
-			myCodeSystemVersionDao.findCurrentVersionByCodeSystemUri(theIncludeOrExclude.getSystem()) :
-			myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theIncludeOrExclude.getSystem(), theIncludeOrExclude.getVersion());
-		return Optional.ofNullable(termCodeSystemVersion);
+		if (isEmpty(theIncludeOrExclude.getVersion())) {
+			return Optional.ofNullable(myCodeSystemVersionDao.findCurrentVersionByCodeSystemUri(theIncludeOrExclude.getSystem()));
+		} else {
+			return Optional.ofNullable(myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theIncludeOrExclude.getSystem(), theIncludeOrExclude.getVersion()));
+		}
 	}
 
 	private boolean isHibernateSearchEnabled() {

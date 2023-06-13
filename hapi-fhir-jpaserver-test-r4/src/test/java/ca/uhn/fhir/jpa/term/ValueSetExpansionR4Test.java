@@ -22,7 +22,9 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import org.hamcrest.MatcherAssert;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -34,6 +36,8 @@ import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -983,32 +987,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	}
 
 	@Test
-	public void testExpandValueSet_withUnknownCodeSystemVersion_throwsException() throws IOException {
-		// given
-		ValueSet vs = new ValueSet();
-		vs.setId("ValueSet/vs-with-unknown-cs-version");
-		vs.setUrl("http://vs-with-unknown-cs-version");
-		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		vs.getCompose().addInclude().setSystem("http://acme.org").setVersion("3.6.0");
-		loadAndPersistCodeSystem();
-
-		// direct expansion
-		vs = myTermSvc.expandValueSet(new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs);
-		assertNotNull(vs);
-		assertEquals(0, vs.getExpansion().getContains().size());
-
-		// when
-		try {
-			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-			fail();
-		} catch (InternalErrorException e) {
-			// then
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " +
-				Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://acme.org|3.6.0", e.getMessage());
-		}
-	}
-
-	@Test
 	public void testExpandTermValueSetAndChildrenWithOffsetAndCountWithClientAssignedId() throws Exception {
 		myStorageSettings.setPreExpandValueSets(true);
 
@@ -1042,6 +1020,43 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		//It is enough to test that the sublist returned is the correct one.
 		MatcherAssert.assertThat(myValueSetTestUtil.toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(1, 23))));
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"/org/hl7/fhir/r4/model/valueset/valuesets.xml, 4.0.1",
+		"/org/hl7/fhir/r4b/model/valueset/valuesets.xml, 4.3.0",
+	})
+	public void testExpandTaskCodeValueSet_loadedFromValidationFile_hasCorrectCodeSystemVersion(String valueSetsPath, String codeSystemVersion) throws IOException {
+		// load validation file
+		Bundle r4ValueSets = loadResourceFromClasspath(Bundle.class, valueSetsPath);
+		ValueSet taskCodeVs = (ValueSet) findResourceByFullUrlInBundle(r4ValueSets, "http://hl7.org/fhir/ValueSet/task-code");
+		CodeSystem taskCodeCs = (CodeSystem) findResourceByFullUrlInBundle(r4ValueSets, "http://hl7.org/fhir/CodeSystem/task-code");
+
+		// check valueSet and codeSystem versions
+		assertEquals(taskCodeCs.getVersion(), codeSystemVersion);
+		assertEquals(taskCodeVs.getVersion(), codeSystemVersion);
+		assertEquals(taskCodeVs.getCompose().getInclude().get(0).getVersion(), codeSystemVersion);
+
+		myCodeSystemDao.update(taskCodeCs);
+		IIdType id = myValueSetDao.create(taskCodeVs).getId().toUnqualifiedVersionless();
+
+		ValueSet expansion = myValueSetDao.expand(id, new ValueSetExpansionOptions(), mySrd);
+
+		// check expansionComponent versions
+		assertEquals(7, expansion.getExpansion().getContains().size());
+		expansion.getExpansion().getContains().stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getVersion).forEach(version -> assertEquals(codeSystemVersion, version));
+	}
+
+	private IBaseResource findResourceByFullUrlInBundle(Bundle thebundle, String theFullUrl) {
+		Optional<Bundle.BundleEntryComponent> bundleEntry = thebundle.getEntry().stream()
+			.filter(entry -> theFullUrl.equals(entry.getFullUrl()))
+			.findFirst();
+		if (bundleEntry.isEmpty()) {
+			fail("Can't find resource: " + theFullUrl);
+		}
+		return bundleEntry.get().getResource();
 	}
 
 
