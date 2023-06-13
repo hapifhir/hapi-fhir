@@ -319,8 +319,9 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * Since 6.7.0
 	 */
-	private boolean myAllowPartitionListinCapabilityStatement = false;
-
+	private boolean myIncludePartitionListingCapabilityStatement = false;
+	//has a setter method call on this object
+	//find where getter method is invoked as well
 	/**
 	 * Constructor
 	 */
@@ -2314,12 +2315,12 @@ public class JpaStorageSettings extends StorageSettings {
 		myNonResourceDbHistoryEnabled = theNonResourceDbHistoryEnabled;
 	}
 
-	public boolean isAllowPartitionListinCapabilityStatement() {
-		return myAllowPartitionListinCapabilityStatement;
+	public boolean isIncludePartitionListingCapabilityStatement() {
+		return myIncludePartitionListingCapabilityStatement;
 	}
 
-	public void setAllowPartitionListinCapabilityStatement(boolean theAllowPartitionListinCapabilityStatement) {
-		myAllowPartitionListinCapabilityStatement = theAllowPartitionListinCapabilityStatement;
+	public void setIncludePartitionListingCapabilityStatement(boolean theIncludePartitionListingCapabilityStatement) {
+		myIncludePartitionListingCapabilityStatement = theIncludePartitionListingCapabilityStatement;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

@@ -89,7 +89,7 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_JSON_PATCH);
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_XML_PATCH);
 
-		if (myPartitionLookupSvc != null && myStorageSettings.isAllowPartitionListinCapabilityStatement()) {
+		if (myPartitionLookupSvc != null && myStorageSettings.isIncludePartitionListingCapabilityStatement()) {
 			IBase parentPartitionExtension = theTerser.addElement(theCapabilityStatement, "extension");
 			theTerser.addElement(parentPartitionExtension, "url", "http://hapifhir.io/fhir/StructureDefinition/partition-list");
 

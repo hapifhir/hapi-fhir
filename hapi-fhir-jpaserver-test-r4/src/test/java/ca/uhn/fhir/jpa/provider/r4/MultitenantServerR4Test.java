@@ -88,7 +88,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 	@Test
 	public void testFetchCapabilityStatement() {
-		myStorageSettings.setAllowPartitionListinCapabilityStatement(true);
+		myStorageSettings.setIncludePartitionListingCapabilityStatement(true);
 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
