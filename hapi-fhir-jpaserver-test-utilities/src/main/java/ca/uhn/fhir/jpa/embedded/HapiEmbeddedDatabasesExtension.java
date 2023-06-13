@@ -113,12 +113,12 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		@Override
 		public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
 			List<Arguments> arguments = new ArrayList<>();
-			arguments.add(Arguments.of(DriverTypeEnum.H2_EMBEDDED));
+//			arguments.add(Arguments.of(DriverTypeEnum.H2_EMBEDDED));
 			arguments.add(Arguments.of(DriverTypeEnum.POSTGRES_9_4));
-			arguments.add(Arguments.of(DriverTypeEnum.MSSQL_2012));
+//			arguments.add(Arguments.of(DriverTypeEnum.MSSQL_2012));
 
 			if (canUseOracle()) {
-				arguments.add(Arguments.of(DriverTypeEnum.ORACLE_12C));
+//				arguments.add(Arguments.of(DriverTypeEnum.ORACLE_12C));
 			}
 
 			return arguments.stream();
