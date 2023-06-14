@@ -19,7 +19,13 @@
  */
 package ca.uhn.fhir.jpa.fql.executor;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -47,10 +53,13 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.thymeleaf.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class FqlExecutor implements IFqlExecutor {
@@ -81,6 +90,8 @@ public class FqlExecutor implements IFqlExecutor {
 		if (dao == null) {
 			throw new DataFormatException("Unknown or unsupported FROM type: " + statement.getFromResourceName());
 		}
+
+		massageSelectColumnNames(statement);
 
 		SearchParameterMap map = new SearchParameterMap();
 		IBundleProvider outcome = dao.search(map, theRequestDetails);
@@ -119,6 +130,55 @@ public class FqlExecutor implements IFqlExecutor {
 		}
 
 		return new FqlResult(statement, outcome, fhirPath, theLimit, 0);
+	}
+
+	private void massageSelectColumnNames(FqlStatement theFqlStatement) {
+
+		List<FqlStatement.SelectClause> selectClauses = theFqlStatement.getSelectClauses();
+		for (int i = 0; i < selectClauses.size(); i++) {
+			if ("*".equals(selectClauses.get(i).getClause())) {
+				resolveAndReplaceStarInSelectClauseAtIndex(theFqlStatement, selectClauses, i);
+			}
+		}
+
+	}
+
+	private void resolveAndReplaceStarInSelectClauseAtIndex(FqlStatement theFqlStatement, List<FqlStatement.SelectClause> theSelectClauses, int theIndex) {
+		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(theFqlStatement.getFromResourceName());
+		TreeSet<String> allLeafPaths = new TreeSet<>(Comparator.reverseOrder());
+		findLeafPaths(def, allLeafPaths, new ArrayList<>());
+
+		theSelectClauses.remove(theIndex);
+		allLeafPaths.forEach(t-> theSelectClauses.add(theIndex, new FqlStatement.SelectClause(t)));
+	}
+
+	private void findLeafPaths(BaseRuntimeElementCompositeDefinition<?> theCompositeDefinition, TreeSet<String> theAllLeafPaths, List<String> theCurrentPath) {
+		for (BaseRuntimeChildDefinition nextChild : theCompositeDefinition.getChildren()) {
+			for (String nextChildName : nextChild.getValidChildNames()) {
+				if (theCurrentPath.contains(nextChildName)) {
+					continue;
+				}
+				if (nextChildName.equals("extension") || nextChildName.equals("modifierExtension")) {
+					continue;
+				}
+				if (nextChildName.equals("id") && theCurrentPath.size() > 0) {
+					continue;
+				}
+
+				theCurrentPath.add(nextChildName);
+
+				BaseRuntimeElementDefinition<?> childDef = nextChild.getChildByName(nextChildName);
+				if (childDef instanceof BaseRuntimeElementCompositeDefinition) {
+					if (theCurrentPath.size() < 2) {
+						findLeafPaths((BaseRuntimeElementCompositeDefinition<?>) childDef, theAllLeafPaths, theCurrentPath);
+					}
+				} else if (childDef instanceof RuntimePrimitiveDatatypeDefinition) {
+					theAllLeafPaths.add(StringUtils.join(theCurrentPath, "."));
+				}
+
+				theCurrentPath.remove(theCurrentPath.size() - 1);
+			}
+		}
 	}
 
 	@Nonnull

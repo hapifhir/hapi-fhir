@@ -25,6 +25,19 @@ public class FqlLexerTest {
 	}
 
 	@Test
+	public void testSelectStar() {
+		String input = """
+					from Patient
+					select
+					   *
+			""";
+		List<String> allTokens = new FqlLexer(input).allTokens();
+		assertThat(allTokens, contains(
+			"from", "Patient", "select", "*"
+		));
+	}
+
+	@Test
 	public void testQuotedString() {
 		String input = """
 			from

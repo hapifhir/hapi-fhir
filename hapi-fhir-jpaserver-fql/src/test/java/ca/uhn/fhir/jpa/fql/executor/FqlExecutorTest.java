@@ -17,40 +17,33 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FqlExecutorTest {
 
+	private final RequestDetails mySrd = new SystemRequestDetails();
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
 	@Spy
@@ -61,7 +54,6 @@ public class FqlExecutorTest {
 	private IPagingProvider myPagingProvider;
 	@InjectMocks
 	private FqlExecutor myFqlExecutor = new FqlExecutor();
-	private final RequestDetails mySrd = new SystemRequestDetails();
 	@Captor
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
 
@@ -129,6 +121,27 @@ public class FqlExecutorTest {
 	}
 
 	@Test
+	public void testFromSelectStar() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
+
+		String statement = """
+					from Patient
+					where name.family = 'Simpson'
+					select *
+			""";
+
+		IFqlResult.Row nextRow;
+		IFqlResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+			"active", "address.city", "address.country"
+		));
+		assertThat(result.getColumnNames().toString(), result.getColumnNames(), not(hasItem(
+			"address.period.start"
+		)));
+	}
+
+	@Test
 	public void testFromWhereSelectIn() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
@@ -184,8 +197,8 @@ public class FqlExecutorTest {
 		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
 
 		String statement = "from Patient " +
-								 "search " + theParamName + " = 'abc' " +
-								 "select name.given";
+			"search " + theParamName + " = 'abc' " +
+			"select name.given";
 
 		try {
 			myFqlExecutor.executeInitialSearch(statement, null, mySrd);
@@ -214,9 +227,9 @@ public class FqlExecutorTest {
 		assertEquals(1, map.get("_id").size());
 		assertEquals(2, map.get("_id").get(0).size());
 		assertNull(((TokenParam) map.get("_id").get(0).get(0)).getSystem());
-		assertEquals("123", ((TokenParam)map.get("_id").get(0).get(0)).getValue());
+		assertEquals("123", ((TokenParam) map.get("_id").get(0).get(0)).getValue());
 		assertNull(((TokenParam) map.get("_id").get(0).get(1)).getSystem());
-		assertEquals("Patient/456", ((TokenParam)map.get("_id").get(0).get(1)).getValue());
+		assertEquals("Patient/456", ((TokenParam) map.get("_id").get(0).get(1)).getValue());
 	}
 
 	@Test
@@ -237,9 +250,9 @@ public class FqlExecutorTest {
 		assertEquals(1, map.get("_lastUpdated").size());
 		assertEquals(2, map.get("_lastUpdated").get(0).size());
 		assertEquals(ParamPrefixEnum.LESSTHAN, ((DateParam) map.get("_lastUpdated").get(0).get(0)).getPrefix());
-		assertEquals("2021", ((DateParam)map.get("_lastUpdated").get(0).get(0)).getValueAsString());
+		assertEquals("2021", ((DateParam) map.get("_lastUpdated").get(0).get(0)).getValueAsString());
 		assertEquals(ParamPrefixEnum.GREATERTHAN, ((DateParam) map.get("_lastUpdated").get(0).get(1)).getPrefix());
-		assertEquals("2023", ((DateParam)map.get("_lastUpdated").get(0).get(1)).getValueAsString());
+		assertEquals("2023", ((DateParam) map.get("_lastUpdated").get(0).get(1)).getValueAsString());
 	}
 
 	@Test
@@ -306,6 +319,25 @@ public class FqlExecutorTest {
 		assertEquals("D", ((StringParam) map.get("name").get(1).get(1)).getValue());
 	}
 
+	@Test
+	public void testError() {
+		String input = """
+			from Foo
+			select Foo.blah
+			""";
+
+		assertEquals("Invalid FROM statement. Unknown resource type 'Foo' at position: [line=0, column=5]",
+			assertThrows(DataFormatException.class, () -> myFqlExecutor.executeInitialSearch(input, null, mySrd)).getMessage());
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IBaseResource> IFhirResourceDao<T> initDao(Class<T> theType) {
+		IFhirResourceDao<T> retVal = mock(IFhirResourceDao.class);
+		String type = myCtx.getResourceType(theType);
+		when(myDaoRegistry.getResourceDao(type)).thenReturn(retVal);
+		return retVal;
+	}
+
 	@Nonnull
 	private static SimpleBundleProvider createSomeSimpsonsAndFlanders() {
 		Patient homer = new Patient();
@@ -327,25 +359,6 @@ public class FqlExecutorTest {
 			homer, nedFlanders, bart, lisa, maggie
 		));
 		return provider;
-	}
-
-	@Test
-	public void testError() {
-		String input = """
-			from Foo
-			select Foo.blah
-			""";
-
-		assertEquals("Invalid FROM statement. Unknown resource type 'Foo' at position: [line=0, column=5]",
-			assertThrows(DataFormatException.class, () -> myFqlExecutor.executeInitialSearch(input, null, mySrd)).getMessage());
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T extends IBaseResource> IFhirResourceDao<T> initDao(Class<T> theType) {
-		IFhirResourceDao<T> retVal = mock(IFhirResourceDao.class);
-		String type = myCtx.getResourceType(theType);
-		when(myDaoRegistry.getResourceDao(type)).thenReturn(retVal);
-		return retVal;
 	}
 
 }

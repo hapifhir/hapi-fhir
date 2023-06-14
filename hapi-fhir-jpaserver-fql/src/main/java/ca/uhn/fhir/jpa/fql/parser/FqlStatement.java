@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.fql.parser;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Nullable;
@@ -30,10 +31,13 @@ import java.util.List;
 public class FqlStatement implements IModelJson {
 
 	@JsonProperty("selectClauses")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<SelectClause> mySelectClauses = new ArrayList<>();
 	@JsonProperty("whereClauses")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<WhereClause> myWhereClauses = new ArrayList<>();
 	@JsonProperty("searchClauses")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<WhereClause> mySearchClauses = new ArrayList<>();
 	@JsonProperty("fromResourceName")
 	private String myFromResourceName;
@@ -106,6 +110,23 @@ public class FqlStatement implements IModelJson {
 		private String myClause;
 		@JsonProperty("alias")
 		private String myAlias;
+
+		/**
+		 * Constructor
+		 */
+		public SelectClause() {
+			// nothing
+		}
+
+		/**
+		 * Constructor
+		 *
+		 * @param theClause The clause (will be used as both the clause and the alias)
+		 */
+		public SelectClause(String theClause) {
+			setClause(theClause);
+			setAlias(theClause);
+		}
 
 		public String getAlias() {
 			return myAlias;

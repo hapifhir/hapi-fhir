@@ -117,6 +117,7 @@ class FqlLexer {
 					case ')':
 					case '|':
 					case ':':
+					case '*':
 						myNextToken = Character.toString(nextChar);
 						myPosition++;
 						return;
