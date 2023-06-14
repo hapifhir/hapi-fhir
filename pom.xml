@@ -895,6 +895,7 @@
 	<properties>
 		<fhir_core_version>6.0.15</fhir_core_version>
 		<spotless_version>2.37.0</spotless_version>
+		<gitbuildhook_version>3.4.1</gitbuildhook_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -2206,6 +2207,23 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>com.rudikershaw.gitbuildhook</groupId>
+					<artifactId>git-build-hook-maven-plugin</artifactId>
+					<version>${gitbuildhook_version}</version>
+					<configuration>
+						<installHooks>
+							<pre-commit>hooks/pre-commit.sh</pre-commit>
+						</installHooks>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>install</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>com.diffplug.spotless</groupId>
 					<artifactId>spotless-maven-plugin</artifactId>
 					<version>${spotless_version}</version>
@@ -2540,6 +2558,10 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>com.rudikershaw.gitbuildhook</groupId>
+				<artifactId>git-build-hook-maven-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>com.diffplug.spotless</groupId>
 				<artifactId>spotless-maven-plugin</artifactId>
