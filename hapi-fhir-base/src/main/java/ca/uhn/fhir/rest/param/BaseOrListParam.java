@@ -23,47 +23,50 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseOrListParam<MT extends BaseOrListParam<?, ?>, PT extends IQueryParameterType> implements IQueryParameterOr<PT> {
+public abstract class BaseOrListParam<
+                MT extends BaseOrListParam<?, ?>, PT extends IQueryParameterType>
+        implements IQueryParameterOr<PT> {
 
-	private List<PT> myList = new ArrayList<>();
+    private List<PT> myList = new ArrayList<>();
 
-	@SuppressWarnings("unchecked")
-	public MT add(PT theParameter) {
-		if (theParameter != null) {
-			myList.add(theParameter);
-		}
-		return (MT) this;
-	}
+    @SuppressWarnings("unchecked")
+    public MT add(PT theParameter) {
+        if (theParameter != null) {
+            myList.add(theParameter);
+        }
+        return (MT) this;
+    }
 
-	public abstract MT addOr(PT theParameter);
+    public abstract MT addOr(PT theParameter);
 
-	@Override
-	public List<PT> getValuesAsQueryTokens() {
-		return myList;
-	}
+    @Override
+    public List<PT> getValuesAsQueryTokens() {
+        return myList;
+    }
 
-	abstract PT newInstance();
+    abstract PT newInstance();
 
-	@Override
-	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
-		myList.clear();
-		for (String next : theParameters) {
-			PT nextParam = newInstance();
-			nextParam.setValueAsQueryToken(theContext, theParamName, theParameters.getQualifier(), next);
-			myList.add(nextParam);
-		}
-	}
+    @Override
+    public void setValuesAsQueryTokens(
+            FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
+        myList.clear();
+        for (String next : theParameters) {
+            PT nextParam = newInstance();
+            nextParam.setValueAsQueryToken(
+                    theContext, theParamName, theParameters.getQualifier(), next);
+            myList.add(nextParam);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return myList.toString();
-	}
+    @Override
+    public String toString() {
+        return myList.toString();
+    }
 
-	public int size() {
-		return myList.size();
-	}
+    public int size() {
+        return myList.size();
+    }
 }

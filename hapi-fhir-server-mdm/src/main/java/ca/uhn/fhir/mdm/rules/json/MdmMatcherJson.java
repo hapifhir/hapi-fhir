@@ -24,42 +24,43 @@ import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MdmMatcherJson implements IModelJson {
-	@JsonProperty(value = "algorithm", required = true)
-	MatchTypeEnum myAlgorithm;
+    @JsonProperty(value = "algorithm", required = true)
+    MatchTypeEnum myAlgorithm;
 
-	@JsonProperty(value = "identifierSystem", required = false)
-	String myIdentifierSystem;
+    @JsonProperty(value = "identifierSystem", required = false)
+    String myIdentifierSystem;
 
-	/**
-	 * For String value types, should the values be normalized (case, accents) before they are compared
-	 */
-	@JsonProperty(value = "exact")
-	boolean myExact;
+    /**
+     * For String value types, should the values be normalized (case, accents) before they are
+     * compared
+     */
+    @JsonProperty(value = "exact")
+    boolean myExact;
 
-	public MatchTypeEnum getAlgorithm() {
-		return myAlgorithm;
-	}
+    public MatchTypeEnum getAlgorithm() {
+        return myAlgorithm;
+    }
 
-	public MdmMatcherJson setAlgorithm(MatchTypeEnum theAlgorithm) {
-		myAlgorithm = theAlgorithm;
-		return this;
-	}
+    public MdmMatcherJson setAlgorithm(MatchTypeEnum theAlgorithm) {
+        myAlgorithm = theAlgorithm;
+        return this;
+    }
 
-	public String getIdentifierSystem() {
-		return myIdentifierSystem;
-	}
+    public String getIdentifierSystem() {
+        return myIdentifierSystem;
+    }
 
-	public MdmMatcherJson setIdentifierSystem(String theIdentifierSystem) {
-		myIdentifierSystem = theIdentifierSystem;
-		return this;
-	}
+    public MdmMatcherJson setIdentifierSystem(String theIdentifierSystem) {
+        myIdentifierSystem = theIdentifierSystem;
+        return this;
+    }
 
-	public boolean getExact() {
-		return myExact;
-	}
+    public boolean getExact() {
+        return myExact;
+    }
 
-	public MdmMatcherJson setExact(boolean theExact) {
-		myExact = theExact;
-		return this;
-	}
+    public MdmMatcherJson setExact(boolean theExact) {
+        myExact = theExact;
+        return this;
+    }
 }

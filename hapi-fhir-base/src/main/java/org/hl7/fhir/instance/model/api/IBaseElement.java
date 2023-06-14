@@ -21,12 +21,11 @@ package org.hl7.fhir.instance.model.api;
 
 public interface IBaseElement {
 
-	IBaseElement setId(String theValue);
+    IBaseElement setId(String theValue);
 
-	String getId();
+    String getId();
 
-	Object getUserData(String theName);
+    Object getUserData(String theName);
 
-	void setUserData(String theName, Object theValue);
-
+    void setUserData(String theName, Object theValue);
 }

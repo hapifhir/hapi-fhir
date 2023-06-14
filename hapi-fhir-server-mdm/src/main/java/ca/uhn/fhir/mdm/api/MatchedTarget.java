@@ -23,27 +23,27 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public class MatchedTarget {
 
-	private final IAnyResource myTarget;
-	private final MdmMatchOutcome myMatchResult;
+    private final IAnyResource myTarget;
+    private final MdmMatchOutcome myMatchResult;
 
-	public MatchedTarget(IAnyResource theTarget, MdmMatchOutcome theMatchResult) {
-		myTarget = theTarget;
-		myMatchResult = theMatchResult;
-	}
+    public MatchedTarget(IAnyResource theTarget, MdmMatchOutcome theMatchResult) {
+        myTarget = theTarget;
+        myMatchResult = theMatchResult;
+    }
 
-	public IAnyResource getTarget() {
-		return myTarget;
-	}
+    public IAnyResource getTarget() {
+        return myTarget;
+    }
 
-	public MdmMatchOutcome getMatchResult() {
-		return myMatchResult;
-	}
+    public MdmMatchOutcome getMatchResult() {
+        return myMatchResult;
+    }
 
-	public boolean isMatch() {
-		return myMatchResult.isMatch();
-	}
+    public boolean isMatch() {
+        return myMatchResult.isMatch();
+    }
 
-	public boolean isPossibleMatch() {
-		return myMatchResult.isPossibleMatch();
-	}
+    public boolean isPossibleMatch() {
+        return myMatchResult.isPossibleMatch();
+    }
 }

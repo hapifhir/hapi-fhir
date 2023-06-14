@@ -19,112 +19,121 @@
  */
 package ca.uhn.fhir.rest.param;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+public class CompositeParam<A extends IQueryParameterType, B extends IQueryParameterType>
+        extends BaseParam implements IQueryParameterType {
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+    private A myLeftType;
+    private B myRightType;
 
-public class CompositeParam<A extends IQueryParameterType, B extends IQueryParameterType> extends BaseParam implements IQueryParameterType {
+    public CompositeParam(A theLeftInstance, B theRightInstance) {
+        myLeftType = theLeftInstance;
+        myRightType = theRightInstance;
+    }
 
-	private A myLeftType;
-	private B myRightType;
+    public CompositeParam(Class<A> theLeftType, Class<B> theRightType) {
+        Validate.notNull(theLeftType);
+        Validate.notNull(theRightType);
+        try {
+            myLeftType = theLeftType.newInstance();
+        } catch (InstantiationException e) {
+            throw new ConfigurationException(
+                    Msg.code(1943) + "Failed to instantiate type: " + myLeftType, e);
+        } catch (IllegalAccessException e) {
+            throw new ConfigurationException(
+                    Msg.code(1944) + "Failed to instantiate type: " + myLeftType, e);
+        }
+        try {
+            myRightType = theRightType.newInstance();
+        } catch (InstantiationException e) {
+            throw new ConfigurationException(
+                    Msg.code(1945) + "Failed to instantiate type: " + myRightType, e);
+        } catch (IllegalAccessException e) {
+            throw new ConfigurationException(
+                    Msg.code(1946) + "Failed to instantiate type: " + myRightType, e);
+        }
+    }
 
-	public CompositeParam(A theLeftInstance, B theRightInstance) {
-		myLeftType = theLeftInstance;
-		myRightType = theRightInstance;
-	}
+    @Override
+    String doGetQueryParameterQualifier() {
+        return null;
+    }
 
-	public CompositeParam(Class<A> theLeftType, Class<B> theRightType) {
-		Validate.notNull(theLeftType);
-		Validate.notNull(theRightType);
-		try {
-			myLeftType = theLeftType.newInstance();
-		} catch (InstantiationException e) {
-			throw new ConfigurationException(Msg.code(1943) + "Failed to instantiate type: " + myLeftType, e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException(Msg.code(1944) + "Failed to instantiate type: " + myLeftType, e);
-		}
-		try {
-			myRightType = theRightType.newInstance();
-		} catch (InstantiationException e) {
-			throw new ConfigurationException(Msg.code(1945) + "Failed to instantiate type: " + myRightType, e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException(Msg.code(1946) + "Failed to instantiate type: " + myRightType, e);
-		}
-	}
+    @Override
+    String doGetValueAsQueryToken(FhirContext theContext) {
+        StringBuilder b = new StringBuilder();
+        if (myLeftType != null) {
+            b.append(myLeftType.getValueAsQueryToken(theContext));
+        }
+        b.append('$');
+        if (myRightType != null) {
+            b.append(myRightType.getValueAsQueryToken(theContext));
+        }
+        return b.toString();
+    }
 
-	@Override
-	String doGetQueryParameterQualifier() {
-		return null;
-	}
+    @Override
+    void doSetValueAsQueryToken(
+            FhirContext theContext, String theParamName, String theQualifier, String theValue) {
+        if (isBlank(theValue)) {
+            myLeftType.setValueAsQueryToken(theContext, theParamName, theQualifier, "");
+            myRightType.setValueAsQueryToken(theContext, theParamName, theQualifier, "");
+        } else {
+            List<String> parts = ParameterUtil.splitParameterString(theValue, '$', false);
+            if (parts.size() > 2) {
+                throw new InvalidRequestException(
+                        Msg.code(1947)
+                                + "Invalid value for composite parameter (only one '$' is valid for"
+                                + " this parameter, others must be escaped). Value was: "
+                                + theValue);
+            }
+            myLeftType.setValueAsQueryToken(theContext, theParamName, theQualifier, parts.get(0));
+            if (parts.size() > 1) {
+                myRightType.setValueAsQueryToken(
+                        theContext, theParamName, theQualifier, parts.get(1));
+            }
+        }
+    }
 
-	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
-		StringBuilder b = new StringBuilder();
-		if (myLeftType != null) {
-			b.append(myLeftType.getValueAsQueryToken(theContext));
-		}
-		b.append('$');
-		if (myRightType != null) {
-			b.append(myRightType.getValueAsQueryToken(theContext));
-		}
-		return b.toString();
-	}
+    /**
+     * @return Returns the left value for this parameter (the first of two parameters in this
+     *     composite)
+     */
+    public A getLeftValue() {
+        return myLeftType;
+    }
 
-	@Override
-	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
-		if (isBlank(theValue)) {
-			myLeftType.setValueAsQueryToken(theContext, theParamName, theQualifier, "");
-			myRightType.setValueAsQueryToken(theContext, theParamName, theQualifier, "");
-		} else {
-			List<String> parts = ParameterUtil.splitParameterString(theValue, '$', false);
-			if (parts.size() > 2) {
-				throw new InvalidRequestException(Msg.code(1947) + "Invalid value for composite parameter (only one '$' is valid for this parameter, others must be escaped). Value was: " + theValue);
-			}
-			myLeftType.setValueAsQueryToken(theContext, theParamName, theQualifier, parts.get(0));
-			if (parts.size() > 1) {
-				myRightType.setValueAsQueryToken(theContext, theParamName, theQualifier, parts.get(1));
-			}
-		}
-	}
+    /**
+     * @return Returns the right value for this parameter (the second of two parameters in this
+     *     composite)
+     */
+    public B getRightValue() {
+        return myRightType;
+    }
 
-	/**
-	 * @return Returns the left value for this parameter (the first of two parameters in this composite)
-	 */
-	public A getLeftValue() {
-		return myLeftType;
-	}
+    /** Get the values of the subcomponents, in order. */
+    public List<IQueryParameterType> getValues() {
+        return Collections.unmodifiableList(Arrays.asList(myLeftType, myRightType));
+    }
 
-	/**
-	 * @return Returns the right value for this parameter (the second of two parameters in this composite)
-	 */
-	public B getRightValue() {
-		return myRightType;
-	}
-
-	/**
-	 * Get the values of the subcomponents, in order.
-	 */
-	public List<IQueryParameterType> getValues() {
-		return Collections.unmodifiableList(Arrays.asList(myLeftType, myRightType));
-	}
-
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("myLeftType", getLeftValue());
-		b.append("myRightType", getRightValue());
-		return b.toString();
-	}
-
+    @Override
+    public String toString() {
+        ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        b.append("myLeftType", getLeftValue());
+        b.append("myRightType", getRightValue());
+        return b.toString();
+    }
 }

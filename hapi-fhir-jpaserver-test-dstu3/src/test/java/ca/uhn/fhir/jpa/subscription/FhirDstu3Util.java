@@ -17,13 +17,16 @@ public class FhirDstu3Util {
     public static final String LPI_CODESYSTEM = "http://cognitivemedicine.com/lpi";
     public static final String LPI_CODE = "LPI-FHIR";
 
-    public static Subscription createSubscription(String criteria, String payload, String endpoint, IGenericClient client) {
+    public static Subscription createSubscription(
+            String criteria, String payload, String endpoint, IGenericClient client) {
         Subscription subscription = new Subscription();
-        subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
+        subscription.setReason(
+                "Monitor new neonatal function (note, age will be determined by the monitor)");
         subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
         subscription.setCriteria(criteria);
 
-        Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
+        Subscription.SubscriptionChannelComponent channel =
+                new Subscription.SubscriptionChannelComponent();
         channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
         channel.setPayload(payload);
         channel.setEndpoint(endpoint);
@@ -96,5 +99,4 @@ public class FhirDstu3Util {
         tag.setCode(LPI_CODE);
         tag.setSystem(LPI_CODESYSTEM);
     }
-
 }

@@ -21,32 +21,36 @@ package ca.uhn.fhir.mdm.batch2.clear;
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.Validate;
-
-import javax.annotation.Nonnull;
-import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.validation.constraints.Pattern;
+import org.apache.commons.lang3.Validate;
 
 public class MdmClearJobParameters extends PartitionedJobParameters {
-	@JsonProperty("resourceType")
-	@Nonnull
-	private List<@Pattern(regexp = "^[A-Z][A-Za-z]+$", message = "If populated, must be a valid resource type'") String> myResourceNames;
+    @JsonProperty("resourceType")
+    @Nonnull
+    private List<
+                    @Pattern(
+                            regexp = "^[A-Z][A-Za-z]+$",
+                            message = "If populated, must be a valid resource type'")
+                    String>
+            myResourceNames;
 
-	public List<String> getResourceNames() {
-		if (myResourceNames == null) {
-			myResourceNames = new ArrayList<>();
-		}
-		return myResourceNames;
-	}
+    public List<String> getResourceNames() {
+        if (myResourceNames == null) {
+            myResourceNames = new ArrayList<>();
+        }
+        return myResourceNames;
+    }
 
-	public MdmClearJobParameters addResourceType(@Nonnull String theResourceName) {
-		Validate.notNull(theResourceName);
-		getResourceNames().add(theResourceName);
-		return this;
-	}
+    public MdmClearJobParameters addResourceType(@Nonnull String theResourceName) {
+        Validate.notNull(theResourceName);
+        getResourceNames().add(theResourceName);
+        return this;
+    }
 
-	public void setResourceNames(@Nonnull List<String> theResourceNames) {
-		myResourceNames = theResourceNames;
-	}
+    public void setResourceNames(@Nonnull List<String> theResourceNames) {
+        myResourceNames = theResourceNames;
+    }
 }

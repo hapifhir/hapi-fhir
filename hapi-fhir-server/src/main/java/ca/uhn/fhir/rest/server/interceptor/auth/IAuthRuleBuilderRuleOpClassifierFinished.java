@@ -23,11 +23,13 @@ import java.util.Collection;
 
 public interface IAuthRuleBuilderRuleOpClassifierFinished extends IAuthRuleFinished {
 
-	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(String... theTenantId);
+    IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(String... theTenantId);
 
-	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(Collection<String> theTenantId);
+    IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(
+            Collection<String> theTenantId);
 
-	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(String... theTenantIds);
+    IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(String... theTenantIds);
 
-	IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(Collection<String> theTenantIds);
+    IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(
+            Collection<String> theTenantIds);
 }

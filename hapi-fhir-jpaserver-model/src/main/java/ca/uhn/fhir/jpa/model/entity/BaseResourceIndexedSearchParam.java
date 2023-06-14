@@ -31,192 +31,214 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
-
+import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import java.util.Date;
-import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
-	static final int MAX_SP_NAME = 100;
-	/**
-	 * Don't change this without careful consideration. You will break existing hashes!
-	 */
-	private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
+    static final int MAX_SP_NAME = 100;
 
-	/**
-	 * Don't make this public 'cause nobody better be able to modify it!
-	 */
-	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
-	private static final long serialVersionUID = 1L;
+    /** Don't change this without careful consideration. You will break existing hashes! */
+    private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
 
-	@GenericField
-	@Column(name = "SP_MISSING", nullable = false)
-	private boolean myMissing = false;
+    /** Don't make this public 'cause nobody better be able to modify it! */
+    private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
 
-	@FullTextField
-	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
-	private String myParamName;
+    private static final long serialVersionUID = 1L;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
-	private Long myResourcePid;
+    @GenericField
+    @Column(name = "SP_MISSING", nullable = false)
+    private boolean myMissing = false;
 
-	@FullTextField
-	@Column(name = "RES_TYPE", updatable = false, nullable = false, length = Constants.MAX_RESOURCE_NAME_LENGTH)
-	private String myResourceType;
+    @FullTextField
+    @Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
+    private String myParamName;
 
-	@GenericField
-	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date myUpdated;
+    @Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
+    private Long myResourcePid;
 
-	@Transient
-	private transient PartitionSettings myPartitionSettings;
+    @FullTextField
+    @Column(
+            name = "RES_TYPE",
+            updatable = false,
+            nullable = false,
+            length = Constants.MAX_RESOURCE_NAME_LENGTH)
+    private String myResourceType;
 
-	@Transient
-	private transient StorageSettings myStorageSettings;
+    @GenericField
+    @Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date myUpdated;
 
-	@Override
-	public abstract Long getId();
+    @Transient private transient PartitionSettings myPartitionSettings;
 
-	public String getParamName() {
-		return myParamName;
-	}
+    @Transient private transient StorageSettings myStorageSettings;
 
-	public void setParamName(String theName) {
-		if (!StringUtils.equals(myParamName, theName)) {
-			myParamName = theName;
-			clearHashes();
-		}
-	}
+    @Override
+    public abstract Long getId();
 
-	// MB pushed these down to the individual SP classes so we could name the FK in the join annotation
-	/**
-	 * Get the Resource this SP indexes
-	 */
-	public abstract ResourceTable getResource();
-	public abstract BaseResourceIndexedSearchParam setResource(ResourceTable theResource);
+    public String getParamName() {
+        return myParamName;
+    }
 
-	@Override
-	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
-		BaseResourceIndexedSearchParam source = (BaseResourceIndexedSearchParam) theSource;
-		myMissing = source.myMissing;
-		myParamName = source.myParamName;
-		myUpdated = source.myUpdated;
-		myStorageSettings = source.myStorageSettings;
-		myPartitionSettings = source.myPartitionSettings;
-		setPartitionId(source.getPartitionId());
-	}
+    public void setParamName(String theName) {
+        if (!StringUtils.equals(myParamName, theName)) {
+            myParamName = theName;
+            clearHashes();
+        }
+    }
 
-	public Long getResourcePid() {
-		return myResourcePid;
-	}
+    // MB pushed these down to the individual SP classes so we could name the FK in the join
+    // annotation
+    /** Get the Resource this SP indexes */
+    public abstract ResourceTable getResource();
 
-	public String getResourceType() {
-		return myResourceType;
-	}
+    public abstract BaseResourceIndexedSearchParam setResource(ResourceTable theResource);
 
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
-	}
+    @Override
+    public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+        BaseResourceIndexedSearchParam source = (BaseResourceIndexedSearchParam) theSource;
+        myMissing = source.myMissing;
+        myParamName = source.myParamName;
+        myUpdated = source.myUpdated;
+        myStorageSettings = source.myStorageSettings;
+        myPartitionSettings = source.myPartitionSettings;
+        setPartitionId(source.getPartitionId());
+    }
 
-	public Date getUpdated() {
-		return myUpdated;
-	}
+    public Long getResourcePid() {
+        return myResourcePid;
+    }
 
-	public void setUpdated(Date theUpdated) {
-		myUpdated = theUpdated;
-	}
+    public String getResourceType() {
+        return myResourceType;
+    }
 
-	public boolean isMissing() {
-		return myMissing;
-	}
+    public void setResourceType(String theResourceType) {
+        myResourceType = theResourceType;
+    }
 
-	public BaseResourceIndexedSearchParam setMissing(boolean theMissing) {
-		myMissing = theMissing;
-		return this;
-	}
+    public Date getUpdated() {
+        return myUpdated;
+    }
 
-	public abstract IQueryParameterType toQueryParameterType();
+    public void setUpdated(Date theUpdated) {
+        myUpdated = theUpdated;
+    }
 
-	public boolean matches(IQueryParameterType theParam) {
-		throw new UnsupportedOperationException(Msg.code(1526) + "No parameter matcher for " + theParam);
-	}
+    public boolean isMissing() {
+        return myMissing;
+    }
 
-	public PartitionSettings getPartitionSettings() {
-		return myPartitionSettings;
-	}
+    public BaseResourceIndexedSearchParam setMissing(boolean theMissing) {
+        myMissing = theMissing;
+        return this;
+    }
 
-	public BaseResourceIndexedSearchParam setPartitionSettings(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
-		return this;
-	}
+    public abstract IQueryParameterType toQueryParameterType();
 
-	public StorageSettings getStorageSettings() {
-		return myStorageSettings;
-	}
+    public boolean matches(IQueryParameterType theParam) {
+        throw new UnsupportedOperationException(
+                Msg.code(1526) + "No parameter matcher for " + theParam);
+    }
 
-	public BaseResourceIndexedSearchParam setStorageSettings(StorageSettings theStorageSettings) {
-		myStorageSettings = theStorageSettings;
-		return this;
-	}
+    public PartitionSettings getPartitionSettings() {
+        return myPartitionSettings;
+    }
 
-	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashIdentity(thePartitionSettings, requestPartitionId, theResourceType, theParamName);
-	}
+    public BaseResourceIndexedSearchParam setPartitionSettings(
+            PartitionSettings thePartitionSettings) {
+        myPartitionSettings = thePartitionSettings;
+        return this;
+    }
 
-	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
-	}
+    public StorageSettings getStorageSettings() {
+        return myStorageSettings;
+    }
 
-	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, List<String> theAdditionalValues) {
-		String[] values = new String[theAdditionalValues.size() + 2];
-		values[0] = theResourceType;
-		values[1] = theParamName;
-		for (int i = 0; i < theAdditionalValues.size(); i++) {
-			values[i + 2] = theAdditionalValues.get(i);
-		}
+    public BaseResourceIndexedSearchParam setStorageSettings(StorageSettings theStorageSettings) {
+        myStorageSettings = theStorageSettings;
+        return this;
+    }
 
-		return hash(thePartitionSettings, theRequestPartitionId, values);
-	}
+    public static long calculateHashIdentity(
+            PartitionSettings thePartitionSettings,
+            PartitionablePartitionId theRequestPartitionId,
+            String theResourceType,
+            String theParamName) {
+        RequestPartitionId requestPartitionId =
+                PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+        return calculateHashIdentity(
+                thePartitionSettings, requestPartitionId, theResourceType, theParamName);
+    }
 
-	/**
-	 * Applies a fast and consistent hashing algorithm to a set of strings
-	 */
-	static long hash(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String... theValues) {
-		Hasher hasher = HASH_FUNCTION.newHasher();
+    public static long calculateHashIdentity(
+            PartitionSettings thePartitionSettings,
+            RequestPartitionId theRequestPartitionId,
+            String theResourceType,
+            String theParamName) {
+        return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
+    }
 
-		if (thePartitionSettings.isPartitioningEnabled() && thePartitionSettings.isIncludePartitionInSearchHashes() && theRequestPartitionId != null) {
-			if (theRequestPartitionId.getPartitionIds().size() > 1) {
-				throw new InternalErrorException(Msg.code(1527) + "Can not search multiple partitions when partitions are included in search hashes");
-			}
-			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
-			if (partitionId != null) {
-				hasher.putInt(partitionId);
-			}
-		}
+    public static long calculateHashIdentity(
+            PartitionSettings thePartitionSettings,
+            RequestPartitionId theRequestPartitionId,
+            String theResourceType,
+            String theParamName,
+            List<String> theAdditionalValues) {
+        String[] values = new String[theAdditionalValues.size() + 2];
+        values[0] = theResourceType;
+        values[1] = theParamName;
+        for (int i = 0; i < theAdditionalValues.size(); i++) {
+            values[i + 2] = theAdditionalValues.get(i);
+        }
 
-		for (String next : theValues) {
-			if (next == null) {
-				hasher.putByte((byte) 0);
-			} else {
-				next = UrlUtil.escapeUrlParam(next);
-				byte[] bytes = next.getBytes(Charsets.UTF_8);
-				hasher.putBytes(bytes);
-			}
-			hasher.putBytes(DELIMITER_BYTES);
-		}
+        return hash(thePartitionSettings, theRequestPartitionId, values);
+    }
 
-		HashCode hashCode = hasher.hash();
-		long retVal = hashCode.asLong();
-		return retVal;
-	}
+    /** Applies a fast and consistent hashing algorithm to a set of strings */
+    static long hash(
+            PartitionSettings thePartitionSettings,
+            RequestPartitionId theRequestPartitionId,
+            String... theValues) {
+        Hasher hasher = HASH_FUNCTION.newHasher();
+
+        if (thePartitionSettings.isPartitioningEnabled()
+                && thePartitionSettings.isIncludePartitionInSearchHashes()
+                && theRequestPartitionId != null) {
+            if (theRequestPartitionId.getPartitionIds().size() > 1) {
+                throw new InternalErrorException(
+                        Msg.code(1527)
+                                + "Can not search multiple partitions when partitions are included"
+                                + " in search hashes");
+            }
+            Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
+            if (partitionId != null) {
+                hasher.putInt(partitionId);
+            }
+        }
+
+        for (String next : theValues) {
+            if (next == null) {
+                hasher.putByte((byte) 0);
+            } else {
+                next = UrlUtil.escapeUrlParam(next);
+                byte[] bytes = next.getBytes(Charsets.UTF_8);
+                hasher.putBytes(bytes);
+            }
+            hasher.putBytes(DELIMITER_BYTES);
+        }
+
+        HashCode hashCode = hasher.hash();
+        long retVal = hashCode.asLong();
+        return retVal;
+    }
 }

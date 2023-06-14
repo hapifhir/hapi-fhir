@@ -40,20 +40,6 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.util.ReflectionUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu2.hapi.rest.server.ServerConformanceProvider;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -65,274 +51,354 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu2.hapi.rest.server.ServerConformanceProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 /**
- * This is the conformance provider for the jax rs servers. It requires all providers to be registered during startup because the conformance profile is generated during the postconstruct phase.
+ * This is the conformance provider for the jax rs servers. It requires all providers to be
+ * registered during startup because the conformance profile is generated during the postconstruct
+ * phase.
  *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProvider implements IResourceProvider {
+public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProvider
+        implements IResourceProvider {
 
-	/**
-	 * the logger
-	 */
-	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(AbstractJaxRsConformanceProvider.class);
-	/**
-	 * the server bindings
-	 */
-	private ResourceBinding myServerBinding = new ResourceBinding();
-	/**
-	 * the resource bindings
-	 */
-	private ConcurrentHashMap<String, ResourceBinding> myResourceNameToBinding = new ConcurrentHashMap<String, ResourceBinding>();
-	/**
-	 * the server configuration
-	 */
-	private RestfulServerConfiguration myServerConfiguration = new RestfulServerConfiguration();
+    /** the logger */
+    private static final org.slf4j.Logger ourLog =
+            LoggerFactory.getLogger(AbstractJaxRsConformanceProvider.class);
 
-	/**
-	 * the conformance. It is created once during startup
-	 */
-	private org.hl7.fhir.r4.model.CapabilityStatement myR4CapabilityStatement;
-	private org.hl7.fhir.dstu3.model.CapabilityStatement myDstu3CapabilityStatement;
-	private org.hl7.fhir.dstu2016may.model.Conformance myDstu2_1Conformance;
-	private org.hl7.fhir.dstu2.model.Conformance myDstu2Hl7OrgConformance;
-	private ca.uhn.fhir.model.dstu2.resource.Conformance myDstu2Conformance;
-	private boolean myInitialized;
+    /** the server bindings */
+    private ResourceBinding myServerBinding = new ResourceBinding();
 
-	/**
-	 * Constructor allowing the description, servername and server to be set
-	 *
-	 * @param implementationDescription the implementation description. If null, "" is used
-	 * @param serverName                the server name. If null, "" is used
-	 * @param serverVersion             the server version. If null, "" is used
-	 */
-	protected AbstractJaxRsConformanceProvider(String implementationDescription, String serverName, String serverVersion) {
-		myServerConfiguration.setFhirContext(getFhirContext());
-		myServerConfiguration.setImplementationDescription(StringUtils.defaultIfEmpty(implementationDescription, ""));
-		myServerConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
-		myServerConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
-	}
+    /** the resource bindings */
+    private ConcurrentHashMap<String, ResourceBinding> myResourceNameToBinding =
+            new ConcurrentHashMap<String, ResourceBinding>();
 
-	/**
-	 * Constructor allowing the description, servername and server to be set
-	 *
-	 * @param ctx                       the {@link FhirContext} instance.
-	 * @param implementationDescription the implementation description. If null, "" is used
-	 * @param serverName                the server name. If null, "" is used
-	 * @param serverVersion             the server version. If null, "" is used
-	 */
-	protected AbstractJaxRsConformanceProvider(FhirContext ctx, String implementationDescription, String serverName, String serverVersion) {
-		super(ctx);
-		myServerConfiguration.setFhirContext(ctx);
-		myServerConfiguration.setImplementationDescription(StringUtils.defaultIfEmpty(implementationDescription, ""));
-		myServerConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
-		myServerConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
-	}
+    /** the server configuration */
+    private RestfulServerConfiguration myServerConfiguration = new RestfulServerConfiguration();
 
-	/**
-	 * This method will set the conformance during the Context Refreshed phase. The method {@link AbstractJaxRsConformanceProvider#getProviders()} is used to get all the resource providers include in the
-	 * conformance
-	 */
-	@EventListener(ContextRefreshedEvent.class)
-	protected synchronized void buildCapabilityStatement() {
-		if (myInitialized) {
-			return;
-		}
+    /** the conformance. It is created once during startup */
+    private org.hl7.fhir.r4.model.CapabilityStatement myR4CapabilityStatement;
 
-		ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers = getProviders();
-		for (Entry<Class<? extends IResourceProvider>, IResourceProvider> provider : providers.entrySet()) {
-			addProvider(provider.getValue(), provider.getKey());
-		}
-		List<BaseMethodBinding> serverBindings = new ArrayList<BaseMethodBinding>();
-		for (ResourceBinding baseMethodBinding : myResourceNameToBinding.values()) {
-			serverBindings.addAll(baseMethodBinding.getMethodBindings());
-		}
-		myServerConfiguration.setServerBindings(serverBindings);
-		myServerConfiguration.setResourceBindings(new LinkedList<ResourceBinding>(myResourceNameToBinding.values()));
-		myServerConfiguration.computeSharedSupertypeForResourcePerName(providers.values());
-		HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy();
-		hardcodedServerAddressStrategy.setValue(getBaseForServer());
-		myServerConfiguration.setServerAddressStrategy(hardcodedServerAddressStrategy);
-		FhirVersionEnum fhirContextVersion = super.getFhirContext().getVersion().getVersion();
-		switch (fhirContextVersion) {
-			case R4:
-				ServerCapabilityStatementProvider r4ServerCapabilityStatementProvider = new ServerCapabilityStatementProvider(getFhirContext(), myServerConfiguration);
-				myR4CapabilityStatement = (CapabilityStatement) r4ServerCapabilityStatementProvider.getServerConformance(null, null);
-				break;
-			case DSTU3:
-				org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider dstu3ServerCapabilityStatementProvider = new org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider(myServerConfiguration);
-				myDstu3CapabilityStatement = dstu3ServerCapabilityStatementProvider.getServerConformance(null, null);
-				break;
-			case DSTU2_1:
-				org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider dstu2_1ServerConformanceProvider = new org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider(myServerConfiguration);
-				myDstu2_1Conformance = dstu2_1ServerConformanceProvider.getServerConformance(null, null);
-				break;
-			case DSTU2_HL7ORG:
-				ServerConformanceProvider dstu2Hl7OrgServerConformanceProvider = new ServerConformanceProvider(myServerConfiguration);
-				myDstu2Hl7OrgConformance = dstu2Hl7OrgServerConformanceProvider.getServerConformance(null, null);
-				break;
-			case DSTU2:
-				ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider dstu2ServerConformanceProvider = new ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider(myServerConfiguration);
-				myDstu2Conformance = dstu2ServerConformanceProvider.getServerConformance(null, null);
-				break;
-			default:
-				throw new ConfigurationException(Msg.code(591) + "Unsupported Fhir version: " + fhirContextVersion);
-		}
+    private org.hl7.fhir.dstu3.model.CapabilityStatement myDstu3CapabilityStatement;
+    private org.hl7.fhir.dstu2016may.model.Conformance myDstu2_1Conformance;
+    private org.hl7.fhir.dstu2.model.Conformance myDstu2Hl7OrgConformance;
+    private ca.uhn.fhir.model.dstu2.resource.Conformance myDstu2Conformance;
+    private boolean myInitialized;
 
-		myInitialized = true;
-	}
+    /**
+     * Constructor allowing the description, servername and server to be set
+     *
+     * @param implementationDescription the implementation description. If null, "" is used
+     * @param serverName the server name. If null, "" is used
+     * @param serverVersion the server version. If null, "" is used
+     */
+    protected AbstractJaxRsConformanceProvider(
+            String implementationDescription, String serverName, String serverVersion) {
+        myServerConfiguration.setFhirContext(getFhirContext());
+        myServerConfiguration.setImplementationDescription(
+                StringUtils.defaultIfEmpty(implementationDescription, ""));
+        myServerConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
+        myServerConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
+    }
 
-	/**
-	 * This method must return all the resource providers which need to be included in the conformance
-	 *
-	 * @return a map of the resource providers and their corresponding classes. This class needs to be given explicitly because retrieving the interface using {@link Object#getClass()} may not give the
-	 * correct interface in a jee environment.
-	 */
-	protected abstract ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders();
+    /**
+     * Constructor allowing the description, servername and server to be set
+     *
+     * @param ctx the {@link FhirContext} instance.
+     * @param implementationDescription the implementation description. If null, "" is used
+     * @param serverName the server name. If null, "" is used
+     * @param serverVersion the server version. If null, "" is used
+     */
+    protected AbstractJaxRsConformanceProvider(
+            FhirContext ctx,
+            String implementationDescription,
+            String serverName,
+            String serverVersion) {
+        super(ctx);
+        myServerConfiguration.setFhirContext(ctx);
+        myServerConfiguration.setImplementationDescription(
+                StringUtils.defaultIfEmpty(implementationDescription, ""));
+        myServerConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
+        myServerConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
+    }
 
-	/**
-	 * This method will retrieve the conformance using the http OPTIONS method
-	 *
-	 * @return the response containing the conformance
-	 */
-	@OPTIONS
-	@Path("/metadata")
-	public Response conformanceUsingOptions() throws IOException {
-		return conformance();
-	}
+    /**
+     * This method will set the conformance during the Context Refreshed phase. The method {@link
+     * AbstractJaxRsConformanceProvider#getProviders()} is used to get all the resource providers
+     * include in the conformance
+     */
+    @EventListener(ContextRefreshedEvent.class)
+    protected synchronized void buildCapabilityStatement() {
+        if (myInitialized) {
+            return;
+        }
 
-	/**
-	 * This method will retrieve the conformance using the http GET method
-	 *
-	 * @return the response containing the conformance
-	 */
-	@GET
-	@Path("/metadata")
-	public Response conformance() throws IOException {
-		buildCapabilityStatement();
+        ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers =
+                getProviders();
+        for (Entry<Class<? extends IResourceProvider>, IResourceProvider> provider :
+                providers.entrySet()) {
+            addProvider(provider.getValue(), provider.getKey());
+        }
+        List<BaseMethodBinding> serverBindings = new ArrayList<BaseMethodBinding>();
+        for (ResourceBinding baseMethodBinding : myResourceNameToBinding.values()) {
+            serverBindings.addAll(baseMethodBinding.getMethodBindings());
+        }
+        myServerConfiguration.setServerBindings(serverBindings);
+        myServerConfiguration.setResourceBindings(
+                new LinkedList<ResourceBinding>(myResourceNameToBinding.values()));
+        myServerConfiguration.computeSharedSupertypeForResourcePerName(providers.values());
+        HardcodedServerAddressStrategy hardcodedServerAddressStrategy =
+                new HardcodedServerAddressStrategy();
+        hardcodedServerAddressStrategy.setValue(getBaseForServer());
+        myServerConfiguration.setServerAddressStrategy(hardcodedServerAddressStrategy);
+        FhirVersionEnum fhirContextVersion = super.getFhirContext().getVersion().getVersion();
+        switch (fhirContextVersion) {
+            case R4:
+                ServerCapabilityStatementProvider r4ServerCapabilityStatementProvider =
+                        new ServerCapabilityStatementProvider(
+                                getFhirContext(), myServerConfiguration);
+                myR4CapabilityStatement =
+                        (CapabilityStatement)
+                                r4ServerCapabilityStatementProvider.getServerConformance(
+                                        null, null);
+                break;
+            case DSTU3:
+                org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider
+                        dstu3ServerCapabilityStatementProvider =
+                                new org.hl7.fhir.dstu3.hapi.rest.server
+                                        .ServerCapabilityStatementProvider(myServerConfiguration);
+                myDstu3CapabilityStatement =
+                        dstu3ServerCapabilityStatementProvider.getServerConformance(null, null);
+                break;
+            case DSTU2_1:
+                org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider
+                        dstu2_1ServerConformanceProvider =
+                                new org.hl7.fhir.dstu2016may.hapi.rest.server
+                                        .ServerConformanceProvider(myServerConfiguration);
+                myDstu2_1Conformance =
+                        dstu2_1ServerConformanceProvider.getServerConformance(null, null);
+                break;
+            case DSTU2_HL7ORG:
+                ServerConformanceProvider dstu2Hl7OrgServerConformanceProvider =
+                        new ServerConformanceProvider(myServerConfiguration);
+                myDstu2Hl7OrgConformance =
+                        dstu2Hl7OrgServerConformanceProvider.getServerConformance(null, null);
+                break;
+            case DSTU2:
+                ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider
+                        dstu2ServerConformanceProvider =
+                                new ca.uhn.fhir.rest.server.provider.dstu2
+                                        .ServerConformanceProvider(myServerConfiguration);
+                myDstu2Conformance =
+                        dstu2ServerConformanceProvider.getServerConformance(null, null);
+                break;
+            default:
+                throw new ConfigurationException(
+                        Msg.code(591) + "Unsupported Fhir version: " + fhirContextVersion);
+        }
 
-		Builder request = getRequest(RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA);
-		JaxRsRequest requestDetails = request.build();
-		IRestfulResponse response = requestDetails.getResponse();
-		response.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "*");
+        myInitialized = true;
+    }
 
-		IBaseResource conformance;
-		FhirVersionEnum fhirContextVersion = super.getFhirContext().getVersion().getVersion();
-		switch (fhirContextVersion) {
-			case R4:
-				conformance = myR4CapabilityStatement;
-				break;
-			case DSTU3:
-				conformance = myDstu3CapabilityStatement;
-				break;
-			case DSTU2_1:
-				conformance = myDstu2_1Conformance;
-				break;
-			case DSTU2_HL7ORG:
-				conformance = myDstu2Hl7OrgConformance;
-				break;
-			case DSTU2:
-				conformance = myDstu2Conformance;
-				break;
-			default:
-				throw new ConfigurationException(Msg.code(592) + "Unsupported Fhir version: " + fhirContextVersion);
-		}
+    /**
+     * This method must return all the resource providers which need to be included in the
+     * conformance
+     *
+     * @return a map of the resource providers and their corresponding classes. This class needs to
+     *     be given explicitly because retrieving the interface using {@link Object#getClass()} may
+     *     not give the correct interface in a jee environment.
+     */
+    protected abstract ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider>
+            getProviders();
 
-		Set<SummaryEnum> summaryMode = Collections.emptySet();
+    /**
+     * This method will retrieve the conformance using the http OPTIONS method
+     *
+     * @return the response containing the conformance
+     */
+    @OPTIONS
+    @Path("/metadata")
+    public Response conformanceUsingOptions() throws IOException {
+        return conformance();
+    }
 
-		return (Response) RestfulServerUtils.streamResponseAsResource(this, conformance, summaryMode, Constants.STATUS_HTTP_200_OK, false, true, requestDetails, null, null);
-	}
+    /**
+     * This method will retrieve the conformance using the http GET method
+     *
+     * @return the response containing the conformance
+     */
+    @GET
+    @Path("/metadata")
+    public Response conformance() throws IOException {
+        buildCapabilityStatement();
 
-	/**
-	 * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object)}
-	 *
-	 * @param theProvider          an instance of the provider interface
-	 * @param theProviderInterface the class describing the providers interface
-	 * @return the numbers of basemethodbindings added
-	 * @see ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object)
-	 */
-	public int addProvider(IResourceProvider theProvider, Class<? extends IResourceProvider> theProviderInterface) throws ConfigurationException {
-		int count = 0;
+        Builder request = getRequest(RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA);
+        JaxRsRequest requestDetails = request.build();
+        IRestfulResponse response = requestDetails.getResponse();
+        response.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "*");
 
-		for (Method m : ReflectionUtil.getDeclaredMethods(theProviderInterface)) {
-			BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theProvider);
-			if (foundMethodBinding == null) {
-				continue;
-			}
+        IBaseResource conformance;
+        FhirVersionEnum fhirContextVersion = super.getFhirContext().getVersion().getVersion();
+        switch (fhirContextVersion) {
+            case R4:
+                conformance = myR4CapabilityStatement;
+                break;
+            case DSTU3:
+                conformance = myDstu3CapabilityStatement;
+                break;
+            case DSTU2_1:
+                conformance = myDstu2_1Conformance;
+                break;
+            case DSTU2_HL7ORG:
+                conformance = myDstu2Hl7OrgConformance;
+                break;
+            case DSTU2:
+                conformance = myDstu2Conformance;
+                break;
+            default:
+                throw new ConfigurationException(
+                        Msg.code(592) + "Unsupported Fhir version: " + fhirContextVersion);
+        }
 
-			count++;
+        Set<SummaryEnum> summaryMode = Collections.emptySet();
 
-			// if (foundMethodBinding instanceof ConformanceMethodBinding) {
-			// myServerConformanceMethod = foundMethodBinding;
-			// continue;
-			// }
+        return (Response)
+                RestfulServerUtils.streamResponseAsResource(
+                        this,
+                        conformance,
+                        summaryMode,
+                        Constants.STATUS_HTTP_200_OK,
+                        false,
+                        true,
+                        requestDetails,
+                        null,
+                        null);
+    }
 
-			if (!Modifier.isPublic(m.getModifiers())) {
-				throw new ConfigurationException(Msg.code(593) + "Method '" + m.getName() + "' is not public, FHIR RESTful methods must be public");
-			} else {
-				if (Modifier.isStatic(m.getModifiers())) {
-					throw new ConfigurationException(Msg.code(594) + "Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
-				} else {
-					ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
+    /**
+     * This method will add a provider to the conformance. This method is almost an exact copy of
+     * {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object)}
+     *
+     * @param theProvider an instance of the provider interface
+     * @param theProviderInterface the class describing the providers interface
+     * @return the numbers of basemethodbindings added
+     * @see ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object)
+     */
+    public int addProvider(
+            IResourceProvider theProvider, Class<? extends IResourceProvider> theProviderInterface)
+            throws ConfigurationException {
+        int count = 0;
 
-					String resourceName = foundMethodBinding.getResourceName();
-					ResourceBinding resourceBinding;
-					if (resourceName == null) {
-						resourceBinding = myServerBinding;
-					} else {
-						RuntimeResourceDefinition definition = getFhirContext().getResourceDefinition(resourceName);
-						if (myResourceNameToBinding.containsKey(definition.getName())) {
-							resourceBinding = myResourceNameToBinding.get(definition.getName());
-						} else {
-							resourceBinding = new ResourceBinding();
-							resourceBinding.setResourceName(resourceName);
-							myResourceNameToBinding.put(resourceName, resourceBinding);
-						}
-					}
+        for (Method m : ReflectionUtil.getDeclaredMethods(theProviderInterface)) {
+            BaseMethodBinding foundMethodBinding =
+                    BaseMethodBinding.bindMethod(m, getFhirContext(), theProvider);
+            if (foundMethodBinding == null) {
+                continue;
+            }
 
-					List<Class<?>> allowableParams = foundMethodBinding.getAllowableParamAnnotations();
-					if (allowableParams != null) {
-						for (Annotation[] nextParamAnnotations : m.getParameterAnnotations()) {
-							for (Annotation annotation : nextParamAnnotations) {
-								Package pack = annotation.annotationType().getPackage();
-								if (pack.equals(IdParam.class.getPackage())) {
-									if (!allowableParams.contains(annotation.annotationType())) {
-										throw new ConfigurationException(Msg.code(595) + "Method[" + m.toString() + "] is not allowed to have a parameter annotated with " + annotation);
-									}
-								}
-							}
-						}
-					}
+            count++;
 
-					resourceBinding.addMethod(foundMethodBinding);
-					ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
-				}
-			}
-		}
+            // if (foundMethodBinding instanceof ConformanceMethodBinding) {
+            // myServerConformanceMethod = foundMethodBinding;
+            // continue;
+            // }
 
-		return count;
-	}
+            if (!Modifier.isPublic(m.getModifiers())) {
+                throw new ConfigurationException(
+                        Msg.code(593)
+                                + "Method '"
+                                + m.getName()
+                                + "' is not public, FHIR RESTful methods must be public");
+            } else {
+                if (Modifier.isStatic(m.getModifiers())) {
+                    throw new ConfigurationException(
+                            Msg.code(594)
+                                    + "Method '"
+                                    + m.getName()
+                                    + "' is static, FHIR RESTful methods must not be static");
+                } else {
+                    ourLog.debug(
+                            "Scanning public method: {}#{}", theProvider.getClass(), m.getName());
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Class<IBaseResource> getResourceType() {
-		FhirVersionEnum fhirContextVersion = super.getFhirContext().getVersion().getVersion();
-		switch (fhirContextVersion) {
-			case R4:
-				return Class.class.cast(org.hl7.fhir.r4.model.CapabilityStatement.class);
-			case DSTU3:
-				return Class.class.cast(org.hl7.fhir.dstu3.model.CapabilityStatement.class);
-			case DSTU2_1:
-				return Class.class.cast(org.hl7.fhir.dstu2016may.model.Conformance.class);
-			case DSTU2_HL7ORG:
-				return Class.class.cast(org.hl7.fhir.dstu2.model.Conformance.class);
-			case DSTU2:
-				return Class.class.cast(ca.uhn.fhir.model.dstu2.resource.Conformance.class);
-			default:
-				throw new ConfigurationException(Msg.code(596) + "Unsupported Fhir version: " + fhirContextVersion);
-		}
-	}
+                    String resourceName = foundMethodBinding.getResourceName();
+                    ResourceBinding resourceBinding;
+                    if (resourceName == null) {
+                        resourceBinding = myServerBinding;
+                    } else {
+                        RuntimeResourceDefinition definition =
+                                getFhirContext().getResourceDefinition(resourceName);
+                        if (myResourceNameToBinding.containsKey(definition.getName())) {
+                            resourceBinding = myResourceNameToBinding.get(definition.getName());
+                        } else {
+                            resourceBinding = new ResourceBinding();
+                            resourceBinding.setResourceName(resourceName);
+                            myResourceNameToBinding.put(resourceName, resourceBinding);
+                        }
+                    }
 
+                    List<Class<?>> allowableParams =
+                            foundMethodBinding.getAllowableParamAnnotations();
+                    if (allowableParams != null) {
+                        for (Annotation[] nextParamAnnotations : m.getParameterAnnotations()) {
+                            for (Annotation annotation : nextParamAnnotations) {
+                                Package pack = annotation.annotationType().getPackage();
+                                if (pack.equals(IdParam.class.getPackage())) {
+                                    if (!allowableParams.contains(annotation.annotationType())) {
+                                        throw new ConfigurationException(
+                                                Msg.code(595)
+                                                        + "Method["
+                                                        + m.toString()
+                                                        + "] is not allowed to have a parameter"
+                                                        + " annotated with "
+                                                        + annotation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    resourceBinding.addMethod(foundMethodBinding);
+                    ourLog.debug(
+                            " * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
+                }
+            }
+        }
+
+        return count;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Class<IBaseResource> getResourceType() {
+        FhirVersionEnum fhirContextVersion = super.getFhirContext().getVersion().getVersion();
+        switch (fhirContextVersion) {
+            case R4:
+                return Class.class.cast(org.hl7.fhir.r4.model.CapabilityStatement.class);
+            case DSTU3:
+                return Class.class.cast(org.hl7.fhir.dstu3.model.CapabilityStatement.class);
+            case DSTU2_1:
+                return Class.class.cast(org.hl7.fhir.dstu2016may.model.Conformance.class);
+            case DSTU2_HL7ORG:
+                return Class.class.cast(org.hl7.fhir.dstu2.model.Conformance.class);
+            case DSTU2:
+                return Class.class.cast(ca.uhn.fhir.model.dstu2.resource.Conformance.class);
+            default:
+                throw new ConfigurationException(
+                        Msg.code(596) + "Unsupported Fhir version: " + fhirContextVersion);
+        }
+    }
 }

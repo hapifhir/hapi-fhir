@@ -25,9 +25,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ISearchIncludeDao extends JpaRepository<SearchInclude, Long>, IHapiFhirJpaRepository {
-	
-	@Modifying
-	@Query(value="DELETE FROM SearchInclude r WHERE r.mySearchPid = :search")
-	void deleteForSearch(@Param("search") Long theSearchPid);
+public interface ISearchIncludeDao
+        extends JpaRepository<SearchInclude, Long>, IHapiFhirJpaRepository {
+
+    @Modifying
+    @Query(value = "DELETE FROM SearchInclude r WHERE r.mySearchPid = :search")
+    void deleteForSearch(@Param("search") Long theSearchPid);
 }

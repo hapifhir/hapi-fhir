@@ -33,7 +33,6 @@ public class EncodeContextPathElement {
         myResource = theResource;
     }
 
-
     public boolean matches(EncodeContextPathElement theOther) {
         if (myResource != theOther.isResource()) {
             return false;
@@ -71,17 +70,14 @@ public class EncodeContextPathElement {
         EncodeContextPathElement that = (EncodeContextPathElement) theO;
 
         return new EqualsBuilder()
-            .append(myResource, that.myResource)
-            .append(myName, that.myName)
-            .isEquals();
+                .append(myResource, that.myResource)
+                .append(myName, that.myName)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-            .append(myName)
-            .append(myResource)
-            .toHashCode();
+        return new HashCodeBuilder(17, 37).append(myName).append(myResource).toHashCode();
     }
 
     @Override

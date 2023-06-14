@@ -20,17 +20,15 @@
 package ca.uhn.fhir.batch2.api;
 
 /**
- * When a step throws an Exception that is not a {@link JobExecutionFailedException},
- * the Smile Batch 2 framework will rethrow the exception as a {@link JobStepFailedException}.
- * This will cause the job notification message to remain on the channel and the system will try executing the send
+ * When a step throws an Exception that is not a {@link JobExecutionFailedException}, the Smile
+ * Batch 2 framework will rethrow the exception as a {@link JobStepFailedException}. This will cause
+ * the job notification message to remain on the channel and the system will try executing the send
  * operation repeatedly until it succeeds.
  */
 public class JobStepFailedException extends RuntimeException {
 
-	/**
-	 * Constructor
-	 */
-	public JobStepFailedException(String theMessage, Throwable theCause) {
-		super(theMessage, theCause);
-	}
+    /** Constructor */
+    public JobStepFailedException(String theMessage, Throwable theCause) {
+        super(theMessage, theCause);
+    }
 }

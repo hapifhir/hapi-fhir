@@ -24,5 +24,5 @@ import org.opencds.cqf.fhir.api.Repository;
 
 @FunctionalInterface
 public interface IActivityDefinitionProcessorFactory {
-	ActivityDefinitionProcessor create(Repository theRepository);
+    ActivityDefinitionProcessor create(Repository theRepository);
 }

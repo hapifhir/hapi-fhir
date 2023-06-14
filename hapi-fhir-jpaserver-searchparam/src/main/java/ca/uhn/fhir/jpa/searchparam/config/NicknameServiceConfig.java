@@ -9,14 +9,14 @@ import org.springframework.context.annotation.Lazy;
 @Configuration
 public class NicknameServiceConfig {
 
-	@Lazy
-	@Bean
-	public NicknameInterceptor nicknameInterceptor(NicknameSvc theNicknameSvc) {
-		return new NicknameInterceptor(theNicknameSvc);
-	}
+    @Lazy
+    @Bean
+    public NicknameInterceptor nicknameInterceptor(NicknameSvc theNicknameSvc) {
+        return new NicknameInterceptor(theNicknameSvc);
+    }
 
-	@Bean
-	public NicknameSvc nicknameSvc() {
-		return new NicknameSvc();
-	}
+    @Bean
+    public NicknameSvc nicknameSvc() {
+        return new NicknameSvc();
+    }
 }

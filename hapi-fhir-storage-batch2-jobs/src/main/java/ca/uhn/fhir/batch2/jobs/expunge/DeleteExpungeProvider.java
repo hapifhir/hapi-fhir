@@ -28,58 +28,83 @@ import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class DeleteExpungeProvider {
-	private final FhirContext myFhirContext;
-	private final IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter;
+    private final FhirContext myFhirContext;
+    private final IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter;
 
-	public DeleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
-		myFhirContext = theFhirContext;
-		myDeleteExpungeJobSubmitter = theDeleteExpungeJobSubmitter;
-	}
+    public DeleteExpungeProvider(
+            FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
+        myFhirContext = theFhirContext;
+        myDeleteExpungeJobSubmitter = theDeleteExpungeJobSubmitter;
+    }
 
-	@Operation(name = ProviderConstants.OPERATION_DELETE_EXPUNGE, idempotent = false)
-	public IBaseParameters deleteExpunge(
-		@OperationParam(name = ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, typeName = "string", min = 1) List<IPrimitiveType<String>> theUrlsToDeleteExpunge,
-		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theBatchSize,
-		@OperationParam(name = ProviderConstants.OPERATION_DELETE_CASCADE, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theCascade,
-		@OperationParam(name = ProviderConstants.OPERATION_DELETE_CASCADE_MAX_ROUNDS, typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theCascadeMaxRounds,
-		RequestDetails theRequestDetails
-	) {
-		if (theUrlsToDeleteExpunge == null) {
-			throw new InvalidRequestException(Msg.code(2101) + "At least one `url` parameter to $delete-expunge must be provided.");
-		}
-		List<String> urls = theUrlsToDeleteExpunge.stream()
-			.map(IPrimitiveType::getValue)
-			.filter(StringUtils::isNotBlank)
-			.collect(Collectors.toList());
+    @Operation(name = ProviderConstants.OPERATION_DELETE_EXPUNGE, idempotent = false)
+    public IBaseParameters deleteExpunge(
+            @OperationParam(
+                            name = ProviderConstants.OPERATION_DELETE_EXPUNGE_URL,
+                            typeName = "string",
+                            min = 1)
+                    List<IPrimitiveType<String>> theUrlsToDeleteExpunge,
+            @OperationParam(
+                            name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE,
+                            typeName = "integer",
+                            min = 0,
+                            max = 1)
+                    IPrimitiveType<Integer> theBatchSize,
+            @OperationParam(
+                            name = ProviderConstants.OPERATION_DELETE_CASCADE,
+                            typeName = "boolean",
+                            min = 0,
+                            max = 1)
+                    IPrimitiveType<Boolean> theCascade,
+            @OperationParam(
+                            name = ProviderConstants.OPERATION_DELETE_CASCADE_MAX_ROUNDS,
+                            typeName = "integer",
+                            min = 0,
+                            max = 1)
+                    IPrimitiveType<Integer> theCascadeMaxRounds,
+            RequestDetails theRequestDetails) {
+        if (theUrlsToDeleteExpunge == null) {
+            throw new InvalidRequestException(
+                    Msg.code(2101)
+                            + "At least one `url` parameter to $delete-expunge must be provided.");
+        }
+        List<String> urls =
+                theUrlsToDeleteExpunge.stream()
+                        .map(IPrimitiveType::getValue)
+                        .filter(StringUtils::isNotBlank)
+                        .collect(Collectors.toList());
 
-		Integer batchSize = null;
-		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue() > 0) {
-			batchSize = theBatchSize.getValue();
-		}
+        Integer batchSize = null;
+        if (theBatchSize != null
+                && theBatchSize.getValue() != null
+                && theBatchSize.getValue() > 0) {
+            batchSize = theBatchSize.getValue();
+        }
 
-		boolean cascase = false;
-		if (theCascade != null && theCascade.hasValue()) {
-			cascase = theCascade.getValue();
-		}
+        boolean cascase = false;
+        if (theCascade != null && theCascade.hasValue()) {
+            cascase = theCascade.getValue();
+        }
 
-		Integer cascadeMaxRounds = null;
-		if (theCascadeMaxRounds != null) {
-			cascadeMaxRounds = theCascadeMaxRounds.getValue();
-		}
+        Integer cascadeMaxRounds = null;
+        if (theCascadeMaxRounds != null) {
+            cascadeMaxRounds = theCascadeMaxRounds.getValue();
+        }
 
-		String jobId = myDeleteExpungeJobSubmitter.submitJob(batchSize, urls, cascase, cascadeMaxRounds, theRequestDetails);
+        String jobId =
+                myDeleteExpungeJobSubmitter.submitJob(
+                        batchSize, urls, cascase, cascadeMaxRounds, theRequestDetails);
 
-		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersString(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobId);
-		return retval;
-	}
+        IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
+        ParametersUtil.addParameterToParametersString(
+                myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobId);
+        return retval;
+    }
 }

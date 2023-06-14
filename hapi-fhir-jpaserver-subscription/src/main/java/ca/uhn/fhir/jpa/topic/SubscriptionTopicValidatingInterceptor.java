@@ -37,83 +37,127 @@ import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
 
 public class SubscriptionTopicValidatingInterceptor {
-	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
+    private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 
-	private final FhirContext myFhirContext;
-	private final SubscriptionQueryValidator mySubscriptionQueryValidator;
+    private final FhirContext myFhirContext;
+    private final SubscriptionQueryValidator mySubscriptionQueryValidator;
 
-	public SubscriptionTopicValidatingInterceptor(FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
-		myFhirContext = theFhirContext;
-		mySubscriptionQueryValidator = theSubscriptionQueryValidator;
-	}
+    public SubscriptionTopicValidatingInterceptor(
+            FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
+        myFhirContext = theFhirContext;
+        mySubscriptionQueryValidator = theSubscriptionQueryValidator;
+    }
 
-	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	public void resourcePreCreate(IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
-		validateSubmittedSubscriptionTopic(theResource, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
-	}
+    @Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
+    public void resourcePreCreate(
+            IBaseResource theResource,
+            RequestDetails theRequestDetails,
+            RequestPartitionId theRequestPartitionId) {
+        validateSubmittedSubscriptionTopic(
+                theResource,
+                theRequestDetails,
+                theRequestPartitionId,
+                Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+    }
 
-	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
-		validateSubmittedSubscriptionTopic(theResource, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED);
-	}
+    @Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+    public void resourceUpdated(
+            IBaseResource theOldResource,
+            IBaseResource theResource,
+            RequestDetails theRequestDetails,
+            RequestPartitionId theRequestPartitionId) {
+        validateSubmittedSubscriptionTopic(
+                theResource,
+                theRequestDetails,
+                theRequestPartitionId,
+                Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED);
+    }
 
-	@VisibleForTesting
-	void validateSubmittedSubscriptionTopic(IBaseResource theSubscription,
-														 RequestDetails theRequestDetails,
-														 RequestPartitionId theRequestPartitionId,
-														 Pointcut thePointcut) {
-		if (Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED != thePointcut && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED != thePointcut) {
-			throw new UnprocessableEntityException(Msg.code(2340) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + thePointcut);
-		}
+    @VisibleForTesting
+    void validateSubmittedSubscriptionTopic(
+            IBaseResource theSubscription,
+            RequestDetails theRequestDetails,
+            RequestPartitionId theRequestPartitionId,
+            Pointcut thePointcut) {
+        if (Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED != thePointcut
+                && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED != thePointcut) {
+            throw new UnprocessableEntityException(
+                    Msg.code(2340)
+                            + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED"
+                            + " or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: "
+                            + thePointcut);
+        }
 
-		if (!"SubscriptionTopic".equals(myFhirContext.getResourceType(theSubscription))) {
-			return;
-		}
+        if (!"SubscriptionTopic".equals(myFhirContext.getResourceType(theSubscription))) {
+            return;
+        }
 
-		SubscriptionTopic subscriptionTopic = SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theSubscription);
+        SubscriptionTopic subscriptionTopic =
+                SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theSubscription);
 
-		boolean finished = false;
-		if (subscriptionTopic.getStatus() == null) {
-			throw new UnprocessableEntityException(Msg.code(2338) + "Can not process submitted SubscriptionTopic - SubscriptionTopic.status must be populated on this server");
-		}
+        boolean finished = false;
+        if (subscriptionTopic.getStatus() == null) {
+            throw new UnprocessableEntityException(
+                    Msg.code(2338)
+                            + "Can not process submitted SubscriptionTopic -"
+                            + " SubscriptionTopic.status must be populated on this server");
+        }
 
-		switch (subscriptionTopic.getStatus()) {
-			case ACTIVE:
-				break;
-			default:
-				finished = true;
-				break;
-		}
+        switch (subscriptionTopic.getStatus()) {
+            case ACTIVE:
+                break;
+            default:
+                finished = true;
+                break;
+        }
 
-		// WIP STR5 add cross-partition support like in SubscriptionValidatingInterceptor
+        // WIP STR5 add cross-partition support like in SubscriptionValidatingInterceptor
 
-		// WIP STR5 warn if the SubscriptionTopic criteria can't be evaluated in memory?  Do we want to annotate the
-		//  strategy with an extension like Subscription?
+        // WIP STR5 warn if the SubscriptionTopic criteria can't be evaluated in memory?  Do we want
+        // to annotate the
+        //  strategy with an extension like Subscription?
 
-		if (!finished) {
-			subscriptionTopic.getResourceTrigger().stream()
-				.forEach(t -> validateQueryCriteria(t.getQueryCriteria()));
-		}
-	}
+        if (!finished) {
+            subscriptionTopic.getResourceTrigger().stream()
+                    .forEach(t -> validateQueryCriteria(t.getQueryCriteria()));
+        }
+    }
 
-	private void validateQueryCriteria(SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent theQueryCriteria) {
-		if (theQueryCriteria.getPrevious() != null) {
-			validateCriteria(theQueryCriteria.getPrevious(), "SubscriptionTopic.resourceTrigger.queryCriteria.previous");
-		}
-		if (theQueryCriteria.getCurrent() != null) {
-			validateCriteria(theQueryCriteria.getCurrent(), "SubscriptionTopic.resourceTrigger.queryCriteria.current");
-		}
-	}
+    private void validateQueryCriteria(
+            SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent
+                    theQueryCriteria) {
+        if (theQueryCriteria.getPrevious() != null) {
+            validateCriteria(
+                    theQueryCriteria.getPrevious(),
+                    "SubscriptionTopic.resourceTrigger.queryCriteria.previous");
+        }
+        if (theQueryCriteria.getCurrent() != null) {
+            validateCriteria(
+                    theQueryCriteria.getCurrent(),
+                    "SubscriptionTopic.resourceTrigger.queryCriteria.current");
+        }
+    }
 
-	public void validateCriteria(String theCriteria, String theFieldName) {
-		try {
-			mySubscriptionQueryValidator.validateCriteria(theCriteria, theFieldName);
-			SubscriptionMatchingStrategy strategy = mySubscriptionQueryValidator.determineStrategy(theCriteria);
-			if (strategy != SubscriptionMatchingStrategy.IN_MEMORY) {
-				ourLog.warn("Warning: Query Criteria '{}' in {} cannot be evaluated in-memory", theCriteria, theFieldName);
-			}
-		} catch (InvalidRequestException | DataFormatException e) {
-			throw new UnprocessableEntityException(Msg.code(2339) + "Invalid SubscriptionTopic criteria '" + theCriteria + "' in " + theFieldName + ": " + e.getMessage());
-		}
-	}
+    public void validateCriteria(String theCriteria, String theFieldName) {
+        try {
+            mySubscriptionQueryValidator.validateCriteria(theCriteria, theFieldName);
+            SubscriptionMatchingStrategy strategy =
+                    mySubscriptionQueryValidator.determineStrategy(theCriteria);
+            if (strategy != SubscriptionMatchingStrategy.IN_MEMORY) {
+                ourLog.warn(
+                        "Warning: Query Criteria '{}' in {} cannot be evaluated in-memory",
+                        theCriteria,
+                        theFieldName);
+            }
+        } catch (InvalidRequestException | DataFormatException e) {
+            throw new UnprocessableEntityException(
+                    Msg.code(2339)
+                            + "Invalid SubscriptionTopic criteria '"
+                            + theCriteria
+                            + "' in "
+                            + theFieldName
+                            + ": "
+                            + e.getMessage());
+        }
+    }
 }

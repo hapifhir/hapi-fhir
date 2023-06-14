@@ -20,61 +20,63 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-
-import javax.persistence.*;
 import java.util.Date;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "HFJ_SUBSCRIPTION_STATS", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_SUBSC_RESID", columnNames = {"RES_ID"}),
-})
+@Table(
+        name = "HFJ_SUBSCRIPTION_STATS",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "IDX_SUBSC_RESID",
+                    columnNames = {"RES_ID"}),
+        })
 public class SubscriptionTable {
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "CREATED_TIME", nullable = false, insertable = true, updatable = false)
-	private Date myCreated;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "CREATED_TIME", nullable = false, insertable = true, updatable = false)
+    private Date myCreated;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SUBSCRIPTION_ID")
-	@SequenceGenerator(name = "SEQ_SUBSCRIPTION_ID", sequenceName = "SEQ_SUBSCRIPTION_ID")
-	@Column(name = "PID", insertable = false, updatable = false)
-	private Long myId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SUBSCRIPTION_ID")
+    @SequenceGenerator(name = "SEQ_SUBSCRIPTION_ID", sequenceName = "SEQ_SUBSCRIPTION_ID")
+    @Column(name = "PID", insertable = false, updatable = false)
+    private Long myId;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
-	private Long myResId;
+    @Column(name = "RES_ID", insertable = false, updatable = false)
+    private Long myResId;
 
-	@OneToOne()
-	@JoinColumn(name = "RES_ID", insertable = true, updatable = false, referencedColumnName = "RES_ID",
-		foreignKey = @ForeignKey(name = "FK_SUBSC_RESOURCE_ID")
-	)
-	private ResourceTable mySubscriptionResource;
+    @OneToOne()
+    @JoinColumn(
+            name = "RES_ID",
+            insertable = true,
+            updatable = false,
+            referencedColumnName = "RES_ID",
+            foreignKey = @ForeignKey(name = "FK_SUBSC_RESOURCE_ID"))
+    private ResourceTable mySubscriptionResource;
 
-	/**
-	 * Constructor
-	 */
-	public SubscriptionTable() {
-		super();
-	}
+    /** Constructor */
+    public SubscriptionTable() {
+        super();
+    }
 
+    public Date getCreated() {
+        return myCreated;
+    }
 
-	public Date getCreated() {
-		return myCreated;
-	}
+    public void setCreated(Date theCreated) {
+        myCreated = theCreated;
+    }
 
-	public void setCreated(Date theCreated) {
-		myCreated = theCreated;
-	}
+    public Long getId() {
+        return myId;
+    }
 
-	public Long getId() {
-		return myId;
-	}
+    public ResourceTable getSubscriptionResource() {
+        return mySubscriptionResource;
+    }
 
-	public ResourceTable getSubscriptionResource() {
-		return mySubscriptionResource;
-	}
-
-	public void setSubscriptionResource(ResourceTable theSubscriptionResource) {
-		mySubscriptionResource = theSubscriptionResource;
-	}
-
+    public void setSubscriptionResource(ResourceTable theSubscriptionResource) {
+        mySubscriptionResource = theSubscriptionResource;
+    }
 }

@@ -27,62 +27,65 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class TypedPidJson implements IModelJson {
 
-	@JsonProperty("type")
-	private String myResourceType;
-	@JsonProperty("id")
-	private String myPid;
+    @JsonProperty("type")
+    private String myResourceType;
 
-	public TypedPidJson() {
-	}
+    @JsonProperty("id")
+    private String myPid;
 
-	public TypedPidJson(String theResourceType, String theId) {
-		myResourceType = theResourceType;
-		myPid = theId;
-	}
+    public TypedPidJson() {}
 
-	public TypedPidJson(TypedResourcePid theTypedResourcePid) {
-		myResourceType = theTypedResourcePid.resourceType;
-		myPid = theTypedResourcePid.id.toString();
-	}
+    public TypedPidJson(String theResourceType, String theId) {
+        myResourceType = theResourceType;
+        myPid = theId;
+    }
 
-	@Override
-	public String toString() {
-		// We put a space in here and not a "/" since this is a PID, not
-		// a resource ID
-		return "[" + myResourceType + " " + myPid + "]";
-	}
+    public TypedPidJson(TypedResourcePid theTypedResourcePid) {
+        myResourceType = theTypedResourcePid.resourceType;
+        myPid = theTypedResourcePid.id.toString();
+    }
 
-	public String getResourceType() {
-		return myResourceType;
-	}
+    @Override
+    public String toString() {
+        // We put a space in here and not a "/" since this is a PID, not
+        // a resource ID
+        return "[" + myResourceType + " " + myPid + "]";
+    }
 
-	public TypedPidJson setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
-		return this;
-	}
+    public String getResourceType() {
+        return myResourceType;
+    }
 
-	public String getPid() {
-		return myPid;
-	}
+    public TypedPidJson setResourceType(String theResourceType) {
+        myResourceType = theResourceType;
+        return this;
+    }
 
-	public TypedPidJson setPid(String thePid) {
-		myPid = thePid;
-		return this;
-	}
+    public String getPid() {
+        return myPid;
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
+    public TypedPidJson setPid(String thePid) {
+        myPid = thePid;
+        return this;
+    }
 
-		if (theO == null || getClass() != theO.getClass()) return false;
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) return true;
 
-		TypedPidJson id = (TypedPidJson) theO;
+        if (theO == null || getClass() != theO.getClass()) return false;
 
-		return new EqualsBuilder().append(myResourceType, id.myResourceType).append(myPid, id.myPid).isEquals();
-	}
+        TypedPidJson id = (TypedPidJson) theO;
 
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myResourceType).append(myPid).toHashCode();
-	}
+        return new EqualsBuilder()
+                .append(myResourceType, id.myResourceType)
+                .append(myPid, id.myPid)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(myResourceType).append(myPid).toHashCode();
+    }
 }

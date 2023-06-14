@@ -23,73 +23,87 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Set;
-
 public class RuleImplConditional extends BaseRule implements IAuthRule {
 
-	private AppliesTypeEnum myAppliesTo;
-	private Set<String> myAppliesToTypes;
-	private RestOperationTypeEnum myOperationType;
+    private AppliesTypeEnum myAppliesTo;
+    private Set<String> myAppliesToTypes;
+    private RestOperationTypeEnum myOperationType;
 
-	RuleImplConditional(String theRuleName) {
-		super(theRuleName);
-	}
+    RuleImplConditional(String theRuleName) {
+        super(theRuleName);
+    }
 
-	@Override
-	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
-									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
-		assert !(theInputResource != null && theOutputResource != null);
+    @Override
+    public Verdict applyRule(
+            RestOperationTypeEnum theOperation,
+            RequestDetails theRequestDetails,
+            IBaseResource theInputResource,
+            IIdType theInputResourceId,
+            IBaseResource theOutputResource,
+            IRuleApplier theRuleApplier,
+            Set<AuthorizationFlagsEnum> theFlags,
+            Pointcut thePointcut) {
+        assert !(theInputResource != null && theOutputResource != null);
 
-		if (theInputResourceId != null && theInputResourceId.hasIdPart()) {
-			return null;
-		}
+        if (theInputResourceId != null && theInputResourceId.hasIdPart()) {
+            return null;
+        }
 
-		if (theOperation == myOperationType) {
-			if (theRequestDetails.getConditionalUrl(myOperationType) == null) {
-				return null;
-			}
-			if (theInputResource == null) {
-				return null;
-			}
+        if (theOperation == myOperationType) {
+            if (theRequestDetails.getConditionalUrl(myOperationType) == null) {
+                return null;
+            }
+            if (theInputResource == null) {
+                return null;
+            }
 
-			switch (myAppliesTo) {
-				case ALL_RESOURCES:
-				case INSTANCES:
-					break;
-				case TYPES:
-					if (myOperationType == RestOperationTypeEnum.DELETE) {
-						String resourceName = theRequestDetails.getResourceName();
-						if (!myAppliesToTypes.contains(resourceName)) {
-							return null;
-						}
-					} else {
-						String inputResourceName = theRequestDetails.getFhirContext().getResourceType(theInputResource);
-						if (!myAppliesToTypes.contains(inputResourceName)) {
-							return null;
-						}
-					}
-					break;
-			}
+            switch (myAppliesTo) {
+                case ALL_RESOURCES:
+                case INSTANCES:
+                    break;
+                case TYPES:
+                    if (myOperationType == RestOperationTypeEnum.DELETE) {
+                        String resourceName = theRequestDetails.getResourceName();
+                        if (!myAppliesToTypes.contains(resourceName)) {
+                            return null;
+                        }
+                    } else {
+                        String inputResourceName =
+                                theRequestDetails
+                                        .getFhirContext()
+                                        .getResourceType(theInputResource);
+                        if (!myAppliesToTypes.contains(inputResourceName)) {
+                            return null;
+                        }
+                    }
+                    break;
+            }
 
-			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
-		}
+            return newVerdict(
+                    theOperation,
+                    theRequestDetails,
+                    theInputResource,
+                    theInputResourceId,
+                    theOutputResource,
+                    theRuleApplier);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	void setAppliesTo(AppliesTypeEnum theAppliesTo) {
-		myAppliesTo = theAppliesTo;
-	}
+    void setAppliesTo(AppliesTypeEnum theAppliesTo) {
+        myAppliesTo = theAppliesTo;
+    }
 
-	void setAppliesToTypes(Set<String> theAppliesToTypes) {
-		myAppliesToTypes = theAppliesToTypes;
-	}
+    void setAppliesToTypes(Set<String> theAppliesToTypes) {
+        myAppliesToTypes = theAppliesToTypes;
+    }
 
-	void setOperationType(RestOperationTypeEnum theOperationType) {
-		myOperationType = theOperationType;
-	}
-
+    void setOperationType(RestOperationTypeEnum theOperationType) {
+        myOperationType = theOperationType;
+    }
 }

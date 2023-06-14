@@ -19,23 +19,19 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
+import ca.uhn.fhir.model.primitive.InstantDt;
 import java.util.Date;
 
-import ca.uhn.fhir.model.primitive.InstantDt;
-
 public final class DateBinder extends BaseJavaPrimitiveBinder<Date> {
-	public DateBinder() {
-	}
+    public DateBinder() {}
 
-	@Override
-	protected String doEncode(Date theString) {
-		return new InstantDt(theString).getValueAsString();
-	}
+    @Override
+    protected String doEncode(Date theString) {
+        return new InstantDt(theString).getValueAsString();
+    }
 
-	@Override
-	protected Date doParse(String theString) {
-		return new InstantDt(theString).getValue();
-	}
-
-
+    @Override
+    protected Date doParse(String theString) {
+        return new InstantDt(theString).getValue();
+    }
 }

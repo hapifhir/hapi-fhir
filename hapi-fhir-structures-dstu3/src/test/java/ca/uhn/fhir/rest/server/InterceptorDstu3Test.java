@@ -1,5 +1,20 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.either;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -23,6 +38,12 @@ import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -49,332 +70,474 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.either;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.nullable;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 public class InterceptorDstu3Test {
 
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
-	private static Patient ourLastPatient;
-	private IServerInterceptor myInterceptor1;
-	private IServerInterceptor myInterceptor2;
+    private static CloseableHttpClient ourClient;
+    private static FhirContext ourCtx = FhirContext.forDstu3();
+    private static int ourPort;
+    private static Server ourServer;
+    private static RestfulServer ourServlet;
+    private static Patient ourLastPatient;
+    private IServerInterceptor myInterceptor1;
+    private IServerInterceptor myInterceptor2;
 
-	@AfterEach
-	public void after() {
-		ourServlet.getInterceptorService().unregisterAllInterceptors();
-	}
+    @AfterEach
+    public void after() {
+        ourServlet.getInterceptorService().unregisterAllInterceptors();
+    }
 
-	@BeforeEach
-	public void before() {
-		myInterceptor1 = mock(IServerInterceptor.class);
-		myInterceptor2 = mock(IServerInterceptor.class);
-	}
+    @BeforeEach
+    public void before() {
+        myInterceptor1 = mock(IServerInterceptor.class);
+        myInterceptor2 = mock(IServerInterceptor.class);
+    }
 
-	private String createInput() {
-		return "{\n" +
-			"   \"resourceType\":\"Patient\",\n" +
-			"   \"id\":\"1855669\",\n" +
-			"   \"meta\":{\n" +
-			"      \"versionId\":\"1\",\n" +
-			"      \"lastUpdated\":\"2016-02-18T07:41:35.953-05:00\"\n" +
-			"   },\n" +
-			"   \"active\":true\n" +
-			"}";
-	}
+    private String createInput() {
+        return "{\n"
+                + "   \"resourceType\":\"Patient\",\n"
+                + "   \"id\":\"1855669\",\n"
+                + "   \"meta\":{\n"
+                + "      \"versionId\":\"1\",\n"
+                + "      \"lastUpdated\":\"2016-02-18T07:41:35.953-05:00\"\n"
+                + "   },\n"
+                + "   \"active\":true\n"
+                + "}";
+    }
 
+    @Test
+    public void testServerPreHandledOnOperationCapturesResource() throws IOException {
 
-	@Test
-	public void testServerPreHandledOnOperationCapturesResource() throws IOException {
+        AtomicReference<IBaseResource> resource = new AtomicReference<>();
+        IAnonymousInterceptor interceptor =
+                (thePointcut, theArgs) -> {
+                    RequestDetails requestDetails = theArgs.get(RequestDetails.class);
+                    resource.set(requestDetails.getResource());
+                };
 
-		AtomicReference<IBaseResource> resource = new AtomicReference<>();
-		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> {
-			RequestDetails requestDetails = theArgs.get(RequestDetails.class);
-			resource.set(requestDetails.getResource());
-		};
+        ourServlet
+                .getInterceptorService()
+                .registerAnonymousInterceptor(
+                        Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+        try {
+            Parameters p = new Parameters();
+            p.addParameter().setName("limit").setValue(new IntegerType(123));
+            String input = ourCtx.newJsonParser().encodeResourceToString(p);
 
-		ourServlet.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
-		try {
-			Parameters p = new Parameters();
-			p.addParameter().setName("limit").setValue(new IntegerType(123));
-			String input = ourCtx.newJsonParser().encodeResourceToString(p);
+            HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Patient/$postOperation");
+            post.setEntity(
+                    new StringEntity(
+                            input,
+                            ContentType.create("application/fhir+json", Constants.CHARSET_UTF8)));
+            try (CloseableHttpResponse status = ourClient.execute(post)) {
+                assertEquals(200, status.getStatusLine().getStatusCode());
+                IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+            }
+        } finally {
+            ourServlet.unregisterInterceptor(interceptor);
+        }
 
-			HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Patient/$postOperation");
-			post.setEntity(new StringEntity(input, ContentType.create("application/fhir+json", Constants.CHARSET_UTF8)));
-			try (CloseableHttpResponse status = ourClient.execute(post)) {
-				assertEquals(200, status.getStatusLine().getStatusCode());
-				IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			}
-		} finally {
-			ourServlet.unregisterInterceptor(interceptor);
-		}
+        assertNotNull(resource.get());
+    }
 
-		assertNotNull(resource.get());
-	}
+    @Test
+    public void testModifyResponse() throws IOException {
+        InterceptorAdapter interceptor =
+                new InterceptorAdapter() {
+                    @Override
+                    public boolean outgoingResponse(
+                            RequestDetails theRequestDetails,
+                            ResponseDetails theResponseDetails,
+                            HttpServletRequest theServletRequest,
+                            HttpServletResponse theServletResponse)
+                            throws AuthenticationException {
+                        Patient retVal = new Patient();
+                        retVal.setId(theResponseDetails.getResponseResource().getIdElement());
+                        retVal.addName().setFamily("NAME1");
+                        theResponseDetails.setResponseResource(retVal);
+                        theResponseDetails.setResponseCode(202);
+                        return true;
+                    }
+                };
+        ourServlet.registerInterceptor(interceptor);
+        try {
 
+            HttpGet get = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+            try (CloseableHttpResponse status = ourClient.execute(get)) {
+                String response =
+                        IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
+                assertThat(response, containsString("NAME1"));
+                assertEquals(202, status.getStatusLine().getStatusCode());
+                assertEquals("Accepted", status.getStatusLine().getReasonPhrase());
+            }
 
-	@Test
-	public void testModifyResponse() throws IOException {
-		InterceptorAdapter interceptor = new InterceptorAdapter() {
-			@Override
-			public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
-				Patient retVal = new Patient();
-				retVal.setId(theResponseDetails.getResponseResource().getIdElement());
-				retVal.addName().setFamily("NAME1");
-				theResponseDetails.setResponseResource(retVal);
-				theResponseDetails.setResponseCode(202);
-				return true;
-			}
-		};
-		ourServlet.registerInterceptor(interceptor);
-		try {
+        } finally {
+            ourServlet.unregisterInterceptor(interceptor);
+        }
+    }
 
-			HttpGet get = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-			try (CloseableHttpResponse status = ourClient.execute(get)) {
-				String response = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
-				assertThat(response, containsString("NAME1"));
-				assertEquals(202, status.getStatusLine().getStatusCode());
-				assertEquals("Accepted", status.getStatusLine().getReasonPhrase());
-			}
+    @Test
+    public void testResourceResponseIncluded() throws Exception {
+        ourServlet.setInterceptors(myInterceptor1, myInterceptor2);
 
-		} finally {
-			ourServlet.unregisterInterceptor(interceptor);
-		}
-	}
+        when(myInterceptor1.incomingRequestPreProcessed(
+                        nullable(HttpServletRequest.class), nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.incomingRequestPostProcessed(
+                        nullable(ServletRequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class), nullable(OperationOutcome.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(ResponseDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(IBaseResource.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
 
-	@Test
-	public void testResourceResponseIncluded() throws Exception {
-		ourServlet.setInterceptors(myInterceptor1, myInterceptor2);
+        when(myInterceptor2.incomingRequestPreProcessed(
+                        nullable(HttpServletRequest.class), nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor2.incomingRequestPostProcessed(
+                        nullable(ServletRequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
+        when(myInterceptor2.outgoingResponse(
+                        nullable(RequestDetails.class), nullable(OperationOutcome.class)))
+                .thenReturn(true);
+        when(myInterceptor2.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(ResponseDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor2.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(IBaseResource.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor2.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
 
-		when(myInterceptor1.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+        doAnswer(
+                        t -> {
+                            RestOperationTypeEnum type =
+                                    (RestOperationTypeEnum) t.getArguments()[0];
+                            RequestDetails det = (RequestDetails) t.getArguments()[1];
+                            return null;
+                        })
+                .when(myInterceptor1)
+                .incomingRequestPreHandled(any(), any());
 
-		when(myInterceptor2.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor2.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
-		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
-		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+        String input = createInput();
 
-		doAnswer(t -> {
-			RestOperationTypeEnum type = (RestOperationTypeEnum) t.getArguments()[0];
-			RequestDetails det = (RequestDetails) t.getArguments()[1];
-			return null;
-		}).when(myInterceptor1).incomingRequestPreHandled(any(), any());
+        HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+        httpPost.setEntity(
+                new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+        try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+            IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+        }
 
-		String input = createInput();
+        InOrder order = inOrder(myInterceptor1, myInterceptor2);
+        order.verify(myInterceptor1, times(1))
+                .incomingRequestPreProcessed(
+                        nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
+        order.verify(myInterceptor2, times(1))
+                .incomingRequestPreProcessed(
+                        nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
+        order.verify(myInterceptor1, times(1))
+                .incomingRequestPostProcessed(
+                        nullable(ServletRequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class));
+        order.verify(myInterceptor2, times(1))
+                .incomingRequestPostProcessed(
+                        nullable(ServletRequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class));
+        ArgumentCaptor<RestOperationTypeEnum> opTypeCapt =
+                ArgumentCaptor.forClass(RestOperationTypeEnum.class);
+        ArgumentCaptor<RequestDetails> arTypeCapt = ArgumentCaptor.forClass(RequestDetails.class);
+        order.verify(myInterceptor1, times(1))
+                .incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
+        order.verify(myInterceptor2, times(1))
+                .incomingRequestPreHandled(
+                        nullable(RestOperationTypeEnum.class), nullable(RequestDetails.class));
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		}
+        assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, opTypeCapt.getValue());
+        assertNotNull(arTypeCapt.getValue().getResource());
+    }
 
-		InOrder order = inOrder(myInterceptor1, myInterceptor2);
-		order.verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
-		order.verify(myInterceptor2, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
-		order.verify(myInterceptor1, times(1)).incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
-		order.verify(myInterceptor2, times(1)).incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
-		ArgumentCaptor<RestOperationTypeEnum> opTypeCapt = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		ArgumentCaptor<RequestDetails> arTypeCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
-		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(nullable(RestOperationTypeEnum.class), nullable(RequestDetails.class));
+    @Test
+    public void testExceptionInProcessingCompletedNormally() throws Exception {
+        ourServlet.setInterceptors(myInterceptor1);
 
-		assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, opTypeCapt.getValue());
-		assertNotNull(arTypeCapt.getValue().getResource());
-	}
+        when(myInterceptor1.incomingRequestPreProcessed(
+                        nullable(HttpServletRequest.class), nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.incomingRequestPostProcessed(
+                        nullable(ServletRequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class), nullable(OperationOutcome.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(ResponseDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(IBaseResource.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
 
-	@Test
-	public void testExceptionInProcessingCompletedNormally() throws Exception {
-		ourServlet.setInterceptors(myInterceptor1);
+        String input = createInput();
 
-		when(myInterceptor1.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+        HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+        httpPost.setEntity(
+                new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+        try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+            IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+            assertThat(
+                    status.getStatusLine().getStatusCode(), either(equalTo(200)).or(equalTo(201)));
+        }
+    }
 
-		String input = createInput();
+    @Test
+    public void testResponseWithNothing() throws Exception {
+        ourServlet.setInterceptors(myInterceptor1);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode(), either(equalTo(200)).or(equalTo(201)));
-		}
-	}
+        when(myInterceptor1.incomingRequestPreProcessed(
+                        nullable(HttpServletRequest.class), nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.incomingRequestPostProcessed(
+                        nullable(ServletRequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class), nullable(OperationOutcome.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(ResponseDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(IBaseResource.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
 
-	@Test
-	public void testResponseWithNothing() throws Exception {
-		ourServlet.setInterceptors(myInterceptor1);
+        String input = createInput();
 
-		when(myInterceptor1.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+        HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+        httpPost.setEntity(
+                new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+        try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+            assertEquals(201, status.getStatusLine().getStatusCode());
+            IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+        }
 
-		String input = createInput();
+        InOrder order = inOrder(myInterceptor1);
+        verify(myInterceptor1, times(1))
+                .incomingRequestPreProcessed(
+                        nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
+        verify(myInterceptor1, times(1))
+                .incomingRequestPostProcessed(
+                        nullable(ServletRequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class));
+        ArgumentCaptor<RestOperationTypeEnum> opTypeCapt =
+                ArgumentCaptor.forClass(RestOperationTypeEnum.class);
+        ArgumentCaptor<RequestDetails> arTypeCapt = ArgumentCaptor.forClass(RequestDetails.class);
+        ArgumentCaptor<ServletRequestDetails> rdCapt =
+                ArgumentCaptor.forClass(ServletRequestDetails.class);
+        ArgumentCaptor<OperationOutcome> resourceCapt =
+                ArgumentCaptor.forClass(OperationOutcome.class);
+        verify(myInterceptor1, times(1))
+                .incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
+        verify(myInterceptor1, times(1))
+                .outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertEquals(201, status.getStatusLine().getStatusCode());
-			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		}
+        assertEquals(1, resourceCapt.getAllValues().size());
+        assertEquals(null, resourceCapt.getAllValues().get(0));
+        //		assertEquals("", rdCapt.getAllValues().get(0).get)
+    }
 
-		InOrder order = inOrder(myInterceptor1);
-		verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
-		verify(myInterceptor1, times(1)).incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
-		ArgumentCaptor<RestOperationTypeEnum> opTypeCapt = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		ArgumentCaptor<RequestDetails> arTypeCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		ArgumentCaptor<ServletRequestDetails> rdCapt = ArgumentCaptor.forClass(ServletRequestDetails.class);
-		ArgumentCaptor<OperationOutcome> resourceCapt = ArgumentCaptor.forClass(OperationOutcome.class);
-		verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
-		verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
+    @Test
+    public void testResponseWithOperationOutcome() throws Exception {
+        ourServlet.setInterceptors(myInterceptor1);
 
-		assertEquals(1, resourceCapt.getAllValues().size());
-		assertEquals(null, resourceCapt.getAllValues().get(0));
-//		assertEquals("", rdCapt.getAllValues().get(0).get)
-	}
+        when(myInterceptor1.incomingRequestPreProcessed(
+                        nullable(HttpServletRequest.class), nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.incomingRequestPostProcessed(
+                        nullable(ServletRequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class), nullable(OperationOutcome.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(ResponseDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(IBaseResource.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
+        when(myInterceptor1.outgoingResponse(
+                        nullable(RequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class)))
+                .thenReturn(true);
 
-	@Test
-	public void testResponseWithOperationOutcome() throws Exception {
-		ourServlet.setInterceptors(myInterceptor1);
+        String input = createInput();
 
-		when(myInterceptor1.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+        HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+        httpPost.setEntity(
+                new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+        try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+            IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+        }
 
-		String input = createInput();
+        InOrder order = inOrder(myInterceptor1);
+        order.verify(myInterceptor1, times(1))
+                .incomingRequestPreProcessed(
+                        nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
+        order.verify(myInterceptor1, times(1))
+                .incomingRequestPostProcessed(
+                        nullable(ServletRequestDetails.class),
+                        nullable(HttpServletRequest.class),
+                        nullable(HttpServletResponse.class));
+        ArgumentCaptor<RestOperationTypeEnum> opTypeCapt =
+                ArgumentCaptor.forClass(RestOperationTypeEnum.class);
+        ArgumentCaptor<RequestDetails> arTypeCapt = ArgumentCaptor.forClass(RequestDetails.class);
+        ArgumentCaptor<OperationOutcome> resourceCapt =
+                ArgumentCaptor.forClass(OperationOutcome.class);
+        order.verify(myInterceptor1, times(1))
+                .incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
+        order.verify(myInterceptor1, times(1))
+                .outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		}
+        assertEquals(1, resourceCapt.getAllValues().size());
+        assertEquals(OperationOutcome.class, resourceCapt.getAllValues().get(0).getClass());
+    }
 
-		InOrder order = inOrder(myInterceptor1);
-		order.verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
-		order.verify(myInterceptor1, times(1)).incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
-		ArgumentCaptor<RestOperationTypeEnum> opTypeCapt = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		ArgumentCaptor<RequestDetails> arTypeCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		ArgumentCaptor<OperationOutcome> resourceCapt = ArgumentCaptor.forClass(OperationOutcome.class);
-		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
-		order.verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testServerOperationInterceptorAdapterMethods() {
+        ServerOperationInterceptorAdapter i = new ServerOperationInterceptorAdapter();
+        i.resourceCreated(null, null);
+        i.resourceDeleted(null, null);
+        i.resourceUpdated(null, null);
+        i.resourceUpdated(null, null, null);
+    }
 
-		assertEquals(1, resourceCapt.getAllValues().size());
-		assertEquals(OperationOutcome.class, resourceCapt.getAllValues().get(0).getClass());
-	}
+    @AfterAll
+    public static void afterClassClearContext() throws Exception {
+        JettyUtil.closeServer(ourServer);
+        TestUtil.randomizeLocaleAndTimezone();
+    }
 
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testServerOperationInterceptorAdapterMethods() {
-		ServerOperationInterceptorAdapter i = new ServerOperationInterceptorAdapter();
-		i.resourceCreated(null, null);
-		i.resourceDeleted(null, null);
-		i.resourceUpdated(null, null);
-		i.resourceUpdated(null, null, null);
-	}
+    @BeforeAll
+    public static void beforeClass() throws Exception {
+        ourServer = new Server(0);
 
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
+        DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+        ServletHandler proxyHandler = new ServletHandler();
+        ourServlet = new RestfulServer(ourCtx);
+        ourServlet.setResourceProviders(patientProvider);
+        ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
+        ServletHolder servletHolder = new ServletHolder(ourServlet);
+        proxyHandler.addServletWithMapping(servletHolder, "/*");
+        ourServer.setHandler(proxyHandler);
+        JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+        PoolingHttpClientConnectionManager connectionManager =
+                new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setConnectionManager(connectionManager);
+        ourClient = builder.build();
+    }
 
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setResourceProviders(patientProvider);
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+    public static class DummyPatientResourceProvider implements IResourceProvider {
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
+        @Create()
+        public MethodOutcome create(@ResourceParam Patient theResource) {
+            ourLastPatient = theResource;
+            return new MethodOutcome().setCreated(true);
+        }
 
-	}
+        @Operation(name = "$postOperation")
+        public Parameters postOperation(@OperationParam(name = "limit") IntegerType theLimit) {
+            return new Parameters();
+        }
 
-	public static class DummyPatientResourceProvider implements IResourceProvider {
+        @Override
+        public Class<Patient> getResourceType() {
+            return Patient.class;
+        }
 
-		@Create()
-		public MethodOutcome create(@ResourceParam Patient theResource) {
-			ourLastPatient = theResource;
-			return new MethodOutcome().setCreated(true);
-		}
+        @Read
+        public Patient read(@IdParam IdType theId) {
+            Patient retVal = new Patient();
+            retVal.setId(theId);
+            retVal.addName().setFamily("NAME0");
+            return retVal;
+        }
 
-		@Operation(name = "$postOperation")
-		public Parameters postOperation(
-			@OperationParam(name = "limit") IntegerType theLimit
-		) {
-			return new Parameters();
-		}
-
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
-		}
-
-		@Read
-		public Patient read(@IdParam IdType theId) {
-			Patient retVal = new Patient();
-			retVal.setId(theId);
-			retVal.addName().setFamily("NAME0");
-			return retVal;
-		}
-
-		@Validate()
-		public MethodOutcome validate(@ResourceParam Patient theResource) {
-			return new MethodOutcome();
-		}
-
-	}
-
+        @Validate()
+        public MethodOutcome validate(@ResourceParam Patient theResource) {
+            return new MethodOutcome();
+        }
+    }
 }

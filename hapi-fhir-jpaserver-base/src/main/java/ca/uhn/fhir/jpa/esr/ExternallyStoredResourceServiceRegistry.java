@@ -19,50 +19,48 @@
  */
 package ca.uhn.fhir.jpa.esr;
 
-import org.apache.commons.lang3.Validate;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import javax.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 
 public class ExternallyStoredResourceServiceRegistry {
 
-	private static final String VALID_ID_PATTERN = "[a-zA-Z0-9_.-]+";
-	private final Map<String, IExternallyStoredResourceService> myIdToProvider = new HashMap<>();
+    private static final String VALID_ID_PATTERN = "[a-zA-Z0-9_.-]+";
+    private final Map<String, IExternallyStoredResourceService> myIdToProvider = new HashMap<>();
 
-	/**
-	 * Registers a new provider. Do not call this method after the server has been started.
-	 *
-	 * @param theProvider The provider to register.
-	 */
-	public void registerProvider(@Nonnull IExternallyStoredResourceService theProvider) {
-		String id = defaultString(theProvider.getId());
-		Validate.isTrue(id.matches(VALID_ID_PATTERN), "Invalid provider ID (must match pattern " + VALID_ID_PATTERN + "): %s", id);
-		Validate.isTrue(!myIdToProvider.containsKey(id), "Already have a provider with ID: %s", id);
+    /**
+     * Registers a new provider. Do not call this method after the server has been started.
+     *
+     * @param theProvider The provider to register.
+     */
+    public void registerProvider(@Nonnull IExternallyStoredResourceService theProvider) {
+        String id = defaultString(theProvider.getId());
+        Validate.isTrue(
+                id.matches(VALID_ID_PATTERN),
+                "Invalid provider ID (must match pattern " + VALID_ID_PATTERN + "): %s",
+                id);
+        Validate.isTrue(!myIdToProvider.containsKey(id), "Already have a provider with ID: %s", id);
 
-		myIdToProvider.put(id, theProvider);
-	}
+        myIdToProvider.put(id, theProvider);
+    }
 
-	/**
-	 * Do we have any providers registered?
-	 */
-	public boolean hasProviders() {
-		return !myIdToProvider.isEmpty();
-	}
+    /** Do we have any providers registered? */
+    public boolean hasProviders() {
+        return !myIdToProvider.isEmpty();
+    }
 
-	/**
-	 * Clears all registered providers. This method is mostly intended for unit tests.
-	 */
-	public void clearProviders() {
-		myIdToProvider.clear();
-	}
+    /** Clears all registered providers. This method is mostly intended for unit tests. */
+    public void clearProviders() {
+        myIdToProvider.clear();
+    }
 
-	@Nonnull
-	public IExternallyStoredResourceService getProvider(@Nonnull String theProviderId) {
-		IExternallyStoredResourceService retVal = myIdToProvider.get(theProviderId);
-		Validate.notNull(retVal, "Invalid ESR provider ID: %s", theProviderId);
-		return retVal;
-	}
+    @Nonnull
+    public IExternallyStoredResourceService getProvider(@Nonnull String theProviderId) {
+        IExternallyStoredResourceService retVal = myIdToProvider.get(theProviderId);
+        Validate.notNull(retVal, "Invalid ESR provider ID: %s", theProviderId);
+        return retVal;
+    }
 }

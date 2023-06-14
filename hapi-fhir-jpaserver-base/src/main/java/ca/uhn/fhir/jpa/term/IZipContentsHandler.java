@@ -25,6 +25,5 @@ import java.io.Reader;
 @FunctionalInterface
 public interface IZipContentsHandler {
 
-	void handle(Reader theReader, String theFilename) throws IOException;
-
+    void handle(Reader theReader, String theFilename) throws IOException;
 }

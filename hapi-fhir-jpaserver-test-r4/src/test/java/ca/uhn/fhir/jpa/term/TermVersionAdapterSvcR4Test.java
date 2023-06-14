@@ -20,9 +20,16 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import java.security.InvalidParameterException;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,48 +38,43 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.security.InvalidParameterException;
-
-import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-
 @ExtendWith(MockitoExtension.class)
 class TermVersionAdapterSvcR4Test {
 
-	private final TermVersionAdapterSvcR4 testedClass = new TermVersionAdapterSvcR4();
+    private final TermVersionAdapterSvcR4 testedClass = new TermVersionAdapterSvcR4();
 
-	@Mock private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
-	@Mock ServletRequestDetails theRequestDetails;
-	@Mock DaoMethodOutcome theDaoMethodOutcome;
+    @Mock private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
+    @Mock ServletRequestDetails theRequestDetails;
+    @Mock DaoMethodOutcome theDaoMethodOutcome;
 
-	@Test
-	void createOrUpdateCodeSystemMustHaveId() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("a-loinc-system");
+    @Test
+    void createOrUpdateCodeSystemMustHaveId() {
+        CodeSystem codeSystem = new CodeSystem();
+        codeSystem.setUrl("a-loinc-system");
 
-		InvalidParameterException thrown = assertThrows(
-			InvalidParameterException.class,
-			() -> testedClass.createOrUpdateCodeSystem(codeSystem, new ServletRequestDetails()));
+        InvalidParameterException thrown =
+                assertThrows(
+                        InvalidParameterException.class,
+                        () ->
+                                testedClass.createOrUpdateCodeSystem(
+                                        codeSystem, new ServletRequestDetails()));
 
-		assertTrue(thrown.getMessage().contains("'loinc' CodeSystem must have an 'ID' element"));
-	}
+        assertTrue(thrown.getMessage().contains("'loinc' CodeSystem must have an 'ID' element"));
+    }
 
+    @Test
+    void createOrUpdateCodeSystemWithIdNoException() {
+        ReflectionTestUtils.setField(
+                testedClass, "myCodeSystemResourceDao", myCodeSystemResourceDao);
 
-	@Test
-	void createOrUpdateCodeSystemWithIdNoException() {
-		ReflectionTestUtils.setField(testedClass, "myCodeSystemResourceDao", myCodeSystemResourceDao);
+        CodeSystem codeSystem = new CodeSystem();
+        codeSystem.setUrl("a-loinc-system").setId(LOINC_LOW);
 
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("a-loinc-system").setId(LOINC_LOW);
+        when(myCodeSystemResourceDao.update(codeSystem, theRequestDetails))
+                .thenReturn(theDaoMethodOutcome);
 
-		when(myCodeSystemResourceDao.update(codeSystem, theRequestDetails)).thenReturn(theDaoMethodOutcome);
+        testedClass.createOrUpdateCodeSystem(codeSystem, theRequestDetails);
 
-		testedClass.createOrUpdateCodeSystem(codeSystem, theRequestDetails);
-
-		verify(myCodeSystemResourceDao, Mockito.times(1)).update(codeSystem, theRequestDetails);
-	}
+        verify(myCodeSystemResourceDao, Mockito.times(1)).update(codeSystem, theRequestDetails);
+    }
 }

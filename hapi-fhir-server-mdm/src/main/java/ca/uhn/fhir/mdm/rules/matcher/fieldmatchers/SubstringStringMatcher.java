@@ -27,13 +27,17 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class SubstringStringMatcher implements IMdmFieldMatcher {
 
-	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String left = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.getExact());
-			String right = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
-			return left.startsWith(right) || right.startsWith(left);
-		}
-		return false;
-	}
+    @Override
+    public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+        if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
+            String left =
+                    StringMatcherUtils.extractString(
+                            (IPrimitiveType<?>) theLeftBase, theParams.getExact());
+            String right =
+                    StringMatcherUtils.extractString(
+                            (IPrimitiveType<?>) theRightBase, theParams.getExact());
+            return left.startsWith(right) || right.startsWith(left);
+        }
+        return false;
+    }
 }

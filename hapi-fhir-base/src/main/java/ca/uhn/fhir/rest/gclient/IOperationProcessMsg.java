@@ -28,26 +28,28 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- *
  * @author HGS
  */
-public interface IOperationProcessMsg{
+public interface IOperationProcessMsg {
 
     /**
      * Set the Message Bundle to POST to the messaging server.<br>
-     * After this call you must choose either the method synchronous or asynchronous to set the processing mode.
-     * 
+     * After this call you must choose either the method synchronous or asynchronous to set the
+     * processing mode.
+     *
      * @param <R>
      * @param theMsgBundle A Bundle of type message
-     * @return 
+     * @return
      */
-    <R extends IBaseResource> IOperationProcessMsgMode<R> setMessageBundle(IBaseBundle theMsgBundle);
+    <R extends IBaseResource> IOperationProcessMsgMode<R> setMessageBundle(
+            IBaseBundle theMsgBundle);
 
     /**
-     * An optional query parameter indicating that responses from the receiving server should be sent to this url
-     * 
+     * An optional query parameter indicating that responses from the receiving server should be
+     * sent to this url
+     *
      * @param respondToUri The receiving endpoint to witch server response messages should be sent.
-     * @return 
+     * @return
      */
     IOperationProcessMsg setResponseUrlParam(String respondToUri);
 }

@@ -19,80 +19,79 @@
  */
 package ca.uhn.fhir.jpa.model.sched;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.quartz.Job;
 import org.quartz.JobKey;
 import org.quartz.TriggerKey;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 public class ScheduledJobDefinition {
-	private Class<? extends Job> myJobClass;
-	private String myId;
-	private String myGroup;
-	private Map<String, String> myJobData;
+    private Class<? extends Job> myJobClass;
+    private String myId;
+    private String myGroup;
+    private Map<String, String> myJobData;
 
-	public Map<String, String> getJobData() {
-		Map<String, String> retVal = myJobData;
-		if (retVal == null) {
-			retVal = Collections.emptyMap();
-		}
-		return Collections.unmodifiableMap(retVal);
-	}
+    public Map<String, String> getJobData() {
+        Map<String, String> retVal = myJobData;
+        if (retVal == null) {
+            retVal = Collections.emptyMap();
+        }
+        return Collections.unmodifiableMap(retVal);
+    }
 
-	public Class<? extends Job> getJobClass() {
-		return myJobClass;
-	}
+    public Class<? extends Job> getJobClass() {
+        return myJobClass;
+    }
 
-	public ScheduledJobDefinition setJobClass(Class<? extends Job> theJobClass) {
-		myJobClass = theJobClass;
-		return this;
-	}
+    public ScheduledJobDefinition setJobClass(Class<? extends Job> theJobClass) {
+        myJobClass = theJobClass;
+        return this;
+    }
 
-	public String getId() {
-		return myId;
-	}
+    public String getId() {
+        return myId;
+    }
 
-	public ScheduledJobDefinition setId(String theId) {
-		myId = theId;
-		return this;
-	}
+    public ScheduledJobDefinition setId(String theId) {
+        myId = theId;
+        return this;
+    }
 
-	public String getGroup() {
-		return myGroup;
-	}
+    public String getGroup() {
+        return myGroup;
+    }
 
-	public ScheduledJobDefinition setGroup(String theGroup) {
-		myGroup = theGroup;
-		return this;
-	}
+    public ScheduledJobDefinition setGroup(String theGroup) {
+        myGroup = theGroup;
+        return this;
+    }
 
-	public void addJobData(String thePropertyName, String thePropertyValue) {
-		Validate.notBlank(thePropertyName);
-		if (myJobData == null) {
-			myJobData = new HashMap<>();
-		}
-		Validate.isTrue(myJobData.containsKey(thePropertyName) == false);
-		myJobData.put(thePropertyName, thePropertyValue);
-	}
+    public void addJobData(String thePropertyName, String thePropertyValue) {
+        Validate.notBlank(thePropertyName);
+        if (myJobData == null) {
+            myJobData = new HashMap<>();
+        }
+        Validate.isTrue(myJobData.containsKey(thePropertyName) == false);
+        myJobData.put(thePropertyName, thePropertyValue);
+    }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myJobClass", myJobClass)
-			.append("myId", myId)
-			.append("myGroup", myGroup)
-			.toString();
-	}
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("myJobClass", myJobClass)
+                .append("myId", myId)
+                .append("myGroup", myGroup)
+                .toString();
+    }
 
-	public JobKey toJobKey() {
-		return new JobKey(getId(), getGroup());
-	}
+    public JobKey toJobKey() {
+        return new JobKey(getId(), getGroup());
+    }
 
-	public TriggerKey toTriggerKey() {
-		return new TriggerKey(getId(), getGroup());
-	}
+    public TriggerKey toTriggerKey() {
+        return new TriggerKey(getId(), getGroup());
+    }
 }

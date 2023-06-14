@@ -21,53 +21,46 @@ package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import java.util.Set;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
-
 public class HapiNullScheduler implements IHapiScheduler {
-	private static final Logger ourLog = LoggerFactory.getLogger(HapiNullScheduler.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(HapiNullScheduler.class);
 
-	@Override
-	public void init() {
-		// nothing
-	}
+    @Override
+    public void init() {
+        // nothing
+    }
 
-	@Override
-	public void start() {
+    @Override
+    public void start() {}
 
-	}
+    @Override
+    public void shutdown() {}
 
-	@Override
-	public void shutdown() {
+    @Override
+    public boolean isStarted() {
+        return true;
+    }
 
-	}
+    @Override
+    public void clear() throws SchedulerException {}
 
-	@Override
-	public boolean isStarted() {
-		return true;
-	}
+    @Override
+    public void logStatusForUnitTest() {}
 
-	@Override
-	public void clear() throws SchedulerException {
+    @Override
+    public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+        ourLog.debug(
+                "Skipping scheduling job {} since scheduling is disabled",
+                theJobDefinition.getId());
+    }
 
-	}
-
-	@Override
-	public void logStatusForUnitTest() {
-
-	}
-
-	@Override
-	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-		ourLog.debug("Skipping scheduling job {} since scheduling is disabled", theJobDefinition.getId());
-	}
-
-	@Override
-	public Set<JobKey> getJobKeysForUnitTest() {
-		return null;
-	}
+    @Override
+    public Set<JobKey> getJobKeysForUnitTest() {
+        return null;
+    }
 }

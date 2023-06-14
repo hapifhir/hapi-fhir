@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.search;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -29,57 +31,90 @@ import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
+import java.util.Date;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import java.util.Date;
-import java.util.UUID;
-
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-
 public class PersistedJpaBundleProviderFactory {
 
-	@Autowired
-	private ApplicationContext myApplicationContext;
+    @Autowired private ApplicationContext myApplicationContext;
 
-	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, String theUuid) {
-		Object retVal = myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_BUNDLE_PROVIDER, theRequest, theUuid);
-		return (PersistedJpaBundleProvider) retVal;
-	}
+    public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, String theUuid) {
+        Object retVal =
+                myApplicationContext.getBean(
+                        JpaConfig.PERSISTED_JPA_BUNDLE_PROVIDER, theRequest, theUuid);
+        return (PersistedJpaBundleProvider) retVal;
+    }
 
-	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
-		Object retVal = myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch);
-		return (PersistedJpaBundleProvider) retVal;
-	}
+    public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
+        Object retVal =
+                myApplicationContext.getBean(
+                        JpaConfig.PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch);
+        return (PersistedJpaBundleProvider) retVal;
+    }
 
-	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(RequestDetails theRequestDetails, Search theSearch, SearchTask theTask, ISearchBuilder theSearchBuilder, RequestPartitionId theRequestPartitionId) {
-		return (PersistedJpaSearchFirstPageBundleProvider) myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER, theRequestDetails, theSearch, theTask, theSearchBuilder, theRequestPartitionId);
-	}
+    public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(
+            RequestDetails theRequestDetails,
+            Search theSearch,
+            SearchTask theTask,
+            ISearchBuilder theSearchBuilder,
+            RequestPartitionId theRequestPartitionId) {
+        return (PersistedJpaSearchFirstPageBundleProvider)
+                myApplicationContext.getBean(
+                        JpaConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER,
+                        theRequestDetails,
+                        theSearch,
+                        theTask,
+                        theSearchBuilder,
+                        theRequestPartitionId);
+    }
 
+    public IBundleProvider history(
+            RequestDetails theRequest,
+            String theResourceType,
+            Long theResourcePid,
+            Date theRangeStartInclusive,
+            Date theRangeEndInclusive,
+            Integer theOffset,
+            RequestPartitionId theRequestPartitionId) {
+        return history(
+                theRequest,
+                theResourceType,
+                theResourcePid,
+                theRangeStartInclusive,
+                theRangeEndInclusive,
+                theOffset,
+                null,
+                theRequestPartitionId);
+    }
 
-	public IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset, RequestPartitionId theRequestPartitionId) {
-		return history(theRequest, theResourceType, theResourcePid, theRangeStartInclusive, theRangeEndInclusive, theOffset, null, theRequestPartitionId);
-	}
+    public IBundleProvider history(
+            RequestDetails theRequest,
+            String theResourceType,
+            Long theResourcePid,
+            Date theRangeStartInclusive,
+            Date theRangeEndInclusive,
+            Integer theOffset,
+            HistorySearchStyleEnum searchParameterType,
+            RequestPartitionId theRequestPartitionId) {
+        String resourceName = defaultIfBlank(theResourceType, null);
 
-	public IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset, HistorySearchStyleEnum searchParameterType, RequestPartitionId theRequestPartitionId) {
-		String resourceName = defaultIfBlank(theResourceType, null);
+        Search search = new Search();
+        search.setOffset(theOffset);
+        search.setDeleted(false);
+        search.setCreated(new Date());
+        search.setLastUpdated(theRangeStartInclusive, theRangeEndInclusive);
+        search.setUuid(UUID.randomUUID().toString());
+        search.setResourceType(resourceName);
+        search.setResourceId(theResourcePid);
+        search.setSearchType(SearchTypeEnum.HISTORY);
+        search.setStatus(SearchStatusEnum.FINISHED);
+        search.setHistorySearchStyle(searchParameterType);
 
-		Search search = new Search();
-		search.setOffset(theOffset);
-		search.setDeleted(false);
-		search.setCreated(new Date());
-		search.setLastUpdated(theRangeStartInclusive, theRangeEndInclusive);
-		search.setUuid(UUID.randomUUID().toString());
-		search.setResourceType(resourceName);
-		search.setResourceId(theResourcePid);
-		search.setSearchType(SearchTypeEnum.HISTORY);
-		search.setStatus(SearchStatusEnum.FINISHED);
-		search.setHistorySearchStyle(searchParameterType);
+        PersistedJpaBundleProvider provider = newInstance(theRequest, search);
+        provider.setRequestPartitionId(theRequestPartitionId);
 
-		PersistedJpaBundleProvider provider = newInstance(theRequest, search);
-		provider.setRequestPartitionId(theRequestPartitionId);
-
-		return provider;
-	}
-
+        return provider;
+    }
 }

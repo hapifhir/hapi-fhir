@@ -26,75 +26,74 @@ import java.math.BigInteger;
 
 public abstract class BaseJsonLikeWriter {
 
-	private boolean prettyPrint;
-	private Writer writer;
+    private boolean prettyPrint;
+    private Writer writer;
 
-	public BaseJsonLikeWriter() {
-		super();
-	}
+    public BaseJsonLikeWriter() {
+        super();
+    }
 
-	public boolean isPrettyPrint() {
-		return prettyPrint;
-	}
+    public boolean isPrettyPrint() {
+        return prettyPrint;
+    }
 
-	public void setPrettyPrint(boolean tf) {
-		prettyPrint = tf;
-	}
+    public void setPrettyPrint(boolean tf) {
+        prettyPrint = tf;
+    }
 
-	public Writer getWriter() {
-		return writer;
-	}
+    public Writer getWriter() {
+        return writer;
+    }
 
-	public void setWriter(Writer writer) {
-		this.writer = writer;
-	}
+    public void setWriter(Writer writer) {
+        this.writer = writer;
+    }
 
-	public abstract BaseJsonLikeWriter init() throws IOException;
+    public abstract BaseJsonLikeWriter init() throws IOException;
 
-	public abstract BaseJsonLikeWriter flush() throws IOException;
+    public abstract BaseJsonLikeWriter flush() throws IOException;
 
-	public abstract void close() throws IOException;
+    public abstract void close() throws IOException;
 
-	public abstract BaseJsonLikeWriter beginObject() throws IOException;
+    public abstract BaseJsonLikeWriter beginObject() throws IOException;
 
-	public abstract BaseJsonLikeWriter beginObject(String name) throws IOException;
+    public abstract BaseJsonLikeWriter beginObject(String name) throws IOException;
 
-	public abstract BaseJsonLikeWriter beginArray(String name) throws IOException;
+    public abstract BaseJsonLikeWriter beginArray(String name) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(String value) throws IOException;
+    public abstract BaseJsonLikeWriter write(String value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(BigInteger value) throws IOException;
+    public abstract BaseJsonLikeWriter write(BigInteger value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(BigDecimal value) throws IOException;
+    public abstract BaseJsonLikeWriter write(BigDecimal value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(long value) throws IOException;
+    public abstract BaseJsonLikeWriter write(long value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(double value) throws IOException;
+    public abstract BaseJsonLikeWriter write(double value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(Boolean value) throws IOException;
+    public abstract BaseJsonLikeWriter write(Boolean value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(boolean value) throws IOException;
+    public abstract BaseJsonLikeWriter write(boolean value) throws IOException;
 
-	public abstract BaseJsonLikeWriter writeNull() throws IOException;
+    public abstract BaseJsonLikeWriter writeNull() throws IOException;
 
-	public abstract BaseJsonLikeWriter write(String name, String value) throws IOException;
+    public abstract BaseJsonLikeWriter write(String name, String value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(String name, BigInteger value) throws IOException;
+    public abstract BaseJsonLikeWriter write(String name, BigInteger value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(String name, BigDecimal value) throws IOException;
+    public abstract BaseJsonLikeWriter write(String name, BigDecimal value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(String name, long value) throws IOException;
+    public abstract BaseJsonLikeWriter write(String name, long value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(String name, double value) throws IOException;
+    public abstract BaseJsonLikeWriter write(String name, double value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(String name, Boolean value) throws IOException;
+    public abstract BaseJsonLikeWriter write(String name, Boolean value) throws IOException;
 
-	public abstract BaseJsonLikeWriter write(String name, boolean value) throws IOException;
+    public abstract BaseJsonLikeWriter write(String name, boolean value) throws IOException;
 
-	public abstract BaseJsonLikeWriter endObject() throws IOException;
+    public abstract BaseJsonLikeWriter endObject() throws IOException;
 
-	public abstract BaseJsonLikeWriter endArray() throws IOException;
+    public abstract BaseJsonLikeWriter endArray() throws IOException;
 
-	public abstract BaseJsonLikeWriter endBlock() throws IOException;
-
+    public abstract BaseJsonLikeWriter endBlock() throws IOException;
 }

@@ -22,19 +22,17 @@ package ca.uhn.fhir.fhirpath;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
- * This exception is thrown if a FHIRPath expression can not be executed successfully
- * for any reason
+ * This exception is thrown if a FHIRPath expression can not be executed successfully for any reason
  */
 public class FhirPathExecutionException extends InternalErrorException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public FhirPathExecutionException(Throwable theCause) {
-		super(theCause);
-	}
+    public FhirPathExecutionException(Throwable theCause) {
+        super(theCause);
+    }
 
-	public FhirPathExecutionException(String theMessage) {
-		super(theMessage);
-	}
-
+    public FhirPathExecutionException(String theMessage) {
+        super(theMessage);
+    }
 }

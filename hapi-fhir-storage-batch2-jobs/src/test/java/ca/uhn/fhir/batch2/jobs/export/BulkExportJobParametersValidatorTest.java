@@ -1,20 +1,5 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,189 +8,206 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 @ExtendWith(MockitoExtension.class)
 public class BulkExportJobParametersValidatorTest {
 
-	@Mock
-	private DaoRegistry myDaoRegistry;
+    @Mock private DaoRegistry myDaoRegistry;
 
-	@Mock
-	private IBinaryStorageSvc myIBinaryStorageSvc;
+    @Mock private IBinaryStorageSvc myIBinaryStorageSvc;
 
-	@InjectMocks
-	private BulkExportJobParametersValidator myValidator;
+    @InjectMocks private BulkExportJobParametersValidator myValidator;
 
-	private BulkExportJobParameters createSystemExportParameters() {
-		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
-		parameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-		return parameters;
-	}
+    private BulkExportJobParameters createSystemExportParameters() {
+        BulkExportJobParameters parameters = new BulkExportJobParameters();
+        parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
+        parameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
+        parameters.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+        return parameters;
+    }
 
-	@Test
-	public void validate_validParametersForSystem_returnsEmptyList() {
-		// setup
-		BulkExportJobParameters parameters = createSystemExportParameters();
+    @Test
+    public void validate_validParametersForSystem_returnsEmptyList() {
+        // setup
+        BulkExportJobParameters parameters = createSystemExportParameters();
 
-		// when
-		when(myDaoRegistry.isResourceTypeSupported(anyString()))
-			.thenReturn(true);
+        // when
+        when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
 
-		// test
-		List<String> result = myValidator.validate(null, parameters);
+        // test
+        List<String> result = myValidator.validate(null, parameters);
 
-		// verify
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
-	}
+        // verify
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 
+    @Test
+    public void validate_exportId_illegal_characters() {
+        BulkExportJobParameters parameters = createSystemExportParameters();
+        parameters.setExportIdentifier("exportId&&&");
+        // when
+        when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+        when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(false);
+        List<String> errors = myValidator.validate(null, parameters);
 
-	@Test
-	public void validate_exportId_illegal_characters() {
-		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportIdentifier("exportId&&&");
-		// when
-		when(myDaoRegistry.isResourceTypeSupported(anyString()))
-			.thenReturn(true);
-		when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(false);
-		List<String> errors = myValidator.validate(null, parameters);
+        // verify
+        assertNotNull(errors);
+        assertEquals(1, errors.size());
+        assertEquals(
+                errors.get(0),
+                "Export ID does not conform to the current blob storage implementation's"
+                        + " limitations.");
+    }
 
-		// verify
-		assertNotNull(errors);
-		assertEquals(1, errors.size());
-		assertEquals(errors.get(0), "Export ID does not conform to the current blob storage implementation's limitations.");
-	}
+    @Test
+    public void validate_exportId_legal_characters() {
+        BulkExportJobParameters parameters = createSystemExportParameters();
+        parameters.setExportIdentifier("HELLO!/WORLD/");
+        // when
+        when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
 
-	@Test
-	public void validate_exportId_legal_characters() {
-		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportIdentifier("HELLO!/WORLD/");
-		// when
-		when(myDaoRegistry.isResourceTypeSupported(anyString()))
-			.thenReturn(true);
+        when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(true);
+        List<String> errors = myValidator.validate(null, parameters);
 
-		when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(true);
-		List<String> errors = myValidator.validate(null, parameters);
+        // verify
+        assertNotNull(errors);
+        assertEquals(0, errors.size());
+    }
 
-		// verify
-		assertNotNull(errors);
-		assertEquals(0, errors.size());
-	}
-	@Test
-	public void validate_validParametersForPatient_returnsEmptyList() {
-		// setup
-		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+    @Test
+    public void validate_validParametersForPatient_returnsEmptyList() {
+        // setup
+        BulkExportJobParameters parameters = createSystemExportParameters();
+        parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 
-		// when
-		when(myDaoRegistry.isResourceTypeSupported(anyString()))
-			.thenReturn(true);
+        // when
+        when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
 
-		// test
-		List<String> result = myValidator.validate(null, parameters);
+        // test
+        List<String> result = myValidator.validate(null, parameters);
 
-		// verify
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
-	}
+        // verify
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 
-	@Test
-	public void validate_invalidResourceType_returnsError() {
-		// setup
-		String resourceType = "notValid";
-		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-		parameters.setResourceTypes(Collections.singletonList(resourceType));
+    @Test
+    public void validate_invalidResourceType_returnsError() {
+        // setup
+        String resourceType = "notValid";
+        BulkExportJobParameters parameters = createSystemExportParameters();
+        parameters.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+        parameters.setResourceTypes(Collections.singletonList(resourceType));
 
-		// test
-		List<String> result = myValidator.validate(null, parameters);
+        // test
+        List<String> result = myValidator.validate(null, parameters);
 
-		// verify
-		assertNotNull(result);
-		assertFalse(result.isEmpty());
-		assertTrue(result.get(0).contains("Resource type " + resourceType + " is not a supported resource type"));
-	}
+        // verify
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(
+                result.get(0)
+                        .contains(
+                                "Resource type "
+                                        + resourceType
+                                        + " is not a supported resource type"));
+    }
 
-	@Test
-	public void validate_validateParametersForGroup_returnsEmptyList() {
-		// setup
-		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
-		parameters.setGroupId("groupId");
-		parameters.setExpandMdm(true);
+    @Test
+    public void validate_validateParametersForGroup_returnsEmptyList() {
+        // setup
+        BulkExportJobParameters parameters = createSystemExportParameters();
+        parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+        parameters.setGroupId("groupId");
+        parameters.setExpandMdm(true);
 
-		// when
-		when(myDaoRegistry.isResourceTypeSupported(anyString()))
-			.thenReturn(true);
+        // when
+        when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
 
-		// test
-		List<String> result = myValidator.validate(null, parameters);
+        // test
+        List<String> result = myValidator.validate(null, parameters);
 
-		// verify
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
-	}
+        // verify
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 
-	@Test
-	public void validate_groupParametersWithoutGroupId_returnsError() {
-		// setup
-		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+    @Test
+    public void validate_groupParametersWithoutGroupId_returnsError() {
+        // setup
+        BulkExportJobParameters parameters = createSystemExportParameters();
+        parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 
-		// test
-		List<String> result = myValidator.validate(null, parameters);
+        // test
+        List<String> result = myValidator.validate(null, parameters);
 
-		// verify
-		assertNotNull(result);
-		assertFalse(result.isEmpty());
-		assertTrue(result.contains("Group export requires a group id, but none provided."));
-	}
+        // verify
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.contains("Group export requires a group id, but none provided."));
+    }
 
-	@Test
-	public void validate_omittedResourceTypes_returnsNoErrorMessages() {
-		// setup
-		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setResourceTypes(null);
+    @Test
+    public void validate_omittedResourceTypes_returnsNoErrorMessages() {
+        // setup
+        BulkExportJobParameters parameters = createSystemExportParameters();
+        parameters.setResourceTypes(null);
 
-		// test
-		List<String> results = myValidator.validate(null, parameters);
+        // test
+        List<String> results = myValidator.validate(null, parameters);
 
-		// verify
-		assertNotNull(results);
-		assertEquals(0, results.size());
-	}
+        // verify
+        assertNotNull(results);
+        assertEquals(0, results.size());
+    }
 
-	@Test
-	public void validate_binaryExport_returnsErrors() {
-		// setup
-		String jobId = "jobId";
-		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setResourceTypes(Arrays.asList("Patient", "Binary"));
-		parameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
+    @Test
+    public void validate_binaryExport_returnsErrors() {
+        // setup
+        String jobId = "jobId";
+        BulkExportJobParameters parameters = new BulkExportJobParameters();
+        parameters.setResourceTypes(Arrays.asList("Patient", "Binary"));
+        parameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		// test
-		List<String> errors = myValidator.validate(null, parameters);
+        // test
+        List<String> errors = myValidator.validate(null, parameters);
 
-		// validate
-		assertNotNull(errors);
-		assertFalse(errors.isEmpty());
-		assertTrue(errors.contains("Bulk export of Binary resources is forbidden"));
-	}
+        // validate
+        assertNotNull(errors);
+        assertFalse(errors.isEmpty());
+        assertTrue(errors.contains("Bulk export of Binary resources is forbidden"));
+    }
 
-	@Test
-	public void validate_incorrectOutputFormat_returnsErrors() {
-		// setup
-		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
-		parameters.setOutputFormat("json");
+    @Test
+    public void validate_incorrectOutputFormat_returnsErrors() {
+        // setup
+        BulkExportJobParameters parameters = new BulkExportJobParameters();
+        parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
+        parameters.setOutputFormat("json");
 
-		// test
-		List<String> errors = myValidator.validate(null, parameters);
+        // test
+        List<String> errors = myValidator.validate(null, parameters);
 
-		// validate
-		assertNotNull(errors);
-		assertFalse(errors.isEmpty());
-		assertTrue(errors.contains("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON));
-	}
+        // validate
+        assertNotNull(errors);
+        assertFalse(errors.isEmpty());
+        assertTrue(
+                errors.contains(
+                        "The only allowed format for Bulk Export is currently "
+                                + Constants.CT_FHIR_NDJSON));
+    }
 }

@@ -24,32 +24,29 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 /**
- * The whole purpose of his class is to ease construction of a non-trivial gson.JsonObject,
- * which can't be done the easy way in this case (using a JSON string), because there are
- * valid regex strings which break gson, as this: ".*\\^Donor$"
+ * The whole purpose of his class is to ease construction of a non-trivial gson.JsonObject, which
+ * can't be done the easy way in this case (using a JSON string), because there are valid regex
+ * strings which break gson, as this: ".*\\^Donor$"
  */
 public class RegexpGsonBuilderUtil {
 
+    private RegexpGsonBuilderUtil() {}
 
-	private RegexpGsonBuilderUtil() { }
+    /**
+     * Builds a json object as this sample: {"regexp":{" + thePropName + ":{"value":" + theValue +
+     * "}}}
+     */
+    public static JsonObject toGson(String thePropName, String theValue) {
+        JsonObject valueJO = new JsonObject();
+        valueJO.add("value", new JsonPrimitive(theValue));
 
-	/**
-	 * Builds a json object as this sample:
-	 * {"regexp":{" + thePropName + ":{"value":" + theValue + "}}}
-	 */
-	public static JsonObject toGson(String thePropName, String theValue) {
-		JsonObject valueJO = new JsonObject();
-		valueJO.add("value", new JsonPrimitive(theValue));
+        JsonObject systemValueJO = new JsonObject();
+        systemValueJO.add(thePropName, valueJO);
 
-		JsonObject systemValueJO = new JsonObject();
-		systemValueJO.add(thePropName, valueJO);
+        JsonObject regexpJO = new JsonObject();
+        regexpJO.add("regexp", systemValueJO);
 
-		JsonObject regexpJO = new JsonObject();
-		regexpJO.add("regexp", systemValueJO);
-
-		JsonArray a = new JsonArray();
-		return regexpJO;
-	}
-
-
+        JsonArray a = new JsonArray();
+        return regexpJO;
+    }
 }

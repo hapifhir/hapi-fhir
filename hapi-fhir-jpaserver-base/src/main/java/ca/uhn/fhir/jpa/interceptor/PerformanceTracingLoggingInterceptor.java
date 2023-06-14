@@ -29,81 +29,99 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
-/**
- * Logs details about the executed query
- */
+/** Logs details about the executed query */
 @Interceptor()
 public class PerformanceTracingLoggingInterceptor {
-	private static final Logger ourLog = LoggerFactory.getLogger(PerformanceTracingLoggingInterceptor.class);
-	private final Logger myLog;
-	private final Level myLevel;
+    private static final Logger ourLog =
+            LoggerFactory.getLogger(PerformanceTracingLoggingInterceptor.class);
+    private final Logger myLog;
+    private final Level myLevel;
 
-	/**
-	 * Constructor that logs to this class with a level of INFO
-	 */
-	public PerformanceTracingLoggingInterceptor() {
-		this(Level.INFO);
-	}
+    /** Constructor that logs to this class with a level of INFO */
+    public PerformanceTracingLoggingInterceptor() {
+        this(Level.INFO);
+    }
 
-	/**
-	 * Constructor that logs with a specific level
-	 *
-	 * @since 5.5.0
-	 */
-	public PerformanceTracingLoggingInterceptor(Level theLevel) {
-		this(ourLog, theLevel);
-	}
+    /**
+     * Constructor that logs with a specific level
+     *
+     * @since 5.5.0
+     */
+    public PerformanceTracingLoggingInterceptor(Level theLevel) {
+        this(ourLog, theLevel);
+    }
 
-	/**
-	 * Constructor that logs to a custom logger and level
-	 */
-	public PerformanceTracingLoggingInterceptor(Logger theLog, Level theLevel) {
-		myLog = theLog;
-		myLevel = theLevel;
-	}
+    /** Constructor that logs to a custom logger and level */
+    public PerformanceTracingLoggingInterceptor(Logger theLog, Level theLevel) {
+        myLog = theLog;
+        myLevel = theLevel;
+    }
 
-	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED)
-	public void searchFirstResultLoaded(SearchRuntimeDetails theOutcome) {
-		log("Initial query result returned in {} for query {}", theOutcome.getQueryStopwatch(), theOutcome.getSearchUuid());
-	}
+    @Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED)
+    public void searchFirstResultLoaded(SearchRuntimeDetails theOutcome) {
+        log(
+                "Initial query result returned in {} for query {}",
+                theOutcome.getQueryStopwatch(),
+                theOutcome.getSearchUuid());
+    }
 
-	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE)
-	public void searchSelectComplete(SearchRuntimeDetails theOutcome) {
-		log("SqlQuery found {} matches in {} for query {}", theOutcome.getFoundMatchesCount(), theOutcome.getQueryStopwatch(), theOutcome.getSearchUuid());
-	}
+    @Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE)
+    public void searchSelectComplete(SearchRuntimeDetails theOutcome) {
+        log(
+                "SqlQuery found {} matches in {} for query {}",
+                theOutcome.getFoundMatchesCount(),
+                theOutcome.getQueryStopwatch(),
+                theOutcome.getSearchUuid());
+    }
 
-	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE)
-	public void searchComplete(SearchRuntimeDetails theOutcome) {
-		log("SqlQuery {} is complete in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
-	}
+    @Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE)
+    public void searchComplete(SearchRuntimeDetails theOutcome) {
+        log(
+                "SqlQuery {} is complete in {} - Found {} matches",
+                theOutcome.getSearchUuid(),
+                theOutcome.getQueryStopwatch(),
+                theOutcome.getFoundMatchesCount());
+    }
 
-	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE)
-	public void searchPassComplete(SearchRuntimeDetails theOutcome) {
-		log("SqlQuery {} pass complete and set to status {} in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getSearchStatus(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
-	}
+    @Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE)
+    public void searchPassComplete(SearchRuntimeDetails theOutcome) {
+        log(
+                "SqlQuery {} pass complete and set to status {} in {} - Found {} matches",
+                theOutcome.getSearchUuid(),
+                theOutcome.getSearchStatus(),
+                theOutcome.getQueryStopwatch(),
+                theOutcome.getFoundMatchesCount());
+    }
 
-	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_FAILED)
-	public void searchFailed(SearchRuntimeDetails theOutcome) {
-		log("SqlQuery {} failed in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
-	}
+    @Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_FAILED)
+    public void searchFailed(SearchRuntimeDetails theOutcome) {
+        log(
+                "SqlQuery {} failed in {} - Found {} matches",
+                theOutcome.getSearchUuid(),
+                theOutcome.getQueryStopwatch(),
+                theOutcome.getFoundMatchesCount());
+    }
 
-	@Hook(value = Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE)
-	public void indexSearchQueryComplete(SearchRuntimeDetails theOutcome) {
-		log("Index query for {} completed in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundIndexMatchesCount());
-	}
+    @Hook(value = Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE)
+    public void indexSearchQueryComplete(SearchRuntimeDetails theOutcome) {
+        log(
+                "Index query for {} completed in {} - Found {} matches",
+                theOutcome.getSearchUuid(),
+                theOutcome.getQueryStopwatch(),
+                theOutcome.getFoundIndexMatchesCount());
+    }
 
-	@Hook(value = Pointcut.JPA_PERFTRACE_INFO)
-	public void info(StorageProcessingMessage theMessage) {
-		log("[INFO] " + theMessage);
-	}
+    @Hook(value = Pointcut.JPA_PERFTRACE_INFO)
+    public void info(StorageProcessingMessage theMessage) {
+        log("[INFO] " + theMessage);
+    }
 
-	@Hook(value = Pointcut.JPA_PERFTRACE_WARNING)
-	public void warning(StorageProcessingMessage theMessage) {
-		log("[WARNING] " + theMessage);
-	}
+    @Hook(value = Pointcut.JPA_PERFTRACE_WARNING)
+    public void warning(StorageProcessingMessage theMessage) {
+        log("[WARNING] " + theMessage);
+    }
 
-	private void log(String theMessage, Object... theArgs) {
-		LogUtil.log(myLog, myLevel, theMessage, theArgs);
-	}
-
+    private void log(String theMessage, Object... theArgs) {
+        LogUtil.log(myLog, myLevel, theMessage, theArgs);
+    }
 }

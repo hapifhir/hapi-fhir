@@ -28,35 +28,37 @@ import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProc
 import org.springframework.scheduling.concurrent.ExecutorConfigurationSupport;
 
 /**
- * This bean postprocessor disables all scheduled tasks. It is intended
- * only to be used in unit tests in circumstances where scheduled
- * tasks cause issues.
+ * This bean postprocessor disables all scheduled tasks. It is intended only to be used in unit
+ * tests in circumstances where scheduled tasks cause issues.
  */
 public class UnregisterScheduledProcessor implements BeanFactoryPostProcessor {
 
-	public static final String SCHEDULING_DISABLED = "scheduling_disabled";
-	public static final String SCHEDULING_DISABLED_EQUALS_TRUE = "scheduling_disabled=true";
-	public static final String SCHEDULING_DISABLED_EQUALS_FALSE = "scheduling_disabled=false";
+    public static final String SCHEDULING_DISABLED = "scheduling_disabled";
+    public static final String SCHEDULING_DISABLED_EQUALS_TRUE = "scheduling_disabled=true";
+    public static final String SCHEDULING_DISABLED_EQUALS_FALSE = "scheduling_disabled=false";
 
-	private final Environment myEnvironment;
+    private final Environment myEnvironment;
 
-	public UnregisterScheduledProcessor(Environment theEnv) {
-		myEnvironment = theEnv;
-	}
+    public UnregisterScheduledProcessor(Environment theEnv) {
+        myEnvironment = theEnv;
+    }
 
-	@Override
-	public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		String schedulingDisabled = myEnvironment.getProperty(SCHEDULING_DISABLED);
-		if ("true".equals(schedulingDisabled)) {
-			for (String beanName : beanFactory.getBeanNamesForType(ScheduledAnnotationBeanPostProcessor.class)) {
-				((DefaultListableBeanFactory) beanFactory).removeBeanDefinition(beanName);
-			}
+    @Override
+    public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory)
+            throws BeansException {
+        String schedulingDisabled = myEnvironment.getProperty(SCHEDULING_DISABLED);
+        if ("true".equals(schedulingDisabled)) {
+            for (String beanName :
+                    beanFactory.getBeanNamesForType(ScheduledAnnotationBeanPostProcessor.class)) {
+                ((DefaultListableBeanFactory) beanFactory).removeBeanDefinition(beanName);
+            }
 
-			for (String beanName : beanFactory.getBeanNamesForType(ExecutorConfigurationSupport.class)) {
-				ExecutorConfigurationSupport executorConfigSupport = beanFactory.getBean(beanName, ExecutorConfigurationSupport.class);
-				executorConfigSupport.shutdown();
-			}
-		}
-
-	}
+            for (String beanName :
+                    beanFactory.getBeanNamesForType(ExecutorConfigurationSupport.class)) {
+                ExecutorConfigurationSupport executorConfigSupport =
+                        beanFactory.getBean(beanName, ExecutorConfigurationSupport.class);
+                executorConfigSupport.shutdown();
+            }
+        }
+    }
 }

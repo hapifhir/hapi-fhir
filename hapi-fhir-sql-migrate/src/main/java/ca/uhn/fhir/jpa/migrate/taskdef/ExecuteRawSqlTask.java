@@ -19,7 +19,13 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.apache.commons.lang3.StringUtils.trim;
+
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -27,75 +33,68 @@ import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.trim;
-
 public class ExecuteRawSqlTask extends BaseTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ExecuteRawSqlTask.class);
-	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
-	private List<String> myDriverNeutralSqls = new ArrayList<>();
+    private static final Logger ourLog = LoggerFactory.getLogger(ExecuteRawSqlTask.class);
+    private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
+    private List<String> myDriverNeutralSqls = new ArrayList<>();
 
-	public ExecuteRawSqlTask(String theProductVersion, String theSchemaVersion) {
-		super(theProductVersion, theSchemaVersion);
-		setDescription("Execute raw sql");
-	}
+    public ExecuteRawSqlTask(String theProductVersion, String theSchemaVersion) {
+        super(theProductVersion, theSchemaVersion);
+        setDescription("Execute raw sql");
+    }
 
-	public ExecuteRawSqlTask addSql(DriverTypeEnum theDriverType, @Language("SQL") String theSql) {
-		Validate.notNull(theDriverType);
-		Validate.notBlank(theSql);
+    public ExecuteRawSqlTask addSql(DriverTypeEnum theDriverType, @Language("SQL") String theSql) {
+        Validate.notNull(theDriverType);
+        Validate.notBlank(theSql);
 
-		List<String> list = myDriverToSqls.computeIfAbsent(theDriverType, t -> new ArrayList<>());
-		String sql = trim(theSql);
+        List<String> list = myDriverToSqls.computeIfAbsent(theDriverType, t -> new ArrayList<>());
+        String sql = trim(theSql);
 
-		// Trim the semicolon at the end if one is present
-		while (sql.endsWith(";")) {
-			sql = sql.substring(0, sql.length() - 1);
-		}
-		list.add(sql);
+        // Trim the semicolon at the end if one is present
+        while (sql.endsWith(";")) {
+            sql = sql.substring(0, sql.length() - 1);
+        }
+        list.add(sql);
 
-		return this;
-	}
+        return this;
+    }
 
-	public ExecuteRawSqlTask addSql(String theSql) {
-		Validate.notBlank("theSql must not be null", theSql);
-		myDriverNeutralSqls.add(theSql);
+    public ExecuteRawSqlTask addSql(String theSql) {
+        Validate.notBlank("theSql must not be null", theSql);
+        myDriverNeutralSqls.add(theSql);
 
-		return this;
-	}
+        return this;
+    }
 
-	@Override
-	public void validate() {
-		// nothing
-	}
+    @Override
+    public void validate() {
+        // nothing
+    }
 
-	@Override
-	public void doExecute() {
-		List<String> sqlStatements = myDriverToSqls.computeIfAbsent(getDriverType(), t -> new ArrayList<>());
-		sqlStatements.addAll(myDriverNeutralSqls);
+    @Override
+    public void doExecute() {
+        List<String> sqlStatements =
+                myDriverToSqls.computeIfAbsent(getDriverType(), t -> new ArrayList<>());
+        sqlStatements.addAll(myDriverNeutralSqls);
 
-		logInfo(ourLog, "Going to execute {} SQL statements", sqlStatements.size());
+        logInfo(ourLog, "Going to execute {} SQL statements", sqlStatements.size());
 
-		for (String nextSql : sqlStatements) {
-			executeSql(null, nextSql);
-		}
+        for (String nextSql : sqlStatements) {
+            executeSql(null, nextSql);
+        }
+    }
 
-	}
+    @Override
+    protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+        ExecuteRawSqlTask otherObject = (ExecuteRawSqlTask) theOtherObject;
+        theBuilder.append(myDriverNeutralSqls, otherObject.myDriverNeutralSqls);
+        theBuilder.append(myDriverToSqls, otherObject.myDriverToSqls);
+    }
 
-	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-		ExecuteRawSqlTask otherObject = (ExecuteRawSqlTask) theOtherObject;
-		theBuilder.append(myDriverNeutralSqls, otherObject.myDriverNeutralSqls);
-		theBuilder.append(myDriverToSqls, otherObject.myDriverToSqls);
-	}
-
-	@Override
-	protected void generateHashCode(HashCodeBuilder theBuilder) {
-		theBuilder.append(myDriverNeutralSqls);
-		theBuilder.append(myDriverToSqls);
-	}
+    @Override
+    protected void generateHashCode(HashCodeBuilder theBuilder) {
+        theBuilder.append(myDriverNeutralSqls);
+        theBuilder.append(myDriverToSqls);
+    }
 }

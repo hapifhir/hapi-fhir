@@ -22,32 +22,25 @@ package ca.uhn.fhir.model.dstu2.composite;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 
-@DatatypeDef(name="Money", profileOf=QuantityDt.class) 
+@DatatypeDef(name = "Money", profileOf = QuantityDt.class)
 public class MoneyDt extends QuantityDt {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor
-     */
+    /** Constructor */
     public MoneyDt() {
         // nothing
     }
 
-    /**
-     * Constructor
-     */
+    /** Constructor */
     @SimpleSetter
     public MoneyDt(@SimpleSetter.Parameter(name = "theValue") double theValue) {
         setValue(theValue);
     }
 
-    /**
-     * Constructor
-     */
+    /** Constructor */
     @SimpleSetter
     public MoneyDt(@SimpleSetter.Parameter(name = "theValue") long theValue) {
         setValue(theValue);
     }
-
 }

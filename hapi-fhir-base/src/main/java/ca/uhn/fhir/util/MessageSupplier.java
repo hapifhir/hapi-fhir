@@ -22,8 +22,8 @@ package ca.uhn.fhir.util;
 import java.util.function.Supplier;
 
 /**
- * This is used to allow lazy parameter initialization for SLF4j - Hopefully
- * a future version will allow lambda params
+ * This is used to allow lazy parameter initialization for SLF4j - Hopefully a future version will
+ * allow lambda params
  */
 public class MessageSupplier {
     private Supplier<?> supplier;

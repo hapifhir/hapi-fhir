@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.patch;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -31,54 +33,59 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import java.io.IOException;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class JsonPatchUtils {
 
-	public static <T extends IBaseResource> T apply(FhirContext theCtx, T theResourceToUpdate, String thePatchBody) {
-		// Parse the patch
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION, false);
+    public static <T extends IBaseResource> T apply(
+            FhirContext theCtx, T theResourceToUpdate, String thePatchBody) {
+        // Parse the patch
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION, false);
 
-		JsonFactory factory = mapper.getFactory();
+        JsonFactory factory = mapper.getFactory();
 
-		final JsonPatch patch;
-		try {
-			JsonParser parser = factory.createParser(thePatchBody);
-			JsonNode jsonPatchNode = mapper.readTree(parser);
-			patch = JsonPatch.fromJson(jsonPatchNode);
+        final JsonPatch patch;
+        try {
+            JsonParser parser = factory.createParser(thePatchBody);
+            JsonNode jsonPatchNode = mapper.readTree(parser);
+            patch = JsonPatch.fromJson(jsonPatchNode);
 
-			JsonNode originalJsonDocument = mapper.readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
-			JsonNode after = patch.apply(originalJsonDocument);
+            JsonNode originalJsonDocument =
+                    mapper.readTree(
+                            theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
+            JsonNode after = patch.apply(originalJsonDocument);
 
-			@SuppressWarnings("unchecked")
-			Class<T> clazz = (Class<T>) theResourceToUpdate.getClass();
+            @SuppressWarnings("unchecked")
+            Class<T> clazz = (Class<T>) theResourceToUpdate.getClass();
 
-			String postPatchedContent = mapper.writeValueAsString(after);
+            String postPatchedContent = mapper.writeValueAsString(after);
 
-			IParser fhirJsonParser = theCtx.newJsonParser();
-			fhirJsonParser.setParserErrorHandler(new StrictErrorHandler());
+            IParser fhirJsonParser = theCtx.newJsonParser();
+            fhirJsonParser.setParserErrorHandler(new StrictErrorHandler());
 
-			T retVal;
-			try {
-				retVal = fhirJsonParser.parseResource(clazz, postPatchedContent);
-			} catch (DataFormatException e) {
-				String resourceId = theResourceToUpdate.getIdElement().toUnqualifiedVersionless().getValue();
-				String resourceType = theCtx.getResourceDefinition(theResourceToUpdate).getName();
-				resourceId = defaultString(resourceId, resourceType);
-				String msg = theCtx.getLocalizer().getMessage(JsonPatchUtils.class, "failedToApplyPatch", resourceId, e.getMessage());
-				throw new InvalidRequestException(Msg.code(1271) + msg);
-			}
-			return retVal;
+            T retVal;
+            try {
+                retVal = fhirJsonParser.parseResource(clazz, postPatchedContent);
+            } catch (DataFormatException e) {
+                String resourceId =
+                        theResourceToUpdate.getIdElement().toUnqualifiedVersionless().getValue();
+                String resourceType = theCtx.getResourceDefinition(theResourceToUpdate).getName();
+                resourceId = defaultString(resourceId, resourceType);
+                String msg =
+                        theCtx.getLocalizer()
+                                .getMessage(
+                                        JsonPatchUtils.class,
+                                        "failedToApplyPatch",
+                                        resourceId,
+                                        e.getMessage());
+                throw new InvalidRequestException(Msg.code(1271) + msg);
+            }
+            return retVal;
 
-		} catch (IOException | JsonPatchException theE) {
-			throw new InvalidRequestException(Msg.code(1272) + theE.getMessage());
-		}
-
-	}
-
+        } catch (IOException | JsonPatchException theE) {
+            throw new InvalidRequestException(Msg.code(1272) + theE.getMessage());
+        }
+    }
 }

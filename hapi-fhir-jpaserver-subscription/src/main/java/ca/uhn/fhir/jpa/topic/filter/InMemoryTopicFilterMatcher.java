@@ -7,14 +7,19 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class InMemoryTopicFilterMatcher implements ISubscriptionTopicFilterMatcher {
-	private final SearchParamMatcher mySearchParamMatcher;
+    private final SearchParamMatcher mySearchParamMatcher;
 
-	public InMemoryTopicFilterMatcher(SearchParamMatcher theSearchParamMatcher) {
-		mySearchParamMatcher = theSearchParamMatcher;
-	}
+    public InMemoryTopicFilterMatcher(SearchParamMatcher theSearchParamMatcher) {
+        mySearchParamMatcher = theSearchParamMatcher;
+    }
 
-	@Override
-	public InMemoryMatchResult match(CanonicalTopicSubscriptionFilter theCanonicalTopicSubscriptionFilter, IBaseResource theResource) {
-		return mySearchParamMatcher.match(theCanonicalTopicSubscriptionFilter.asCriteriaString(), theResource, new SystemRequestDetails());
-	}
+    @Override
+    public InMemoryMatchResult match(
+            CanonicalTopicSubscriptionFilter theCanonicalTopicSubscriptionFilter,
+            IBaseResource theResource) {
+        return mySearchParamMatcher.match(
+                theCanonicalTopicSubscriptionFilter.asCriteriaString(),
+                theResource,
+                new SystemRequestDetails());
+    }
 }

@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -32,8 +32,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.io.Serializable;
-
 
 /*
  * These classes are no longer needed.
@@ -47,32 +45,36 @@ import java.io.Serializable;
 @Deprecated
 public class BulkExportCollectionFileEntity implements Serializable {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXCOLFILE_PID")
-	@SequenceGenerator(name = "SEQ_BLKEXCOLFILE_PID", sequenceName = "SEQ_BLKEXCOLFILE_PID")
-	@Column(name = "PID")
-	private Long myId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXCOLFILE_PID")
+    @SequenceGenerator(name = "SEQ_BLKEXCOLFILE_PID", sequenceName = "SEQ_BLKEXCOLFILE_PID")
+    @Column(name = "PID")
+    private Long myId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "COLLECTION_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name="FK_BLKEXCOLFILE_COLLECT"))
-	private BulkExportCollectionEntity myCollection;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "COLLECTION_PID",
+            referencedColumnName = "PID",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "FK_BLKEXCOLFILE_COLLECT"))
+    private BulkExportCollectionEntity myCollection;
 
-	@Column(name = "RES_ID", length = ForcedId.MAX_FORCED_ID_LENGTH, nullable = false)
-	private String myResourceId;
+    @Column(name = "RES_ID", length = ForcedId.MAX_FORCED_ID_LENGTH, nullable = false)
+    private String myResourceId;
 
-	public void setCollection(BulkExportCollectionEntity theCollection) {
-		myCollection = theCollection;
-	}
+    public void setCollection(BulkExportCollectionEntity theCollection) {
+        myCollection = theCollection;
+    }
 
-	public void setResource(String theResourceId) {
-		myResourceId = theResourceId;
-	}
+    public void setResource(String theResourceId) {
+        myResourceId = theResourceId;
+    }
 
-	public String getResourceId() {
-		return myResourceId;
-	}
+    public String getResourceId() {
+        return myResourceId;
+    }
 
-	public Long getId() {
-		return myId;
-	}
+    public Long getId() {
+        return myId;
+    }
 }

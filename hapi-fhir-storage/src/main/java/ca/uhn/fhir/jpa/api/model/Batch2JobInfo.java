@@ -21,105 +21,103 @@ package ca.uhn.fhir.jpa.api.model;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
-
 import java.util.Date;
 
 public class Batch2JobInfo {
 
-	// job instance id
-	private String myJobId;
+    // job instance id
+    private String myJobId;
 
-	// job status - see StatusEnum
-	private BulkExportJobStatusEnum myStatus;
+    // job status - see StatusEnum
+    private BulkExportJobStatusEnum myStatus;
 
-	// cancelled boolean
-	private boolean myCancelled;
+    // cancelled boolean
+    private boolean myCancelled;
 
-	// start time
-	private Date myStartTime;
+    // start time
+    private Date myStartTime;
 
-	// end time
-	private Date myEndTime;
+    // end time
+    private Date myEndTime;
 
-	// error message
-	private String myErrorMsg;
+    // error message
+    private String myErrorMsg;
 
-	// the output report (stringified json of whatever the reduction step outputs)
-	private String myReport;
+    // the output report (stringified json of whatever the reduction step outputs)
+    private String myReport;
 
-	private RequestPartitionId myRequestPartitionId;
-	private Integer myCombinedRecordsProcessed;
+    private RequestPartitionId myRequestPartitionId;
+    private Integer myCombinedRecordsProcessed;
 
-	public String getJobId() {
-		return myJobId;
-	}
+    public String getJobId() {
+        return myJobId;
+    }
 
-	public void setJobId(String theJobId) {
-		myJobId = theJobId;
-	}
+    public void setJobId(String theJobId) {
+        myJobId = theJobId;
+    }
 
-	public BulkExportJobStatusEnum getStatus() {
-		return myStatus;
-	}
+    public BulkExportJobStatusEnum getStatus() {
+        return myStatus;
+    }
 
-	public void setStatus(BulkExportJobStatusEnum theStatus) {
-		myStatus = theStatus;
-	}
+    public void setStatus(BulkExportJobStatusEnum theStatus) {
+        myStatus = theStatus;
+    }
 
-	public boolean isCancelled() {
-		return myCancelled;
-	}
+    public boolean isCancelled() {
+        return myCancelled;
+    }
 
-	public void setCancelled(boolean theCancelled) {
-		myCancelled = theCancelled;
-	}
+    public void setCancelled(boolean theCancelled) {
+        myCancelled = theCancelled;
+    }
 
-	public Date getStartTime() {
-		return myStartTime;
-	}
+    public Date getStartTime() {
+        return myStartTime;
+    }
 
-	public void setStartTime(Date theStartTime) {
-		myStartTime = theStartTime;
-	}
+    public void setStartTime(Date theStartTime) {
+        myStartTime = theStartTime;
+    }
 
-	public Date getEndTime() {
-		return myEndTime;
-	}
+    public Date getEndTime() {
+        return myEndTime;
+    }
 
-	public void setEndTime(Date theEndTime) {
-		myEndTime = theEndTime;
-	}
+    public void setEndTime(Date theEndTime) {
+        myEndTime = theEndTime;
+    }
 
-	public String getReport() {
-		return myReport;
-	}
+    public String getReport() {
+        return myReport;
+    }
 
-	public void setReport(String theReport) {
-		myReport = theReport;
-	}
+    public void setReport(String theReport) {
+        myReport = theReport;
+    }
 
-	public String getErrorMsg() {
-		return myErrorMsg;
-	}
+    public String getErrorMsg() {
+        return myErrorMsg;
+    }
 
-	public void setErrorMsg(String theErrorMsg) {
-		myErrorMsg = theErrorMsg;
-	}
+    public void setErrorMsg(String theErrorMsg) {
+        myErrorMsg = theErrorMsg;
+    }
 
-	public RequestPartitionId getRequestPartitionId() {
-		return myRequestPartitionId;
-	}
+    public RequestPartitionId getRequestPartitionId() {
+        return myRequestPartitionId;
+    }
 
-	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
-		myRequestPartitionId = theRequestPartitionId;
-	}
+    public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+        myRequestPartitionId = theRequestPartitionId;
+    }
 
-	public Integer getCombinedRecordsProcessed() {
-		return myCombinedRecordsProcessed;
-	}
+    public Integer getCombinedRecordsProcessed() {
+        return myCombinedRecordsProcessed;
+    }
 
-	public void setCombinedRecordsProcessed(Integer theCombinedRecordsProcessed) {
-		myCombinedRecordsProcessed = theCombinedRecordsProcessed;
-	}
-
+    public void setCombinedRecordsProcessed(Integer theCombinedRecordsProcessed) {
+        myCombinedRecordsProcessed = theCombinedRecordsProcessed;
+    }
 }

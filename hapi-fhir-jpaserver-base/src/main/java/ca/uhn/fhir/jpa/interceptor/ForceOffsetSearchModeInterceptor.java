@@ -27,43 +27,39 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
 
 /**
- * This interceptor for the HAPI FHIR JPA server forces all queries to
- * be performed as offset queries. This means that the query cache will
- * not be used and searches will never result in any writes to the
- * database.
+ * This interceptor for the HAPI FHIR JPA server forces all queries to be performed as offset
+ * queries. This means that the query cache will not be used and searches will never result in any
+ * writes to the database.
  */
 @Interceptor
 public class ForceOffsetSearchModeInterceptor {
 
-	/**
-	 * Default value for {@link #setDefaultCount(Integer)}
-	 */
-	public static final int DEFAULT_DEFAULT_COUNT = 100;
+    /** Default value for {@link #setDefaultCount(Integer)} */
+    public static final int DEFAULT_DEFAULT_COUNT = 100;
 
-	private Integer myDefaultCount = DEFAULT_DEFAULT_COUNT;
+    private Integer myDefaultCount = DEFAULT_DEFAULT_COUNT;
 
-	public void setDefaultCount(Integer theDefaultCount) {
-		Validate.notNull(theDefaultCount, "theDefaultCount must not be null");
-		myDefaultCount = theDefaultCount;
-	}
+    public void setDefaultCount(Integer theDefaultCount) {
+        Validate.notNull(theDefaultCount, "theDefaultCount must not be null");
+        myDefaultCount = theDefaultCount;
+    }
 
-	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
-	public void storagePreSearchRegistered(SearchParameterMap theMap, RequestDetails theRequestDetails) {
+    @Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
+    public void storagePreSearchRegistered(
+            SearchParameterMap theMap, RequestDetails theRequestDetails) {
 
-		// If the params indicate a synchronous search, it doesn't make
-		// sense to inject any offset processing since the search
-		// will be handled synchronously anyhow
-		if (theMap.isLoadSynchronous()) {
-			return;
-		}
+        // If the params indicate a synchronous search, it doesn't make
+        // sense to inject any offset processing since the search
+        // will be handled synchronously anyhow
+        if (theMap.isLoadSynchronous()) {
+            return;
+        }
 
-		if (theMap.getOffset() == null) {
-			theMap.setOffset(0);
-		}
-		if (theMap.getCount() == null) {
-			theMap.setCount(myDefaultCount);
-		}
-	}
-
-
+        if (theMap.getOffset() == null) {
+            theMap.setOffset(0);
+        }
+        if (theMap.getCount() == null) {
+            theMap.setCount(myDefaultCount);
+        }
+    }
 }

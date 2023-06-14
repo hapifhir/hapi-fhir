@@ -20,18 +20,18 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+public interface IResourceIndexedSearchParamDateDao
+        extends JpaRepository<ResourceIndexedSearchParamDate, Long>, IHapiFhirJpaRepository {
+    @Modifying
+    @Query("delete from ResourceIndexedSearchParamDate t WHERE t.myResourcePid = :resid")
+    void deleteByResourceId(@Param("resid") Long theResourcePid);
 
-public interface IResourceIndexedSearchParamDateDao extends JpaRepository<ResourceIndexedSearchParamDate, Long>, IHapiFhirJpaRepository {
-	@Modifying
-	@Query("delete from ResourceIndexedSearchParamDate t WHERE t.myResourcePid = :resid")
-	void deleteByResourceId(@Param("resid") Long theResourcePid);
-
-	@Query("SELECT t FROM ResourceIndexedSearchParamDate t WHERE t.myResourcePid = :resId")
-	List<ResourceIndexedSearchParamDate> findAllForResourceId(@Param("resId") Long thePatientId);
+    @Query("SELECT t FROM ResourceIndexedSearchParamDate t WHERE t.myResourcePid = :resId")
+    List<ResourceIndexedSearchParamDate> findAllForResourceId(@Param("resId") Long thePatientId);
 }

@@ -19,20 +19,22 @@
  */
 package ca.uhn.test.concurrency;
 
+import java.util.function.Function;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.function.Function;
-
 public class FhirObjectPrinter implements Function<Object, String> {
-	@Override
-	public String apply(Object object) {
-		if (object instanceof IBaseResource) {
-			IBaseResource resource = (IBaseResource) object;
-			return resource.getClass().getSimpleName() + " { " + resource.getIdElement().getValue() + " }";
-		} else if (object != null) {
-			return object.toString();
-		} else {
-			return "null";
-		}
-	}
+    @Override
+    public String apply(Object object) {
+        if (object instanceof IBaseResource) {
+            IBaseResource resource = (IBaseResource) object;
+            return resource.getClass().getSimpleName()
+                    + " { "
+                    + resource.getIdElement().getValue()
+                    + " }";
+        } else if (object != null) {
+            return object.toString();
+        } else {
+            return "null";
+        }
+    }
 }

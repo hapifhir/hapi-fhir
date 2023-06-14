@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.batch2.jobs.imprt;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -41,6 +43,12 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nonnull;
 import org.apache.commons.io.LineIterator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -48,112 +56,118 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+public class ConsumeFilesStep
+        implements ILastJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+    private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStep.class);
+    @Autowired private FhirContext myCtx;
+    @Autowired private DaoRegistry myDaoRegistry;
+    @Autowired private HapiTransactionService myHapiTransactionService;
+    @Autowired private IIdHelperService myIdHelperService;
+    @Autowired private IFhirSystemDao<?, ?> mySystemDao;
 
-public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
+    @Nonnull
+    @Override
+    public RunOutcome run(
+            @Nonnull
+                    StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson>
+                            theStepExecutionDetails,
+            @Nonnull IJobDataSink<VoidModel> theDataSink) {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStep.class);
-	@Autowired
-	private FhirContext myCtx;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private HapiTransactionService myHapiTransactionService;
-	@Autowired
-	private IIdHelperService myIdHelperService;
-	@Autowired
-	private IFhirSystemDao<?, ?> mySystemDao;
+        String ndjson = theStepExecutionDetails.getData().getNdJsonText();
+        String sourceName = theStepExecutionDetails.getData().getSourceName();
 
-	@Nonnull
-	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) {
+        IParser jsonParser = myCtx.newJsonParser();
+        LineIterator lineIter = new LineIterator(new StringReader(ndjson));
+        List<IBaseResource> resources = new ArrayList<>();
+        while (lineIter.hasNext()) {
+            String next = lineIter.next();
+            if (isNotBlank(next)) {
+                IBaseResource parsed;
+                try {
+                    parsed = jsonParser.parseResource(next);
+                } catch (DataFormatException e) {
+                    throw new JobExecutionFailedException(
+                            Msg.code(2052) + "Failed to parse resource: " + e, e);
+                }
+                resources.add(parsed);
+            }
+        }
 
-		String ndjson = theStepExecutionDetails.getData().getNdJsonText();
-		String sourceName = theStepExecutionDetails.getData().getSourceName();
+        ourLog.info("Bulk loading {} resources from source {}", resources.size(), sourceName);
 
-		IParser jsonParser = myCtx.newJsonParser();
-		LineIterator lineIter = new LineIterator(new StringReader(ndjson));
-		List<IBaseResource> resources = new ArrayList<>();
-		while (lineIter.hasNext()) {
-			String next = lineIter.next();
-			if (isNotBlank(next)) {
-				IBaseResource parsed;
-				try {
-					parsed = jsonParser.parseResource(next);
-				} catch (DataFormatException e) {
-					throw new JobExecutionFailedException(Msg.code(2052) + "Failed to parse resource: " + e, e);
-				}
-				resources.add(parsed);
-			}
-		}
+        storeResources(resources, theStepExecutionDetails.getParameters().getPartitionId());
 
-		ourLog.info("Bulk loading {} resources from source {}", resources.size(), sourceName);
+        return new RunOutcome(resources.size());
+    }
 
-		storeResources(resources, theStepExecutionDetails.getParameters().getPartitionId());
+    public void storeResources(List<IBaseResource> resources, RequestPartitionId thePartitionId) {
+        SystemRequestDetails requestDetails = new SystemRequestDetails();
+        if (thePartitionId == null) {
+            requestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
+        } else {
+            requestDetails.setRequestPartitionId(thePartitionId);
+        }
+        TransactionDetails transactionDetails = new TransactionDetails();
+        myHapiTransactionService.execute(
+                requestDetails,
+                transactionDetails,
+                tx ->
+                        storeResourcesInsideTransaction(
+                                resources, requestDetails, transactionDetails));
+    }
 
-		return new RunOutcome(resources.size());
-	}
+    private Void storeResourcesInsideTransaction(
+            List<IBaseResource> theResources,
+            SystemRequestDetails theRequestDetails,
+            TransactionDetails theTransactionDetails) {
+        Map<IIdType, IBaseResource> ids = new HashMap<>();
+        for (IBaseResource next : theResources) {
+            if (!next.getIdElement().hasIdPart()) {
+                continue;
+            }
 
-	public void storeResources(List<IBaseResource> resources, RequestPartitionId thePartitionId) {
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		if (thePartitionId == null) {
-			requestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
-		} else {
-			requestDetails.setRequestPartitionId(thePartitionId);
-		}
-		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(requestDetails, transactionDetails, tx -> storeResourcesInsideTransaction(resources, requestDetails, transactionDetails));
-	}
+            IIdType id = next.getIdElement();
+            if (!id.hasResourceType()) {
+                id.setParts(
+                        null, myCtx.getResourceType(next), id.getIdPart(), id.getVersionIdPart());
+            }
+            ids.put(id, next);
+        }
 
-	private Void storeResourcesInsideTransaction(List<IBaseResource> theResources, SystemRequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
-		Map<IIdType, IBaseResource> ids = new HashMap<>();
-		for (IBaseResource next : theResources) {
-			if (!next.getIdElement().hasIdPart()) {
-				continue;
-			}
+        List<IIdType> idsList = new ArrayList<>(ids.keySet());
+        List<IResourcePersistentId> resolvedIds =
+                myIdHelperService.resolveResourcePersistentIdsWithCache(
+                        theRequestDetails.getRequestPartitionId(), idsList, true);
+        for (IResourcePersistentId next : resolvedIds) {
+            IIdType resId = next.getAssociatedResourceId();
+            theTransactionDetails.addResolvedResourceId(resId, next);
+            ids.remove(resId);
+        }
+        for (IIdType next : ids.keySet()) {
+            theTransactionDetails.addResolvedResourceId(next, null);
+        }
 
-			IIdType id = next.getIdElement();
-			if (!id.hasResourceType()) {
-				id.setParts(null, myCtx.getResourceType(next), id.getIdPart(), id.getVersionIdPart());
-			}
-			ids.put(id, next);
-		}
+        mySystemDao.preFetchResources(resolvedIds, true);
 
-		List<IIdType> idsList = new ArrayList<>(ids.keySet());
-		List<IResourcePersistentId> resolvedIds = myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestDetails.getRequestPartitionId(), idsList, true);
-		for (IResourcePersistentId next : resolvedIds) {
-			IIdType resId = next.getAssociatedResourceId();
-			theTransactionDetails.addResolvedResourceId(resId, next);
-			ids.remove(resId);
-		}
-		for (IIdType next : ids.keySet()) {
-			theTransactionDetails.addResolvedResourceId(next, null);
-		}
+        for (IBaseResource next : theResources) {
+            updateResource(theRequestDetails, theTransactionDetails, next);
+        }
 
-		mySystemDao.preFetchResources(resolvedIds, true);
+        return null;
+    }
 
-		for (IBaseResource next : theResources) {
-			updateResource(theRequestDetails, theTransactionDetails, next);
-		}
-
-		return null;
-	}
-
-	private <T extends IBaseResource> void updateResource(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, T theResource) {
-		IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(theResource);
-		try {
-			dao.update(theResource, null, true, false, theRequestDetails, theTransactionDetails);
-		} catch (InvalidRequestException | PreconditionFailedException e) {
-			String msg = "Failure during bulk import: " + e;
-			ourLog.error(msg);
-			throw new JobExecutionFailedException(Msg.code(2053) + msg, e);
-		}
-	}
+    private <T extends IBaseResource> void updateResource(
+            RequestDetails theRequestDetails,
+            TransactionDetails theTransactionDetails,
+            T theResource) {
+        IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(theResource);
+        try {
+            dao.update(theResource, null, true, false, theRequestDetails, theTransactionDetails);
+        } catch (InvalidRequestException | PreconditionFailedException e) {
+            String msg = "Failure during bulk import: " + e;
+            ourLog.error(msg);
+            throw new JobExecutionFailedException(Msg.code(2053) + msg, e);
+        }
+    }
 }

@@ -21,27 +21,26 @@ package ca.uhn.fhir.jpa.util;
 
 public class AddRemoveCount {
 
-	private int myAddCount;
-	private int myRemoveCount;
+    private int myAddCount;
+    private int myRemoveCount;
 
+    public void addToAddCount(int theCount) {
+        myAddCount += theCount;
+    }
 
-	public void addToAddCount(int theCount) {
-		myAddCount += theCount;
-	}
+    public void addToRemoveCount(int theCount) {
+        myRemoveCount += theCount;
+    }
 
-	public void addToRemoveCount(int theCount) {
-		myRemoveCount += theCount;
-	}
+    public int getAddCount() {
+        return myAddCount;
+    }
 
-	public int getAddCount() {
-		return myAddCount;
-	}
+    public int getRemoveCount() {
+        return myRemoveCount;
+    }
 
-	public int getRemoveCount() {
-		return myRemoveCount;
-	}
-
-	public boolean isEmpty() {
-		return myAddCount > 0 || myRemoveCount > 0;
-	}
+    public boolean isEmpty() {
+        return myAddCount > 0 || myRemoveCount > 0;
+    }
 }

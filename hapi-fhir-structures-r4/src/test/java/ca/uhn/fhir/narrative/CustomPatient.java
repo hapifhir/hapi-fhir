@@ -9,21 +9,20 @@ import org.hl7.fhir.r4.model.Patient;
 @ResourceDef(profile = "http://custom_patient")
 public class CustomPatient extends Patient {
 
-	@Child(name = "favouritePizzaExtension")
-	@Extension(url = "http://example.com/favourite_pizza")
-	private FavouritePizzaExtension myFavouritePizza;
+    @Child(name = "favouritePizzaExtension")
+    @Extension(url = "http://example.com/favourite_pizza")
+    private FavouritePizzaExtension myFavouritePizza;
 
-	public FavouritePizzaExtension getFavouritePizza() {
-		return myFavouritePizza;
-	}
+    public FavouritePizzaExtension getFavouritePizza() {
+        return myFavouritePizza;
+    }
 
-	public void setFavouritePizza(FavouritePizzaExtension theFavouritePizza) {
-		myFavouritePizza = theFavouritePizza;
-	}
+    public void setFavouritePizza(FavouritePizzaExtension theFavouritePizza) {
+        myFavouritePizza = theFavouritePizza;
+    }
 
-	@Override
-	public boolean isEmpty() {
-		return super.isEmpty() && ElementUtil.isEmpty(myFavouritePizza);
-	}
-
+    @Override
+    public boolean isEmpty() {
+        return super.isEmpty() && ElementUtil.isEmpty(myFavouritePizza);
+    }
 }

@@ -19,78 +19,96 @@
  */
 package ca.uhn.fhir.context;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import java.util.Map;
+public class RuntimeCompositeDatatypeDefinition
+        extends BaseRuntimeElementCompositeDefinition<ICompositeType>
+        implements IRuntimeDatatypeDefinition {
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+    private boolean mySpecialization;
+    private Class<? extends IBaseDatatype> myProfileOfType;
+    private BaseRuntimeElementDefinition<?> myProfileOf;
 
-public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompositeDefinition<ICompositeType> implements IRuntimeDatatypeDefinition {
+    public RuntimeCompositeDatatypeDefinition(
+            DatatypeDef theDef,
+            Class<? extends ICompositeType> theImplementingClass,
+            boolean theStandardType,
+            FhirContext theContext,
+            Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+                    theClassToElementDefinitions) {
+        super(
+                theDef.name(),
+                theImplementingClass,
+                theStandardType,
+                theContext,
+                theClassToElementDefinitions);
 
-	private boolean mySpecialization;
-	private Class<? extends IBaseDatatype> myProfileOfType;
-	private BaseRuntimeElementDefinition<?> myProfileOf;
+        String resourceName = theDef.name();
+        if (isBlank(resourceName)) {
+            throw new ConfigurationException(
+                    Msg.code(1712)
+                            + "Resource type @"
+                            + ResourceDef.class.getSimpleName()
+                            + " annotation contains no resource name: "
+                            + theImplementingClass.getCanonicalName());
+        }
 
-	public RuntimeCompositeDatatypeDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType, FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		super(theDef.name(), theImplementingClass, theStandardType, theContext, theClassToElementDefinitions);
-		
-		String resourceName = theDef.name();
-		if (isBlank(resourceName)) {
-			throw new ConfigurationException(Msg.code(1712) + "Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
-		}
-		
-		mySpecialization = theDef.isSpecialization();
-		myProfileOfType = theDef.profileOf();
-		if (myProfileOfType.equals(IBaseDatatype.class)) {
-			myProfileOfType = null;
-		}
+        mySpecialization = theDef.isSpecialization();
+        myProfileOfType = theDef.profileOf();
+        if (myProfileOfType.equals(IBaseDatatype.class)) {
+            myProfileOfType = null;
+        }
+    }
 
-	}
+    @Override
+    public void sealAndInitialize(
+            FhirContext theContext,
+            Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+                    theClassToElementDefinitions) {
+        super.sealAndInitialize(theContext, theClassToElementDefinitions);
 
-	@Override
-	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		super.sealAndInitialize(theContext, theClassToElementDefinitions);
-		
-		if (myProfileOfType != null) {
-			myProfileOf = theClassToElementDefinitions.get(myProfileOfType);
-			if (myProfileOf == null) {
-				throw new ConfigurationException(Msg.code(1713) + "Unknown profileOf value: " + myProfileOfType);
-			}
-		}
-	}
+        if (myProfileOfType != null) {
+            myProfileOf = theClassToElementDefinitions.get(myProfileOfType);
+            if (myProfileOf == null) {
+                throw new ConfigurationException(
+                        Msg.code(1713) + "Unknown profileOf value: " + myProfileOfType);
+            }
+        }
+    }
 
-	@Override
-	public Class<? extends IBaseDatatype> getProfileOf() {
-		return myProfileOfType;
-	}
+    @Override
+    public Class<? extends IBaseDatatype> getProfileOf() {
+        return myProfileOfType;
+    }
 
-	@Override
-	public boolean isSpecialization() {
-		return mySpecialization;
-	}
+    @Override
+    public boolean isSpecialization() {
+        return mySpecialization;
+    }
 
-	@Override
-	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
-		return ChildTypeEnum.COMPOSITE_DATATYPE;
-	}
+    @Override
+    public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+        return ChildTypeEnum.COMPOSITE_DATATYPE;
+    }
 
-	@Override
-	public boolean isProfileOf(Class<? extends IBaseDatatype> theType) {
-		validateSealed();
-		if (myProfileOfType != null) {
-			if (myProfileOfType.equals(theType)) {
-				return true;
-			} else if (myProfileOf instanceof IRuntimeDatatypeDefinition) {
-				return ((IRuntimeDatatypeDefinition) myProfileOf).isProfileOf(theType);
-			}
-		}
-		return false;
-	}
-
-
+    @Override
+    public boolean isProfileOf(Class<? extends IBaseDatatype> theType) {
+        validateSealed();
+        if (myProfileOfType != null) {
+            if (myProfileOfType.equals(theType)) {
+                return true;
+            } else if (myProfileOf instanceof IRuntimeDatatypeDefinition) {
+                return ((IRuntimeDatatypeDefinition) myProfileOf).isProfileOf(theType);
+            }
+        }
+        return false;
+    }
 }

@@ -28,36 +28,40 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
-
-import javax.annotation.Nonnull;
 import java.util.Iterator;
+import javax.annotation.Nonnull;
 
-public class ReadTermConceptVersionsStep implements IFirstJobStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> {
+public class ReadTermConceptVersionsStep
+        implements IFirstJobStepWorker<
+                TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> {
 
-	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
+    private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
 
-	public ReadTermConceptVersionsStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
-		myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
-	}
+    public ReadTermConceptVersionsStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+        myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
+    }
 
-	@Nonnull
-	@Override
-	public RunOutcome run(
-		@Nonnull StepExecutionDetails<TermCodeSystemDeleteJobParameters, VoidModel> theStepExecutionDetails,
-		@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink
-	) throws JobExecutionFailedException {
-		TermCodeSystemDeleteJobParameters parameters = theStepExecutionDetails.getParameters();
+    @Nonnull
+    @Override
+    public RunOutcome run(
+            @Nonnull
+                    StepExecutionDetails<TermCodeSystemDeleteJobParameters, VoidModel>
+                            theStepExecutionDetails,
+            @Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink)
+            throws JobExecutionFailedException {
+        TermCodeSystemDeleteJobParameters parameters = theStepExecutionDetails.getParameters();
 
-		long pid = parameters.getTermPid();
+        long pid = parameters.getTermPid();
 
-		Iterator<Long> versionPids = myITermCodeSystemSvc.getAllCodeSystemVersionForCodeSystemPid(pid);
-		while (versionPids.hasNext()) {
-			long next = versionPids.next().longValue();
-			CodeSystemVersionPIDResult versionPidResult = new CodeSystemVersionPIDResult();
-			versionPidResult.setCodeSystemVersionPID(next);
-			theDataSink.accept(versionPidResult);
-		}
+        Iterator<Long> versionPids =
+                myITermCodeSystemSvc.getAllCodeSystemVersionForCodeSystemPid(pid);
+        while (versionPids.hasNext()) {
+            long next = versionPids.next().longValue();
+            CodeSystemVersionPIDResult versionPidResult = new CodeSystemVersionPIDResult();
+            versionPidResult.setCodeSystemVersionPID(next);
+            theDataSink.accept(versionPidResult);
+        }
 
-		return RunOutcome.SUCCESS;
-	}
+        return RunOutcome.SUCCESS;
+    }
 }

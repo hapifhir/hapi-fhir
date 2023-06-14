@@ -1,11 +1,9 @@
-
 package ca.uhn.fhir.tinder.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
-
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.DOMErrorHandler;
 import org.w3c.dom.DOMImplementation;
@@ -23,7 +21,7 @@ public class XMLUtils {
     private static DOMImplementation IMPL;
 
     @SuppressWarnings("unchecked")
-    public synchronized static <T> T getDOMImpl() {
+    public static synchronized <T> T getDOMImpl() {
         if (IMPL == null) {
             try {
                 DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
@@ -91,7 +89,7 @@ public class XMLUtils {
         if (prettyPrint && config.canSetParameter("format-pretty-print", Boolean.TRUE)) {
             config.setParameter("format-pretty-print", true);
         }
-        config.setParameter("xml-declaration", true);        
+        config.setParameter("xml-declaration", true);
         LSOutput output = impl.createLSOutput();
         output.setEncoding("UTF-8");
         Writer writer = new StringWriter();
@@ -118,15 +116,17 @@ public class XMLUtils {
         }
 
         @Override
-		  public LSInput resolveResource(String type, String namespaceURI, String publicId, String systemId,
-													String baseURI) {
+        public LSInput resolveResource(
+                String type,
+                String namespaceURI,
+                String publicId,
+                String systemId,
+                String baseURI) {
             LSInput lsInput = impl.createLSInput();
             InputStream is = getClass().getResourceAsStream("/" + systemId);
-            if (is == null)
-                return null;
+            if (is == null) return null;
             lsInput.setByteStream(is);
             return lsInput;
         }
     }
-
 }

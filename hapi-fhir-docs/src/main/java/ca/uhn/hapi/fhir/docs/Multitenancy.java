@@ -31,39 +31,40 @@ import org.hl7.fhir.r4.model.Patient;
 
 public class Multitenancy {
 
-//START SNIPPET: enableUrlBaseTenantIdentificationStrategy
-	public class MyServer extends RestfulServer {
+    // START SNIPPET: enableUrlBaseTenantIdentificationStrategy
+    public class MyServer extends RestfulServer {
 
-	@Override
-	protected void initialize() {
+        @Override
+        protected void initialize() {
 
-		setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
+            setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 
-		// ... do other initialization ...
-	}
-}
-//END SNIPPET: enableUrlBaseTenantIdentificationStrategy
+            // ... do other initialization ...
+        }
+    }
 
-//START SNIPPET: resourceProvider
-	public class MyPatientResourceProvider implements IResourceProvider {
+    // END SNIPPET: enableUrlBaseTenantIdentificationStrategy
 
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return Patient.class;
-	}
+    // START SNIPPET: resourceProvider
+    public class MyPatientResourceProvider implements IResourceProvider {
 
-	@Read
-	public Patient read(RequestDetails theRequestDetails, @IdParam IdType theId) {
+        @Override
+        public Class<? extends IBaseResource> getResourceType() {
+            return Patient.class;
+        }
 
-		String tenantId = theRequestDetails.getTenantId();
-		String resourceId = theId.getIdPart();
+        @Read
+        public Patient read(RequestDetails theRequestDetails, @IdParam IdType theId) {
 
-		// Use these two values to fetch the patient
+            String tenantId = theRequestDetails.getTenantId();
+            String resourceId = theId.getIdPart();
 
-		return new Patient();
-	}
-}
+            // Use these two values to fetch the patient
 
-//END SNIPPET: resourceProvider
+            return new Patient();
+        }
+    }
+
+    // END SNIPPET: resourceProvider
 
 }

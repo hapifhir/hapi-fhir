@@ -23,50 +23,51 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.util.ICallable;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.concurrent.NotThreadSafe;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-/**
- * THIS CLASS IS NOT THREAD SAFE
- */
+/** THIS CLASS IS NOT THREAD SAFE */
 @NotThreadSafe
 public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 
-	private final List<JpaPid> myResourcePids;
-	private final boolean[] myBlocked;
-	private final ICallable<ISearchBuilder> mySearchBuilderSupplier;
-	private List<IBaseResource> myResources;
+    private final List<JpaPid> myResourcePids;
+    private final boolean[] myBlocked;
+    private final ICallable<ISearchBuilder> mySearchBuilderSupplier;
+    private List<IBaseResource> myResources;
 
-	public JpaPreResourceAccessDetails(List<JpaPid> theResourcePids, ICallable<ISearchBuilder> theSearchBuilderSupplier) {
-		myResourcePids = theResourcePids;
-		myBlocked = new boolean[myResourcePids.size()];
-		mySearchBuilderSupplier = theSearchBuilderSupplier;
-	}
+    public JpaPreResourceAccessDetails(
+            List<JpaPid> theResourcePids, ICallable<ISearchBuilder> theSearchBuilderSupplier) {
+        myResourcePids = theResourcePids;
+        myBlocked = new boolean[myResourcePids.size()];
+        mySearchBuilderSupplier = theSearchBuilderSupplier;
+    }
 
-	@Override
-	public int size() {
-		return myResourcePids.size();
-	}
+    @Override
+    public int size() {
+        return myResourcePids.size();
+    }
 
-	@Override
-	public IBaseResource getResource(int theIndex) {
-		if (myResources == null) {
-			myResources = new ArrayList<>(myResourcePids.size());
-			mySearchBuilderSupplier.call().loadResourcesByPid(myResourcePids, Collections.emptySet(), myResources, false, null);
-		}
-		return myResources.get(theIndex);
-	}
+    @Override
+    public IBaseResource getResource(int theIndex) {
+        if (myResources == null) {
+            myResources = new ArrayList<>(myResourcePids.size());
+            mySearchBuilderSupplier
+                    .call()
+                    .loadResourcesByPid(
+                            myResourcePids, Collections.emptySet(), myResources, false, null);
+        }
+        return myResources.get(theIndex);
+    }
 
-	@Override
-	public void setDontReturnResourceAtIndex(int theIndex) {
-		myBlocked[theIndex] = true;
-	}
+    @Override
+    public void setDontReturnResourceAtIndex(int theIndex) {
+        myBlocked[theIndex] = true;
+    }
 
-	public boolean isDontReturnResourceAtIndex(int theIndex) {
-		return myBlocked[theIndex];
-	}
+    public boolean isDontReturnResourceAtIndex(int theIndex) {
+        return myBlocked[theIndex];
+    }
 }

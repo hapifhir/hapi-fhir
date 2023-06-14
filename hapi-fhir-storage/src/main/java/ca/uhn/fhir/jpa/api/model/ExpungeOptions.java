@@ -23,60 +23,56 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ExpungeOptions {
-	private int myLimit = 1000;
-	private boolean myExpungeOldVersions;
-	private boolean myExpungeDeletedResources;
-	private boolean myExpungeEverything;
+    private int myLimit = 1000;
+    private boolean myExpungeOldVersions;
+    private boolean myExpungeDeletedResources;
+    private boolean myExpungeEverything;
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("limit", myLimit)
-			.append("oldVersions", myExpungeOldVersions)
-			.append("deletedResources", myExpungeDeletedResources)
-			.append("everything", myExpungeEverything)
-			.toString();
-	}
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("limit", myLimit)
+                .append("oldVersions", myExpungeOldVersions)
+                .append("deletedResources", myExpungeDeletedResources)
+                .append("everything", myExpungeEverything)
+                .toString();
+    }
 
-	/**
-	 * The maximum number of resources versions to expunge
-	 */
-	public int getLimit() {
-		return myLimit;
-	}
+    /** The maximum number of resources versions to expunge */
+    public int getLimit() {
+        return myLimit;
+    }
 
-	/**
-	 * The maximum number of resource versions to expunge
-	 */
-	public ExpungeOptions setLimit(int theLimit) {
-		myLimit = theLimit;
-		return this;
-	}
+    /** The maximum number of resource versions to expunge */
+    public ExpungeOptions setLimit(int theLimit) {
+        myLimit = theLimit;
+        return this;
+    }
 
-	public boolean isExpungeEverything() {
-		return myExpungeEverything;
-	}
+    public boolean isExpungeEverything() {
+        return myExpungeEverything;
+    }
 
-	public ExpungeOptions setExpungeEverything(boolean theExpungeEverything) {
-		myExpungeEverything = theExpungeEverything;
-		return this;
-	}
+    public ExpungeOptions setExpungeEverything(boolean theExpungeEverything) {
+        myExpungeEverything = theExpungeEverything;
+        return this;
+    }
 
-	public boolean isExpungeDeletedResources() {
-		return myExpungeDeletedResources;
-	}
+    public boolean isExpungeDeletedResources() {
+        return myExpungeDeletedResources;
+    }
 
-	public ExpungeOptions setExpungeDeletedResources(boolean theExpungeDeletedResources) {
-		myExpungeDeletedResources = theExpungeDeletedResources;
-		return this;
-	}
+    public ExpungeOptions setExpungeDeletedResources(boolean theExpungeDeletedResources) {
+        myExpungeDeletedResources = theExpungeDeletedResources;
+        return this;
+    }
 
-	public boolean isExpungeOldVersions() {
-		return myExpungeOldVersions;
-	}
+    public boolean isExpungeOldVersions() {
+        return myExpungeOldVersions;
+    }
 
-	public ExpungeOptions setExpungeOldVersions(boolean theExpungeOldVersions) {
-		myExpungeOldVersions = theExpungeOldVersions;
-		return this;
-	}
+    public ExpungeOptions setExpungeOldVersions(boolean theExpungeOldVersions) {
+        myExpungeOldVersions = theExpungeOldVersions;
+        return this;
+    }
 }

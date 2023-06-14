@@ -21,13 +21,11 @@ package ca.uhn.fhir.parser;
 
 class ParseErrorHandler {
 
-	String describeLocation(IParserErrorHandler.IParseLocation theLocation) {
-		if (theLocation == null) {
-			return "";
-		} else {
-			return theLocation.toString() + " ";
-		}
-	}
-
+    String describeLocation(IParserErrorHandler.IParseLocation theLocation) {
+        if (theLocation == null) {
+            return "";
+        } else {
+            return theLocation.toString() + " ";
+        }
+    }
 }
-

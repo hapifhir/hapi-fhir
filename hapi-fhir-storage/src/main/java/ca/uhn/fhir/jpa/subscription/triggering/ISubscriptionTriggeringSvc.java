@@ -19,17 +19,18 @@
  */
 package ca.uhn.fhir.jpa.subscription.triggering;
 
-import ca.uhn.fhir.rest.annotation.IdParam;
+import java.util.List;
+import javax.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nullable;
-import java.util.List;
-
 public interface ISubscriptionTriggeringSvc {
 
-	IBaseParameters triggerSubscription(@Nullable List<IPrimitiveType<String>> theResourceIds, @Nullable List<IPrimitiveType<String>> theSearchUrls, @Nullable IIdType theSubscriptionId);
+    IBaseParameters triggerSubscription(
+            @Nullable List<IPrimitiveType<String>> theResourceIds,
+            @Nullable List<IPrimitiveType<String>> theSearchUrls,
+            @Nullable IIdType theSubscriptionId);
 
-	void runDeliveryPass();
+    void runDeliveryPass();
 }

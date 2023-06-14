@@ -19,30 +19,29 @@
  */
 package ca.uhn.fhir.context.support;
 
-import org.thymeleaf.util.Validate;
-
 import java.util.HashSet;
 import java.util.Set;
+import org.thymeleaf.util.Validate;
 
 public class ValidationSupportContext {
 
-	private final IValidationSupport myRootValidationSupport;
-	private final Set<String> myCurrentlyGeneratingSnapshots = new HashSet<>();
+    private final IValidationSupport myRootValidationSupport;
+    private final Set<String> myCurrentlyGeneratingSnapshots = new HashSet<>();
 
-	public ValidationSupportContext(IValidationSupport theRootValidationSupport) {
-		Validate.notNull(theRootValidationSupport, "theRootValidationSupport musty not be null");
-		myRootValidationSupport = theRootValidationSupport;
-	}
+    public ValidationSupportContext(IValidationSupport theRootValidationSupport) {
+        Validate.notNull(theRootValidationSupport, "theRootValidationSupport musty not be null");
+        myRootValidationSupport = theRootValidationSupport;
+    }
 
-	public IValidationSupport getRootValidationSupport() {
-		return myRootValidationSupport;
-	}
+    public IValidationSupport getRootValidationSupport() {
+        return myRootValidationSupport;
+    }
 
-	public Set<String> getCurrentlyGeneratingSnapshots() {
-		return myCurrentlyGeneratingSnapshots;
-	}
+    public Set<String> getCurrentlyGeneratingSnapshots() {
+        return myCurrentlyGeneratingSnapshots;
+    }
 
-	public boolean isEnabledValidationForCodingsLogicalAnd() {
-		return myRootValidationSupport.isEnabledValidationForCodingsLogicalAnd();
-	}
+    public boolean isEnabledValidationForCodingsLogicalAnd() {
+        return myRootValidationSupport.isEnabledValidationForCodingsLogicalAnd();
+    }
 }

@@ -22,44 +22,41 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 
-/**
- * Contract for validating addresses.
- */
+/** Contract for validating addresses. */
 public interface IAddressValidator {
 
-	/**
-	 * URL for validation results that should be placed on addresses. Extension with boolean value "true" indicates there there is an address validation error.
-	 */
-	public static final String ADDRESS_VALIDATION_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-has-error";
+    /**
+     * URL for validation results that should be placed on addresses. Extension with boolean value
+     * "true" indicates there there is an address validation error.
+     */
+    public static final String ADDRESS_VALIDATION_EXTENSION_URL =
+            "http://hapifhir.org/StructureDefinition/ext-validation-address-has-error";
 
-	/**
-	 * URL for an optional address quality extensions that may be added to addresses.
-	 */
-	public static final String ADDRESS_QUALITY_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-quality";
+    /** URL for an optional address quality extensions that may be added to addresses. */
+    public static final String ADDRESS_QUALITY_EXTENSION_URL =
+            "http://hapifhir.org/StructureDefinition/ext-validation-address-quality";
 
-	/**
-	 * URL for an optional geocoding accuracy extensions that may be added to addresses.
-	 */
-	public static final String ADDRESS_GEO_ACCURACY_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-geo-accuracy";
+    /** URL for an optional geocoding accuracy extensions that may be added to addresses. */
+    public static final String ADDRESS_GEO_ACCURACY_EXTENSION_URL =
+            "http://hapifhir.org/StructureDefinition/ext-validation-address-geo-accuracy";
 
-	/**
-	 * URL for an optional address verification extensions that may be added to addresses.
-	 */
-	public static final String ADDRESS_VERIFICATION_CODE_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-verification";
+    /** URL for an optional address verification extensions that may be added to addresses. */
+    public static final String ADDRESS_VERIFICATION_CODE_EXTENSION_URL =
+            "http://hapifhir.org/StructureDefinition/ext-validation-address-verification";
 
-	/**
-	 * URL for an optional FHIR geolocation extension.
-	 */
-	public static final String FHIR_GEOCODE_EXTENSION_URL = "http://hl7.org/fhir/StructureDefinition/geolocation";
+    /** URL for an optional FHIR geolocation extension. */
+    public static final String FHIR_GEOCODE_EXTENSION_URL =
+            "http://hl7.org/fhir/StructureDefinition/geolocation";
 
-	/**
-	 * Validates address against a service
-	 *
-	 * @param theAddress     Address to be validated
-	 * @param theFhirContext Current FHIR context
-	 * @return Returns true in case address represents a valid
-	 * @throws AddressValidationException AddressValidationException is thrown in case validation can not be completed successfully.
-	 */
-	AddressValidationResult isValid(IBase theAddress, FhirContext theFhirContext) throws AddressValidationException;
-
+    /**
+     * Validates address against a service
+     *
+     * @param theAddress Address to be validated
+     * @param theFhirContext Current FHIR context
+     * @return Returns true in case address represents a valid
+     * @throws AddressValidationException AddressValidationException is thrown in case validation
+     *     can not be completed successfully.
+     */
+    AddressValidationResult isValid(IBase theAddress, FhirContext theFhirContext)
+            throws AddressValidationException;
 }

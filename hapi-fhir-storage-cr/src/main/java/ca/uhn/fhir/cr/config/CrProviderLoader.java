@@ -30,31 +30,39 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 /**
- * This class loads and registers CQL provider factory for clinical reasoning into hapi-fhir central provider factory
- **/
+ * This class loads and registers CQL provider factory for clinical reasoning into hapi-fhir central
+ * provider factory
+ */
 @Service
 public class CrProviderLoader {
-	private static final Logger myLogger = LoggerFactory.getLogger(CrProviderLoader.class);
-	private final FhirContext myFhirContext;
-	private final ResourceProviderFactory myResourceProviderFactory;
-	private final CrProviderFactory myCqlProviderFactory;
+    private static final Logger myLogger = LoggerFactory.getLogger(CrProviderLoader.class);
+    private final FhirContext myFhirContext;
+    private final ResourceProviderFactory myResourceProviderFactory;
+    private final CrProviderFactory myCqlProviderFactory;
 
-	public CrProviderLoader(FhirContext theFhirContext, ResourceProviderFactory theResourceProviderFactory, CrProviderFactory theCqlProviderFactory) {
-		myFhirContext = theFhirContext;
-		myResourceProviderFactory = theResourceProviderFactory;
-		myCqlProviderFactory = theCqlProviderFactory;
-	}
+    public CrProviderLoader(
+            FhirContext theFhirContext,
+            ResourceProviderFactory theResourceProviderFactory,
+            CrProviderFactory theCqlProviderFactory) {
+        myFhirContext = theFhirContext;
+        myResourceProviderFactory = theResourceProviderFactory;
+        myCqlProviderFactory = theCqlProviderFactory;
+    }
 
-	@EventListener(ContextRefreshedEvent.class)
-	public void loadProvider() {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case DSTU3:
-			case R4:
-				myLogger.info("Registering CQL Provider");
-				myResourceProviderFactory.addSupplier(() -> myCqlProviderFactory.getMeasureOperationsProvider());
-				break;
-			default:
-				throw new ConfigurationException(Msg.code(1653) + "CQL not supported for FHIR version " + myFhirContext.getVersion().getVersion());
-		}
-	}
+    @EventListener(ContextRefreshedEvent.class)
+    public void loadProvider() {
+        switch (myFhirContext.getVersion().getVersion()) {
+            case DSTU3:
+            case R4:
+                myLogger.info("Registering CQL Provider");
+                myResourceProviderFactory.addSupplier(
+                        () -> myCqlProviderFactory.getMeasureOperationsProvider());
+                break;
+            default:
+                throw new ConfigurationException(
+                        Msg.code(1653)
+                                + "CQL not supported for FHIR version "
+                                + myFhirContext.getVersion().getVersion());
+        }
+    }
 }

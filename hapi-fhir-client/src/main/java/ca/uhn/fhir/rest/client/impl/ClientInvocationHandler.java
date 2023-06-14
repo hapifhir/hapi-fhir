@@ -19,60 +19,72 @@
  */
 package ca.uhn.fhir.rest.client.impl;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.impl.ClientInvocationHandlerFactory.ILambda;
+import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IHttpClient;
-import ca.uhn.fhir.rest.client.impl.ClientInvocationHandlerFactory.ILambda;
-import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
-
 public class ClientInvocationHandler extends BaseClient implements InvocationHandler {
 
-	private final Map<Method, BaseMethodBinding<?>> myBindings;
-	private final Map<Method, Object> myMethodToReturnValue;
-	private FhirContext myContext;
-	private Map<Method, ILambda> myMethodToLambda;
+    private final Map<Method, BaseMethodBinding<?>> myBindings;
+    private final Map<Method, Object> myMethodToReturnValue;
+    private FhirContext myContext;
+    private Map<Method, ILambda> myMethodToLambda;
 
-	public ClientInvocationHandler(IHttpClient theClient, FhirContext theContext, String theUrlBase, Map<Method, Object> theMethodToReturnValue, Map<Method, BaseMethodBinding<?>> theBindings, Map<Method, ILambda> theMethodToLambda, RestfulClientFactory theFactory) {
-		super(theClient, theUrlBase, theFactory);
+    public ClientInvocationHandler(
+            IHttpClient theClient,
+            FhirContext theContext,
+            String theUrlBase,
+            Map<Method, Object> theMethodToReturnValue,
+            Map<Method, BaseMethodBinding<?>> theBindings,
+            Map<Method, ILambda> theMethodToLambda,
+            RestfulClientFactory theFactory) {
+        super(theClient, theUrlBase, theFactory);
 
-		myContext = theContext;
-		myMethodToReturnValue = theMethodToReturnValue;
-		myBindings = theBindings;
-		myMethodToLambda = theMethodToLambda;
-	}
+        myContext = theContext;
+        myMethodToReturnValue = theMethodToReturnValue;
+        myBindings = theBindings;
+        myMethodToLambda = theMethodToLambda;
+    }
 
-	public void addBinding(Method theMethod, BaseMethodBinding<?> theBinding) {
-		myBindings.put(theMethod, theBinding);
-	}
+    public void addBinding(Method theMethod, BaseMethodBinding<?> theBinding) {
+        myBindings.put(theMethod, theBinding);
+    }
 
-	@Override
-	public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
-		Object directRetVal = myMethodToReturnValue.get(theMethod);
-		if (directRetVal != null) {
-			return directRetVal;
-		}
+    @Override
+    public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
+        Object directRetVal = myMethodToReturnValue.get(theMethod);
+        if (directRetVal != null) {
+            return directRetVal;
+        }
 
-		BaseMethodBinding<?> binding = myBindings.get(theMethod);
-		if (binding != null) {
-			BaseHttpClientInvocation clientInvocation = binding.invokeClient(theArgs);
-			return invokeClient(myContext, binding, clientInvocation);
-		}
+        BaseMethodBinding<?> binding = myBindings.get(theMethod);
+        if (binding != null) {
+            BaseHttpClientInvocation clientInvocation = binding.invokeClient(theArgs);
+            return invokeClient(myContext, binding, clientInvocation);
+        }
 
-		ILambda lambda = myMethodToLambda.get(theMethod);
-		if (lambda != null) {
-			return lambda.handle(this, theArgs);
-		}
+        ILambda lambda = myMethodToLambda.get(theMethod);
+        if (lambda != null) {
+            return lambda.handle(this, theArgs);
+        }
 
-		throw new UnsupportedOperationException(Msg.code(1403) + "The method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getSimpleName() + " has no handler. Did you forget to annotate it with a RESTful method annotation?");
-	}
+        throw new UnsupportedOperationException(
+                Msg.code(1403)
+                        + "The method '"
+                        + theMethod.getName()
+                        + "' in type "
+                        + theMethod.getDeclaringClass().getSimpleName()
+                        + " has no handler. Did you forget to annotate it with a RESTful method"
+                        + " annotation?");
+    }
 
-	@Override
-	public FhirContext getFhirContext() {
-		return myContext;
-	}
-
+    @Override
+    public FhirContext getFhirContext() {
+        return myContext;
+    }
 }

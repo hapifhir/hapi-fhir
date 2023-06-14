@@ -22,60 +22,58 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import java.util.List;
+import javax.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nullable;
-import java.util.List;
-
 public class NpmJpaValidationSupport implements IValidationSupport {
 
-	@Autowired
-	private FhirContext myFhirContext;
+    @Autowired private FhirContext myFhirContext;
 
-	@Autowired
-	private IHapiPackageCacheManager myHapiPackageCacheManager;
+    @Autowired private IHapiPackageCacheManager myHapiPackageCacheManager;
 
-	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
-	}
+    @Override
+    public FhirContext getFhirContext() {
+        return myFhirContext;
+    }
 
-	@Override
-	public IBaseResource fetchValueSet(String theUri) {
-		return fetchResource("ValueSet", theUri);
-	}
+    @Override
+    public IBaseResource fetchValueSet(String theUri) {
+        return fetchResource("ValueSet", theUri);
+    }
 
-	@Override
-	public IBaseResource fetchCodeSystem(String theUri) {
-		return fetchResource("CodeSystem", theUri);
-	}
+    @Override
+    public IBaseResource fetchCodeSystem(String theUri) {
+        return fetchResource("CodeSystem", theUri);
+    }
 
-	@Override
-	public IBaseResource fetchStructureDefinition(String theUri) {
-		return fetchResource("StructureDefinition", theUri);
-	}
+    @Override
+    public IBaseResource fetchStructureDefinition(String theUri) {
+        return fetchResource("StructureDefinition", theUri);
+    }
 
-	@Nullable
-	public IBaseResource fetchResource(String theResourceType, String theUri) {
-		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
-		IBaseResource asset = myHapiPackageCacheManager.loadPackageAssetByUrl(fhirVersion, theUri);
-		if (asset != null) {
-			Class<? extends IBaseResource> type = myFhirContext.getResourceDefinition(theResourceType).getImplementingClass();
-			if (type.isAssignableFrom(asset.getClass())) {
-				return asset;
-			}
-		}
-		return null;
-	}
+    @Nullable
+    public IBaseResource fetchResource(String theResourceType, String theUri) {
+        FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
+        IBaseResource asset = myHapiPackageCacheManager.loadPackageAssetByUrl(fhirVersion, theUri);
+        if (asset != null) {
+            Class<? extends IBaseResource> type =
+                    myFhirContext.getResourceDefinition(theResourceType).getImplementingClass();
+            if (type.isAssignableFrom(asset.getClass())) {
+                return asset;
+            }
+        }
+        return null;
+    }
 
-
-	@SuppressWarnings("unchecked")
-	@Nullable
-	@Override
-	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
-		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
-		return (List<T>) myHapiPackageCacheManager.loadPackageAssetsByType(fhirVersion, "StructureDefinition");
-	}
-
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
+        FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
+        return (List<T>)
+                myHapiPackageCacheManager.loadPackageAssetsByType(
+                        fhirVersion, "StructureDefinition");
+    }
 }

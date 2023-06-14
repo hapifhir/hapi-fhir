@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.batch2.model;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -26,263 +28,259 @@ import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.util.Date;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.util.Date;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /**
- * Payload for step processing.
- * Implements a state machine on {@link WorkChunkStatusEnum}.
+ * Payload for step processing. Implements a state machine on {@link WorkChunkStatusEnum}.
  *
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
 public class WorkChunk implements IModelJson {
 
-	@JsonProperty("id")
-	private String myId;
+    @JsonProperty("id")
+    private String myId;
 
-	@JsonProperty("sequence")
-	// TODO MB danger - these repeat with a job or even a single step.  They start at 0 for every parent chunk.  Review after merge.
-	private int mySequence;
+    @JsonProperty("sequence")
+    // TODO MB danger - these repeat with a job or even a single step.  They start at 0 for every
+    // parent chunk.  Review after merge.
+    private int mySequence;
 
-	@JsonProperty("status")
-	private WorkChunkStatusEnum myStatus;
+    @JsonProperty("status")
+    private WorkChunkStatusEnum myStatus;
 
-	@JsonProperty("jobDefinitionId")
-	private String myJobDefinitionId;
+    @JsonProperty("jobDefinitionId")
+    private String myJobDefinitionId;
 
-	@JsonProperty("jobDefinitionVersion")
-	private int myJobDefinitionVersion;
+    @JsonProperty("jobDefinitionVersion")
+    private int myJobDefinitionVersion;
 
-	@JsonProperty("targetStepId")
-	private String myTargetStepId;
+    @JsonProperty("targetStepId")
+    private String myTargetStepId;
 
-	@JsonProperty("instanceId")
-	private String myInstanceId;
+    @JsonProperty("instanceId")
+    private String myInstanceId;
 
-	@JsonProperty("data")
-	private String myData;
+    @JsonProperty("data")
+    private String myData;
 
-	@JsonProperty("createTime")
-	@JsonSerialize(using = JsonDateSerializer.class)
-	@JsonDeserialize(using = JsonDateDeserializer.class)
-	private Date myCreateTime;
+    @JsonProperty("createTime")
+    @JsonSerialize(using = JsonDateSerializer.class)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    private Date myCreateTime;
 
-	@JsonProperty("startTime")
-	@JsonSerialize(using = JsonDateSerializer.class)
-	@JsonDeserialize(using = JsonDateDeserializer.class)
-	private Date myStartTime;
+    @JsonProperty("startTime")
+    @JsonSerialize(using = JsonDateSerializer.class)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    private Date myStartTime;
 
-	@JsonProperty("endTime")
-	@JsonSerialize(using = JsonDateSerializer.class)
-	@JsonDeserialize(using = JsonDateDeserializer.class)
-	private Date myEndTime;
+    @JsonProperty("endTime")
+    @JsonSerialize(using = JsonDateSerializer.class)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    private Date myEndTime;
 
-	@JsonProperty("updateTime")
-	@JsonSerialize(using = JsonDateSerializer.class)
-	@JsonDeserialize(using = JsonDateDeserializer.class)
-	private Date myUpdateTime;
-	@JsonProperty(value = "recordsProcessed", access = JsonProperty.Access.READ_ONLY)
-	private Integer myRecordsProcessed;
+    @JsonProperty("updateTime")
+    @JsonSerialize(using = JsonDateSerializer.class)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    private Date myUpdateTime;
 
-	@JsonProperty(value = "errorMessage", access = JsonProperty.Access.READ_ONLY)
-	private String myErrorMessage;
+    @JsonProperty(value = "recordsProcessed", access = JsonProperty.Access.READ_ONLY)
+    private Integer myRecordsProcessed;
 
-	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
-	private int myErrorCount;
+    @JsonProperty(value = "errorMessage", access = JsonProperty.Access.READ_ONLY)
+    private String myErrorMessage;
 
-	@JsonProperty(value = "warningMessage", access = JsonProperty.Access.READ_ONLY)
-	private String myWarningMessage;
+    @JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
+    private int myErrorCount;
 
-	/**
-	 * Constructor
-	 */
-	public WorkChunk() {
-		super();
-	}
+    @JsonProperty(value = "warningMessage", access = JsonProperty.Access.READ_ONLY)
+    private String myWarningMessage;
 
-	public int getErrorCount() {
-		return myErrorCount;
-	}
+    /** Constructor */
+    public WorkChunk() {
+        super();
+    }
 
-	public WorkChunk setErrorCount(int theErrorCount) {
-		myErrorCount = theErrorCount;
-		return this;
-	}
+    public int getErrorCount() {
+        return myErrorCount;
+    }
 
-	public Date getStartTime() {
-		return myStartTime;
-	}
+    public WorkChunk setErrorCount(int theErrorCount) {
+        myErrorCount = theErrorCount;
+        return this;
+    }
 
-	public WorkChunk setStartTime(Date theStartTime) {
-		myStartTime = theStartTime;
-		return this;
-	}
+    public Date getStartTime() {
+        return myStartTime;
+    }
 
-	public Date getEndTime() {
-		return myEndTime;
-	}
+    public WorkChunk setStartTime(Date theStartTime) {
+        myStartTime = theStartTime;
+        return this;
+    }
 
-	public WorkChunk setEndTime(Date theEndTime) {
-		myEndTime = theEndTime;
-		return this;
-	}
+    public Date getEndTime() {
+        return myEndTime;
+    }
 
-	public Integer getRecordsProcessed() {
-		return myRecordsProcessed;
-	}
+    public WorkChunk setEndTime(Date theEndTime) {
+        myEndTime = theEndTime;
+        return this;
+    }
 
-	public WorkChunk setRecordsProcessed(Integer theRecordsProcessed) {
-		myRecordsProcessed = theRecordsProcessed;
-		return this;
-	}
+    public Integer getRecordsProcessed() {
+        return myRecordsProcessed;
+    }
 
-	public WorkChunkStatusEnum getStatus() {
-		return myStatus;
-	}
+    public WorkChunk setRecordsProcessed(Integer theRecordsProcessed) {
+        myRecordsProcessed = theRecordsProcessed;
+        return this;
+    }
 
-	public WorkChunk setStatus(WorkChunkStatusEnum theStatus) {
-		myStatus = theStatus;
-		return this;
-	}
+    public WorkChunkStatusEnum getStatus() {
+        return myStatus;
+    }
 
-	public String getJobDefinitionId() {
-		return myJobDefinitionId;
-	}
+    public WorkChunk setStatus(WorkChunkStatusEnum theStatus) {
+        myStatus = theStatus;
+        return this;
+    }
 
-	public WorkChunk setJobDefinitionId(String theJobDefinitionId) {
-		Validate.notBlank(theJobDefinitionId);
-		myJobDefinitionId = theJobDefinitionId;
-		return this;
-	}
+    public String getJobDefinitionId() {
+        return myJobDefinitionId;
+    }
 
-	public int getJobDefinitionVersion() {
-		return myJobDefinitionVersion;
-	}
+    public WorkChunk setJobDefinitionId(String theJobDefinitionId) {
+        Validate.notBlank(theJobDefinitionId);
+        myJobDefinitionId = theJobDefinitionId;
+        return this;
+    }
 
-	public WorkChunk setJobDefinitionVersion(int theJobDefinitionVersion) {
-		Validate.isTrue(theJobDefinitionVersion >= 1);
-		myJobDefinitionVersion = theJobDefinitionVersion;
-		return this;
-	}
+    public int getJobDefinitionVersion() {
+        return myJobDefinitionVersion;
+    }
 
-	public String getTargetStepId() {
-		return myTargetStepId;
-	}
+    public WorkChunk setJobDefinitionVersion(int theJobDefinitionVersion) {
+        Validate.isTrue(theJobDefinitionVersion >= 1);
+        myJobDefinitionVersion = theJobDefinitionVersion;
+        return this;
+    }
 
-	public WorkChunk setTargetStepId(String theTargetStepId) {
-		Validate.notBlank(theTargetStepId);
-		myTargetStepId = theTargetStepId;
-		return this;
-	}
+    public String getTargetStepId() {
+        return myTargetStepId;
+    }
 
-	public String getData() {
-		return myData;
-	}
+    public WorkChunk setTargetStepId(String theTargetStepId) {
+        Validate.notBlank(theTargetStepId);
+        myTargetStepId = theTargetStepId;
+        return this;
+    }
 
-	public WorkChunk setData(String theData) {
-		myData = theData;
-		return this;
-	}
+    public String getData() {
+        return myData;
+    }
 
-	public WorkChunk setData(IModelJson theData) {
-		setData(JsonUtil.serializeOrInvalidRequest(theData));
-		return this;
-	}
+    public WorkChunk setData(String theData) {
+        myData = theData;
+        return this;
+    }
 
-	public <T extends IModelJson> T getData(Class<T> theType) {
-		return JsonUtil.deserialize(getData(), theType);
-	}
+    public WorkChunk setData(IModelJson theData) {
+        setData(JsonUtil.serializeOrInvalidRequest(theData));
+        return this;
+    }
 
-	public String getInstanceId() {
-		return myInstanceId;
-	}
+    public <T extends IModelJson> T getData(Class<T> theType) {
+        return JsonUtil.deserialize(getData(), theType);
+    }
 
-	public WorkChunk setInstanceId(String theInstanceId) {
-		myInstanceId = theInstanceId;
-		return this;
-	}
+    public String getInstanceId() {
+        return myInstanceId;
+    }
 
-	public String getId() {
-		return myId;
-	}
+    public WorkChunk setInstanceId(String theInstanceId) {
+        myInstanceId = theInstanceId;
+        return this;
+    }
 
-	public WorkChunk setId(String theId) {
-		Validate.notBlank(theId);
-		myId = theId;
-		return this;
-	}
+    public String getId() {
+        return myId;
+    }
 
-	public int getSequence() {
-		return mySequence;
-	}
+    public WorkChunk setId(String theId) {
+        Validate.notBlank(theId);
+        myId = theId;
+        return this;
+    }
 
-	public void setSequence(int theSequence) {
-		mySequence = theSequence;
-	}
+    public int getSequence() {
+        return mySequence;
+    }
 
-	public Date getCreateTime() {
-		return myCreateTime;
-	}
+    public void setSequence(int theSequence) {
+        mySequence = theSequence;
+    }
 
-	public void setCreateTime(Date theCreateTime) {
-		myCreateTime = theCreateTime;
-	}
+    public Date getCreateTime() {
+        return myCreateTime;
+    }
 
-	public String getErrorMessage() {
-		return myErrorMessage;
-	}
+    public void setCreateTime(Date theCreateTime) {
+        myCreateTime = theCreateTime;
+    }
 
-	public WorkChunk setErrorMessage(String theErrorMessage) {
-		myErrorMessage = theErrorMessage;
-		return this;
-	}
+    public String getErrorMessage() {
+        return myErrorMessage;
+    }
 
-	public Date getUpdateTime() {
-		return myUpdateTime;
-	}
+    public WorkChunk setErrorMessage(String theErrorMessage) {
+        myErrorMessage = theErrorMessage;
+        return this;
+    }
 
-	public void setUpdateTime(Date theUpdateTime) {
-		myUpdateTime = theUpdateTime;
-	}
+    public Date getUpdateTime() {
+        return myUpdateTime;
+    }
 
-	public String getWarningMessage() {
-		return myWarningMessage;
-	}
+    public void setUpdateTime(Date theUpdateTime) {
+        myUpdateTime = theUpdateTime;
+    }
 
-	public WorkChunk setWarningMessage(String theWarningMessage) {
-		myWarningMessage = theWarningMessage;
-		return this;
-	}
+    public String getWarningMessage() {
+        return myWarningMessage;
+    }
 
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this);
-		b.append("Id", myId);
-		b.append("Sequence", mySequence);
-		b.append("Status", myStatus);
-		b.append("JobDefinitionId", myJobDefinitionId);
-		b.append("JobDefinitionVersion", myJobDefinitionVersion);
-		b.append("TargetStepId", myTargetStepId);
-		b.append("InstanceId", myInstanceId);
-		b.append("Data", isNotBlank(myData) ? "(present)" : "(absent)");
-		b.append("CreateTime", myCreateTime);
-		b.append("StartTime", myStartTime);
-		b.append("EndTime", myEndTime);
-		b.append("UpdateTime", myUpdateTime);
-		b.append("RecordsProcessed", myRecordsProcessed);
-		if (isNotBlank(myErrorMessage)) {
-			b.append("ErrorMessage", myErrorMessage);
-		}
-		if (myErrorCount > 0) {
-			b.append("ErrorCount", myErrorCount);
-		}
-		if (isNotBlank(myWarningMessage)) {
-			b.append("WarningMessage", myWarningMessage);
-		}
-		return b.toString();
-	}
+    public WorkChunk setWarningMessage(String theWarningMessage) {
+        myWarningMessage = theWarningMessage;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        ToStringBuilder b = new ToStringBuilder(this);
+        b.append("Id", myId);
+        b.append("Sequence", mySequence);
+        b.append("Status", myStatus);
+        b.append("JobDefinitionId", myJobDefinitionId);
+        b.append("JobDefinitionVersion", myJobDefinitionVersion);
+        b.append("TargetStepId", myTargetStepId);
+        b.append("InstanceId", myInstanceId);
+        b.append("Data", isNotBlank(myData) ? "(present)" : "(absent)");
+        b.append("CreateTime", myCreateTime);
+        b.append("StartTime", myStartTime);
+        b.append("EndTime", myEndTime);
+        b.append("UpdateTime", myUpdateTime);
+        b.append("RecordsProcessed", myRecordsProcessed);
+        if (isNotBlank(myErrorMessage)) {
+            b.append("ErrorMessage", myErrorMessage);
+        }
+        if (myErrorCount > 0) {
+            b.append("ErrorCount", myErrorCount);
+        }
+        if (isNotBlank(myWarningMessage)) {
+            b.append("WarningMessage", myWarningMessage);
+        }
+        return b.toString();
+    }
 }

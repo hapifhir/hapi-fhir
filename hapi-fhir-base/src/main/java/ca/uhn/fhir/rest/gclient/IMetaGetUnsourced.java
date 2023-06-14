@@ -24,16 +24,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IMetaGetUnsourced<T extends IBaseMetaType> {
 
-	IClientExecutable<IClientExecutable<?, T>, T> fromServer();
+    IClientExecutable<IClientExecutable<?, T>, T> fromServer();
 
-	IClientExecutable<IClientExecutable<?, T>, T> fromType(String theResourceName);
+    IClientExecutable<IClientExecutable<?, T>, T> fromType(String theResourceName);
 
-	/**
-	 * Get the meta from a resource instance by ID.
-	 * 
-	 * @param theId
-	 *           The ID. Must contain both a resource type and an ID part
-	 */
-	IClientExecutable<IClientExecutable<?, T>, T> fromResource(IIdType theId);
-
+    /**
+     * Get the meta from a resource instance by ID.
+     *
+     * @param theId The ID. Must contain both a resource type and an ID part
+     */
+    IClientExecutable<IClientExecutable<?, T>, T> fromResource(IIdType theId);
 }

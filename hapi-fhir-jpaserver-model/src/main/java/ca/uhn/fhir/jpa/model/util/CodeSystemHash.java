@@ -30,7 +30,7 @@ public class CodeSystemHash {
     private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
     private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
 
-    static public long hashCodeSystem( String system, String code ) {
+    public static long hashCodeSystem(String system, String code) {
         Hasher hasher = HASH_FUNCTION.newHasher();
         addStringToHasher(hasher, system);
         addStringToHasher(hasher, code);
@@ -39,7 +39,7 @@ public class CodeSystemHash {
         return hashCode.asLong();
     }
 
-    static private void addStringToHasher(Hasher hasher, String next) {
+    private static void addStringToHasher(Hasher hasher, String next) {
         if (next == null) {
             hasher.putByte((byte) 0);
         } else {

@@ -29,21 +29,28 @@ import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
-
 import javax.annotation.Nonnull;
 
-public class LoadGoldenIdsStep implements IJobStepWorker<MdmClearJobParameters, MdmChunkRangeJson, ResourceIdListWorkChunkJson> {
-	private final ResourceIdListStep<MdmClearJobParameters, MdmChunkRangeJson> myResourceIdListStep;
+public class LoadGoldenIdsStep
+        implements IJobStepWorker<
+                MdmClearJobParameters, MdmChunkRangeJson, ResourceIdListWorkChunkJson> {
+    private final ResourceIdListStep<MdmClearJobParameters, MdmChunkRangeJson> myResourceIdListStep;
 
-	public LoadGoldenIdsStep(IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
-		IIdChunkProducer<MdmChunkRangeJson> idChunkProducer = new MdmIdChunkProducer(theGoldenResourceSearchSvc);
+    public LoadGoldenIdsStep(IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
+        IIdChunkProducer<MdmChunkRangeJson> idChunkProducer =
+                new MdmIdChunkProducer(theGoldenResourceSearchSvc);
 
-		myResourceIdListStep = new ResourceIdListStep<>(idChunkProducer);
-	}
+        myResourceIdListStep = new ResourceIdListStep<>(idChunkProducer);
+    }
 
-	@Nonnull
-	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmClearJobParameters, MdmChunkRangeJson> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
-		return myResourceIdListStep.run(theStepExecutionDetails, theDataSink);
-	}
+    @Nonnull
+    @Override
+    public RunOutcome run(
+            @Nonnull
+                    StepExecutionDetails<MdmClearJobParameters, MdmChunkRangeJson>
+                            theStepExecutionDetails,
+            @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink)
+            throws JobExecutionFailedException {
+        return myResourceIdListStep.run(theStepExecutionDetails, theDataSink);
+    }
 }

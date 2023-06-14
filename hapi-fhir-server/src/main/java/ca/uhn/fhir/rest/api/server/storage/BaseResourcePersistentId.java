@@ -19,70 +19,68 @@
  */
 package ca.uhn.fhir.rest.api.server.storage;
 
+import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Objects;
-
 /**
- * This class is an abstraction for however primary keys are stored in the underlying storage engine. This might be
- * a Long, a String, or something else.  The generic type T represents the primary key type.
+ * This class is an abstraction for however primary keys are stored in the underlying storage
+ * engine. This might be a Long, a String, or something else. The generic type T represents the
+ * primary key type.
  */
 public abstract class BaseResourcePersistentId<T> implements IResourcePersistentId<T> {
-	private Long myVersion;
-	private final String myResourceType;
-	private IIdType myAssociatedResourceId;
+    private Long myVersion;
+    private final String myResourceType;
+    private IIdType myAssociatedResourceId;
 
+    protected BaseResourcePersistentId(String theResourceType) {
+        myResourceType = theResourceType;
+    }
 
-	protected BaseResourcePersistentId(String theResourceType) {
-		myResourceType = theResourceType;
-	}
+    protected BaseResourcePersistentId(Long theVersion, String theResourceType) {
+        myVersion = theVersion;
+        myResourceType = theResourceType;
+    }
 
-	protected BaseResourcePersistentId(Long theVersion, String theResourceType) {
-		myVersion = theVersion;
-		myResourceType = theResourceType;
-	}
+    @Override
+    public IIdType getAssociatedResourceId() {
+        return myAssociatedResourceId;
+    }
 
-	@Override
-	public IIdType getAssociatedResourceId() {
-		return myAssociatedResourceId;
-	}
+    @Override
+    public IResourcePersistentId<T> setAssociatedResourceId(IIdType theAssociatedResourceId) {
+        myAssociatedResourceId = theAssociatedResourceId;
+        return this;
+    }
 
-	@Override
-	public IResourcePersistentId<T> setAssociatedResourceId(IIdType theAssociatedResourceId) {
-		myAssociatedResourceId = theAssociatedResourceId;
-		return this;
-	}
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) return true;
+        if (theO == null || getClass() != theO.getClass()) return false;
+        BaseResourcePersistentId<?> that = (BaseResourcePersistentId<?>) theO;
+        return Objects.equals(myVersion, that.myVersion);
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-		if (theO == null || getClass() != theO.getClass()) return false;
-		BaseResourcePersistentId<?> that = (BaseResourcePersistentId<?>) theO;
-		return Objects.equals(myVersion, that.myVersion);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(myVersion);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(myVersion);
-	}
+    @Override
+    public Long getVersion() {
+        return myVersion;
+    }
 
+    /**
+     * @param theVersion This should only be populated if a specific version is needed. If you want
+     *     the current version, leave this as <code>null</code>
+     */
+    @Override
+    public void setVersion(Long theVersion) {
+        myVersion = theVersion;
+    }
 
-	@Override
-	public Long getVersion() {
-		return myVersion;
-	}
-
-	/**
-	 * @param theVersion This should only be populated if a specific version is needed. If you want the current version,
-	 *                   leave this as <code>null</code>
-	 */
-	@Override
-	public void setVersion(Long theVersion) {
-		myVersion = theVersion;
-	}
-
-	@Override
-	public String getResourceType() {
-		return myResourceType;
-	}
+    @Override
+    public String getResourceType() {
+        return myResourceType;
+    }
 }

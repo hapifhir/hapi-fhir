@@ -23,20 +23,14 @@ import javax.annotation.Nullable;
 
 public class ActivateJobResult {
 
-	/**
-	 * Whether the job is activated or not
-	 */
-	public final boolean isActivated;
+    /** Whether the job is activated or not */
+    public final boolean isActivated;
 
-	/**
-	 * The newly created jobid
-	 */
-	@Nullable
-	public final String jobId;
+    /** The newly created jobid */
+    @Nullable public final String jobId;
 
-	public ActivateJobResult(boolean theIsActivated,
-									 @Nullable String theJobId) {
-		isActivated = theIsActivated;
-		jobId = theJobId;
-	}
+    public ActivateJobResult(boolean theIsActivated, @Nullable String theJobId) {
+        isActivated = theIsActivated;
+        jobId = theJobId;
+    }
 }

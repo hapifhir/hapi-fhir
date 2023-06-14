@@ -25,12 +25,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+public interface IResourceHistoryTagDao
+        extends JpaRepository<ResourceHistoryTag, Long>, IHapiFhirJpaRepository {
 
-public interface IResourceHistoryTagDao extends JpaRepository<ResourceHistoryTag, Long>, IHapiFhirJpaRepository {
-
-	@Modifying
-	@Query("DELETE FROM ResourceHistoryTag t WHERE t.myResourceHistoryPid = :historyPid")
-	void deleteByPid(@Param("historyPid") Long theResourceHistoryTablePid);
-
+    @Modifying
+    @Query("DELETE FROM ResourceHistoryTag t WHERE t.myResourceHistoryPid = :historyPid")
+    void deleteByPid(@Param("historyPid") Long theResourceHistoryTablePid);
 }

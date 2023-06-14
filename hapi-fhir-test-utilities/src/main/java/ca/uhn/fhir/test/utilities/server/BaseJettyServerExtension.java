@@ -19,8 +19,28 @@
  */
 package ca.uhn.fhir.test.utilities.server;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.PreDestroy;
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -47,284 +67,270 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
-import javax.annotation.PreDestroy;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
+public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtension<?>>
+        implements BeforeEachCallback, AfterEachCallback, AfterAllCallback {
+    private static final Logger ourLog = LoggerFactory.getLogger(BaseJettyServerExtension.class);
+    private final List<List<String>> myRequestHeaders = new ArrayList<>();
+    private final List<String> myRequestContentTypes = new ArrayList<>();
+    private String myServletPath = "/*";
+    private Server myServer;
+    private CloseableHttpClient myHttpClient;
+    private int myPort = 0;
+    private boolean myKeepAliveBetweenTests;
+    private String myContextPath = "";
+    private AtomicLong myConnectionsOpenedCounter;
+    private Class<? extends WebSocketConfigurer> myEnableSpringWebsocketSupport;
+    private String myEnableSpringWebsocketContextPath;
+    private long myIdleTimeoutMillis = 30000;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+    /**
+     * Sets the Jetty server "idle timeout" in millis. This is the amount of time that the HTTP
+     * processor will allow a request to take before it hangs up on the client. This means the
+     * amount of time receiving the request over the network or streaming the response, not the
+     * amount of time spent actually processing the request (ie this is a network timeout, not a CPU
+     * timeout). Default is 30000.
+     */
+    public T withIdleTimeout(long theIdleTimeoutMillis) {
+        myIdleTimeoutMillis = theIdleTimeoutMillis;
+        return (T) this;
+    }
 
-public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtension<?>> implements BeforeEachCallback, AfterEachCallback, AfterAllCallback {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseJettyServerExtension.class);
-	private final List<List<String>> myRequestHeaders = new ArrayList<>();
-	private final List<String> myRequestContentTypes = new ArrayList<>();
-	private String myServletPath = "/*";
-	private Server myServer;
-	private CloseableHttpClient myHttpClient;
-	private int myPort = 0;
-	private boolean myKeepAliveBetweenTests;
-	private String myContextPath = "";
-	private AtomicLong myConnectionsOpenedCounter;
-	private Class<? extends WebSocketConfigurer> myEnableSpringWebsocketSupport;
-	private String myEnableSpringWebsocketContextPath;
-	private long myIdleTimeoutMillis = 30000;
+    @SuppressWarnings("unchecked")
+    public T withContextPath(String theContextPath) {
+        myContextPath = defaultString(theContextPath);
+        return (T) this;
+    }
 
-	/**
-	 * Sets the Jetty server "idle timeout" in millis. This is the amount of time that
-	 * the HTTP processor will allow a request to take before it hangs up on the
-	 * client. This means the amount of time receiving the request over the network or
-	 * streaming the response, not the amount of time spent actually processing the
-	 * request (ie this is a network timeout, not a CPU timeout). Default is
-	 * 30000.
-	 */
-	public T withIdleTimeout(long theIdleTimeoutMillis) {
-		myIdleTimeoutMillis = theIdleTimeoutMillis;
-		return (T) this;
-	}
+    /**
+     * Returns the total number of connections that this server has received. This is not the
+     * current number of open connections, it's the number of new connections that have been opened
+     * at any point.
+     */
+    public long getConnectionsOpenedCount() {
+        return myConnectionsOpenedCounter.get();
+    }
 
-	@SuppressWarnings("unchecked")
-	public T withContextPath(String theContextPath) {
-		myContextPath = defaultString(theContextPath);
-		return (T) this;
-	}
+    public void resetConnectionsOpenedCount() {
+        myConnectionsOpenedCounter.set(0);
+    }
 
-	/**
-	 * Returns the total number of connections that this server has received. This
-	 * is not the current number of open connections, it's the number of new
-	 * connections that have been opened at any point.
-	 */
-	public long getConnectionsOpenedCount() {
-		return myConnectionsOpenedCounter.get();
-	}
+    public CloseableHttpClient getHttpClient() {
+        return myHttpClient;
+    }
 
-	public void resetConnectionsOpenedCount() {
-		myConnectionsOpenedCounter.set(0);
-	}
+    public List<String> getRequestContentTypes() {
+        return myRequestContentTypes;
+    }
 
-	public CloseableHttpClient getHttpClient() {
-		return myHttpClient;
-	}
+    public List<List<String>> getRequestHeaders() {
+        return myRequestHeaders;
+    }
 
-	public List<String> getRequestContentTypes() {
-		return myRequestContentTypes;
-	}
+    @PreDestroy
+    public void stopServer() throws Exception {
+        if (!isRunning()) {
+            return;
+        }
+        JettyUtil.closeServer(myServer);
+        myServer = null;
 
-	public List<List<String>> getRequestHeaders() {
-		return myRequestHeaders;
-	}
+        myHttpClient.close();
+        myHttpClient = null;
+    }
 
-	@PreDestroy
-	public void stopServer() throws Exception {
-		if (!isRunning()) {
-			return;
-		}
-		JettyUtil.closeServer(myServer);
-		myServer = null;
+    protected void startServer() throws Exception {
+        if (isRunning()) {
+            return;
+        }
 
-		myHttpClient.close();
-		myHttpClient = null;
-	}
+        myServer = new Server();
+        myConnectionsOpenedCounter = new AtomicLong(0);
 
-	protected void startServer() throws Exception {
-		if (isRunning()) {
-			return;
-		}
+        ServerConnector connector = new ServerConnector(myServer);
+        connector.setIdleTimeout(myIdleTimeoutMillis);
+        connector.setPort(myPort);
+        myServer.setConnectors(new Connector[] {connector});
 
-		myServer = new Server();
-		myConnectionsOpenedCounter = new AtomicLong(0);
+        HttpConnectionFactory connectionFactory =
+                (HttpConnectionFactory) connector.getConnectionFactories().iterator().next();
+        connectionFactory.addBean(
+                new Listener() {
+                    @Override
+                    public void onOpened(Connection connection) {
+                        myConnectionsOpenedCounter.incrementAndGet();
+                    }
 
-		ServerConnector connector = new ServerConnector(myServer);
-		connector.setIdleTimeout(myIdleTimeoutMillis);
-		connector.setPort(myPort);
-		myServer.setConnectors(new Connector[]{connector});
+                    @Override
+                    public void onClosed(Connection connection) {
+                        // nothing
+                    }
+                });
 
-		HttpConnectionFactory connectionFactory = (HttpConnectionFactory) connector.getConnectionFactories().iterator().next();
-		connectionFactory.addBean(new Listener() {
-			@Override
-			public void onOpened(Connection connection) {
-				myConnectionsOpenedCounter.incrementAndGet();
-			}
+        ServletHolder servletHolder = new ServletHolder(provideServlet());
 
-			@Override
-			public void onClosed(Connection connection) {
-				// nothing
-			}
-		});
+        HandlerList handlerList = new HandlerList();
 
-		ServletHolder servletHolder = new ServletHolder(provideServlet());
+        ServletContextHandler contextHandler = new ServletContextHandler();
+        contextHandler.setContextPath(myContextPath);
+        contextHandler.addServlet(servletHolder, myServletPath);
+        contextHandler.addFilter(
+                new FilterHolder(requestCapturingFilter()),
+                "/*",
+                EnumSet.allOf(DispatcherType.class));
+        handlerList.addHandler(contextHandler);
 
-		HandlerList handlerList = new HandlerList();
+        if (myEnableSpringWebsocketSupport != null) {
 
-		ServletContextHandler contextHandler = new ServletContextHandler();
-		contextHandler.setContextPath(myContextPath);
-		contextHandler.addServlet(servletHolder, myServletPath);
-		contextHandler.addFilter(new FilterHolder(requestCapturingFilter()), "/*", EnumSet.allOf(DispatcherType.class));
-		handlerList.addHandler(contextHandler);
+            GenericWebApplicationContext wac = new GenericWebApplicationContext();
+            wac.setParent(SpringContextGrabbingTestExecutionListener.getApplicationContext());
+            AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(wac);
+            reader.register(myEnableSpringWebsocketSupport);
 
-		if (myEnableSpringWebsocketSupport != null) {
+            DispatcherServlet dispatcherServlet = new DispatcherServlet();
+            dispatcherServlet.setApplicationContext(wac);
+            ServletHolder subsServletHolder = new ServletHolder();
+            subsServletHolder.setServlet(dispatcherServlet);
 
-			GenericWebApplicationContext wac = new GenericWebApplicationContext();
-			wac.setParent(SpringContextGrabbingTestExecutionListener.getApplicationContext());
-			AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(wac);
-			reader.register(myEnableSpringWebsocketSupport);
+            ServletContextHandler servletContextHandler = new ServletContextHandler();
+            servletContextHandler.setContextPath(myEnableSpringWebsocketContextPath);
+            servletContextHandler.setAllowNullPathInfo(true);
+            servletContextHandler.addServlet(new ServletHolder(dispatcherServlet), "/*");
+            JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
 
-			DispatcherServlet dispatcherServlet = new DispatcherServlet();
-			dispatcherServlet.setApplicationContext(wac);
-			ServletHolder subsServletHolder = new ServletHolder();
-			subsServletHolder.setServlet(dispatcherServlet);
+            handlerList.addHandler(servletContextHandler);
+        }
 
-			ServletContextHandler servletContextHandler = new ServletContextHandler();
-			servletContextHandler.setContextPath(myEnableSpringWebsocketContextPath);
-			servletContextHandler.setAllowNullPathInfo(true);
-			servletContextHandler.addServlet(new ServletHolder(dispatcherServlet), "/*");
-			JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
+        myServer.setHandler(handlerList);
+        myServer.start();
 
-			handlerList.addHandler(servletContextHandler);
-		}
+        myPort = JettyUtil.getPortForStartedServer(myServer);
+        ourLog.info("Server has started on port {}", myPort);
+        PoolingHttpClientConnectionManager connectionManager =
+                new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setConnectionManager(connectionManager);
+        myHttpClient = builder.build();
+    }
 
-		myServer.setHandler(handlerList);
-		myServer.start();
+    private Filter requestCapturingFilter() {
+        return new RequestCapturingFilter();
+    }
 
-		myPort = JettyUtil.getPortForStartedServer(myServer);
-		ourLog.info("Server has started on port {}", myPort);
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		myHttpClient = builder.build();
-	}
+    public int getPort() {
+        return myPort;
+    }
 
-	private Filter requestCapturingFilter() {
-		return new RequestCapturingFilter();
-	}
+    protected abstract HttpServlet provideServlet();
 
-	public int getPort() {
-		return myPort;
-	}
+    public String getWebsocketContextPath() {
+        return myEnableSpringWebsocketContextPath;
+    }
 
-	protected abstract HttpServlet provideServlet();
+    /** Should be in the format <code>/the/path/*</code> */
+    @SuppressWarnings("unchecked")
+    public T withServletPath(String theServletPath) {
+        Validate.isTrue(theServletPath.startsWith("/"), "Servlet path should start with /");
+        Validate.isTrue(theServletPath.endsWith("/*"), "Servlet path should end with /*");
+        myServletPath = theServletPath;
+        return (T) this;
+    }
 
+    @SuppressWarnings("unchecked")
+    public T withPort(int thePort) {
+        myPort = thePort;
+        return (T) this;
+    }
 
-	public String getWebsocketContextPath() {
-		return myEnableSpringWebsocketContextPath;
-	}
+    @SuppressWarnings("unchecked")
+    public T keepAliveBetweenTests() {
+        myKeepAliveBetweenTests = true;
+        return (T) this;
+    }
 
-	/**
-	 * Should be in the format <code>/the/path/*</code>
-	 */
-	@SuppressWarnings("unchecked")
-	public T withServletPath(String theServletPath) {
-		Validate.isTrue(theServletPath.startsWith("/"), "Servlet path should start with /");
-		Validate.isTrue(theServletPath.endsWith("/*"), "Servlet path should end with /*");
-		myServletPath = theServletPath;
-		return (T) this;
-	}
+    protected boolean isRunning() {
+        return myServer != null;
+    }
 
-	@SuppressWarnings("unchecked")
-	public T withPort(int thePort) {
-		myPort = thePort;
-		return (T) this;
-	}
+    /** Returns the server base URL with no trailing slash */
+    public String getBaseUrl() {
+        assert myServletPath.endsWith("/*");
+        return "http://localhost:"
+                + myPort
+                + myContextPath
+                + myServletPath.substring(0, myServletPath.length() - 2);
+    }
 
-	@SuppressWarnings("unchecked")
-	public T keepAliveBetweenTests() {
-		myKeepAliveBetweenTests = true;
-		return (T) this;
-	}
+    @Override
+    public void beforeEach(ExtensionContext context) throws Exception {
+        startServer();
+        myRequestContentTypes.clear();
+        myRequestHeaders.clear();
+    }
 
-	protected boolean isRunning() {
-		return myServer != null;
-	}
+    @Override
+    public void afterEach(ExtensionContext context) throws Exception {
+        if (!myKeepAliveBetweenTests) {
+            stopServer();
+        }
+    }
 
-	/**
-	 * Returns the server base URL with no trailing slash
-	 */
-	public String getBaseUrl() {
-		assert myServletPath.endsWith("/*");
-		return "http://localhost:" + myPort + myContextPath + myServletPath.substring(0, myServletPath.length() - 2);
-	}
+    @Override
+    public void afterAll(ExtensionContext context) throws Exception {
+        stopServer();
+    }
 
-	@Override
-	public void beforeEach(ExtensionContext context) throws Exception {
-		startServer();
-		myRequestContentTypes.clear();
-		myRequestHeaders.clear();
-	}
+    /**
+     * To use this method, you need to add the following to your test class: <code>
+     * @TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
+     * </code>
+     */
+    @SuppressWarnings("unchecked")
+    public T withSpringWebsocketSupport(
+            String theContextPath, Class<? extends WebSocketConfigurer> theContextConfigClass) {
+        assert !isRunning();
+        assert theContextConfigClass != null;
+        myEnableSpringWebsocketSupport = theContextConfigClass;
+        myEnableSpringWebsocketContextPath = theContextPath;
+        return (T) this;
+    }
 
-	@Override
-	public void afterEach(ExtensionContext context) throws Exception {
-		if (!myKeepAliveBetweenTests) {
-			stopServer();
-		}
-	}
+    private class RequestCapturingFilter implements Filter {
+        @Override
+        public void init(FilterConfig filterConfig) throws ServletException {
+            // nothing
+        }
 
-	@Override
-	public void afterAll(ExtensionContext context) throws Exception {
-		stopServer();
-	}
+        @Override
+        public void doFilter(
+                ServletRequest theRequest, ServletResponse theResponse, FilterChain theChain)
+                throws IOException, ServletException {
+            HttpServletRequest request = (HttpServletRequest) theRequest;
 
-	/**
-	 * To use this method, you need to add the following to your
-	 * test class:
-	 * <code>@TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)</code>
-	 */
-	@SuppressWarnings("unchecked")
-	public T withSpringWebsocketSupport(String theContextPath, Class<? extends WebSocketConfigurer> theContextConfigClass) {
-		assert !isRunning();
-		assert theContextConfigClass != null;
-		myEnableSpringWebsocketSupport = theContextConfigClass;
-		myEnableSpringWebsocketContextPath = theContextPath;
-		return (T) this;
-	}
+            String header = request.getHeader(Constants.HEADER_CONTENT_TYPE);
+            if (isNotBlank(header)) {
+                myRequestContentTypes.add(header.replaceAll(";.*", ""));
+            } else {
+                myRequestContentTypes.add(null);
+            }
 
-	private class RequestCapturingFilter implements Filter {
-		@Override
-		public void init(FilterConfig filterConfig) throws ServletException {
-			// nothing
-		}
+            java.util.Enumeration<String> headerNamesEnum = request.getHeaderNames();
+            List<String> requestHeaders = new ArrayList<>();
+            myRequestHeaders.add(requestHeaders);
+            while (headerNamesEnum.hasMoreElements()) {
+                String nextName = headerNamesEnum.nextElement();
+                Enumeration<String> valueEnum = request.getHeaders(nextName);
+                while (valueEnum.hasMoreElements()) {
+                    String nextValue = valueEnum.nextElement();
+                    requestHeaders.add(nextName + ": " + nextValue);
+                }
+            }
 
-		@Override
-		public void doFilter(ServletRequest theRequest, ServletResponse theResponse, FilterChain theChain) throws IOException, ServletException {
-			HttpServletRequest request = (HttpServletRequest) theRequest;
+            theChain.doFilter(theRequest, theResponse);
+        }
 
-			String header = request.getHeader(Constants.HEADER_CONTENT_TYPE);
-			if (isNotBlank(header)) {
-				myRequestContentTypes.add(header.replaceAll(";.*", ""));
-			} else {
-				myRequestContentTypes.add(null);
-			}
-
-			java.util.Enumeration<String> headerNamesEnum = request.getHeaderNames();
-			List<String> requestHeaders = new ArrayList<>();
-			myRequestHeaders.add(requestHeaders);
-			while (headerNamesEnum.hasMoreElements()) {
-				String nextName = headerNamesEnum.nextElement();
-				Enumeration<String> valueEnum = request.getHeaders(nextName);
-				while (valueEnum.hasMoreElements()) {
-					String nextValue = valueEnum.nextElement();
-					requestHeaders.add(nextName + ": " + nextValue);
-				}
-			}
-
-			theChain.doFilter(theRequest, theResponse);
-		}
-
-		@Override
-		public void destroy() {
-			// nothing
-		}
-	}
+        @Override
+        public void destroy() {
+            // nothing
+        }
+    }
 }

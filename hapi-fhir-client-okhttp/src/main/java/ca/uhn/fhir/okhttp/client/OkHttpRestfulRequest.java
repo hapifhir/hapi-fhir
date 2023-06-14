@@ -24,15 +24,14 @@ import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.StopWatch;
-import okhttp3.Call;
-import okhttp3.Call.Factory;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import okhttp3.Call;
+import okhttp3.Call.Factory;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 /**
  * Adapter for building an OkHttp-specific request.
@@ -47,7 +46,11 @@ public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpReques
     private RequestTypeEnum myRequestTypeEnum;
     private RequestBody myRequestBody;
 
-    public OkHttpRestfulRequest(Call.Factory theClient, String theUrl, RequestTypeEnum theRequestTypeEnum, RequestBody theRequestBody) {
+    public OkHttpRestfulRequest(
+            Call.Factory theClient,
+            String theUrl,
+            RequestTypeEnum theRequestTypeEnum,
+            RequestBody theRequestBody) {
         myClient = theClient;
         myUrl = theUrl;
         myRequestTypeEnum = theRequestTypeEnum;
@@ -67,10 +70,10 @@ public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpReques
 
     @Override
     public IHttpResponse execute() throws IOException {
-		 StopWatch responseStopWatch = new StopWatch();
-		 myRequestBuilder.method(getHttpVerbName(), myRequestBody);
-		 Call call = myClient.newCall(myRequestBuilder.build());
-		 return new OkHttpRestfulResponse(call.execute(), responseStopWatch);
+        StopWatch responseStopWatch = new StopWatch();
+        myRequestBuilder.method(getHttpVerbName(), myRequestBody);
+        Call call = myClient.newCall(myRequestBuilder.build());
+        return new OkHttpRestfulResponse(call.execute(), responseStopWatch);
     }
 
     @Override
@@ -80,7 +83,8 @@ public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpReques
 
     @Override
     public String getRequestBodyFromStream() {
-        // returning null to indicate this is not supported, as documented in IHttpRequest's contract
+        // returning null to indicate this is not supported, as documented in IHttpRequest's
+        // contract
         return null;
     }
 
@@ -89,23 +93,23 @@ public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpReques
         return myUrl;
     }
 
-	@Override
-	public void setUri(String theUrl) {
-		myUrl = theUrl;
-	}
+    @Override
+    public void setUri(String theUrl) {
+        myUrl = theUrl;
+    }
 
-	@Override
+    @Override
     public String getHttpVerbName() {
         return myRequestTypeEnum.name();
     }
 
-	@Override
-	public void removeHeaders(String theHeaderName) {
-    	myRequestBuilder.removeHeader(theHeaderName);
-	}
+    @Override
+    public void removeHeaders(String theHeaderName) {
+        myRequestBuilder.removeHeader(theHeaderName);
+    }
 
-	@Override
-	public String toString() {
-		return getHttpVerbName() + " " + getUri();
-	}
+    @Override
+    public String toString() {
+        return getHttpVerbName() + " " + getUri();
+    }
 }

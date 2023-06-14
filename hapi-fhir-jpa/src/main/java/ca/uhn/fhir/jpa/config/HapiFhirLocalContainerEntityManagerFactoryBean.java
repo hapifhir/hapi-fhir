@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.base.Strings;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
@@ -29,87 +31,87 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.orm.hibernate5.SpringBeanContainer;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 /**
- * This class is an extension of the Spring/Hibernate LocalContainerEntityManagerFactoryBean
- * that sets some sensible default property values
+ * This class is an extension of the Spring/Hibernate LocalContainerEntityManagerFactoryBean that
+ * sets some sensible default property values
  */
-public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContainerEntityManagerFactoryBean {
+public class HapiFhirLocalContainerEntityManagerFactoryBean
+        extends LocalContainerEntityManagerFactoryBean {
 
-	//https://stackoverflow.com/questions/57902388/how-to-inject-spring-beans-into-the-hibernate-envers-revisionlistener
-	ConfigurableListableBeanFactory myConfigurableListableBeanFactory;
+    // https://stackoverflow.com/questions/57902388/how-to-inject-spring-beans-into-the-hibernate-envers-revisionlistener
+    ConfigurableListableBeanFactory myConfigurableListableBeanFactory;
 
-	public HapiFhirLocalContainerEntityManagerFactoryBean(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
-		myConfigurableListableBeanFactory = theConfigurableListableBeanFactory;
-	}
+    public HapiFhirLocalContainerEntityManagerFactoryBean(
+            ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
+        myConfigurableListableBeanFactory = theConfigurableListableBeanFactory;
+    }
 
-	@Override
-	public Map<String, Object> getJpaPropertyMap() {
-		Map<String, Object> retVal = super.getJpaPropertyMap();
+    @Override
+    public Map<String, Object> getJpaPropertyMap() {
+        Map<String, Object> retVal = super.getJpaPropertyMap();
 
-		// SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
-		if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {
-			retVal.put(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE, LiteralHandlingMode.BIND);
-		}
+        // SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
+        if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {
+            retVal.put(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE, LiteralHandlingMode.BIND);
+        }
 
-		if (!retVal.containsKey(AvailableSettings.CONNECTION_HANDLING)) {
-			retVal.put(AvailableSettings.CONNECTION_HANDLING, PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
-		}
+        if (!retVal.containsKey(AvailableSettings.CONNECTION_HANDLING)) {
+            retVal.put(
+                    AvailableSettings.CONNECTION_HANDLING,
+                    PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
+        }
 
-		/*
-		 * Set some performance options
-		 */
+        /*
+         * Set some performance options
+         */
 
-		if (!retVal.containsKey(AvailableSettings.STATEMENT_BATCH_SIZE)) {
-			retVal.put(AvailableSettings.STATEMENT_BATCH_SIZE, "30");
-		}
+        if (!retVal.containsKey(AvailableSettings.STATEMENT_BATCH_SIZE)) {
+            retVal.put(AvailableSettings.STATEMENT_BATCH_SIZE, "30");
+        }
 
-		if (!retVal.containsKey(AvailableSettings.ORDER_INSERTS)) {
-			retVal.put(AvailableSettings.ORDER_INSERTS, "true");
-		}
+        if (!retVal.containsKey(AvailableSettings.ORDER_INSERTS)) {
+            retVal.put(AvailableSettings.ORDER_INSERTS, "true");
+        }
 
-		if (!retVal.containsKey(AvailableSettings.ORDER_UPDATES)) {
-			retVal.put(AvailableSettings.ORDER_UPDATES, "true");
-		}
+        if (!retVal.containsKey(AvailableSettings.ORDER_UPDATES)) {
+            retVal.put(AvailableSettings.ORDER_UPDATES, "true");
+        }
 
-		if (!retVal.containsKey(AvailableSettings.BATCH_VERSIONED_DATA)) {
-			retVal.put(AvailableSettings.BATCH_VERSIONED_DATA, "true");
-		}
-		// Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the setting hibernate needs
-		// in order to be able to resolve beans, so we add it back in manually here
-		if (!retVal.containsKey(AvailableSettings.BEAN_CONTAINER)) {
-			retVal.put(AvailableSettings.BEAN_CONTAINER, new SpringBeanContainer(myConfigurableListableBeanFactory));
-		}
+        if (!retVal.containsKey(AvailableSettings.BATCH_VERSIONED_DATA)) {
+            retVal.put(AvailableSettings.BATCH_VERSIONED_DATA, "true");
+        }
+        // Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the
+        // setting hibernate needs
+        // in order to be able to resolve beans, so we add it back in manually here
+        if (!retVal.containsKey(AvailableSettings.BEAN_CONTAINER)) {
+            retVal.put(
+                    AvailableSettings.BEAN_CONTAINER,
+                    new SpringBeanContainer(myConfigurableListableBeanFactory));
+        }
 
-		return retVal;
-	}
+        return retVal;
+    }
 
-	/**
-	 * Helper to add hook to property.
-	 *
-	 * Listener properties are comma-separated lists, so we can't just overwrite or default it.
-	 */
-	void addHibernateHook(String thePropertyName, String theHookFQCN) {
-		Map<String, Object> retVal = super.getJpaPropertyMap();
-		List<String> listeners = new ArrayList<>();
+    /**
+     * Helper to add hook to property.
+     *
+     * <p>Listener properties are comma-separated lists, so we can't just overwrite or default it.
+     */
+    void addHibernateHook(String thePropertyName, String theHookFQCN) {
+        Map<String, Object> retVal = super.getJpaPropertyMap();
+        List<String> listeners = new ArrayList<>();
 
-		{
-			String currentListeners = (String) retVal.get(thePropertyName);
-			if (!Strings.isNullOrEmpty(currentListeners)) {
-				listeners.addAll(Arrays.asList(currentListeners.split(",")));
-			}
-		}
+        {
+            String currentListeners = (String) retVal.get(thePropertyName);
+            if (!Strings.isNullOrEmpty(currentListeners)) {
+                listeners.addAll(Arrays.asList(currentListeners.split(",")));
+            }
+        }
 
-		// add if missing
-		if (!listeners.contains(theHookFQCN)) {
-			listeners.add(theHookFQCN);
-			retVal.put(thePropertyName, String.join(",", listeners));
-		}
-	}
-
-
+        // add if missing
+        if (!listeners.contains(theHookFQCN)) {
+            listeners.add(theHookFQCN);
+            retVal.put(thePropertyName, String.join(",", listeners));
+        }
+    }
 }

@@ -23,18 +23,16 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * This interface is used by any storage implementations to convert from
- * persisted database format (independent of the kind of database) and
- * HAPI FHIR resource model classes.
+ * This interface is used by any storage implementations to convert from persisted database format
+ * (independent of the kind of database) and HAPI FHIR resource model classes.
  *
- * Currently only DB->FHIR is enabled through this interface but the aim
- * eventually is to handle both directions
+ * <p>Currently only DB->FHIR is enabled through this interface but the aim eventually is to handle
+ * both directions
  */
 public interface IStorageResourceParser {
 
-	// TODO: JA2 - Remove theForHistoryOperation flag - It toggles adding a bit of extra
-	// metadata but there's no reason to not always just add that, and this would
-	// simplify this interface
-	IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation);
-
+    // TODO: JA2 - Remove theForHistoryOperation flag - It toggles adding a bit of extra
+    // metadata but there's no reason to not always just add that, and this would
+    // simplify this interface
+    IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation);
 }

@@ -19,105 +19,113 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 public class DropForeignKeyTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(DropForeignKeyTask.class);
-	private String myConstraintName;
-	private String myParentTableName;
+    private static final Logger ourLog = LoggerFactory.getLogger(DropForeignKeyTask.class);
+    private String myConstraintName;
+    private String myParentTableName;
 
-	public DropForeignKeyTask(String theProductVersion, String theSchemaVersion) {
-		super(theProductVersion, theSchemaVersion);
-	}
+    public DropForeignKeyTask(String theProductVersion, String theSchemaVersion) {
+        super(theProductVersion, theSchemaVersion);
+    }
 
-	@Nonnull
-	static List<String> generateSql(String theTableName, String theConstraintName, DriverTypeEnum theDriverType) {
-		List<String> sqls = new ArrayList<>();
-		switch (theDriverType) {
-			case MYSQL_5_7:
-			case MARIADB_10_1:
-				// Lousy MYQL....
-				sqls.add("alter table " + theTableName + " drop foreign key " + theConstraintName);
-				break;
-			case POSTGRES_9_4:
-			case DERBY_EMBEDDED:
-			case H2_EMBEDDED:
-			case ORACLE_12C:
-			case MSSQL_2012:
-				sqls.add("alter table " + theTableName + " drop constraint " + theConstraintName);
-				break;
-			case COCKROACHDB_21_1:
-				sqls.add("drop index if exists " + theTableName + "@" + theConstraintName + " cascade");
-				break;
-			default:
-				throw new IllegalStateException(Msg.code(59));
-		}
-		return sqls;
-	}
+    @Nonnull
+    static List<String> generateSql(
+            String theTableName, String theConstraintName, DriverTypeEnum theDriverType) {
+        List<String> sqls = new ArrayList<>();
+        switch (theDriverType) {
+            case MYSQL_5_7:
+            case MARIADB_10_1:
+                // Lousy MYQL....
+                sqls.add("alter table " + theTableName + " drop foreign key " + theConstraintName);
+                break;
+            case POSTGRES_9_4:
+            case DERBY_EMBEDDED:
+            case H2_EMBEDDED:
+            case ORACLE_12C:
+            case MSSQL_2012:
+                sqls.add("alter table " + theTableName + " drop constraint " + theConstraintName);
+                break;
+            case COCKROACHDB_21_1:
+                sqls.add(
+                        "drop index if exists "
+                                + theTableName
+                                + "@"
+                                + theConstraintName
+                                + " cascade");
+                break;
+            default:
+                throw new IllegalStateException(Msg.code(59));
+        }
+        return sqls;
+    }
 
-	public void setConstraintName(String theConstraintName) {
-		myConstraintName = theConstraintName;
-	}
+    public void setConstraintName(String theConstraintName) {
+        myConstraintName = theConstraintName;
+    }
 
-	public void setParentTableName(String theParentTableName) {
-		myParentTableName = theParentTableName;
-	}
+    public void setParentTableName(String theParentTableName) {
+        myParentTableName = theParentTableName;
+    }
 
-	@Override
-	public void validate() {
-		super.validate();
+    @Override
+    public void validate() {
+        super.validate();
 
-		Validate.isTrue(isNotBlank(myConstraintName));
-		Validate.isTrue(isNotBlank(myParentTableName));
-		setDescription("Drop foreign key " + myConstraintName + " from table " + getTableName());
+        Validate.isTrue(isNotBlank(myConstraintName));
+        Validate.isTrue(isNotBlank(myParentTableName));
+        setDescription("Drop foreign key " + myConstraintName + " from table " + getTableName());
+    }
 
-	}
+    @Override
+    public void doExecute() throws SQLException {
 
-	@Override
-	public void doExecute() throws SQLException {
+        Set<String> existing =
+                JdbcUtils.getForeignKeys(
+                        getConnectionProperties(), myParentTableName, getTableName());
+        if (!existing.contains(myConstraintName)) {
+            logInfo(
+                    ourLog,
+                    "Don't have constraint named {} - No action performed",
+                    myConstraintName);
+            return;
+        }
 
-		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myParentTableName, getTableName());
-		if (!existing.contains(myConstraintName)) {
-			logInfo(ourLog, "Don't have constraint named {} - No action performed", myConstraintName);
-			return;
-		}
+        List<String> sqls = generateSql(getTableName(), myConstraintName, getDriverType());
 
-		List<String> sqls = generateSql(getTableName(), myConstraintName, getDriverType());
+        for (String next : sqls) {
+            executeSql(getTableName(), next);
+        }
+    }
 
-		for (String next : sqls) {
-			executeSql(getTableName(), next);
-		}
+    @Override
+    protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+        DropForeignKeyTask otherObject = (DropForeignKeyTask) theOtherObject;
+        super.generateEquals(theBuilder, otherObject);
+        theBuilder.append(myConstraintName, otherObject.myConstraintName);
+        theBuilder.append(myParentTableName, otherObject.myParentTableName);
+    }
 
-	}
-
-	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-		DropForeignKeyTask otherObject = (DropForeignKeyTask) theOtherObject;
-		super.generateEquals(theBuilder, otherObject);
-		theBuilder.append(myConstraintName, otherObject.myConstraintName);
-		theBuilder.append(myParentTableName, otherObject.myParentTableName);
-	}
-
-	@Override
-	protected void generateHashCode(HashCodeBuilder theBuilder) {
-		super.generateHashCode(theBuilder);
-		theBuilder.append(myConstraintName);
-		theBuilder.append(myParentTableName);
-	}
+    @Override
+    protected void generateHashCode(HashCodeBuilder theBuilder) {
+        super.generateHashCode(theBuilder);
+        theBuilder.append(myConstraintName);
+        theBuilder.append(myParentTableName);
+    }
 }

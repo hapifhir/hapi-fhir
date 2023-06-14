@@ -19,6 +19,4 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-public interface IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId extends IAuthRuleFinished {
-
-}
+public interface IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId extends IAuthRuleFinished {}

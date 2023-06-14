@@ -24,17 +24,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
- * This annotation should be added to any {@link ca.uhn.fhir.model.api.IModelJson}
- * model fields
- * that contain a password or other credentials. Data in such a field should not be
- * serialized back to users.
+ * This annotation should be added to any {@link ca.uhn.fhir.model.api.IModelJson} model fields that
+ * contain a password or other credentials. Data in such a field should not be serialized back to
+ * users.
  *
- * Note that there is not yet any global automatic processing for this annotation.
- * Perhaps in the future.
+ * <p>Note that there is not yet any global automatic processing for this annotation. Perhaps in the
+ * future.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface PasswordField {
-}
+public @interface PasswordField {}

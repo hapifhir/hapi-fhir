@@ -19,75 +19,71 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.primitive.IdDt;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
-//import ca.uhn.fhir.testmodel.Patient; // TODO: qualify this correctly
+// import ca.uhn.fhir.testmodel.Patient; // TODO: qualify this correctly
 
 /**
- * RESTful method annotation to be used for the FHIR
- * <a href="http://hl7.org/implement/standards/fhir/http.html#history">history</a> method.
- * 
- * <p>
- * History returns a feed containing all versions (or a selected range of versions) of 
- * a resource or a specific set of resources.
- * </p>
- * <p>
- * The history command supports three usage patterns, as described in the
- * <a href="http://hl7.org/implement/standards/fhir/http.html#history">FHIR history</a> documentation:
- * </p>
+ * RESTful method annotation to be used for the FHIR <a
+ * href="http://hl7.org/implement/standards/fhir/http.html#history">history</a> method.
+ *
+ * <p>History returns a feed containing all versions (or a selected range of versions) of a resource
+ * or a specific set of resources.
+ *
+ * <p>The history command supports three usage patterns, as described in the <a
+ * href="http://hl7.org/implement/standards/fhir/http.html#history">FHIR history</a> documentation:
+ *
  * <ul>
- * <li>
- *   A search for the history of all resources on a server. In this case, {@link #type()} 
- *   should be set to {@link IResource} (as is the default) and the method should not have an ID parameter.
- *   <ul><li>
- *   	To invoke this pattern: <code>GET [base]/_history{?[parameters]&amp;_format=[mime-type]}</code>
- *   </li></ul>
- * </li>
- * <li>
- *   A search for the history of all instances of a specific resource type on a server. In this case, {@link #type()} 
- *   should be set to the specific resource type (e.g. <code>Patient.class</code>) and the method should not have an ID parameter.
- *   <ul><li>
- *   	To invoke this pattern: <code>GET [base]/[type]/_history{?[parameters]&amp;_format=[mime-type]}</code>
- *   </li></ul>
- * </li>
- * <li>
- *   A search for the history of a specific instances of a specific resource type on a server. In this case, {@link #type()} 
- *   should be set to the specific resource type (e.g. <code>Patient.class</code> and the method should 
- *   have one parameter of type {@link IdDt} annotated with the {@link IdParam} annotation. 
- *   <ul><li>
- *   	To invoke this pattern: <code>GET [base]/[type]/[id]/_history{?[parameters]&amp;_format=[mime-type]}</code>
- *   </li></ul>
- * </li>
+ *   <li>A search for the history of all resources on a server. In this case, {@link #type()} should
+ *       be set to {@link IResource} (as is the default) and the method should not have an ID
+ *       parameter.
+ *       <ul>
+ *         <li>To invoke this pattern: <code>
+ *             GET [base]/_history{?[parameters]&amp;_format=[mime-type]}</code>
+ *       </ul>
+ *   <li>A search for the history of all instances of a specific resource type on a server. In this
+ *       case, {@link #type()} should be set to the specific resource type (e.g. <code>Patient.class
+ *       </code>) and the method should not have an ID parameter.
+ *       <ul>
+ *         <li>To invoke this pattern: <code>
+ *             GET [base]/[type]/_history{?[parameters]&amp;_format=[mime-type]}</code>
+ *       </ul>
+ *   <li>A search for the history of a specific instances of a specific resource type on a server.
+ *       In this case, {@link #type()} should be set to the specific resource type (e.g. <code>
+ *       Patient.class</code> and the method should have one parameter of type {@link IdDt}
+ *       annotated with the {@link IdParam} annotation.
+ *       <ul>
+ *         <li>To invoke this pattern: <code>
+ *             GET [base]/[type]/[id]/_history{?[parameters]&amp;_format=[mime-type]}</code>
+ *       </ul>
  * </ul>
- * 
+ *
  * @see Count
  * @see Since
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value=ElementType.METHOD)
+@Target(value = ElementType.METHOD)
 public @interface History {
-	
-	/**
-	 * The resource type that this method applies to. See the {@link History History annotation type documentation}
-	 * for information on usage patterns.  
-	 */
-	Class<? extends IBaseResource> type() default IBaseResource.class;
 
-	/**
-	 * This method allows the return type for this method to be specified in a
-	 * non-type-specific way, using the text name of the resource, e.g. "Patient".
-	 *
-	 * This attribute should be populate, or {@link #type()} should be, but not both.
-	 *
-	 * @since 5.4.0
-	 */
-	String typeName() default "";
+    /**
+     * The resource type that this method applies to. See the {@link History History annotation type
+     * documentation} for information on usage patterns.
+     */
+    Class<? extends IBaseResource> type() default IBaseResource.class;
 
+    /**
+     * This method allows the return type for this method to be specified in a non-type-specific
+     * way, using the text name of the resource, e.g. "Patient".
+     *
+     * <p>This attribute should be populate, or {@link #type()} should be, but not both.
+     *
+     * @since 5.4.0
+     */
+    String typeName() default "";
 }

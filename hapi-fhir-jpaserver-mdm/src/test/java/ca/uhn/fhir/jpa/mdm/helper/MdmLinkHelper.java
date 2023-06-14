@@ -1,5 +1,10 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -9,7 +14,6 @@ import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMLinkResults;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MdmTestLinkExpression;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -17,6 +21,11 @@ import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
@@ -25,245 +34,251 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @Service
 public class MdmLinkHelper {
-	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkHelper.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkHelper.class);
 
-	private enum Side {
-		LHS, // left hand side; practically speaking, this is the GoldenResource of the link
-		RHS // right hand side; practically speaking, this is the SourceResource of the link
-	}
+    private enum Side {
+        LHS, // left hand side; practically speaking, this is the GoldenResource of the link
+        RHS // right hand side; practically speaking, this is the SourceResource of the link
+    }
 
-	@Autowired
-   private IMdmLinkDao myMdmLinkRepo;
-	@Autowired
-	private IFhirResourceDao<Patient> myPatientDao;
-	@Autowired
-	private MdmLinkDaoSvc<JpaPid, MdmLink> myMdmLinkDaoSvc;
-	@SuppressWarnings("rawtypes")
-	@Autowired
-	private IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
-	@Autowired
-	private IdHelperService myIdHelperService;
+    @Autowired private IMdmLinkDao myMdmLinkRepo;
+    @Autowired private IFhirResourceDao<Patient> myPatientDao;
+    @Autowired private MdmLinkDaoSvc<JpaPid, MdmLink> myMdmLinkDaoSvc;
 
-	@Transactional
-	public void logMdmLinks() {
-		List<MdmLink> links = myMdmLinkRepo.findAll();
-		ourLog.info("All MDM Links:");
-		for (MdmLink link : links) {
-			IdDt goldenResourceId = link.getGoldenResource().getIdDt().toVersionless();
-			IdDt targetId = link.getSource().getIdDt().toVersionless();
-			ourLog.info("{}: {}, {}, {}, {}", link.getId(), goldenResourceId, targetId, link.getMatchResult(), link.getLinkSource());
-		}
-	}
+    @SuppressWarnings("rawtypes")
+    @Autowired
+    private IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 
-	private MdmTransactionContext createContextForCreate(String theResourceType) {
-		MdmTransactionContext ctx = new MdmTransactionContext();
-		ctx.setRestOperation(MdmTransactionContext.OperationType.CREATE_RESOURCE);
-		ctx.setResourceType(theResourceType);
-		ctx.setTransactionLogMessages(null);
-		return ctx;
-	}
+    @Autowired private IdHelperService myIdHelperService;
 
-	/**
-	 * Creates all the initial links specified in the state object.
-	 *
-	 * These links will be returned in an MDMLinkResults object, in case
-	 * they are needed.
-	 */
-	public MDMLinkResults setup(MDMState<Patient, JpaPid> theState) {
-		MDMLinkResults results = new MDMLinkResults();
+    @Transactional
+    public void logMdmLinks() {
+        List<MdmLink> links = myMdmLinkRepo.findAll();
+        ourLog.info("All MDM Links:");
+        for (MdmLink link : links) {
+            IdDt goldenResourceId = link.getGoldenResource().getIdDt().toVersionless();
+            IdDt targetId = link.getSource().getIdDt().toVersionless();
+            ourLog.info(
+                    "{}: {}, {}, {}, {}",
+                    link.getId(),
+                    goldenResourceId,
+                    targetId,
+                    link.getMatchResult(),
+                    link.getLinkSource());
+        }
+    }
 
-		List<MdmTestLinkExpression> inputExpressions = theState.getParsedInputState();
+    private MdmTransactionContext createContextForCreate(String theResourceType) {
+        MdmTransactionContext ctx = new MdmTransactionContext();
+        ctx.setRestOperation(MdmTransactionContext.OperationType.CREATE_RESOURCE);
+        ctx.setResourceType(theResourceType);
+        ctx.setTransactionLogMessages(null);
+        return ctx;
+    }
 
-		// create all patients if needed
-		for (MdmTestLinkExpression inputExpression : inputExpressions) {
-			createIfNeeded(theState, inputExpression.getLeftSideResourceIdentifier());
-			createIfNeeded(theState, inputExpression.getRightSideResourceIdentifier());
-		}
+    /**
+     * Creates all the initial links specified in the state object.
+     *
+     * <p>These links will be returned in an MDMLinkResults object, in case they are needed.
+     */
+    public MDMLinkResults setup(MDMState<Patient, JpaPid> theState) {
+        MDMLinkResults results = new MDMLinkResults();
 
-		// create all the links
-		for (MdmTestLinkExpression inputExpression : theState.getParsedInputState()) {
-			ourLog.info(inputExpression.getLinkExpression());
+        List<MdmTestLinkExpression> inputExpressions = theState.getParsedInputState();
 
-			Patient goldenResource = theState.getParameter(inputExpression.getLeftSideResourceIdentifier());
-			Patient targetResource = theState.getParameter(inputExpression.getRightSideResourceIdentifier());
+        // create all patients if needed
+        for (MdmTestLinkExpression inputExpression : inputExpressions) {
+            createIfNeeded(theState, inputExpression.getLeftSideResourceIdentifier());
+            createIfNeeded(theState, inputExpression.getRightSideResourceIdentifier());
+        }
 
-			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(inputExpression.getMdmLinkSource());
-			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(inputExpression.getMdmMatchResult());
+        // create all the links
+        for (MdmTestLinkExpression inputExpression : theState.getParsedInputState()) {
+            ourLog.info(inputExpression.getLinkExpression());
 
-			MdmMatchOutcome matchOutcome = new MdmMatchOutcome(
-				null,
-				null
-			);
-			matchOutcome.setMatchResultEnum(matchResultType);
+            Patient goldenResource =
+                    theState.getParameter(inputExpression.getLeftSideResourceIdentifier());
+            Patient targetResource =
+                    theState.getParameter(inputExpression.getRightSideResourceIdentifier());
 
-			MdmLink link = (MdmLink) myMdmLinkDaoSvc.createOrUpdateLinkEntity(
-				goldenResource, // golden
-				targetResource, // source
-				matchOutcome, // match outcome
-				matchSourceType, // link source
-				createContextForCreate("Patient") // context
-			);
+            MdmLinkSourceEnum matchSourceType =
+                    MdmLinkSourceEnum.valueOf(inputExpression.getMdmLinkSource());
+            MdmMatchResultEnum matchResultType =
+                    MdmMatchResultEnum.valueOf(inputExpression.getMdmMatchResult());
 
-			results.addResult(link);
-		}
+            MdmMatchOutcome matchOutcome = new MdmMatchOutcome(null, null);
+            matchOutcome.setMatchResultEnum(matchResultType);
 
-		return results;
-	}
+            MdmLink link =
+                    (MdmLink)
+                            myMdmLinkDaoSvc.createOrUpdateLinkEntity(
+                                    goldenResource, // golden
+                                    targetResource, // source
+                                    matchOutcome, // match outcome
+                                    matchSourceType, // link source
+                                    createContextForCreate("Patient") // context
+                                    );
 
-	private void createIfNeeded(MDMState<Patient, JpaPid> theState, String thePatientId) {
-		Patient patient = theState.getParameter(thePatientId);
-		if (patient == null) {
-			// if it doesn't exist, create it
-			patient = createPatientAndTags(thePatientId, theState);
-			theState.addParameter(thePatientId, patient);
-		}
-	}
+            results.addResult(link);
+        }
 
-	private Patient createPatientAndTags(String theId, MDMState<Patient, JpaPid> theState) {
-		Patient patient = new Patient();
-		patient.setActive(true); // all mdm patients must be active
+        return results;
+    }
 
-		// we add an identifier and use a forced id
-		// to make test debugging a little simpler
-		patient.addIdentifier(new Identifier().setValue(theId));
-		patient.setId(theId);
+    private void createIfNeeded(MDMState<Patient, JpaPid> theState, String thePatientId) {
+        Patient patient = theState.getParameter(thePatientId);
+        if (patient == null) {
+            // if it doesn't exist, create it
+            patient = createPatientAndTags(thePatientId, theState);
+            theState.addParameter(thePatientId, patient);
+        }
+    }
 
-		// Golden patients will be "GP#"
-		if (theId.length() >= 2 && theId.charAt(0) == 'G') {
-			// golden resource
-			MdmResourceUtil.setGoldenResource(patient);
-		}
-		MdmResourceUtil.setMdmManaged(patient);
+    private Patient createPatientAndTags(String theId, MDMState<Patient, JpaPid> theState) {
+        Patient patient = new Patient();
+        patient.setActive(true); // all mdm patients must be active
 
-		DaoMethodOutcome outcome = myPatientDao.update(patient,
-			SystemRequestDetails.forAllPartitions());
-		Patient outputPatient = (Patient) outcome.getResource();
-		theState.addPID(theId, (JpaPid) outcome.getPersistentId());
-		return outputPatient;
-	}
+        // we add an identifier and use a forced id
+        // to make test debugging a little simpler
+        patient.addIdentifier(new Identifier().setValue(theId));
+        patient.setId(theId);
 
-	public void validateResults(MDMState<Patient, JpaPid> theState) {
-		List<MdmTestLinkExpression> expectedOutputStates = theState.getParsedOutputState();
+        // Golden patients will be "GP#"
+        if (theId.length() >= 2 && theId.charAt(0) == 'G') {
+            // golden resource
+            MdmResourceUtil.setGoldenResource(patient);
+        }
+        MdmResourceUtil.setMdmManaged(patient);
 
-		StringBuilder outputStateSB = new StringBuilder();
+        DaoMethodOutcome outcome =
+                myPatientDao.update(patient, SystemRequestDetails.forAllPartitions());
+        Patient outputPatient = (Patient) outcome.getResource();
+        theState.addPID(theId, (JpaPid) outcome.getPersistentId());
+        return outputPatient;
+    }
 
-		// for every parameter, we'll get all links
-		for (Map.Entry<String, Patient> entrySet : theState.getParameterToValue().entrySet()) {
-			Patient patient = entrySet.getValue();
-			List<MdmLink> links = getAllMdmLinks(patient);
-			for (MdmLink link : links) {
-				if (!outputStateSB.isEmpty()) {
-					outputStateSB.append("\n");
-				}
-				outputStateSB.append(createStateFromLink(link, theState));
-				theState.addLinksForResource(patient, link);
-			}
-		}
+    public void validateResults(MDMState<Patient, JpaPid> theState) {
+        List<MdmTestLinkExpression> expectedOutputStates = theState.getParsedOutputState();
 
-		String actualOutputState = outputStateSB.toString();
-		ourLog.info("Expected: \n" + theState.getOutputState());
-		ourLog.info("Actual: \n" + actualOutputState);
+        StringBuilder outputStateSB = new StringBuilder();
 
-		int totalExpectedLinks = expectedOutputStates.size();
-		int totalActualLinks = theState.getActualOutcomeLinks().entries().size();
+        // for every parameter, we'll get all links
+        for (Map.Entry<String, Patient> entrySet : theState.getParameterToValue().entrySet()) {
+            Patient patient = entrySet.getValue();
+            List<MdmLink> links = getAllMdmLinks(patient);
+            for (MdmLink link : links) {
+                if (!outputStateSB.isEmpty()) {
+                    outputStateSB.append("\n");
+                }
+                outputStateSB.append(createStateFromLink(link, theState));
+                theState.addLinksForResource(patient, link);
+            }
+        }
 
-		assertEquals(totalExpectedLinks, totalActualLinks,
-			String.format("Invalid number of links. Expected %d, Actual %d.",
-				totalExpectedLinks, totalActualLinks)
-		);
+        String actualOutputState = outputStateSB.toString();
+        ourLog.info("Expected: \n" + theState.getOutputState());
+        ourLog.info("Actual: \n" + actualOutputState);
 
-		for (MdmTestLinkExpression stateExpression : expectedOutputStates) {
-			ourLog.info(stateExpression.getLinkExpression());
+        int totalExpectedLinks = expectedOutputStates.size();
+        int totalActualLinks = theState.getActualOutcomeLinks().entries().size();
 
-			Patient leftSideResource = theState.getParameter(stateExpression.getLeftSideResourceIdentifier());
-			Collection<MdmLink> links = theState.getActualOutcomeLinks().get(leftSideResource);
-			assertFalse(links.isEmpty(), String.format("No links found, but expected state: %s", stateExpression));
+        assertEquals(
+                totalExpectedLinks,
+                totalActualLinks,
+                String.format(
+                        "Invalid number of links. Expected %d, Actual %d.",
+                        totalExpectedLinks, totalActualLinks));
 
-			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(stateExpression.getMdmLinkSource());
-			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(stateExpression.getMdmMatchResult());
+        for (MdmTestLinkExpression stateExpression : expectedOutputStates) {
+            ourLog.info(stateExpression.getLinkExpression());
 
-			Patient rightSideResource = theState.getParameter(stateExpression.getRightSideResourceIdentifier());
+            Patient leftSideResource =
+                    theState.getParameter(stateExpression.getLeftSideResourceIdentifier());
+            Collection<MdmLink> links = theState.getActualOutcomeLinks().get(leftSideResource);
+            assertFalse(
+                    links.isEmpty(),
+                    String.format("No links found, but expected state: %s", stateExpression));
 
-			boolean foundLink = false;
-			for (MdmLink link : links) {
-				if (isResourcePartOfLink(link, leftSideResource, Side.LHS, theState)
-					&& isResourcePartOfLink(link, rightSideResource, Side.RHS, theState)
-					&& link.getMatchResult() == matchResultType
-					&& link.getLinkSource() == matchSourceType
-				) {
-					foundLink = true;
-					break;
-				}
-			}
+            MdmLinkSourceEnum matchSourceType =
+                    MdmLinkSourceEnum.valueOf(stateExpression.getMdmLinkSource());
+            MdmMatchResultEnum matchResultType =
+                    MdmMatchResultEnum.valueOf(stateExpression.getMdmMatchResult());
 
-			assertTrue(foundLink, String.format("State: %s - not found", stateExpression));
-		}
-	}
+            Patient rightSideResource =
+                    theState.getParameter(stateExpression.getRightSideResourceIdentifier());
 
-	public List<MdmLink> getAllMdmLinks(Patient theGoldenPatient) {
-		return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
-			.map( link -> (MdmLink) link)
-			.collect(Collectors.toList());
-	}
+            boolean foundLink = false;
+            for (MdmLink link : links) {
+                if (isResourcePartOfLink(link, leftSideResource, Side.LHS, theState)
+                        && isResourcePartOfLink(link, rightSideResource, Side.RHS, theState)
+                        && link.getMatchResult() == matchResultType
+                        && link.getLinkSource() == matchSourceType) {
+                    foundLink = true;
+                    break;
+                }
+            }
 
-	private boolean isResourcePartOfLink(
-		MdmLink theLink,
-		Patient theResource,
-		Side theSide,
-		MDMState<Patient, JpaPid> theState
-	) {
-		JpaPid resourcePid = theState.getPID(theResource.getIdElement().getIdPart());
+            assertTrue(foundLink, String.format("State: %s - not found", stateExpression));
+        }
+    }
 
-		long linkPid;
-		if (theSide == Side.LHS) {
-			// LHS
-			linkPid = theLink.getGoldenResourcePid();
-		} else {
-			// RHS
-			linkPid = theLink.getSourcePid();
-		}
+    public List<MdmLink> getAllMdmLinks(Patient theGoldenPatient) {
+        return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
+                .map(link -> (MdmLink) link)
+                .collect(Collectors.toList());
+    }
 
-		return linkPid == resourcePid.getId();
-	}
+    private boolean isResourcePartOfLink(
+            MdmLink theLink,
+            Patient theResource,
+            Side theSide,
+            MDMState<Patient, JpaPid> theState) {
+        JpaPid resourcePid = theState.getPID(theResource.getIdElement().getIdPart());
 
-	private String createStateFromLink(MdmLink theLink, MDMState<Patient, JpaPid> theState) {
-		String LHS = "";
-		String RHS = "";
-		for (Map.Entry<String, Patient> set : theState.getParameterToValue().entrySet()) {
-			Patient patient = set.getValue();
-			if (isResourcePartOfLink(theLink, patient, Side.LHS, theState)) {
-				LHS = set.getKey();
-			}
-			if (isResourcePartOfLink(theLink, patient, Side.RHS, theState)) {
-				RHS = set.getKey();
-			}
+        long linkPid;
+        if (theSide == Side.LHS) {
+            // LHS
+            linkPid = theLink.getGoldenResourcePid();
+        } else {
+            // RHS
+            linkPid = theLink.getSourcePid();
+        }
 
-			if (isNotBlank(LHS) && isNotBlank(RHS)) {
-				boolean selfReferential = LHS.equals(RHS);
+        return linkPid == resourcePid.getId();
+    }
 
-				String link = LHS + ", "
-					+ theLink.getLinkSource().name() + ", "
-					+ theLink.getMatchResult().name() + ", "
-					+ RHS;
-				if (selfReferential) {
-					link += " <- Invalid Self Referencing link!";
-				}
-				return link;
-			}
-		}
+    private String createStateFromLink(MdmLink theLink, MDMState<Patient, JpaPid> theState) {
+        String LHS = "";
+        String RHS = "";
+        for (Map.Entry<String, Patient> set : theState.getParameterToValue().entrySet()) {
+            Patient patient = set.getValue();
+            if (isResourcePartOfLink(theLink, patient, Side.LHS, theState)) {
+                LHS = set.getKey();
+            }
+            if (isResourcePartOfLink(theLink, patient, Side.RHS, theState)) {
+                RHS = set.getKey();
+            }
 
-		return "INVALID LINK: " + theLink.getId().toString();
-	}
+            if (isNotBlank(LHS) && isNotBlank(RHS)) {
+                boolean selfReferential = LHS.equals(RHS);
+
+                String link =
+                        LHS
+                                + ", "
+                                + theLink.getLinkSource().name()
+                                + ", "
+                                + theLink.getMatchResult().name()
+                                + ", "
+                                + RHS;
+                if (selfReferential) {
+                    link += " <- Invalid Self Referencing link!";
+                }
+                return link;
+            }
+        }
+
+        return "INVALID LINK: " + theLink.getId().toString();
+    }
 }

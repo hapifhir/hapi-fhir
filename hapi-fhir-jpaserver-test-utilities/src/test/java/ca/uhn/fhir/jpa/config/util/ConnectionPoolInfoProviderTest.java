@@ -1,6 +1,13 @@
 package ca.uhn.fhir.jpa.config.util;
 
-import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Optional;
+import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,134 +18,128 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.sql.DataSource;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @ExtendWith(MockitoExtension.class)
 class ConnectionPoolInfoProviderTest {
 
-	public static final long MAX_WAIT_MILLIS = 10_000;
-	public static final int MAX_CONNECTIONS_TOTAL = 50;
+    public static final long MAX_WAIT_MILLIS = 10_000;
+    public static final int MAX_CONNECTIONS_TOTAL = 50;
 
-	private IConnectionPoolInfoProvider tested;
+    private IConnectionPoolInfoProvider tested;
 
+    @Nested
+    public class TestBasiDataSourceImplementation {
 
-	@Nested
-	public class TestBasiDataSourceImplementation {
+        @BeforeEach
+        void setUp() {
+            BasicDataSource myDataSource = new BasicDataSource();
+            myDataSource.setMaxWaitMillis(MAX_WAIT_MILLIS);
+            myDataSource.setMaxTotal(MAX_CONNECTIONS_TOTAL);
+            tested = new BasicDataSourceConnectionPoolInfoProvider(myDataSource);
+        }
 
-		@BeforeEach
-		void setUp() {
-			BasicDataSource myDataSource = new BasicDataSource();
-			myDataSource.setMaxWaitMillis(MAX_WAIT_MILLIS);
-			myDataSource.setMaxTotal(MAX_CONNECTIONS_TOTAL);
-			tested = new BasicDataSourceConnectionPoolInfoProvider(myDataSource);
-		}
+        @Test
+        void testGetMaxWaitMillis() {
+            Optional<Long> resOpt = tested.getMaxWaitMillis();
+            assertTrue(resOpt.isPresent());
+            assertEquals(MAX_WAIT_MILLIS, resOpt.get());
+        }
 
+        @Test
+        void testGetMaxConnectionSize() {
+            Optional<Integer> resOpt = tested.getTotalConnectionSize();
+            assertTrue(resOpt.isPresent());
+            assertEquals(MAX_CONNECTIONS_TOTAL, resOpt.get());
+        }
+    }
 
-		@Test
-		void testGetMaxWaitMillis() {
-			Optional<Long> resOpt = tested.getMaxWaitMillis();
-			assertTrue(resOpt.isPresent());
-			assertEquals(MAX_WAIT_MILLIS, resOpt.get());
-		}
+    @Nested
+    public class TestFailedProviderSetup {
 
-		@Test
-		void testGetMaxConnectionSize() {
-			Optional<Integer> resOpt = tested.getTotalConnectionSize();
-			assertTrue(resOpt.isPresent());
-			assertEquals(MAX_CONNECTIONS_TOTAL, resOpt.get());
-		}
+        @Mock DataSource unknownDataSource;
 
-	}
+        @BeforeEach
+        void setUp() {
+            tested = new ConnectionPoolInfoProvider(unknownDataSource);
+        }
 
+        @Test
+        void testGetMaxWaitMillis() {
+            Optional<Long> resOpt = tested.getMaxWaitMillis();
+            assertFalse(resOpt.isPresent());
+        }
 
-	@Nested
-	public class TestFailedProviderSetup {
+        @Test
+        void testGetMaxConnectionSize() {
+            Optional<Integer> resOpt = tested.getTotalConnectionSize();
+            assertFalse(resOpt.isPresent());
+        }
 
-		@Mock DataSource unknownDataSource;
+        @Test
+        void testGetActiveConnections() {
+            Optional<Integer> resOpt = tested.getActiveConnections();
+            assertFalse(resOpt.isPresent());
+        }
+    }
 
-		@BeforeEach
-		void setUp() {
-			tested = new ConnectionPoolInfoProvider(unknownDataSource);
-		}
+    @Nested
+    public class TestConfig {
 
+        @Mock DataSource unknownDataSource;
 
-		@Test
-		void testGetMaxWaitMillis() {
-			Optional<Long> resOpt = tested.getMaxWaitMillis();
-			assertFalse(resOpt.isPresent());
-		}
+        @Test
+        void dataSourceIsBasicDataSource() {
+            DataSource ds = new BasicDataSource();
 
-		@Test
-		void testGetMaxConnectionSize() {
-			Optional<Integer> resOpt = tested.getTotalConnectionSize();
-			assertFalse(resOpt.isPresent());
-		}
+            IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(ds);
 
-		@Test
-		void testGetActiveConnections() {
-			Optional<Integer> resOpt = tested.getActiveConnections();
-			assertFalse(resOpt.isPresent());
-		}
+            IConnectionPoolInfoProvider instantiatedProvider =
+                    (IConnectionPoolInfoProvider)
+                            ReflectionTestUtils.getField(provider, "myProvider");
 
-	}
+            assertNotNull(instantiatedProvider);
+            assertTrue(
+                    instantiatedProvider
+                            .getClass()
+                            .isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
+        }
 
-	@Nested
-	public class TestConfig {
+        @Test
+        void dataSourceIsProxyDataSourceWrappingBasicDataSource() {
+            DataSource ds = new BasicDataSource();
+            ProxyDataSource proxyDs = new ProxyDataSource(ds);
 
-		@Mock DataSource unknownDataSource;
+            IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(proxyDs);
 
-		@Test
-		void dataSourceIsBasicDataSource() {
-			DataSource ds = new BasicDataSource();
+            IConnectionPoolInfoProvider instantiatedProvider =
+                    (IConnectionPoolInfoProvider)
+                            ReflectionTestUtils.getField(provider, "myProvider");
+            assertNotNull(instantiatedProvider);
+            assertTrue(
+                    instantiatedProvider
+                            .getClass()
+                            .isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
+        }
 
-			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(ds);
+        @Test
+        void dataSourceIsProxyDataSourceWrappingNotBasicDataSource() {
+            ProxyDataSource proxyDs = new ProxyDataSource(unknownDataSource);
 
-			IConnectionPoolInfoProvider instantiatedProvider =
-				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
+            IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(proxyDs);
+            IConnectionPoolInfoProvider instantiatedProvider =
+                    (IConnectionPoolInfoProvider)
+                            ReflectionTestUtils.getField(provider, "myProvider");
+            assertNull(instantiatedProvider);
+        }
 
-			assertNotNull(instantiatedProvider);
-			assertTrue(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
-		}
+        @Test
+        void dataSourceIsNotBasicDataSourceOrProxyDataSource() {
+            IConnectionPoolInfoProvider provider =
+                    new ConnectionPoolInfoProvider(unknownDataSource);
 
-		@Test
-		void dataSourceIsProxyDataSourceWrappingBasicDataSource() {
-			DataSource ds = new BasicDataSource();
-			ProxyDataSource proxyDs = new ProxyDataSource(ds);
-
-			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(proxyDs);
-
-			IConnectionPoolInfoProvider instantiatedProvider =
-				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
-			assertNotNull(instantiatedProvider);
-			assertTrue(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
-		}
-
-		@Test
-		void dataSourceIsProxyDataSourceWrappingNotBasicDataSource() {
-			ProxyDataSource proxyDs = new ProxyDataSource(unknownDataSource);
-
-			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(proxyDs);
-			IConnectionPoolInfoProvider instantiatedProvider =
-				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
-			assertNull(instantiatedProvider);
-		}
-
-		@Test
-		void dataSourceIsNotBasicDataSourceOrProxyDataSource() {
-			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(unknownDataSource);
-
-			IConnectionPoolInfoProvider instantiatedProvider =
-				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
-			assertNull(instantiatedProvider);
-		}
-
-	}
-
+            IConnectionPoolInfoProvider instantiatedProvider =
+                    (IConnectionPoolInfoProvider)
+                            ReflectionTestUtils.getField(provider, "myProvider");
+            assertNull(instantiatedProvider);
+        }
+    }
 }

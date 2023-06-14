@@ -21,80 +21,77 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-
 public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
-	NpmPackage installPackage(PackageInstallationSpec theInstallationSpec) throws IOException;
+    NpmPackage installPackage(PackageInstallationSpec theInstallationSpec) throws IOException;
 
-	IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
+    IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
 
-	NpmPackageMetadataJson loadPackageMetadata(String thePackageId) throws ResourceNotFoundException;
+    NpmPackageMetadataJson loadPackageMetadata(String thePackageId)
+            throws ResourceNotFoundException;
 
-	PackageContents loadPackageContents(String thePackageId, String theVersion);
+    PackageContents loadPackageContents(String thePackageId, String theVersion);
 
-	NpmPackageSearchResultJson search(PackageSearchSpec thePackageSearchSpec);
+    NpmPackageSearchResultJson search(PackageSearchSpec thePackageSearchSpec);
 
-	PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion);
+    PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion);
 
-	List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType);
+    List<IBaseResource> loadPackageAssetsByType(
+            FhirVersionEnum theFhirVersion, String theResourceType);
 
+    class PackageContents {
 
-	class PackageContents {
+        private byte[] myBytes;
+        private String myPackageId;
+        private String myVersion;
+        private Date myLastModified;
 
-		private byte[] myBytes;
-		private String myPackageId;
-		private String myVersion;
-		private Date myLastModified;
+        /** Constructor */
+        public PackageContents() {
+            super();
+        }
 
-		/**
-		 * Constructor
-		 */
-		public PackageContents() {
-			super();
-		}
+        public byte[] getBytes() {
+            return myBytes;
+        }
 
-		public byte[] getBytes() {
-			return myBytes;
-		}
+        public PackageContents setBytes(byte[] theBytes) {
+            myBytes = theBytes;
+            return this;
+        }
 
-		public PackageContents setBytes(byte[] theBytes) {
-			myBytes = theBytes;
-			return this;
-		}
+        public String getPackageId() {
+            return myPackageId;
+        }
 
-		public String getPackageId() {
-			return myPackageId;
-		}
+        public PackageContents setPackageId(String thePackageId) {
+            myPackageId = thePackageId;
+            return this;
+        }
 
-		public PackageContents setPackageId(String thePackageId) {
-			myPackageId = thePackageId;
-			return this;
-		}
+        public String getVersion() {
+            return myVersion;
+        }
 
-		public String getVersion() {
-			return myVersion;
-		}
+        public PackageContents setVersion(String theVersion) {
+            myVersion = theVersion;
+            return this;
+        }
 
-		public PackageContents setVersion(String theVersion) {
-			myVersion = theVersion;
-			return this;
-		}
+        public Date getLastModified() {
+            return myLastModified;
+        }
 
-		public Date getLastModified() {
-			return myLastModified;
-		}
-
-		public PackageContents setLastModified(Date theLastModified) {
-			myLastModified = theLastModified;
-			return this;
-		}
-	}
-
+        public PackageContents setLastModified(Date theLastModified) {
+            myLastModified = theLastModified;
+            return this;
+        }
+    }
 }

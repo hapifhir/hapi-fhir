@@ -20,7 +20,6 @@
 package ca.uhn.fhir.parser.json;
 
 import ca.uhn.fhir.parser.DataFormatException;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -34,23 +33,21 @@ import java.io.Writer;
  * @author Bill.Denton
  */
 public interface JsonLikeStructure {
-	JsonLikeStructure getInstance();
+    JsonLikeStructure getInstance();
 
-	/**
-	 * Parse the JSON document into the Json-like structure
-	 * so that it can be navigated.
-	 *
-	 * @param theReader a <code>Reader</code> that will
-	 *                  process the JSON input stream
-	 * @throws DataFormatException when invalid JSON is received
-	 */
-	void load(Reader theReader) throws DataFormatException;
+    /**
+     * Parse the JSON document into the Json-like structure so that it can be navigated.
+     *
+     * @param theReader a <code>Reader</code> that will process the JSON input stream
+     * @throws DataFormatException when invalid JSON is received
+     */
+    void load(Reader theReader) throws DataFormatException;
 
-	void load(Reader theReader, boolean allowArray) throws DataFormatException;
+    void load(Reader theReader, boolean allowArray) throws DataFormatException;
 
-	BaseJsonLikeObject getRootObject() throws DataFormatException;
+    BaseJsonLikeObject getRootObject() throws DataFormatException;
 
-	BaseJsonLikeWriter getJsonLikeWriter();
+    BaseJsonLikeWriter getJsonLikeWriter();
 
-	BaseJsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException;
+    BaseJsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException;
 }

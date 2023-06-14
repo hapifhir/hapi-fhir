@@ -30,12 +30,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ResourceLoaderImpl implements IResourceLoader {
-	@Autowired
-	DaoRegistry myDaoRegistry;
+    @Autowired DaoRegistry myDaoRegistry;
 
-	@Override
-	public <T extends IBaseResource> T load(Class<T> theType, IIdType theId) throws ResourceNotFoundException {
-		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
-		return myDaoRegistry.getResourceDao(theType).read(theId, systemRequestDetails);
-	}
+    @Override
+    public <T extends IBaseResource> T load(Class<T> theType, IIdType theId)
+            throws ResourceNotFoundException {
+        SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
+        return myDaoRegistry.getResourceDao(theType).read(theId, systemRequestDetails);
+    }
 }

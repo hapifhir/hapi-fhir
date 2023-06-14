@@ -25,36 +25,39 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Adapter from {@link SearchParamMatcher} to our authorization version.
- */
+/** Adapter from {@link SearchParamMatcher} to our authorization version. */
 public class AuthorizationSearchParamMatcher implements IAuthorizationSearchParamMatcher {
-	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationSearchParamMatcher.class);
-	private final SearchParamMatcher mySearchParamMatcher;
+    private static final Logger ourLog =
+            LoggerFactory.getLogger(AuthorizationSearchParamMatcher.class);
+    private final SearchParamMatcher mySearchParamMatcher;
 
-	public AuthorizationSearchParamMatcher(SearchParamMatcher mySearchParamMatcher) {
-		this.mySearchParamMatcher = mySearchParamMatcher;
-	}
+    public AuthorizationSearchParamMatcher(SearchParamMatcher mySearchParamMatcher) {
+        this.mySearchParamMatcher = mySearchParamMatcher;
+    }
 
-	@Override
-	public MatchResult match(String theQueryParameters, IBaseResource theResource) {
-		try {
-			InMemoryMatchResult inMemoryMatchResult = mySearchParamMatcher.match(theQueryParameters, theResource, null);
-			if (!inMemoryMatchResult.supported()) {
-				return MatchResult.buildUnsupported(inMemoryMatchResult.getUnsupportedReason());
-			}
-			if (inMemoryMatchResult.matched()) {
-				return MatchResult.buildMatched();
-			} else {
-				return MatchResult.buildUnmatched();
-			}
-		} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
-			// The matcher treats a bad expression as InvalidRequestException because
-			// it assumes it is during SearchParameter storage.
-			// Instead, we adapt this to UNSUPPORTED during authorization.
-			// We may be applying to all types, and this filter won't match.
-			ourLog.info("Unsupported filter {} applied to resource: {}", theQueryParameters, e.getMessage());
-			return MatchResult.buildUnsupported(e.getMessage());
-		}
-	}
+    @Override
+    public MatchResult match(String theQueryParameters, IBaseResource theResource) {
+        try {
+            InMemoryMatchResult inMemoryMatchResult =
+                    mySearchParamMatcher.match(theQueryParameters, theResource, null);
+            if (!inMemoryMatchResult.supported()) {
+                return MatchResult.buildUnsupported(inMemoryMatchResult.getUnsupportedReason());
+            }
+            if (inMemoryMatchResult.matched()) {
+                return MatchResult.buildMatched();
+            } else {
+                return MatchResult.buildUnmatched();
+            }
+        } catch (MatchUrlService.UnrecognizedSearchParameterException e) {
+            // The matcher treats a bad expression as InvalidRequestException because
+            // it assumes it is during SearchParameter storage.
+            // Instead, we adapt this to UNSUPPORTED during authorization.
+            // We may be applying to all types, and this filter won't match.
+            ourLog.info(
+                    "Unsupported filter {} applied to resource: {}",
+                    theQueryParameters,
+                    e.getMessage());
+            return MatchResult.buildUnsupported(e.getMessage());
+        }
+    }
 }

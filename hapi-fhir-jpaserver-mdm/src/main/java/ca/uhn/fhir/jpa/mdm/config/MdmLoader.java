@@ -32,28 +32,26 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MdmLoader {
-	private static final Logger ourLog = LoggerFactory.getLogger(MdmLoader.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(MdmLoader.class);
 
-	@Autowired
-	IMdmSettings myMdmSettings;
-	@Autowired
-	MdmProviderLoader myMdmProviderLoader;
-	@Autowired
-	MdmSubscriptionLoader myMdmSubscriptionLoader;
+    @Autowired IMdmSettings myMdmSettings;
+    @Autowired MdmProviderLoader myMdmProviderLoader;
+    @Autowired MdmSubscriptionLoader myMdmSubscriptionLoader;
 
-	@EventListener(classes = {ContextRefreshedEvent.class})
-	// This @Order is here to ensure that MatchingQueueSubscriberLoader has initialized before we initialize this.
-	// Otherwise the MDM subscriptions won't get loaded into the SubscriptionRegistry
-	@Order(IHapiBootOrder.AFTER_SUBSCRIPTION_INITIALIZED)
-	public void updateSubscriptions() {
-		if (!myMdmSettings.isEnabled()) {
-			return;
-		}
+    @EventListener(classes = {ContextRefreshedEvent.class})
+    // This @Order is here to ensure that MatchingQueueSubscriberLoader has initialized before we
+    // initialize this.
+    // Otherwise the MDM subscriptions won't get loaded into the SubscriptionRegistry
+    @Order(IHapiBootOrder.AFTER_SUBSCRIPTION_INITIALIZED)
+    public void updateSubscriptions() {
+        if (!myMdmSettings.isEnabled()) {
+            return;
+        }
 
-		myMdmProviderLoader.loadProvider();
-		ourLog.info("MDM provider registered");
+        myMdmProviderLoader.loadProvider();
+        ourLog.info("MDM provider registered");
 
-		myMdmSubscriptionLoader.daoUpdateMdmSubscriptions();
-		ourLog.info("MDM subscriptions updated");
-	}
+        myMdmSubscriptionLoader.daoUpdateMdmSubscriptions();
+        ourLog.info("MDM subscriptions updated");
+    }
 }

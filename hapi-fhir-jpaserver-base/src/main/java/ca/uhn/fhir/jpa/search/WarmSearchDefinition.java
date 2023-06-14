@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.search;
 
 public class WarmSearchDefinition {
 
-	private String mySearchUrl;
-	private long myRefreshPeriodMillis;
-
+    private String mySearchUrl;
+    private long myRefreshPeriodMillis;
 }

@@ -19,42 +19,39 @@
  */
 package ca.uhn.fhir.jpa.binary.api;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.util.HapiExtensions;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.Optional;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /**
- * Wraps an Attachment datatype or Binary resource, since they both
- * hold binary content but don't look entirely similar
+ * Wraps an Attachment datatype or Binary resource, since they both hold binary content but don't
+ * look entirely similar
  */
 public interface IBinaryTarget {
 
-	void setSize(Integer theSize);
+    void setSize(Integer theSize);
 
-	String getContentType();
+    String getContentType();
 
-	void setContentType(String theContentType);
+    void setContentType(String theContentType);
 
-	byte[] getData();
+    byte[] getData();
 
-	void setData(byte[] theBytes);
+    void setData(byte[] theBytes);
 
-	IBaseHasExtensions getTarget();
+    IBaseHasExtensions getTarget();
 
-	@SuppressWarnings("unchecked")
-	default Optional<String> getAttachmentId() {
-		return getTarget()
-			.getExtension()
-			.stream()
-			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
-			.filter(t -> t.getValue() instanceof IPrimitiveType)
-			.map(t -> (IPrimitiveType<String>) t.getValue())
-			.map(t -> t.getValue())
-			.filter(t -> isNotBlank(t))
-			.findFirst();
-	}
+    @SuppressWarnings("unchecked")
+    default Optional<String> getAttachmentId() {
+        return getTarget().getExtension().stream()
+                .filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
+                .filter(t -> t.getValue() instanceof IPrimitiveType)
+                .map(t -> (IPrimitiveType<String>) t.getValue())
+                .map(t -> t.getValue())
+                .filter(t -> isNotBlank(t))
+                .findFirst();
+    }
 }

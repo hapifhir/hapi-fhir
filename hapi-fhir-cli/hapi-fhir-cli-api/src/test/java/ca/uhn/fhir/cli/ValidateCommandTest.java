@@ -12,63 +12,62 @@ import org.slf4j.LoggerFactory;
 
 public class ValidateCommandTest {
 
-	private final Logger ourLog = (Logger) LoggerFactory.getLogger(ValidateCommand.class);
-	private ValidateCommand myValidateCommand = new ValidateCommand();
-	private ListAppender<ILoggingEvent> myListAppender = new ListAppender<>();
+    private final Logger ourLog = (Logger) LoggerFactory.getLogger(ValidateCommand.class);
+    private ValidateCommand myValidateCommand = new ValidateCommand();
+    private ListAppender<ILoggingEvent> myListAppender = new ListAppender<>();
 
+    @BeforeEach
+    public void beforeEach() {
+        ourLog.setLevel(Level.ALL);
+        myListAppender = new ListAppender<>();
+        myListAppender.start();
+        ourLog.addAppender(myListAppender);
+    }
 
-	@BeforeEach
-	public void beforeEach() {
-		ourLog.setLevel(Level.ALL);
-		myListAppender = new ListAppender<>();
-		myListAppender.start();
-		ourLog.addAppender(myListAppender);
-	}
+    @AfterEach
+    public void afterEach() {
+        myListAppender.stop();
+    }
 
-	@AfterEach
-	public void afterEach() {
-		myListAppender.stop();
-	}
+    @BeforeEach
+    public void before() {
+        HapiSystemProperties.enableTestMode();
+    }
 
+    @Test
+    public void testValidateLocalProfileDstu3() {
+        String resourcePath =
+                ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
 
-	@BeforeEach
-	public void before() {
-		HapiSystemProperties.enableTestMode();
-	}
+        App.main(new String[] {"validate", "-v", "dstu3", "-p", "-n", resourcePath});
+    }
 
-	@Test
-	public void testValidateLocalProfileDstu3() {
-		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
+    @Test
+    public void testValidateLocalProfileR4() {
+        String resourcePath =
+                ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
+        ourLog.info(resourcePath);
 
-		App.main(new String[]{
-			"validate",
-			"-v", "dstu3",
-			"-p",
-			"-n", resourcePath});
-	}
+        App.main(new String[] {"validate", "-v", "R4", "-p", "-n", resourcePath});
+    }
 
-	@Test
-	public void testValidateLocalProfileR4() {
-		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
-		ourLog.info(resourcePath);
+    @Test
+    public void validate_withLocalProfileR4_shouldPass_whenResourceCompliesWithProfile() {
+        String patientJson =
+                ValidateCommandTest.class.getResource("/validate/Patient.json").getFile();
+        String patientProfile =
+                ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();
 
-		App.main(new String[]{
-			"validate",
-			"-v", "R4",
-			"-p",
-			"-n", resourcePath});
-	}
-
-	@Test
-	public void validate_withLocalProfileR4_shouldPass_whenResourceCompliesWithProfile() {
-		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient.json").getFile();
-		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();
-
-		App.main(new String[]{
-			"validate",
-			"--fhir-version", "r4",
-			"--profile",
-			"--file", patientJson,
-			"-l", patientProfile});
-	}
+        App.main(
+                new String[] {
+                    "validate",
+                    "--fhir-version",
+                    "r4",
+                    "--profile",
+                    "--file",
+                    patientJson,
+                    "-l",
+                    patientProfile
+                });
+    }
 }

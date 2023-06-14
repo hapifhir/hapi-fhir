@@ -26,18 +26,24 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
- * Similarity measure for two IBase fields whose similarity can be measured by their String representations.
+ * Similarity measure for two IBase fields whose similarity can be measured by their String
+ * representations.
  */
 public class HapiStringMatcher implements IMdmFieldMatcher {
 
-	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theExtraMatchParams) {
-		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExtraMatchParams.getExact());
-			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExtraMatchParams.getExact());
+    @Override
+    public boolean matches(
+            IBase theLeftBase, IBase theRightBase, MdmMatcherJson theExtraMatchParams) {
+        if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
+            String leftString =
+                    StringMatcherUtils.extractString(
+                            (IPrimitiveType<?>) theLeftBase, theExtraMatchParams.getExact());
+            String rightString =
+                    StringMatcherUtils.extractString(
+                            (IPrimitiveType<?>) theRightBase, theExtraMatchParams.getExact());
 
-			return leftString.equals(rightString);
-		}
-		return false;
-	}
+            return leftString.equals(rightString);
+        }
+        return false;
+    }
 }

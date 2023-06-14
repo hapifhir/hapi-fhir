@@ -27,21 +27,21 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 public class JpaResourceDaoBundle<T extends IBaseBundle> extends BaseHapiFhirResourceDao<T> {
 
-	@Override
-	protected void preProcessResourceForStorage(IBaseResource theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, boolean thePerformIndexing) {
-		super.preProcessResourceForStorage(theResource, theRequestDetails, theTransactionDetails, thePerformIndexing);
+    @Override
+    protected void preProcessResourceForStorage(
+            IBaseResource theResource,
+            RequestDetails theRequestDetails,
+            TransactionDetails theTransactionDetails,
+            boolean thePerformIndexing) {
+        super.preProcessResourceForStorage(
+                theResource, theRequestDetails, theTransactionDetails, thePerformIndexing);
 
-		if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
-			for (Entry next : ((Bundle) theResource).getEntry()) {
-				next.setFullUrl((String) null);
-			}
-		}
-	}
-
-
-
+        if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+            for (Entry next : ((Bundle) theResource).getEntry()) {
+                next.setFullUrl((String) null);
+            }
+        }
+    }
 }

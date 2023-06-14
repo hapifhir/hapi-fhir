@@ -1,5 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -12,92 +20,92 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 
-	@BeforeEach
-	public void beforeSetDao() {
-		myStorageSettings.setInlineResourceTextBelowSize(5000);
-	}
+    @BeforeEach
+    public void beforeSetDao() {
+        myStorageSettings.setInlineResourceTextBelowSize(5000);
+    }
 
-	@AfterEach
-	public void afterResetDao() {
-		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
-	}
+    @AfterEach
+    public void afterResetDao() {
+        myStorageSettings.setInlineResourceTextBelowSize(
+                new JpaStorageSettings().getInlineResourceTextBelowSize());
+    }
 
-	@Test
-	public void testCreateWithInlineResourceTextStorage() {
-		Patient patient = new Patient();
-		patient.setActive(true);
-		Long resourceId = myPatientDao.create(patient).getId().getIdPartAsLong();
+    @Test
+    public void testCreateWithInlineResourceTextStorage() {
+        Patient patient = new Patient();
+        patient.setActive(true);
+        Long resourceId = myPatientDao.create(patient).getId().getIdPartAsLong();
 
-		patient = new Patient();
-		patient.setId("Patient/" + resourceId);
-		patient.setActive(false);
-		myPatientDao.update(patient);
+        patient = new Patient();
+        patient.setId("Patient/" + resourceId);
+        patient.setActive(false);
+        myPatientDao.update(patient);
 
-		runInTransaction(() -> {
-			// Version 1
-			ResourceHistoryTable entity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 1);
-			assertNull(entity.getResource());
-			assertThat(entity.getResourceTextVc(), containsString("\"active\":true"));
-			// Version 2
-			entity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 2);
-			assertNull(entity.getResource());
-			assertThat(entity.getResourceTextVc(), containsString("\"active\":false"));
-		});
+        runInTransaction(
+                () -> {
+                    // Version 1
+                    ResourceHistoryTable entity =
+                            myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
+                                    resourceId, 1);
+                    assertNull(entity.getResource());
+                    assertThat(entity.getResourceTextVc(), containsString("\"active\":true"));
+                    // Version 2
+                    entity =
+                            myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
+                                    resourceId, 2);
+                    assertNull(entity.getResource());
+                    assertThat(entity.getResourceTextVc(), containsString("\"active\":false"));
+                });
 
-		patient = myPatientDao.read(new IdType("Patient/" + resourceId));
-		assertFalse(patient.getActive());
+        patient = myPatientDao.read(new IdType("Patient/" + resourceId));
+        assertFalse(patient.getActive());
 
-		patient = (Patient) myPatientDao.search(SearchParameterMap.newSynchronous()).getAllResources().get(0);
-		assertFalse(patient.getActive());
+        patient =
+                (Patient)
+                        myPatientDao
+                                .search(SearchParameterMap.newSynchronous())
+                                .getAllResources()
+                                .get(0);
+        assertFalse(patient.getActive());
+    }
 
-	}
+    @Test
+    public void testDontUseInlineAboveThreshold() {
+        String veryLongFamilyName = StringUtils.leftPad("", 6000, 'a');
 
+        Patient patient = new Patient();
+        patient.setActive(true);
+        patient.addName().setFamily(veryLongFamilyName);
+        Long resourceId = myPatientDao.create(patient).getId().getIdPartAsLong();
 
-	@Test
-	public void testDontUseInlineAboveThreshold() {
-		String veryLongFamilyName = StringUtils.leftPad("", 6000, 'a');
+        runInTransaction(
+                () -> {
+                    // Version 1
+                    ResourceHistoryTable entity =
+                            myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
+                                    resourceId, 1);
+                    assertNotNull(entity.getResource());
+                    assertNull(entity.getResourceTextVc());
+                });
 
-		Patient patient = new Patient();
-		patient.setActive(true);
-		patient.addName().setFamily(veryLongFamilyName);
-		Long resourceId = myPatientDao.create(patient).getId().getIdPartAsLong();
+        patient = myPatientDao.read(new IdType("Patient/" + resourceId));
+        assertEquals(veryLongFamilyName, patient.getNameFirstRep().getFamily());
+    }
 
-		runInTransaction(() -> {
-			// Version 1
-			ResourceHistoryTable entity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 1);
-			assertNotNull(entity.getResource());
-			assertNull(entity.getResourceTextVc());
-		});
+    @Test
+    public void testNopOnUnchangedUpdate() {
+        Patient patient = new Patient();
+        patient.setActive(true);
+        Long resourceId = myPatientDao.create(patient).getId().getIdPartAsLong();
 
-		patient = myPatientDao.read(new IdType("Patient/" + resourceId));
-		assertEquals(veryLongFamilyName, patient.getNameFirstRep().getFamily());
-	}
-
-
-	@Test
-	public void testNopOnUnchangedUpdate() {
-		Patient patient = new Patient();
-		patient.setActive(true);
-		Long resourceId = myPatientDao.create(patient).getId().getIdPartAsLong();
-
-		patient = new Patient();
-		patient.setId("Patient/" + resourceId);
-		patient.setActive(true);
-		DaoMethodOutcome updateOutcome = myPatientDao.update(patient);
-		assertEquals("1", updateOutcome.getId().getVersionIdPart());
-		assertTrue(updateOutcome.isNop());
-
-	}
-
-
+        patient = new Patient();
+        patient.setId("Patient/" + resourceId);
+        patient.setActive(true);
+        DaoMethodOutcome updateOutcome = myPatientDao.update(patient);
+        assertEquals("1", updateOutcome.getId().getVersionIdPart());
+        assertTrue(updateOutcome.isNop());
+    }
 }

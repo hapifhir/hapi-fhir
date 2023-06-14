@@ -24,5 +24,5 @@ import org.opencds.cqf.fhir.api.Repository;
 
 @FunctionalInterface
 public interface IQuestionnaireResponseProcessorFactory {
-	QuestionnaireResponseProcessor create(Repository theRepository);
+    QuestionnaireResponseProcessor create(Repository theRepository);
 }

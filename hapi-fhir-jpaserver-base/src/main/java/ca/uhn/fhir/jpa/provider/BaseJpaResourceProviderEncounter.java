@@ -35,74 +35,88 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
+public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource>
+        extends BaseJpaResourceProvider<T> {
 
-	/**
-	 * Encounter/123/$everything
-	 */
-	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
-	public IBundleProvider EncounterInstanceEverything(
+    /** Encounter/123/$everything */
+    @Operation(
+            name = JpaConstants.OPERATION_EVERYTHING,
+            idempotent = true,
+            bundleType = BundleTypeEnum.SEARCHSET)
+    public IBundleProvider EncounterInstanceEverything(
+            javax.servlet.http.HttpServletRequest theServletRequest,
+            @IdParam IIdType theId,
+            @Description(
+                            formalDefinition =
+                                    "Results from this method are returned across multiple pages."
+                                            + " This parameter controls the size of those pages.")
+                    @OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
+                    IPrimitiveType<Integer> theCount,
+            @Description(
+                            formalDefinition =
+                                    "Results from this method are returned across multiple pages."
+                                            + " This parameter controls the offset when fetching a"
+                                            + " page.")
+                    @OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
+                    IPrimitiveType<Integer> theOffset,
+            @Description(
+                            shortDefinition =
+                                    "Only return resources which were last updated as specified by"
+                                            + " the given range")
+                    @OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
+                    DateRangeParam theLastUpdated,
+            @Sort SortSpec theSortSpec) {
 
-		javax.servlet.http.HttpServletRequest theServletRequest,
+        startRequest(theServletRequest);
+        try {
+            return ((IFhirResourceDaoEncounter<?>) getDao())
+                    .encounterInstanceEverything(
+                            theServletRequest,
+                            theId,
+                            theCount,
+                            theOffset,
+                            theLastUpdated,
+                            theSortSpec);
+        } finally {
+            endRequest(theServletRequest);
+        }
+    }
 
-		@IdParam
-		IIdType theId,
+    /** /Encounter/$everything */
+    @Operation(
+            name = JpaConstants.OPERATION_EVERYTHING,
+            idempotent = true,
+            bundleType = BundleTypeEnum.SEARCHSET)
+    public IBundleProvider EncounterTypeEverything(
+            javax.servlet.http.HttpServletRequest theServletRequest,
+            @Description(
+                            formalDefinition =
+                                    "Results from this method are returned across multiple pages."
+                                            + " This parameter controls the size of those pages.")
+                    @OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
+                    IPrimitiveType<Integer> theCount,
+            @Description(
+                            formalDefinition =
+                                    "Results from this method are returned across multiple pages."
+                                            + " This parameter controls the offset when fetching a"
+                                            + " page.")
+                    @OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
+                    IPrimitiveType<Integer> theOffset,
+            @Description(
+                            shortDefinition =
+                                    "Only return resources which were last updated as specified by"
+                                            + " the given range")
+                    @OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
+                    DateRangeParam theLastUpdated,
+            @Sort SortSpec theSortSpec) {
 
-		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
-		IPrimitiveType<Integer> theCount,
-
-		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-		@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
-		IPrimitiveType<Integer> theOffset,
-
-		@Description(shortDefinition = "Only return resources which were last updated as specified by the given range")
-		@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
-		DateRangeParam theLastUpdated,
-
-		@Sort
-		SortSpec theSortSpec
-	) {
-
-		startRequest(theServletRequest);
-		try {
-			return ((IFhirResourceDaoEncounter<?>) getDao()).encounterInstanceEverything(theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec);
-		} finally {
-			endRequest(theServletRequest);
-		}
-	}
-
-	/**
-	 * /Encounter/$everything
-	 */
-	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
-	public IBundleProvider EncounterTypeEverything(
-
-		javax.servlet.http.HttpServletRequest theServletRequest,
-
-		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
-		IPrimitiveType<Integer> theCount,
-
-		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-		@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
-		IPrimitiveType<Integer> theOffset,
-
-		@Description(shortDefinition = "Only return resources which were last updated as specified by the given range")
-		@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
-		DateRangeParam theLastUpdated,
-
-		@Sort
-		SortSpec theSortSpec
-	) {
-
-		startRequest(theServletRequest);
-		try {
-			return ((IFhirResourceDaoEncounter<?>) getDao()).encounterTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec);
-		} finally {
-			endRequest(theServletRequest);
-		}
-
-	}
-
+        startRequest(theServletRequest);
+        try {
+            return ((IFhirResourceDaoEncounter<?>) getDao())
+                    .encounterTypeEverything(
+                            theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec);
+        } finally {
+            endRequest(theServletRequest);
+        }
+    }
 }

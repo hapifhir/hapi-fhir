@@ -21,17 +21,13 @@ package ca.uhn.fhir.rest.server;
 
 /**
  * RESTful server behaviour for automatically adding profile tags
- * 
+ *
  * @see RestfulServer#setETagSupport(ETagSupportEnum)
  */
 public enum ETagSupportEnum {
-	/**
-	 * Send ETag headers
-	 */
-	ENABLED,
-	
-	/**
-	 * Do not send ETag headers
-	 */
-	DISABLED
+    /** Send ETag headers */
+    ENABLED,
+
+    /** Do not send ETag headers */
+    DISABLED
 }

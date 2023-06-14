@@ -21,6 +21,9 @@ package ca.uhn.fhir.cr.common;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -28,61 +31,54 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.evaluator.fhir.util.Libraries;
 import org.opencds.cqf.cql.evaluator.fhir.util.Versions;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-
 /**
- * This class provides an implementation of the cql-translator's LibrarySourceProvider
- * interface which is used for loading
- * library resources during CQL evaluation.
+ * This class provides an implementation of the cql-translator's LibrarySourceProvider interface
+ * which is used for loading library resources during CQL evaluation.
  */
-public class HapiLibrarySourceProvider
-	implements LibrarySourceProvider, IDaoRegistryUser {
-	protected final DaoRegistry myDaoRegistry;
-	protected final RequestDetails myRequestDetails;
+public class HapiLibrarySourceProvider implements LibrarySourceProvider, IDaoRegistryUser {
+    protected final DaoRegistry myDaoRegistry;
+    protected final RequestDetails myRequestDetails;
 
-	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry) {
-		this(theDaoRegistry, null);
-	}
+    public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry) {
+        this(theDaoRegistry, null);
+    }
 
-	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
-		this.myDaoRegistry = theDaoRegistry;
-		this.myRequestDetails = theRequestDetails;
-	}
+    public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
+        this.myDaoRegistry = theDaoRegistry;
+        this.myRequestDetails = theRequestDetails;
+    }
 
-	@Override
-	public DaoRegistry getDaoRegistry() {
-		return this.myDaoRegistry;
-	}
+    @Override
+    public DaoRegistry getDaoRegistry() {
+        return this.myDaoRegistry;
+    }
 
+    @Override
+    public InputStream getLibraryContent(
+            VersionedIdentifier theLibraryIdentifier, LibraryContentType theLibraryContentType) {
+        String name = theLibraryIdentifier.getId();
+        String version = theLibraryIdentifier.getVersion();
+        var libraries = search(getClass("Library"), Searches.byName(name), myRequestDetails);
+        var libraryList = new ArrayList<IBaseResource>();
+        for (var l : libraries) {
+            libraryList.add(l);
+        }
+        IBaseResource library =
+                Versions.selectByVersion(libraryList, version, Libraries::getVersion);
 
-	@Override
-	public InputStream getLibraryContent(VersionedIdentifier theLibraryIdentifier,
-													 LibraryContentType theLibraryContentType) {
-		String name = theLibraryIdentifier.getId();
-		String version = theLibraryIdentifier.getVersion();
-		var libraries = search(getClass("Library"), Searches.byName(name), myRequestDetails);
-		var libraryList = new ArrayList<IBaseResource>();
-		for(var l:libraries){
-			libraryList.add(l);
-		}
-		IBaseResource library = Versions.selectByVersion(libraryList, version,
-			Libraries::getVersion);
+        if (library == null) {
+            return null;
+        }
+        byte[] content = Libraries.getContent(library, theLibraryContentType.mimeType());
+        if (content == null) {
+            return null;
+        }
 
-		if (library == null) {
-			return null;
-		}
-		byte[] content = Libraries.getContent(library, theLibraryContentType.mimeType());
-		if (content == null) {
-			return null;
-		}
+        return new ByteArrayInputStream(content);
+    }
 
-		return new ByteArrayInputStream(content);
-	}
-
-	@Override
-	public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
-		return this.getLibraryContent(libraryIdentifier, LibraryContentType.CQL);
-	}
+    @Override
+    public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
+        return this.getLibraryContent(libraryIdentifier, LibraryContentType.CQL);
+    }
 }

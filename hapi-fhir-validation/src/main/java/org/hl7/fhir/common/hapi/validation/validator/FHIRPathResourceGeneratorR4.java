@@ -1,31 +1,28 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.ExpressionNode;
 import org.hl7.fhir.r4.model.Resource;
-
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 /**
  * This class can be used to generate resources using FHIRPath expressions.
  *
- * Note that this is an experimental feature and the API is expected to change. Ideally
- * this will be made version independent and moved out of the validation module
- * in a future release.
+ * <p>Note that this is an experimental feature and the API is expected to change. Ideally this will
+ * be made version independent and moved out of the validation module in a future release.
  *
  * @author Marcel Parciak <marcel.parciak@med.uni-goettingen.de>
  */
@@ -40,8 +37,8 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
     private Stack<GenerationTier> nodeStack = null;
 
     /**
-     * The GenerationTier summarizes some variables that are needed to create FHIR
-     * elements later on.
+     * The GenerationTier summarizes some variables that are needed to create FHIR elements later
+     * on.
      */
     class GenerationTier {
         // The RuntimeDefinition of nodes
@@ -54,8 +51,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
         // The path segment name of nodes
         public String fhirPathName = null;
 
-        public GenerationTier() {
-        }
+        public GenerationTier() {}
 
         public GenerationTier(BaseRuntimeElementDefinition<?> nodeDef, IBase firstNode) {
             this.nodeDefinition = nodeDef;
@@ -64,8 +60,8 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
     }
 
     /**
-     * Constructor without parameters, needs a call to `setMapping` later on in
-     * order to generate any Resources.
+     * Constructor without parameters, needs a call to `setMapping` later on in order to generate
+     * any Resources.
      */
     public FHIRPathResourceGeneratorR4() {
         this.pathMapping = new HashMap<String, String>();
@@ -75,9 +71,9 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 
     /**
      * Constructor that allows to provide a mapping right away.
-     * 
-     * @param mapping Map<String, String> a mapping of FHIRPath to value Strings
-     *                that will be used to create a Resource.
+     *
+     * @param mapping Map<String, String> a mapping of FHIRPath to value Strings that will be used
+     *     to create a Resource.
      */
     public FHIRPathResourceGeneratorR4(Map<String, String> mapping) {
         this();
@@ -86,9 +82,9 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 
     /**
      * Setter for the FHIRPath mapping Map instance.
-     * 
-     * @param mapping Map<String, String> a mapping of FHIRPath to value Strings
-     *                that will be used to create a Resource.
+     *
+     * @param mapping Map<String, String> a mapping of FHIRPath to value Strings that will be used
+     *     to create a Resource.
      */
     public void setMapping(Map<String, String> mapping) {
         this.pathMapping = mapping;
@@ -96,7 +92,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 
     /**
      * Getter for a generated Resource. null if no Resource has been generated yet.
-     * 
+     *
      * @return T the generated Resource or null.
      */
     public T getResource() {
@@ -104,11 +100,11 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
     }
 
     /**
-     * Prepares the internal state prior to generating a FHIR Resource. Called once
-     * upon generation at the start.
-     * 
-     * @param resourceClass Class<T> The class of the Resource that shall be created
-     *                      (an empty Resource will be created in this method).
+     * Prepares the internal state prior to generating a FHIR Resource. Called once upon generation
+     * at the start.
+     *
+     * @param resourceClass Class<T> The class of the Resource that shall be created (an empty
+     *     Resource will be created in this method).
      */
     @SuppressWarnings("unchecked")
     private void prepareInternalState(Class<T> resourceClass) {
@@ -116,11 +112,10 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
     }
 
     /**
-     * The generation method that yields a new instance of class `resourceClass`
-     * with every value set in the FHIRPath mapping.
-     * 
-     * @param resourceClass Class<T> The class of the Resource that shall be
-     *                      created.
+     * The generation method that yields a new instance of class `resourceClass` with every value
+     * set in the FHIRPath mapping.
+     *
+     * @param resourceClass Class<T> The class of the Resource that shall be created.
      * @return T a new FHIR Resource instance of class `resourceClass`.
      */
     public T generateResource(Class<T> resourceClass) {
@@ -129,7 +124,9 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
         for (String fhirPath : this.sortedPaths()) {
             // prepare the next fhirPath iteration: create a new nodeStack and set the value
             this.nodeStack = new Stack<>();
-            this.nodeStack.push(new GenerationTier(this.ctx.getResourceDefinition(this.resource), this.resource));
+            this.nodeStack.push(
+                    new GenerationTier(
+                            this.ctx.getResourceDefinition(this.resource), this.resource));
             this.valueToSet = this.pathMapping.get(fhirPath);
 
             // pathNode is the part of the FHIRPath we are processing
@@ -161,13 +158,14 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
      */
 
     /**
-     * Handles a named node, either adding a new layer to the `nodeStack` when
-     * reaching a Composite Node or adding the value for Primitive Nodes.
-     * 
+     * Handles a named node, either adding a new layer to the `nodeStack` when reaching a Composite
+     * Node or adding the value for Primitive Nodes.
+     *
      * @param fhirPath String the FHIRPath section for the next GenerationTier.
      */
     private void handleNameNode(ExpressionNode fhirPath) {
-        BaseRuntimeChildDefinition childDef = this.nodeStack.peek().nodeDefinition.getChildByName(fhirPath.getName());
+        BaseRuntimeChildDefinition childDef =
+                this.nodeStack.peek().nodeDefinition.getChildByName(fhirPath.getName());
         if (childDef == null) {
             // nothing to do
             return;
@@ -198,55 +196,59 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
     }
 
     /**
-     * Handles primitive nodes with regards to the current latest tier of the
-     * nodeStack. Sets a primitive value to all nodes.
-     * 
-     * @param fhirPath ExpressionNode segment of the fhirPath that specifies the
-     *                 primitive value to set.
+     * Handles primitive nodes with regards to the current latest tier of the nodeStack. Sets a
+     * primitive value to all nodes.
+     *
+     * @param fhirPath ExpressionNode segment of the fhirPath that specifies the primitive value to
+     *     set.
      */
     private void handlePrimitiveNode(ExpressionNode fhirPath) {
         // Get the child definition from the parent
-        BaseRuntimeChildDefinition childDefinition = this.nodeStack.peek().nodeDefinition
-                .getChildByName(fhirPath.getName());
+        BaseRuntimeChildDefinition childDefinition =
+                this.nodeStack.peek().nodeDefinition.getChildByName(fhirPath.getName());
         // Get the primitive type definition from the childDeftinion
-        RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) childDefinition
-                .getChildByName(fhirPath.getName());
+        RuntimePrimitiveDatatypeDefinition primitiveTarget =
+                (RuntimePrimitiveDatatypeDefinition)
+                        childDefinition.getChildByName(fhirPath.getName());
         for (IBase nodeElement : this.nodeStack.peek().nodes) {
             // add the primitive value to each parent node
-            IPrimitiveType<?> primitive = primitiveTarget
-                    .newInstance(childDefinition.getInstanceConstructorArguments());
+            IPrimitiveType<?> primitive =
+                    primitiveTarget.newInstance(childDefinition.getInstanceConstructorArguments());
             primitive.setValueAsString(this.valueToSet);
             childDefinition.getMutator().addValue(nodeElement, primitive);
         }
     }
 
     /**
-     * Handles a composite node with regards to the current latest tier of the
-     * nodeStack. Creates a new node based on fhirPath if none are available.
-     * 
-     * @param fhirPath ExpressionNode the segment of the FHIRPath that is being
-     *                 handled right now.
+     * Handles a composite node with regards to the current latest tier of the nodeStack. Creates a
+     * new node based on fhirPath if none are available.
+     *
+     * @param fhirPath ExpressionNode the segment of the FHIRPath that is being handled right now.
      */
     private void handleCompositeNode(ExpressionNode fhirPath) {
         GenerationTier nextTier = new GenerationTier();
         // get the name of the FHIRPath for the next tier
         nextTier.fhirPathName = fhirPath.getName();
         // get the child definition from the parent nodePefinition
-        nextTier.childDefinition = this.nodeStack.peek().nodeDefinition.getChildByName(fhirPath.getName());
+        nextTier.childDefinition =
+                this.nodeStack.peek().nodeDefinition.getChildByName(fhirPath.getName());
         // create a nodeDefinition for the next tier
         nextTier.nodeDefinition = nextTier.childDefinition.getChildByName(nextTier.fhirPathName);
 
-        RuntimeCompositeDatatypeDefinition compositeTarget = (RuntimeCompositeDatatypeDefinition) nextTier.nodeDefinition;
+        RuntimeCompositeDatatypeDefinition compositeTarget =
+                (RuntimeCompositeDatatypeDefinition) nextTier.nodeDefinition;
         // iterate through all parent nodes
         for (IBase nodeElement : this.nodeStack.peek().nodes) {
-            List<IBase> containedNodes = nextTier.childDefinition.getAccessor().getValues(nodeElement);
+            List<IBase> containedNodes =
+                    nextTier.childDefinition.getAccessor().getValues(nodeElement);
             if (containedNodes.size() > 0) {
                 // check if sister nodes are already available
                 nextTier.nodes.addAll(containedNodes);
             } else {
                 // if not nodes are available, create a new node
-                ICompositeType compositeNode = compositeTarget
-                        .newInstance(nextTier.childDefinition.getInstanceConstructorArguments());
+                ICompositeType compositeNode =
+                        compositeTarget.newInstance(
+                                nextTier.childDefinition.getInstanceConstructorArguments());
                 nextTier.childDefinition.getMutator().addValue(nodeElement, compositeNode);
                 nextTier.nodes.add(compositeNode);
             }
@@ -261,17 +263,16 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 
     /**
      * Handles a function node of a FHIRPath.
-     * 
-     * @param fhirPath ExpressionNode the segment of the FHIRPath that is being
-     *                 handled right now.
+     *
+     * @param fhirPath ExpressionNode the segment of the FHIRPath that is being handled right now.
      */
     private void handleFunctionNode(ExpressionNode fhirPath) {
-        switch(fhirPath.getFunction()) {
+        switch (fhirPath.getFunction()) {
             case Where:
                 this.handleWhereFunctionNode(fhirPath);
-					 break;
-			  case MatchesFull:
-			  case Aggregate:
+                break;
+            case MatchesFull:
+            case Aggregate:
             case Alias:
             case AliasAs:
             case All:
@@ -344,73 +345,71 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
             case Union:
             case Upper:
                 // TODO: unimplemented, what to do?
-			  case ConvertsToDate:
-				  break;
-			  case Round:
-				  break;
-			  case Sqrt:
-				  break;
-			  case Abs:
-				  break;
-			  case Ceiling:
-				  break;
-			  case Exp:
-				  break;
-			  case Floor:
-				  break;
-			  case Ln:
-				  break;
-			  case Log:
-				  break;
-			  case Power:
-				  break;
-			  case Truncate:
-				  break;
-			  case Encode:
-				  break;
-			  case Decode:
-				  break;
-			  case Escape:
-				  break;
-			  case Unescape:
-				  break;
-			  case Trim:
-				  break;
-			  case Split:
-				  break;
-			  case Join:
-				  break;
-			  case LowBoundary:
-				  break;
-			  case HighBoundary:
-				  break;
-			  case Precision:
-				  break;
-			  case HtmlChecks1:
-				  break;
-			  case HtmlChecks2:
-				  break;
-		  }
+            case ConvertsToDate:
+                break;
+            case Round:
+                break;
+            case Sqrt:
+                break;
+            case Abs:
+                break;
+            case Ceiling:
+                break;
+            case Exp:
+                break;
+            case Floor:
+                break;
+            case Ln:
+                break;
+            case Log:
+                break;
+            case Power:
+                break;
+            case Truncate:
+                break;
+            case Encode:
+                break;
+            case Decode:
+                break;
+            case Escape:
+                break;
+            case Unescape:
+                break;
+            case Trim:
+                break;
+            case Split:
+                break;
+            case Join:
+                break;
+            case LowBoundary:
+                break;
+            case HighBoundary:
+                break;
+            case Precision:
+                break;
+            case HtmlChecks1:
+                break;
+            case HtmlChecks2:
+                break;
+        }
     }
 
     /**
-     * Handles a function node of a `where`-function. Iterates through all params
-     * and handle where functions for primitive datatypes (others are not
-     * implemented and yield errors.)
-     * 
-     * @param fhirPath ExpressionNode the segment of the FHIRPath that contains the
-     *                 where function
+     * Handles a function node of a `where`-function. Iterates through all params and handle where
+     * functions for primitive datatypes (others are not implemented and yield errors.)
+     *
+     * @param fhirPath ExpressionNode the segment of the FHIRPath that contains the where function
      */
     private void handleWhereFunctionNode(ExpressionNode fhirPath) {
         // iterate through all where parameters
         for (ExpressionNode param : fhirPath.getParameters()) {
-            BaseRuntimeChildDefinition wherePropertyChild = this.nodeStack.peek().nodeDefinition
-                    .getChildByName(param.getName());
-            BaseRuntimeElementDefinition<?> wherePropertyDefinition = wherePropertyChild
-                    .getChildByName(param.getName());
+            BaseRuntimeChildDefinition wherePropertyChild =
+                    this.nodeStack.peek().nodeDefinition.getChildByName(param.getName());
+            BaseRuntimeElementDefinition<?> wherePropertyDefinition =
+                    wherePropertyChild.getChildByName(param.getName());
 
             // only primitive nodes can be checked using the where function
-            switch(wherePropertyDefinition.getChildType()) {
+            switch (wherePropertyDefinition.getChildType()) {
                 case PRIMITIVE_DATATYPE:
                     this.handleWhereFunctionParam(param);
                     break;
@@ -431,14 +430,15 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 
     /**
      * Filter the latest nodeStack tier using `param`.
-     * 
-     * @param param ExpressionNode parameter type ExpressionNode that provides the
-     *              where clause that is used to filter nodes from the nodeStack.
+     *
+     * @param param ExpressionNode parameter type ExpressionNode that provides the where clause that
+     *     is used to filter nodes from the nodeStack.
      */
     private void handleWhereFunctionParam(ExpressionNode param) {
-        BaseRuntimeChildDefinition wherePropertyChild = this.nodeStack.peek().nodeDefinition
-                .getChildByName(param.getName());
-        BaseRuntimeElementDefinition<?> wherePropertyDefinition = wherePropertyChild.getChildByName(param.getName());
+        BaseRuntimeChildDefinition wherePropertyChild =
+                this.nodeStack.peek().nodeDefinition.getChildByName(param.getName());
+        BaseRuntimeElementDefinition<?> wherePropertyDefinition =
+                wherePropertyChild.getChildByName(param.getName());
 
         String matchingValue = param.getOpNext().getConstant().toString();
         List<IBase> matchingNodes = new ArrayList<>();
@@ -499,20 +499,27 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
                 GenerationTier previousTier = this.nodeStack.peek();
                 this.nodeStack.push(latestTier);
 
-                RuntimeCompositeDatatypeDefinition compositeTarget = (RuntimeCompositeDatatypeDefinition) latestTier.nodeDefinition;
-                ICompositeType compositeNode = compositeTarget
-                        .newInstance(latestTier.childDefinition.getInstanceConstructorArguments());
-                latestTier.childDefinition.getMutator().addValue(previousTier.nodes.get(0), compositeNode);
+                RuntimeCompositeDatatypeDefinition compositeTarget =
+                        (RuntimeCompositeDatatypeDefinition) latestTier.nodeDefinition;
+                ICompositeType compositeNode =
+                        compositeTarget.newInstance(
+                                latestTier.childDefinition.getInstanceConstructorArguments());
+                latestTier
+                        .childDefinition
+                        .getMutator()
+                        .addValue(previousTier.nodes.get(0), compositeNode);
                 unlabeledNodes.add(compositeNode);
             }
 
-            switch(param.getOperation()) {
+            switch (param.getOperation()) {
                 case Equals:
                     // if we are checking for equality, we need to set the property we looked for on
                     // the unlabeled node(s)
-                    RuntimePrimitiveDatatypeDefinition equalsPrimitive = (RuntimePrimitiveDatatypeDefinition) wherePropertyDefinition;
-                    IPrimitiveType<?> primitive = equalsPrimitive
-                            .newInstance(wherePropertyChild.getInstanceConstructorArguments());
+                    RuntimePrimitiveDatatypeDefinition equalsPrimitive =
+                            (RuntimePrimitiveDatatypeDefinition) wherePropertyDefinition;
+                    IPrimitiveType<?> primitive =
+                            equalsPrimitive.newInstance(
+                                    wherePropertyChild.getInstanceConstructorArguments());
                     primitive.setValueAsString(param.getOpNext().getConstant().toString());
                     for (IBase node : unlabeledNodes) {
                         wherePropertyChild.getMutator().addValue(node, primitive);
@@ -556,9 +563,9 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
     }
 
     /**
-     * Creates a list all FHIRPaths from the mapping ordered by paths with where
-     * equals, where unequals and the rest.
-     * 
+     * Creates a list all FHIRPaths from the mapping ordered by paths with where equals, where
+     * unequals and the rest.
+     *
      * @return List<String> a List of FHIRPaths ordered by the type.
      */
     private List<String> sortedPaths() {
@@ -589,7 +596,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 
     /**
      * Returns the type of path based on the FHIRPath String.
-     * 
+     *
      * @param fhirPath String representation of a FHIRPath.
      * @return PathType the type of path supplied as `fhirPath`.
      */
@@ -638,10 +645,12 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
     }
 
     /**
-     * A simple enum to diffirentiate between types of FHIRPaths in the special use
-     * case of generating FHIR Resources.
+     * A simple enum to diffirentiate between types of FHIRPaths in the special use case of
+     * generating FHIR Resources.
      */
     public enum PathType {
-        WHERE_EQUALS, WHERE_UNEQUALS, WITHOUT_WHERE
+        WHERE_EQUALS,
+        WHERE_UNEQUALS,
+        WITHOUT_WHERE
     }
 }

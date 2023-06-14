@@ -23,18 +23,19 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IExternallyStoredResourceService {
 
-	/**
-	 * Returns the ID of this provider. No two providers may return the same
-	 * ID, and this provider should always return the same ID.
-	 */
-	String getId();
+    /**
+     * Returns the ID of this provider. No two providers may return the same ID, and this provider
+     * should always return the same ID.
+     */
+    String getId();
 
-	/**
-	 * Fetches the given resource using the given address string
-	 *
-	 * @param theAddress The address string is a format that is entirely up to the individual provider. HAPI FHIR
-	 *                   doesn't try to understand it.
-	 * @return HAPI FHIR may modify the returned object, so it is important to always return a new object for every call here (careful with caching!)
-	 */
-	IBaseResource fetchResource(String theAddress);
+    /**
+     * Fetches the given resource using the given address string
+     *
+     * @param theAddress The address string is a format that is entirely up to the individual
+     *     provider. HAPI FHIR doesn't try to understand it.
+     * @return HAPI FHIR may modify the returned object, so it is important to always return a new
+     *     object for every call here (careful with caching!)
+     */
+    IBaseResource fetchResource(String theAddress);
 }

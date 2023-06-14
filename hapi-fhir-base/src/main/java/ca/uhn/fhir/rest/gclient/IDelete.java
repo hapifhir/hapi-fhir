@@ -24,32 +24,36 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IDelete {
 
-	IDeleteTyped resource(IBaseResource theResource);
-	
-	IDeleteTyped resourceById(IIdType theId);
-	
-	IDeleteTyped resourceById(String theResourceType, String theLogicalId);
+    IDeleteTyped resource(IBaseResource theResource);
 
-	/**
-	 * Specifies that the delete should be performed as a conditional delete
-	 * against a given search URL.
-	 *
-	 * @param theSearchUrl The search URL to use. The format of this URL should be of the form <code>[ResourceType]?[Parameters]</code>,
-	 *                     for example: <code>Patient?name=Smith&amp;identifier=13.2.4.11.4%7C847366</code>
-	 * @since HAPI 0.9 / FHIR DSTU 2
-	 */
-	IDeleteTyped resourceConditionalByUrl(String theSearchUrl);
+    IDeleteTyped resourceById(IIdType theId);
 
-	/**
-	 * Delete using a conditional/match URL. The query parameters will be added in the next part of the call chain.
-	 * @since HAPI 0.9 / FHIR DSTU 2
-	 */
-	IDeleteWithQuery resourceConditionalByType(String theResourceType);
+    IDeleteTyped resourceById(String theResourceType, String theLogicalId);
 
-	/**
-	 * Delete using a conditional/match URL. The query parameters will be added in the next part of the call chain.
-	 * @since HAPI 1.3
-	 */
-	IDeleteWithQuery resourceConditionalByType(Class<? extends IBaseResource> theResourceType);
+    /**
+     * Specifies that the delete should be performed as a conditional delete against a given search
+     * URL.
+     *
+     * @param theSearchUrl The search URL to use. The format of this URL should be of the form
+     *     <code>[ResourceType]?[Parameters]</code>, for example: <code>
+     *     Patient?name=Smith&amp;identifier=13.2.4.11.4%7C847366</code>
+     * @since HAPI 0.9 / FHIR DSTU 2
+     */
+    IDeleteTyped resourceConditionalByUrl(String theSearchUrl);
 
+    /**
+     * Delete using a conditional/match URL. The query parameters will be added in the next part of
+     * the call chain.
+     *
+     * @since HAPI 0.9 / FHIR DSTU 2
+     */
+    IDeleteWithQuery resourceConditionalByType(String theResourceType);
+
+    /**
+     * Delete using a conditional/match URL. The query parameters will be added in the next part of
+     * the call chain.
+     *
+     * @since HAPI 1.3
+     */
+    IDeleteWithQuery resourceConditionalByType(Class<? extends IBaseResource> theResourceType);
 }

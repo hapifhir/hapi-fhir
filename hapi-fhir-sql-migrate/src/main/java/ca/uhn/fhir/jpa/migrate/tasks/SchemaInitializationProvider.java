@@ -19,140 +19,149 @@
  */
 package ca.uhn.fhir.jpa.migrate.tasks;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import javax.annotation.Nonnull;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class SchemaInitializationProvider implements ISchemaInitializationProvider {
 
-	private final String mySchemaExistsIndicatorTable;
-	private final boolean myCanInitializeSchema;
-	private String mySchemaFileClassPath;
-	private String mySchemaDescription;
+    private final String mySchemaExistsIndicatorTable;
+    private final boolean myCanInitializeSchema;
+    private String mySchemaFileClassPath;
+    private String mySchemaDescription;
 
-	/**
-	 * @param theSchemaFileClassPath        pathname to script used to initialize schema
-	 * @param theSchemaExistsIndicatorTable a table name we can use to determine if this schema has already been initialized
-	 * @param theCanInitializeSchema        this is a "root" schema initializer that creates the primary tables used by this app
-	 */
-	public SchemaInitializationProvider(String theSchemaDescription, String theSchemaFileClassPath, String theSchemaExistsIndicatorTable, boolean theCanInitializeSchema) {
-		mySchemaDescription = theSchemaDescription;
-		mySchemaFileClassPath = theSchemaFileClassPath;
-		mySchemaExistsIndicatorTable = theSchemaExistsIndicatorTable;
-		myCanInitializeSchema = theCanInitializeSchema;
-	}
+    /**
+     * @param theSchemaFileClassPath pathname to script used to initialize schema
+     * @param theSchemaExistsIndicatorTable a table name we can use to determine if this schema has
+     *     already been initialized
+     * @param theCanInitializeSchema this is a "root" schema initializer that creates the primary
+     *     tables used by this app
+     */
+    public SchemaInitializationProvider(
+            String theSchemaDescription,
+            String theSchemaFileClassPath,
+            String theSchemaExistsIndicatorTable,
+            boolean theCanInitializeSchema) {
+        mySchemaDescription = theSchemaDescription;
+        mySchemaFileClassPath = theSchemaFileClassPath;
+        mySchemaExistsIndicatorTable = theSchemaExistsIndicatorTable;
+        myCanInitializeSchema = theCanInitializeSchema;
+    }
 
-	@Override
-	public List<String> getSqlStatements(DriverTypeEnum theDriverType) {
-		if (!isEnabled()) {
-			return Collections.emptyList();
-		}
+    @Override
+    public List<String> getSqlStatements(DriverTypeEnum theDriverType) {
+        if (!isEnabled()) {
+            return Collections.emptyList();
+        }
 
-		List<String> retval = new ArrayList<>();
+        List<String> retval = new ArrayList<>();
 
-		String initScript = mySchemaFileClassPath + "/" + getInitScript(theDriverType);
-		try {
-			InputStream sqlFileInputStream = SchemaInitializationProvider.class.getResourceAsStream(initScript);
-			if (sqlFileInputStream == null) {
-				throw new ConfigurationException(Msg.code(49) + "Schema initialization script " + initScript + " not found on classpath");
-			}
-			// Assumes no escaped semicolons...
-			String sqlString = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8);
-			parseSqlFileIntoIndividualStatements(theDriverType, retval, sqlString);
-		} catch (IOException e) {
-			throw new ConfigurationException(Msg.code(50) + "Error reading schema initialization script " + initScript, e);
-		}
-		return retval;
-	}
+        String initScript = mySchemaFileClassPath + "/" + getInitScript(theDriverType);
+        try {
+            InputStream sqlFileInputStream =
+                    SchemaInitializationProvider.class.getResourceAsStream(initScript);
+            if (sqlFileInputStream == null) {
+                throw new ConfigurationException(
+                        Msg.code(49)
+                                + "Schema initialization script "
+                                + initScript
+                                + " not found on classpath");
+            }
+            // Assumes no escaped semicolons...
+            String sqlString = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8);
+            parseSqlFileIntoIndividualStatements(theDriverType, retval, sqlString);
+        } catch (IOException e) {
+            throw new ConfigurationException(
+                    Msg.code(50) + "Error reading schema initialization script " + initScript, e);
+        }
+        return retval;
+    }
 
-	@VisibleForTesting
-	void parseSqlFileIntoIndividualStatements(DriverTypeEnum theDriverType, List<String> retval, String theSqlString) {
-		String sqlString = theSqlString.replaceAll("--.*", "");
-		
-		String sqlStringNoComments = preProcessSqlString(theDriverType, sqlString);
-		String[] statements = sqlStringNoComments.split("\\;");
-		for (String statement : statements) {
-			String cleanedStatement = preProcessSqlStatement(theDriverType, statement);
-			if (!isBlank(cleanedStatement)) {
-				String next = trim(cleanedStatement);
-				next = next.replace('\n', ' ');
-				next = next.replace('\r', ' ');
-				next = next.replaceAll(" +", " ");
-				retval.add(next);
-			}
-		}
-	}
+    @VisibleForTesting
+    void parseSqlFileIntoIndividualStatements(
+            DriverTypeEnum theDriverType, List<String> retval, String theSqlString) {
+        String sqlString = theSqlString.replaceAll("--.*", "");
 
-	protected String preProcessSqlString(DriverTypeEnum theDriverType, String sqlString) {
-		return sqlString;
-	}
+        String sqlStringNoComments = preProcessSqlString(theDriverType, sqlString);
+        String[] statements = sqlStringNoComments.split("\\;");
+        for (String statement : statements) {
+            String cleanedStatement = preProcessSqlStatement(theDriverType, statement);
+            if (!isBlank(cleanedStatement)) {
+                String next = trim(cleanedStatement);
+                next = next.replace('\n', ' ');
+                next = next.replace('\r', ' ');
+                next = next.replaceAll(" +", " ");
+                retval.add(next);
+            }
+        }
+    }
 
-	protected String preProcessSqlStatement(DriverTypeEnum theDriverType, String sqlStatement) {
-		return sqlStatement;
-	}
+    protected String preProcessSqlString(DriverTypeEnum theDriverType, String sqlString) {
+        return sqlString;
+    }
 
-	@Nonnull
-	protected String getInitScript(DriverTypeEnum theDriverType) {
-		return theDriverType.getSchemaFilename();
-	}
+    protected String preProcessSqlStatement(DriverTypeEnum theDriverType, String sqlStatement) {
+        return sqlStatement;
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
+    @Nonnull
+    protected String getInitScript(DriverTypeEnum theDriverType) {
+        return theDriverType.getSchemaFilename();
+    }
 
-		if (theO == null || getClass() != theO.getClass()) return false;
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) return true;
 
-		SchemaInitializationProvider that = (SchemaInitializationProvider) theO;
+        if (theO == null || getClass() != theO.getClass()) return false;
 
-		return this.getClass().getSimpleName() == that.getClass().getSimpleName();
-	}
+        SchemaInitializationProvider that = (SchemaInitializationProvider) theO;
 
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(this.getClass().getSimpleName())
-			.toHashCode();
-	}
+        return this.getClass().getSimpleName() == that.getClass().getSimpleName();
+    }
 
-	@Override
-	public String getSchemaExistsIndicatorTable() {
-		return mySchemaExistsIndicatorTable;
-	}
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(this.getClass().getSimpleName()).toHashCode();
+    }
 
-	public SchemaInitializationProvider setSchemaFileClassPath(String theSchemaFileClassPath) {
-		mySchemaFileClassPath = theSchemaFileClassPath;
-		return this;
-	}
+    @Override
+    public String getSchemaExistsIndicatorTable() {
+        return mySchemaExistsIndicatorTable;
+    }
 
-	@Override
-	public String getSchemaDescription() {
-		return mySchemaDescription;
-	}
+    public SchemaInitializationProvider setSchemaFileClassPath(String theSchemaFileClassPath) {
+        mySchemaFileClassPath = theSchemaFileClassPath;
+        return this;
+    }
 
-	@Override
-	public SchemaInitializationProvider setSchemaDescription(String theSchemaDescription) {
-		mySchemaDescription = theSchemaDescription;
-		return this;
-	}
+    @Override
+    public String getSchemaDescription() {
+        return mySchemaDescription;
+    }
 
-	@Override
-	public boolean canInitializeSchema() {
-		return myCanInitializeSchema;
-	}
+    @Override
+    public SchemaInitializationProvider setSchemaDescription(String theSchemaDescription) {
+        mySchemaDescription = theSchemaDescription;
+        return this;
+    }
+
+    @Override
+    public boolean canInitializeSchema() {
+        return myCanInitializeSchema;
+    }
 }
-

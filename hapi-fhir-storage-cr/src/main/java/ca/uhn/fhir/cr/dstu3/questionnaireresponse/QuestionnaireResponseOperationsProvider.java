@@ -21,7 +21,6 @@ package ca.uhn.fhir.cr.dstu3.questionnaireresponse;
  */
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
-import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.cr.dstu3.IQuestionnaireResponseProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -36,28 +35,34 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnaireResponseOperationsProvider {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
-	@Autowired
-	IQuestionnaireResponseProcessorFactory myDstu3QuestionnaireResponseServiceFactory;
+    @Autowired IRepositoryFactory myRepositoryFactory;
+    @Autowired IQuestionnaireResponseProcessorFactory myDstu3QuestionnaireResponseServiceFactory;
 
-	/**
-	 * Implements the <a href=
-	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse-extract.html>$extract</a>
-	 * operation found in the
-	 * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
-	 *
-	 * @param theId                    The id of the QuestionnaireResponse to extract data from.
-	 * @param theQuestionnaireResponse The QuestionnaireResponse to extract data from. Used when the operation is invoked at the 'type' level.
-	 * @param theRequestDetails        The details (such as tenant) of this request. Usually
-	 *                                 autopopulated HAPI.
-	 * @return The resulting FHIR resource produced after extracting data. This will either be a single resource or a Transaction Bundle that contains multiple resources.
-	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
-	public IBaseBundle extract(@IdParam IdType theId, @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
-										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return this.myDstu3QuestionnaireResponseServiceFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.extract(theId, theQuestionnaireResponse, null, null, null);
-	}
+    /**
+     * Implements the <a href=
+     * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse-extract.html>$extract</a>
+     * operation found in the <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data
+     * Capture (SDC) IG</a>.
+     *
+     * @param theId The id of the QuestionnaireResponse to extract data from.
+     * @param theQuestionnaireResponse The QuestionnaireResponse to extract data from. Used when the
+     *     operation is invoked at the 'type' level.
+     * @param theRequestDetails The details (such as tenant) of this request. Usually autopopulated
+     *     HAPI.
+     * @return The resulting FHIR resource produced after extracting data. This will either be a
+     *     single resource or a Transaction Bundle that contains multiple resources.
+     */
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_EXTRACT,
+            idempotent = true,
+            type = QuestionnaireResponse.class)
+    public IBaseBundle extract(
+            @IdParam IdType theId,
+            @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
+            RequestDetails theRequestDetails)
+            throws InternalErrorException, FHIRException {
+        return this.myDstu3QuestionnaireResponseServiceFactory
+                .create(myRepositoryFactory.create(theRequestDetails))
+                .extract(theId, theQuestionnaireResponse, null, null, null);
+    }
 }

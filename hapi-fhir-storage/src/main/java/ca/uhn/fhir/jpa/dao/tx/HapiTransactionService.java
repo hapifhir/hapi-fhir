@@ -38,6 +38,10 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.annotations.VisibleForTesting;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -56,438 +60,528 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Objects;
-import java.util.concurrent.Callable;
-
 /**
  * @see IHapiTransactionService for an explanation of this class
  */
 public class HapiTransactionService implements IHapiTransactionService {
 
-	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS = HapiTransactionService.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
-	public static final String XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS = HapiTransactionService.class.getName() + "_EXISTING_SEARCH_PARAMS";
-	private static final Logger ourLog = LoggerFactory.getLogger(HapiTransactionService.class);
-	private static final ThreadLocal<RequestPartitionId> ourRequestPartitionThreadLocal = new ThreadLocal<>();
-	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
-	@Autowired
-	protected PlatformTransactionManager myTransactionManager;
-	@Autowired
-	protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	@Autowired
-	protected PartitionSettings myPartitionSettings;
-	private Propagation myTransactionPropagationWhenChangingPartitions = Propagation.REQUIRED;
+    public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS =
+            HapiTransactionService.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
+    public static final String XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS =
+            HapiTransactionService.class.getName() + "_EXISTING_SEARCH_PARAMS";
+    private static final Logger ourLog = LoggerFactory.getLogger(HapiTransactionService.class);
+    private static final ThreadLocal<RequestPartitionId> ourRequestPartitionThreadLocal =
+            new ThreadLocal<>();
+    @Autowired protected IInterceptorBroadcaster myInterceptorBroadcaster;
+    @Autowired protected PlatformTransactionManager myTransactionManager;
+    @Autowired protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+    @Autowired protected PartitionSettings myPartitionSettings;
+    private Propagation myTransactionPropagationWhenChangingPartitions = Propagation.REQUIRED;
 
-	@VisibleForTesting
-	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
-		myInterceptorBroadcaster = theInterceptorBroadcaster;
-	}
+    @VisibleForTesting
+    public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
+        myInterceptorBroadcaster = theInterceptorBroadcaster;
+    }
 
-	@Override
-	public IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails) {
-		return new ExecutionBuilder(theRequestDetails);
-	}
+    @Override
+    public IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails) {
+        return new ExecutionBuilder(theRequestDetails);
+    }
 
-	@Override
-	public IExecutionBuilder withSystemRequest() {
-		return new ExecutionBuilder(null);
-	}
+    @Override
+    public IExecutionBuilder withSystemRequest() {
+        return new ExecutionBuilder(null);
+    }
 
+    /**
+     * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
+     */
+    @Deprecated
+    public <T> T execute(
+            @Nullable RequestDetails theRequestDetails,
+            @Nullable TransactionDetails theTransactionDetails,
+            @Nonnull TransactionCallback<T> theCallback) {
+        return execute(theRequestDetails, theTransactionDetails, theCallback, null);
+    }
 
-	/**
-	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
-	 */
-	@Deprecated
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback) {
-		return execute(theRequestDetails, theTransactionDetails, theCallback, null);
-	}
+    /**
+     * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
+     */
+    @Deprecated
+    public void execute(
+            @Nullable RequestDetails theRequestDetails,
+            @Nullable TransactionDetails theTransactionDetails,
+            @Nonnull Propagation thePropagation,
+            @Nonnull Isolation theIsolation,
+            @Nonnull Runnable theCallback) {
+        TransactionCallbackWithoutResult callback =
+                new TransactionCallbackWithoutResult() {
+                    @Override
+                    protected void doInTransactionWithoutResult(TransactionStatus status) {
+                        theCallback.run();
+                    }
+                };
+        execute(
+                theRequestDetails,
+                theTransactionDetails,
+                callback,
+                null,
+                thePropagation,
+                theIsolation);
+    }
 
-	/**
-	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
-	 */
-	@Deprecated
-	public void execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull Runnable theCallback) {
-		TransactionCallbackWithoutResult callback = new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				theCallback.run();
-			}
-		};
-		execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
-	}
+    /**
+     * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
+     */
+    @Deprecated
+    @Override
+    public <T> T withRequest(
+            @Nullable RequestDetails theRequestDetails,
+            @Nullable TransactionDetails theTransactionDetails,
+            @Nonnull Propagation thePropagation,
+            @Nonnull Isolation theIsolation,
+            @Nonnull ICallable<T> theCallback) {
 
-	/**
-	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
-	 */
-	@Deprecated
-	@Override
-	public <T> T withRequest(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback) {
+        TransactionCallback<T> callback = tx -> theCallback.call();
+        return execute(
+                theRequestDetails,
+                theTransactionDetails,
+                callback,
+                null,
+                thePropagation,
+                theIsolation);
+    }
 
-		TransactionCallback<T> callback = tx -> theCallback.call();
-		return execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
-	}
+    /**
+     * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
+     */
+    @Deprecated
+    public <T> T execute(
+            @Nullable RequestDetails theRequestDetails,
+            @Nullable TransactionDetails theTransactionDetails,
+            @Nonnull TransactionCallback<T> theCallback,
+            @Nullable Runnable theOnRollback) {
+        return execute(
+                theRequestDetails, theTransactionDetails, theCallback, theOnRollback, null, null);
+    }
 
-	/**
-	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
-	 */
-	@Deprecated
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback) {
-		return execute(theRequestDetails, theTransactionDetails, theCallback, theOnRollback, null, null);
-	}
+    @SuppressWarnings("ConstantConditions")
+    /**
+     * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
+     */
+    @Deprecated
+    public <T> T execute(
+            @Nullable RequestDetails theRequestDetails,
+            @Nullable TransactionDetails theTransactionDetails,
+            @Nonnull TransactionCallback<T> theCallback,
+            @Nullable Runnable theOnRollback,
+            @Nullable Propagation thePropagation,
+            @Nullable Isolation theIsolation) {
+        return withRequest(theRequestDetails)
+                .withTransactionDetails(theTransactionDetails)
+                .withPropagation(thePropagation)
+                .withIsolation(theIsolation)
+                .onRollback(theOnRollback)
+                .execute(theCallback);
+    }
 
-	@SuppressWarnings("ConstantConditions")
-	/**
-	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
-	 */
-	@Deprecated
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nullable Propagation thePropagation, @Nullable Isolation theIsolation) {
-		return withRequest(theRequestDetails)
-			.withTransactionDetails(theTransactionDetails)
-			.withPropagation(thePropagation)
-			.withIsolation(theIsolation)
-			.onRollback(theOnRollback)
-			.execute(theCallback);
-	}
+    /**
+     * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
+     */
+    @Deprecated
+    public <T> T execute(
+            @Nullable RequestDetails theRequestDetails,
+            @Nullable TransactionDetails theTransactionDetails,
+            @Nonnull TransactionCallback<T> theCallback,
+            @Nullable Runnable theOnRollback,
+            @Nonnull Propagation thePropagation,
+            @Nonnull Isolation theIsolation,
+            RequestPartitionId theRequestPartitionId) {
+        return withRequest(theRequestDetails)
+                .withTransactionDetails(theTransactionDetails)
+                .withPropagation(thePropagation)
+                .withIsolation(theIsolation)
+                .withRequestPartitionId(theRequestPartitionId)
+                .onRollback(theOnRollback)
+                .execute(theCallback);
+    }
 
-	/**
-	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
-	 */
-	@Deprecated
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, RequestPartitionId theRequestPartitionId) {
-		return withRequest(theRequestDetails)
-			.withTransactionDetails(theTransactionDetails)
-			.withPropagation(thePropagation)
-			.withIsolation(theIsolation)
-			.withRequestPartitionId(theRequestPartitionId)
-			.onRollback(theOnRollback)
-			.execute(theCallback);
-	}
+    public boolean isCustomIsolationSupported() {
+        return false;
+    }
 
-	public boolean isCustomIsolationSupported() {
-		return false;
-	}
+    @VisibleForTesting
+    public void setRequestPartitionSvcForUnitTest(
+            IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+        myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+    }
 
-	@VisibleForTesting
-	public void setRequestPartitionSvcForUnitTest(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-	}
+    public PlatformTransactionManager getTransactionManager() {
+        return myTransactionManager;
+    }
 
-	public PlatformTransactionManager getTransactionManager() {
-		return myTransactionManager;
-	}
+    @VisibleForTesting
+    public void setTransactionManager(PlatformTransactionManager theTransactionManager) {
+        myTransactionManager = theTransactionManager;
+    }
 
-	@VisibleForTesting
-	public void setTransactionManager(PlatformTransactionManager theTransactionManager) {
-		myTransactionManager = theTransactionManager;
-	}
+    @Nullable
+    protected <T> T doExecute(
+            ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
+        final RequestPartitionId requestPartitionId;
+        if (theExecutionBuilder.myRequestPartitionId != null) {
+            requestPartitionId = theExecutionBuilder.myRequestPartitionId;
+        } else if (theExecutionBuilder.myRequestDetails != null) {
+            requestPartitionId =
+                    myRequestPartitionHelperSvc.determineGenericPartitionForRequest(
+                            theExecutionBuilder.myRequestDetails);
+        } else {
+            requestPartitionId = null;
+        }
+        RequestPartitionId previousRequestPartitionId = null;
+        if (requestPartitionId != null) {
+            previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
+            ourRequestPartitionThreadLocal.set(requestPartitionId);
+        }
 
-	@Nullable
-	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
-		final RequestPartitionId requestPartitionId;
-		if (theExecutionBuilder.myRequestPartitionId != null) {
-			requestPartitionId = theExecutionBuilder.myRequestPartitionId;
-		} else if (theExecutionBuilder.myRequestDetails != null) {
-			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theExecutionBuilder.myRequestDetails);
-		} else {
-			requestPartitionId = null;
-		}
-		RequestPartitionId previousRequestPartitionId = null;
-		if (requestPartitionId != null) {
-			previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
-			ourRequestPartitionThreadLocal.set(requestPartitionId);
-		}
+        if (Objects.equals(previousRequestPartitionId, requestPartitionId)) {
+            if (canReuseExistingTransaction(theExecutionBuilder)) {
+                /*
+                 * If we're already in an active transaction, and it's for the right partition,
+                 * and it's not a read-only transaction, we don't need to open a new transaction
+                 * so let's just add a method to the stack trace that makes this obvious.
+                 */
+                return executeInExistingTransaction(theCallback);
+            }
+        } else if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
+            return executeInNewTransactionForPartitionChange(
+                    theExecutionBuilder,
+                    theCallback,
+                    requestPartitionId,
+                    previousRequestPartitionId);
+        }
 
-		if (Objects.equals(previousRequestPartitionId, requestPartitionId)) {
-			if (canReuseExistingTransaction(theExecutionBuilder)) {
-				/*
-				 * If we're already in an active transaction, and it's for the right partition,
-				 * and it's not a read-only transaction, we don't need to open a new transaction
-				 * so let's just add a method to the stack trace that makes this obvious.
-				 */
-				return executeInExistingTransaction(theCallback);
-			}
-		} else if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
-			return executeInNewTransactionForPartitionChange(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
-		}
+        return doExecuteInTransaction(
+                theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+    }
 
-		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
-	}
+    @Nullable
+    private <T> T executeInNewTransactionForPartitionChange(
+            ExecutionBuilder theExecutionBuilder,
+            TransactionCallback<T> theCallback,
+            RequestPartitionId requestPartitionId,
+            RequestPartitionId previousRequestPartitionId) {
+        theExecutionBuilder.myPropagation = myTransactionPropagationWhenChangingPartitions;
+        return doExecuteInTransaction(
+                theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+    }
 
-	@Nullable
-	private <T> T executeInNewTransactionForPartitionChange(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback, RequestPartitionId requestPartitionId, RequestPartitionId previousRequestPartitionId) {
-		theExecutionBuilder.myPropagation = myTransactionPropagationWhenChangingPartitions;
-		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
-	}
+    @Nullable
+    private <T> T doExecuteInTransaction(
+            ExecutionBuilder theExecutionBuilder,
+            TransactionCallback<T> theCallback,
+            RequestPartitionId requestPartitionId,
+            RequestPartitionId previousRequestPartitionId) {
+        try {
+            for (int i = 0; ; i++) {
+                try {
 
-	@Nullable
-	private <T> T doExecuteInTransaction(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback, RequestPartitionId requestPartitionId, RequestPartitionId previousRequestPartitionId) {
-		try {
-			for (int i = 0; ; i++) {
-				try {
+                    return doExecuteCallback(theExecutionBuilder, theCallback);
 
-					return doExecuteCallback(theExecutionBuilder, theCallback);
+                } catch (Exception e) {
+                    if (!(ExceptionUtils.indexOfThrowable(e, ResourceVersionConflictException.class)
+                                    != -1
+                            || ExceptionUtils.indexOfThrowable(
+                                            e, DataIntegrityViolationException.class)
+                                    != -1
+                            || ExceptionUtils.indexOfThrowable(
+                                            e, ConstraintViolationException.class)
+                                    != -1
+                            || ExceptionUtils.indexOfThrowable(
+                                            e, ObjectOptimisticLockingFailureException.class)
+                                    != -1)) {
+                        ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
+                        throw e;
+                    } else {
 
-				} catch (Exception e) {
-					if (!(ExceptionUtils.indexOfThrowable(e, ResourceVersionConflictException.class) != -1 ||
-						ExceptionUtils.indexOfThrowable(e, DataIntegrityViolationException.class) != -1 ||
-						ExceptionUtils.indexOfThrowable(e, ConstraintViolationException.class) != -1 ||
-						ExceptionUtils.indexOfThrowable(e, ObjectOptimisticLockingFailureException.class) != -1)) {
-						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
-						throw e;
-					} else {
+                        ourLog.debug("Version conflict detected", e);
 
-						ourLog.debug("Version conflict detected", e);
+                        if (theExecutionBuilder.myOnRollback != null) {
+                            theExecutionBuilder.myOnRollback.run();
+                        }
 
-						if (theExecutionBuilder.myOnRollback != null) {
-							theExecutionBuilder.myOnRollback.run();
-						}
+                        int maxRetries = 0;
 
-						int maxRetries = 0;
+                        /*
+                         * If two client threads both concurrently try to add the same tag that isn't
+                         * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
+                         * which is the tag definition table. In that case, a constraint error will be
+                         * thrown by one of the client threads, so we auto-retry in order to avoid
+                         * annoying spurious failures for the client.
+                         */
+                        if (DaoFailureUtil.isTagStorageFailure(e)) {
+                            maxRetries = 3;
+                        }
 
-						/*
-						 * If two client threads both concurrently try to add the same tag that isn't
-						 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
-						 * which is the tag definition table. In that case, a constraint error will be
-						 * thrown by one of the client threads, so we auto-retry in order to avoid
-						 * annoying spurious failures for the client.
-						 */
-						if (DaoFailureUtil.isTagStorageFailure(e)) {
-							maxRetries = 3;
-						}
+                        if (maxRetries == 0) {
+                            HookParams params =
+                                    new HookParams()
+                                            .add(
+                                                    RequestDetails.class,
+                                                    theExecutionBuilder.myRequestDetails)
+                                            .addIfMatchesType(
+                                                    ServletRequestDetails.class,
+                                                    theExecutionBuilder.myRequestDetails);
+                            ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
+                                    (ResourceVersionConflictResolutionStrategy)
+                                            CompositeInterceptorBroadcaster
+                                                    .doCallHooksAndReturnObject(
+                                                            myInterceptorBroadcaster,
+                                                            theExecutionBuilder.myRequestDetails,
+                                                            Pointcut.STORAGE_VERSION_CONFLICT,
+                                                            params);
+                            if (conflictResolutionStrategy != null
+                                    && conflictResolutionStrategy.isRetry()) {
+                                maxRetries = conflictResolutionStrategy.getMaxRetries();
+                            }
+                        }
 
-						if (maxRetries == 0) {
-							HookParams params = new HookParams()
-								.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
-								.addIfMatchesType(ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
-							ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-								myInterceptorBroadcaster,
-								theExecutionBuilder.myRequestDetails,
-								Pointcut.STORAGE_VERSION_CONFLICT,
-								params
-							);
-							if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-								maxRetries = conflictResolutionStrategy.getMaxRetries();
-							}
-						}
+                        if (i < maxRetries) {
+                            if (theExecutionBuilder.myTransactionDetails != null) {
+                                theExecutionBuilder
+                                        .myTransactionDetails
+                                        .getRollbackUndoActions()
+                                        .forEach(Runnable::run);
+                                theExecutionBuilder.myTransactionDetails.clearRollbackUndoActions();
+                                theExecutionBuilder.myTransactionDetails.clearResolvedItems();
+                                theExecutionBuilder.myTransactionDetails.clearUserData(
+                                        XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+                                theExecutionBuilder.myTransactionDetails.clearUserData(
+                                        XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+                            }
+                            double sleepAmount = (250.0d * i) * Math.random();
+                            long sleepAmountLong = (long) sleepAmount;
+                            TestUtil.sleepAtLeast(sleepAmountLong, false);
 
-						if (i < maxRetries) {
-							if (theExecutionBuilder.myTransactionDetails != null) {
-								theExecutionBuilder.myTransactionDetails.getRollbackUndoActions().forEach(Runnable::run);
-								theExecutionBuilder.myTransactionDetails.clearRollbackUndoActions();
-								theExecutionBuilder.myTransactionDetails.clearResolvedItems();
-								theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-								theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
-							}
-							double sleepAmount = (250.0d * i) * Math.random();
-							long sleepAmountLong = (long) sleepAmount;
-							TestUtil.sleepAtLeast(sleepAmountLong, false);
+                            ourLog.info(
+                                    "About to start a transaction retry due to conflict or"
+                                            + " constraint error. Sleeping {}ms first.",
+                                    sleepAmountLong);
+                            continue;
+                        }
 
-							ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
-							continue;
-						}
+                        IBaseOperationOutcome oo = null;
+                        if (e instanceof ResourceVersionConflictException) {
+                            oo = ((ResourceVersionConflictException) e).getOperationOutcome();
+                        }
 
-						IBaseOperationOutcome oo = null;
-						if (e instanceof ResourceVersionConflictException) {
-							oo = ((ResourceVersionConflictException) e).getOperationOutcome();
-						}
+                        if (maxRetries > 0) {
+                            String msg =
+                                    "Max retries ("
+                                            + maxRetries
+                                            + ") exceeded for version conflict: "
+                                            + e.getMessage();
+                            ourLog.info(msg, maxRetries);
+                            throw new ResourceVersionConflictException(Msg.code(549) + msg);
+                        }
 
-						if (maxRetries > 0) {
-							String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
-							ourLog.info(msg, maxRetries);
-							throw new ResourceVersionConflictException(Msg.code(549) + msg);
-						}
+                        throw new ResourceVersionConflictException(
+                                Msg.code(550) + e.getMessage(), e, oo);
+                    }
+                }
+            }
+        } finally {
+            if (requestPartitionId != null) {
+                ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
+            }
+        }
+    }
 
-						throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
-					}
-				}
-			}
-		} finally {
-			if (requestPartitionId != null) {
-				ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
-			}
-		}
-	}
+    public void setTransactionPropagationWhenChangingPartitions(
+            Propagation theTransactionPropagationWhenChangingPartitions) {
+        Validate.notNull(theTransactionPropagationWhenChangingPartitions);
+        myTransactionPropagationWhenChangingPartitions =
+                theTransactionPropagationWhenChangingPartitions;
+    }
 
-	public void setTransactionPropagationWhenChangingPartitions(Propagation theTransactionPropagationWhenChangingPartitions) {
-		Validate.notNull(theTransactionPropagationWhenChangingPartitions);
-		myTransactionPropagationWhenChangingPartitions = theTransactionPropagationWhenChangingPartitions;
-	}
+    @Nullable
+    protected <T> T doExecuteCallback(
+            ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
+        try {
+            TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 
-	@Nullable
-	protected <T> T doExecuteCallback(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
-		try {
-			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+            if (theExecutionBuilder.myPropagation != null) {
+                txTemplate.setPropagationBehavior(theExecutionBuilder.myPropagation.value());
+            }
 
-			if (theExecutionBuilder.myPropagation != null) {
-				txTemplate.setPropagationBehavior(theExecutionBuilder.myPropagation.value());
-			}
+            if (isCustomIsolationSupported()
+                    && theExecutionBuilder.myIsolation != null
+                    && theExecutionBuilder.myIsolation != Isolation.DEFAULT) {
+                txTemplate.setIsolationLevel(theExecutionBuilder.myIsolation.value());
+            }
 
-			if (isCustomIsolationSupported() && theExecutionBuilder.myIsolation != null && theExecutionBuilder.myIsolation != Isolation.DEFAULT) {
-				txTemplate.setIsolationLevel(theExecutionBuilder.myIsolation.value());
-			}
+            if (theExecutionBuilder.myReadOnly) {
+                txTemplate.setReadOnly(true);
+            }
 
-			if (theExecutionBuilder.myReadOnly) {
-				txTemplate.setReadOnly(true);
-			}
+            return txTemplate.execute(theCallback);
+        } catch (MyException e) {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
+                throw new InternalErrorException(Msg.code(551) + e);
+            }
+        }
+    }
 
-			return txTemplate.execute(theCallback);
-		} catch (MyException e) {
-			if (e.getCause() instanceof RuntimeException) {
-				throw (RuntimeException) e.getCause();
-			} else {
-				throw new InternalErrorException(Msg.code(551) + e);
-			}
-		}
-	}
+    protected class ExecutionBuilder implements IExecutionBuilder {
 
-	protected class ExecutionBuilder implements IExecutionBuilder {
+        private final RequestDetails myRequestDetails;
+        private Isolation myIsolation;
+        private Propagation myPropagation;
+        private boolean myReadOnly;
+        private TransactionDetails myTransactionDetails;
+        private Runnable myOnRollback;
+        private RequestPartitionId myRequestPartitionId;
 
-		private final RequestDetails myRequestDetails;
-		private Isolation myIsolation;
-		private Propagation myPropagation;
-		private boolean myReadOnly;
-		private TransactionDetails myTransactionDetails;
-		private Runnable myOnRollback;
-		private RequestPartitionId myRequestPartitionId;
+        protected ExecutionBuilder(RequestDetails theRequestDetails) {
+            myRequestDetails = theRequestDetails;
+        }
 
-		protected ExecutionBuilder(RequestDetails theRequestDetails) {
-			myRequestDetails = theRequestDetails;
-		}
+        @Override
+        public ExecutionBuilder withIsolation(Isolation theIsolation) {
+            assert myIsolation == null;
+            myIsolation = theIsolation;
+            return this;
+        }
 
-		@Override
-		public ExecutionBuilder withIsolation(Isolation theIsolation) {
-			assert myIsolation == null;
-			myIsolation = theIsolation;
-			return this;
-		}
+        @Override
+        public ExecutionBuilder withTransactionDetails(TransactionDetails theTransactionDetails) {
+            assert myTransactionDetails == null;
+            myTransactionDetails = theTransactionDetails;
+            return this;
+        }
 
-		@Override
-		public ExecutionBuilder withTransactionDetails(TransactionDetails theTransactionDetails) {
-			assert myTransactionDetails == null;
-			myTransactionDetails = theTransactionDetails;
-			return this;
-		}
+        @Override
+        public ExecutionBuilder withPropagation(Propagation thePropagation) {
+            assert myPropagation == null;
+            myPropagation = thePropagation;
+            return this;
+        }
 
-		@Override
-		public ExecutionBuilder withPropagation(Propagation thePropagation) {
-			assert myPropagation == null;
-			myPropagation = thePropagation;
-			return this;
-		}
+        @Override
+        public ExecutionBuilder withRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+            assert myRequestPartitionId == null;
+            myRequestPartitionId = theRequestPartitionId;
+            return this;
+        }
 
-		@Override
-		public ExecutionBuilder withRequestPartitionId(RequestPartitionId theRequestPartitionId) {
-			assert myRequestPartitionId == null;
-			myRequestPartitionId = theRequestPartitionId;
-			return this;
-		}
+        @Override
+        public ExecutionBuilder readOnly() {
+            myReadOnly = true;
+            return this;
+        }
 
-		@Override
-		public ExecutionBuilder readOnly() {
-			myReadOnly = true;
-			return this;
-		}
+        @Override
+        public ExecutionBuilder onRollback(Runnable theOnRollback) {
+            assert myOnRollback == null;
+            myOnRollback = theOnRollback;
+            return this;
+        }
 
-		@Override
-		public ExecutionBuilder onRollback(Runnable theOnRollback) {
-			assert myOnRollback == null;
-			myOnRollback = theOnRollback;
-			return this;
-		}
+        @Override
+        public void execute(Runnable theTask) {
+            TransactionCallback<Void> task =
+                    tx -> {
+                        theTask.run();
+                        return null;
+                    };
+            execute(task);
+        }
 
-		@Override
-		public void execute(Runnable theTask) {
-			TransactionCallback<Void> task = tx -> {
-				theTask.run();
-				return null;
-			};
-			execute(task);
-		}
+        @Override
+        public <T> T execute(Callable<T> theTask) {
+            TransactionCallback<T> callback = tx -> invokeCallableAndHandleAnyException(theTask);
+            return execute(callback);
+        }
 
-		@Override
-		public <T> T execute(Callable<T> theTask) {
-			TransactionCallback<T> callback = tx -> invokeCallableAndHandleAnyException(theTask);
-			return execute(callback);
-		}
+        @Override
+        public <T> T execute(TransactionCallback<T> callback) {
+            assert callback != null;
 
-		@Override
-		public <T> T execute(TransactionCallback<T> callback) {
-			assert callback != null;
+            return doExecute(this, callback);
+        }
+    }
 
-			return doExecute(this, callback);
-		}
+    /**
+     * This is just an unchecked exception so that we can catch checked exceptions inside
+     * TransactionTemplate and rethrow them outside of it
+     */
+    static class MyException extends RuntimeException {
 
-	}
+        public MyException(Throwable theThrowable) {
+            super(theThrowable);
+        }
+    }
 
-	/**
-	 * This is just an unchecked exception so that we can catch checked exceptions inside TransactionTemplate
-	 * and rethrow them outside of it
-	 */
-	static class MyException extends RuntimeException {
+    /**
+     * Returns true if we alreadyt have an active transaction associated with the current thread,
+     * AND either it's non-read-only or we only need a read-only transaction, AND the newly
+     * requested transaction has a propagation of REQUIRED
+     */
+    private static boolean canReuseExistingTransaction(ExecutionBuilder theExecutionBuilder) {
+        return TransactionSynchronizationManager.isActualTransactionActive()
+                && (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()
+                        || theExecutionBuilder.myReadOnly)
+                && (theExecutionBuilder.myPropagation == null
+                        || theExecutionBuilder.myPropagation == Propagation.REQUIRED);
+    }
 
-		public MyException(Throwable theThrowable) {
-			super(theThrowable);
-		}
-	}
+    @Nullable
+    private static <T> T executeInExistingTransaction(TransactionCallback<T> theCallback) {
+        return theCallback.doInTransaction(null);
+    }
 
-	/**
-	 * Returns true if we alreadyt have an active transaction associated with the current thread, AND
-	 * either it's non-read-only or we only need a read-only transaction, AND
-	 * the newly requested transaction has a propagation of REQUIRED
-	 */
-	private static boolean canReuseExistingTransaction(ExecutionBuilder theExecutionBuilder) {
-		return TransactionSynchronizationManager.isActualTransactionActive()
-			&& (!TransactionSynchronizationManager.isCurrentTransactionReadOnly() || theExecutionBuilder.myReadOnly)
-			&& (theExecutionBuilder.myPropagation == null || theExecutionBuilder.myPropagation == Propagation.REQUIRED);
-	}
+    /**
+     * Invokes {@link Callable#call()} and rethrows any exceptions thrown by that method. If the
+     * exception extends {@link BaseServerResponseException} it is rethrown unmodified. Otherwise,
+     * it's wrapped in a {@link InternalErrorException}.
+     */
+    public static <T> T invokeCallableAndHandleAnyException(Callable<T> theTask) {
+        try {
+            return theTask.call();
+        } catch (BaseServerResponseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalErrorException(Msg.code(2223) + e.getMessage(), e);
+        }
+    }
 
-	@Nullable
-	private static <T> T executeInExistingTransaction(TransactionCallback<T> theCallback) {
-		return theCallback.doInTransaction(null);
-	}
+    public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
+        RequestPartitionId previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
+        ourRequestPartitionThreadLocal.set(RequestPartitionId.defaultPartition());
+        try {
+            return theCallback.call();
+        } finally {
+            ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
+        }
+    }
 
-	/**
-	 * Invokes {@link Callable#call()} and rethrows any exceptions thrown by that method.
-	 * If the exception extends {@link BaseServerResponseException} it is rethrown unmodified.
-	 * Otherwise, it's wrapped in a {@link InternalErrorException}.
-	 */
-	public static <T> T invokeCallableAndHandleAnyException(Callable<T> theTask) {
-		try {
-			return theTask.call();
-		} catch (BaseServerResponseException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new InternalErrorException(Msg.code(2223) + e.getMessage(), e);
-		}
-	}
+    public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
+        return ourRequestPartitionThreadLocal.get();
+    }
 
-	public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
-		RequestPartitionId previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
-		ourRequestPartitionThreadLocal.set(RequestPartitionId.defaultPartition());
-		try {
-			return theCallback.call();
-		} finally {
-			ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
-		}
-	}
+    /** Throws an {@link IllegalArgumentException} if a transaction is active */
+    public static void noTransactionAllowed() {
+        Validate.isTrue(
+                !TransactionSynchronizationManager.isActualTransactionActive(),
+                "Transaction must not be active but found an active transaction");
+    }
 
-	public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
-		return ourRequestPartitionThreadLocal.get();
-	}
-
-	/**
-	 * Throws an {@link IllegalArgumentException} if a transaction is active
-	 */
-	public static void noTransactionAllowed() {
-		Validate.isTrue(!TransactionSynchronizationManager.isActualTransactionActive(), "Transaction must not be active but found an active transaction");
-	}
-
-	/**
-	 * Throws an {@link IllegalArgumentException} if no transaction is active
-	 */
-	public static void requireTransaction() {
-		Validate.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Transaction required here but no active transaction found");
-	}
+    /** Throws an {@link IllegalArgumentException} if no transaction is active */
+    public static void requireTransaction() {
+        Validate.isTrue(
+                TransactionSynchronizationManager.isActualTransactionActive(),
+                "Transaction required here but no active transaction found");
+    }
 }

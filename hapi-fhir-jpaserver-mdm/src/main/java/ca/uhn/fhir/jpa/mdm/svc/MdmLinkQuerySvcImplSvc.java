@@ -24,13 +24,15 @@ import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
-import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,81 +40,101 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkQuerySvcImplSvc.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkQuerySvcImplSvc.class);
 
-	@Autowired
-	MdmLinkDaoSvc myMdmLinkDaoSvc;
+    @Autowired MdmLinkDaoSvc myMdmLinkDaoSvc;
 
-	@Autowired
-	IMdmModelConverterSvc myMdmModelConverterSvc;
+    @Autowired IMdmModelConverterSvc myMdmModelConverterSvc;
 
-	@Override
-	@Deprecated
-	@Transactional
-	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
-		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
-			.setGoldenResourceId(theGoldenResourceId)
-			.setSourceId(theSourceResourceId)
-			.setMatchResult(theMatchResult)
-			.setLinkSource(theLinkSource);
+    @Override
+    @Deprecated
+    @Transactional
+    public Page<MdmLinkJson> queryLinks(
+            IIdType theGoldenResourceId,
+            IIdType theSourceResourceId,
+            MdmMatchResultEnum theMatchResult,
+            MdmLinkSourceEnum theLinkSource,
+            MdmTransactionContext theMdmContext,
+            MdmPageRequest thePageRequest) {
+        MdmQuerySearchParameters mdmQuerySearchParameters =
+                new MdmQuerySearchParameters(thePageRequest)
+                        .setGoldenResourceId(theGoldenResourceId)
+                        .setSourceId(theSourceResourceId)
+                        .setMatchResult(theMatchResult)
+                        .setLinkSource(theLinkSource);
 
-		return queryLinks(mdmQuerySearchParameters, theMdmContext);
-	}
+        return queryLinks(mdmQuerySearchParameters, theMdmContext);
+    }
 
-	@Override
-	@Deprecated
-	@Transactional
-	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionIds) {
-		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
-			.setGoldenResourceId(theGoldenResourceId)
-			.setSourceId(theSourceResourceId)
-			.setMatchResult(theMatchResult)
-			.setLinkSource(theLinkSource)
-			.setPartitionIds(thePartitionIds);
+    @Override
+    @Deprecated
+    @Transactional
+    public Page<MdmLinkJson> queryLinks(
+            IIdType theGoldenResourceId,
+            IIdType theSourceResourceId,
+            MdmMatchResultEnum theMatchResult,
+            MdmLinkSourceEnum theLinkSource,
+            MdmTransactionContext theMdmContext,
+            MdmPageRequest thePageRequest,
+            List<Integer> thePartitionIds) {
+        MdmQuerySearchParameters mdmQuerySearchParameters =
+                new MdmQuerySearchParameters(thePageRequest)
+                        .setGoldenResourceId(theGoldenResourceId)
+                        .setSourceId(theSourceResourceId)
+                        .setMatchResult(theMatchResult)
+                        .setLinkSource(theLinkSource)
+                        .setPartitionIds(thePartitionIds);
 
-		return queryLinks(mdmQuerySearchParameters, theMdmContext);
-	}
+        return queryLinks(mdmQuerySearchParameters, theMdmContext);
+    }
 
-	@Override
-	@Transactional
-	public Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmContext) {
-		@SuppressWarnings("unchecked")
-		Page<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theMdmQuerySearchParameters);
-		return mdmLinks.map(myMdmModelConverterSvc::toJson);
-	}
+    @Override
+    @Transactional
+    public Page<MdmLinkJson> queryLinks(
+            MdmQuerySearchParameters theMdmQuerySearchParameters,
+            MdmTransactionContext theMdmContext) {
+        @SuppressWarnings("unchecked")
+        Page<? extends IMdmLink> mdmLinks =
+                myMdmLinkDaoSvc.executeTypedQuery(theMdmQuerySearchParameters);
+        return mdmLinks.map(myMdmModelConverterSvc::toJson);
+    }
 
+    @Override
+    @Transactional
+    public Page<MdmLinkJson> getDuplicateGoldenResources(
+            MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
+        return getDuplicateGoldenResources(theMdmContext, thePageRequest, null, null);
+    }
 
-	@Override
-	@Transactional
-	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
-		return getDuplicateGoldenResources(theMdmContext, thePageRequest, null, null);
-	}
+    @Override
+    @Transactional
+    public Page<MdmLinkJson> getDuplicateGoldenResources(
+            MdmTransactionContext theMdmContext,
+            MdmPageRequest thePageRequest,
+            List<Integer> thePartitionIds,
+            String theRequestResourceType) {
+        MdmQuerySearchParameters mdmQuerySearchParameters =
+                new MdmQuerySearchParameters(thePageRequest)
+                        .setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
+                        .setPartitionIds(thePartitionIds)
+                        .setResourceType(theRequestResourceType);
 
-	@Override
-	@Transactional
-	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest,
-																		  List<Integer> thePartitionIds, String theRequestResourceType) {
-		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
-			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
-			.setPartitionIds(thePartitionIds)
-			.setResourceType(theRequestResourceType);
+        @SuppressWarnings("unchecked")
+        Page<? extends IMdmLink> mdmLinkPage =
+                myMdmLinkDaoSvc.executeTypedQuery(mdmQuerySearchParameters);
+        return mdmLinkPage.map(myMdmModelConverterSvc::toJson);
+    }
 
-		@SuppressWarnings("unchecked")
-		Page<? extends IMdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(mdmQuerySearchParameters);
-		return mdmLinkPage.map(myMdmModelConverterSvc::toJson);
-	}
+    @Override
+    public List<MdmLinkWithRevisionJson> queryLinkHistory(
+            MdmHistorySearchParameters theMdmHistorySearchParameters) {
+        final List<MdmLinkWithRevision<? extends IMdmLink<?>>> mdmLinkHistoryFromDao =
+                myMdmLinkDaoSvc.findMdmLinkHistory(theMdmHistorySearchParameters);
 
-	@Override
-	public List<MdmLinkWithRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
-		final List<MdmLinkWithRevision<? extends IMdmLink<?>>> mdmLinkHistoryFromDao = myMdmLinkDaoSvc.findMdmLinkHistory(theMdmHistorySearchParameters);
-
-		return mdmLinkHistoryFromDao.stream()
-			.map(myMdmModelConverterSvc::toJson)
-			.collect(Collectors.toUnmodifiableList());
-	}
+        return mdmLinkHistoryFromDao.stream()
+                .map(myMdmModelConverterSvc::toJson)
+                .collect(Collectors.toUnmodifiableList());
+    }
 }

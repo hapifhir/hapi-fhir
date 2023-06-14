@@ -27,36 +27,42 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
  */
 public interface IChannelFactory {
 
-	/**
-	 * Create a channel that is used to receive messages from the queue.
-	 *
-	 * <p>
-	 * Implementations can choose to return the same object for multiple invocations of this method (and {@link #getOrCreateReceiver(String, Class, ChannelConsumerSettings)}
-	 * when invoked with the same {@literal theChannelName} if they need to, or they can create a new instance.
-	 * </p>
-	 *
-	 * @param theChannelName     The actual underlying queue name
-	 * @param theMessageType     The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
-	 * @param theChannelSettings Contains the configuration for subscribers.
-	 */
-	IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings);
+    /**
+     * Create a channel that is used to receive messages from the queue.
+     *
+     * <p>Implementations can choose to return the same object for multiple invocations of this
+     * method (and {@link #getOrCreateReceiver(String, Class, ChannelConsumerSettings)} when invoked
+     * with the same {@literal theChannelName} if they need to, or they can create a new instance.
+     *
+     * @param theChannelName The actual underlying queue name
+     * @param theMessageType The object type that will be placed on this queue. Objects will be
+     *     Jackson-annotated structures.
+     * @param theChannelSettings Contains the configuration for subscribers.
+     */
+    IChannelReceiver getOrCreateReceiver(
+            String theChannelName,
+            Class<?> theMessageType,
+            ChannelConsumerSettings theChannelSettings);
 
-	/**
-	 * Create a channel that is used to send messages to the queue.
-	 *
-	 * <p>
-	 * Implementations can choose to return the same object for multiple invocations of this method (and {@link #getOrCreateReceiver(String, Class, ChannelConsumerSettings)}
-	 * when invoked with the same {@literal theChannelName} if they need to, or they can create a new instance.
-	 * </p>
-	 *
-	 * @param theChannelName     The actual underlying queue name
-	 * @param theMessageType     The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
-	 * @param theChannelSettings Contains the configuration for senders.
-	 */
-	IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings);
+    /**
+     * Create a channel that is used to send messages to the queue.
+     *
+     * <p>Implementations can choose to return the same object for multiple invocations of this
+     * method (and {@link #getOrCreateReceiver(String, Class, ChannelConsumerSettings)} when invoked
+     * with the same {@literal theChannelName} if they need to, or they can create a new instance.
+     *
+     * @param theChannelName The actual underlying queue name
+     * @param theMessageType The object type that will be placed on this queue. Objects will be
+     *     Jackson-annotated structures.
+     * @param theChannelSettings Contains the configuration for senders.
+     */
+    IChannelProducer getOrCreateProducer(
+            String theChannelName,
+            Class<?> theMessageType,
+            ChannelProducerSettings theChannelSettings);
 
-	/**
-	 * @return the IChannelNamer used by this factory
-	 */
-	IChannelNamer getChannelNamer();
+    /**
+     * @return the IChannelNamer used by this factory
+     */
+    IChannelNamer getChannelNamer();
 }

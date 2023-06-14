@@ -22,18 +22,17 @@ package ca.uhn.fhir.jpa.api.dao;
 import ca.uhn.fhir.context.FhirContext;
 
 /**
- * Note that this interface is not considered a stable interface. While it is possible to build applications
- * that use it directly, please be aware that we may modify methods, add methods, or even remove methods from
- * time to time, even within minor point releases.
+ * Note that this interface is not considered a stable interface. While it is possible to build
+ * applications that use it directly, please be aware that we may modify methods, add methods, or
+ * even remove methods from time to time, even within minor point releases.
  */
 public interface IDao {
-	String RESOURCE_PID_KEY = "RESOURCE_PID";
+    String RESOURCE_PID_KEY = "RESOURCE_PID";
 
-	MetadataKeyResourcePid RESOURCE_PID = new MetadataKeyResourcePid(RESOURCE_PID_KEY);
+    MetadataKeyResourcePid RESOURCE_PID = new MetadataKeyResourcePid(RESOURCE_PID_KEY);
 
-	MetadataKeyCurrentlyReindexing CURRENTLY_REINDEXING = new MetadataKeyCurrentlyReindexing("CURRENTLY_REINDEXING");
+    MetadataKeyCurrentlyReindexing CURRENTLY_REINDEXING =
+            new MetadataKeyCurrentlyReindexing("CURRENTLY_REINDEXING");
 
-	FhirContext getContext();
-
-
+    FhirContext getContext();
 }

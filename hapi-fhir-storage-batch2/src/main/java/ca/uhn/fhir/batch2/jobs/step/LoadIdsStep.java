@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.batch2.jobs.step;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -28,27 +30,34 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
+public class LoadIdsStep
+        implements IJobStepWorker<
+                PartitionedUrlListJobParameters,
+                PartitionedUrlChunkRangeJson,
+                ResourceIdListWorkChunkJson> {
+    private static final Logger ourLog = getLogger(LoadIdsStep.class);
 
-import static org.slf4j.LoggerFactory.getLogger;
+    private final ResourceIdListStep<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson>
+            myResourceIdListStep;
 
-public class LoadIdsStep implements IJobStepWorker<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson, ResourceIdListWorkChunkJson> {
-	private static final Logger ourLog = getLogger(LoadIdsStep.class);
+    public LoadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
+        IIdChunkProducer<PartitionedUrlChunkRangeJson> idChunkProducer =
+                new PartitionedUrlListIdChunkProducer(theBatch2DaoSvc);
+        myResourceIdListStep = new ResourceIdListStep<>(idChunkProducer);
+    }
 
-
-	private final ResourceIdListStep<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> myResourceIdListStep;
-
-	public LoadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
-		IIdChunkProducer<PartitionedUrlChunkRangeJson> idChunkProducer = new PartitionedUrlListIdChunkProducer(theBatch2DaoSvc);
-		myResourceIdListStep = new ResourceIdListStep<>(idChunkProducer);
-	}
-
-	@Nonnull
-	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
-		return myResourceIdListStep.run(theStepExecutionDetails, theDataSink);
-	}
-
+    @Nonnull
+    @Override
+    public RunOutcome run(
+            @Nonnull
+                    StepExecutionDetails<
+                                    PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson>
+                            theStepExecutionDetails,
+            @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink)
+            throws JobExecutionFailedException {
+        return myResourceIdListStep.run(theStepExecutionDetails, theDataSink);
+    }
 }

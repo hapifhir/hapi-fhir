@@ -23,19 +23,19 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 public interface IPatch {
 
-	/**
-	 * The body of the patch document serialized in either XML or JSON which conforms to
-	 * http://jsonpatch.com/ or http://tools.ietf.org/html/rfc5261
-	 *
-	 * @param thePatchBody The body of the patch
-	 */
-	IPatchWithBody withBody(String thePatchBody);
+    /**
+     * The body of the patch document serialized in either XML or JSON which conforms to
+     * http://jsonpatch.com/ or http://tools.ietf.org/html/rfc5261
+     *
+     * @param thePatchBody The body of the patch
+     */
+    IPatchWithBody withBody(String thePatchBody);
 
-	/**
-	 * The body of the patch document using FHIR Patch syntax as described at
-	 * http://hl7.org/fhir/fhirpatch.html
-	 *
-	 * @since 5.1.0
-	 */
-	IPatchWithBody withFhirPatch(IBaseParameters thePatchBody);
+    /**
+     * The body of the patch document using FHIR Patch syntax as described at
+     * http://hl7.org/fhir/fhirpatch.html
+     *
+     * @since 5.1.0
+     */
+    IPatchWithBody withFhirPatch(IBaseParameters thePatchBody);
 }

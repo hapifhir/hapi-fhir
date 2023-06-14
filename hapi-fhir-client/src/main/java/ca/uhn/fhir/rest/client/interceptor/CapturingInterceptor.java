@@ -26,65 +26,66 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 
-import java.io.IOException;
-
 /**
- * Client interceptor which simply captures request and response objects and stores them so that they can be inspected after a client
- * call has returned
+ * Client interceptor which simply captures request and response objects and stores them so that
+ * they can be inspected after a client call has returned
  *
- * @see ThreadLocalCapturingInterceptor for an interceptor that uses a ThreadLocal in order to work in multithreaded environments
+ * @see ThreadLocalCapturingInterceptor for an interceptor that uses a ThreadLocal in order to work
+ *     in multithreaded environments
  */
 @Interceptor
 public class CapturingInterceptor {
 
-	private IHttpRequest myLastRequest;
-	private IHttpResponse myLastResponse;
+    private IHttpRequest myLastRequest;
+    private IHttpResponse myLastResponse;
 
-	/**
-	 * Clear the last request and response values
-	 */
-	public void clear() {
-		myLastRequest = null;
-		myLastResponse = null;
-	}
+    /** Clear the last request and response values */
+    public void clear() {
+        myLastRequest = null;
+        myLastResponse = null;
+    }
 
-	public IHttpRequest getLastRequest() {
-		return myLastRequest;
-	}
+    public IHttpRequest getLastRequest() {
+        return myLastRequest;
+    }
 
-	public IHttpResponse getLastResponse() {
-		return myLastResponse;
-	}
+    public IHttpResponse getLastResponse() {
+        return myLastResponse;
+    }
 
-	@Hook(value = Pointcut.CLIENT_REQUEST, order = InterceptorOrders.CAPTURING_INTERCEPTOR_REQUEST)
-	public void interceptRequest(IHttpRequest theRequest) {
-		myLastRequest = theRequest;
-	}
+    @Hook(value = Pointcut.CLIENT_REQUEST, order = InterceptorOrders.CAPTURING_INTERCEPTOR_REQUEST)
+    public void interceptRequest(IHttpRequest theRequest) {
+        myLastRequest = theRequest;
+    }
 
-	@Hook(value = Pointcut.CLIENT_RESPONSE, order = InterceptorOrders.CAPTURING_INTERCEPTOR_RESPONSE)
-	public void interceptResponse(IHttpResponse theResponse) {
-		//Buffer the reponse to avoid errors when content has already been read and the entity is not repeatable
-		bufferResponse(theResponse);
+    @Hook(
+            value = Pointcut.CLIENT_RESPONSE,
+            order = InterceptorOrders.CAPTURING_INTERCEPTOR_RESPONSE)
+    public void interceptResponse(IHttpResponse theResponse) {
+        // Buffer the reponse to avoid errors when content has already been read and the entity is
+        // not repeatable
+        bufferResponse(theResponse);
 
-		myLastResponse = theResponse;
-	}
+        myLastResponse = theResponse;
+    }
 
-	static void bufferResponse(IHttpResponse theResponse) {
-		try {
-			if (theResponse.getResponse() instanceof HttpResponse) {
-				HttpEntity entity = ((HttpResponse) theResponse.getResponse()).getEntity();
-				if (entity != null && !entity.isRepeatable()) {
-					theResponse.bufferEntity();
-				}
-			} else {
-				theResponse.bufferEntity();
-			}
-		} catch (IOException e) {
-			throw new InternalErrorException(Msg.code(1404) + "Unable to buffer the entity for capturing", e);
-		}
-	}
-
+    static void bufferResponse(IHttpResponse theResponse) {
+        try {
+            if (theResponse.getResponse() instanceof HttpResponse) {
+                HttpEntity entity = ((HttpResponse) theResponse.getResponse()).getEntity();
+                if (entity != null && !entity.isRepeatable()) {
+                    theResponse.bufferEntity();
+                }
+            } else {
+                theResponse.bufferEntity();
+            }
+        } catch (IOException e) {
+            throw new InternalErrorException(
+                    Msg.code(1404) + "Unable to buffer the entity for capturing", e);
+        }
+    }
 }

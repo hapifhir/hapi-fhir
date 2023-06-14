@@ -27,11 +27,15 @@ import org.springframework.context.ApplicationContext;
 
 public class SearchBuilderFactory<T extends IResourcePersistentId<?>> {
 
-	@Autowired
-	private ApplicationContext myApplicationContext;
+    @Autowired private ApplicationContext myApplicationContext;
 
-	public ISearchBuilder<T> newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
-		return (ISearchBuilder<T>) myApplicationContext.getBean(ISearchBuilder.SEARCH_BUILDER_BEAN_NAME, theDao, theResourceName, theResourceType);
-	}
-
+    public ISearchBuilder<T> newSearchBuilder(
+            IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+        return (ISearchBuilder<T>)
+                myApplicationContext.getBean(
+                        ISearchBuilder.SEARCH_BUILDER_BEAN_NAME,
+                        theDao,
+                        theResourceName,
+                        theResourceType);
+    }
 }

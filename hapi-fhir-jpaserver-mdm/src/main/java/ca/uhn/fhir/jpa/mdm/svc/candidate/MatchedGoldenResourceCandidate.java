@@ -25,28 +25,32 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public class MatchedGoldenResourceCandidate {
 
-	private final IResourcePersistentId myCandidateGoldenResourcePid;
-	private final MdmMatchOutcome myMdmMatchOutcome;
+    private final IResourcePersistentId myCandidateGoldenResourcePid;
+    private final MdmMatchOutcome myMdmMatchOutcome;
 
-	public MatchedGoldenResourceCandidate(IResourcePersistentId theCandidate, MdmMatchOutcome theMdmMatchOutcome) {
-		myCandidateGoldenResourcePid = theCandidate;
-		myMdmMatchOutcome = theMdmMatchOutcome;
-	}
+    public MatchedGoldenResourceCandidate(
+            IResourcePersistentId theCandidate, MdmMatchOutcome theMdmMatchOutcome) {
+        myCandidateGoldenResourcePid = theCandidate;
+        myMdmMatchOutcome = theMdmMatchOutcome;
+    }
 
-	public MatchedGoldenResourceCandidate(IResourcePersistentId theGoldenResourcePid, IMdmLink theMdmLink) {
-		myCandidateGoldenResourcePid = theGoldenResourcePid;
-		myMdmMatchOutcome = new MdmMatchOutcome(theMdmLink.getVector(), theMdmLink.getScore()).setMatchResultEnum(theMdmLink.getMatchResult());
-	}
+    public MatchedGoldenResourceCandidate(
+            IResourcePersistentId theGoldenResourcePid, IMdmLink theMdmLink) {
+        myCandidateGoldenResourcePid = theGoldenResourcePid;
+        myMdmMatchOutcome =
+                new MdmMatchOutcome(theMdmLink.getVector(), theMdmLink.getScore())
+                        .setMatchResultEnum(theMdmLink.getMatchResult());
+    }
 
-	public IResourcePersistentId getCandidateGoldenResourcePid() {
-		return myCandidateGoldenResourcePid;
-	}
+    public IResourcePersistentId getCandidateGoldenResourcePid() {
+        return myCandidateGoldenResourcePid;
+    }
 
-	public MdmMatchOutcome getMatchResult() {
-		return myMdmMatchOutcome;
-	}
+    public MdmMatchOutcome getMatchResult() {
+        return myMdmMatchOutcome;
+    }
 
-	public boolean isMatch() {
-		return myMdmMatchOutcome.isMatch();
-	}
+    public boolean isMatch() {
+        return myMdmMatchOutcome.isMatch();
+    }
 }

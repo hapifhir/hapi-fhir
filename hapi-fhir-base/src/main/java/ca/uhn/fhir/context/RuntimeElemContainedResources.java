@@ -23,14 +23,14 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 
 public class RuntimeElemContainedResources extends BaseRuntimeElementDefinition<BaseContainedDt> {
 
-	public RuntimeElemContainedResources(Class<? extends BaseContainedDt> theClass, boolean theStandardType) {
-		super("contained", theClass, theStandardType);
-		assert BaseContainedDt.class.isAssignableFrom(theClass);
-	}
+    public RuntimeElemContainedResources(
+            Class<? extends BaseContainedDt> theClass, boolean theStandardType) {
+        super("contained", theClass, theStandardType);
+        assert BaseContainedDt.class.isAssignableFrom(theClass);
+    }
 
-	@Override
-	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
-		return ChildTypeEnum.CONTAINED_RESOURCES;
-	}
-
+    @Override
+    public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+        return ChildTypeEnum.CONTAINED_RESOURCES;
+    }
 }

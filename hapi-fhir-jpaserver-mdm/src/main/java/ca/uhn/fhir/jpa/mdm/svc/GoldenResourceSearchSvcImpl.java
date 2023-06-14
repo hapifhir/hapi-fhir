@@ -27,62 +27,75 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.DateRangeUtil;
+import java.util.Date;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Date;
-import java.util.List;
-
 public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
-	@Autowired
-	private MatchUrlService myMatchUrlService;
+    @Autowired private MatchUrlService myMatchUrlService;
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+    @Autowired private DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private FhirContext myFhirContext;
+    @Autowired private FhirContext myFhirContext;
 
-	@Override
-	@Transactional
-	public IResourcePidList fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, @Nonnull String theResourceType) {
-		return fetchResourceIdsPageWithResourceType(theStart, theEnd, thePageSize, theResourceType, theRequestPartitionId);
-	}
+    @Override
+    @Transactional
+    public IResourcePidList fetchGoldenResourceIdsPage(
+            Date theStart,
+            Date theEnd,
+            @Nonnull Integer thePageSize,
+            @Nullable RequestPartitionId theRequestPartitionId,
+            @Nonnull String theResourceType) {
+        return fetchResourceIdsPageWithResourceType(
+                theStart, theEnd, thePageSize, theResourceType, theRequestPartitionId);
+    }
 
-	private IResourcePidList fetchResourceIdsPageWithResourceType(Date theStart, Date theEnd, int thePageSize, String theResourceType, RequestPartitionId theRequestPartitionId) {
+    private IResourcePidList fetchResourceIdsPageWithResourceType(
+            Date theStart,
+            Date theEnd,
+            int thePageSize,
+            String theResourceType,
+            RequestPartitionId theRequestPartitionId) {
 
-		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(theResourceType);
+        RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(theResourceType);
 
-		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theResourceType, def);
-		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
-		DateRangeParam chunkDateRange = DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
-		searchParamMap.setLastUpdated(chunkDateRange);
-		searchParamMap.setCount(thePageSize); // request this many pids
-		searchParamMap.add("_tag", new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
+        SearchParameterMap searchParamMap =
+                myMatchUrlService.translateMatchUrl(theResourceType, def);
+        searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
+        DateRangeParam chunkDateRange =
+                DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
+        searchParamMap.setLastUpdated(chunkDateRange);
+        searchParamMap.setCount(thePageSize); // request this many pids
+        searchParamMap.add(
+                "_tag",
+                new TokenParam(
+                        MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
 
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
-		SystemRequestDetails request = new SystemRequestDetails();
-		request.setRequestPartitionId(theRequestPartitionId);
-		List<IResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
+        IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
+        SystemRequestDetails request = new SystemRequestDetails();
+        request.setRequestPartitionId(theRequestPartitionId);
+        List<IResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
-		Date lastDate = null;
-		if (ids.size() > 0) {
-			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
-		}
+        Date lastDate = null;
+        if (ids.size() > 0) {
+            lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
+        }
 
-		return new HomogeneousResourcePidList(theResourceType, ids, lastDate, theRequestPartitionId);
-	}
+        return new HomogeneousResourcePidList(
+                theResourceType, ids, lastDate, theRequestPartitionId);
+    }
 }

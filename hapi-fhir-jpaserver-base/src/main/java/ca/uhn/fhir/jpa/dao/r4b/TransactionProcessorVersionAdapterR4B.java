@@ -24,6 +24,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import java.util.Date;
+import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,143 +33,145 @@ import org.hl7.fhir.r4b.model.Bundle;
 import org.hl7.fhir.r4b.model.OperationOutcome;
 import org.hl7.fhir.r4b.model.Resource;
 
-import java.util.Date;
-import java.util.List;
+public class TransactionProcessorVersionAdapterR4B
+        implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
+    @Override
+    public void setResponseStatus(Bundle.BundleEntryComponent theBundleEntry, String theStatus) {
+        theBundleEntry.getResponse().setStatus(theStatus);
+    }
 
-public class TransactionProcessorVersionAdapterR4B implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
-	@Override
-	public void setResponseStatus(Bundle.BundleEntryComponent theBundleEntry, String theStatus) {
-		theBundleEntry.getResponse().setStatus(theStatus);
-	}
+    @Override
+    public void setResponseLastModified(
+            Bundle.BundleEntryComponent theBundleEntry, Date theLastModified) {
+        theBundleEntry.getResponse().setLastModified(theLastModified);
+    }
 
-	@Override
-	public void setResponseLastModified(Bundle.BundleEntryComponent theBundleEntry, Date theLastModified) {
-		theBundleEntry.getResponse().setLastModified(theLastModified);
-	}
+    @Override
+    public void setResource(Bundle.BundleEntryComponent theBundleEntry, IBaseResource theResource) {
+        theBundleEntry.setResource((Resource) theResource);
+    }
 
-	@Override
-	public void setResource(Bundle.BundleEntryComponent theBundleEntry, IBaseResource theResource) {
-		theBundleEntry.setResource((Resource) theResource);
-	}
+    @Override
+    public IBaseResource getResource(Bundle.BundleEntryComponent theBundleEntry) {
+        return theBundleEntry.getResource();
+    }
 
-	@Override
-	public IBaseResource getResource(Bundle.BundleEntryComponent theBundleEntry) {
-		return theBundleEntry.getResource();
-	}
+    @Override
+    public String getBundleType(Bundle theRequest) {
+        if (theRequest.getType() == null) {
+            return null;
+        }
+        return theRequest.getTypeElement().getValue().toCode();
+    }
 
-	@Override
-	public String getBundleType(Bundle theRequest) {
-		if (theRequest.getType() == null) {
-			return null;
-		}
-		return theRequest.getTypeElement().getValue().toCode();
-	}
+    @Override
+    public void populateEntryWithOperationOutcome(
+            BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
+        OperationOutcome oo = new OperationOutcome();
+        oo.addIssue()
+                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                .setDiagnostics(theCaughtEx.getMessage())
+                .setCode(OperationOutcome.IssueType.EXCEPTION);
+        theEntry.getResponse().setOutcome(oo);
+    }
 
-	@Override
-	public void populateEntryWithOperationOutcome(BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
-		OperationOutcome oo = new OperationOutcome();
-		oo.addIssue()
-			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-			.setDiagnostics(theCaughtEx.getMessage())
-			.setCode(OperationOutcome.IssueType.EXCEPTION);
-		theEntry.getResponse().setOutcome(oo);
-	}
+    @Override
+    public Bundle createBundle(String theBundleType) {
+        Bundle resp = new Bundle();
+        try {
+            resp.setType(Bundle.BundleType.fromCode(theBundleType));
+        } catch (FHIRException theE) {
+            throw new InternalErrorException(
+                    Msg.code(2151) + "Unknown bundle type: " + theBundleType);
+        }
+        return resp;
+    }
 
-	@Override
-	public Bundle createBundle(String theBundleType) {
-		Bundle resp = new Bundle();
-		try {
-			resp.setType(Bundle.BundleType.fromCode(theBundleType));
-		} catch (FHIRException theE) {
-			throw new InternalErrorException(Msg.code(2151) + "Unknown bundle type: " + theBundleType);
-		}
-		return resp;
-	}
+    @Override
+    public List<Bundle.BundleEntryComponent> getEntries(Bundle theRequest) {
+        return theRequest.getEntry();
+    }
 
-	@Override
-	public List<Bundle.BundleEntryComponent> getEntries(Bundle theRequest) {
-		return theRequest.getEntry();
-	}
+    @Override
+    public void addEntry(Bundle theBundle, Bundle.BundleEntryComponent theEntry) {
+        theBundle.addEntry(theEntry);
+    }
 
-	@Override
-	public void addEntry(Bundle theBundle, Bundle.BundleEntryComponent theEntry) {
-		theBundle.addEntry(theEntry);
-	}
+    @Override
+    public Bundle.BundleEntryComponent addEntry(Bundle theBundle) {
+        return theBundle.addEntry();
+    }
 
-	@Override
-	public Bundle.BundleEntryComponent addEntry(Bundle theBundle) {
-		return theBundle.addEntry();
-	}
+    @Override
+    public String getEntryRequestVerb(
+            FhirContext theContext, Bundle.BundleEntryComponent theEntry) {
+        String retVal = null;
+        Bundle.HTTPVerb value = theEntry.getRequest().getMethodElement().getValue();
+        if (value != null) {
+            retVal = value.toCode();
+        }
+        return retVal;
+    }
 
-	@Override
-	public String getEntryRequestVerb(FhirContext theContext, Bundle.BundleEntryComponent theEntry) {
-		String retVal = null;
-		Bundle.HTTPVerb value = theEntry.getRequest().getMethodElement().getValue();
-		if (value != null) {
-			retVal = value.toCode();
-		}
-		return retVal;
-	}
+    @Override
+    public String getFullUrl(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getFullUrl();
+    }
 
-	@Override
-	public String getFullUrl(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getFullUrl();
-	}
+    @Override
+    public void setFullUrl(Bundle.BundleEntryComponent theEntry, String theFullUrl) {
+        theEntry.setFullUrl(theFullUrl);
+    }
 
+    @Override
+    public String getEntryIfNoneExist(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getRequest().getIfNoneExist();
+    }
 
-	@Override
-	public void setFullUrl(Bundle.BundleEntryComponent theEntry, String theFullUrl) {
-		theEntry.setFullUrl(theFullUrl);
-	}
+    @Override
+    public String getEntryRequestUrl(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getRequest().getUrl();
+    }
 
-	@Override
-	public String getEntryIfNoneExist(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getRequest().getIfNoneExist();
-	}
+    @Override
+    public void setResponseLocation(
+            Bundle.BundleEntryComponent theEntry, String theResponseLocation) {
+        theEntry.getResponse().setLocation(theResponseLocation);
+    }
 
-	@Override
-	public String getEntryRequestUrl(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getRequest().getUrl();
-	}
+    @Override
+    public void setResponseETag(Bundle.BundleEntryComponent theEntry, String theEtag) {
+        theEntry.getResponse().setEtag(theEtag);
+    }
 
-	@Override
-	public void setResponseLocation(Bundle.BundleEntryComponent theEntry, String theResponseLocation) {
-		theEntry.getResponse().setLocation(theResponseLocation);
-	}
+    @Override
+    public String getEntryRequestIfMatch(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getRequest().getIfMatch();
+    }
 
-	@Override
-	public void setResponseETag(Bundle.BundleEntryComponent theEntry, String theEtag) {
-		theEntry.getResponse().setEtag(theEtag);
-	}
+    @Override
+    public String getEntryRequestIfNoneExist(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getRequest().getIfNoneExist();
+    }
 
-	@Override
-	public String getEntryRequestIfMatch(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getRequest().getIfMatch();
-	}
+    @Override
+    public String getEntryRequestIfNoneMatch(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getRequest().getIfNoneMatch();
+    }
 
-	@Override
-	public String getEntryRequestIfNoneExist(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getRequest().getIfNoneExist();
-	}
+    @Override
+    public void setResponseOutcome(
+            Bundle.BundleEntryComponent theEntry, IBaseOperationOutcome theOperationOutcome) {
+        theEntry.getResponse().setOutcome((Resource) theOperationOutcome);
+    }
 
-	@Override
-	public String getEntryRequestIfNoneMatch(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getRequest().getIfNoneMatch();
-	}
+    @Override
+    public void setRequestVerb(Bundle.BundleEntryComponent theEntry, String theVerb) {
+        theEntry.getRequest().setMethod(Bundle.HTTPVerb.fromCode(theVerb));
+    }
 
-	@Override
-	public void setResponseOutcome(Bundle.BundleEntryComponent theEntry, IBaseOperationOutcome theOperationOutcome) {
-		theEntry.getResponse().setOutcome((Resource) theOperationOutcome);
-	}
-
-	@Override
-	public void setRequestVerb(Bundle.BundleEntryComponent theEntry, String theVerb) {
-		theEntry.getRequest().setMethod(Bundle.HTTPVerb.fromCode(theVerb));
-	}
-
-	@Override
-	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
-		theEntry.getRequest().setUrl(theUrl);
-	}
-
+    @Override
+    public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
+        theEntry.getRequest().setUrl(theUrl);
+    }
 }

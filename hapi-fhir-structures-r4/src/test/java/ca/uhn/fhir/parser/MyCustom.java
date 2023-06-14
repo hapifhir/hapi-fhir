@@ -9,21 +9,21 @@ import org.hl7.fhir.r4.model.UuidType;
 
 @ResourceDef(name = "Basic", profile = "http://mycustom.url")
 public class MyCustom extends Basic {
-	public static final String PROFILE = "http://mycustom.url";
+    public static final String PROFILE = "http://mycustom.url";
 
-	@Child(name = "myValue")
-	@Extension(url = "http://myValue.url", definedLocally = false, isModifier = false)
-	@Description(shortDefinition = "")
-	private UuidType myValue;
+    @Child(name = "myValue")
+    @Extension(url = "http://myValue.url", definedLocally = false, isModifier = false)
+    @Description(shortDefinition = "")
+    private UuidType myValue;
 
-	public MyCustom() {
-		super();
-	}
+    public MyCustom() {
+        super();
+    }
 
-	public UuidType getValue() {
-		if (myValue == null) {
-			myValue = new UuidType();
-		}
-		return myValue;
-	}
+    public UuidType getValue() {
+        if (myValue == null) {
+            myValue = new UuidType();
+        }
+        return myValue;
+    }
 }

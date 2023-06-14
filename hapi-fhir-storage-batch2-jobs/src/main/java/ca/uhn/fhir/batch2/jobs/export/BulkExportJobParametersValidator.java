@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.batch2.jobs.export;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -30,100 +32,116 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+public class BulkExportJobParametersValidator
+        implements IJobParametersValidator<BulkExportJobParameters> {
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+    /**
+     * @deprecated use BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE instead
+     */
+    @Deprecated(since = "6.3.10")
+    public static final String UNSUPPORTED_BINARY_TYPE =
+            BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE;
 
-public class BulkExportJobParametersValidator implements IJobParametersValidator<BulkExportJobParameters> {
+    @Autowired private DaoRegistry myDaoRegistry;
+    @Autowired private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
-	/** @deprecated use BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE instead */
-	@Deprecated(since="6.3.10")
-	public static final String UNSUPPORTED_BINARY_TYPE = BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+    @Autowired(required = false)
+    private IBinaryStorageSvc myBinaryStorageSvc;
 
-	@Autowired(required = false)
-	private IBinaryStorageSvc myBinaryStorageSvc;
+    @Nullable
+    @Override
+    public List<String> validate(
+            RequestDetails theRequestDetails, @Nonnull BulkExportJobParameters theParameters) {
+        List<String> errorMsgs = new ArrayList<>();
 
-	@Nullable
-	@Override
-	public List<String> validate(RequestDetails theRequestDetails, @Nonnull BulkExportJobParameters theParameters) {
-		List<String> errorMsgs = new ArrayList<>();
+        // initial validation
+        List<String> resourceTypes = theParameters.getResourceTypes();
+        if (resourceTypes != null && !resourceTypes.isEmpty()) {
+            for (String resourceType : theParameters.getResourceTypes()) {
+                if (resourceType.equalsIgnoreCase(UNSUPPORTED_BINARY_TYPE)) {
+                    errorMsgs.add("Bulk export of Binary resources is forbidden");
+                } else if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
+                    errorMsgs.add(
+                            "Resource type " + resourceType + " is not a supported resource type!");
+                }
+            }
+        }
 
-		// initial validation
-		List<String> resourceTypes = theParameters.getResourceTypes();
-		if (resourceTypes != null && !resourceTypes.isEmpty()) {
-			for (String resourceType : theParameters.getResourceTypes()) {
-				if (resourceType.equalsIgnoreCase(UNSUPPORTED_BINARY_TYPE)) {
-					errorMsgs.add("Bulk export of Binary resources is forbidden");
-				} else if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
-					errorMsgs.add("Resource type " + resourceType + " is not a supported resource type!");
-				}
-			}
-		}
+        // validate the output format
+        if (!Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theParameters.getOutputFormat())) {
+            errorMsgs.add(
+                    "The only allowed format for Bulk Export is currently "
+                            + Constants.CT_FHIR_NDJSON);
+        }
+        // validate the exportId
+        if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
 
-		// validate the output format
-		if (!Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theParameters.getOutputFormat())) {
-			errorMsgs.add("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
-		}
-		// validate the exportId
-		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
+            if (myBinaryStorageSvc != null
+                    && !myBinaryStorageSvc.isValidBlobId(theParameters.getExportIdentifier())) {
+                errorMsgs.add(
+                        "Export ID does not conform to the current blob storage implementation's"
+                                + " limitations.");
+            }
+        }
 
-			if (myBinaryStorageSvc != null && !myBinaryStorageSvc.isValidBlobId(theParameters.getExportIdentifier())) {
-				errorMsgs.add("Export ID does not conform to the current blob storage implementation's limitations.");
-			}
-		}
+        // validate for group
+        BulkDataExportOptions.ExportStyle style = theParameters.getExportStyle();
+        if (style == null) {
+            errorMsgs.add("Export style is required");
+        } else {
+            switch (style) {
+                case GROUP:
+                    if (theParameters.getGroupId() == null
+                            || theParameters.getGroupId().isEmpty()) {
+                        errorMsgs.add("Group export requires a group id, but none provided.");
+                    }
+                    break;
+                case SYSTEM:
+                case PATIENT:
+                default:
+                    break;
+            }
+        }
 
-		// validate for group
-		BulkDataExportOptions.ExportStyle style = theParameters.getExportStyle();
-		if (style == null) {
-			errorMsgs.add("Export style is required");
-		}
-		else {
-			switch (style) {
-				case GROUP:
-					if (theParameters.getGroupId() == null || theParameters.getGroupId().isEmpty()) {
-						errorMsgs.add("Group export requires a group id, but none provided.");
-					}
-					break;
-				case SYSTEM:
-				case PATIENT:
-				default:
-					break;
-			}
-		}
+        // Validate post fetch filter URLs
+        for (String next : theParameters.getPostFetchFilterUrls()) {
+            if (!next.contains("?") || isBlank(next.substring(next.indexOf('?') + 1))) {
+                errorMsgs.add(
+                        "Invalid post-fetch filter URL, must be in the format"
+                                + " [resourceType]?[parameters]: "
+                                + next);
+                continue;
+            }
+            String resourceType = next.substring(0, next.indexOf('?'));
+            if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
+                errorMsgs.add(
+                        "Invalid post-fetch filter URL, unknown resource type: " + resourceType);
+                continue;
+            }
 
-		// Validate post fetch filter URLs
-		for (String next : theParameters.getPostFetchFilterUrls()) {
-			if (!next.contains("?") || isBlank(next.substring(next.indexOf('?') + 1))) {
-				errorMsgs.add("Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: " + next);
-				continue;
-			}
-			String resourceType = next.substring(0, next.indexOf('?'));
-			if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
-				errorMsgs.add("Invalid post-fetch filter URL, unknown resource type: " + resourceType);
-				continue;
-			}
+            try {
+                InMemoryMatchResult inMemoryMatchResult =
+                        myInMemoryResourceMatcher.canBeEvaluatedInMemory(next);
+                if (!inMemoryMatchResult.supported()) {
+                    errorMsgs.add(
+                            "Invalid post-fetch filter URL, filter is not supported for in-memory"
+                                    + " matching \""
+                                    + next
+                                    + "\". Reason: "
+                                    + inMemoryMatchResult.getUnsupportedReason());
+                }
+            } catch (InvalidRequestException e) {
+                errorMsgs.add("Invalid post-fetch filter URL. Reason: " + e.getMessage());
+            }
+        }
 
-			try {
-				InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.canBeEvaluatedInMemory(next);
-				if (!inMemoryMatchResult.supported()) {
-					errorMsgs.add("Invalid post-fetch filter URL, filter is not supported for in-memory matching \"" + next + "\". Reason: " + inMemoryMatchResult.getUnsupportedReason());
-				}
-			} catch (InvalidRequestException e) {
-				errorMsgs.add("Invalid post-fetch filter URL. Reason: " + e.getMessage());
-			}
-		}
-
-		return errorMsgs;
-	}
-
+        return errorMsgs;
+    }
 }

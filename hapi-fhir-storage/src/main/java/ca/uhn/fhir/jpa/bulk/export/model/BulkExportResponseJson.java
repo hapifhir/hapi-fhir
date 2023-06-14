@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.model;
 
-
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -28,117 +27,122 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+        creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class BulkExportResponseJson {
 
-	@JsonProperty("transactionTime")
-	@JsonSerialize(using = JsonDateSerializer.class)
-	@JsonDeserialize(using = JsonDateDeserializer.class)
-	private Date myTransactionTime;
+    @JsonProperty("transactionTime")
+    @JsonSerialize(using = JsonDateSerializer.class)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    private Date myTransactionTime;
 
-	@JsonProperty("request")
-	private String myRequest;
-	@JsonProperty("requiresAccessToken")
-	private Boolean myRequiresAccessToken;
-	@JsonProperty("output")
-	private List<Output> myOutput;
+    @JsonProperty("request")
+    private String myRequest;
 
-	/*
-	 * Note that we override the include here as ONC regulations require that we actually serialize the empty error array.
-	 */
-	@JsonInclude
-	@JsonProperty("error")
-	private List<Output> myError = new ArrayList<>();
+    @JsonProperty("requiresAccessToken")
+    private Boolean myRequiresAccessToken;
 
-	@JsonProperty("message")
-	private String myMsg;
+    @JsonProperty("output")
+    private List<Output> myOutput;
 
-	public Date getTransactionTime() {
-		return myTransactionTime;
-	}
+    /*
+     * Note that we override the include here as ONC regulations require that we actually serialize the empty error array.
+     */
+    @JsonInclude
+    @JsonProperty("error")
+    private List<Output> myError = new ArrayList<>();
 
-	public BulkExportResponseJson setTransactionTime(Date theTransactionTime) {
-		myTransactionTime = theTransactionTime;
-		return this;
-	}
+    @JsonProperty("message")
+    private String myMsg;
 
-	public String getRequest() {
-		return myRequest;
-	}
+    public Date getTransactionTime() {
+        return myTransactionTime;
+    }
 
-	public BulkExportResponseJson setRequest(String theRequest) {
-		myRequest = theRequest;
-		return this;
-	}
+    public BulkExportResponseJson setTransactionTime(Date theTransactionTime) {
+        myTransactionTime = theTransactionTime;
+        return this;
+    }
 
-	public Boolean getRequiresAccessToken() {
-		return myRequiresAccessToken;
-	}
+    public String getRequest() {
+        return myRequest;
+    }
 
-	public BulkExportResponseJson setRequiresAccessToken(Boolean theRequiresAccessToken) {
-		myRequiresAccessToken = theRequiresAccessToken;
-		return this;
-	}
+    public BulkExportResponseJson setRequest(String theRequest) {
+        myRequest = theRequest;
+        return this;
+    }
 
-	public List<Output> getOutput() {
-		if (myOutput == null) {
-			myOutput = new ArrayList<>();
-		}
-		return myOutput;
-	}
+    public Boolean getRequiresAccessToken() {
+        return myRequiresAccessToken;
+    }
 
-	public List<Output> getError() {
-		if (myError == null) {
-			myError = new ArrayList<>();
-		}
-		return myError;
-	}
+    public BulkExportResponseJson setRequiresAccessToken(Boolean theRequiresAccessToken) {
+        myRequiresAccessToken = theRequiresAccessToken;
+        return this;
+    }
 
-	public Output addOutput() {
-		Output retVal = new Output();
-		getOutput().add(retVal);
-		return retVal;
-	}
+    public List<Output> getOutput() {
+        if (myOutput == null) {
+            myOutput = new ArrayList<>();
+        }
+        return myOutput;
+    }
 
-	public String getMsg() {
-		return myMsg;
-	}
+    public List<Output> getError() {
+        if (myError == null) {
+            myError = new ArrayList<>();
+        }
+        return myError;
+    }
 
-	public void setMsg(String theMsg) {
-		myMsg = theMsg;
-	}
+    public Output addOutput() {
+        Output retVal = new Output();
+        getOutput().add(retVal);
+        return retVal;
+    }
 
-	public static class Output implements IModelJson {
+    public String getMsg() {
+        return myMsg;
+    }
 
-		@JsonProperty("type")
-		private String myType;
-		@JsonProperty("url")
-		private String myUrl;
+    public void setMsg(String theMsg) {
+        myMsg = theMsg;
+    }
 
-		public String getType() {
-			return myType;
-		}
+    public static class Output implements IModelJson {
 
-		public Output setType(String theType) {
-			myType = theType;
-			return this;
-		}
+        @JsonProperty("type")
+        private String myType;
 
-		public String getUrl() {
-			return myUrl;
-		}
+        @JsonProperty("url")
+        private String myUrl;
 
-		public Output setUrl(String theUrl) {
-			myUrl = theUrl;
-			return this;
-		}
+        public String getType() {
+            return myType;
+        }
 
-	}
+        public Output setType(String theType) {
+            myType = theType;
+            return this;
+        }
 
+        public String getUrl() {
+            return myUrl;
+        }
+
+        public Output setUrl(String theUrl) {
+            myUrl = theUrl;
+            return this;
+        }
+    }
 }

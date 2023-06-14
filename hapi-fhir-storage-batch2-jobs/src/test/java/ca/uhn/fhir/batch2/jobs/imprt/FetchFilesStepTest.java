@@ -1,23 +1,5 @@
 package ca.uhn.fhir.batch2.jobs.imprt;
 
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.Base64Utils;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
-
 import static ca.uhn.fhir.rest.api.Constants.CT_APP_NDJSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
@@ -32,104 +14,148 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.Base64Utils;
+
 @ExtendWith(MockitoExtension.class)
 public class FetchFilesStepTest {
 
-	public static final String INSTANCE_ID = "instance-id";
-	public static final JobInstance ourTestInstance = JobInstance.fromInstanceId(INSTANCE_ID);
-	public static final String CHUNK_ID = "chunk-id";
+    public static final String INSTANCE_ID = "instance-id";
+    public static final JobInstance ourTestInstance = JobInstance.fromInstanceId(INSTANCE_ID);
+    public static final String CHUNK_ID = "chunk-id";
 
-	private final ContentTypeHeaderModifiableBulkImportFileServlet myBulkImportFileServlet = new ContentTypeHeaderModifiableBulkImportFileServlet();
-	@RegisterExtension
-	private final HttpServletExtension myHttpServletExtension = new HttpServletExtension()
-		.withServlet(myBulkImportFileServlet);
-	private final FetchFilesStep mySvc = new FetchFilesStep();
+    private final ContentTypeHeaderModifiableBulkImportFileServlet myBulkImportFileServlet =
+            new ContentTypeHeaderModifiableBulkImportFileServlet();
 
-	@Mock
-	private IJobDataSink<NdJsonFileJson> myJobDataSink;
+    @RegisterExtension
+    private final HttpServletExtension myHttpServletExtension =
+            new HttpServletExtension().withServlet(myBulkImportFileServlet);
 
-	@ParameterizedTest
-	@ValueSource(strings = {CT_FHIR_NDJSON, CT_FHIR_JSON, CT_FHIR_JSON_NEW, CT_APP_NDJSON, CT_JSON, CT_TEXT})
-	public void testFetchWithBasicAuth(String theHeaderContentType) {
+    private final FetchFilesStep mySvc = new FetchFilesStep();
 
-		// Setup
-		myBulkImportFileServlet.setHeaderContentTypeValue(theHeaderContentType);
-		String index = myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
+    @Mock private IJobDataSink<NdJsonFileJson> myJobDataSink;
 
-		BulkImportJobParameters parameters = new BulkImportJobParameters()
-			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
-			.setHttpBasicCredentials("admin:password");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                CT_FHIR_NDJSON,
+                CT_FHIR_JSON,
+                CT_FHIR_JSON_NEW,
+                CT_APP_NDJSON,
+                CT_JSON,
+                CT_TEXT
+            })
+    public void testFetchWithBasicAuth(String theHeaderContentType) {
 
-		// Test
+        // Setup
+        myBulkImportFileServlet.setHeaderContentTypeValue(theHeaderContentType);
+        String index =
+                myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
 
-		mySvc.run(details, myJobDataSink);
+        BulkImportJobParameters parameters =
+                new BulkImportJobParameters()
+                        .addNdJsonUrl(
+                                myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
+                        .setHttpBasicCredentials("admin:password");
+        StepExecutionDetails<BulkImportJobParameters, VoidModel> details =
+                new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
-		// Verify
+        // Test
 
-		assertEquals(1, myHttpServletExtension.getRequestHeaders().size());
+        mySvc.run(details, myJobDataSink);
 
-		String expectedAuthHeader = "Authorization: Basic " + Base64Utils.encodeToString("admin:password".getBytes(StandardCharsets.UTF_8));
-		assertThat(myHttpServletExtension.toString(), myHttpServletExtension.getRequestHeaders().get(0), hasItem(expectedAuthHeader));
-	}
+        // Verify
 
-	@Test
-	public void testFetchWithBasicAuth_SplitIntoBatches() {
+        assertEquals(1, myHttpServletExtension.getRequestHeaders().size());
 
-		// Setup
+        String expectedAuthHeader =
+                "Authorization: Basic "
+                        + Base64Utils.encodeToString(
+                                "admin:password".getBytes(StandardCharsets.UTF_8));
+        assertThat(
+                myHttpServletExtension.toString(),
+                myHttpServletExtension.getRequestHeaders().get(0),
+                hasItem(expectedAuthHeader));
+    }
 
-		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < 10; i++) {
-			b.append("{\"resourceType\":\"Patient\"}").append("\n");
-		}
-		String resource = b.toString();
-		String index = myBulkImportFileServlet.registerFileByContents(resource);
+    @Test
+    public void testFetchWithBasicAuth_SplitIntoBatches() {
 
-		BulkImportJobParameters parameters = new BulkImportJobParameters()
-			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
-			.setMaxBatchResourceCount(3);
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
+        // Setup
 
-		// Test
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < 10; i++) {
+            b.append("{\"resourceType\":\"Patient\"}").append("\n");
+        }
+        String resource = b.toString();
+        String index = myBulkImportFileServlet.registerFileByContents(resource);
 
-		mySvc.run(details, myJobDataSink);
+        BulkImportJobParameters parameters =
+                new BulkImportJobParameters()
+                        .addNdJsonUrl(
+                                myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
+                        .setMaxBatchResourceCount(3);
+        StepExecutionDetails<BulkImportJobParameters, VoidModel> details =
+                new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
-		// Verify
+        // Test
 
-		verify(myJobDataSink, times(4)).accept(any(NdJsonFileJson.class));
+        mySvc.run(details, myJobDataSink);
 
-	}
+        // Verify
 
-	@Test
-	public void testFetchWithBasicAuth_InvalidCredential() {
+        verify(myJobDataSink, times(4)).accept(any(NdJsonFileJson.class));
+    }
 
-		// Setup
+    @Test
+    public void testFetchWithBasicAuth_InvalidCredential() {
 
-		String index = myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
+        // Setup
 
-		BulkImportJobParameters parameters = new BulkImportJobParameters()
-			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
-			.setHttpBasicCredentials("admin");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
+        String index =
+                myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
 
-		// Test & Verify
+        BulkImportJobParameters parameters =
+                new BulkImportJobParameters()
+                        .addNdJsonUrl(
+                                myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
+                        .setHttpBasicCredentials("admin");
+        StepExecutionDetails<BulkImportJobParameters, VoidModel> details =
+                new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
-		assertThrows(JobExecutionFailedException.class, () -> mySvc.run(details, myJobDataSink));
-	}
+        // Test & Verify
 
-	public static class ContentTypeHeaderModifiableBulkImportFileServlet extends BulkImportFileServlet{
+        assertThrows(JobExecutionFailedException.class, () -> mySvc.run(details, myJobDataSink));
+    }
 
-		public String myContentTypeValue;
+    public static class ContentTypeHeaderModifiableBulkImportFileServlet
+            extends BulkImportFileServlet {
 
+        public String myContentTypeValue;
 
-		public void setHeaderContentTypeValue(String theContentTypeValue) {
-			myContentTypeValue = theContentTypeValue;
-		}
+        public void setHeaderContentTypeValue(String theContentTypeValue) {
+            myContentTypeValue = theContentTypeValue;
+        }
 
-		@Override
-		public String getHeaderContentType() {
-			return Objects.nonNull(myContentTypeValue) ? myContentTypeValue : super.getHeaderContentType();
-		}
-	}
-
+        @Override
+        public String getHeaderContentType() {
+            return Objects.nonNull(myContentTypeValue)
+                    ? myContentTypeValue
+                    : super.getHeaderContentType();
+        }
+    }
 }

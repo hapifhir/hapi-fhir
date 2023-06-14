@@ -24,88 +24,95 @@ import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.hash.HashingInputStream;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.CountingInputStream;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.CountingInputStream;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
- * Purely in-memory implementation of binary storage service. This is really
- * only appropriate for testing, since it doesn't persist anywhere and is
- * limited by the amount of available RAM.
+ * Purely in-memory implementation of binary storage service. This is really only appropriate for
+ * testing, since it doesn't persist anywhere and is limited by the amount of available RAM.
  */
-public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
+public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl
+        implements IBinaryStorageSvc {
 
-	private final ConcurrentHashMap<String, byte[]> myDataMap = new ConcurrentHashMap<>();
-	private final ConcurrentHashMap<String, StoredDetails> myDetailsMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, byte[]> myDataMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, StoredDetails> myDetailsMap = new ConcurrentHashMap<>();
 
-	/**
-	 * Constructor
-	 */
-	public MemoryBinaryStorageSvcImpl() {
-		super();
-	}
+    /** Constructor */
+    public MemoryBinaryStorageSvcImpl() {
+        super();
+    }
 
-	@Nonnull
-	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
-											 InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
+    @Nonnull
+    @Override
+    public StoredDetails storeBlob(
+            IIdType theResourceId,
+            String theBlobIdOrNull,
+            String theContentType,
+            InputStream theInputStream,
+            RequestDetails theRequestDetails)
+            throws IOException {
 
-		HashingInputStream hashingIs = createHashingInputStream(theInputStream);
-		CountingInputStream countingIs = createCountingInputStream(hashingIs);
+        HashingInputStream hashingIs = createHashingInputStream(theInputStream);
+        CountingInputStream countingIs = createCountingInputStream(hashingIs);
 
-		byte[] bytes = IOUtils.toByteArray(countingIs);
-		String id = super.provideIdForNewBlob(theBlobIdOrNull, bytes, theRequestDetails, theContentType);
-		String key = toKey(theResourceId, id);
-		theInputStream.close();
-		myDataMap.put(key, bytes);
-		StoredDetails storedDetails = new StoredDetails(id, countingIs.getByteCount(), theContentType, hashingIs, new Date());
-		myDetailsMap.put(key, storedDetails);
-		return storedDetails;
-	}
+        byte[] bytes = IOUtils.toByteArray(countingIs);
+        String id =
+                super.provideIdForNewBlob(
+                        theBlobIdOrNull, bytes, theRequestDetails, theContentType);
+        String key = toKey(theResourceId, id);
+        theInputStream.close();
+        myDataMap.put(key, bytes);
+        StoredDetails storedDetails =
+                new StoredDetails(
+                        id, countingIs.getByteCount(), theContentType, hashingIs, new Date());
+        myDetailsMap.put(key, storedDetails);
+        return storedDetails;
+    }
 
-	@Override
-	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
-		String key = toKey(theResourceId, theBlobId);
-		return myDetailsMap.get(key);
-	}
+    @Override
+    public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
+        String key = toKey(theResourceId, theBlobId);
+        return myDetailsMap.get(key);
+    }
 
-	@Override
-	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
-		String key = toKey(theResourceId, theBlobId);
-		byte[] bytes = myDataMap.get(key);
-		if (bytes == null) {
-			return false;
-		}
-		theOutputStream.write(bytes);
-		return true;
-	}
+    @Override
+    public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream)
+            throws IOException {
+        String key = toKey(theResourceId, theBlobId);
+        byte[] bytes = myDataMap.get(key);
+        if (bytes == null) {
+            return false;
+        }
+        theOutputStream.write(bytes);
+        return true;
+    }
 
-	@Override
-	public void expungeBlob(IIdType theResourceId, String theBlobId) {
-		String key = toKey(theResourceId, theBlobId);
-		myDataMap.remove(key);
-		myDetailsMap.remove(key);
-	}
+    @Override
+    public void expungeBlob(IIdType theResourceId, String theBlobId) {
+        String key = toKey(theResourceId, theBlobId);
+        myDataMap.remove(key);
+        myDetailsMap.remove(key);
+    }
 
-	@Override
-	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
-		String key = toKey(theResourceId, theBlobId);
-		return myDataMap.get(key);
-	}
+    @Override
+    public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
+        String key = toKey(theResourceId, theBlobId);
+        return myDataMap.get(key);
+    }
 
-	private String toKey(IIdType theResourceId, String theBlobId) {
-		return theBlobId + '-' + theResourceId.toUnqualifiedVersionless().getValue();
-	}
+    private String toKey(IIdType theResourceId, String theBlobId) {
+        return theBlobId + '-' + theResourceId.toUnqualifiedVersionless().getValue();
+    }
 
-	public void clear() {
-		myDetailsMap.clear();
-		myDataMap.clear();
-	}
+    public void clear() {
+        myDetailsMap.clear();
+        myDataMap.clear();
+    }
 }

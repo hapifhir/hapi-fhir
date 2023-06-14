@@ -20,28 +20,27 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class LocalFileValidationSupport extends PrePopulatedValidationSupport {
 
-	public LocalFileValidationSupport(FhirContext ctx) {
-		super(ctx);
-	}
+    public LocalFileValidationSupport(FhirContext ctx) {
+        super(ctx);
+    }
 
-	@Override
-	public FhirContext getFhirContext() {
-		return myCtx;
-	}
+    @Override
+    public FhirContext getFhirContext() {
+        return myCtx;
+    }
 
-	public void loadFile(String theFileName) throws IOException {
-		String contents = IOUtils.toString(new InputStreamReader(new FileInputStream(theFileName), "UTF-8"));
-		IBaseResource resource  = myCtx.newJsonParser().parseResource(contents);
-		this.addResource(resource);
-	}
-
+    public void loadFile(String theFileName) throws IOException {
+        String contents =
+                IOUtils.toString(new InputStreamReader(new FileInputStream(theFileName), "UTF-8"));
+        IBaseResource resource = myCtx.newJsonParser().parseResource(contents);
+        this.addResource(resource);
+    }
 }

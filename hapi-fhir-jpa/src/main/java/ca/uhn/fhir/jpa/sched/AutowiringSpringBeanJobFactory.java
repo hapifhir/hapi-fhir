@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.sched;
 
+import java.util.Date;
 import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.JobKey;
 import org.quartz.spi.TriggerFiredBundle;
@@ -29,42 +30,48 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
-import java.util.Date;
+public class AutowiringSpringBeanJobFactory extends SpringBeanJobFactory
+        implements ApplicationContextAware {
 
-public class AutowiringSpringBeanJobFactory extends SpringBeanJobFactory implements ApplicationContextAware {
+    private transient AutowireCapableBeanFactory myBeanFactory;
+    private ApplicationContext myAppCtx;
+    private static final Logger ourLog =
+            LoggerFactory.getLogger(AutowiringSpringBeanJobFactory.class);
 
-	private transient AutowireCapableBeanFactory myBeanFactory;
-	private ApplicationContext myAppCtx;
-	private static final Logger ourLog = LoggerFactory.getLogger(AutowiringSpringBeanJobFactory.class);
+    @Override
+    public void setApplicationContext(final ApplicationContext theApplicationContext) {
+        myAppCtx = theApplicationContext;
+        myBeanFactory = theApplicationContext.getAutowireCapableBeanFactory();
+    }
 
-	@Override
-	public void setApplicationContext(final ApplicationContext theApplicationContext) {
-		myAppCtx = theApplicationContext;
-		myBeanFactory = theApplicationContext.getAutowireCapableBeanFactory();
-	}
+    @Override
+    protected Object createJobInstance(final TriggerFiredBundle bundle) throws Exception {
 
-	@Override
-	protected Object createJobInstance(final TriggerFiredBundle bundle) throws Exception {
+        String prev = toString(bundle.getPrevFireTime());
+        String scheduled = toString(bundle.getScheduledFireTime());
+        String next = toString(bundle.getNextFireTime());
+        String fireInstanceId = bundle.getTrigger().getFireInstanceId();
+        JobKey key = bundle.getJobDetail().getKey();
+        ourLog.trace(
+                "Firing job[{}] ID[{}] - Previous[{}] Scheduled[{}] Next[{}]",
+                key,
+                fireInstanceId,
+                prev,
+                scheduled,
+                next);
 
-		String prev = toString(bundle.getPrevFireTime());
-		String scheduled = toString(bundle.getScheduledFireTime());
-		String next = toString(bundle.getNextFireTime());
-		String fireInstanceId = bundle.getTrigger().getFireInstanceId();
-		JobKey key = bundle.getJobDetail().getKey();
-		ourLog.trace("Firing job[{}] ID[{}] - Previous[{}] Scheduled[{}] Next[{}]", key, fireInstanceId, prev, scheduled, next);
+        Object job = super.createJobInstance(bundle);
+        myBeanFactory.autowireBean(job);
+        if (job instanceof ApplicationContextAware) {
+            ((ApplicationContextAware) job).setApplicationContext(myAppCtx);
+        }
+        return job;
+    }
 
-		Object job = super.createJobInstance(bundle);
-		myBeanFactory.autowireBean(job);
-		if (job instanceof ApplicationContextAware) {
-			((ApplicationContextAware) job).setApplicationContext(myAppCtx);
-		}
-		return job;
-	}
-
-	private String toString(Date theDate) {
-		if (theDate == null) {
-			return null;
-		}
-		return new InstantType(theDate).getValueAsString();
-	}
+    private String toString(Date theDate) {
+        if (theDate == null) {
+            return null;
+        }
+        return new InstantType(theDate).getValueAsString();
+    }
 }

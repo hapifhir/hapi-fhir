@@ -24,51 +24,54 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
- * States for the {@link WorkChunk} state machine.
- * The initial state is QUEUED.
- * The terminal states are FAILED, COMPLETED.
+ * States for the {@link WorkChunk} state machine. The initial state is QUEUED. The terminal states
+ * are FAILED, COMPLETED.
  *
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
 public enum WorkChunkStatusEnum {
-	// wipmb For 6.8 Add WAITING for gated, and READY for in db, but not yet sent to channel.
-	QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED;
+    // wipmb For 6.8 Add WAITING for gated, and READY for in db, but not yet sent to channel.
+    QUEUED,
+    IN_PROGRESS,
+    ERRORED,
+    FAILED,
+    COMPLETED;
 
-	private static final EnumMap<WorkChunkStatusEnum, Set<WorkChunkStatusEnum>> ourPriorStates;
-	static {
-		ourPriorStates = new EnumMap<>(WorkChunkStatusEnum.class);
-		for (WorkChunkStatusEnum nextEnum: WorkChunkStatusEnum.values()) {
-			ourPriorStates.put(nextEnum, EnumSet.noneOf(WorkChunkStatusEnum.class));
-		}
-		for (WorkChunkStatusEnum nextPriorEnum: WorkChunkStatusEnum.values()) {
-			for (WorkChunkStatusEnum nextEnum: nextPriorEnum.getNextStates()) {
-				ourPriorStates.get(nextEnum).add(nextPriorEnum);
-			}
-		}
-	}
+    private static final EnumMap<WorkChunkStatusEnum, Set<WorkChunkStatusEnum>> ourPriorStates;
 
+    static {
+        ourPriorStates = new EnumMap<>(WorkChunkStatusEnum.class);
+        for (WorkChunkStatusEnum nextEnum : WorkChunkStatusEnum.values()) {
+            ourPriorStates.put(nextEnum, EnumSet.noneOf(WorkChunkStatusEnum.class));
+        }
+        for (WorkChunkStatusEnum nextPriorEnum : WorkChunkStatusEnum.values()) {
+            for (WorkChunkStatusEnum nextEnum : nextPriorEnum.getNextStates()) {
+                ourPriorStates.get(nextEnum).add(nextPriorEnum);
+            }
+        }
+    }
 
-	public boolean isIncomplete() {
-		return (this != WorkChunkStatusEnum.COMPLETED);
-	}
+    public boolean isIncomplete() {
+        return (this != WorkChunkStatusEnum.COMPLETED);
+    }
 
-	public Set<WorkChunkStatusEnum> getNextStates() {
-		switch (this) {
-			case QUEUED:
-				return EnumSet.of(IN_PROGRESS);
-			case IN_PROGRESS:
-				return EnumSet.of(IN_PROGRESS, ERRORED, FAILED, COMPLETED);
-			case ERRORED:
-				return EnumSet.of(IN_PROGRESS, FAILED, COMPLETED);
-			// terminal states
-			case FAILED:
-			case COMPLETED:
-			default:
-				return EnumSet.noneOf(WorkChunkStatusEnum.class);
-		}
-	}
+    public Set<WorkChunkStatusEnum> getNextStates() {
+        switch (this) {
+            case QUEUED:
+                return EnumSet.of(IN_PROGRESS);
+            case IN_PROGRESS:
+                return EnumSet.of(IN_PROGRESS, ERRORED, FAILED, COMPLETED);
+            case ERRORED:
+                return EnumSet.of(IN_PROGRESS, FAILED, COMPLETED);
+                // terminal states
+            case FAILED:
+            case COMPLETED:
+            default:
+                return EnumSet.noneOf(WorkChunkStatusEnum.class);
+        }
+    }
 
-	public Set<WorkChunkStatusEnum> getPriorStates() {
-		return ourPriorStates.get(this);
-	}
+    public Set<WorkChunkStatusEnum> getPriorStates() {
+        return ourPriorStates.get(this);
+    }
 }

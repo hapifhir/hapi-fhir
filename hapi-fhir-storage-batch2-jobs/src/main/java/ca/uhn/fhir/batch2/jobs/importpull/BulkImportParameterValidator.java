@@ -19,54 +19,56 @@
  */
 package ca.uhn.fhir.batch2.jobs.importpull;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+public class BulkImportParameterValidator
+        implements IJobParametersValidator<Batch2BulkImportPullJobParameters> {
+    private static final Logger ourLog = getLogger(BulkImportParameterValidator.class);
 
-import static org.slf4j.LoggerFactory.getLogger;
+    private final IBulkDataImportSvc myBulkDataImportSvc;
 
-public class BulkImportParameterValidator implements IJobParametersValidator<Batch2BulkImportPullJobParameters> {
-	private static final Logger ourLog = getLogger(BulkImportParameterValidator.class);
+    public BulkImportParameterValidator(IBulkDataImportSvc theIBulkDataImportSvc) {
+        myBulkDataImportSvc = theIBulkDataImportSvc;
+    }
 
-	private final IBulkDataImportSvc myBulkDataImportSvc;
+    @Nullable
+    @Override
+    public List<String> validate(
+            RequestDetails theRequestDetails,
+            @Nonnull Batch2BulkImportPullJobParameters theParameters) {
+        ourLog.info("BulkImportPull parameter validation begin");
 
-	public BulkImportParameterValidator(IBulkDataImportSvc theIBulkDataImportSvc) {
-		myBulkDataImportSvc = theIBulkDataImportSvc;
-	}
+        ArrayList<String> errors = new ArrayList<>();
 
-	@Nullable
-	@Override
-	public List<String> validate(RequestDetails theRequestDetails, @Nonnull Batch2BulkImportPullJobParameters theParameters) {
-		ourLog.info("BulkImportPull parameter validation begin");
+        if (theParameters.getBatchSize() <= 0) {
+            errors.add("Batch size must be positive");
+        }
 
-		ArrayList<String> errors = new ArrayList<>();
+        String jobId = theParameters.getJobId();
+        if (StringUtils.isEmpty(jobId)) {
+            errors.add("Bulk Import Pull requires an existing job id");
+        } else {
+            BulkImportJobJson job = myBulkDataImportSvc.fetchJob(jobId);
 
-		if (theParameters.getBatchSize() <= 0) {
-			errors.add("Batch size must be positive");
-		}
+            if (job == null) {
+                errors.add("There is no persistent job that exists with UUID: " + jobId);
+            }
+        }
 
-		String jobId = theParameters.getJobId();
-		if (StringUtils.isEmpty(jobId)) {
-			errors.add("Bulk Import Pull requires an existing job id");
-		} else {
-			BulkImportJobJson job = myBulkDataImportSvc.fetchJob(jobId);
+        ourLog.info("BulkImportPull parameter validation end");
 
-			if (job == null) {
-				errors.add("There is no persistent job that exists with UUID: " + jobId);
-			}
-		}
-
-		ourLog.info("BulkImportPull parameter validation end");
-
-		return errors;
-	}
+        return errors;
+    }
 }

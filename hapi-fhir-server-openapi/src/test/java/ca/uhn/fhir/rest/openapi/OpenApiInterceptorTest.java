@@ -1,5 +1,13 @@
 package ca.uhn.fhir.rest.openapi;
 
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -26,6 +34,15 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -52,334 +69,387 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 public class OpenApiInterceptorTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(OpenApiInterceptorTest.class);
-	private final FhirContext myFhirContext = FhirContext.forR4Cached();
-	@RegisterExtension
-	@Order(0)
-	protected RestfulServerExtension myServer = new RestfulServerExtension(myFhirContext)
-		.withServletPath("/fhir/*")
-		.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Patient.class)))
-		.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Observation.class)))
-		.withServer(t -> t.registerProvider(new MyLastNProvider()))
-		.withServer(t -> t.registerInterceptor(new ResponseHighlighterInterceptor()));
-	private CloseableHttpClient myClient;
+    private static final Logger ourLog = LoggerFactory.getLogger(OpenApiInterceptorTest.class);
+    private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
-	@BeforeEach
-	public void before() {
-		myClient = HttpClientBuilder.create().build();
-	}
+    @RegisterExtension
+    @Order(0)
+    protected RestfulServerExtension myServer =
+            new RestfulServerExtension(myFhirContext)
+                    .withServletPath("/fhir/*")
+                    .withServer(
+                            t ->
+                                    t.registerProvider(
+                                            new HashMapResourceProvider<>(
+                                                    myFhirContext, Patient.class)))
+                    .withServer(
+                            t ->
+                                    t.registerProvider(
+                                            new HashMapResourceProvider<>(
+                                                    myFhirContext, Observation.class)))
+                    .withServer(t -> t.registerProvider(new MyLastNProvider()))
+                    .withServer(t -> t.registerInterceptor(new ResponseHighlighterInterceptor()));
 
-	@AfterEach
-	public void after() throws IOException {
-		myClient.close();
-		myServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
-	}
+    private CloseableHttpClient myClient;
 
-	@Test
-	public void testFetchSwagger() throws IOException {
-		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+    @BeforeEach
+    public void before() {
+        myClient = HttpClientBuilder.create().build();
+    }
 
-		String resp;
-		HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/metadata?_pretty=true");
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("CapabilityStatement: {}", resp);
-		}
+    @AfterEach
+    public void after() throws IOException {
+        myClient.close();
+        myServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
+    }
 
-		get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/api-docs");
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", response.getStatusLine());
-			ourLog.debug("Response: {}", resp);
-		}
+    @Test
+    public void testFetchSwagger() throws IOException {
+        myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
-		OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
+        String resp;
+        HttpGet get =
+                new HttpGet(
+                        "http://localhost:" + myServer.getPort() + "/fhir/metadata?_pretty=true");
+        try (CloseableHttpResponse response = myClient.execute(get)) {
+            resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+            ourLog.info("CapabilityStatement: {}", resp);
+        }
 
-		PathItem fooOpPath = parsed.getPaths().get("/$foo-op");
-		assertNull(fooOpPath.getGet());
-		assertNotNull(fooOpPath.getPost());
-		assertEquals("Foo Op Description", fooOpPath.getPost().getDescription());
-		assertEquals("Foo Op Short", fooOpPath.getPost().getSummary());
+        get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/api-docs");
+        try (CloseableHttpResponse response = myClient.execute(get)) {
+            resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+            ourLog.info("Response: {}", response.getStatusLine());
+            ourLog.debug("Response: {}", resp);
+        }
 
-		PathItem lastNPath = parsed.getPaths().get("/Observation/$lastn");
-		assertNotNull(lastNPath.getPost());
-		assertEquals("LastN Description", lastNPath.getPost().getDescription());
-		assertEquals("LastN Short", lastNPath.getPost().getSummary());
-		assertNull(lastNPath.getPost().getParameters());
-		assertNotNull(lastNPath.getPost().getRequestBody());
-		assertNotNull(lastNPath.getGet());
-		assertEquals("LastN Description", lastNPath.getGet().getDescription());
-		assertEquals("LastN Short", lastNPath.getGet().getSummary());
-		assertEquals(4, lastNPath.getGet().getParameters().size());
-		assertEquals("Subject description", lastNPath.getGet().getParameters().get(0).getDescription());
-	}
+        OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
 
-	@Test
-	public void testRedirectFromBaseUrl() throws IOException {
-		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+        PathItem fooOpPath = parsed.getPaths().get("/$foo-op");
+        assertNull(fooOpPath.getGet());
+        assertNotNull(fooOpPath.getPost());
+        assertEquals("Foo Op Description", fooOpPath.getPost().getDescription());
+        assertEquals("Foo Op Short", fooOpPath.getPost().getSummary());
 
-		HttpGet get;
+        PathItem lastNPath = parsed.getPaths().get("/Observation/$lastn");
+        assertNotNull(lastNPath.getPost());
+        assertEquals("LastN Description", lastNPath.getPost().getDescription());
+        assertEquals("LastN Short", lastNPath.getPost().getSummary());
+        assertNull(lastNPath.getPost().getParameters());
+        assertNotNull(lastNPath.getPost().getRequestBody());
+        assertNotNull(lastNPath.getGet());
+        assertEquals("LastN Description", lastNPath.getGet().getDescription());
+        assertEquals("LastN Short", lastNPath.getGet().getSummary());
+        assertEquals(4, lastNPath.getGet().getParameters().size());
+        assertEquals(
+                "Subject description", lastNPath.getGet().getParameters().get(0).getDescription());
+    }
 
-		get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			assertEquals(400, response.getStatusLine().getStatusCode());
-		}
+    @Test
+    public void testRedirectFromBaseUrl() throws IOException {
+        myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
-		get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			ourLog.info("Response: {}", responseString);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(responseString, containsString("<title>Swagger UI</title>"));
-		}
+        HttpGet get;
 
-		get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/?foo=foo");
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			assertEquals(400, response.getStatusLine().getStatusCode());
-		}
+        get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
+        try (CloseableHttpResponse response = myClient.execute(get)) {
+            assertEquals(400, response.getStatusLine().getStatusCode());
+        }
 
-		get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir?foo=foo");
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			assertEquals(400, response.getStatusLine().getStatusCode());
-		}
+        get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
+        get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
+        try (CloseableHttpResponse response = myClient.execute(get)) {
+            String responseString =
+                    IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+            ourLog.info("Response: {}", response);
+            ourLog.info("Response: {}", responseString);
+            assertEquals(200, response.getStatusLine().getStatusCode());
+            assertThat(responseString, containsString("<title>Swagger UI</title>"));
+        }
 
-	}
+        get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/?foo=foo");
+        get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
+        try (CloseableHttpResponse response = myClient.execute(get)) {
+            assertEquals(400, response.getStatusLine().getStatusCode());
+        }
 
+        get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir?foo=foo");
+        get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
+        try (CloseableHttpResponse response = myClient.execute(get)) {
+            assertEquals(400, response.getStatusLine().getStatusCode());
+        }
+    }
 
-	@Test
-	public void testSwaggerUiWithResourceCounts() throws IOException {
-		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
-		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+    @Test
+    public void testSwaggerUiWithResourceCounts() throws IOException {
+        myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+        myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
-		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
-		String resp = fetchSwaggerUi(url);
-		List<String> buttonTexts = parsePageButtonTexts(resp, url);
-		assertThat(buttonTexts.toString(), buttonTexts, Matchers.contains("All", "System Level Operations", "Patient 2", "OperationDefinition 1", "Observation 0"));
-	}
+        String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+        String resp = fetchSwaggerUi(url);
+        List<String> buttonTexts = parsePageButtonTexts(resp, url);
+        assertThat(
+                buttonTexts.toString(),
+                buttonTexts,
+                Matchers.contains(
+                        "All",
+                        "System Level Operations",
+                        "Patient 2",
+                        "OperationDefinition 1",
+                        "Observation 0"));
+    }
 
-	@Test
-	public void testSwaggerUiWithCopyright() throws IOException {
-		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
-		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+    @Test
+    public void testSwaggerUiWithCopyright() throws IOException {
+        myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+        myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
-		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
-		String resp = fetchSwaggerUi(url);
-		assertThat(resp, resp, containsString("<p>This server is copyright <strong>Example Org</strong> 2021</p>"));
-		assertThat(resp, resp, not(containsString("swagger-ui-custom.css")));
-	}
+        String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+        String resp = fetchSwaggerUi(url);
+        assertThat(
+                resp,
+                resp,
+                containsString(
+                        "<p>This server is copyright <strong>Example Org</strong> 2021</p>"));
+        assertThat(resp, resp, not(containsString("swagger-ui-custom.css")));
+    }
 
-	@Test
-	public void testSwaggerUiWithNoBannerUrl() throws IOException {
-		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
-		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor().setBannerImage(""));
+    @Test
+    public void testSwaggerUiWithNoBannerUrl() throws IOException {
+        myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+        myServer.getRestfulServer()
+                .registerInterceptor(new OpenApiInterceptor().setBannerImage(""));
 
-		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
-		String resp = fetchSwaggerUi(url);
-		assertThat(resp, resp, not(containsString("img id=\"banner_img\"")));
-	}
+        String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+        String resp = fetchSwaggerUi(url);
+        assertThat(resp, resp, not(containsString("img id=\"banner_img\"")));
+    }
 
-	@Test
-	public void testSwaggerUiWithCustomStylesheet() throws IOException {
-		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+    @Test
+    public void testSwaggerUiWithCustomStylesheet() throws IOException {
+        myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
 
-		OpenApiInterceptor interceptor = new OpenApiInterceptor();
-		interceptor.setCssText("BODY {\nfont-size: 1.1em;\n}");
-		myServer.getRestfulServer().registerInterceptor(interceptor);
+        OpenApiInterceptor interceptor = new OpenApiInterceptor();
+        interceptor.setCssText("BODY {\nfont-size: 1.1em;\n}");
+        myServer.getRestfulServer().registerInterceptor(interceptor);
 
-		// Fetch Swagger UI HTML
-		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
-		String resp = fetchSwaggerUi(url);
-		assertThat(resp, resp, containsString("<link rel=\"stylesheet\" type=\"text/css\" href=\"./swagger-ui-custom.css\"/>"));
+        // Fetch Swagger UI HTML
+        String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+        String resp = fetchSwaggerUi(url);
+        assertThat(
+                resp,
+                resp,
+                containsString(
+                        "<link rel=\"stylesheet\" type=\"text/css\""
+                                + " href=\"./swagger-ui-custom.css\"/>"));
 
-		// Fetch Custom CSS
-		url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/swagger-ui-custom.css";
-		resp = fetchSwaggerUi(url);
-		String expected = """
+        // Fetch Custom CSS
+        url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/swagger-ui-custom.css";
+        resp = fetchSwaggerUi(url);
+        String expected = """
 			BODY {
 			font-size: 1.1em;
 			}
 			""";
-		assertEquals(removeCtrlR(expected), removeCtrlR(resp));
-	}
+        assertEquals(removeCtrlR(expected), removeCtrlR(resp));
+    }
 
-	protected String removeCtrlR (String source) {
-		String result = source;
-		if (source != null) {
-			result = StringUtils.remove(source, '\r');
-		}
-		return result;
-	}
-	
-	@Test
-	public void testSwaggerUiNotPaged() throws IOException {
-		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+    protected String removeCtrlR(String source) {
+        String result = source;
+        if (source != null) {
+            result = StringUtils.remove(source, '\r');
+        }
+        return result;
+    }
 
-		OpenApiInterceptor interceptor = new OpenApiInterceptor();
-		interceptor.setUseResourcePages(false);
-		myServer.getRestfulServer().registerInterceptor(interceptor);
+    @Test
+    public void testSwaggerUiNotPaged() throws IOException {
+        myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
 
-		// Fetch Swagger UI HTML
-		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
-		String resp = fetchSwaggerUi(url);
-		List<String> buttonTexts = parsePageButtonTexts(resp, url);
-		assertThat(buttonTexts.toString(), buttonTexts, empty());
-	}
+        OpenApiInterceptor interceptor = new OpenApiInterceptor();
+        interceptor.setUseResourcePages(false);
+        myServer.getRestfulServer().registerInterceptor(interceptor);
 
-	@Test
-	public void testSwaggerUiWithResourceCounts_OneResourceOnly() throws IOException {
-		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor("OperationDefinition"));
-		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+        // Fetch Swagger UI HTML
+        String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+        String resp = fetchSwaggerUi(url);
+        List<String> buttonTexts = parsePageButtonTexts(resp, url);
+        assertThat(buttonTexts.toString(), buttonTexts, empty());
+    }
 
-		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
-		String resp = fetchSwaggerUi(url);
-		List<String> buttonTexts = parsePageButtonTexts(resp, url);
-		assertThat(buttonTexts.toString(), buttonTexts, Matchers.contains("All", "System Level Operations", "OperationDefinition 1", "Observation", "Patient"));
-	}
+    @Test
+    public void testSwaggerUiWithResourceCounts_OneResourceOnly() throws IOException {
+        myServer.getRestfulServer()
+                .registerInterceptor(new AddResourceCountsInterceptor("OperationDefinition"));
+        myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
-	@Test
-	public void testRemoveTrailingSlash() {
-		OpenApiInterceptor interceptor = new OpenApiInterceptor();
-		String url1 = interceptor.removeTrailingSlash("http://localhost:8000");
-		String url2 = interceptor.removeTrailingSlash("http://localhost:8000/");
-		String url3 = interceptor.removeTrailingSlash("http://localhost:8000//");
-		String expect = "http://localhost:8000";
-		assertEquals(expect, url1);
-		assertEquals(expect, url2);
-		assertEquals(expect, url3);
-	}
+        String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+        String resp = fetchSwaggerUi(url);
+        List<String> buttonTexts = parsePageButtonTexts(resp, url);
+        assertThat(
+                buttonTexts.toString(),
+                buttonTexts,
+                Matchers.contains(
+                        "All",
+                        "System Level Operations",
+                        "OperationDefinition 1",
+                        "Observation",
+                        "Patient"));
+    }
 
-	@Test
-	public void testRemoveTrailingSlashWithNullUrl() {
-		OpenApiInterceptor interceptor = new OpenApiInterceptor();
-		String url = interceptor.removeTrailingSlash(null);
-		assertEquals(null, url);
-	}
+    @Test
+    public void testRemoveTrailingSlash() {
+        OpenApiInterceptor interceptor = new OpenApiInterceptor();
+        String url1 = interceptor.removeTrailingSlash("http://localhost:8000");
+        String url2 = interceptor.removeTrailingSlash("http://localhost:8000/");
+        String url3 = interceptor.removeTrailingSlash("http://localhost:8000//");
+        String expect = "http://localhost:8000";
+        assertEquals(expect, url1);
+        assertEquals(expect, url2);
+        assertEquals(expect, url3);
+    }
 
-	@Test
-	public void testStandardRedirectScriptIsAccessible() throws IOException {
-		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
-		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+    @Test
+    public void testRemoveTrailingSlashWithNullUrl() {
+        OpenApiInterceptor interceptor = new OpenApiInterceptor();
+        String url = interceptor.removeTrailingSlash(null);
+        assertEquals(null, url);
+    }
 
-		HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/oauth2-redirect.html");
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		}
-	}
+    @Test
+    public void testStandardRedirectScriptIsAccessible() throws IOException {
+        myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+        myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
-	private String fetchSwaggerUi(String url) throws IOException {
-		String resp;
-		HttpGet get = new HttpGet(url);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", response.getStatusLine());
-			ourLog.debug("Response: {}", resp);
-		}
-		return resp;
-	}
+        HttpGet get =
+                new HttpGet(
+                        "http://localhost:"
+                                + myServer.getPort()
+                                + "/fhir/swagger-ui/oauth2-redirect.html");
+        try (CloseableHttpResponse response = myClient.execute(get)) {
+            assertEquals(200, response.getStatusLine().getStatusCode());
+        }
+    }
 
-	private List<String> parsePageButtonTexts(String resp, String url) throws IOException {
-		HtmlPage html = HtmlUtil.parseAsHtml(resp, new URL(url));
-		HtmlDivision pageButtons = (HtmlDivision) html.getElementById("pageButtons");
-		if (pageButtons == null) {
-			return Collections.emptyList();
-		}
+    private String fetchSwaggerUi(String url) throws IOException {
+        String resp;
+        HttpGet get = new HttpGet(url);
+        try (CloseableHttpResponse response = myClient.execute(get)) {
+            resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+            ourLog.info("Response: {}", response.getStatusLine());
+            ourLog.debug("Response: {}", resp);
+        }
+        return resp;
+    }
 
-		List<String> buttonTexts = new ArrayList<>();
-		for (DomElement next : pageButtons.getChildElements()) {
-			buttonTexts.add(next.asNormalizedText());
-		}
-		return buttonTexts;
-	}
+    private List<String> parsePageButtonTexts(String resp, String url) throws IOException {
+        HtmlPage html = HtmlUtil.parseAsHtml(resp, new URL(url));
+        HtmlDivision pageButtons = (HtmlDivision) html.getElementById("pageButtons");
+        if (pageButtons == null) {
+            return Collections.emptyList();
+        }
 
+        List<String> buttonTexts = new ArrayList<>();
+        for (DomElement next : pageButtons.getChildElements()) {
+            buttonTexts.add(next.asNormalizedText());
+        }
+        return buttonTexts;
+    }
 
-	public static class AddResourceCountsInterceptor {
+    public static class AddResourceCountsInterceptor {
 
-		private final HashSet<String> myResourceNamesToAddTo;
+        private final HashSet<String> myResourceNamesToAddTo;
 
-		public AddResourceCountsInterceptor(String... theResourceNamesToAddTo) {
-			myResourceNamesToAddTo = new HashSet<>(Arrays.asList(theResourceNamesToAddTo));
-		}
+        public AddResourceCountsInterceptor(String... theResourceNamesToAddTo) {
+            myResourceNamesToAddTo = new HashSet<>(Arrays.asList(theResourceNamesToAddTo));
+        }
 
-		@Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
-		public void capabilityStatementGenerated(IBaseConformance theCapabilityStatement) {
-			CapabilityStatement cs = (CapabilityStatement) theCapabilityStatement;
-			cs.setCopyright("This server is copyright **Example Org** 2021");
+        @Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
+        public void capabilityStatementGenerated(IBaseConformance theCapabilityStatement) {
+            CapabilityStatement cs = (CapabilityStatement) theCapabilityStatement;
+            cs.setCopyright("This server is copyright **Example Org** 2021");
 
-			int numResources = cs.getRestFirstRep().getResource().size();
-			for (int i = 0; i < numResources; i++) {
+            int numResources = cs.getRestFirstRep().getResource().size();
+            for (int i = 0; i < numResources; i++) {
 
-				CapabilityStatement.CapabilityStatementRestResourceComponent restResource = cs.getRestFirstRep().getResource().get(i);
-				if (!myResourceNamesToAddTo.isEmpty() && !myResourceNamesToAddTo.contains(restResource.getType())) {
-					continue;
-				}
+                CapabilityStatement.CapabilityStatementRestResourceComponent restResource =
+                        cs.getRestFirstRep().getResource().get(i);
+                if (!myResourceNamesToAddTo.isEmpty()
+                        && !myResourceNamesToAddTo.contains(restResource.getType())) {
+                    continue;
+                }
 
-				restResource.addExtension(
-					ExtensionConstants.CONF_RESOURCE_COUNT,
-					new DecimalType(i) // reverse order
-				);
+                restResource.addExtension(
+                        ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalType(i) // reverse order
+                        );
+            }
+        }
+    }
 
-			}
-		}
+    public static class MyLastNProvider {
 
-	}
+        @Description(value = "LastN Description", shortDefinition = "LastN Short")
+        @Operation(name = Constants.OPERATION_LASTN, typeName = "Observation", idempotent = true)
+        public IBaseBundle lastN(
+                @Description(
+                                value = "Subject description",
+                                shortDefinition = "Subject short",
+                                example = {"Patient/456", "Patient/789"})
+                        @OperationParam(name = "subject", typeName = "reference", min = 0, max = 1)
+                        IBaseReference theSubject,
+                @OperationParam(
+                                name = "category",
+                                typeName = "coding",
+                                min = 0,
+                                max = OperationParam.MAX_UNLIMITED)
+                        List<IBaseCoding> theCategories,
+                @OperationParam(
+                                name = "code",
+                                typeName = "coding",
+                                min = 0,
+                                max = OperationParam.MAX_UNLIMITED)
+                        List<IBaseCoding> theCodes,
+                @OperationParam(name = "max", typeName = "integer", min = 0, max = 1)
+                        IPrimitiveType<Integer> theMax) {
+            throw new IllegalStateException();
+        }
 
-	public static class MyLastNProvider {
+        @Description(value = "Foo Op Description", shortDefinition = "Foo Op Short")
+        @Operation(name = "foo-op", idempotent = false)
+        public IBaseBundle foo(
+                ServletRequestDetails theRequestDetails,
+                @Description(shortDefinition = "Reference description", example = "Patient/123")
+                        @OperationParam(name = "subject", typeName = "reference", min = 0, max = 1)
+                        IBaseReference theSubject,
+                @OperationParam(
+                                name = "category",
+                                typeName = "coding",
+                                min = 0,
+                                max = OperationParam.MAX_UNLIMITED)
+                        List<IBaseCoding> theCategories,
+                @OperationParam(
+                                name = "code",
+                                typeName = "coding",
+                                min = 0,
+                                max = OperationParam.MAX_UNLIMITED)
+                        List<IBaseCoding> theCodes,
+                @OperationParam(name = "max", typeName = "integer", min = 0, max = 1)
+                        IPrimitiveType<Integer> theMax) {
+            throw new IllegalStateException();
+        }
 
-
-		@Description(value = "LastN Description", shortDefinition = "LastN Short")
-		@Operation(name = Constants.OPERATION_LASTN, typeName = "Observation", idempotent = true)
-		public IBaseBundle lastN(
-			@Description(value = "Subject description", shortDefinition = "Subject short", example = {"Patient/456", "Patient/789"})
-			@OperationParam(name = "subject", typeName = "reference", min = 0, max = 1) IBaseReference theSubject,
-			@OperationParam(name = "category", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCategories,
-			@OperationParam(name = "code", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCodes,
-			@OperationParam(name = "max", typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theMax
-		) {
-			throw new IllegalStateException();
-		}
-
-		@Description(value = "Foo Op Description", shortDefinition = "Foo Op Short")
-		@Operation(name = "foo-op", idempotent = false)
-		public IBaseBundle foo(
-			ServletRequestDetails theRequestDetails,
-			@Description(shortDefinition = "Reference description", example = "Patient/123")
-			@OperationParam(name = "subject", typeName = "reference", min = 0, max = 1) IBaseReference theSubject,
-			@OperationParam(name = "category", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCategories,
-			@OperationParam(name = "code", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCodes,
-			@OperationParam(name = "max", typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theMax
-		) {
-			throw new IllegalStateException();
-		}
-
-		@Patch(type = Patient.class)
-		public MethodOutcome patch(HttpServletRequest theRequest, @IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType, @ResourceParam IBaseParameters theRequestBody) {
-			throw new IllegalStateException();
-		}
-
-
-	}
+        @Patch(type = Patient.class)
+        public MethodOutcome patch(
+                HttpServletRequest theRequest,
+                @IdParam IIdType theId,
+                @ConditionalUrlParam String theConditionalUrl,
+                RequestDetails theRequestDetails,
+                @ResourceParam String theBody,
+                PatchTypeEnum thePatchType,
+                @ResourceParam IBaseParameters theRequestBody) {
+            throw new IllegalStateException();
+        }
+    }
 }

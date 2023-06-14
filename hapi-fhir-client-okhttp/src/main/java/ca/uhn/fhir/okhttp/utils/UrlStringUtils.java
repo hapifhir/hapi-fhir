@@ -40,5 +40,4 @@ public class UrlStringUtils {
     public static boolean endsWith(StringBuilder sb, char c) {
         return sb.length() > 0 && sb.charAt(sb.length() - 1) == c;
     }
-
 }

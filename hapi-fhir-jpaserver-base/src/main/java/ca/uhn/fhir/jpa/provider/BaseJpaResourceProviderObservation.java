@@ -32,81 +32,76 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import java.util.List;
+import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.List;
-import java.util.Map;
+public abstract class BaseJpaResourceProviderObservation<T extends IBaseResource>
+        extends BaseJpaResourceProvider<T> {
 
-public abstract class BaseJpaResourceProviderObservation<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
+    /** Observation/$lastn */
+    @Operation(
+            name = JpaConstants.OPERATION_LASTN,
+            idempotent = true,
+            bundleType = BundleTypeEnum.SEARCHSET)
+    public IBundleProvider observationLastN(
+            javax.servlet.http.HttpServletRequest theServletRequest,
+            javax.servlet.http.HttpServletResponse theServletResponse,
+            ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
+            @Description(
+                            formalDefinition =
+                                    "Results from this method are returned across multiple pages."
+                                            + " This parameter controls the size of those pages.")
+                    @OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
+                    IPrimitiveType<Integer> theCount,
+            @Description(shortDefinition = "The classification of the type of observation")
+                    @OperationParam(name = "category")
+                    TokenAndListParam theCategory,
+            @Description(shortDefinition = "The code of the observation type")
+                    @OperationParam(name = "code")
+                    TokenAndListParam theCode,
+            @Description(shortDefinition = "The effective date of the observation")
+                    @OperationParam(name = "date")
+                    DateAndListParam theDate,
+            @Description(shortDefinition = "The subject that the observation is about (if patient)")
+                    @OperationParam(name = "patient")
+                    ReferenceAndListParam thePatient,
+            @Description(shortDefinition = "The subject that the observation is about")
+                    @OperationParam(name = "subject")
+                    ReferenceAndListParam theSubject,
+            @Description(
+                            shortDefinition =
+                                    "The maximum number of observations to return for each"
+                                            + " observation code")
+                    @OperationParam(name = "max", typeName = "integer", min = 0, max = 1)
+                    IPrimitiveType<Integer> theMax,
+            @RawParam Map<String, List<String>> theAdditionalRawParams) {
+        startRequest(theServletRequest);
+        try {
+            SearchParameterMap paramMap = new SearchParameterMap();
+            paramMap.add(org.hl7.fhir.r4.model.Observation.SP_CATEGORY, theCategory);
+            paramMap.add(org.hl7.fhir.r4.model.Observation.SP_CODE, theCode);
+            paramMap.add(org.hl7.fhir.r4.model.Observation.SP_DATE, theDate);
+            if (thePatient != null) {
+                paramMap.add(org.hl7.fhir.r4.model.Observation.SP_PATIENT, thePatient);
+            }
+            if (theSubject != null) {
+                paramMap.add(org.hl7.fhir.r4.model.Observation.SP_SUBJECT, theSubject);
+            }
+            if (theMax != null) {
+                paramMap.setLastNMax(theMax.getValue());
+            }
+            if (theCount != null) {
+                paramMap.setCount(theCount.getValue());
+            }
 
-	/**
-	 * Observation/$lastn
-	 */
-	@Operation(name = JpaConstants.OPERATION_LASTN, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
-	public IBundleProvider observationLastN(
+            getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 
-		javax.servlet.http.HttpServletRequest theServletRequest,
-		javax.servlet.http.HttpServletResponse theServletResponse,
-
-		ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
-
-		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
-			IPrimitiveType<Integer> theCount,
-
-		@Description(shortDefinition="The classification of the type of observation")
-		@OperationParam(name="category")
-			TokenAndListParam theCategory,
-
-		@Description(shortDefinition="The code of the observation type")
-		@OperationParam(name="code")
-			TokenAndListParam theCode,
-
-		@Description(shortDefinition="The effective date of the observation")
-		@OperationParam(name="date")
-			DateAndListParam theDate,
-
-		@Description(shortDefinition="The subject that the observation is about (if patient)")
-		@OperationParam(name="patient")
-			ReferenceAndListParam thePatient,
-
-		@Description(shortDefinition="The subject that the observation is about")
-		@OperationParam(name="subject" )
-			ReferenceAndListParam theSubject,
-
-		@Description(shortDefinition="The maximum number of observations to return for each observation code")
-		@OperationParam(name = "max", typeName = "integer", min = 0, max = 1)
-			IPrimitiveType<Integer> theMax,
-
-		@RawParam
-			Map<String, List<String>> theAdditionalRawParams
-		) {
-		startRequest(theServletRequest);
-		try {
-			SearchParameterMap paramMap = new SearchParameterMap();
-			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_CATEGORY, theCategory);
-			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_CODE, theCode);
-			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_DATE, theDate);
-			if (thePatient != null) {
-				paramMap.add(org.hl7.fhir.r4.model.Observation.SP_PATIENT, thePatient);
-			}
-			if (theSubject != null) {
-				paramMap.add(org.hl7.fhir.r4.model.Observation.SP_SUBJECT, theSubject);
-			}
-			if (theMax != null) {
-				paramMap.setLastNMax(theMax.getValue());
-			}
-			if (theCount != null) {
-				paramMap.setCount(theCount.getValue());
-			}
-
-			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
-
-			return ((IFhirResourceDaoObservation<?>) getDao()).observationsLastN(paramMap, theRequestDetails, theServletResponse);
-		} finally {
-			endRequest(theServletRequest);
-		}
-	}
-
+            return ((IFhirResourceDaoObservation<?>) getDao())
+                    .observationsLastN(paramMap, theRequestDetails, theServletResponse);
+        } finally {
+            endRequest(theServletRequest);
+        }
+    }
 }

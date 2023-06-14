@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.util.ValidateUtil;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.length;
 
+import ca.uhn.fhir.util.ValidateUtil;
+import java.io.Serializable;
 import javax.annotation.Nonnull;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,128 +37,152 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.io.Serializable;
-
-import static org.apache.commons.lang3.StringUtils.left;
-import static org.apache.commons.lang3.StringUtils.length;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Entity
-@Table(name = "TRM_CONCEPT_DESIG", uniqueConstraints = { }, indexes = {
-	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
-	@Index(name = "FK_CONCEPTDESIG_CONCEPT",  columnList = "CONCEPT_PID", unique = false)
-})
+@Table(
+        name = "TRM_CONCEPT_DESIG",
+        uniqueConstraints = {},
+        indexes = {
+            // must have same name that indexed FK or SchemaMigrationTest complains because H2 sets
+            // this index automatically
+            @Index(name = "FK_CONCEPTDESIG_CONCEPT", columnList = "CONCEPT_PID", unique = false)
+        })
 public class TermConceptDesignation implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public static final int MAX_LENGTH = 500;
-	public static final int MAX_VAL_LENGTH = 2000;
+    public static final int MAX_LENGTH = 500;
+    public static final int MAX_VAL_LENGTH = 2000;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CONCEPT_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CONCEPT"))
-	private TermConcept myConcept;
-	@Id()
-	@SequenceGenerator(name = "SEQ_CONCEPT_DESIG_PID", sequenceName = "SEQ_CONCEPT_DESIG_PID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_DESIG_PID")
-	@Column(name = "PID")
-	private Long myId;
-	@Column(name = "LANG", nullable = true, length = MAX_LENGTH)
-	private String myLanguage;
-	@Column(name = "USE_SYSTEM", nullable = true, length = MAX_LENGTH)
-	private String myUseSystem;
-	@Column(name = "USE_CODE", nullable = true, length = MAX_LENGTH)
-	private String myUseCode;
-	@Column(name = "USE_DISPLAY", nullable = true, length = MAX_LENGTH)
-	private String myUseDisplay;
-	@Column(name = "VAL", nullable = false, length = MAX_VAL_LENGTH)
-	private String myValue;
-	/**
-	 * TODO: Make this non-null
-	 *
-	 * @since 3.5.0
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CS_VER_PID", nullable = true, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CSV"))
-	private TermCodeSystemVersion myCodeSystemVersion;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "CONCEPT_PID",
+            referencedColumnName = "PID",
+            foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CONCEPT"))
+    private TermConcept myConcept;
 
-	public String getLanguage() {
-		return myLanguage;
-	}
+    @Id()
+    @SequenceGenerator(name = "SEQ_CONCEPT_DESIG_PID", sequenceName = "SEQ_CONCEPT_DESIG_PID")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_DESIG_PID")
+    @Column(name = "PID")
+    private Long myId;
 
-	public TermConceptDesignation setLanguage(String theLanguage) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theLanguage, MAX_LENGTH,
-			"Language exceeds maximum length (" + MAX_LENGTH + "): " + length(theLanguage));
-		myLanguage = theLanguage;
-		return this;
-	}
+    @Column(name = "LANG", nullable = true, length = MAX_LENGTH)
+    private String myLanguage;
 
-	public String getUseCode() {
-		return myUseCode;
-	}
+    @Column(name = "USE_SYSTEM", nullable = true, length = MAX_LENGTH)
+    private String myUseSystem;
 
-	public TermConceptDesignation setUseCode(String theUseCode) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseCode, MAX_LENGTH,
-			"Use code exceeds maximum length (" + MAX_LENGTH + "): " + length(theUseCode));
-		myUseCode = theUseCode;
-		return this;
-	}
+    @Column(name = "USE_CODE", nullable = true, length = MAX_LENGTH)
+    private String myUseCode;
 
-	public String getUseDisplay() {
-		return myUseDisplay;
-	}
+    @Column(name = "USE_DISPLAY", nullable = true, length = MAX_LENGTH)
+    private String myUseDisplay;
 
-	public TermConceptDesignation setUseDisplay(String theUseDisplay) {
-		myUseDisplay = left(theUseDisplay, MAX_LENGTH);
-		return this;
-	}
+    @Column(name = "VAL", nullable = false, length = MAX_VAL_LENGTH)
+    private String myValue;
 
-	public String getUseSystem() {
-		return myUseSystem;
-	}
+    /**
+     * TODO: Make this non-null
+     *
+     * @since 3.5.0
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "CS_VER_PID",
+            nullable = true,
+            referencedColumnName = "PID",
+            foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CSV"))
+    private TermCodeSystemVersion myCodeSystemVersion;
 
-	public TermConceptDesignation setUseSystem(String theUseSystem) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseSystem, MAX_LENGTH,
-			"Use system exceeds maximum length (" + MAX_LENGTH + "): " + length(theUseSystem));
-		myUseSystem = theUseSystem;
-		return this;
-	}
+    public String getLanguage() {
+        return myLanguage;
+    }
 
-	public String getValue() {
-		return myValue;
-	}
+    public TermConceptDesignation setLanguage(String theLanguage) {
+        ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+                theLanguage,
+                MAX_LENGTH,
+                "Language exceeds maximum length (" + MAX_LENGTH + "): " + length(theLanguage));
+        myLanguage = theLanguage;
+        return this;
+    }
 
-	public TermConceptDesignation setValue(@Nonnull String theValue) {
-		ValidateUtil.isNotBlankOrThrowIllegalArgument(theValue, "theValue must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theValue, MAX_VAL_LENGTH,
-			"Value exceeds maximum length (" + MAX_VAL_LENGTH + "): " + length(theValue));
-		myValue = theValue;
-		return this;
-	}
+    public String getUseCode() {
+        return myUseCode;
+    }
 
-	public TermConceptDesignation setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
-		myCodeSystemVersion = theCodeSystemVersion;
-		return this;
-	}
+    public TermConceptDesignation setUseCode(String theUseCode) {
+        ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+                theUseCode,
+                MAX_LENGTH,
+                "Use code exceeds maximum length (" + MAX_LENGTH + "): " + length(theUseCode));
+        myUseCode = theUseCode;
+        return this;
+    }
 
-	public TermConceptDesignation setConcept(TermConcept theConcept) {
-		myConcept = theConcept;
-		return this;
-	}
+    public String getUseDisplay() {
+        return myUseDisplay;
+    }
 
+    public TermConceptDesignation setUseDisplay(String theUseDisplay) {
+        myUseDisplay = left(theUseDisplay, MAX_LENGTH);
+        return this;
+    }
 
-	public Long getPid() {
-		return myId;
-	}
+    public String getUseSystem() {
+        return myUseSystem;
+    }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("conceptPid", myConcept.getId())
-			.append("pid", myId)
-			.append("language", myLanguage)
-			.append("useSystem", myUseSystem)
-			.append("useCode", myUseCode)
-			.append("useDisplay", myUseDisplay)
-			.append("value", myValue)
-			.toString();
-	}
+    public TermConceptDesignation setUseSystem(String theUseSystem) {
+        ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+                theUseSystem,
+                MAX_LENGTH,
+                "Use system exceeds maximum length (" + MAX_LENGTH + "): " + length(theUseSystem));
+        myUseSystem = theUseSystem;
+        return this;
+    }
+
+    public String getValue() {
+        return myValue;
+    }
+
+    public TermConceptDesignation setValue(@Nonnull String theValue) {
+        ValidateUtil.isNotBlankOrThrowIllegalArgument(
+                theValue, "theValue must not be null or empty");
+        ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+                theValue,
+                MAX_VAL_LENGTH,
+                "Value exceeds maximum length (" + MAX_VAL_LENGTH + "): " + length(theValue));
+        myValue = theValue;
+        return this;
+    }
+
+    public TermConceptDesignation setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+        myCodeSystemVersion = theCodeSystemVersion;
+        return this;
+    }
+
+    public TermConceptDesignation setConcept(TermConcept theConcept) {
+        myConcept = theConcept;
+        return this;
+    }
+
+    public Long getPid() {
+        return myId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("conceptPid", myConcept.getId())
+                .append("pid", myId)
+                .append("language", myLanguage)
+                .append("useSystem", myUseSystem)
+                .append("useCode", myUseCode)
+                .append("useDisplay", myUseDisplay)
+                .append("value", myValue)
+                .toString();
+    }
 }

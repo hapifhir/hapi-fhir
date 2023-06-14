@@ -21,31 +21,37 @@ package ca.uhn.fhir.jpa.esr;
 
 public class ExternallyStoredResourceAddress {
 
-	private final String myProviderId;
-	private final String myLocation;
+    private final String myProviderId;
+    private final String myLocation;
 
-	/**
-	 * Constructor
-	 *
-	 * @param theProviderId The ID of the provider which will handle this address. Must match the ID returned by a registered {@link IExternallyStoredResourceService}.
-	 * @param theLocation   The actual location for the provider to resolve. The format of this string is entirely up to the {@link IExternallyStoredResourceService} and only needs to make sense to it.
-	 */
-	public ExternallyStoredResourceAddress(String theProviderId, String theLocation) {
-		myProviderId = theProviderId;
-		myLocation = theLocation;
-	}
+    /**
+     * Constructor
+     *
+     * @param theProviderId The ID of the provider which will handle this address. Must match the ID
+     *     returned by a registered {@link IExternallyStoredResourceService}.
+     * @param theLocation The actual location for the provider to resolve. The format of this string
+     *     is entirely up to the {@link IExternallyStoredResourceService} and only needs to make
+     *     sense to it.
+     */
+    public ExternallyStoredResourceAddress(String theProviderId, String theLocation) {
+        myProviderId = theProviderId;
+        myLocation = theLocation;
+    }
 
-	/**
-	 * @return The ID of the provider which will handle this address. Must match the ID returned by a registered {@link IExternallyStoredResourceService}.
-	 */
-	public String getProviderId() {
-		return myProviderId;
-	}
+    /**
+     * @return The ID of the provider which will handle this address. Must match the ID returned by
+     *     a registered {@link IExternallyStoredResourceService}.
+     */
+    public String getProviderId() {
+        return myProviderId;
+    }
 
-	/**
-	 * @return The actual location for the provider to resolve. The format of this string is entirely up to the {@link IExternallyStoredResourceService} and only needs to make sense to it.
-	 */
-	public String getLocation() {
-		return myLocation;
-	}
+    /**
+     * @return The actual location for the provider to resolve. The format of this string is
+     *     entirely up to the {@link IExternallyStoredResourceService} and only needs to make sense
+     *     to it.
+     */
+    public String getLocation() {
+        return myLocation;
+    }
 }

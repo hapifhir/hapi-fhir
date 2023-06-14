@@ -25,56 +25,65 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class MdmResourceFilteringSvc {
-	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+    private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	@Autowired
-	private IMdmSettings myMdmSettings;
-	@Autowired
-	MdmSearchParamSvc myMdmSearchParamSvc;
-	@Autowired
-	FhirContext myFhirContext;
+    @Autowired private IMdmSettings myMdmSettings;
+    @Autowired MdmSearchParamSvc myMdmSearchParamSvc;
+    @Autowired FhirContext myFhirContext;
 
-	/**
-	 * Given a resource from the MDM Channel, determine whether or not MDM processing should occur on it.
-	 *
-	 * MDM processing should occur if for any {@link MdmResourceSearchParamJson ) Search Param, the resource contains a value.
-	 *
-	 * If the resource has no attributes that appear in the candidate search params, processing should be skipped, as there is not
-	 * sufficient information to perform meaningful MDM processing. (For example, how can MDM processing occur on a patient that has _no_ attributes?)
-	 *
-	 * @param theResource the resource that you wish to check against MDM rules.
-	 *
-	 * @return whether or not MDM processing should proceed
-	 */
-	public boolean shouldBeProcessed(IAnyResource theResource) {
-		if (MdmResourceUtil.isMdmManaged(theResource)) {
-			ourLog.trace("MDM Message handler is dropping [{}] as it is MDM-managed.", theResource.getId());
-			return false;
-		}
+    /**
+     * Given a resource from the MDM Channel, determine whether or not MDM processing should occur on it.
+     *
+     * MDM processing should occur if for any {@link MdmResourceSearchParamJson ) Search Param, the resource contains a value.
+     *
+     * If the resource has no attributes that appear in the candidate search params, processing should be skipped, as there is not
+     * sufficient information to perform meaningful MDM processing. (For example, how can MDM processing occur on a patient that has _no_ attributes?)
+     *
+     * @param theResource the resource that you wish to check against MDM rules.
+     *
+     * @return whether or not MDM processing should proceed
+     */
+    public boolean shouldBeProcessed(IAnyResource theResource) {
+        if (MdmResourceUtil.isMdmManaged(theResource)) {
+            ourLog.trace(
+                    "MDM Message handler is dropping [{}] as it is MDM-managed.",
+                    theResource.getId());
+            return false;
+        }
 
-		String resourceType = myFhirContext.getResourceType(theResource);
-		List<MdmResourceSearchParamJson> candidateSearchParams = myMdmSettings.getMdmRules().getCandidateSearchParams();
+        String resourceType = myFhirContext.getResourceType(theResource);
+        List<MdmResourceSearchParamJson> candidateSearchParams =
+                myMdmSettings.getMdmRules().getCandidateSearchParams();
 
-		if (candidateSearchParams.isEmpty()) {
-			return true;
-		}
+        if (candidateSearchParams.isEmpty()) {
+            return true;
+        }
 
-		boolean containsValueForSomeSearchParam = candidateSearchParams.stream()
-			.filter(csp -> myMdmSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
-			.flatMap(csp -> csp.getSearchParams().stream())
-			.map(searchParam -> myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
-			.anyMatch(valueList -> !valueList.isEmpty());
+        boolean containsValueForSomeSearchParam =
+                candidateSearchParams.stream()
+                        .filter(
+                                csp ->
+                                        myMdmSearchParamSvc.searchParamTypeIsValidForResourceType(
+                                                csp.getResourceType(), resourceType))
+                        .flatMap(csp -> csp.getSearchParams().stream())
+                        .map(
+                                searchParam ->
+                                        myMdmSearchParamSvc.getValueFromResourceForSearchParam(
+                                                theResource, searchParam))
+                        .anyMatch(valueList -> !valueList.isEmpty());
 
-		ourLog.trace("Is {} suitable for MDM processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
-		return containsValueForSomeSearchParam;
-	}
+        ourLog.trace(
+                "Is {} suitable for MDM processing? : {}",
+                theResource.getId(),
+                containsValueForSomeSearchParam);
+        return containsValueForSomeSearchParam;
+    }
 }

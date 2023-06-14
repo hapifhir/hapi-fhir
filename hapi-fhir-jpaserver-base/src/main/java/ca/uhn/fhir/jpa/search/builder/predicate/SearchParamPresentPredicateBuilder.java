@@ -30,31 +30,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class SearchParamPresentPredicateBuilder extends BaseJoiningPredicateBuilder {
 
-	private final DbColumn myColumnResourceId;
-	private final DbColumn myColumnHashPresence;
+    private final DbColumn myColumnResourceId;
+    private final DbColumn myColumnHashPresence;
 
-	@Autowired
-	private PartitionSettings myPartitionSettings;
+    @Autowired private PartitionSettings myPartitionSettings;
 
-	/**
-	 * Constructor
-	 */
-	public SearchParamPresentPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_PARAM_PRESENT"));
-		myColumnResourceId = getTable().addColumn("RES_ID");
-		myColumnHashPresence = getTable().addColumn("HASH_PRESENCE");
-	}
+    /** Constructor */
+    public SearchParamPresentPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+        super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_PARAM_PRESENT"));
+        myColumnResourceId = getTable().addColumn("RES_ID");
+        myColumnHashPresence = getTable().addColumn("HASH_PRESENCE");
+    }
 
-	@Override
-	public DbColumn getResourceIdColumn() {
-		return myColumnResourceId;
-	}
+    @Override
+    public DbColumn getResourceIdColumn() {
+        return myColumnResourceId;
+    }
 
-
-	public Condition createPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
-		Long hash = SearchParamPresentEntity.calculateHashPresence(myPartitionSettings, theRequestPartitionId, theResourceName, theParamName, !theMissing);
-		BinaryCondition predicate = BinaryCondition.equalTo(myColumnHashPresence, generatePlaceholder(hash));
-		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
-	}
-
+    public Condition createPredicateParamMissingForReference(
+            String theResourceName,
+            String theParamName,
+            boolean theMissing,
+            RequestPartitionId theRequestPartitionId) {
+        Long hash =
+                SearchParamPresentEntity.calculateHashPresence(
+                        myPartitionSettings,
+                        theRequestPartitionId,
+                        theResourceName,
+                        theParamName,
+                        !theMissing);
+        BinaryCondition predicate =
+                BinaryCondition.equalTo(myColumnHashPresence, generatePlaceholder(hash));
+        return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
+    }
 }

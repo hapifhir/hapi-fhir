@@ -24,80 +24,79 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ResourceIdListWorkChunkJson implements IModelJson {
 
-	@JsonProperty("requestPartitionId")
-	private RequestPartitionId myRequestPartitionId;
-	@JsonProperty("ids")
-	private List<TypedPidJson> myTypedPids;
+    @JsonProperty("requestPartitionId")
+    private RequestPartitionId myRequestPartitionId;
 
-	/**
-	 * Constructor
-	 */
-	public ResourceIdListWorkChunkJson() {
-		super();
-	}
+    @JsonProperty("ids")
+    private List<TypedPidJson> myTypedPids;
 
-	/**
-	 * Constructor
-	 */
-	public ResourceIdListWorkChunkJson(Collection<TypedPidJson> theTypedPids, RequestPartitionId theRequestPartitionId) {
-		this();
-		getTypedPids().addAll(theTypedPids);
-		myRequestPartitionId = theRequestPartitionId;
-	}
+    /** Constructor */
+    public ResourceIdListWorkChunkJson() {
+        super();
+    }
 
-	public RequestPartitionId getRequestPartitionId() {
-		return myRequestPartitionId;
-	}
+    /** Constructor */
+    public ResourceIdListWorkChunkJson(
+            Collection<TypedPidJson> theTypedPids, RequestPartitionId theRequestPartitionId) {
+        this();
+        getTypedPids().addAll(theTypedPids);
+        myRequestPartitionId = theRequestPartitionId;
+    }
 
-	private List<TypedPidJson> getTypedPids() {
-		if (myTypedPids == null) {
-			myTypedPids = new ArrayList<>();
-		}
-		return myTypedPids;
-	}
+    public RequestPartitionId getRequestPartitionId() {
+        return myRequestPartitionId;
+    }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("ids", myTypedPids)
-			.toString();
-	}
+    private List<TypedPidJson> getTypedPids() {
+        if (myTypedPids == null) {
+            myTypedPids = new ArrayList<>();
+        }
+        return myTypedPids;
+    }
 
-	public <T extends IResourcePersistentId> List<T> getResourcePersistentIds(IIdHelperService<T> theIdHelperService) {
-		if (myTypedPids.isEmpty()) {
-			return Collections.emptyList();
-		}
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("ids", myTypedPids)
+                .toString();
+    }
 
-		return myTypedPids
-			.stream()
-			.map(t -> {
-				T retval = theIdHelperService.newPidFromStringIdAndResourceName(t.getPid(), t.getResourceType());
-				return retval;
-			})
-			.collect(Collectors.toList());
-	}
+    public <T extends IResourcePersistentId> List<T> getResourcePersistentIds(
+            IIdHelperService<T> theIdHelperService) {
+        if (myTypedPids.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-	public int size() {
-		return getTypedPids().size();
-	}
+        return myTypedPids.stream()
+                .map(
+                        t -> {
+                            T retval =
+                                    theIdHelperService.newPidFromStringIdAndResourceName(
+                                            t.getPid(), t.getResourceType());
+                            return retval;
+                        })
+                .collect(Collectors.toList());
+    }
 
-	public void addTypedPid(String theResourceType, Long thePid) {
-		getTypedPids().add(new TypedPidJson(theResourceType, thePid.toString()));
-	}
+    public int size() {
+        return getTypedPids().size();
+    }
 
-	public String getResourceType(int index) {
-		return getTypedPids().get(index).getResourceType();
-	}
+    public void addTypedPid(String theResourceType, Long thePid) {
+        getTypedPids().add(new TypedPidJson(theResourceType, thePid.toString()));
+    }
 
+    public String getResourceType(int index) {
+        return getTypedPids().get(index).getResourceType();
+    }
 }

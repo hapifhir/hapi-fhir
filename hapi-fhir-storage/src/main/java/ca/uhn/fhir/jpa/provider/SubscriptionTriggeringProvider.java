@@ -28,42 +28,57 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-
 public class SubscriptionTriggeringProvider implements IResourceProvider {
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
+    @Autowired private FhirContext myFhirContext;
+    @Autowired private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 
+    @Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+    public IBaseParameters triggerSubscription(
+            @OperationParam(
+                            name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID,
+                            min = 0,
+                            max = OperationParam.MAX_UNLIMITED,
+                            typeName = "uri")
+                    List<IPrimitiveType<String>> theResourceIds,
+            @OperationParam(
+                            name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL,
+                            min = 0,
+                            max = OperationParam.MAX_UNLIMITED,
+                            typeName = "string")
+                    List<IPrimitiveType<String>> theSearchUrls) {
+        return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, null);
+    }
 
-	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-	public IBaseParameters triggerSubscription(
-		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "uri") List<IPrimitiveType<String>> theResourceIds,
-		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theSearchUrls
-	) {
-		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, null);
-	}
+    @Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+    public IBaseParameters triggerSubscription(
+            @IdParam IIdType theSubscriptionId,
+            @OperationParam(
+                            name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID,
+                            min = 0,
+                            max = OperationParam.MAX_UNLIMITED,
+                            typeName = "uri")
+                    List<IPrimitiveType<String>> theResourceIds,
+            @OperationParam(
+                            name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL,
+                            min = 0,
+                            max = OperationParam.MAX_UNLIMITED,
+                            typeName = "string")
+                    List<IPrimitiveType<String>> theSearchUrls) {
+        return mySubscriptionTriggeringSvc.triggerSubscription(
+                theResourceIds, theSearchUrls, theSubscriptionId);
+    }
 
-	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-	public IBaseParameters triggerSubscription(
-		@IdParam IIdType theSubscriptionId,
-		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "uri") List<IPrimitiveType<String>> theResourceIds,
-		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theSearchUrls
-	) {
-		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, theSubscriptionId);
-	}
-
-
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return myFhirContext.getResourceDefinition(ResourceTypeEnum.SUBSCRIPTION.getCode()).getImplementingClass();
-	}
-
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+        return myFhirContext
+                .getResourceDefinition(ResourceTypeEnum.SUBSCRIPTION.getCode())
+                .getImplementingClass();
+    }
 }

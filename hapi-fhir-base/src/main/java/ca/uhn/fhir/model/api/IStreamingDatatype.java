@@ -19,13 +19,11 @@
  */
 package ca.uhn.fhir.model.api;
 
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 import java.io.IOException;
 import java.io.Writer;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public interface IStreamingDatatype<T> extends IPrimitiveType<T> {
 
-	void writeAsText(Writer theWriter) throws IOException;
-
+    void writeAsText(Writer theWriter) throws IOException;
 }

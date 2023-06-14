@@ -20,70 +20,75 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincXmlFileZipContentsHandler;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Properties;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.loinc.LoincXmlFileZipContentsHandler;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.Properties;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class TermLoaderSvcImplTest {
 
-	@Mock private ITermDeferredStorageSvc theDeferredStorageSvc;
-	@Mock private ITermCodeSystemStorageSvc theCodeSystemStorageSvc;
+    @Mock private ITermDeferredStorageSvc theDeferredStorageSvc;
+    @Mock private ITermCodeSystemStorageSvc theCodeSystemStorageSvc;
 
-	@Mock private LoadedFileDescriptors theDescriptors;
-	@Mock private RequestDetails theRequestDetails;
-	@Mock private Properties theUploadProperties;
-	@Mock private LoincXmlFileZipContentsHandler myZipContentsHandler;
+    @Mock private LoadedFileDescriptors theDescriptors;
+    @Mock private RequestDetails theRequestDetails;
+    @Mock private Properties theUploadProperties;
+    @Mock private LoincXmlFileZipContentsHandler myZipContentsHandler;
 
-	private final TermLoaderSvcImpl myTermLoaderSvc = TermLoaderSvcImpl.withoutProxyCheck(
-		theDeferredStorageSvc, theCodeSystemStorageSvc);
-	private final TermLoaderSvcImpl testedClass = spy(myTermLoaderSvc);
+    private final TermLoaderSvcImpl myTermLoaderSvc =
+            TermLoaderSvcImpl.withoutProxyCheck(theDeferredStorageSvc, theCodeSystemStorageSvc);
+    private final TermLoaderSvcImpl testedClass = spy(myTermLoaderSvc);
 
-	public static final String versionedLoinXmlsString =
-		"<CodeSystem xmlns=\"http://hl7.org/fhir\">" +
-			"	<id value=\"loinc\"/>" +
-			"	<url value=\"http://loinc.org\"/>" +
-			"	<version value=\"2.70\"/>" +
-			"</CodeSystem>";
+    public static final String versionedLoinXmlsString =
+            "<CodeSystem xmlns=\"http://hl7.org/fhir\">"
+                    + "	<id value=\"loinc\"/>"
+                    + "	<url value=\"http://loinc.org\"/>"
+                    + "	<version value=\"2.70\"/>"
+                    + "</CodeSystem>";
 
+    @Test
+    void loadLoincWithoutLoincXmlFileThrows() {
+        InvalidRequestException thrown =
+                assertThrows(
+                        InvalidRequestException.class,
+                        () ->
+                                testedClass.processLoincFiles(
+                                        theDescriptors,
+                                        theRequestDetails,
+                                        theUploadProperties,
+                                        true));
 
-	@Test
-	void loadLoincWithoutLoincXmlFileThrows() {
-		InvalidRequestException thrown = assertThrows(
-			InvalidRequestException.class,
-			() -> testedClass.processLoincFiles(
-				theDescriptors, theRequestDetails, theUploadProperties, true));
+        assertTrue(thrown.getMessage().contains("Did not find loinc.xml in the ZIP distribution."));
+    }
 
-		assertTrue(thrown.getMessage().contains("Did not find loinc.xml in the ZIP distribution."));
-	}
+    @Test
+    void loadLoincWithLoincXmlFileWithVersionThrows() {
+        when(testedClass.getLoincXmlFileZipContentsHandler()).thenReturn(myZipContentsHandler);
+        when(myZipContentsHandler.getContents()).thenReturn(versionedLoinXmlsString);
 
-	@Test
-	void loadLoincWithLoincXmlFileWithVersionThrows() {
-		when(testedClass.getLoincXmlFileZipContentsHandler()).thenReturn(myZipContentsHandler);
-		when(myZipContentsHandler.getContents()).thenReturn(versionedLoinXmlsString);
+        InvalidRequestException thrown =
+                assertThrows(
+                        InvalidRequestException.class,
+                        () ->
+                                testedClass.processLoincFiles(
+                                        theDescriptors,
+                                        theRequestDetails,
+                                        theUploadProperties,
+                                        true));
 
-		InvalidRequestException thrown = assertThrows(
-			InvalidRequestException.class,
-			() -> testedClass.processLoincFiles(
-				theDescriptors, theRequestDetails, theUploadProperties, true));
-
-		assertTrue(thrown.getMessage().contains("'loinc.xml' file must not have a version defined."));
-	}
-
-
+        assertTrue(
+                thrown.getMessage().contains("'loinc.xml' file must not have a version defined."));
+    }
 }

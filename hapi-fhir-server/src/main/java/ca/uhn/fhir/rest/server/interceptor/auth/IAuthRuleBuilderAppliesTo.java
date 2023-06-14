@@ -23,21 +23,16 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IAuthRuleBuilderAppliesTo<T> {
 
-	/**
-	 * Rule applies to all resources
-	 */
-	T allResources();
+    /** Rule applies to all resources */
+    T allResources();
 
-	/**
-	 * Rule applies to resources of the given type
-	 */
-	T resourcesOfType(Class<? extends IBaseResource> theType);
+    /** Rule applies to resources of the given type */
+    T resourcesOfType(Class<? extends IBaseResource> theType);
 
-	/**
-	 * Rule applies to resources of the given type
-	 *
-	 * @param theType E.g. "Patient"
-	 */
-	T resourcesOfType(String theType);
-
+    /**
+     * Rule applies to resources of the given type
+     *
+     * @param theType E.g. "Patient"
+     */
+    T resourcesOfType(String theType);
 }

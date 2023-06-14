@@ -20,34 +20,31 @@
 package ca.uhn.fhir.rest.api;
 
 /**
- * Enumerated type to represent the various allowable syntax for a search/query
- * as described in the  
- * <a href="http://www.hl7.org/implement/standards/fhir/http.html#search">FHIR Specification Section 2.1.11</a>
+ * Enumerated type to represent the various allowable syntax for a search/query as described in the
+ * <a href="http://www.hl7.org/implement/standards/fhir/http.html#search">FHIR Specification Section
+ * 2.1.11</a>
  */
 public enum SearchStyleEnum {
 
-	/**
-	 * This is the most common (and generally the default) behaviour. Performs the search using the style:
-	 * <br>
-	 * <code>GET [base]/[resource type]?[params]</code>
-	 */
-	GET,
-	
-	/**
-	 * Performs the search using the style below. Note that this style is less commonly supported
-	 * in servers so it should not be used unless there is a specific reason for needing to.
-	 * <br>
-	 * <code>GET [base]/[resource type]/_search?[params]</code>
-	 */
-	GET_WITH_SEARCH,
+    /**
+     * This is the most common (and generally the default) behaviour. Performs the search using the
+     * style: <br>
+     * <code>GET [base]/[resource type]?[params]</code>
+     */
+    GET,
 
-	/**
-	 * Performs the search using the style below. This style is useful when you have long search strings.
-	 * <br>
-	 * <code>POST [base]/[resource type]/_search</code>
-	 * <br>
-	 * and the params in a form encoded POST body.
-	 */
-	POST
-	
+    /**
+     * Performs the search using the style below. Note that this style is less commonly supported in
+     * servers so it should not be used unless there is a specific reason for needing to. <br>
+     * <code>GET [base]/[resource type]/_search?[params]</code>
+     */
+    GET_WITH_SEARCH,
+
+    /**
+     * Performs the search using the style below. This style is useful when you have long search
+     * strings. <br>
+     * <code>POST [base]/[resource type]/_search</code> <br>
+     * and the params in a form encoded POST body.
+     */
+    POST
 }

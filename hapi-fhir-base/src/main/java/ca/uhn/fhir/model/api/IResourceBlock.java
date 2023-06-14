@@ -20,5 +20,5 @@
 package ca.uhn.fhir.model.api;
 
 public interface IResourceBlock extends ICompositeElement, IIdentifiableElement {
-	// nothing yet
+    // nothing yet
 }

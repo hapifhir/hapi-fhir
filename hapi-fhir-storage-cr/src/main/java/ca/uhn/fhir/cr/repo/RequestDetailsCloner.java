@@ -1,11 +1,3 @@
-package ca.uhn.fhir.cr.repo;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -26,9 +18,15 @@ import org.hl7.fhir.instance.model.api.IIdType;
  * #L%
  */
 
+package ca.uhn.fhir.cr.repo;
+
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import java.util.HashMap;
+import java.util.Map;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * This class produces partial clones of RequestDetails, the intent being to reuse the context of a
@@ -37,73 +35,73 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
  */
 class RequestDetailsCloner {
 
-	static DetailsBuilder startWith(RequestDetails theDetails) {
-		var newDetails = new SystemRequestDetails(theDetails);
-		newDetails.setRequestType(RequestTypeEnum.POST);
-		newDetails.setOperation(null);
-		newDetails.setResource(null);
-		newDetails.setParameters(new HashMap<>());
-		newDetails.setResourceName(null);
-		newDetails.setCompartmentName(null);
+    static DetailsBuilder startWith(RequestDetails theDetails) {
+        var newDetails = new SystemRequestDetails(theDetails);
+        newDetails.setRequestType(RequestTypeEnum.POST);
+        newDetails.setOperation(null);
+        newDetails.setResource(null);
+        newDetails.setParameters(new HashMap<>());
+        newDetails.setResourceName(null);
+        newDetails.setCompartmentName(null);
 
-		return new DetailsBuilder(newDetails);
-	}
+        return new DetailsBuilder(newDetails);
+    }
 
-	static class DetailsBuilder {
-		private final SystemRequestDetails myDetails;
+    static class DetailsBuilder {
+        private final SystemRequestDetails myDetails;
 
-		DetailsBuilder(SystemRequestDetails theDetails) {
-			myDetails = theDetails;
-		}
+        DetailsBuilder(SystemRequestDetails theDetails) {
+            myDetails = theDetails;
+        }
 
-		DetailsBuilder addHeaders(Map<String, String> theHeaders) {
-			if (theHeaders != null) {
-				for (var entry : theHeaders.entrySet()) {
-					myDetails.addHeader(entry.getKey(), entry.getValue());
-				}
-			}
+        DetailsBuilder addHeaders(Map<String, String> theHeaders) {
+            if (theHeaders != null) {
+                for (var entry : theHeaders.entrySet()) {
+                    myDetails.addHeader(entry.getKey(), entry.getValue());
+                }
+            }
 
-			return this;
-		}
+            return this;
+        }
 
-		DetailsBuilder setParameters(IBaseParameters theParameters) {
-			myDetails.setResource(theParameters);
+        DetailsBuilder setParameters(IBaseParameters theParameters) {
+            myDetails.setResource(theParameters);
 
-			return this;
-		}
+            return this;
+        }
 
-		DetailsBuilder setParameters(Map<String, String[]> theParameters) {
-			myDetails.setParameters(theParameters);
+        DetailsBuilder setParameters(Map<String, String[]> theParameters) {
+            myDetails.setParameters(theParameters);
 
-			return this;
-		}
+            return this;
+        }
 
-		DetailsBuilder withRestOperationType(RequestTypeEnum theType) {
-			myDetails.setRequestType(theType);
+        DetailsBuilder withRestOperationType(RequestTypeEnum theType) {
+            myDetails.setRequestType(theType);
 
-			return this;
-		}
+            return this;
+        }
 
-		DetailsBuilder setOperation(String theOperation) {
-			myDetails.setOperation(theOperation);
+        DetailsBuilder setOperation(String theOperation) {
+            myDetails.setOperation(theOperation);
 
-			return this;
-		}
+            return this;
+        }
 
-		DetailsBuilder setResourceType(String theResourceName) {
-			myDetails.setResourceName(theResourceName);
+        DetailsBuilder setResourceType(String theResourceName) {
+            myDetails.setResourceName(theResourceName);
 
-			return this;
-		}
+            return this;
+        }
 
-		DetailsBuilder setId(IIdType theId) {
-			myDetails.setId(theId);
+        DetailsBuilder setId(IIdType theId) {
+            myDetails.setId(theId);
 
-			return this;
-		}
+            return this;
+        }
 
-		SystemRequestDetails create() {
-			return myDetails;
-		}
-	}
+        SystemRequestDetails create() {
+            return myDetails;
+        }
+    }
 }

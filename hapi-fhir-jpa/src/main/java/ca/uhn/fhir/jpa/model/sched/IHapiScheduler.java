@@ -19,27 +19,26 @@
  */
 package ca.uhn.fhir.jpa.model.sched;
 
+import java.util.Set;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 
-import java.util.Set;
-
 public interface IHapiScheduler {
-	void init() throws SchedulerException;
+    void init() throws SchedulerException;
 
-	void start();
+    void start();
 
-	void shutdown();
+    void shutdown();
 
-	boolean isStarted();
+    boolean isStarted();
 
-	void clear() throws SchedulerException;
+    void clear() throws SchedulerException;
 
-	void logStatusForUnitTest();
+    void logStatusForUnitTest();
 
-	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+    void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 
-	Set<JobKey> getJobKeysForUnitTest() throws SchedulerException;
+    Set<JobKey> getJobKeysForUnitTest() throws SchedulerException;
 
-	default void triggerJobImmediately(ScheduledJobDefinition theJobDefinition) {}
+    default void triggerJobImmediately(ScheduledJobDefinition theJobDefinition) {}
 }

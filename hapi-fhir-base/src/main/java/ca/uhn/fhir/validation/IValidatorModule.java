@@ -21,22 +21,20 @@ package ca.uhn.fhir.validation;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-
 /**
- * An individual validation module, which applies validation rules against
- * resources and adds failure/informational messages as it goes.
- * 
- * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/introduction.html">Validation</a>
+ * An individual validation module, which applies validation rules against resources and adds
+ * failure/informational messages as it goes.
+ *
+ * <p>See <a href="https://hapifhir.io/hapi-fhir/docs/validation/introduction.html">Validation</a>
  * for a list of available modules. You may also create your own.
  */
 public interface IValidatorModule {
 
-	/**
-	 * Validate the actual resource.
-	 * 
-	 * The {@link IValidationContext} can be used to access the resource being validated,
-	 * and is populated with the results.
-	 */
-	void validateResource(IValidationContext<IBaseResource> theCtx);
-
+    /**
+     * Validate the actual resource.
+     *
+     * <p>The {@link IValidationContext} can be used to access the resource being validated, and is
+     * populated with the results.
+     */
+    void validateResource(IValidationContext<IBaseResource> theCtx);
 }

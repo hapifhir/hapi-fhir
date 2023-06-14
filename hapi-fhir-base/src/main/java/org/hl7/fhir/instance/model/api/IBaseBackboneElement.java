@@ -21,7 +21,5 @@ package org.hl7.fhir.instance.model.api;
 
 import ca.uhn.fhir.model.api.IElement;
 
-
-public interface IBaseBackboneElement extends IElement, IBaseHasExtensions, IBaseHasModifierExtensions {
-
-}
+public interface IBaseBackboneElement
+        extends IElement, IBaseHasExtensions, IBaseHasModifierExtensions {}

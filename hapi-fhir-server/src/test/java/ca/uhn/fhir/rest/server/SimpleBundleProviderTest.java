@@ -1,18 +1,17 @@
 package ca.uhn.fhir.rest.server;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 public class SimpleBundleProviderTest {
 
-	@Test
-	public void testPreferredPageSize() {
-		SimpleBundleProvider p = new SimpleBundleProvider();
-		assertEquals(null, p.preferredPageSize());
+    @Test
+    public void testPreferredPageSize() {
+        SimpleBundleProvider p = new SimpleBundleProvider();
+        assertEquals(null, p.preferredPageSize());
 
-		p.setPreferredPageSize(100);
-		assertEquals(100, p.preferredPageSize().intValue());
-	}
-
+        p.setPreferredPageSize(100);
+        assertEquals(100, p.preferredPageSize().intValue());
+    }
 }

@@ -23,8 +23,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import org.hibernate.annotations.OptimisticLock;
-
+import java.util.Collection;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -32,145 +32,136 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import java.util.Collection;
-import java.util.Date;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import org.hibernate.annotations.OptimisticLock;
 
 @MappedSuperclass
-public abstract class BaseHasResource extends BasePartitionable implements IBaseResourceEntity, IBasePersistedResource<JpaPid> {
+public abstract class BaseHasResource extends BasePartitionable
+        implements IBaseResourceEntity, IBasePersistedResource<JpaPid> {
 
-	public static final String RES_PUBLISHED = "RES_PUBLISHED";
-	public static final String RES_UPDATED = "RES_UPDATED";
-	@Column(name = "RES_DELETED_AT", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date myDeleted;
+    public static final String RES_PUBLISHED = "RES_PUBLISHED";
+    public static final String RES_UPDATED = "RES_UPDATED";
 
-	@Column(name = "RES_VERSION", nullable = true, length = 7)
-	@Enumerated(EnumType.STRING)
-	@OptimisticLock(excluded = true)
-	private FhirVersionEnum myFhirVersion;
+    @Column(name = "RES_DELETED_AT", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date myDeleted;
 
-	@Column(name = "HAS_TAGS", nullable = false)
-	@OptimisticLock(excluded = true)
-	private boolean myHasTags;
+    @Column(name = "RES_VERSION", nullable = true, length = 7)
+    @Enumerated(EnumType.STRING)
+    @OptimisticLock(excluded = true)
+    private FhirVersionEnum myFhirVersion;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = RES_PUBLISHED, nullable = false)
-	@OptimisticLock(excluded = true)
-	private Date myPublished;
+    @Column(name = "HAS_TAGS", nullable = false)
+    @OptimisticLock(excluded = true)
+    private boolean myHasTags;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = RES_UPDATED, nullable = false)
-	@OptimisticLock(excluded = true)
-	private Date myUpdated;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = RES_PUBLISHED, nullable = false)
+    @OptimisticLock(excluded = true)
+    private Date myPublished;
 
-	/**
-	 * This is stored as an optimization to avoid needing to query for this
-	 * after an update
-	 */
-	@Transient
-	private transient String myTransientForcedId;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = RES_UPDATED, nullable = false)
+    @OptimisticLock(excluded = true)
+    private Date myUpdated;
 
-	public String getTransientForcedId() {
-		return myTransientForcedId;
-	}
+    /** This is stored as an optimization to avoid needing to query for this after an update */
+    @Transient private transient String myTransientForcedId;
 
-	public void setTransientForcedId(String theTransientForcedId) {
-		myTransientForcedId = theTransientForcedId;
-	}
+    public String getTransientForcedId() {
+        return myTransientForcedId;
+    }
 
+    public void setTransientForcedId(String theTransientForcedId) {
+        myTransientForcedId = theTransientForcedId;
+    }
 
-	public abstract BaseTag addTag(TagDefinition theDef);
+    public abstract BaseTag addTag(TagDefinition theDef);
 
-	@Override
-	public Date getDeleted() {
-		return cloneDate(myDeleted);
-	}
+    @Override
+    public Date getDeleted() {
+        return cloneDate(myDeleted);
+    }
 
-	@Override
-	public FhirVersionEnum getFhirVersion() {
-		return myFhirVersion;
-	}
+    @Override
+    public FhirVersionEnum getFhirVersion() {
+        return myFhirVersion;
+    }
 
-	public void setFhirVersion(FhirVersionEnum theFhirVersion) {
-		myFhirVersion = theFhirVersion;
-	}
+    public void setFhirVersion(FhirVersionEnum theFhirVersion) {
+        myFhirVersion = theFhirVersion;
+    }
 
-	abstract public ForcedId getForcedId();
+    public abstract ForcedId getForcedId();
 
-	abstract public void setForcedId(ForcedId theForcedId);
+    public abstract void setForcedId(ForcedId theForcedId);
 
-	@Override
-	public abstract Long getId();
+    @Override
+    public abstract Long getId();
 
+    public void setDeleted(Date theDate) {
+        myDeleted = theDate;
+    }
 
+    @Override
+    public InstantDt getPublished() {
+        if (myPublished != null) {
+            return new InstantDt(getPublishedDate());
+        } else {
+            return null;
+        }
+    }
 
-	public void setDeleted(Date theDate) {
-		myDeleted = theDate;
-	}
+    public Date getPublishedDate() {
+        return cloneDate(myPublished);
+    }
 
-	@Override
-	public InstantDt getPublished() {
-		if (myPublished != null) {
-			return new InstantDt(getPublishedDate());
-		} else {
-			return null;
-		}
-	}
+    public void setPublished(Date thePublished) {
+        myPublished = thePublished;
+    }
 
-	public Date getPublishedDate() {
-		return cloneDate(myPublished);
-	}
+    public void setPublished(InstantDt thePublished) {
+        myPublished = thePublished.getValue();
+    }
 
-	public void setPublished(Date thePublished) {
-		myPublished = thePublished;
-	}
+    @Override
+    public abstract Long getResourceId();
 
-	public void setPublished(InstantDt thePublished) {
-		myPublished = thePublished.getValue();
-	}
+    @Override
+    public abstract String getResourceType();
 
-	@Override
-	public abstract Long getResourceId();
+    public abstract Collection<? extends BaseTag> getTags();
 
-	@Override
-	public abstract String getResourceType();
+    @Override
+    public InstantDt getUpdated() {
+        return new InstantDt(getUpdatedDate());
+    }
 
-	public abstract Collection<? extends BaseTag> getTags();
+    @Override
+    public Date getUpdatedDate() {
+        return cloneDate(myUpdated);
+    }
 
-	@Override
-	public InstantDt getUpdated() {
-		return new InstantDt(getUpdatedDate());
-	}
+    public void setUpdated(Date theUpdated) {
+        myUpdated = theUpdated;
+    }
 
-	@Override
-	public Date getUpdatedDate() {
-		return cloneDate(myUpdated);
-	}
+    @Override
+    public abstract long getVersion();
 
-	public void setUpdated(Date theUpdated) {
-		myUpdated = theUpdated;
-	}
+    @Override
+    public boolean isHasTags() {
+        return myHasTags;
+    }
 
-	@Override
-	public abstract long getVersion();
+    public void setHasTags(boolean theHasTags) {
+        myHasTags = theHasTags;
+    }
 
-	@Override
-	public boolean isHasTags() {
-		return myHasTags;
-	}
-
-	public void setHasTags(boolean theHasTags) {
-		myHasTags = theHasTags;
-	}
-
-	static Date cloneDate(Date theDate) {
-		Date retVal = theDate;
-		if (retVal != null) {
-			retVal = new Date(retVal.getTime());
-		}
-		return retVal;
-	}
-
+    static Date cloneDate(Date theDate) {
+        Date retVal = theDate;
+        if (retVal != null) {
+            retVal = new Date(retVal.getTime());
+        }
+        return retVal;
+    }
 }

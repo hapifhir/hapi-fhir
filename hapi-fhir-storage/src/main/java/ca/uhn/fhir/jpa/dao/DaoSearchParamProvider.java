@@ -31,20 +31,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class DaoSearchParamProvider implements ISearchParamProvider {
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+    @Autowired private DaoRegistry myDaoRegistry;
 
-	@Override
-	public IBundleProvider search(SearchParameterMap theParams) {
-		return getSearchParamDao().search(theParams);
-	}
+    @Override
+    public IBundleProvider search(SearchParameterMap theParams) {
+        return getSearchParamDao().search(theParams);
+    }
 
-	private IFhirResourceDao getSearchParamDao() {
-		return myDaoRegistry.getResourceDao(ResourceTypeEnum.SEARCHPARAMETER.getCode());
-	}
+    private IFhirResourceDao getSearchParamDao() {
+        return myDaoRegistry.getResourceDao(ResourceTypeEnum.SEARCHPARAMETER.getCode());
+    }
 
-	@Override
-	public IBaseResource read(IIdType theSearchParamId) {
-		return getSearchParamDao().read(theSearchParamId);
-	}
+    @Override
+    public IBaseResource read(IIdType theSearchParamId) {
+        return getSearchParamDao().read(theSearchParamId);
+    }
 }

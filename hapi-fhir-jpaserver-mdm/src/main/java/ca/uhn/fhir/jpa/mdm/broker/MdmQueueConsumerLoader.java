@@ -26,58 +26,69 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import com.google.common.annotations.VisibleForTesting;
+import javax.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PreDestroy;
-
 @Service
 public class MdmQueueConsumerLoader {
-	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+    private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	private final IChannelFactory myChannelFactory;
-	private final IMdmSettings myMdmSettings;
-	private final MdmMessageHandler myMdmMessageHandler;
+    private final IChannelFactory myChannelFactory;
+    private final IMdmSettings myMdmSettings;
+    private final MdmMessageHandler myMdmMessageHandler;
 
-	protected IChannelReceiver myMdmChannel;
+    protected IChannelReceiver myMdmChannel;
 
-	public MdmQueueConsumerLoader(IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
-		myChannelFactory = theChannelFactory;
-		myMdmSettings = theMdmSettings;
-		myMdmMessageHandler = theMdmMessageHandler;
+    public MdmQueueConsumerLoader(
+            IChannelFactory theChannelFactory,
+            IMdmSettings theMdmSettings,
+            MdmMessageHandler theMdmMessageHandler) {
+        myChannelFactory = theChannelFactory;
+        myMdmSettings = theMdmSettings;
+        myMdmMessageHandler = theMdmMessageHandler;
 
-		startListeningToMdmChannel();
-	}
+        startListeningToMdmChannel();
+    }
 
+    private void startListeningToMdmChannel() {
+        if (myMdmChannel == null) {
+            ChannelConsumerSettings config = new ChannelConsumerSettings();
 
-	private void startListeningToMdmChannel() {
-		if (myMdmChannel == null) {
-			ChannelConsumerSettings config = new ChannelConsumerSettings();
-			
-			config.setConcurrentConsumers(myMdmSettings.getConcurrentConsumers());
+            config.setConcurrentConsumers(myMdmSettings.getConcurrentConsumers());
 
-			myMdmChannel = myChannelFactory.getOrCreateReceiver(IMdmSettings.EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, config);
-			if (myMdmChannel == null) {
-				ourLog.error("Unable to create receiver for {}", IMdmSettings.EMPI_CHANNEL_NAME);
-			} else {
-				myMdmChannel.subscribe(myMdmMessageHandler);
-				ourLog.info("MDM Matching Consumer subscribed to Matching Channel {} with name {}", myMdmChannel.getClass().getName(), myMdmChannel.getName());
-			}
-		}
-	}
+            myMdmChannel =
+                    myChannelFactory.getOrCreateReceiver(
+                            IMdmSettings.EMPI_CHANNEL_NAME,
+                            ResourceModifiedJsonMessage.class,
+                            config);
+            if (myMdmChannel == null) {
+                ourLog.error("Unable to create receiver for {}", IMdmSettings.EMPI_CHANNEL_NAME);
+            } else {
+                myMdmChannel.subscribe(myMdmMessageHandler);
+                ourLog.info(
+                        "MDM Matching Consumer subscribed to Matching Channel {} with name {}",
+                        myMdmChannel.getClass().getName(),
+                        myMdmChannel.getName());
+            }
+        }
+    }
 
-	@SuppressWarnings("unused")
-	@PreDestroy
-	public void stop() throws Exception {
-		if (myMdmChannel != null) {
-			// JMS channel needs to be destroyed to avoid dangling receivers
-			myMdmChannel.destroy();
-			ourLog.info("MDM Matching Consumer unsubscribed from Matching Channel {} with name {}", myMdmChannel.getClass().getName(), myMdmChannel.getName());
-		}
-	}
+    @SuppressWarnings("unused")
+    @PreDestroy
+    public void stop() throws Exception {
+        if (myMdmChannel != null) {
+            // JMS channel needs to be destroyed to avoid dangling receivers
+            myMdmChannel.destroy();
+            ourLog.info(
+                    "MDM Matching Consumer unsubscribed from Matching Channel {} with name {}",
+                    myMdmChannel.getClass().getName(),
+                    myMdmChannel.getName());
+        }
+    }
 
-	@VisibleForTesting
-	public IChannelReceiver getMdmChannelForUnitTest() {
-		return myMdmChannel;
-	}
+    @VisibleForTesting
+    public IChannelReceiver getMdmChannelForUnitTest() {
+        return myMdmChannel;
+    }
 }

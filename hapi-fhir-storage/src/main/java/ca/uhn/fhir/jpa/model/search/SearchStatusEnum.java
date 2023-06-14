@@ -21,39 +21,28 @@ package ca.uhn.fhir.jpa.model.search;
 
 public enum SearchStatusEnum {
 
-	/**
-	 * The search is currently actively working
-	 */
-	LOADING(false),
-	/**
-	 * The search has loaded a set of results and has stopped searching because it
-	 * reached an appropriate threshold
-	 */
-	PASSCMPLET(false),
-	/**
-	 * The search completed normally and loaded all of the results it as permitted to
-	 * load
-	 */
-	FINISHED(true),
-	/**
-	 * The search failed and will not continue
-	 */
-	FAILED(true),
-	/**
-	 * The search has been expired and will be expunged shortly
-	 */
-	GONE(true);
+    /** The search is currently actively working */
+    LOADING(false),
+    /**
+     * The search has loaded a set of results and has stopped searching because it reached an
+     * appropriate threshold
+     */
+    PASSCMPLET(false),
+    /** The search completed normally and loaded all of the results it as permitted to load */
+    FINISHED(true),
+    /** The search failed and will not continue */
+    FAILED(true),
+    /** The search has been expired and will be expunged shortly */
+    GONE(true);
 
-	private final boolean myDone;
+    private final boolean myDone;
 
-	SearchStatusEnum(boolean theDone) {
-		myDone = theDone;
-	}
+    SearchStatusEnum(boolean theDone) {
+        myDone = theDone;
+    }
 
-	/**
-	 * Returns true if no more work will happen for this search (finished, failed, gone)
-	 */
-	public boolean isDone() {
-		return myDone;
-	}
+    /** Returns true if no more work will happen for this search (finished, failed, gone) */
+    public boolean isDone() {
+        return myDone;
+    }
 }

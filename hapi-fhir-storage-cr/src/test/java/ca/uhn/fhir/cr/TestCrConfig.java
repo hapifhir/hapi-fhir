@@ -11,20 +11,19 @@ import org.springframework.context.annotation.Import;
 @Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class})
 public class TestCrConfig {
 
-	@Bean
-	public JpaStorageSettings storageSettings() {
-		JpaStorageSettings storageSettings = new JpaStorageSettings();
-		storageSettings.setAllowExternalReferences(true);
-		storageSettings.setEnforceReferentialIntegrityOnWrite(false);
-		storageSettings.setEnforceReferenceTargetTypes(false);
-		storageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
-		//storageSettings.setResourceServerIdStrategy(Id);
-		return storageSettings;
-	}
+    @Bean
+    public JpaStorageSettings storageSettings() {
+        JpaStorageSettings storageSettings = new JpaStorageSettings();
+        storageSettings.setAllowExternalReferences(true);
+        storageSettings.setEnforceReferentialIntegrityOnWrite(false);
+        storageSettings.setEnforceReferenceTargetTypes(false);
+        storageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+        // storageSettings.setResourceServerIdStrategy(Id);
+        return storageSettings;
+    }
 
-	@Bean
-	public PartitionHelper partitionHelper() {
-		return new PartitionHelper();
-	}
-
+    @Bean
+    public PartitionHelper partitionHelper() {
+        return new PartitionHelper();
+    }
 }

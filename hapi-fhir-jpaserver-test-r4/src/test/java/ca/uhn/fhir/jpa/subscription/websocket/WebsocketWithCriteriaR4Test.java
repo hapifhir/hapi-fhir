@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.websocket;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.FhirR4Util;
 import ca.uhn.fhir.jpa.util.WebsocketSubscriptionClient;
@@ -17,108 +20,112 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-
-
 // This is currently disabled as the criteria mechanism was a non-standard experiment
 @Disabled
 public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 
-	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaR4Test.class);
-	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
-	private String myPatientId;
-	private String mySubscriptionId;
+    private static final Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaR4Test.class);
 
-	@Override
-	@AfterEach
-	public void after() throws Exception {
-		super.after();
-	}
+    @RegisterExtension
+    private final WebsocketSubscriptionClient myWebsocketClientExtension =
+            new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
 
-	@Override
-	@BeforeEach
-	public void before() throws Exception {
-		super.before();
+    private String myPatientId;
+    private String mySubscriptionId;
 
-		/*
-		 * Create patient
-		 */
+    @Override
+    @AfterEach
+    public void after() throws Exception {
+        super.after();
+    }
 
-		Patient patient = FhirR4Util.getPatient();
-		MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
-		myPatientId = methodOutcome.getId().getIdPart();
+    @Override
+    @BeforeEach
+    public void before() throws Exception {
+        super.before();
 
-		/*
-		 * Create subscription
-		 */
-		Subscription subscription = new Subscription();
-		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
-		// subscription.setCriteria("Observation?subject=Patient/" + PATIENT_ID);
-		subscription.setCriteria("Observation?code=SNOMED-CT|82313006&_format=xml");
+        /*
+         * Create patient
+         */
 
-		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
-		channel.setType(Subscription.SubscriptionChannelType.WEBSOCKET);
-		channel.setPayload("application/json");
-		subscription.setChannel(channel);
+        Patient patient = FhirR4Util.getPatient();
+        MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
+        myPatientId = methodOutcome.getId().getIdPart();
 
-		methodOutcome = myClient.create().resource(subscription).execute();
-		mySubscriptionId = methodOutcome.getId().getIdPart();
+        /*
+         * Create subscription
+         */
+        Subscription subscription = new Subscription();
+        subscription.setReason(
+                "Monitor new neonatal function (note, age will be determined by the monitor)");
+        subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+        // subscription.setCriteria("Observation?subject=Patient/" + PATIENT_ID);
+        subscription.setCriteria("Observation?code=SNOMED-CT|82313006&_format=xml");
 
-		/*
-		 * Attach websocket
-		 */
+        Subscription.SubscriptionChannelComponent channel =
+                new Subscription.SubscriptionChannelComponent();
+        channel.setType(Subscription.SubscriptionChannelType.WEBSOCKET);
+        channel.setPayload("application/json");
+        subscription.setChannel(channel);
 
-		myWebsocketClientExtension.bind(mySubscriptionId);
-	}
+        methodOutcome = myClient.create().resource(subscription).execute();
+        mySubscriptionId = methodOutcome.getId().getIdPart();
 
-	@Test
-	public void createObservation() throws Exception {
-		Observation observation = new Observation();
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation.setCode(codeableConcept);
-		Coding coding = codeableConcept.addCoding();
-		coding.setCode("82313006");
-		coding.setSystem("SNOMED-CT");
-		Reference reference = new Reference();
-		reference.setReference("Patient/" + myPatientId);
-		observation.setSubject(reference);
-		observation.setStatus(Observation.ObservationStatus.FINAL);
+        /*
+         * Attach websocket
+         */
 
-		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
-		String observationId = methodOutcome2.getId().getIdPart();
-		observation.setId(observationId);
+        myWebsocketClientExtension.bind(mySubscriptionId);
+    }
 
-		ourLog.info("Observation id generated by server is: " + observationId);
+    @Test
+    public void createObservation() throws Exception {
+        Observation observation = new Observation();
+        CodeableConcept codeableConcept = new CodeableConcept();
+        observation.setCode(codeableConcept);
+        Coding coding = codeableConcept.addCoding();
+        coding.setCode("82313006");
+        coding.setSystem("SNOMED-CT");
+        Reference reference = new Reference();
+        reference.setReference("Patient/" + myPatientId);
+        observation.setSubject(reference);
+        observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
-		waitForSize(2, myWebsocketClientExtension.getMessages());
-		assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
-	}
+        MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
+        String observationId = methodOutcome2.getId().getIdPart();
+        observation.setId(observationId);
 
-	@Test
-	public void createObservationThatDoesNotMatch() throws Exception {
-		Observation observation = new Observation();
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation.setCode(codeableConcept);
-		Coding coding = codeableConcept.addCoding();
-		coding.setCode("8231");
-		coding.setSystem("SNOMED-CT");
-		Reference reference = new Reference();
-		reference.setReference("Patient/" + myPatientId);
-		observation.setSubject(reference);
-		observation.setStatus(Observation.ObservationStatus.FINAL);
+        ourLog.info("Observation id generated by server is: " + observationId);
 
-		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
-		String observationId = methodOutcome2.getId().getIdPart();
-		observation.setId(observationId);
+        ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
+        waitForSize(2, myWebsocketClientExtension.getMessages());
+        assertThat(
+                myWebsocketClientExtension.getMessages(),
+                contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
+    }
 
-		ourLog.info("Observation id generated by server is: " + observationId);
+    @Test
+    public void createObservationThatDoesNotMatch() throws Exception {
+        Observation observation = new Observation();
+        CodeableConcept codeableConcept = new CodeableConcept();
+        observation.setCode(codeableConcept);
+        Coding coding = codeableConcept.addCoding();
+        coding.setCode("8231");
+        coding.setSystem("SNOMED-CT");
+        Reference reference = new Reference();
+        reference.setReference("Patient/" + myPatientId);
+        observation.setSubject(reference);
+        observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
-		waitForSize(2, myWebsocketClientExtension.getMessages());
-		assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId));
-	}
+        MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
+        String observationId = methodOutcome2.getId().getIdPart();
+        observation.setId(observationId);
+
+        ourLog.info("Observation id generated by server is: " + observationId);
+
+        ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
+        waitForSize(2, myWebsocketClientExtension.getMessages());
+        assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId));
+    }
 }

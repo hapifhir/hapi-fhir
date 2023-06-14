@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
@@ -30,7 +32,6 @@ import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -45,207 +46,345 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+public abstract class BaseStorageResourceDao<T extends IBaseResource> extends BaseStorageDao
+        implements IFhirResourceDao<T>, IJpaDao<T> {
+    public static final StrictErrorHandler STRICT_ERROR_HANDLER = new StrictErrorHandler();
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+    @Autowired
+    protected abstract HapiTransactionService getTransactionService();
 
-public abstract class BaseStorageResourceDao<T extends IBaseResource> extends BaseStorageDao implements IFhirResourceDao<T>, IJpaDao<T> {
-	public static final StrictErrorHandler STRICT_ERROR_HANDLER = new StrictErrorHandler();
+    @Autowired
+    protected abstract MatchResourceUrlService getMatchResourceUrlService();
 
-	@Autowired
-	protected abstract HapiTransactionService getTransactionService();
+    @Autowired
+    protected abstract IStorageResourceParser getStorageResourceParser();
 
-	@Autowired
-	protected abstract MatchResourceUrlService getMatchResourceUrlService();
+    @Autowired
+    protected abstract IDeleteExpungeJobSubmitter getDeleteExpungeJobSubmitter();
 
-	@Autowired
-	protected abstract IStorageResourceParser getStorageResourceParser();
+    @Override
+    public DaoMethodOutcome patch(
+            IIdType theId,
+            String theConditionalUrl,
+            PatchTypeEnum thePatchType,
+            String thePatchBody,
+            IBaseParameters theFhirPatchBody,
+            RequestDetails theRequestDetails) {
+        TransactionDetails transactionDetails = new TransactionDetails();
+        return getTransactionService()
+                .execute(
+                        theRequestDetails,
+                        transactionDetails,
+                        tx ->
+                                patchInTransaction(
+                                        theId,
+                                        theConditionalUrl,
+                                        true,
+                                        thePatchType,
+                                        thePatchBody,
+                                        theFhirPatchBody,
+                                        theRequestDetails,
+                                        transactionDetails));
+    }
 
-	@Autowired
-	protected abstract IDeleteExpungeJobSubmitter getDeleteExpungeJobSubmitter();
+    @Override
+    public DaoMethodOutcome patchInTransaction(
+            IIdType theId,
+            String theConditionalUrl,
+            boolean thePerformIndexing,
+            PatchTypeEnum thePatchType,
+            String thePatchBody,
+            IBaseParameters theFhirPatchBody,
+            RequestDetails theRequestDetails,
+            TransactionDetails theTransactionDetails) {
+        assert TransactionSynchronizationManager.isActualTransactionActive();
 
-	@Override
-	public DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails) {
-		TransactionDetails transactionDetails = new TransactionDetails();
-		return getTransactionService().execute(theRequestDetails, transactionDetails, tx -> patchInTransaction(theId, theConditionalUrl, true, thePatchType, thePatchBody, theFhirPatchBody, theRequestDetails, transactionDetails));
-	}
+        IBasePersistedResource entityToUpdate;
+        IIdType resourceId;
+        if (isNotBlank(theConditionalUrl)) {
 
-	@Override
-	public DaoMethodOutcome patchInTransaction(IIdType theId, String theConditionalUrl, boolean thePerformIndexing, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
+            Set<IResourcePersistentId> match =
+                    getMatchResourceUrlService()
+                            .processMatchUrl(
+                                    theConditionalUrl,
+                                    getResourceType(),
+                                    theTransactionDetails,
+                                    theRequestDetails);
+            if (match.size() > 1) {
+                String msg =
+                        getContext()
+                                .getLocalizer()
+                                .getMessageSanitized(
+                                        BaseStorageDao.class,
+                                        "transactionOperationWithMultipleMatchFailure",
+                                        "PATCH",
+                                        theConditionalUrl,
+                                        match.size());
+                throw new PreconditionFailedException(Msg.code(972) + msg);
+            } else if (match.size() == 1) {
+                IResourcePersistentId pid = match.iterator().next();
+                entityToUpdate =
+                        readEntityLatestVersion(pid, theRequestDetails, theTransactionDetails);
+                resourceId = entityToUpdate.getIdDt();
+            } else {
+                String msg =
+                        getContext()
+                                .getLocalizer()
+                                .getMessageSanitized(
+                                        BaseStorageDao.class,
+                                        "invalidMatchUrlNoMatches",
+                                        theConditionalUrl);
+                throw new ResourceNotFoundException(Msg.code(973) + msg);
+            }
 
-		IBasePersistedResource entityToUpdate;
-		IIdType resourceId;
-		if (isNotBlank(theConditionalUrl)) {
+        } else {
+            resourceId = theId;
+            entityToUpdate =
+                    readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
+            if (theId.hasVersionIdPart()) {
+                if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
+                    throw new ResourceVersionConflictException(
+                            Msg.code(974)
+                                    + "Version "
+                                    + theId.getVersionIdPart()
+                                    + " is not the most recent version of this resource, unable to"
+                                    + " apply patch");
+                }
+            }
+        }
 
-			Set<IResourcePersistentId> match = getMatchResourceUrlService().processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequestDetails);
-			if (match.size() > 1) {
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "PATCH", theConditionalUrl, match.size());
-				throw new PreconditionFailedException(Msg.code(972) + msg);
-			} else if (match.size() == 1) {
-				IResourcePersistentId pid = match.iterator().next();
-				entityToUpdate = readEntityLatestVersion(pid, theRequestDetails, theTransactionDetails);
-				resourceId = entityToUpdate.getIdDt();
-			} else {
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidMatchUrlNoMatches", theConditionalUrl);
-				throw new ResourceNotFoundException(Msg.code(973) + msg);
-			}
+        validateResourceType(entityToUpdate, getResourceName());
 
-		} else {
-			resourceId = theId;
-			entityToUpdate = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
-			if (theId.hasVersionIdPart()) {
-				if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
-					throw new ResourceVersionConflictException(Msg.code(974) + "Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
-				}
-			}
-		}
+        if (entityToUpdate.isDeleted()) {
+            throw createResourceGoneException(entityToUpdate);
+        }
 
-		validateResourceType(entityToUpdate, getResourceName());
+        IBaseResource resourceToUpdate =
+                getStorageResourceParser().toResource(entityToUpdate, false);
+        if (resourceToUpdate == null) {
+            // If this is null, we are presumably in a FHIR transaction bundle with both a create
+            // and a patch on the same
+            // resource. This is weird but not impossible.
+            resourceToUpdate = theTransactionDetails.getResolvedResource(resourceId);
+        }
 
-		if (entityToUpdate.isDeleted()) {
-			throw createResourceGoneException(entityToUpdate);
-		}
+        IBaseResource destination;
+        switch (thePatchType) {
+            case JSON_PATCH:
+                destination = JsonPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
+                break;
+            case XML_PATCH:
+                destination = XmlPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
+                break;
+            case FHIR_PATCH_XML:
+            case FHIR_PATCH_JSON:
+            default:
+                IBaseParameters fhirPatchJson = theFhirPatchBody;
+                new FhirPatch(getContext()).apply(resourceToUpdate, fhirPatchJson);
+                destination = resourceToUpdate;
+                break;
+        }
 
-		IBaseResource resourceToUpdate = getStorageResourceParser().toResource(entityToUpdate, false);
-		if (resourceToUpdate == null) {
-			// If this is null, we are presumably in a FHIR transaction bundle with both a create and a patch on the same
-			// resource. This is weird but not impossible.
-			resourceToUpdate = theTransactionDetails.getResolvedResource(resourceId);
-		}
+        @SuppressWarnings("unchecked")
+        T destinationCasted = (T) destination;
+        myFhirContext
+                .newJsonParser()
+                .setParserErrorHandler(STRICT_ERROR_HANDLER)
+                .encodeResourceToString(destinationCasted);
 
-		IBaseResource destination;
-		switch (thePatchType) {
-			case JSON_PATCH:
-				destination = JsonPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
-				break;
-			case XML_PATCH:
-				destination = XmlPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
-				break;
-			case FHIR_PATCH_XML:
-			case FHIR_PATCH_JSON:
-			default:
-				IBaseParameters fhirPatchJson = theFhirPatchBody;
-				new FhirPatch(getContext()).apply(resourceToUpdate, fhirPatchJson);
-				destination = resourceToUpdate;
-				break;
-		}
+        preProcessResourceForStorage(
+                destinationCasted, theRequestDetails, theTransactionDetails, true);
 
-		@SuppressWarnings("unchecked")
-		T destinationCasted = (T) destination;
-		myFhirContext.newJsonParser().setParserErrorHandler(STRICT_ERROR_HANDLER).encodeResourceToString(destinationCasted);
+        return doUpdateForUpdateOrPatch(
+                theRequestDetails,
+                resourceId,
+                theConditionalUrl,
+                thePerformIndexing,
+                false,
+                destinationCasted,
+                entityToUpdate,
+                RestOperationTypeEnum.PATCH,
+                theTransactionDetails);
+    }
 
-		preProcessResourceForStorage(destinationCasted, theRequestDetails, theTransactionDetails, true);
+    @Override
+    @Nonnull
+    public abstract Class<T> getResourceType();
 
-		return doUpdateForUpdateOrPatch(theRequestDetails, resourceId, theConditionalUrl, thePerformIndexing, false, destinationCasted, entityToUpdate, RestOperationTypeEnum.PATCH, theTransactionDetails);
-	}
+    @Override
+    @Nonnull
+    protected abstract String getResourceName();
 
-	@Override
-	@Nonnull
-	public abstract Class<T> getResourceType();
+    protected abstract IBasePersistedResource readEntityLatestVersion(
+            IResourcePersistentId thePersistentId,
+            RequestDetails theRequestDetails,
+            TransactionDetails theTransactionDetails);
 
-	@Override
-	@Nonnull
-	protected abstract String getResourceName();
+    protected abstract IBasePersistedResource readEntityLatestVersion(
+            IIdType theId,
+            RequestDetails theRequestDetails,
+            TransactionDetails theTransactionDetails);
 
-	protected abstract IBasePersistedResource readEntityLatestVersion(IResourcePersistentId thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+    protected DaoMethodOutcome doUpdateForUpdateOrPatch(
+            RequestDetails theRequest,
+            IIdType theResourceId,
+            String theMatchUrl,
+            boolean thePerformIndexing,
+            boolean theForceUpdateVersion,
+            T theResource,
+            IBasePersistedResource theEntity,
+            RestOperationTypeEnum theOperationType,
+            TransactionDetails theTransactionDetails) {
+        if (theResourceId.hasVersionIdPart()
+                && Long.parseLong(theResourceId.getVersionIdPart()) != theEntity.getVersion()) {
+            throw new ResourceVersionConflictException(
+                    Msg.code(989)
+                            + "Trying to update "
+                            + theResourceId
+                            + " but this is not the current version");
+        }
 
-	protected abstract IBasePersistedResource readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+        if (theResourceId.hasResourceType()
+                && !theResourceId.getResourceType().equals(getResourceName())) {
+            throw new UnprocessableEntityException(
+                    Msg.code(990)
+                            + "Invalid resource ID["
+                            + theEntity.getIdDt().toUnqualifiedVersionless()
+                            + "] of type["
+                            + theEntity.getResourceType()
+                            + "] - Does not match expected ["
+                            + getResourceName()
+                            + "]");
+        }
 
+        IBaseResource oldResource;
+        if (getStorageSettings().isMassIngestionMode()) {
+            oldResource = null;
+        } else {
+            oldResource = getStorageResourceParser().toResource(theEntity, false);
+        }
 
-	protected DaoMethodOutcome doUpdateForUpdateOrPatch(RequestDetails theRequest, IIdType theResourceId, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, T theResource, IBasePersistedResource theEntity, RestOperationTypeEnum theOperationType, TransactionDetails theTransactionDetails) {
-		if (theResourceId.hasVersionIdPart() && Long.parseLong(theResourceId.getVersionIdPart()) != theEntity.getVersion()) {
-			throw new ResourceVersionConflictException(Msg.code(989) + "Trying to update " + theResourceId + " but this is not the current version");
-		}
+        /*
+         * Mark the entity as not deleted - This is also done in the actual updateInternal()
+         * method later on so it usually doesn't matter whether we do it here, but in the
+         * case of a transaction with multiple PUTs we don't get there until later so
+         * having this here means that a transaction can have a reference in one
+         * resource to another resource in the same transaction that is being
+         * un-deleted by the transaction. Wacky use case, sure. But it's real.
+         *
+         * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
+         * for a test that needs this.
+         */
+        boolean wasDeleted = theEntity.isDeleted();
+        theEntity.setNotDeleted();
 
-		if (theResourceId.hasResourceType() && !theResourceId.getResourceType().equals(getResourceName())) {
-			throw new UnprocessableEntityException(Msg.code(990) + "Invalid resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] of type[" + theEntity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
-		}
+        /*
+         * If we aren't indexing, that means we're doing this inside a transaction.
+         * The transaction will do the actual storage to the database a bit later on,
+         * after placeholder IDs have been replaced, by calling {@link #updateInternal}
+         * directly. So we just bail now.
+         */
+        if (!thePerformIndexing) {
+            theResource.setId(theEntity.getIdDt().getValue());
+            DaoMethodOutcome outcome =
+                    toMethodOutcome(
+                                    theRequest,
+                                    theEntity,
+                                    theResource,
+                                    theMatchUrl,
+                                    theOperationType)
+                            .setCreated(wasDeleted);
+            outcome.setPreviousResource(oldResource);
+            if (!outcome.isNop()) {
+                // Technically this may not end up being right since we might not increment if the
+                // contents turn out to be the same
+                outcome.setId(
+                        outcome.getId()
+                                .withVersion(
+                                        Long.toString(
+                                                outcome.getId().getVersionIdPartAsLong() + 1)));
+            }
+            return outcome;
+        }
 
-		IBaseResource oldResource;
-		if (getStorageSettings().isMassIngestionMode()) {
-			oldResource = null;
-		} else {
-			oldResource = getStorageResourceParser().toResource(theEntity, false);
-		}
+        /*
+         * Otherwise, we're not in a transaction
+         */
+        return updateInternal(
+                theRequest,
+                theResource,
+                theMatchUrl,
+                thePerformIndexing,
+                theForceUpdateVersion,
+                theEntity,
+                theResourceId,
+                oldResource,
+                theOperationType,
+                theTransactionDetails);
+    }
 
-		/*
-		 * Mark the entity as not deleted - This is also done in the actual updateInternal()
-		 * method later on so it usually doesn't matter whether we do it here, but in the
-		 * case of a transaction with multiple PUTs we don't get there until later so
-		 * having this here means that a transaction can have a reference in one
-		 * resource to another resource in the same transaction that is being
-		 * un-deleted by the transaction. Wacky use case, sure. But it's real.
-		 *
-		 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
-		 * for a test that needs this.
-		 */
-		boolean wasDeleted = theEntity.isDeleted();
-		theEntity.setNotDeleted();
+    public static void validateResourceType(
+            IBasePersistedResource theEntity, String theResourceName) {
+        if (!theResourceName.equals(theEntity.getResourceType())) {
+            throw new ResourceNotFoundException(
+                    Msg.code(935)
+                            + "Resource with ID "
+                            + theEntity.getIdDt().getIdPart()
+                            + " exists but it is not of type "
+                            + theResourceName
+                            + ", found resource of type "
+                            + theEntity.getResourceType());
+        }
+    }
 
-		/*
-		 * If we aren't indexing, that means we're doing this inside a transaction.
-		 * The transaction will do the actual storage to the database a bit later on,
-		 * after placeholder IDs have been replaced, by calling {@link #updateInternal}
-		 * directly. So we just bail now.
-		 */
-		if (!thePerformIndexing) {
-			theResource.setId(theEntity.getIdDt().getValue());
-			DaoMethodOutcome outcome = toMethodOutcome(theRequest, theEntity, theResource, theMatchUrl, theOperationType).setCreated(wasDeleted);
-			outcome.setPreviousResource(oldResource);
-			if (!outcome.isNop()) {
-				// Technically this may not end up being right since we might not increment if the
-				// contents turn out to be the same
-				outcome.setId(outcome.getId().withVersion(Long.toString(outcome.getId().getVersionIdPartAsLong() + 1)));
-			}
-			return outcome;
-		}
+    protected DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theRequest) {
+        if (!getStorageSettings().canDeleteExpunge()) {
+            throw new MethodNotAllowedException(
+                    Msg.code(963)
+                            + "_expunge is not enabled on this server: "
+                            + getStorageSettings().cannotDeleteExpungeReason());
+        }
 
-		/*
-		 * Otherwise, we're not in a transaction
-		 */
-		return updateInternal(theRequest, theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theEntity, theResourceId, oldResource, theOperationType, theTransactionDetails);
-	}
+        RestfulServerUtils.DeleteCascadeDetails cascadeDelete =
+                RestfulServerUtils.extractDeleteCascadeParameter(theRequest);
+        boolean cascade = false;
+        Integer cascadeMaxRounds = null;
+        if (cascadeDelete.getMode() == DeleteCascadeModeEnum.DELETE) {
+            cascade = true;
+            cascadeMaxRounds = cascadeDelete.getMaxRounds();
+            if (cascadeMaxRounds == null) {
+                cascadeMaxRounds = myStorageSettings.getMaximumDeleteConflictQueryCount();
+            } else if (myStorageSettings.getMaximumDeleteConflictQueryCount() != null
+                    && myStorageSettings.getMaximumDeleteConflictQueryCount() < cascadeMaxRounds) {
+                cascadeMaxRounds = myStorageSettings.getMaximumDeleteConflictQueryCount();
+            }
+        }
 
-	public static void validateResourceType(IBasePersistedResource theEntity, String theResourceName) {
-		if (!theResourceName.equals(theEntity.getResourceType())) {
-			throw new ResourceNotFoundException(Msg.code(935) + "Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
-		}
-	}
-
-	protected DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theRequest) {
-		if (!getStorageSettings().canDeleteExpunge()) {
-			throw new MethodNotAllowedException(Msg.code(963) + "_expunge is not enabled on this server: " + getStorageSettings().cannotDeleteExpungeReason());
-		}
-
-		RestfulServerUtils.DeleteCascadeDetails cascadeDelete = RestfulServerUtils.extractDeleteCascadeParameter(theRequest);
-		boolean cascade = false;
-		Integer cascadeMaxRounds = null;
-		if (cascadeDelete.getMode() == DeleteCascadeModeEnum.DELETE) {
-			cascade = true;
-			cascadeMaxRounds = cascadeDelete.getMaxRounds();
-			if (cascadeMaxRounds == null) {
-				cascadeMaxRounds = myStorageSettings.getMaximumDeleteConflictQueryCount();
-			} else if (myStorageSettings.getMaximumDeleteConflictQueryCount() != null && myStorageSettings.getMaximumDeleteConflictQueryCount() < cascadeMaxRounds) {
-				cascadeMaxRounds = myStorageSettings.getMaximumDeleteConflictQueryCount();
-			}
-		}
-
-		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
-		try {
-			String jobId = getDeleteExpungeJobSubmitter().submitJob(getStorageSettings().getExpungeBatchSize(), urlsToDeleteExpunge, cascade, cascadeMaxRounds, theRequest);
-			return new DeleteMethodOutcome(createInfoOperationOutcome("Delete job submitted with id " + jobId));
-		} catch (InvalidRequestException e) {
-			throw new InvalidRequestException(Msg.code(965) + "Invalid Delete Expunge Request: " + e.getMessage(), e);
-		}
-	}
+        List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
+        try {
+            String jobId =
+                    getDeleteExpungeJobSubmitter()
+                            .submitJob(
+                                    getStorageSettings().getExpungeBatchSize(),
+                                    urlsToDeleteExpunge,
+                                    cascade,
+                                    cascadeMaxRounds,
+                                    theRequest);
+            return new DeleteMethodOutcome(
+                    createInfoOperationOutcome("Delete job submitted with id " + jobId));
+        } catch (InvalidRequestException e) {
+            throw new InvalidRequestException(
+                    Msg.code(965) + "Invalid Delete Expunge Request: " + e.getMessage(), e);
+        }
+    }
 }

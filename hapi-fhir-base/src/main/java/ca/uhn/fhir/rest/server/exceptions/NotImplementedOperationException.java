@@ -19,40 +19,35 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
- * This Represents an <b>HTTP 501 Not Implemented</b> response, which means the resource provider currently lacks the
- * ability to fullfill the request.
- * 
- * <p>
- * Note that a complete list of RESTful exceptions is available in the <a href="./package-summary.html">Package
- * Summary</a>.
- * </p>
+ * This Represents an <b>HTTP 501 Not Implemented</b> response, which means the resource provider
+ * currently lacks the ability to fullfill the request.
+ *
+ * <p>Note that a complete list of RESTful exceptions is available in the <a
+ * href="./package-summary.html">Package Summary</a>.
  */
 @CoverageIgnore
 public class NotImplementedOperationException extends BaseServerResponseException {
 
-	public static final int STATUS_CODE = Constants.STATUS_HTTP_501_NOT_IMPLEMENTED;
-	private static final long serialVersionUID = 1L;
+    public static final int STATUS_CODE = Constants.STATUS_HTTP_501_NOT_IMPLEMENTED;
+    private static final long serialVersionUID = 1L;
 
-	public NotImplementedOperationException(String theMessage) {
-		super(STATUS_CODE, theMessage);
-	}
+    public NotImplementedOperationException(String theMessage) {
+        super(STATUS_CODE, theMessage);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param theMessage
-	 *            The message
-	 * @param theOperationOutcome
-	 *            The OperationOutcome resource to return to the client
-	 */
-	public NotImplementedOperationException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
-		super(STATUS_CODE, theMessage, theOperationOutcome);
-	}
-
+    /**
+     * Constructor
+     *
+     * @param theMessage The message
+     * @param theOperationOutcome The OperationOutcome resource to return to the client
+     */
+    public NotImplementedOperationException(
+            String theMessage, IBaseOperationOutcome theOperationOutcome) {
+        super(STATUS_CODE, theMessage, theOperationOutcome);
+    }
 }

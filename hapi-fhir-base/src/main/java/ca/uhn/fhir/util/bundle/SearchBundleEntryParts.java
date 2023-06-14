@@ -23,31 +23,30 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class SearchBundleEntryParts {
-	private final IBaseResource myResource;
-	private final BundleEntrySearchModeEnum mySearchMode;
-	private final String myFullUrl;
+    private final IBaseResource myResource;
+    private final BundleEntrySearchModeEnum mySearchMode;
+    private final String myFullUrl;
 
-	public SearchBundleEntryParts(String theFullUrl, IBaseResource theResource, String theSearchMode) {
-		myFullUrl = theFullUrl;
-		myResource = theResource;
-		if ("match".equalsIgnoreCase(theSearchMode)) {
-			mySearchMode = BundleEntrySearchModeEnum.MATCH;
-		} else {
-			mySearchMode = BundleEntrySearchModeEnum.INCLUDE;
-		}
-	}
+    public SearchBundleEntryParts(
+            String theFullUrl, IBaseResource theResource, String theSearchMode) {
+        myFullUrl = theFullUrl;
+        myResource = theResource;
+        if ("match".equalsIgnoreCase(theSearchMode)) {
+            mySearchMode = BundleEntrySearchModeEnum.MATCH;
+        } else {
+            mySearchMode = BundleEntrySearchModeEnum.INCLUDE;
+        }
+    }
 
-	public String getFullUrl() {
-		return myFullUrl;
-	}
+    public String getFullUrl() {
+        return myFullUrl;
+    }
 
-	public IBaseResource getResource() {
-		return myResource;
-	}
+    public IBaseResource getResource() {
+        return myResource;
+    }
 
-	public BundleEntrySearchModeEnum getSearchMode() {
-		return mySearchMode;
-	}
-
-
+    public BundleEntrySearchModeEnum getSearchMode() {
+        return mySearchMode;
+    }
 }

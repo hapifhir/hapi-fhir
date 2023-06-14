@@ -22,47 +22,53 @@ package ca.uhn.fhir.context;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import java.lang.reflect.Field;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import java.lang.reflect.Field;
+public class RuntimeChildPrimitiveEnumerationDatatypeDefinition
+        extends RuntimeChildPrimitiveDatatypeDefinition {
 
-public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeChildPrimitiveDatatypeDefinition {
+    private Object myBinder;
+    private Class<? extends Enum<?>> myEnumType;
 
-	private Object myBinder;
-	private Class<? extends Enum<?>> myEnumType;
+    public RuntimeChildPrimitiveEnumerationDatatypeDefinition(
+            Field theField,
+            String theElementName,
+            Child theChildAnnotation,
+            Description theDescriptionAnnotation,
+            Class<? extends IBase> theDatatype,
+            Class<? extends Enum<?>> theBinderType) {
+        super(theField, theElementName, theDescriptionAnnotation, theChildAnnotation, theDatatype);
 
-	public RuntimeChildPrimitiveEnumerationDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation,  Class<? extends IBase> theDatatype, Class<? extends Enum<?>> theBinderType) {
-		super(theField, theElementName, theDescriptionAnnotation, theChildAnnotation, theDatatype);
+        myEnumType = theBinderType;
+    }
 
-		myEnumType = theBinderType;
-	}
+    @Override
+    public Class<? extends Enum<?>> getBoundEnumType() {
+        return myEnumType;
+    }
 
-	@Override
-	public Class<? extends Enum<?>> getBoundEnumType() {
-		return myEnumType;
-	}
+    @Override
+    public Object getInstanceConstructorArguments() {
+        Object retVal = myBinder;
+        if (retVal == null) {
+            retVal = toEnumFactory(myEnumType);
+            myBinder = retVal;
+        }
+        return retVal;
+    }
 
-	@Override
-	public Object getInstanceConstructorArguments() {
-		Object retVal = myBinder;
-		if (retVal == null) {
-			retVal = toEnumFactory(myEnumType);
-			myBinder = retVal;
-		}
-		return retVal;
-	}
-
-	static Object toEnumFactory(Class<?> theEnumerationType) {
-		Class<?> clazz;
-		String className = theEnumerationType.getName() + "EnumFactory";
-		Object retVal;
-		try {
-			clazz = Class.forName(className);
-			retVal = clazz.newInstance();
-		} catch (Exception e) {
-			throw new ConfigurationException(Msg.code(1694) + "Failed to instantiate " + className, e);
-		}
-		return retVal;
-	}
-
+    static Object toEnumFactory(Class<?> theEnumerationType) {
+        Class<?> clazz;
+        String className = theEnumerationType.getName() + "EnumFactory";
+        Object retVal;
+        try {
+            clazz = Class.forName(className);
+            retVal = clazz.newInstance();
+        } catch (Exception e) {
+            throw new ConfigurationException(
+                    Msg.code(1694) + "Failed to instantiate " + className, e);
+        }
+        return retVal;
+    }
 }

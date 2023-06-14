@@ -27,76 +27,74 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.springframework.data.domain.Page;
-
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
+import org.springframework.data.domain.Page;
 
 public interface IJobCoordinator {
 
-	/**
-	 * Starts a new job instance
-	 *
-	 * @param theStartRequest The request, containing the job type and parameters
-	 * @return Returns a unique ID for this job execution
-	 * @throws InvalidRequestException If the request is invalid (incorrect/missing parameters, etc)
-	 * @deprecated Use {@link #startInstance(RequestDetails, JobInstanceStartRequest)}
-	 */
-	@Deprecated(since = "6.8.0", forRemoval = true)
-	default Batch2JobStartResponse startInstance(JobInstanceStartRequest theStartRequest) throws InvalidRequestException {
-		return startInstance(null, theStartRequest);
-	}
+    /**
+     * Starts a new job instance
+     *
+     * @param theStartRequest The request, containing the job type and parameters
+     * @return Returns a unique ID for this job execution
+     * @throws InvalidRequestException If the request is invalid (incorrect/missing parameters, etc)
+     * @deprecated Use {@link #startInstance(RequestDetails, JobInstanceStartRequest)}
+     */
+    @Deprecated(since = "6.8.0", forRemoval = true)
+    default Batch2JobStartResponse startInstance(JobInstanceStartRequest theStartRequest)
+            throws InvalidRequestException {
+        return startInstance(null, theStartRequest);
+    }
 
-	/**
-	 * Starts a new job instance
-	 *
-	 * @param theRequestDetails The request details associated with the request. This will get used to validate that the
-	 *                          request is appropriate for the given user, so if at all possible it should be the
-	 *                          original RequestDetails from the server request.
-	 * @param theStartRequest The request, containing the job type and parameters
-	 * @return Returns a unique ID for this job execution
-	 * @throws InvalidRequestException If the request is invalid (incorrect/missing parameters, etc)
-	 */
-	Batch2JobStartResponse startInstance(RequestDetails theRequestDetails, JobInstanceStartRequest theStartRequest) throws InvalidRequestException;
+    /**
+     * Starts a new job instance
+     *
+     * @param theRequestDetails The request details associated with the request. This will get used
+     *     to validate that the request is appropriate for the given user, so if at all possible it
+     *     should be the original RequestDetails from the server request.
+     * @param theStartRequest The request, containing the job type and parameters
+     * @return Returns a unique ID for this job execution
+     * @throws InvalidRequestException If the request is invalid (incorrect/missing parameters, etc)
+     */
+    Batch2JobStartResponse startInstance(
+            RequestDetails theRequestDetails, JobInstanceStartRequest theStartRequest)
+            throws InvalidRequestException;
 
-	/**
-	 * Fetch details about a job instance
-	 *
-	 * @param theInstanceId The instance ID
-	 * @return Returns the current instance details
-	 * @throws ResourceNotFoundException If the instance ID can not be found
-	 */
-	JobInstance getInstance(String theInstanceId) throws ResourceNotFoundException;
+    /**
+     * Fetch details about a job instance
+     *
+     * @param theInstanceId The instance ID
+     * @return Returns the current instance details
+     * @throws ResourceNotFoundException If the instance ID can not be found
+     */
+    JobInstance getInstance(String theInstanceId) throws ResourceNotFoundException;
 
-	/**
-	 * Fetch all job instances
-	 */
-	List<JobInstance> getInstances(int thePageSize, int thePageIndex);
+    /** Fetch all job instances */
+    List<JobInstance> getInstances(int thePageSize, int thePageIndex);
 
-	/**
-	 * Fetch recent job instances
-	 */
-	List<JobInstance> getRecentInstances(int theCount, int theStart);
+    /** Fetch recent job instances */
+    List<JobInstance> getRecentInstances(int theCount, int theStart);
 
-	JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException;
+    JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException;
 
-	List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart);
+    List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(
+            String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart);
 
-	/**
-	 * Fetches all job instances tht meet the FetchRequest criteria
-	 * @param theFetchRequest - fetch request
-	 * @return - page of job instances
-	 */
-	Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest);
+    /**
+     * Fetches all job instances tht meet the FetchRequest criteria
+     *
+     * @param theFetchRequest - fetch request
+     * @return - page of job instances
+     */
+    Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest);
 
-	/**
-	 * Fetches all job instances by job definition id and statuses
-	 */
-	List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart);
+    /** Fetches all job instances by job definition id and statuses */
+    List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(
+            String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart);
 
-	/**
-	 * Fetches all jobs by job definition id
-	 */
-	List<JobInstance> getJobInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
+    /** Fetches all jobs by job definition id */
+    List<JobInstance> getJobInstancesByJobDefinitionId(
+            String theJobDefinitionId, int theCount, int theStart);
 }

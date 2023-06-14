@@ -27,52 +27,51 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import javax.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PreDestroy;
-
 @Service
 public class MdmProviderLoader {
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private ResourceProviderFactory myResourceProviderFactory;
-	@Autowired
-	private MdmControllerHelper myMdmControllerHelper;
-	@Autowired
-	private IMdmControllerSvc myMdmControllerSvc;
-	@Autowired
-	private IMdmSubmitSvc myMdmSubmitSvc;
-	@Autowired
-	private IMdmSettings myMdmSettings;
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
+    @Autowired private FhirContext myFhirContext;
+    @Autowired private ResourceProviderFactory myResourceProviderFactory;
+    @Autowired private MdmControllerHelper myMdmControllerHelper;
+    @Autowired private IMdmControllerSvc myMdmControllerSvc;
+    @Autowired private IMdmSubmitSvc myMdmSubmitSvc;
+    @Autowired private IMdmSettings myMdmSettings;
+    @Autowired private JpaStorageSettings myStorageSettings;
 
-	private BaseMdmProvider myMdmProvider;
+    private BaseMdmProvider myMdmProvider;
 
-	public void loadProvider() {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case DSTU3:
-			case R4:
-				myResourceProviderFactory.addSupplier(() ->  new MdmProviderDstu3Plus(myFhirContext,
-						myMdmControllerSvc,
-						myMdmControllerHelper,
-						myMdmSubmitSvc,
-						myMdmSettings
-						));
-				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
-					myResourceProviderFactory.addSupplier(() -> new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc));
-				}
-				break;
-			default:
-				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
-		}
-	}
+    public void loadProvider() {
+        switch (myFhirContext.getVersion().getVersion()) {
+            case DSTU3:
+            case R4:
+                myResourceProviderFactory.addSupplier(
+                        () ->
+                                new MdmProviderDstu3Plus(
+                                        myFhirContext,
+                                        myMdmControllerSvc,
+                                        myMdmControllerHelper,
+                                        myMdmSubmitSvc,
+                                        myMdmSettings));
+                if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
+                    myResourceProviderFactory.addSupplier(
+                            () ->
+                                    new MdmLinkHistoryProviderDstu3Plus(
+                                            myFhirContext, myMdmControllerSvc));
+                }
+                break;
+            default:
+                throw new ConfigurationException(
+                        Msg.code(1497)
+                                + "MDM not supported for FHIR version "
+                                + myFhirContext.getVersion().getVersion());
+        }
+    }
 
-	@PreDestroy
-	public void unloadProvider() {
-		myResourceProviderFactory.removeSupplier(() -> myMdmProvider);
-	}
+    @PreDestroy
+    public void unloadProvider() {
+        myResourceProviderFactory.removeSupplier(() -> myMdmProvider);
+    }
 }
-

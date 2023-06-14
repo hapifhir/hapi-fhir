@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import java.sql.Blob;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -26,81 +28,85 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import java.sql.Blob;
-import java.util.Date;
 
 @Entity
 @Table(name = "HFJ_BINARY_STORAGE_BLOB")
 public class BinaryStorageEntity {
 
-	@Id
-	@Column(name = "BLOB_ID", length = 200, nullable = false)
-	//N.B GGG: Note that the `blob id` is the same as the `externalized binary id`.
-	private String myBlobId;
-	@Column(name = "RESOURCE_ID", length = 100, nullable = false)
-	private String myResourceId;
-	@Column(name = "BLOB_SIZE", nullable = true)
-	private long mySize;
-	@Column(name = "CONTENT_TYPE", nullable = false, length = 100)
-	private String myBlobContentType;
-	@Lob
-	@Column(name = "BLOB_DATA", nullable = false, insertable = true, updatable = false)
-	private Blob myBlob;
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "PUBLISHED_DATE", nullable = false)
-	private Date myPublished;
-	@Column(name = "BLOB_HASH", length = 128, nullable = true)
-	private String myHash;
+    @Id
+    @Column(name = "BLOB_ID", length = 200, nullable = false)
+    // N.B GGG: Note that the `blob id` is the same as the `externalized binary id`.
+    private String myBlobId;
 
-	public Date getPublished() {
-		return new Date(myPublished.getTime());
-	}
+    @Column(name = "RESOURCE_ID", length = 100, nullable = false)
+    private String myResourceId;
 
-	public void setPublished(Date thePublishedDate) {
-		myPublished = thePublishedDate;
-	}
+    @Column(name = "BLOB_SIZE", nullable = true)
+    private long mySize;
 
-	public String getHash() {
-		return myHash;
-	}
+    @Column(name = "CONTENT_TYPE", nullable = false, length = 100)
+    private String myBlobContentType;
 
-	public void setBlobId(String theBlobId) {
-		myBlobId = theBlobId;
-	}
+    @Lob
+    @Column(name = "BLOB_DATA", nullable = false, insertable = true, updatable = false)
+    private Blob myBlob;
 
-	public void setResourceId(String theResourceId) {
-		myResourceId = theResourceId;
-	}
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "PUBLISHED_DATE", nullable = false)
+    private Date myPublished;
 
-	public long getSize() {
-		return mySize;
-	}
+    @Column(name = "BLOB_HASH", length = 128, nullable = true)
+    private String myHash;
 
-	public String getBlobContentType() {
-		return myBlobContentType;
-	}
+    public Date getPublished() {
+        return new Date(myPublished.getTime());
+    }
 
-	public void setBlobContentType(String theBlobContentType) {
-		myBlobContentType = theBlobContentType;
-	}
+    public void setPublished(Date thePublishedDate) {
+        myPublished = thePublishedDate;
+    }
 
-	public Blob getBlob() {
-		return myBlob;
-	}
+    public String getHash() {
+        return myHash;
+    }
 
-	public void setBlob(Blob theBlob) {
-		myBlob = theBlob;
-	}
+    public void setBlobId(String theBlobId) {
+        myBlobId = theBlobId;
+    }
 
-	public String getBlobId() {
-		return myBlobId;
-	}
+    public void setResourceId(String theResourceId) {
+        myResourceId = theResourceId;
+    }
 
-	public void setSize(long theSize) {
-		mySize = theSize;
-	}
+    public long getSize() {
+        return mySize;
+    }
 
-	public void setHash(String theHash) {
-		myHash = theHash;
-	}
+    public String getBlobContentType() {
+        return myBlobContentType;
+    }
+
+    public void setBlobContentType(String theBlobContentType) {
+        myBlobContentType = theBlobContentType;
+    }
+
+    public Blob getBlob() {
+        return myBlob;
+    }
+
+    public void setBlob(Blob theBlob) {
+        myBlob = theBlob;
+    }
+
+    public String getBlobId() {
+        return myBlobId;
+    }
+
+    public void setSize(long theSize) {
+        mySize = theSize;
+    }
+
+    public void setHash(String theHash) {
+        myHash = theHash;
+    }
 }

@@ -20,24 +20,29 @@
 package ca.uhn.fhir.context;
 
 import java.util.Map;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 
-public class RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition  extends BaseRuntimeElementDefinition<IBaseXhtml> {
+public class RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition
+        extends BaseRuntimeElementDefinition<IBaseXhtml> {
 
-	public RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition(String theName, Class<? extends IBaseXhtml> theImplementingClass, boolean theStandardType) {
-		super(theName, theImplementingClass, theStandardType);
-	}
+    public RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition(
+            String theName,
+            Class<? extends IBaseXhtml> theImplementingClass,
+            boolean theStandardType) {
+        super(theName, theImplementingClass, theStandardType);
+    }
 
-	@Override
-	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
-		return ChildTypeEnum.PRIMITIVE_XHTML_HL7ORG;
-	}
+    @Override
+    public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+        return ChildTypeEnum.PRIMITIVE_XHTML_HL7ORG;
+    }
 
-	@Override
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		// nothing
-	}
-
+    @Override
+    void sealAndInitialize(
+            FhirContext theContext,
+            Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+                    theClassToElementDefinitions) {
+        // nothing
+    }
 }

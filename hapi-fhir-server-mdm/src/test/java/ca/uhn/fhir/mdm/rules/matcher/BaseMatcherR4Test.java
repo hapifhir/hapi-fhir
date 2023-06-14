@@ -5,12 +5,12 @@ import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import org.junit.jupiter.api.BeforeEach;
 
 public abstract class BaseMatcherR4Test {
-	protected static final FhirContext ourFhirContext = FhirContext.forR4();
+    protected static final FhirContext ourFhirContext = FhirContext.forR4();
 
-	protected MdmMatcherJson myMdmMatcherJson;
+    protected MdmMatcherJson myMdmMatcherJson;
 
-	@BeforeEach
-	public void before() {
-		myMdmMatcherJson = new MdmMatcherJson();
-	}
+    @BeforeEach
+    public void before() {
+        myMdmMatcherJson = new MdmMatcherJson();
+    }
 }

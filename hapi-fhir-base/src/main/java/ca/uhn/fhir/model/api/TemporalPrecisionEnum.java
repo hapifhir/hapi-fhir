@@ -21,77 +21,80 @@ package ca.uhn.fhir.model.api;
 
 import java.util.Calendar;
 import java.util.Date;
-
 import org.apache.commons.lang3.time.DateUtils;
 
 public enum TemporalPrecisionEnum {
+    YEAR(Calendar.YEAR) {
+        @Override
+        public Date add(Date theInput, int theAmount) {
+            return DateUtils.addYears(theInput, theAmount);
+        }
+    },
 
-	YEAR(Calendar.YEAR) {
-		@Override
-		public Date add(Date theInput, int theAmount) {
-			return DateUtils.addYears(theInput, theAmount);
-		}
-	},
-	
-	MONTH(Calendar.MONTH) {
-		@Override
-		public Date add(Date theInput, int theAmount) {
-			return DateUtils.addMonths(theInput, theAmount);
-		}
-	},
-	DAY(Calendar.DATE) {
-		@Override
-		public Date add(Date theInput, int theAmount) {
-			return DateUtils.addDays(theInput, theAmount);
-		}
-	},
-	MINUTE(Calendar.MINUTE) {
-		@Override
-		public Date add(Date theInput, int theAmount) {
-			return DateUtils.addMinutes(theInput, theAmount);
-		}
-		
-	},
-	SECOND(Calendar.SECOND) {
-		@Override
-		public Date add(Date theInput, int theAmount) {
-			return DateUtils.addSeconds(theInput, theAmount);
-		}
-	},
-	
-	MILLI(Calendar.MILLISECOND) {
-		@Override
-		public Date add(Date theInput, int theAmount) {
-			return DateUtils.addMilliseconds(theInput, theAmount);
-		}
-	}, 
-	
-	;
-	
-	private int myCalendarConstant;
+    MONTH(Calendar.MONTH) {
+        @Override
+        public Date add(Date theInput, int theAmount) {
+            return DateUtils.addMonths(theInput, theAmount);
+        }
+    },
+    DAY(Calendar.DATE) {
+        @Override
+        public Date add(Date theInput, int theAmount) {
+            return DateUtils.addDays(theInput, theAmount);
+        }
+    },
+    MINUTE(Calendar.MINUTE) {
+        @Override
+        public Date add(Date theInput, int theAmount) {
+            return DateUtils.addMinutes(theInput, theAmount);
+        }
+    },
+    SECOND(Calendar.SECOND) {
+        @Override
+        public Date add(Date theInput, int theAmount) {
+            return DateUtils.addSeconds(theInput, theAmount);
+        }
+    },
 
-	TemporalPrecisionEnum(int theCalendarConstant) {
-		myCalendarConstant = theCalendarConstant;
-	}
+    MILLI(Calendar.MILLISECOND) {
+        @Override
+        public Date add(Date theInput, int theAmount) {
+            return DateUtils.addMilliseconds(theInput, theAmount);
+        }
+    },
+    ;
 
-	public abstract Date add(Date theInput, int theAmount);
-	
-	public int getCalendarConstant() {
-		return myCalendarConstant;
-	}
+    private int myCalendarConstant;
 
-	/**
-	 * Given the standard string representation - YYYY-DD-MMTHH:NN:SS.SSS - how long is the string for the stated precision?
-	 */
-	public int stringLength() {
-		switch (this) {
-			case YEAR: return 4;
-			case MONTH: return 7;
-			case DAY: return 10;
-			case MINUTE: return 16;
-			case SECOND: return 19;
-			case MILLI: return 23;
-		}
-		return 0; // ??
-	}
+    TemporalPrecisionEnum(int theCalendarConstant) {
+        myCalendarConstant = theCalendarConstant;
+    }
+
+    public abstract Date add(Date theInput, int theAmount);
+
+    public int getCalendarConstant() {
+        return myCalendarConstant;
+    }
+
+    /**
+     * Given the standard string representation - YYYY-DD-MMTHH:NN:SS.SSS - how long is the string
+     * for the stated precision?
+     */
+    public int stringLength() {
+        switch (this) {
+            case YEAR:
+                return 4;
+            case MONTH:
+                return 7;
+            case DAY:
+                return 10;
+            case MINUTE:
+                return 16;
+            case SECOND:
+                return 19;
+            case MILLI:
+                return 23;
+        }
+        return 0; // ??
+    }
 }

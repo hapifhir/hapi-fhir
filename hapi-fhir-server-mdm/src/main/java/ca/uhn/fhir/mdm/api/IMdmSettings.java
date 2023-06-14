@@ -20,45 +20,44 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-
 import java.util.stream.Collectors;
 
 public interface IMdmSettings {
 
-	String EMPI_CHANNEL_NAME = "empi";
+    String EMPI_CHANNEL_NAME = "empi";
 
-	// Parallel processing of MDM can result in missed matches.  Best to single-thread.
-	int MDM_DEFAULT_CONCURRENT_CONSUMERS = 1;
+    // Parallel processing of MDM can result in missed matches.  Best to single-thread.
+    int MDM_DEFAULT_CONCURRENT_CONSUMERS = 1;
 
-	boolean isEnabled();
+    boolean isEnabled();
 
-	int getConcurrentConsumers();
+    int getConcurrentConsumers();
 
-	MdmRulesJson getMdmRules();
+    MdmRulesJson getMdmRules();
 
-	boolean isPreventEidUpdates();
+    boolean isPreventEidUpdates();
 
-	boolean isPreventMultipleEids();
+    boolean isPreventMultipleEids();
 
-	String getRuleVersion();
+    String getRuleVersion();
 
-	String getSurvivorshipRules();
+    String getSurvivorshipRules();
 
-	default boolean isSupportedMdmType(String theResourceName) {
-		return getMdmRules().getMdmTypes().contains(theResourceName);
-	}
+    default boolean isSupportedMdmType(String theResourceName) {
+        return getMdmRules().getMdmTypes().contains(theResourceName);
+    }
 
-	default String getSupportedMdmTypes() {
-		return getMdmRules().getMdmTypes().stream().collect(Collectors.joining(", "));
-	}
+    default String getSupportedMdmTypes() {
+        return getMdmRules().getMdmTypes().stream().collect(Collectors.joining(", "));
+    }
 
-	int getCandidateSearchLimit();
+    int getCandidateSearchLimit();
 
-	String getGoldenResourcePartitionName();
+    String getGoldenResourcePartitionName();
 
-	void setGoldenResourcePartitionName(String theGoldenResourcePartitionName);
+    void setGoldenResourcePartitionName(String theGoldenResourcePartitionName);
 
-	boolean getSearchAllPartitionForMatch();
+    boolean getSearchAllPartitionForMatch();
 
-	void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch);
+    void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch);
 }

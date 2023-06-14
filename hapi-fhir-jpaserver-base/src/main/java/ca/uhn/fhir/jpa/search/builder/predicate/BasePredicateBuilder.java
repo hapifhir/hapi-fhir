@@ -28,65 +28,69 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 public abstract class BasePredicateBuilder {
 
-	private final SearchQueryBuilder mySearchSqlBuilder;
+    private final SearchQueryBuilder mySearchSqlBuilder;
 
-	public BasePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		mySearchSqlBuilder = theSearchSqlBuilder;
-	}
+    public BasePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+        mySearchSqlBuilder = theSearchSqlBuilder;
+    }
 
+    PartitionSettings getPartitionSettings() {
+        return mySearchSqlBuilder.getPartitionSettings();
+    }
 
-	PartitionSettings getPartitionSettings() {
-		return mySearchSqlBuilder.getPartitionSettings();
-	}
+    RequestPartitionId getRequestPartitionId() {
+        return mySearchSqlBuilder.getRequestPartitionId();
+    }
 
-	RequestPartitionId getRequestPartitionId() {
-		return mySearchSqlBuilder.getRequestPartitionId();
-	}
+    String getResourceType() {
+        return mySearchSqlBuilder.getResourceType();
+    }
 
-	String getResourceType() {
-		return mySearchSqlBuilder.getResourceType();
-	}
+    StorageSettings getStorageSettings() {
+        return mySearchSqlBuilder.getStorageSettings();
+    }
 
-	StorageSettings getStorageSettings() {
-		return mySearchSqlBuilder.getStorageSettings();
-	}
+    @Nonnull
+    String generatePlaceholder(Object theInput) {
+        return mySearchSqlBuilder.generatePlaceholder(theInput);
+    }
 
-	@Nonnull
-	String generatePlaceholder(Object theInput) {
-		return mySearchSqlBuilder.generatePlaceholder(theInput);
-	}
+    @Nonnull
+    List<String> generatePlaceholders(Collection<?> theValues) {
+        return mySearchSqlBuilder.generatePlaceholders(theValues);
+    }
 
-	@Nonnull
-	List<String> generatePlaceholders(Collection<?> theValues) {
-		return mySearchSqlBuilder.generatePlaceholders(theValues);
-	}
+    protected FhirContext getFhirContext() {
+        return mySearchSqlBuilder.getFhirContext();
+    }
 
-	protected FhirContext getFhirContext() {
-		return mySearchSqlBuilder.getFhirContext();
-	}
+    protected void setMatchNothing() {
+        mySearchSqlBuilder.setMatchNothing();
+    }
 
-	protected void setMatchNothing() {
-		mySearchSqlBuilder.setMatchNothing();
-	}
+    protected BinaryCondition createConditionForValueWithComparator(
+            ParamPrefixEnum theComparator, DbColumn theColumn, Object theValue) {
+        return mySearchSqlBuilder.createConditionForValueWithComparator(
+                theComparator, theColumn, theValue);
+    }
 
+    protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable(
+            boolean theIncludeResourceTypeAndNonDeletedFlag) {
+        return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(
+                theIncludeResourceTypeAndNonDeletedFlag);
+    }
 
-	protected BinaryCondition createConditionForValueWithComparator(ParamPrefixEnum theComparator, DbColumn theColumn, Object theValue) {
-		return mySearchSqlBuilder.createConditionForValueWithComparator(theComparator, theColumn, theValue);
-	}
-
-	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable(boolean theIncludeResourceTypeAndNonDeletedFlag) {
-		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
-	}
-
-	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
-		mySearchSqlBuilder.addJoin(theFromTable, theToTable, theFromColumn, theToColumn);
-	}
-
+    public void addJoin(
+            DbTable theFromTable,
+            DbTable theToTable,
+            DbColumn theFromColumn,
+            DbColumn theToColumn) {
+        mySearchSqlBuilder.addJoin(theFromTable, theToTable, theFromColumn, theToColumn);
+    }
 }

@@ -36,33 +36,34 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 @Import({
-	FhirContextDstu2Config.class,
-	GeneratedDaoAndResourceProviderConfigDstu2.class,
-	JpaConfig.class
+    FhirContextDstu2Config.class,
+    GeneratedDaoAndResourceProviderConfigDstu2.class,
+    JpaConfig.class
 })
 public class JpaDstu2Config {
-	@Bean
-	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
-		return new TransactionProcessorVersionAdapterDstu2();
-	}
+    @Bean
+    public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+        return new TransactionProcessorVersionAdapterDstu2();
+    }
 
-	@Bean
-	public ITermVersionAdapterSvc translationAdaptorVersion() {
-		return new TermVersionAdapterSvcDstu2();
-	}
+    @Bean
+    public ITermVersionAdapterSvc translationAdaptorVersion() {
+        return new TermVersionAdapterSvcDstu2();
+    }
 
-	@Bean(name = "mySystemDaoDstu2")
-	public IFhirSystemDao<Bundle, MetaDt> systemDaoDstu2() {
-		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2();
-		return retVal;
-	}
+    @Bean(name = "mySystemDaoDstu2")
+    public IFhirSystemDao<Bundle, MetaDt> systemDaoDstu2() {
+        ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2 retVal =
+                new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2();
+        return retVal;
+    }
 
-	@Bean(name = "mySystemProviderDstu2")
-	public JpaSystemProvider<Bundle, MetaDt> systemProviderDstu2(FhirContext theFhirContext) {
-		JpaSystemProvider<Bundle, MetaDt> retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProvider<>();
-		retVal.setDao(systemDaoDstu2());
-		retVal.setContext(theFhirContext);
-		return retVal;
-	}
-
+    @Bean(name = "mySystemProviderDstu2")
+    public JpaSystemProvider<Bundle, MetaDt> systemProviderDstu2(FhirContext theFhirContext) {
+        JpaSystemProvider<Bundle, MetaDt> retVal =
+                new ca.uhn.fhir.jpa.provider.JpaSystemProvider<>();
+        retVal.setDao(systemDaoDstu2());
+        retVal.setContext(theFhirContext);
+        return retVal;
+    }
 }

@@ -25,23 +25,20 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marker annotation for a primitive setter method that can be used to
- * indicate a "simple setter" method on a resource or composite type.  
- * 
- * This annotation is used by HAPI's code generator and can be ignored by
- * client code
+ * Marker annotation for a primitive setter method that can be used to indicate a "simple setter"
+ * method on a resource or composite type.
+ *
+ * <p>This annotation is used by HAPI's code generator and can be ignored by client code
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value= {ElementType.CONSTRUCTOR})
+@Target(value = {ElementType.CONSTRUCTOR})
 public @interface SimpleSetter {
-	
-	String suffix() default "";
-	
-	
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(value= {ElementType.PARAMETER})
-	public @interface Parameter {
-		String name();
-	}	
-	
+
+    String suffix() default "";
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(value = {ElementType.PARAMETER})
+    public @interface Parameter {
+        String name();
+    }
 }

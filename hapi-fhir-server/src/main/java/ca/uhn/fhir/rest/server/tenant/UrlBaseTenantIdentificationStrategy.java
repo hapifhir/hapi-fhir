@@ -19,8 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.tenant;
 
-import ca.uhn.fhir.i18n.Msg;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -29,44 +31,44 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-
 /**
- * This class is a tenant identification strategy which assumes that a single path
- * element will be present between the server base URL and individual request.
- * <p>
- * For example,
- * with this strategy enabled, given the following URL on a server with base URL <code>http://example.com/base</code>,
- * the server will extract the <code>TENANT-A</code> portion of the URL and use it as the tenant identifier. The
- * request will then proceed to read the resource with ID <code>Patient/123</code>.
- * </p>
- * <p>
- * GET http://example.com/base/TENANT-A/Patient/123
- * </p>
+ * This class is a tenant identification strategy which assumes that a single path element will be
+ * present between the server base URL and individual request.
+ *
+ * <p>For example, with this strategy enabled, given the following URL on a server with base URL
+ * <code>http://example.com/base</code>, the server will extract the <code>TENANT-A</code> portion
+ * of the URL and use it as the tenant identifier. The request will then proceed to read the
+ * resource with ID <code>Patient/123</code>.
+ *
+ * <p>GET http://example.com/base/TENANT-A/Patient/123
  */
 public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificationStrategy {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(UrlBaseTenantIdentificationStrategy.class);
+    private static final Logger ourLog =
+            LoggerFactory.getLogger(UrlBaseTenantIdentificationStrategy.class);
 
-	@Override
-	public void extractTenant(UrlPathTokenizer theUrlPathTokenizer, RequestDetails theRequestDetails) {
-		String tenantId = null;
-		if (theUrlPathTokenizer.hasMoreTokens()) {
-			tenantId = defaultIfBlank(theUrlPathTokenizer.nextTokenUnescapedAndSanitized(), null);
-			ourLog.trace("Found tenant ID {} in request string", tenantId);
-			theRequestDetails.setTenantId(tenantId);
-		}
+    @Override
+    public void extractTenant(
+            UrlPathTokenizer theUrlPathTokenizer, RequestDetails theRequestDetails) {
+        String tenantId = null;
+        if (theUrlPathTokenizer.hasMoreTokens()) {
+            tenantId = defaultIfBlank(theUrlPathTokenizer.nextTokenUnescapedAndSanitized(), null);
+            ourLog.trace("Found tenant ID {} in request string", tenantId);
+            theRequestDetails.setTenantId(tenantId);
+        }
 
-		if (tenantId == null) {
-			HapiLocalizer localizer = theRequestDetails.getServer().getFhirContext().getLocalizer();
-			throw new InvalidRequestException(Msg.code(307) + localizer.getMessage(RestfulServer.class, "rootRequest.multitenant"));
-		}
-	}
+        if (tenantId == null) {
+            HapiLocalizer localizer = theRequestDetails.getServer().getFhirContext().getLocalizer();
+            throw new InvalidRequestException(
+                    Msg.code(307)
+                            + localizer.getMessage(RestfulServer.class, "rootRequest.multitenant"));
+        }
+    }
 
-	@Override
-	public String massageServerBaseUrl(String theFhirServerBase, RequestDetails theRequestDetails) {
-		Validate.notNull(theRequestDetails.getTenantId(), "theTenantId is not populated on this request");
-		return theFhirServerBase + '/' + theRequestDetails.getTenantId();
-	}
-
+    @Override
+    public String massageServerBaseUrl(String theFhirServerBase, RequestDetails theRequestDetails) {
+        Validate.notNull(
+                theRequestDetails.getTenantId(), "theTenantId is not populated on this request");
+        return theFhirServerBase + '/' + theRequestDetails.getTenantId();
+    }
 }

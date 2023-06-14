@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -29,32 +28,39 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMatcher {
-	private Logger ourLog = LoggerFactory.getLogger(CompositeInMemoryDaoSubscriptionMatcher.class);
+    private Logger ourLog = LoggerFactory.getLogger(CompositeInMemoryDaoSubscriptionMatcher.class);
 
-	private final DaoSubscriptionMatcher myDaoSubscriptionMatcher;
-	private final InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
-	@Autowired
-	StorageSettings myStorageSettings;
+    private final DaoSubscriptionMatcher myDaoSubscriptionMatcher;
+    private final InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
+    @Autowired StorageSettings myStorageSettings;
 
-	public CompositeInMemoryDaoSubscriptionMatcher(DaoSubscriptionMatcher theDaoSubscriptionMatcher, InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
-		myDaoSubscriptionMatcher = theDaoSubscriptionMatcher;
-		myInMemorySubscriptionMatcher = theInMemorySubscriptionMatcher;
-	}
+    public CompositeInMemoryDaoSubscriptionMatcher(
+            DaoSubscriptionMatcher theDaoSubscriptionMatcher,
+            InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
+        myDaoSubscriptionMatcher = theDaoSubscriptionMatcher;
+        myInMemorySubscriptionMatcher = theInMemorySubscriptionMatcher;
+    }
 
-	@Override
-	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
-		InMemoryMatchResult result;
-		if (myStorageSettings.isEnableInMemorySubscriptionMatching()) {
-			result = myInMemorySubscriptionMatcher.match(theSubscription, theMsg);
-			if (result.supported()) {
-				result.setInMemory(true);
-			} else {
-				ourLog.info("Criteria {} for Subscription {} not supported by InMemoryMatcher: {}.  Reverting to DatabaseMatcher", theSubscription.getCriteriaString(), theSubscription.getIdElementString(), result.getUnsupportedReason());
-				result = myDaoSubscriptionMatcher.match(theSubscription, theMsg);
-			}
-		} else {
-			result = myDaoSubscriptionMatcher.match(theSubscription, theMsg);
-		}
-		return result;
-	}
+    @Override
+    public InMemoryMatchResult match(
+            CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
+        InMemoryMatchResult result;
+        if (myStorageSettings.isEnableInMemorySubscriptionMatching()) {
+            result = myInMemorySubscriptionMatcher.match(theSubscription, theMsg);
+            if (result.supported()) {
+                result.setInMemory(true);
+            } else {
+                ourLog.info(
+                        "Criteria {} for Subscription {} not supported by InMemoryMatcher: {}. "
+                                + " Reverting to DatabaseMatcher",
+                        theSubscription.getCriteriaString(),
+                        theSubscription.getIdElementString(),
+                        result.getUnsupportedReason());
+                result = myDaoSubscriptionMatcher.match(theSubscription, theMsg);
+            }
+        } else {
+            result = myDaoSubscriptionMatcher.match(theSubscription, theMsg);
+        }
+        return result;
+    }
 }

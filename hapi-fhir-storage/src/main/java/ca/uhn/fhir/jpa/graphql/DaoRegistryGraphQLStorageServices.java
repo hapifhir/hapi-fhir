@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.jpa.graphql;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_FILTER;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -56,6 +59,11 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -65,280 +73,340 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_FILTER;
-
 public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageServices {
 
-	// the constant hasn't already been defined in org.hl7.fhir.core so we define it here
-	static final String SEARCH_ID_PARAM = "search-id";
-	static final String SEARCH_OFFSET_PARAM = "search-offset";
+    // the constant hasn't already been defined in org.hl7.fhir.core so we define it here
+    static final String SEARCH_ID_PARAM = "search-id";
+    static final String SEARCH_OFFSET_PARAM = "search-offset";
 
-	private static final int MAX_SEARCH_SIZE = 500;
-	@Autowired
-	private FhirContext myContext;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	@Autowired
-	private IRequestPartitionHelperSvc myPartitionHelperSvc;
-	@Autowired
-	private IPagingProvider myPagingProvider;
+    private static final int MAX_SEARCH_SIZE = 500;
+    @Autowired private FhirContext myContext;
+    @Autowired private DaoRegistry myDaoRegistry;
+    @Autowired private ISearchParamRegistry mySearchParamRegistry;
+    @Autowired protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+    @Autowired private IRequestPartitionHelperSvc myPartitionHelperSvc;
+    @Autowired private IPagingProvider myPagingProvider;
 
-	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
-		RuntimeResourceDefinition typeDef = myContext.getResourceDefinition(theResourceType);
-		return myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
-	}
+    private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
+        RuntimeResourceDefinition typeDef = myContext.getResourceDefinition(theResourceType);
+        return myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
+    }
 
-	private String graphqlArgumentToSearchParam(String name) {
-		if (name.startsWith("_")) {
-			return name;
-		} else {
-			return name.replaceAll("_", "-");
-		}
-	}
+    private String graphqlArgumentToSearchParam(String name) {
+        if (name.startsWith("_")) {
+            return name;
+        } else {
+            return name.replaceAll("_", "-");
+        }
+    }
 
-	private String searchParamToGraphqlArgument(String name) {
-		return name.replaceAll("-", "_");
-	}
+    private String searchParamToGraphqlArgument(String name) {
+        return name.replaceAll("-", "_");
+    }
 
-	private SearchParameterMap buildSearchParams(String theType, List<Argument> theSearchParams) {
-		List<Argument> resourceSearchParam = theSearchParams.stream()
-			.filter(it -> !PARAM_COUNT.equals(it.getName()))
-			.collect(Collectors.toList());
+    private SearchParameterMap buildSearchParams(String theType, List<Argument> theSearchParams) {
+        List<Argument> resourceSearchParam =
+                theSearchParams.stream()
+                        .filter(it -> !PARAM_COUNT.equals(it.getName()))
+                        .collect(Collectors.toList());
 
-		FhirContext fhirContext = myContext;
-		RuntimeResourceDefinition typeDef = fhirContext.getResourceDefinition(theType);
+        FhirContext fhirContext = myContext;
+        RuntimeResourceDefinition typeDef = fhirContext.getResourceDefinition(theType);
 
-		SearchParameterMap params = new SearchParameterMap();
-		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(typeDef.getName());
+        SearchParameterMap params = new SearchParameterMap();
+        ResourceSearchParams searchParams =
+                mySearchParamRegistry.getActiveSearchParams(typeDef.getName());
 
-		for (Argument nextArgument : resourceSearchParam) {
+        for (Argument nextArgument : resourceSearchParam) {
 
-			if (nextArgument.getName().equals(PARAM_FILTER)) {
-				String value = nextArgument.getValues().get(0).getValue();
-				params.add(PARAM_FILTER, new StringParam(value));
-				continue;
-			}
+            if (nextArgument.getName().equals(PARAM_FILTER)) {
+                String value = nextArgument.getValues().get(0).getValue();
+                params.add(PARAM_FILTER, new StringParam(value));
+                continue;
+            }
 
-			String searchParamName = graphqlArgumentToSearchParam(nextArgument.getName());
-			RuntimeSearchParam searchParam = searchParams.get(searchParamName);
-			if (searchParam == null) {
-				Set<String> graphqlArguments = searchParams.getSearchParamNames().stream()
-					.map(this::searchParamToGraphqlArgument)
-					.collect(Collectors.toSet());
-				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
-				throw new InvalidRequestException(Msg.code(1275) + msg);
-			}
+            String searchParamName = graphqlArgumentToSearchParam(nextArgument.getName());
+            RuntimeSearchParam searchParam = searchParams.get(searchParamName);
+            if (searchParam == null) {
+                Set<String> graphqlArguments =
+                        searchParams.getSearchParamNames().stream()
+                                .map(this::searchParamToGraphqlArgument)
+                                .collect(Collectors.toSet());
+                String msg =
+                        myContext
+                                .getLocalizer()
+                                .getMessageSanitized(
+                                        DaoRegistryGraphQLStorageServices.class,
+                                        "invalidGraphqlArgument",
+                                        nextArgument.getName(),
+                                        new TreeSet<>(graphqlArguments));
+                throw new InvalidRequestException(Msg.code(1275) + msg);
+            }
 
-			IQueryParameterOr<?> queryParam;
+            IQueryParameterOr<?> queryParam;
 
-			switch (searchParam.getParamType()) {
-				case NUMBER:
-					NumberOrListParam numberOrListParam = new NumberOrListParam();
-					for (Value value : nextArgument.getValues()) {
-						numberOrListParam.addOr(new NumberParam(value.getValue()));
-					}
-					queryParam = numberOrListParam;
-					break;
-				case DATE:
-					DateOrListParam dateOrListParam = new DateOrListParam();
-					for (Value value : nextArgument.getValues()) {
-						dateOrListParam.addOr(new DateParam(value.getValue()));
-					}
-					queryParam = dateOrListParam;
-					break;
-				case STRING:
-					StringOrListParam stringOrListParam = new StringOrListParam();
-					for (Value value : nextArgument.getValues()) {
-						stringOrListParam.addOr(new StringParam(value.getValue()));
-					}
-					queryParam = stringOrListParam;
-					break;
-				case TOKEN:
-					TokenOrListParam tokenOrListParam = new TokenOrListParam();
-					for (Value value : nextArgument.getValues()) {
-						TokenParam tokenParam = new TokenParam();
-						tokenParam.setValueAsQueryToken(fhirContext, searchParamName, null, value.getValue());
-						tokenOrListParam.addOr(tokenParam);
-					}
-					queryParam = tokenOrListParam;
-					break;
-				case REFERENCE:
-					ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
-					for (Value value : nextArgument.getValues()) {
-						referenceOrListParam.addOr(new ReferenceParam(value.getValue()));
-					}
-					queryParam = referenceOrListParam;
-					break;
-				case QUANTITY:
-					QuantityOrListParam quantityOrListParam = new QuantityOrListParam();
-					for (Value value : nextArgument.getValues()) {
-						quantityOrListParam.addOr(new QuantityParam(value.getValue()));
-					}
-					queryParam = quantityOrListParam;
-					break;
-				case SPECIAL:
-					SpecialOrListParam specialOrListParam = new SpecialOrListParam();
-					for (Value value : nextArgument.getValues()) {
-						specialOrListParam.addOr(new SpecialParam().setValue(value.getValue()));
-					}
-					queryParam = specialOrListParam;
-					break;
-				case COMPOSITE:
-				case URI:
-				case HAS:
-				default:
-					throw new InvalidRequestException(Msg.code(1276) + String.format("%s parameters are not yet supported in GraphQL", searchParam.getParamType()));
-			}
+            switch (searchParam.getParamType()) {
+                case NUMBER:
+                    NumberOrListParam numberOrListParam = new NumberOrListParam();
+                    for (Value value : nextArgument.getValues()) {
+                        numberOrListParam.addOr(new NumberParam(value.getValue()));
+                    }
+                    queryParam = numberOrListParam;
+                    break;
+                case DATE:
+                    DateOrListParam dateOrListParam = new DateOrListParam();
+                    for (Value value : nextArgument.getValues()) {
+                        dateOrListParam.addOr(new DateParam(value.getValue()));
+                    }
+                    queryParam = dateOrListParam;
+                    break;
+                case STRING:
+                    StringOrListParam stringOrListParam = new StringOrListParam();
+                    for (Value value : nextArgument.getValues()) {
+                        stringOrListParam.addOr(new StringParam(value.getValue()));
+                    }
+                    queryParam = stringOrListParam;
+                    break;
+                case TOKEN:
+                    TokenOrListParam tokenOrListParam = new TokenOrListParam();
+                    for (Value value : nextArgument.getValues()) {
+                        TokenParam tokenParam = new TokenParam();
+                        tokenParam.setValueAsQueryToken(
+                                fhirContext, searchParamName, null, value.getValue());
+                        tokenOrListParam.addOr(tokenParam);
+                    }
+                    queryParam = tokenOrListParam;
+                    break;
+                case REFERENCE:
+                    ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+                    for (Value value : nextArgument.getValues()) {
+                        referenceOrListParam.addOr(new ReferenceParam(value.getValue()));
+                    }
+                    queryParam = referenceOrListParam;
+                    break;
+                case QUANTITY:
+                    QuantityOrListParam quantityOrListParam = new QuantityOrListParam();
+                    for (Value value : nextArgument.getValues()) {
+                        quantityOrListParam.addOr(new QuantityParam(value.getValue()));
+                    }
+                    queryParam = quantityOrListParam;
+                    break;
+                case SPECIAL:
+                    SpecialOrListParam specialOrListParam = new SpecialOrListParam();
+                    for (Value value : nextArgument.getValues()) {
+                        specialOrListParam.addOr(new SpecialParam().setValue(value.getValue()));
+                    }
+                    queryParam = specialOrListParam;
+                    break;
+                case COMPOSITE:
+                case URI:
+                case HAS:
+                default:
+                    throw new InvalidRequestException(
+                            Msg.code(1276)
+                                    + String.format(
+                                            "%s parameters are not yet supported in GraphQL",
+                                            searchParam.getParamType()));
+            }
 
-			params.add(searchParamName, queryParam);
-		}
+            params.add(searchParamName, queryParam);
+        }
 
-		return params;
-	}
+        return params;
+    }
 
-	@Transactional(propagation = Propagation.NEVER)
-	@Override
-	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<IBaseResource> theMatches) throws FHIRException {
-		SearchParameterMap params = buildSearchParams(theType, theSearchParams);
-		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
+    @Transactional(propagation = Propagation.NEVER)
+    @Override
+    public void listResources(
+            Object theAppInfo,
+            String theType,
+            List<Argument> theSearchParams,
+            List<IBaseResource> theMatches)
+            throws FHIRException {
+        SearchParameterMap params = buildSearchParams(theType, theSearchParams);
+        params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
 
-		RequestDetails requestDetails = (RequestDetails) theAppInfo;
-		IBundleProvider response = getDao(theType).search(params, requestDetails);
-		Integer size = response.size();
-		//We set size to null in SearchCoordinatorSvcImpl.executeQuery() if matching results exceeds count
-		//so don't throw here
-		if ((response.preferredPageSize() != null && size != null && response.preferredPageSize() < size) ||
-			size == null) {
-			size = response.preferredPageSize();
-		}
+        RequestDetails requestDetails = (RequestDetails) theAppInfo;
+        IBundleProvider response = getDao(theType).search(params, requestDetails);
+        Integer size = response.size();
+        // We set size to null in SearchCoordinatorSvcImpl.executeQuery() if matching results
+        // exceeds count
+        // so don't throw here
+        if ((response.preferredPageSize() != null
+                        && size != null
+                        && response.preferredPageSize() < size)
+                || size == null) {
+            size = response.preferredPageSize();
+        }
 
-		Validate.notNull(size, "size is null");
-		theMatches.addAll(response.getResources(0, size));
-	}
+        Validate.notNull(size, "size is null");
+        theMatches.addAll(response.getResources(0, size));
+    }
 
-	@Transactional(propagation = Propagation.REQUIRED)
-	@Override
-	public IBaseResource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
-		IIdType refId = myContext.getVersion().newIdType();
-		refId.setValue(theType + "/" + theId);
-		return lookup(theAppInfo, refId);
-	}
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public IBaseResource lookup(Object theAppInfo, String theType, String theId)
+            throws FHIRException {
+        IIdType refId = myContext.getVersion().newIdType();
+        refId.setValue(theType + "/" + theId);
+        return lookup(theAppInfo, refId);
+    }
 
-	private IBaseResource lookup(Object theAppInfo, IIdType theRefId) {
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(theRefId.getResourceType());
-		RequestDetails requestDetails = (RequestDetails) theAppInfo;
-		return dao.read(theRefId, requestDetails, false);
-	}
+    private IBaseResource lookup(Object theAppInfo, IIdType theRefId) {
+        IFhirResourceDao<? extends IBaseResource> dao = getDao(theRefId.getResourceType());
+        RequestDetails requestDetails = (RequestDetails) theAppInfo;
+        return dao.read(theRefId, requestDetails, false);
+    }
 
-	@Transactional(propagation = Propagation.REQUIRED)
-	@Override
-	public ReferenceResolution lookup(Object theAppInfo, IBaseResource theContext, IBaseReference theReference) throws FHIRException {
-		IBaseResource outcome = lookup(theAppInfo, theReference.getReferenceElement());
-		if (outcome == null) {
-			return null;
-		}
-		return new ReferenceResolution(theContext, outcome);
-	}
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public ReferenceResolution lookup(
+            Object theAppInfo, IBaseResource theContext, IBaseReference theReference)
+            throws FHIRException {
+        IBaseResource outcome = lookup(theAppInfo, theReference.getReferenceElement());
+        if (outcome == null) {
+            return null;
+        }
+        return new ReferenceResolution(theContext, outcome);
+    }
 
-	private Optional<String> getArgument(List<Argument> params, String name) {
-		return params.stream()
-			.filter(it -> name.equals(it.getName()))
-			.map(it -> it.getValues().get(0).getValue())
-			.findAny();
-	}
+    private Optional<String> getArgument(List<Argument> params, String name) {
+        return params.stream()
+                .filter(it -> name.equals(it.getName()))
+                .map(it -> it.getValues().get(0).getValue())
+                .findAny();
+    }
 
-	@Transactional(propagation = Propagation.NEVER)
-	@Override
-	public IBaseBundle search(Object theAppInfo, String theType, List<Argument> theSearchParams) throws FHIRException {
-		RequestDetails requestDetails = (RequestDetails) theAppInfo;
+    @Transactional(propagation = Propagation.NEVER)
+    @Override
+    public IBaseBundle search(Object theAppInfo, String theType, List<Argument> theSearchParams)
+            throws FHIRException {
+        RequestDetails requestDetails = (RequestDetails) theAppInfo;
 
-		Optional<String> searchIdArgument = getArgument(theSearchParams, SEARCH_ID_PARAM);
-		Optional<String> searchOffsetArgument = getArgument(theSearchParams, SEARCH_OFFSET_PARAM);
+        Optional<String> searchIdArgument = getArgument(theSearchParams, SEARCH_ID_PARAM);
+        Optional<String> searchOffsetArgument = getArgument(theSearchParams, SEARCH_OFFSET_PARAM);
 
-		String searchId;
-		int searchOffset;
-		int pageSize;
-		IBundleProvider response;
+        String searchId;
+        int searchOffset;
+        int pageSize;
+        IBundleProvider response;
 
-		if (searchIdArgument.isPresent() && searchOffsetArgument.isPresent()) {
-			searchId = searchIdArgument.get();
-			searchOffset = Integer.parseInt(searchOffsetArgument.get());
+        if (searchIdArgument.isPresent() && searchOffsetArgument.isPresent()) {
+            searchId = searchIdArgument.get();
+            searchOffset = Integer.parseInt(searchOffsetArgument.get());
 
-			response = Optional.ofNullable(myPagingProvider.retrieveResultList(requestDetails, searchId)).orElseThrow(()->{
-				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlCursorArgument", searchId);
-				return new InvalidRequestException(Msg.code(2076) + msg);
-			});
+            response =
+                    Optional.ofNullable(
+                                    myPagingProvider.retrieveResultList(requestDetails, searchId))
+                            .orElseThrow(
+                                    () -> {
+                                        String msg =
+                                                myContext
+                                                        .getLocalizer()
+                                                        .getMessageSanitized(
+                                                                DaoRegistryGraphQLStorageServices
+                                                                        .class,
+                                                                "invalidGraphqlCursorArgument",
+                                                                searchId);
+                                        return new InvalidRequestException(Msg.code(2076) + msg);
+                                    });
 
-			pageSize = Optional.ofNullable(response.preferredPageSize())
-				.orElseGet(myPagingProvider::getDefaultPageSize);
-		} else {
-			pageSize = getArgument(theSearchParams, "_count").map(Integer::parseInt)
-				.orElseGet(myPagingProvider::getDefaultPageSize);
+            pageSize =
+                    Optional.ofNullable(response.preferredPageSize())
+                            .orElseGet(myPagingProvider::getDefaultPageSize);
+        } else {
+            pageSize =
+                    getArgument(theSearchParams, "_count")
+                            .map(Integer::parseInt)
+                            .orElseGet(myPagingProvider::getDefaultPageSize);
 
-			SearchParameterMap params = buildSearchParams(theType, theSearchParams);
-			params.setCount(pageSize);
+            SearchParameterMap params = buildSearchParams(theType, theSearchParams);
+            params.setCount(pageSize);
 
-			CacheControlDirective cacheControlDirective = new CacheControlDirective();
-			cacheControlDirective.parse(requestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
+            CacheControlDirective cacheControlDirective = new CacheControlDirective();
+            cacheControlDirective.parse(requestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
 
-			RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(requestDetails, theType, params, null);
-			response = mySearchCoordinatorSvc.registerSearch(getDao(theType), params, theType, cacheControlDirective, requestDetails, requestPartitionId);
+            RequestPartitionId requestPartitionId =
+                    myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+                            requestDetails, theType, params, null);
+            response =
+                    mySearchCoordinatorSvc.registerSearch(
+                            getDao(theType),
+                            params,
+                            theType,
+                            cacheControlDirective,
+                            requestDetails,
+                            requestPartitionId);
 
-			searchOffset = 0;
-			searchId = myPagingProvider.storeResultList(requestDetails, response);
-		}
+            searchOffset = 0;
+            searchId = myPagingProvider.storeResultList(requestDetails, response);
+        }
 
+        // response.size() may return {@literal null}, in that case use pageSize
+        String serverBase = requestDetails.getFhirServerBase();
+        Optional<Integer> numTotalResults = Optional.ofNullable(response.size());
+        int numToReturn =
+                numTotalResults
+                        .map(integer -> Math.min(pageSize, integer - searchOffset))
+                        .orElse(pageSize);
 
-		// response.size() may return {@literal null}, in that case use pageSize
-		String serverBase = requestDetails.getFhirServerBase();
-		Optional<Integer> numTotalResults = Optional.ofNullable(response.size());
-		int numToReturn = numTotalResults.map(integer -> Math.min(pageSize, integer - searchOffset)).orElse(pageSize);
+        BundleLinks links =
+                new BundleLinks(
+                        requestDetails.getServerBaseForRequest(),
+                        null,
+                        RestfulServerUtils.prettyPrintResponse(
+                                requestDetails.getServer(), requestDetails),
+                        BundleTypeEnum.SEARCHSET);
 
-		BundleLinks links = new BundleLinks(requestDetails.getServerBaseForRequest(), null, RestfulServerUtils.prettyPrintResponse(requestDetails.getServer(), requestDetails), BundleTypeEnum.SEARCHSET);
+        // RestfulServerUtils.createLinkSelf not suitable here
+        String linkFormat =
+                "%s/%s?_format=application/json&search-id=%s&search-offset=%d&_count=%d";
 
-		// RestfulServerUtils.createLinkSelf not suitable here
-		String linkFormat = "%s/%s?_format=application/json&search-id=%s&search-offset=%d&_count=%d";
+        String linkSelf =
+                String.format(linkFormat, serverBase, theType, searchId, searchOffset, pageSize);
+        links.setSelf(linkSelf);
 
-		String linkSelf = String.format(linkFormat, serverBase, theType, searchId, searchOffset, pageSize);
-		links.setSelf(linkSelf);
+        boolean hasNext =
+                numTotalResults.map(total -> (searchOffset + numToReturn) < total).orElse(true);
 
-		boolean hasNext = numTotalResults.map(total -> (searchOffset + numToReturn) < total).orElse(true);
+        if (hasNext) {
+            String linkNext =
+                    String.format(
+                            linkFormat,
+                            serverBase,
+                            theType,
+                            searchId,
+                            searchOffset + numToReturn,
+                            pageSize);
+            links.setNext(linkNext);
+        }
 
-		if (hasNext) {
-			String linkNext = String.format(linkFormat, serverBase, theType, searchId, searchOffset+numToReturn, pageSize);
-			links.setNext(linkNext);
-		}
+        if (searchOffset > 0) {
+            String linkPrev =
+                    String.format(
+                            linkFormat,
+                            serverBase,
+                            theType,
+                            searchId,
+                            Math.max(0, searchOffset - pageSize),
+                            pageSize);
+            links.setPrev(linkPrev);
+        }
 
-		if (searchOffset > 0) {
-			String linkPrev = String.format(linkFormat, serverBase, theType, searchId, Math.max(0, searchOffset-pageSize), pageSize);
-			links.setPrev(linkPrev);
-		}
+        List<IBaseResource> resourceList =
+                response.getResources(searchOffset, numToReturn + searchOffset);
 
-		List<IBaseResource> resourceList = response.getResources(searchOffset, numToReturn + searchOffset);
+        IVersionSpecificBundleFactory bundleFactory = myContext.newBundleFactory();
+        bundleFactory.addRootPropertiesToBundle(
+                response.getUuid(), links, response.size(), response.getPublished());
+        bundleFactory.addResourcesToBundle(
+                resourceList, BundleTypeEnum.SEARCHSET, serverBase, null, null);
 
-		IVersionSpecificBundleFactory bundleFactory = myContext.newBundleFactory();
-		bundleFactory.addRootPropertiesToBundle(response.getUuid(), links, response.size(), response.getPublished());
-		bundleFactory.addResourcesToBundle(resourceList, BundleTypeEnum.SEARCHSET, serverBase, null, null);
-
-		IBaseResource result = bundleFactory.getResourceBundle();
-		return (IBaseBundle) result;
-	}
-
+        IBaseResource result = bundleFactory.getResourceBundle();
+        return (IBaseBundle) result;
+    }
 }

@@ -19,6 +19,10 @@
  */
 package ca.uhn.hapi.converters.server;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -31,6 +35,9 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationConstants;
+import java.util.StringTokenizer;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor10_30;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor10_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_30;
@@ -40,109 +47,119 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.StringTokenizer;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /**
- * <b>This is an experimental interceptor! Use with caution as
- * behaviour may change or be removed in a future version of
- * FHIR.</b>
- * <p>
- * This interceptor partially implements the proposed
- * Versioned API features.
- * </p>
+ * <b>This is an experimental interceptor! Use with caution as behaviour may change or be removed in
+ * a future version of FHIR.</b>
+ *
+ * <p>This interceptor partially implements the proposed Versioned API features.
  */
-
 @Interceptor(order = AuthorizationConstants.ORDER_CONVERTER_INTERCEPTOR)
 public class VersionedApiConverterInterceptor extends InterceptorAdapter {
-	private final FhirContext myCtxDstu2;
-	private final FhirContext myCtxDstu2Hl7Org;
-	private final NullVersionConverterAdvisor10_40 advisor40;
-	private final NullVersionConverterAdvisor10_30 advisor30;
+    private final FhirContext myCtxDstu2;
+    private final FhirContext myCtxDstu2Hl7Org;
+    private final NullVersionConverterAdvisor10_40 advisor40;
+    private final NullVersionConverterAdvisor10_30 advisor30;
 
-	public VersionedApiConverterInterceptor() {
-		advisor40 = new NullVersionConverterAdvisor10_40();
-		advisor30 = new NullVersionConverterAdvisor10_30();
+    public VersionedApiConverterInterceptor() {
+        advisor40 = new NullVersionConverterAdvisor10_40();
+        advisor30 = new NullVersionConverterAdvisor10_30();
 
-		myCtxDstu2 = FhirContext.forDstu2();
-		myCtxDstu2Hl7Org = FhirContext.forDstu2Hl7Org();
-	}
+        myCtxDstu2 = FhirContext.forDstu2();
+        myCtxDstu2Hl7Org = FhirContext.forDstu2Hl7Org();
+    }
 
-	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
-		IBaseResource responseResource = theResponseDetails.getResponseResource();
-		if (responseResource == null) {
-			return true;
-		}
+    @Override
+    public boolean outgoingResponse(
+            RequestDetails theRequestDetails,
+            ResponseDetails theResponseDetails,
+            HttpServletRequest theServletRequest,
+            HttpServletResponse theServletResponse)
+            throws AuthenticationException {
+        IBaseResource responseResource = theResponseDetails.getResponseResource();
+        if (responseResource == null) {
+            return true;
+        }
 
-		String[] formatParams = theRequestDetails.getParameters().get(Constants.PARAM_FORMAT);
-		String accept = null;
-		if (formatParams != null && formatParams.length > 0) {
-			accept = formatParams[0];
-		}
-		if (isBlank(accept)) {
-			accept = defaultString(theServletRequest.getHeader(Constants.HEADER_ACCEPT));
-		}
-		StringTokenizer tok = new StringTokenizer(accept, ";");
-		String wantVersionString = null;
-		while (tok.hasMoreTokens()) {
-			String next = tok.nextToken().trim();
-			if (next.startsWith("fhirVersion=")) {
-				wantVersionString = next.substring("fhirVersion=".length()).trim();
-				break;
-			}
-		}
+        String[] formatParams = theRequestDetails.getParameters().get(Constants.PARAM_FORMAT);
+        String accept = null;
+        if (formatParams != null && formatParams.length > 0) {
+            accept = formatParams[0];
+        }
+        if (isBlank(accept)) {
+            accept = defaultString(theServletRequest.getHeader(Constants.HEADER_ACCEPT));
+        }
+        StringTokenizer tok = new StringTokenizer(accept, ";");
+        String wantVersionString = null;
+        while (tok.hasMoreTokens()) {
+            String next = tok.nextToken().trim();
+            if (next.startsWith("fhirVersion=")) {
+                wantVersionString = next.substring("fhirVersion=".length()).trim();
+                break;
+            }
+        }
 
-		FhirVersionEnum wantVersion = null;
-		if (isNotBlank(wantVersionString)) {
-			wantVersion = FhirVersionEnum.forVersionString(wantVersionString);
-		}
+        FhirVersionEnum wantVersion = null;
+        if (isNotBlank(wantVersionString)) {
+            wantVersion = FhirVersionEnum.forVersionString(wantVersionString);
+        }
 
-		FhirVersionEnum haveVersion = responseResource.getStructureFhirVersionEnum();
+        FhirVersionEnum haveVersion = responseResource.getStructureFhirVersionEnum();
 
-		IBaseResource converted = null;
-		try {
-			if (wantVersion == FhirVersionEnum.R4 && haveVersion == FhirVersionEnum.DSTU3) {
-				converted = VersionConvertorFactory_30_40.convertResource(toDstu3(responseResource));
-			} else if (wantVersion == FhirVersionEnum.DSTU3 && haveVersion == FhirVersionEnum.R4) {
-				converted = VersionConvertorFactory_30_40.convertResource(toR4(responseResource));
-			} else if (wantVersion == FhirVersionEnum.DSTU2 && haveVersion == FhirVersionEnum.R4) {
-				converted = VersionConvertorFactory_10_40.convertResource(toR4(responseResource), advisor40);
-			} else if (wantVersion == FhirVersionEnum.R4 && haveVersion == FhirVersionEnum.DSTU2) {
-				converted = VersionConvertorFactory_10_40.convertResource(toDstu2(responseResource), advisor40);
-			} else if (wantVersion == FhirVersionEnum.DSTU2 && haveVersion == FhirVersionEnum.DSTU3) {
-				converted = VersionConvertorFactory_10_30.convertResource(toDstu3(responseResource), advisor30);
-			} else if (wantVersion == FhirVersionEnum.DSTU3 && haveVersion == FhirVersionEnum.DSTU2) {
-				converted = VersionConvertorFactory_10_30.convertResource(toDstu2(responseResource), advisor30);
-			}
-		} catch (FHIRException e) {
-			throw new InternalErrorException(Msg.code(73) + e);
-		}
+        IBaseResource converted = null;
+        try {
+            if (wantVersion == FhirVersionEnum.R4 && haveVersion == FhirVersionEnum.DSTU3) {
+                converted =
+                        VersionConvertorFactory_30_40.convertResource(toDstu3(responseResource));
+            } else if (wantVersion == FhirVersionEnum.DSTU3 && haveVersion == FhirVersionEnum.R4) {
+                converted = VersionConvertorFactory_30_40.convertResource(toR4(responseResource));
+            } else if (wantVersion == FhirVersionEnum.DSTU2 && haveVersion == FhirVersionEnum.R4) {
+                converted =
+                        VersionConvertorFactory_10_40.convertResource(
+                                toR4(responseResource), advisor40);
+            } else if (wantVersion == FhirVersionEnum.R4 && haveVersion == FhirVersionEnum.DSTU2) {
+                converted =
+                        VersionConvertorFactory_10_40.convertResource(
+                                toDstu2(responseResource), advisor40);
+            } else if (wantVersion == FhirVersionEnum.DSTU2
+                    && haveVersion == FhirVersionEnum.DSTU3) {
+                converted =
+                        VersionConvertorFactory_10_30.convertResource(
+                                toDstu3(responseResource), advisor30);
+            } else if (wantVersion == FhirVersionEnum.DSTU3
+                    && haveVersion == FhirVersionEnum.DSTU2) {
+                converted =
+                        VersionConvertorFactory_10_30.convertResource(
+                                toDstu2(responseResource), advisor30);
+            }
+        } catch (FHIRException e) {
+            throw new InternalErrorException(Msg.code(73) + e);
+        }
 
-		if (converted != null) {
-			theResponseDetails.setResponseResource(converted);
-		}
+        if (converted != null) {
+            theResponseDetails.setResponseResource(converted);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private org.hl7.fhir.dstu2.model.Resource toDstu2(IBaseResource theResponseResource) {
-		if (theResponseResource instanceof IResource) {
-			return (org.hl7.fhir.dstu2.model.Resource) myCtxDstu2Hl7Org.newJsonParser().parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
-		}
-		return (org.hl7.fhir.dstu2.model.Resource) theResponseResource;
-	}
+    private org.hl7.fhir.dstu2.model.Resource toDstu2(IBaseResource theResponseResource) {
+        if (theResponseResource instanceof IResource) {
+            return (org.hl7.fhir.dstu2.model.Resource)
+                    myCtxDstu2Hl7Org
+                            .newJsonParser()
+                            .parseResource(
+                                    myCtxDstu2
+                                            .newJsonParser()
+                                            .encodeResourceToString(theResponseResource));
+        }
+        return (org.hl7.fhir.dstu2.model.Resource) theResponseResource;
+    }
 
-	private Resource toDstu3(IBaseResource theResponseResource) {
-		return (Resource) theResponseResource;
-	}
+    private Resource toDstu3(IBaseResource theResponseResource) {
+        return (Resource) theResponseResource;
+    }
 
-	private org.hl7.fhir.r4.model.Resource toR4(IBaseResource theResponseResource) {
-		return (org.hl7.fhir.r4.model.Resource) theResponseResource;
-	}
+    private org.hl7.fhir.r4.model.Resource toR4(IBaseResource theResponseResource) {
+        return (org.hl7.fhir.r4.model.Resource) theResponseResource;
+    }
 }

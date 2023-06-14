@@ -19,25 +19,30 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 class ServletResponseParameter implements IParameter {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServletResponseParameter.class);
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(ServletResponseParameter.class);
 
-	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		return ((ServletRequestDetails) theRequest).getServletResponse();
-	}
+    @Override
+    public Object translateQueryParametersIntoServerArgument(
+            RequestDetails theRequest, BaseMethodBinding theMethodBinding)
+            throws InternalErrorException, InvalidRequestException {
+        return ((ServletRequestDetails) theRequest).getServletResponse();
+    }
 
-	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		// ignore
-	}
-
+    @Override
+    public void initializeTypes(
+            Method theMethod,
+            Class<? extends Collection<?>> theOuterCollectionType,
+            Class<? extends Collection<?>> theInnerCollectionType,
+            Class<?> theParameterType) {
+        // ignore
+    }
 }

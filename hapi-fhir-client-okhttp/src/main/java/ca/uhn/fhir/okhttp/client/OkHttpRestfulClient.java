@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.okhttp.client;
 
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.deleteLastCharacter;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.endsWith;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.everythingAfterFirstQuestionMark;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.hasQuestionMark;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.withTrailingQuestionMarkRemoved;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -29,6 +35,8 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
+import java.util.List;
+import java.util.Map;
 import okhttp3.Call;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
@@ -36,18 +44,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
-import java.util.List;
-import java.util.Map;
-
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.deleteLastCharacter;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.endsWith;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.everythingAfterFirstQuestionMark;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.hasQuestionMark;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.withTrailingQuestionMarkRemoved;
-
 /**
- * A Http Request based on OkHttp. This is an adapter around the class
- * {@link OkHttpClient}
+ * A Http Request based on OkHttp. This is an adapter around the class {@link OkHttpClient}
  *
  * @author Matthew Clarke | matthew.clarke@orionhealth.com | Orion Health
  */
@@ -61,12 +59,13 @@ public class OkHttpRestfulClient implements IHttpClient {
     private List<Header> myHeaders;
     private OkHttpRestfulRequest myRequest;
 
-    public OkHttpRestfulClient(Call.Factory theClient,
-                               StringBuilder theUrl,
-                               Map<String, List<String>> theIfNoneExistParams,
-                               String theIfNoneExistString,
-                               RequestTypeEnum theRequestType,
-                               List<Header> theHeaders) {
+    public OkHttpRestfulClient(
+            Call.Factory theClient,
+            StringBuilder theUrl,
+            Map<String, List<String>> theIfNoneExistParams,
+            String theIfNoneExistString,
+            RequestTypeEnum theRequestType,
+            List<Header> theHeaders) {
         myClient = theClient;
         myUrl = theUrl;
         myIfNoneExistParams = theIfNoneExistParams;
@@ -76,25 +75,31 @@ public class OkHttpRestfulClient implements IHttpClient {
     }
 
     @Override
-    public IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
+    public IHttpRequest createByteRequest(
+            FhirContext theContext,
+            String theContents,
+            String theContentType,
+            EncodingEnum theEncoding) {
         initBaseRequest(theContext, theEncoding, createPostBody(theContents, theContentType));
         return myRequest;
     }
 
-    private void initBaseRequest(FhirContext theContext, EncodingEnum theEncoding, RequestBody body) {
+    private void initBaseRequest(
+            FhirContext theContext, EncodingEnum theEncoding, RequestBody body) {
         String sanitisedUrl = withTrailingQuestionMarkRemoved(myUrl.toString());
         myRequest = new OkHttpRestfulRequest(myClient, sanitisedUrl, myRequestType, body);
         addHeadersToRequest(myRequest, theEncoding, theContext);
     }
 
     private RequestBody createPostBody(String theContents, String theContentType) {
-		 return RequestBody.create(MediaType.parse(theContentType), theContents);
+        return RequestBody.create(MediaType.parse(theContentType), theContents);
     }
 
     @Override
-    public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
+    public IHttpRequest createParamRequest(
+            FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
         initBaseRequest(theContext, theEncoding, getFormBodyFromParams(theParams));
-		 return myRequest;
+        return myRequest;
     }
 
     private RequestBody getFormBodyFromParams(Map<String, List<String>> queryParams) {
@@ -110,7 +115,10 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     @Override
     public IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary) {
-        initBaseRequest(theContext, null, createPostBody(theBinary.getContent(), theBinary.getContentType()));
+        initBaseRequest(
+                theContext,
+                null,
+                createPostBody(theBinary.getContent(), theBinary.getContentType()));
         return myRequest;
     }
 
@@ -124,7 +132,8 @@ public class OkHttpRestfulClient implements IHttpClient {
         return myRequest;
     }
 
-    private void addHeadersToRequest(OkHttpRestfulRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
+    private void addHeadersToRequest(
+            OkHttpRestfulRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
         if (myHeaders != null) {
             for (Header next : myHeaders) {
                 theHttpRequest.addHeader(next.getName(), next.getValue());
@@ -138,7 +147,8 @@ public class OkHttpRestfulClient implements IHttpClient {
     }
 
     private void addUserAgentHeader(OkHttpRestfulRequest theHttpRequest, FhirContext theContext) {
-        theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "okhttp"));
+        theHttpRequest.addHeader(
+                "User-Agent", HttpClientUtil.createUserAgentString(theContext, "okhttp"));
     }
 
     private void addAcceptCharsetHeader(OkHttpRestfulRequest theHttpRequest) {
@@ -161,10 +171,12 @@ public class OkHttpRestfulClient implements IHttpClient {
         result.addHeader(Constants.HEADER_IF_NONE_EXIST, sb.toString());
     }
 
-    private void addIfNoneExistHeaderFromParams(IHttpRequest result, Map<String, List<String>> ifNoneExistParams) {
+    private void addIfNoneExistHeaderFromParams(
+            IHttpRequest result, Map<String, List<String>> ifNoneExistParams) {
         StringBuilder sb = newHeaderBuilder(myUrl);
         boolean shouldAddInitialQuestionMark = !hasQuestionMark(sb);
-        BaseHttpClientInvocation.appendExtraParamsWithQuestionMark(ifNoneExistParams, sb, shouldAddInitialQuestionMark);
+        BaseHttpClientInvocation.appendExtraParamsWithQuestionMark(
+                ifNoneExistParams, sb, shouldAddInitialQuestionMark);
         result.addHeader(Constants.HEADER_IF_NONE_EXIST, sb.toString());
     }
 
@@ -175,5 +187,4 @@ public class OkHttpRestfulClient implements IHttpClient {
         }
         return sb;
     }
-
 }

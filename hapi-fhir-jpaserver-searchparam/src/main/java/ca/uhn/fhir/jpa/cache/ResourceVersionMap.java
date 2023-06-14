@@ -21,79 +21,80 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.model.primitive.IdDt;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * This immutable map holds a copy of current resource versions read from the repository.
- */
+/** This immutable map holds a copy of current resource versions read from the repository. */
 public class ResourceVersionMap {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceVersionMap.class);
-	private final Set<IIdType> mySourceIds = new HashSet<>();
-	// Key versionless id, value version
-	private final Map<IIdType, Long> myMap = new HashMap<>();
-	private ResourceVersionMap() {}
+    private static final Logger ourLog = LoggerFactory.getLogger(ResourceVersionMap.class);
+    private final Set<IIdType> mySourceIds = new HashSet<>();
+    // Key versionless id, value version
+    private final Map<IIdType, Long> myMap = new HashMap<>();
 
-	public static ResourceVersionMap fromResourceTableEntities(List<? extends IBasePersistedResource> theEntities) {
-		ResourceVersionMap retval = new ResourceVersionMap();
-		theEntities.forEach(entity -> retval.add(entity.getIdDt()));
-		return retval;
-	}
+    private ResourceVersionMap() {}
 
-	public static ResourceVersionMap fromResources(List<? extends IBaseResource> theResources) {
-		ResourceVersionMap retval = new ResourceVersionMap();
-		theResources.forEach(resource -> retval.add(resource.getIdElement()));
-		return retval;
-	}
+    public static ResourceVersionMap fromResourceTableEntities(
+            List<? extends IBasePersistedResource> theEntities) {
+        ResourceVersionMap retval = new ResourceVersionMap();
+        theEntities.forEach(entity -> retval.add(entity.getIdDt()));
+        return retval;
+    }
 
-	public static ResourceVersionMap empty() {
-		return new ResourceVersionMap();
-	}
+    public static ResourceVersionMap fromResources(List<? extends IBaseResource> theResources) {
+        ResourceVersionMap retval = new ResourceVersionMap();
+        theResources.forEach(resource -> retval.add(resource.getIdElement()));
+        return retval;
+    }
 
-	private void add(IIdType theId) {
-		if (theId.getVersionIdPart() == null) {
-			ourLog.warn("Not storing {} in ResourceVersionMap because it does not have a version.", theId);
-			return;
-		}
-		IdDt id = new IdDt(theId);
-		mySourceIds.add(id);
-		myMap.put(id.toUnqualifiedVersionless(), id.getVersionIdPartAsLong());
-	}
+    public static ResourceVersionMap empty() {
+        return new ResourceVersionMap();
+    }
 
-	public Long getVersion(IIdType theResourceId) {
-		return get(theResourceId);
-	}
+    private void add(IIdType theId) {
+        if (theId.getVersionIdPart() == null) {
+            ourLog.warn(
+                    "Not storing {} in ResourceVersionMap because it does not have a version.",
+                    theId);
+            return;
+        }
+        IdDt id = new IdDt(theId);
+        mySourceIds.add(id);
+        myMap.put(id.toUnqualifiedVersionless(), id.getVersionIdPartAsLong());
+    }
 
-	public int size() {
-		return myMap.size();
-	}
+    public Long getVersion(IIdType theResourceId) {
+        return get(theResourceId);
+    }
 
-	public Set<IIdType> keySet() {
-		return Collections.unmodifiableSet(myMap.keySet());
-	}
+    public int size() {
+        return myMap.size();
+    }
 
-	public Set<IIdType> getSourceIds() {
-		return Collections.unmodifiableSet(mySourceIds);
-	}
+    public Set<IIdType> keySet() {
+        return Collections.unmodifiableSet(myMap.keySet());
+    }
 
-	public Long get(IIdType theId) {
-		return myMap.get(new IdDt(theId.toUnqualifiedVersionless()));
-	}
+    public Set<IIdType> getSourceIds() {
+        return Collections.unmodifiableSet(mySourceIds);
+    }
 
-	public boolean containsKey(IIdType theId) {
-		return myMap.containsKey(new IdDt(theId.toUnqualifiedVersionless()));
-	}
+    public Long get(IIdType theId) {
+        return myMap.get(new IdDt(theId.toUnqualifiedVersionless()));
+    }
 
-	public boolean isEmpty() {
-		return myMap.isEmpty();
-	}
+    public boolean containsKey(IIdType theId) {
+        return myMap.containsKey(new IdDt(theId.toUnqualifiedVersionless()));
+    }
+
+    public boolean isEmpty() {
+        return myMap.isEmpty();
+    }
 }

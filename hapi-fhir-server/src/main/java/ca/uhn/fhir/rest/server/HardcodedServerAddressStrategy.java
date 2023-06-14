@@ -21,37 +21,34 @@ package ca.uhn.fhir.rest.server;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.Validate;
 
-/**
- * Server address strategy which simply returns a hardcoded URL
- */
+/** Server address strategy which simply returns a hardcoded URL */
 public class HardcodedServerAddressStrategy implements IServerAddressStrategy {
 
-	private String myValue;
+    private String myValue;
 
-	public HardcodedServerAddressStrategy() {
-		// nothing
-	}
+    public HardcodedServerAddressStrategy() {
+        // nothing
+    }
 
-	public HardcodedServerAddressStrategy(String theValue) {
-		Validate.notBlank(theValue, "theValue must not be null or empty");
-		myValue = theValue;
-	}
+    public HardcodedServerAddressStrategy(String theValue) {
+        Validate.notBlank(theValue, "theValue must not be null or empty");
+        myValue = theValue;
+    }
 
-	public String getValue() {
-		return myValue;
-	}
+    public String getValue() {
+        return myValue;
+    }
 
-	public void setValue(String theValue) {
-		Validate.notBlank(theValue, "theValue must not be null or empty");
-		myValue = theValue;
-	}
+    public void setValue(String theValue) {
+        Validate.notBlank(theValue, "theValue must not be null or empty");
+        myValue = theValue;
+    }
 
-	@Override
-	public String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest) {
-		return myValue;
-	}
-
+    @Override
+    public String determineServerBase(
+            ServletContext theServletContext, HttpServletRequest theRequest) {
+        return myValue;
+    }
 }

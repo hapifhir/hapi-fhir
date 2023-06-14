@@ -22,5 +22,5 @@ package ca.uhn.fhir.jpa.term;
 import org.apache.commons.csv.CSVRecord;
 
 public interface IZipContentsHandlerCsv {
-   void accept(CSVRecord theRecord);
+    void accept(CSVRecord theRecord);
 }

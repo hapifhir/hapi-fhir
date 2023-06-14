@@ -6,9 +6,8 @@ import org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider;
 
 public class FhirServerDstu2_1 implements IFhirVersionServer {
 
-	@Override
-	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
-		return new ServerConformanceProvider(theServer);
-	}
-
+    @Override
+    public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
+        return new ServerConformanceProvider(theServer);
+    }
 }

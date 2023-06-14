@@ -24,37 +24,38 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BulkImportJobFileJson implements IModelJson {
 
-	@JsonProperty("tenantName")
-	private String myTenantName;
-	@JsonProperty("contents")
-	private String myContents;
-	@JsonProperty("description")
-	private String myDescription;
+    @JsonProperty("tenantName")
+    private String myTenantName;
 
-	public String getDescription() {
-		return myDescription;
-	}
+    @JsonProperty("contents")
+    private String myContents;
 
-	public void setDescription(String theDescription) {
-		myDescription = theDescription;
-	}
+    @JsonProperty("description")
+    private String myDescription;
 
-	public String getTenantName() {
-		return myTenantName;
-	}
+    public String getDescription() {
+        return myDescription;
+    }
 
-	public BulkImportJobFileJson setTenantName(String theTenantName) {
-		myTenantName = theTenantName;
-		return this;
-	}
+    public void setDescription(String theDescription) {
+        myDescription = theDescription;
+    }
 
-	public String getContents() {
-		return myContents;
-	}
+    public String getTenantName() {
+        return myTenantName;
+    }
 
-	public BulkImportJobFileJson setContents(String theContents) {
-		myContents = theContents;
-		return this;
-	}
+    public BulkImportJobFileJson setTenantName(String theTenantName) {
+        myTenantName = theTenantName;
+        return this;
+    }
 
+    public String getContents() {
+        return myContents;
+    }
+
+    public BulkImportJobFileJson setContents(String theContents) {
+        myContents = theContents;
+        return this;
+    }
 }

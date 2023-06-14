@@ -25,13 +25,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Parameter annotation for the _offset parameter, which indicates to the
- * server the offset of desired results.
- * 
+ * Parameter annotation for the _offset parameter, which indicates to the server the offset of
+ * desired results.
+ *
  * @see History
  */
-@Target(value=ElementType.PARAMETER)
+@Target(value = ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Offset {
-	//nothing
+    // nothing
 }

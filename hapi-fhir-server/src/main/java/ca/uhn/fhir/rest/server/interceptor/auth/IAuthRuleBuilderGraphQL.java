@@ -21,9 +21,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 public interface IAuthRuleBuilderGraphQL {
 
-	/**
-	 * Allow any GraphQL request. Note that this does not mean that any specific sub-operations are permitted, as
-	 * other rules may be required in order to actually access specific resources
-	 */
-	IAuthRuleFinished any();
+    /**
+     * Allow any GraphQL request. Note that this does not mean that any specific sub-operations are
+     * permitted, as other rules may be required in order to actually access specific resources
+     */
+    IAuthRuleFinished any();
 }

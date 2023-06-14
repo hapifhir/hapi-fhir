@@ -1,5 +1,13 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -26,6 +34,14 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -40,260 +56,265 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-
 public class InterceptorUserDataMapDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InterceptorUserDataMapDstu2Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer servlet;
-	private final Object myKey = "KEY";
-	private final Object myValue = "VALUE";
-	private Map<Object, Object> myMap;
-	private Set<String> myMapCheckMethods;
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(InterceptorUserDataMapDstu2Test.class);
+    private static CloseableHttpClient ourClient;
+    private static FhirContext ourCtx = FhirContext.forDstu2();
+    private static int ourPort;
+    private static Server ourServer;
+    private static RestfulServer servlet;
+    private final Object myKey = "KEY";
+    private final Object myValue = "VALUE";
+    private Map<Object, Object> myMap;
+    private Set<String> myMapCheckMethods;
 
-	@BeforeEach
-	public void before() {
-		servlet.getInterceptorService().unregisterAllInterceptors();
-		servlet.getInterceptorService().registerInterceptor(new MyInterceptor());
-	}
+    @BeforeEach
+    public void before() {
+        servlet.getInterceptorService().unregisterAllInterceptors();
+        servlet.getInterceptorService().registerInterceptor(new MyInterceptor());
+    }
 
+    @BeforeEach
+    public void beforePurgeMap() {
+        myMap = null;
+        myMapCheckMethods = Collections.synchronizedSet(new LinkedHashSet<>());
+    }
 
-	@BeforeEach
-	public void beforePurgeMap() {
-		myMap = null;
-		myMapCheckMethods = Collections.synchronizedSet(new LinkedHashSet<>());
-	}
+    @Test
+    public void testException() throws Exception {
 
+        HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=foo");
+        try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+            assertEquals(400, status.getStatusLine().getStatusCode());
+        }
 
-	@Test
-	public void testException() throws Exception {
+        await().until(
+                        () -> myMapCheckMethods,
+                        contains(
+                                "incomingRequestPostProcessed",
+                                "incomingRequestPreHandled",
+                                "preProcessOutgoingException",
+                                "handleException",
+                                "processingCompleted"));
+    }
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=foo");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
-		}
+    @Test
+    public void testRead() throws Exception {
 
-		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException", "processingCompleted"));
-	}
+        HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 
-	@Test
-	public void testRead() throws Exception {
+        try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+            String response =
+                    IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+            assertThat(response, containsString("\"id\":\"1\""));
+            await().until(
+                            () -> myMapCheckMethods,
+                            contains(
+                                    "incomingRequestPostProcessed",
+                                    "incomingRequestPreHandled",
+                                    "outgoingResponse",
+                                    "processingCompletedNormally",
+                                    "processingCompleted"));
+        }
+    }
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+    private void updateMapUsing(Map<Object, Object> theUserData, String theMethod) {
+        assertNotNull(theUserData);
+        if (myMap == null) {
+            myMap = theUserData;
+            myMap.put(myKey, myValue);
+        } else {
+            assertSame(myMap, theUserData);
+            assertEquals(myValue, myMap.get(myKey));
+        }
+        myMapCheckMethods.add(theMethod);
+    }
 
-			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(response, containsString("\"id\":\"1\""));
-		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
-	}
+    @Interceptor
+    public class MyInterceptor {
 
-	}
+        @Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
+        public void incomingRequestPostProcessed(
+                RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+            updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPostProcessed");
+            updateMapUsing(theServletRequestDetails.getUserData(), "incomingRequestPostProcessed");
+        }
 
-	private void updateMapUsing(Map<Object, Object> theUserData, String theMethod) {
-		assertNotNull(theUserData);
-		if (myMap == null) {
-			myMap = theUserData;
-			myMap.put(myKey, myValue);
-		} else {
-			assertSame(myMap, theUserData);
-			assertEquals(myValue, myMap.get(myKey));
-		}
-		myMapCheckMethods.add(theMethod);
-	}
+        @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
+        public void incomingRequestPreHandled(RequestDetails theRequestDetails) {
+            updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPreHandled");
+        }
 
-	@Interceptor
-	public class MyInterceptor {
+        @Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
+        public void outgoingResponse(
+                RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+            updateMapUsing(theRequestDetails.getUserData(), "outgoingResponse");
+            updateMapUsing(theServletRequestDetails.getUserData(), "outgoingResponse");
+        }
 
-		@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-		public void incomingRequestPostProcessed(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPostProcessed");
-			updateMapUsing(theServletRequestDetails.getUserData(), "incomingRequestPostProcessed");
-		}
+        @Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
+        public void processingCompletedNormally(
+                RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+            updateMapUsing(theRequestDetails.getUserData(), "processingCompletedNormally");
+            updateMapUsing(theServletRequestDetails.getUserData(), "processingCompletedNormally");
+        }
 
-		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-		public void incomingRequestPreHandled(RequestDetails theRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPreHandled");
-		}
+        @Hook(Pointcut.SERVER_PROCESSING_COMPLETED)
+        public void processingCompleted(
+                RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+            updateMapUsing(theRequestDetails.getUserData(), "processingCompleted");
+            updateMapUsing(theServletRequestDetails.getUserData(), "processingCompleted");
+        }
 
-		@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-		public void outgoingResponse(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "outgoingResponse");
-			updateMapUsing(theServletRequestDetails.getUserData(), "outgoingResponse");
-		}
+        @Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
+        public void preProcessOutgoingException(
+                RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+            updateMapUsing(theRequestDetails.getUserData(), "preProcessOutgoingException");
+            updateMapUsing(theServletRequestDetails.getUserData(), "preProcessOutgoingException");
+        }
 
-		@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
-		public void processingCompletedNormally(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "processingCompletedNormally");
-			updateMapUsing(theServletRequestDetails.getUserData(), "processingCompletedNormally");
-		}
+        @Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
+        public void handleException(
+                RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+            updateMapUsing(theRequestDetails.getUserData(), "handleException");
+            updateMapUsing(theServletRequestDetails.getUserData(), "handleException");
+        }
+    }
 
-		@Hook(Pointcut.SERVER_PROCESSING_COMPLETED)
-		public void processingCompleted(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "processingCompleted");
-			updateMapUsing(theServletRequestDetails.getUserData(), "processingCompleted");
-		}
+    public static class DummyPatientResourceProvider implements IResourceProvider {
 
-		@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
-		public void preProcessOutgoingException(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "preProcessOutgoingException");
-			updateMapUsing(theServletRequestDetails.getUserData(), "preProcessOutgoingException");
-		}
+        private Patient createPatient1() {
+            Patient patient = new Patient();
+            patient.addIdentifier();
+            patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+            patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+            patient.getIdentifier().get(0).setValue("00001");
+            patient.addName();
+            patient.getName().get(0).addFamily("Test");
+            patient.getName().get(0).addGiven("PatientOne");
+            patient.setGender(AdministrativeGenderEnum.MALE);
+            patient.getId().setValue("1");
+            return patient;
+        }
 
-		@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
-		public void handleException(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "handleException");
-			updateMapUsing(theServletRequestDetails.getUserData(), "handleException");
-		}
+        public Map<String, Patient> getIdToPatient() {
+            Map<String, Patient> idToPatient = new HashMap<>();
+            {
+                Patient patient = createPatient1();
+                idToPatient.put("1", patient);
+            }
+            {
+                Patient patient = new Patient();
+                patient.getIdentifier().add(new IdentifierDt());
+                patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+                patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+                patient.getIdentifier().get(0).setValue("00002");
+                patient.getName().add(new HumanNameDt());
+                patient.getName().get(0).addFamily("Test");
+                patient.getName().get(0).addGiven("PatientTwo");
+                patient.setGender(AdministrativeGenderEnum.FEMALE);
+                patient.getId().setValue("2");
+                idToPatient.put("2", patient);
+            }
+            return idToPatient;
+        }
 
-	}
+        /**
+         * Retrieve the resource by its identifier
+         *
+         * @param theId The resource identity
+         * @return The resource
+         */
+        @Read()
+        public Patient getResourceById(@IdParam IdDt theId) {
+            if (theId.getIdPart().equals("EX")) {
+                throw new InvalidRequestException("FOO");
+            }
+            String key = theId.getIdPart();
+            Patient retVal = getIdToPatient().get(key);
+            return retVal;
+        }
 
-	public static class DummyPatientResourceProvider implements IResourceProvider {
+        /**
+         * Retrieve the resource by its identifier
+         *
+         * @param theId The resource identity
+         * @return The resource
+         */
+        @Search()
+        public List<Patient> getResourceById(@RequiredParam(name = "_id") String theId) {
+            throw new InvalidRequestException("FOO");
+        }
 
-		private Patient createPatient1() {
-			Patient patient = new Patient();
-			patient.addIdentifier();
-			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-			patient.getIdentifier().get(0).setValue("00001");
-			patient.addName();
-			patient.getName().get(0).addFamily("Test");
-			patient.getName().get(0).addGiven("PatientOne");
-			patient.setGender(AdministrativeGenderEnum.MALE);
-			patient.getId().setValue("1");
-			return patient;
-		}
+        @Override
+        public Class<Patient> getResourceType() {
+            return Patient.class;
+        }
 
-		public Map<String, Patient> getIdToPatient() {
-			Map<String, Patient> idToPatient = new HashMap<>();
-			{
-				Patient patient = createPatient1();
-				idToPatient.put("1", patient);
-			}
-			{
-				Patient patient = new Patient();
-				patient.getIdentifier().add(new IdentifierDt());
-				patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-				patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-				patient.getIdentifier().get(0).setValue("00002");
-				patient.getName().add(new HumanNameDt());
-				patient.getName().get(0).addFamily("Test");
-				patient.getName().get(0).addGiven("PatientTwo");
-				patient.setGender(AdministrativeGenderEnum.FEMALE);
-				patient.getId().setValue("2");
-				idToPatient.put("2", patient);
-			}
-			return idToPatient;
-		}
+        @Operation(name = "$everything", idempotent = true)
+        public Bundle patientTypeOperation(
+                @OperationParam(name = "start") DateDt theStart,
+                @OperationParam(name = "end") DateDt theEnd) {
 
-		/**
-		 * Retrieve the resource by its identifier
-		 *
-		 * @param theId The resource identity
-		 * @return The resource
-		 */
-		@Read()
-		public Patient getResourceById(@IdParam IdDt theId) {
-			if (theId.getIdPart().equals("EX")) {
-				throw new InvalidRequestException("FOO");
-			}
-			String key = theId.getIdPart();
-			Patient retVal = getIdToPatient().get(key);
-			return retVal;
-		}
+            Bundle retVal = new Bundle();
+            // Populate bundle with matching resources
+            return retVal;
+        }
 
-		/**
-		 * Retrieve the resource by its identifier
-		 *
-		 * @param theId The resource identity
-		 * @return The resource
-		 */
-		@Search()
-		public List<Patient> getResourceById(@RequiredParam(name = "_id") String theId) {
-			throw new InvalidRequestException("FOO");
-		}
+        @Operation(name = "$everything", idempotent = true)
+        public Bundle patientTypeOperation(
+                @IdParam IdDt theId,
+                @OperationParam(name = "start") DateDt theStart,
+                @OperationParam(name = "end") DateDt theEnd) {
 
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
-		}
+            Bundle retVal = new Bundle();
+            // Populate bundle with matching resources
+            return retVal;
+        }
+    }
 
-		@Operation(name = "$everything", idempotent = true)
-		public Bundle patientTypeOperation(@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+    public static class PlainProvider {
 
-			Bundle retVal = new Bundle();
-			// Populate bundle with matching resources
-			return retVal;
-		}
+        @Operation(name = "$everything", idempotent = true)
+        public Bundle patientTypeOperation(
+                @OperationParam(name = "start") DateDt theStart,
+                @OperationParam(name = "end") DateDt theEnd) {
 
-		@Operation(name = "$everything", idempotent = true)
-		public Bundle patientTypeOperation(@IdParam IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+            Bundle retVal = new Bundle();
+            // Populate bundle with matching resources
+            return retVal;
+        }
+    }
 
-			Bundle retVal = new Bundle();
-			// Populate bundle with matching resources
-			return retVal;
-		}
+    @AfterAll
+    public static void afterClassClearContext() throws Exception {
+        JettyUtil.closeServer(ourServer);
+        TestUtil.randomizeLocaleAndTimezone();
+    }
 
-	}
+    @BeforeAll
+    public static void beforeClass() throws Exception {
+        ourServer = new Server(0);
 
-	public static class PlainProvider {
+        ServletHandler proxyHandler = new ServletHandler();
+        servlet = new RestfulServer(ourCtx);
 
-		@Operation(name = "$everything", idempotent = true)
-		public Bundle patientTypeOperation(@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+        servlet.setResourceProviders(new DummyPatientResourceProvider());
+        servlet.setPlainProviders(new PlainProvider());
 
-			Bundle retVal = new Bundle();
-			// Populate bundle with matching resources
-			return retVal;
-		}
+        ServletHolder servletHolder = new ServletHolder(servlet);
+        proxyHandler.addServletWithMapping(servletHolder, "/*");
+        ourServer.setHandler(proxyHandler);
+        JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer(ourCtx);
-
-		servlet.setResourceProviders(new DummyPatientResourceProvider());
-		servlet.setPlainProviders(new PlainProvider());
-
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
+        PoolingHttpClientConnectionManager connectionManager =
+                new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setConnectionManager(connectionManager);
+        ourClient = builder.build();
+    }
 }

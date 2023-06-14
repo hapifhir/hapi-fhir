@@ -22,28 +22,30 @@ package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.util.ExtensionUtil;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
-import java.util.List;
-
 public class ExtensionMatcher implements IMdmFieldMatcher {
 
-	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-		if (!(theLeftBase instanceof IBaseHasExtensions && theRightBase instanceof IBaseHasExtensions)) {
-			return false;
-		}
-		List<? extends IBaseExtension<?, ?>> leftExtension = ((IBaseHasExtensions) theLeftBase).getExtension();
-		List<? extends IBaseExtension<?, ?>> rightExtension = ((IBaseHasExtensions) theRightBase).getExtension();
+    @Override
+    public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+        if (!(theLeftBase instanceof IBaseHasExtensions
+                && theRightBase instanceof IBaseHasExtensions)) {
+            return false;
+        }
+        List<? extends IBaseExtension<?, ?>> leftExtension =
+                ((IBaseHasExtensions) theLeftBase).getExtension();
+        List<? extends IBaseExtension<?, ?>> rightExtension =
+                ((IBaseHasExtensions) theRightBase).getExtension();
 
-		boolean match = false;
-		for (IBaseExtension leftExtensionValue : leftExtension) {
-			for (IBaseExtension rightExtensionValue : rightExtension) {
-				match |= ExtensionUtil.equals(leftExtensionValue, rightExtensionValue);
-			}
-		}
-		return match;
-	}
+        boolean match = false;
+        for (IBaseExtension leftExtensionValue : leftExtension) {
+            for (IBaseExtension rightExtensionValue : rightExtension) {
+                match |= ExtensionUtil.equals(leftExtensionValue, rightExtensionValue);
+            }
+        }
+        return match;
+    }
 }

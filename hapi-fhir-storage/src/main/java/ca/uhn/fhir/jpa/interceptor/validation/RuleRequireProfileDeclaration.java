@@ -21,47 +21,50 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import java.util.Collection;
+import java.util.Optional;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Optional;
-
 class RuleRequireProfileDeclaration extends BaseTypedRule {
-	private final Collection<String> myProfileOptions;
+    private final Collection<String> myProfileOptions;
 
-	RuleRequireProfileDeclaration(FhirContext theFhirContext, String theType, Collection<String> theProfileOptions) {
-		super(theFhirContext, theType);
-		myProfileOptions = theProfileOptions;
-	}
+    RuleRequireProfileDeclaration(
+            FhirContext theFhirContext, String theType, Collection<String> theProfileOptions) {
+        super(theFhirContext, theType);
+        myProfileOptions = theProfileOptions;
+    }
 
-	@Nonnull
-	@Override
-	public IRepositoryValidatingRule.RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
-		Optional<String> matchingProfile = theResource
-			.getMeta()
-			.getProfile()
-			.stream()
-			.map(t -> t.getValueAsString())
-			.filter(t -> myProfileOptions.contains(t))
-			.findFirst();
-		if (matchingProfile.isPresent()) {
-			return IRepositoryValidatingRule.RuleEvaluation.forSuccess(this);
-		}
-		String msg = getFhirContext().getLocalizer().getMessage(RuleRequireProfileDeclaration.class, "noMatchingProfile", getResourceType(), myProfileOptions);
-		return IRepositoryValidatingRule.RuleEvaluation.forFailure(this, msg);
-	}
+    @Nonnull
+    @Override
+    public IRepositoryValidatingRule.RuleEvaluation evaluate(
+            RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
+        Optional<String> matchingProfile =
+                theResource.getMeta().getProfile().stream()
+                        .map(t -> t.getValueAsString())
+                        .filter(t -> myProfileOptions.contains(t))
+                        .findFirst();
+        if (matchingProfile.isPresent()) {
+            return IRepositoryValidatingRule.RuleEvaluation.forSuccess(this);
+        }
+        String msg =
+                getFhirContext()
+                        .getLocalizer()
+                        .getMessage(
+                                RuleRequireProfileDeclaration.class,
+                                "noMatchingProfile",
+                                getResourceType(),
+                                myProfileOptions);
+        return IRepositoryValidatingRule.RuleEvaluation.forFailure(this, msg);
+    }
 
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("resourceType", getResourceType())
-			.append("profiles", myProfileOptions)
-			.toString();
-	}
-
-
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("resourceType", getResourceType())
+                .append("profiles", myProfileOptions)
+                .toString();
+    }
 }

@@ -26,39 +26,34 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
+import javax.annotation.PostConstruct;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
-
 public class MdmSubmitterInterceptorLoader {
-	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+    private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	@Autowired
-	private IMdmSettings myMdmSettings;
-	@Autowired
-	JpaStorageSettings myStorageSettings;
-	@Autowired
-	private IMdmStorageInterceptor myIMdmStorageInterceptor;
-	@Autowired
-	private MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor;
-	@Autowired
-	private IInterceptorService myInterceptorService;
-	@Autowired
-	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
+    @Autowired private IMdmSettings myMdmSettings;
+    @Autowired JpaStorageSettings myStorageSettings;
+    @Autowired private IMdmStorageInterceptor myIMdmStorageInterceptor;
+    @Autowired private MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor;
+    @Autowired private IInterceptorService myInterceptorService;
+    @Autowired private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 
-	@PostConstruct
-	public void loadInterceptors() {
-		if (!myMdmSettings.isEnabled()) {
-			return;
-		}
+    @PostConstruct
+    public void loadInterceptors() {
+        if (!myMdmSettings.isEnabled()) {
+            return;
+        }
 
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
-		myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
-		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
-		ourLog.info("MDM interceptor registered");
-		// We need to call SubscriptionSubmitInterceptorLoader.start() again in case there were no subscription types the first time it was called.
-		mySubscriptionSubmitInterceptorLoader.start();
-	}
+        myStorageSettings.addSupportedSubscriptionType(
+                Subscription.SubscriptionChannelType.MESSAGE);
+        myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
+        myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
+        ourLog.info("MDM interceptor registered");
+        // We need to call SubscriptionSubmitInterceptorLoader.start() again in case there were no
+        // subscription types the first time it was called.
+        mySubscriptionSubmitInterceptorLoader.start();
+    }
 }

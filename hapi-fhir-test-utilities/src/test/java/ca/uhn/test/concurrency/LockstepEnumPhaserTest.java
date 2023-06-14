@@ -1,14 +1,13 @@
 package ca.uhn.test.concurrency;
 
-import com.github.seregamorph.hamcrest.OrderMatchers;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.FINISHED;
+import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.ONE;
+import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.THREE;
+import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.TWO;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import javax.annotation.Nonnull;
+import com.github.seregamorph.hamcrest.OrderMatchers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,217 +18,236 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.FINISHED;
-import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.ONE;
-import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.THREE;
-import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.TWO;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import javax.annotation.Nonnull;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // All of these should run pretty quickly - 5s should be lots.
 // But if they deadlock, they will hang forever.  Need @Timeout.
 @Timeout(5)
 class LockstepEnumPhaserTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(LockstepEnumPhaserTest.class);
-	final ExecutorService myExecutorService = Executors.newFixedThreadPool(10);
-	final List<Pair<Integer, Stages>> myProgressEvents = Collections.synchronizedList(new ArrayList<>());
-	/** Compare progress records by stage */
-	final Comparator<Pair<Integer, Stages>> myProgressStageComparator = Comparator.comparing(Pair::getRight);
+    private static final Logger ourLog = LoggerFactory.getLogger(LockstepEnumPhaserTest.class);
+    final ExecutorService myExecutorService = Executors.newFixedThreadPool(10);
+    final List<Pair<Integer, Stages>> myProgressEvents =
+            Collections.synchronizedList(new ArrayList<>());
 
-	enum Stages {
-		ONE, TWO, THREE, FINISHED
-	}
+    /** Compare progress records by stage */
+    final Comparator<Pair<Integer, Stages>> myProgressStageComparator =
+            Comparator.comparing(Pair::getRight);
 
-	LockstepEnumPhaser<Stages> myPhaser;
+    enum Stages {
+        ONE,
+        TWO,
+        THREE,
+        FINISHED
+    }
 
-	@Test
-	void phaserWithOnePariticpant_worksFine() {
-	    // given
-		myPhaser = new LockstepEnumPhaser<>(1, Stages.class);
+    LockstepEnumPhaser<Stages> myPhaser;
 
-		myPhaser.assertInPhase(ONE);
+    @Test
+    void phaserWithOnePariticpant_worksFine() {
+        // given
+        myPhaser = new LockstepEnumPhaser<>(1, Stages.class);
 
-		myPhaser.arriveAndAwaitSharedEndOf(ONE);
+        myPhaser.assertInPhase(ONE);
 
-		myPhaser.arriveAndAwaitSharedEndOf(TWO);
+        myPhaser.arriveAndAwaitSharedEndOf(ONE);
 
-		myPhaser.arriveAndAwaitSharedEndOf(THREE);
+        myPhaser.arriveAndAwaitSharedEndOf(TWO);
 
-		myPhaser.assertInPhase(FINISHED);
-	}
+        myPhaser.arriveAndAwaitSharedEndOf(THREE);
 
-	@Test
-	void phaserWithTwoThreads_runsInLockStep() throws InterruptedException, ExecutionException {
-		// given
-		myPhaser = new LockstepEnumPhaser<>(2, Stages.class);
+        myPhaser.assertInPhase(FINISHED);
+    }
 
-		// run two copies of the same schedule
-		AtomicInteger i = new AtomicInteger(0);
-		Callable<Integer> schedule = ()->{
-			// get unique ids for each thread.
-			int threadId = i.getAndIncrement();
+    @Test
+    void phaserWithTwoThreads_runsInLockStep() throws InterruptedException, ExecutionException {
+        // given
+        myPhaser = new LockstepEnumPhaser<>(2, Stages.class);
 
-			myPhaser.assertInPhase(ONE);
-			ourLog.info("Starting");
-			recordProgress(threadId);
+        // run two copies of the same schedule
+        AtomicInteger i = new AtomicInteger(0);
+        Callable<Integer> schedule =
+                () -> {
+                    // get unique ids for each thread.
+                    int threadId = i.getAndIncrement();
 
-			myPhaser.arriveAndAwaitSharedEndOf(ONE);
+                    myPhaser.assertInPhase(ONE);
+                    ourLog.info("Starting");
+                    recordProgress(threadId);
 
-			myPhaser.assertInPhase(TWO);
-			recordProgress(threadId);
+                    myPhaser.arriveAndAwaitSharedEndOf(ONE);
 
-			myPhaser.arriveAndAwaitSharedEndOf(TWO);
+                    myPhaser.assertInPhase(TWO);
+                    recordProgress(threadId);
 
-			myPhaser.assertInPhase(THREE);
-			recordProgress(threadId);
+                    myPhaser.arriveAndAwaitSharedEndOf(TWO);
 
-			myPhaser.arriveAndAwaitSharedEndOf(THREE);
+                    myPhaser.assertInPhase(THREE);
+                    recordProgress(threadId);
 
-			ourLog.info("Finished");
+                    myPhaser.arriveAndAwaitSharedEndOf(THREE);
 
-			return 1;
-		};
-		Future<Integer> result1 = myExecutorService.submit(schedule);
-		Future<Integer> result2 = myExecutorService.submit(schedule);
+                    ourLog.info("Finished");
 
-		assertEquals(1, result1.get());
-		assertEquals(1, result2.get());
-		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(6));
-	}
+                    return 1;
+                };
+        Future<Integer> result1 = myExecutorService.submit(schedule);
+        Future<Integer> result2 = myExecutorService.submit(schedule);
 
-	private void recordProgress(int threadId) {
-		myProgressEvents.add(Pair.of(threadId, myPhaser.getPhase()));
-	}
+        assertEquals(1, result1.get());
+        assertEquals(1, result2.get());
+        assertThat(
+                "progress is ordered",
+                myProgressEvents,
+                OrderMatchers.softOrdered(myProgressStageComparator));
+        assertThat("all progress logged", myProgressEvents, Matchers.hasSize(6));
+    }
 
-	@Test
-	void phaserWithTwoThreads_canAddThird_sequencContinues() throws InterruptedException, ExecutionException {
-		// given
-		myPhaser = new LockstepEnumPhaser<>(2, Stages.class);
+    private void recordProgress(int threadId) {
+        myProgressEvents.add(Pair.of(threadId, myPhaser.getPhase()));
+    }
 
-		// run one simple schedule
-		Callable<Integer> schedule1 = buildSimpleCountingSchedule(1);
-		// this schedule will start half-way in
-		Callable<Integer> schedule2 = ()->{
-			int threadId = 2;
-			ourLog.info("Starting schedule2");
+    @Test
+    void phaserWithTwoThreads_canAddThird_sequencContinues()
+            throws InterruptedException, ExecutionException {
+        // given
+        myPhaser = new LockstepEnumPhaser<>(2, Stages.class);
 
-			myPhaser.assertInPhase(TWO);
-			recordProgress(threadId);
+        // run one simple schedule
+        Callable<Integer> schedule1 = buildSimpleCountingSchedule(1);
+        // this schedule will start half-way in
+        Callable<Integer> schedule2 =
+                () -> {
+                    int threadId = 2;
+                    ourLog.info("Starting schedule2");
 
-			myPhaser.arriveAndAwaitSharedEndOf(TWO);
+                    myPhaser.assertInPhase(TWO);
+                    recordProgress(threadId);
 
-			myPhaser.assertInPhase(THREE);
+                    myPhaser.arriveAndAwaitSharedEndOf(TWO);
 
-			recordProgress(threadId);
+                    myPhaser.assertInPhase(THREE);
 
-			myPhaser.arriveAndAwaitSharedEndOf(THREE);
+                    recordProgress(threadId);
 
-			ourLog.info("Finished schedule2");
+                    myPhaser.arriveAndAwaitSharedEndOf(THREE);
 
-			return 2;
-		};
-		// this schedule will start schedule 2 half-way
-		Callable<Integer> schedule3 = ()->{
-			int threadId = 3;
-			myPhaser.assertInPhase(ONE);
-			ourLog.info("Starting schedule3");
-			recordProgress(threadId);
+                    ourLog.info("Finished schedule2");
 
-			myPhaser.arriveAndAwaitSharedEndOf(ONE);
+                    return 2;
+                };
+        // this schedule will start schedule 2 half-way
+        Callable<Integer> schedule3 =
+                () -> {
+                    int threadId = 3;
+                    myPhaser.assertInPhase(ONE);
+                    ourLog.info("Starting schedule3");
+                    recordProgress(threadId);
 
-			recordProgress(threadId);
+                    myPhaser.arriveAndAwaitSharedEndOf(ONE);
 
-			// add a new thread to the mix
-			myPhaser.register(); // tell the phaser to expect one more
-			myExecutorService.submit(schedule2);
+                    recordProgress(threadId);
 
-			myPhaser.arriveAndAwaitSharedEndOf(TWO);
+                    // add a new thread to the mix
+                    myPhaser.register(); // tell the phaser to expect one more
+                    myExecutorService.submit(schedule2);
 
-			recordProgress(threadId);
+                    myPhaser.arriveAndAwaitSharedEndOf(TWO);
 
-			myPhaser.arriveAndAwaitSharedEndOf(THREE);
+                    recordProgress(threadId);
 
-			ourLog.info("Finished schedule3");
+                    myPhaser.arriveAndAwaitSharedEndOf(THREE);
 
-			return 3;
-		};
-		Future<Integer> result1 = myExecutorService.submit(schedule1);
-		Future<Integer> result3 = myExecutorService.submit(schedule3);
+                    ourLog.info("Finished schedule3");
 
-		assertEquals(1, result1.get());
-		assertEquals(3, result3.get());
+                    return 3;
+                };
+        Future<Integer> result1 = myExecutorService.submit(schedule1);
+        Future<Integer> result3 = myExecutorService.submit(schedule3);
 
-		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(8));
+        assertEquals(1, result1.get());
+        assertEquals(3, result3.get());
 
-	}
+        assertThat(
+                "progress is ordered",
+                myProgressEvents,
+                OrderMatchers.softOrdered(myProgressStageComparator));
+        assertThat("all progress logged", myProgressEvents, Matchers.hasSize(8));
+    }
 
-	@Nonnull
-	private Callable<Integer> buildSimpleCountingSchedule(int theThreadId) {
-		Callable<Integer> schedule = ()->{
-			ourLog.info("Starting schedule - {}", theThreadId);
+    @Nonnull
+    private Callable<Integer> buildSimpleCountingSchedule(int theThreadId) {
+        Callable<Integer> schedule =
+                () -> {
+                    ourLog.info("Starting schedule - {}", theThreadId);
 
-			myPhaser.assertInPhase(ONE);
-			recordProgress(theThreadId);
+                    myPhaser.assertInPhase(ONE);
+                    recordProgress(theThreadId);
 
-			myPhaser.arriveAndAwaitSharedEndOf(ONE);
+                    myPhaser.arriveAndAwaitSharedEndOf(ONE);
 
-			recordProgress(theThreadId);
+                    recordProgress(theThreadId);
 
-			myPhaser.arriveAndAwaitSharedEndOf(TWO);
+                    myPhaser.arriveAndAwaitSharedEndOf(TWO);
 
-			recordProgress(theThreadId);
+                    recordProgress(theThreadId);
 
-			myPhaser.arriveAndAwaitSharedEndOf(THREE);
+                    myPhaser.arriveAndAwaitSharedEndOf(THREE);
 
-			ourLog.info("Finished schedule1");
+                    ourLog.info("Finished schedule1");
 
-			return theThreadId;
-		};
-		return schedule;
-	}
+                    return theThreadId;
+                };
+        return schedule;
+    }
 
-	@Test
-	void aShortScheduleDeregister_allowsRemainingParticipantsToContinue() throws ExecutionException, InterruptedException {
-		// given
-		myPhaser = new LockstepEnumPhaser<>(3, Stages.class);
+    @Test
+    void aShortScheduleDeregister_allowsRemainingParticipantsToContinue()
+            throws ExecutionException, InterruptedException {
+        // given
+        myPhaser = new LockstepEnumPhaser<>(3, Stages.class);
 
-		// Three schedules, but with one that leaves early
-		// sched 1,2 counting
-		// sched 3 start, but end with 2.
-		Callable<Integer> schedule1 = buildSimpleCountingSchedule(1);
-		Callable<Integer> schedule2 = buildSimpleCountingSchedule(2);
-		Callable<Integer> schedule3 = () -> {
-			int threadId = 3;
-			ourLog.info("Starting schedule - {}", threadId);
+        // Three schedules, but with one that leaves early
+        // sched 1,2 counting
+        // sched 3 start, but end with 2.
+        Callable<Integer> schedule1 = buildSimpleCountingSchedule(1);
+        Callable<Integer> schedule2 = buildSimpleCountingSchedule(2);
+        Callable<Integer> schedule3 =
+                () -> {
+                    int threadId = 3;
+                    ourLog.info("Starting schedule - {}", threadId);
 
-			myPhaser.assertInPhase(ONE);
-			recordProgress(threadId);
+                    myPhaser.assertInPhase(ONE);
+                    recordProgress(threadId);
 
-			myPhaser.arriveAndAwaitSharedEndOf(ONE);
+                    myPhaser.arriveAndAwaitSharedEndOf(ONE);
 
-			recordProgress(threadId);
+                    recordProgress(threadId);
 
-			ourLog.info("Leaving schedule - {}", threadId);
+                    ourLog.info("Leaving schedule - {}", threadId);
 
-			Stages deregisterPhase = myPhaser.arriveAndDeregister();
-			assertEquals(TWO, deregisterPhase);
+                    Stages deregisterPhase = myPhaser.arriveAndDeregister();
+                    assertEquals(TWO, deregisterPhase);
 
-			return threadId;
-		};
-		Future<Integer> result1 = myExecutorService.submit(schedule1);
-		Future<Integer> result2 = myExecutorService.submit(schedule2);
-		Future<Integer> result3 = myExecutorService.submit(schedule3);
+                    return threadId;
+                };
+        Future<Integer> result1 = myExecutorService.submit(schedule1);
+        Future<Integer> result2 = myExecutorService.submit(schedule2);
+        Future<Integer> result3 = myExecutorService.submit(schedule3);
 
-		assertEquals(1, result1.get());
-		assertEquals(2, result2.get());
-		assertEquals(3, result3.get());
+        assertEquals(1, result1.get());
+        assertEquals(2, result2.get());
+        assertEquals(3, result3.get());
 
-		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(2*3 + 2));
-
-	}
-
+        assertThat(
+                "progress is ordered",
+                myProgressEvents,
+                OrderMatchers.softOrdered(myProgressStageComparator));
+        assertThat("all progress logged", myProgressEvents, Matchers.hasSize(2 * 3 + 2));
+    }
 }

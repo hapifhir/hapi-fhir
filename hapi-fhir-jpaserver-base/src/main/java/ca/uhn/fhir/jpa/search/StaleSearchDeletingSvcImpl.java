@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.search;
 
+import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -31,52 +33,47 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
-
-/**
- * Deletes old searches
- */
+/** Deletes old searches */
 //
 // NOTE: This is not a @Service because we manually instantiate
 // it in BaseConfig. This is so that we can override the definition
 // in Smile.
 //
 public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHasScheduledJobs {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
-	@Autowired
-	private ISearchCacheSvc mySearchCacheSvc;
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
+    @Autowired private JpaStorageSettings myStorageSettings;
+    @Autowired private ISearchCacheSvc mySearchCacheSvc;
 
-	@Override
-	@Transactional(propagation = Propagation.NEVER)
-	public void pollForStaleSearchesAndDeleteThem() {
-		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
-	}
+    @Override
+    @Transactional(propagation = Propagation.NEVER)
+    public void pollForStaleSearchesAndDeleteThem() {
+        mySearchCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
+    }
 
-	@Override
-	public void scheduleJobs(ISchedulerService theSchedulerService) {
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(getClass().getName());
-		jobDetail.setJobClass(Job.class);
-		theSchedulerService.scheduleClusteredJob(SEARCH_CLEANUP_JOB_INTERVAL_MILLIS, jobDetail);
-	}
+    @Override
+    public void scheduleJobs(ISchedulerService theSchedulerService) {
+        ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+        jobDetail.setId(getClass().getName());
+        jobDetail.setJobClass(Job.class);
+        theSchedulerService.scheduleClusteredJob(SEARCH_CLEANUP_JOB_INTERVAL_MILLIS, jobDetail);
+    }
 
-	public static class Job implements HapiJob {
-		@Autowired
-		private IStaleSearchDeletingSvc myTarget;
+    public static class Job implements HapiJob {
+        @Autowired private IStaleSearchDeletingSvc myTarget;
 
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.schedulePollForStaleSearches();
-		}
-	}
+        @Override
+        public void execute(JobExecutionContext theContext) {
+            myTarget.schedulePollForStaleSearches();
+        }
+    }
 
-	@Transactional(propagation = Propagation.NEVER)
-	@Override
-	public synchronized void schedulePollForStaleSearches() {
-		if (!myStorageSettings.isSchedulingDisabled() && myStorageSettings.isEnableTaskStaleSearchCleanup()) {
-			pollForStaleSearchesAndDeleteThem();
-		}
-	}
+    @Transactional(propagation = Propagation.NEVER)
+    @Override
+    public synchronized void schedulePollForStaleSearches() {
+        if (!myStorageSettings.isSchedulingDisabled()
+                && myStorageSettings.isEnableTaskStaleSearchCleanup()) {
+            pollForStaleSearchesAndDeleteThem();
+        }
+    }
 }

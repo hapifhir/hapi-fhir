@@ -48,8 +48,6 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
-import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
-import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
@@ -69,10 +67,12 @@ import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
+import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
@@ -83,201 +83,208 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({MdmCommonConfig.class, MdmBatch2Config.class})
 public class MdmConsumerConfig {
-	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+    private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	@Bean
-	IMdmStorageInterceptor mdmStorageInterceptor() {
-		return new MdmStorageInterceptor();
-	}
+    @Bean
+    IMdmStorageInterceptor mdmStorageInterceptor() {
+        return new MdmStorageInterceptor();
+    }
 
-	@Bean
-	IMdmSurvivorshipService mdmSurvivorshipService() { return new MdmSurvivorshipSvcImpl(); }
+    @Bean
+    IMdmSurvivorshipService mdmSurvivorshipService() {
+        return new MdmSurvivorshipSvcImpl();
+    }
 
-	@Bean
-	MdmQueueConsumerLoader mdmQueueConsumerLoader(IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
-		return new MdmQueueConsumerLoader(theChannelFactory, theMdmSettings, theMdmMessageHandler);
-	}
+    @Bean
+    MdmQueueConsumerLoader mdmQueueConsumerLoader(
+            IChannelFactory theChannelFactory,
+            IMdmSettings theMdmSettings,
+            MdmMessageHandler theMdmMessageHandler) {
+        return new MdmQueueConsumerLoader(theChannelFactory, theMdmSettings, theMdmMessageHandler);
+    }
 
-	@Bean
-	MdmMessageHandler mdmMessageHandler() {
-		return new MdmMessageHandler();
-	}
+    @Bean
+    MdmMessageHandler mdmMessageHandler() {
+        return new MdmMessageHandler();
+    }
 
-	@Bean
-	MdmMessageKeySvc mdmMessageKeySvc() {
-		return new MdmMessageKeySvc();
-	}
-	@Bean
-	MdmMatchLinkSvc mdmMatchLinkSvc() {
-		return new MdmMatchLinkSvc();
-	}
+    @Bean
+    MdmMessageKeySvc mdmMessageKeySvc() {
+        return new MdmMessageKeySvc();
+    }
 
-	@Bean
-	MdmEidUpdateService eidUpdateService() {
-		return new MdmEidUpdateService();
-	}
+    @Bean
+    MdmMatchLinkSvc mdmMatchLinkSvc() {
+        return new MdmMatchLinkSvc();
+    }
 
-	@Bean
-	MdmResourceDaoSvc mdmResourceDaoSvc() {
-		return new MdmResourceDaoSvc();
-	}
+    @Bean
+    MdmEidUpdateService eidUpdateService() {
+        return new MdmEidUpdateService();
+    }
 
-	@Bean
-	IMdmLinkSvc mdmLinkSvc() {
-		return new MdmLinkSvcImpl();
-	}
+    @Bean
+    MdmResourceDaoSvc mdmResourceDaoSvc() {
+        return new MdmResourceDaoSvc();
+    }
 
-	@Bean
-	GoldenResourceHelper goldenResourceHelper(FhirContext theFhirContext) {
-		return new GoldenResourceHelper(theFhirContext);
-	}
+    @Bean
+    IMdmLinkSvc mdmLinkSvc() {
+        return new MdmLinkSvcImpl();
+    }
 
-	@Bean
-	MessageHelper messageHelper(IMdmSettings theMdmSettings, FhirContext theFhirContext) {
-		return new MessageHelper(theMdmSettings, theFhirContext);
-	}
+    @Bean
+    GoldenResourceHelper goldenResourceHelper(FhirContext theFhirContext) {
+        return new GoldenResourceHelper(theFhirContext);
+    }
 
-	@Bean
-	MdmSubscriptionLoader mdmSubscriptionLoader() {
-		return new MdmSubscriptionLoader();
-	}
+    @Bean
+    MessageHelper messageHelper(IMdmSettings theMdmSettings, FhirContext theFhirContext) {
+        return new MessageHelper(theMdmSettings, theFhirContext);
+    }
 
-	@Bean
-	MdmGoldenResourceFindingSvc mdmGoldenResourceFindingSvc() {
-		return new MdmGoldenResourceFindingSvc();
-	}
+    @Bean
+    MdmSubscriptionLoader mdmSubscriptionLoader() {
+        return new MdmSubscriptionLoader();
+    }
 
-	@Bean
-	FindCandidateByEidSvc findCandidateByEidSvc() {
-		return new FindCandidateByEidSvc();
-	}
+    @Bean
+    MdmGoldenResourceFindingSvc mdmGoldenResourceFindingSvc() {
+        return new MdmGoldenResourceFindingSvc();
+    }
 
-	@Bean
-	FindCandidateByLinkSvc findCandidateByLinkSvc() {
-		return new FindCandidateByLinkSvc();
-	}
+    @Bean
+    FindCandidateByEidSvc findCandidateByEidSvc() {
+        return new FindCandidateByEidSvc();
+    }
 
-	@Bean
-	FindCandidateByExampleSvc findCandidateByScoreSvc() {
-		return new FindCandidateByExampleSvc();
-	}
+    @Bean
+    FindCandidateByLinkSvc findCandidateByLinkSvc() {
+        return new FindCandidateByLinkSvc();
+    }
 
-	@Bean
-	MdmProviderLoader mdmProviderLoader() {
-		return new MdmProviderLoader();
-	}
+    @Bean
+    FindCandidateByExampleSvc findCandidateByScoreSvc() {
+        return new FindCandidateByExampleSvc();
+    }
 
+    @Bean
+    MdmProviderLoader mdmProviderLoader() {
+        return new MdmProviderLoader();
+    }
 
-	@Bean
-	IMdmMatchFinderSvc mdmMatchFinderSvc() {
-		return new MdmMatchFinderSvcImpl();
-	}
+    @Bean
+    IMdmMatchFinderSvc mdmMatchFinderSvc() {
+        return new MdmMatchFinderSvcImpl();
+    }
 
-	@Bean
-	IGoldenResourceMergerSvc mdmGoldenResourceMergerSvc() {
-		return new GoldenResourceMergerSvcImpl();
-	}
+    @Bean
+    IGoldenResourceMergerSvc mdmGoldenResourceMergerSvc() {
+        return new GoldenResourceMergerSvcImpl();
+    }
 
+    @Bean
+    IMdmLinkQuerySvc mdmLinkQuerySvc() {
+        return new MdmLinkQuerySvcImplSvc();
+    }
 
-	@Bean
-	IMdmLinkQuerySvc mdmLinkQuerySvc() {
-		return new MdmLinkQuerySvcImplSvc();
-	}
+    @Bean
+    IMdmModelConverterSvc mdmModelConverterSvc() {
+        return new MdmModelConverterSvcImpl();
+    }
 
-	@Bean
-	IMdmModelConverterSvc mdmModelConverterSvc() {
-		return new MdmModelConverterSvcImpl();
-	}
+    @Bean
+    MdmCandidateSearchSvc mdmCandidateSearchSvc() {
+        return new MdmCandidateSearchSvc();
+    }
 
+    @Bean
+    CandidateSearcher candidateSearcher(
+            DaoRegistry theDaoRegistry,
+            IMdmSettings theMdmSettings,
+            MdmSearchParamSvc theMdmSearchParamSvc) {
+        return new CandidateSearcher(theDaoRegistry, theMdmSettings, theMdmSearchParamSvc);
+    }
 
-	@Bean
-	MdmCandidateSearchSvc mdmCandidateSearchSvc() {
-		return new MdmCandidateSearchSvc();
-	}
+    @Bean
+    MdmCandidateSearchCriteriaBuilderSvc mdmCriteriaBuilderSvc() {
+        return new MdmCandidateSearchCriteriaBuilderSvc();
+    }
 
-	@Bean
-	CandidateSearcher candidateSearcher(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, MdmSearchParamSvc theMdmSearchParamSvc) {
-		return new CandidateSearcher(theDaoRegistry, theMdmSettings, theMdmSearchParamSvc);
-	}
+    @Bean
+    MdmResourceMatcherSvc mdmResourceComparatorSvc(
+            FhirContext theFhirContext,
+            IMatcherFactory theIMatcherFactory,
+            IMdmSettings theMdmSettings) {
+        return new MdmResourceMatcherSvc(theFhirContext, theIMatcherFactory, theMdmSettings);
+    }
 
-	@Bean
-	MdmCandidateSearchCriteriaBuilderSvc mdmCriteriaBuilderSvc() {
-		return new MdmCandidateSearchCriteriaBuilderSvc();
-	}
+    @Bean
+    EIDHelper eidHelper(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
+        return new EIDHelper(theFhirContext, theMdmSettings);
+    }
 
-	@Bean
-	MdmResourceMatcherSvc mdmResourceComparatorSvc(
-		FhirContext theFhirContext,
-		IMatcherFactory theIMatcherFactory,
-		IMdmSettings theMdmSettings
-	) {
-		return new MdmResourceMatcherSvc(theFhirContext, theIMatcherFactory, theMdmSettings);
-	}
+    @Bean
+    MdmLinkDaoSvc mdmLinkDaoSvc() {
+        return new MdmLinkDaoSvc();
+    }
 
-	@Bean
-	EIDHelper eidHelper(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
-		return new EIDHelper(theFhirContext, theMdmSettings);
-	}
+    @Bean
+    MdmLinkFactory mdmLinkFactory(
+            IMdmSettings theMdmSettings, IMdmLinkImplFactory theMdmLinkImplFactory) {
+        return new MdmLinkFactory(theMdmSettings, theMdmLinkImplFactory);
+    }
 
-	@Bean
-	MdmLinkDaoSvc mdmLinkDaoSvc() {
-		return new MdmLinkDaoSvc();
-	}
+    @Bean
+    IMdmLinkUpdaterSvc mdmLinkUpdaterSvc() {
+        return new MdmLinkUpdaterSvcImpl();
+    }
 
-	@Bean
-	MdmLinkFactory mdmLinkFactory(IMdmSettings theMdmSettings, IMdmLinkImplFactory theMdmLinkImplFactory) {
-		return new MdmLinkFactory(theMdmSettings, theMdmLinkImplFactory);
-	}
+    @Bean
+    IMdmLinkCreateSvc mdmLinkCreateSvc() {
+        return new MdmLinkCreateSvcImpl();
+    }
 
-	@Bean
-	IMdmLinkUpdaterSvc mdmLinkUpdaterSvc() {
-		return new MdmLinkUpdaterSvcImpl();
-	}
+    @Bean
+    MdmLoader mdmLoader() {
+        return new MdmLoader();
+    }
 
-	@Bean
-	IMdmLinkCreateSvc mdmLinkCreateSvc() {
-		return new MdmLinkCreateSvcImpl();
-	}
+    @Bean
+    MdmResourceFilteringSvc mdmResourceFilteringSvc() {
+        return new MdmResourceFilteringSvc();
+    }
 
+    @Bean
+    MdmControllerHelper mdmProviderHelper(
+            FhirContext theFhirContext,
+            IResourceLoader theResourceLoader,
+            IMdmSettings theMdmSettings,
+            IMdmMatchFinderSvc theMdmMatchFinderSvc,
+            MessageHelper messageHelper,
+            IRequestPartitionHelperSvc partitionHelperSvc) {
+        return new MdmControllerHelper(
+                theFhirContext,
+                theResourceLoader,
+                theMdmMatchFinderSvc,
+                theMdmSettings,
+                messageHelper,
+                partitionHelperSvc);
+    }
 
-	@Bean
-	MdmLoader mdmLoader() {
-		return new MdmLoader();
-	}
+    @Bean
+    IMdmControllerSvc mdmControllerSvc() {
+        return new MdmControllerSvcImpl();
+    }
 
-	@Bean
-	MdmResourceFilteringSvc mdmResourceFilteringSvc() {
-		return new MdmResourceFilteringSvc();
-	}
+    @Bean
+    MdmPartitionHelper mdmPartitionHelper(
+            MessageHelper theMessageHelper, IMdmSettings theMdmSettings) {
+        return new MdmPartitionHelper(theMessageHelper, theMdmSettings);
+    }
 
-	@Bean
-	MdmControllerHelper mdmProviderHelper(FhirContext theFhirContext,
-													  IResourceLoader theResourceLoader,
-													  IMdmSettings theMdmSettings,
-													  IMdmMatchFinderSvc theMdmMatchFinderSvc,
-													  MessageHelper messageHelper,
-													  IRequestPartitionHelperSvc partitionHelperSvc) {
-		return new MdmControllerHelper(theFhirContext,
-			theResourceLoader,
-			theMdmMatchFinderSvc,
-			theMdmSettings,
-			messageHelper,
-			partitionHelperSvc);
-	}
-
-	@Bean
-	IMdmControllerSvc mdmControllerSvc() {
-		return new MdmControllerSvcImpl();
-	}
-
-	@Bean
-	MdmPartitionHelper mdmPartitionHelper(MessageHelper theMessageHelper,
-													  IMdmSettings theMdmSettings) {
-		return new MdmPartitionHelper(theMessageHelper, theMdmSettings);
-	}
-
-	@Bean
-	public IGoldenResourceSearchSvc goldenResourceSearchSvc() {
-		return new GoldenResourceSearchSvcImpl();
-	}
+    @Bean
+    public IGoldenResourceSearchSvc goldenResourceSearchSvc() {
+        return new GoldenResourceSearchSvcImpl();
+    }
 }

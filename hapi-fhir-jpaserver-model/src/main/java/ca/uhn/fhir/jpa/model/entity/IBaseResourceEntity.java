@@ -20,37 +20,35 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-
-import javax.annotation.Nullable;
 import java.util.Date;
+import javax.annotation.Nullable;
 
 public interface IBaseResourceEntity {
 
-	Date getDeleted();
+    Date getDeleted();
 
-	FhirVersionEnum getFhirVersion();
+    FhirVersionEnum getFhirVersion();
 
-	Long getId();
+    Long getId();
 
-	IdDt getIdDt();
+    IdDt getIdDt();
 
-	InstantDt getPublished();
+    InstantDt getPublished();
 
-	Long getResourceId();
+    Long getResourceId();
 
-	String getResourceType();
+    String getResourceType();
 
-	InstantDt getUpdated();
+    InstantDt getUpdated();
 
-	Date getUpdatedDate();
+    Date getUpdatedDate();
 
-	long getVersion();
+    long getVersion();
 
-	boolean isHasTags();
+    boolean isHasTags();
 
-	@Nullable
-	PartitionablePartitionId getPartitionId();
+    @Nullable
+    PartitionablePartitionId getPartitionId();
 }

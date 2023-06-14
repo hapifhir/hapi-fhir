@@ -1,5 +1,10 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -9,6 +14,19 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.helger.commons.collection.iterate.EmptyEnumeration;
+import java.io.ByteArrayInputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import javax.annotation.Nonnull;
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.iterators.IteratorEnumeration;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hl7.fhir.r4.model.IdType;
@@ -23,177 +41,162 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import javax.annotation.Nonnull;
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 public class ServerConcurrencyTest {
 
-	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static final Logger ourLog = LoggerFactory.getLogger(ServerConcurrencyTest.class);
-	@RegisterExtension
-	private static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
-		.registerProvider(new MyPatientProvider());
-	@RegisterExtension
-	private final HttpClientExtension myHttpClient = new HttpClientExtension();
+    private static final FhirContext ourCtx = FhirContext.forR4Cached();
+    private static final Logger ourLog = LoggerFactory.getLogger(ServerConcurrencyTest.class);
 
-	@Mock
-	private HttpServletRequest myRequest;
-	@Mock
-	private HttpServletResponse myResponse;
-	@Mock
-	private PrintWriter myWriter;
-	private HashMap<String, String> myHeaders;
+    @RegisterExtension
+    private static final RestfulServerExtension ourServer =
+            new RestfulServerExtension(ourCtx).registerProvider(new MyPatientProvider());
 
-	@Test
-	public void testExceptionClosingInputStream() throws IOException {
-		initRequestMocks();
-		DelegatingServletInputStream inputStream = createMockPatientBodyServletInputStream();
-		inputStream.setExceptionOnClose(true);
-		when(myRequest.getInputStream()).thenReturn(inputStream);
-		when(myResponse.getWriter()).thenReturn(myWriter);
+    @RegisterExtension private final HttpClientExtension myHttpClient = new HttpClientExtension();
 
-		assertDoesNotThrow(() ->
-			ourServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse)
-		);
-	}
+    @Mock private HttpServletRequest myRequest;
+    @Mock private HttpServletResponse myResponse;
+    @Mock private PrintWriter myWriter;
+    private HashMap<String, String> myHeaders;
 
-	@Test
-	public void testExceptionClosingOutputStream() throws IOException {
-		initRequestMocks();
-		when(myRequest.getInputStream()).thenReturn(createMockPatientBodyServletInputStream());
-		when(myResponse.getWriter()).thenReturn(myWriter);
+    @Test
+    public void testExceptionClosingInputStream() throws IOException {
+        initRequestMocks();
+        DelegatingServletInputStream inputStream = createMockPatientBodyServletInputStream();
+        inputStream.setExceptionOnClose(true);
+        when(myRequest.getInputStream()).thenReturn(inputStream);
+        when(myResponse.getWriter()).thenReturn(myWriter);
 
-		// Throw an exception when the stream is closed
-		doThrow(new EOFException()).when(myWriter).close();
+        assertDoesNotThrow(
+                () ->
+                        ourServer
+                                .getRestfulServer()
+                                .handleRequest(RequestTypeEnum.POST, myRequest, myResponse));
+    }
 
-		assertDoesNotThrow(() ->
-			ourServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse)
-		);
-	}
+    @Test
+    public void testExceptionClosingOutputStream() throws IOException {
+        initRequestMocks();
+        when(myRequest.getInputStream()).thenReturn(createMockPatientBodyServletInputStream());
+        when(myResponse.getWriter()).thenReturn(myWriter);
 
-	private void initRequestMocks() {
-		myHeaders = new HashMap<>();
-		myHeaders.put(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+        // Throw an exception when the stream is closed
+        doThrow(new EOFException()).when(myWriter).close();
 
-		when(myRequest.getRequestURI()).thenReturn("/Patient");
-		when(myRequest.getRequestURL()).thenReturn(new StringBuffer(ourServer.getBaseUrl() + "/Patient"));
-		when(myRequest.getHeader(any())).thenAnswer(t -> {
-			String header = t.getArgument(0, String.class);
-			String value = myHeaders.get(header);
-			ourLog.info("Request for header '{}' produced: {}", header, value);
-			return value;
-		});
-		when(myRequest.getHeaders(any())).thenAnswer(t -> {
-			String header = t.getArgument(0, String.class);
-			String value = myHeaders.get(header);
-			ourLog.info("Request for header '{}' produced: {}", header, value);
-			if (value != null) {
-				return new IteratorEnumeration<>(Collections.singleton(value).iterator());
-			}
-			return new EmptyEnumeration<>();
-		});
-	}
+        assertDoesNotThrow(
+                () ->
+                        ourServer
+                                .getRestfulServer()
+                                .handleRequest(RequestTypeEnum.POST, myRequest, myResponse));
+    }
 
-	/**
-	 * Based on the class from Spring Test with the same name
-	 */
-	public static class DelegatingServletInputStream extends ServletInputStream {
-		private final InputStream mySourceStream;
-		private boolean myFinished = false;
-		private boolean myExceptionOnClose = false;
+    private void initRequestMocks() {
+        myHeaders = new HashMap<>();
+        myHeaders.put(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 
-		public DelegatingServletInputStream(InputStream sourceStream) {
-			Assert.notNull(sourceStream, "Source InputStream must not be null");
-			this.mySourceStream = sourceStream;
-		}
+        when(myRequest.getRequestURI()).thenReturn("/Patient");
+        when(myRequest.getRequestURL())
+                .thenReturn(new StringBuffer(ourServer.getBaseUrl() + "/Patient"));
+        when(myRequest.getHeader(any()))
+                .thenAnswer(
+                        t -> {
+                            String header = t.getArgument(0, String.class);
+                            String value = myHeaders.get(header);
+                            ourLog.info("Request for header '{}' produced: {}", header, value);
+                            return value;
+                        });
+        when(myRequest.getHeaders(any()))
+                .thenAnswer(
+                        t -> {
+                            String header = t.getArgument(0, String.class);
+                            String value = myHeaders.get(header);
+                            ourLog.info("Request for header '{}' produced: {}", header, value);
+                            if (value != null) {
+                                return new IteratorEnumeration<>(
+                                        Collections.singleton(value).iterator());
+                            }
+                            return new EmptyEnumeration<>();
+                        });
+    }
 
-		public void setExceptionOnClose(boolean theExceptionOnClose) {
-			myExceptionOnClose = theExceptionOnClose;
-		}
+    /** Based on the class from Spring Test with the same name */
+    public static class DelegatingServletInputStream extends ServletInputStream {
+        private final InputStream mySourceStream;
+        private boolean myFinished = false;
+        private boolean myExceptionOnClose = false;
 
-		@Override
-		public int read() throws IOException {
-			int data = this.mySourceStream.read();
-			if (data == -1) {
-				this.myFinished = true;
-			}
+        public DelegatingServletInputStream(InputStream sourceStream) {
+            Assert.notNull(sourceStream, "Source InputStream must not be null");
+            this.mySourceStream = sourceStream;
+        }
 
-			return data;
-		}
+        public void setExceptionOnClose(boolean theExceptionOnClose) {
+            myExceptionOnClose = theExceptionOnClose;
+        }
 
-		@Override
-		public int available() throws IOException {
-			return this.mySourceStream.available();
-		}
+        @Override
+        public int read() throws IOException {
+            int data = this.mySourceStream.read();
+            if (data == -1) {
+                this.myFinished = true;
+            }
 
-		@Override
-		public void close() throws IOException {
-			super.close();
-			this.mySourceStream.close();
-			if (myExceptionOnClose) {
-				throw new IOException("Failed!");
-			}
-		}
+            return data;
+        }
 
-		@Override
-		public boolean isFinished() {
-			return this.myFinished;
-		}
+        @Override
+        public int available() throws IOException {
+            return this.mySourceStream.available();
+        }
 
-		@Override
-		public boolean isReady() {
-			return true;
-		}
+        @Override
+        public void close() throws IOException {
+            super.close();
+            this.mySourceStream.close();
+            if (myExceptionOnClose) {
+                throw new IOException("Failed!");
+            }
+        }
 
-		@Override
-		public void setReadListener(ReadListener readListener) {
-			throw new UnsupportedOperationException();
-		}
-	}
+        @Override
+        public boolean isFinished() {
+            return this.myFinished;
+        }
 
-	@SuppressWarnings("unused")
-	public static class MyPatientProvider implements IResourceProvider {
+        @Override
+        public boolean isReady() {
+            return true;
+        }
 
-		@Create
-		public MethodOutcome create(@ResourceParam Patient thePatient) throws InterruptedException {
-			OperationOutcome oo = new OperationOutcome();
-			oo.addIssue().setDiagnostics(RandomStringUtils.randomAlphanumeric(1000));
+        @Override
+        public void setReadListener(ReadListener readListener) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-			return new MethodOutcome()
-				.setId(new IdType("Patient/A"))
-				.setOperationOutcome(oo);
-		}
+    @SuppressWarnings("unused")
+    public static class MyPatientProvider implements IResourceProvider {
 
+        @Create
+        public MethodOutcome create(@ResourceParam Patient thePatient) throws InterruptedException {
+            OperationOutcome oo = new OperationOutcome();
+            oo.addIssue().setDiagnostics(RandomStringUtils.randomAlphanumeric(1000));
 
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
-		}
-	}
+            return new MethodOutcome().setId(new IdType("Patient/A")).setOperationOutcome(oo);
+        }
 
-	@Nonnull
-	public static DelegatingServletInputStream createMockPatientBodyServletInputStream() {
-		Patient input = new Patient();
-		input.addName().setFamily(RandomStringUtils.randomAlphanumeric(100000));
-		String patient = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
-		ByteArrayInputStream bais = new ByteArrayInputStream(patient.getBytes(StandardCharsets.UTF_8));
-		return new DelegatingServletInputStream(bais);
-	}
+        @Override
+        public Class<Patient> getResourceType() {
+            return Patient.class;
+        }
+    }
+
+    @Nonnull
+    public static DelegatingServletInputStream createMockPatientBodyServletInputStream() {
+        Patient input = new Patient();
+        input.addName().setFamily(RandomStringUtils.randomAlphanumeric(100000));
+        String patient = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+        ByteArrayInputStream bais =
+                new ByteArrayInputStream(patient.getBytes(StandardCharsets.UTF_8));
+        return new DelegatingServletInputStream(bais);
+    }
 }

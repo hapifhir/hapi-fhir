@@ -19,16 +19,12 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
@@ -42,215 +38,247 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_URI", indexes = {
-	// for queries
-	@Index(name = "IDX_SP_URI_HASH_URI_V2", columnList = "HASH_URI,RES_ID,PARTITION_ID", unique = true),
-	// for sorting
-	@Index(name = "IDX_SP_URI_HASH_IDENTITY_V2", columnList = "HASH_IDENTITY,SP_URI,RES_ID,PARTITION_ID", unique = true),
-	// for index create/delete
-	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
-})
+@Table(
+        name = "HFJ_SPIDX_URI",
+        indexes = {
+            // for queries
+            @Index(
+                    name = "IDX_SP_URI_HASH_URI_V2",
+                    columnList = "HASH_URI,RES_ID,PARTITION_ID",
+                    unique = true),
+            // for sorting
+            @Index(
+                    name = "IDX_SP_URI_HASH_IDENTITY_V2",
+                    columnList = "HASH_IDENTITY,SP_URI,RES_ID,PARTITION_ID",
+                    unique = true),
+            // for index create/delete
+            @Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
+        })
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
-	/*
-	 * Be careful when modifying this value
-	 * MySQL chokes on indexes with combined column length greater than 3052 bytes (768 chars)
-	 * https://dev.mysql.com/doc/refman/8.0/en/innodb-limits.html
-	 */
-	public static final int MAX_LENGTH = 500;
+    /*
+     * Be careful when modifying this value
+     * MySQL chokes on indexes with combined column length greater than 3052 bytes (768 chars)
+     * https://dev.mysql.com/doc/refman/8.0/en/innodb-limits.html
+     */
+    public static final int MAX_LENGTH = 500;
 
-	private static final long serialVersionUID = 1L;
-	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
-	@FullTextField
-	public String myUri;
+    private static final long serialVersionUID = 1L;
 
+    @Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
+    @FullTextField
+    public String myUri;
 
+    @Id
+    @SequenceGenerator(name = "SEQ_SPIDX_URI", sequenceName = "SEQ_SPIDX_URI")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")
+    @Column(name = "SP_ID")
+    private Long myId;
 
-	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_URI", sequenceName = "SEQ_SPIDX_URI")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")
-	@Column(name = "SP_ID")
-	private Long myId;
-	/**
-	 * @since 3.4.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_URI", nullable = true)
-	private Long myHashUri;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
+    /**
+     * @since 3.4.0 - At some point this should be made not-null
+     */
+    @Column(name = "HASH_URI", nullable = true)
+    private Long myHashUri;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(foreignKey = @ForeignKey(name = "FKGXSREUTYMMFJUWDSWV3Y887DO"),
-		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
-	private ResourceTable myResource;
+    /**
+     * @since 3.5.0 - At some point this should be made not-null
+     */
+    @Column(name = "HASH_IDENTITY", nullable = true)
+    private Long myHashIdentity;
 
-	/**
-	 * Constructor
-	 */
-	public ResourceIndexedSearchParamUri() {
-		super();
-	}
+    @ManyToOne(
+            optional = false,
+            fetch = FetchType.LAZY,
+            cascade = {})
+    @JoinColumn(
+            foreignKey = @ForeignKey(name = "FKGXSREUTYMMFJUWDSWV3Y887DO"),
+            name = "RES_ID",
+            referencedColumnName = "RES_ID",
+            nullable = false)
+    private ResourceTable myResource;
 
-	/**
-	 * Constructor
-	 */
-	public ResourceIndexedSearchParamUri(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, String theUri) {
-		setPartitionSettings(thePartitionSettings);
-		setResourceType(theResourceType);
-		setParamName(theParamName);
-		setUri(theUri);
-		calculateHashes();
-	}
+    /** Constructor */
+    public ResourceIndexedSearchParamUri() {
+        super();
+    }
 
-	@Override
-	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
-		super.copyMutableValuesFrom(theSource);
-		ResourceIndexedSearchParamUri source = (ResourceIndexedSearchParamUri) theSource;
-		myUri = source.myUri;
-		myHashUri = source.myHashUri;
-		myHashIdentity = source.myHashIdentity;
-	}
+    /** Constructor */
+    public ResourceIndexedSearchParamUri(
+            PartitionSettings thePartitionSettings,
+            String theResourceType,
+            String theParamName,
+            String theUri) {
+        setPartitionSettings(thePartitionSettings);
+        setResourceType(theResourceType);
+        setParamName(theParamName);
+        setUri(theUri);
+        calculateHashes();
+    }
 
-	@Override
-	public void clearHashes() {
-		myHashIdentity = null;
-		myHashUri = null;
-	}
+    @Override
+    public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+        super.copyMutableValuesFrom(theSource);
+        ResourceIndexedSearchParamUri source = (ResourceIndexedSearchParamUri) theSource;
+        myUri = source.myUri;
+        myHashUri = source.myHashUri;
+        myHashIdentity = source.myHashIdentity;
+    }
 
+    @Override
+    public void clearHashes() {
+        myHashIdentity = null;
+        myHashUri = null;
+    }
 
-	@Override
-	public void calculateHashes() {
-		if (myHashIdentity != null || myHashUri != null) {
-			return;
-		}
+    @Override
+    public void calculateHashes() {
+        if (myHashIdentity != null || myHashUri != null) {
+            return;
+        }
 
-		String resourceType = getResourceType();
-		String paramName = getParamName();
-		String uri = getUri();
-		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		setHashUri(calculateHashUri(getPartitionSettings(), getPartitionId(), resourceType, paramName, uri));
-	}
+        String resourceType = getResourceType();
+        String paramName = getParamName();
+        String uri = getUri();
+        setHashIdentity(
+                calculateHashIdentity(
+                        getPartitionSettings(), getPartitionId(), resourceType, paramName));
+        setHashUri(
+                calculateHashUri(
+                        getPartitionSettings(), getPartitionId(), resourceType, paramName, uri));
+    }
 
-	@Override
-	public boolean equals(Object theObj) {
-		if (this == theObj) {
-			return true;
-		}
-		if (theObj == null) {
-			return false;
-		}
-		if (!(theObj instanceof ResourceIndexedSearchParamUri)) {
-			return false;
-		}
-		ResourceIndexedSearchParamUri obj = (ResourceIndexedSearchParamUri) theObj;
-		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
-		b.append(getUri(), obj.getUri());
-		b.append(getHashUri(), obj.getHashUri());
-		b.append(getHashIdentity(), obj.getHashIdentity());
-		return b.isEquals();
-	}
+    @Override
+    public boolean equals(Object theObj) {
+        if (this == theObj) {
+            return true;
+        }
+        if (theObj == null) {
+            return false;
+        }
+        if (!(theObj instanceof ResourceIndexedSearchParamUri)) {
+            return false;
+        }
+        ResourceIndexedSearchParamUri obj = (ResourceIndexedSearchParamUri) theObj;
+        EqualsBuilder b = new EqualsBuilder();
+        b.append(getResourceType(), obj.getResourceType());
+        b.append(getParamName(), obj.getParamName());
+        b.append(getUri(), obj.getUri());
+        b.append(getHashUri(), obj.getHashUri());
+        b.append(getHashIdentity(), obj.getHashIdentity());
+        return b.isEquals();
+    }
 
-	private Long getHashIdentity() {
-		return myHashIdentity;
-	}
+    private Long getHashIdentity() {
+        return myHashIdentity;
+    }
 
-	private void setHashIdentity(long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
-	}
+    private void setHashIdentity(long theHashIdentity) {
+        myHashIdentity = theHashIdentity;
+    }
 
-	public Long getHashUri() {
-		return myHashUri;
-	}
+    public Long getHashUri() {
+        return myHashUri;
+    }
 
-	public void setHashUri(Long theHashUri) {
-		myHashUri = theHashUri;
-	}
+    public void setHashUri(Long theHashUri) {
+        myHashUri = theHashUri;
+    }
 
-	@Override
-	public Long getId() {
-		return myId;
-	}
+    @Override
+    public Long getId() {
+        return myId;
+    }
 
-	@Override
-	public void setId(Long theId) {
-		myId = theId;
-	}
+    @Override
+    public void setId(Long theId) {
+        myId = theId;
+    }
 
+    public String getUri() {
+        return myUri;
+    }
 
-	public String getUri() {
-		return myUri;
-	}
+    public ResourceIndexedSearchParamUri setUri(String theUri) {
+        myUri = StringUtils.defaultIfBlank(theUri, null);
+        return this;
+    }
 
-	public ResourceIndexedSearchParamUri setUri(String theUri) {
-		myUri = StringUtils.defaultIfBlank(theUri, null);
-		return this;
-	}
+    @Override
+    public int hashCode() {
+        HashCodeBuilder b = new HashCodeBuilder();
+        b.append(getResourceType());
+        b.append(getParamName());
+        b.append(getUri());
+        b.append(getHashUri());
+        b.append(getHashIdentity());
+        return b.toHashCode();
+    }
 
-	@Override
-	public int hashCode() {
-		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
-		b.append(getUri());
-		b.append(getHashUri());
-		b.append(getHashIdentity());
-		return b.toHashCode();
-	}
+    @Override
+    public IQueryParameterType toQueryParameterType() {
+        return new UriParam(getUri());
+    }
 
-	@Override
-	public IQueryParameterType toQueryParameterType() {
-		return new UriParam(getUri());
-	}
+    @Override
+    public String toString() {
+        ToStringBuilder b = new ToStringBuilder(this);
+        b.append("id", getId());
+        b.append("resourceId", getResourcePid());
+        b.append("paramName", getParamName());
+        b.append("uri", myUri);
+        b.append("hashUri", myHashUri);
+        return b.toString();
+    }
 
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this);
-		b.append("id", getId());
-		b.append("resourceId", getResourcePid());
-		b.append("paramName", getParamName());
-		b.append("uri", myUri);
-		b.append("hashUri", myHashUri);
-		return b.toString();
-	}
+    @Override
+    public boolean matches(IQueryParameterType theParam) {
+        if (!(theParam instanceof UriParam)) {
+            return false;
+        }
+        UriParam uri = (UriParam) theParam;
+        return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
+    }
 
-	@Override
-	public boolean matches(IQueryParameterType theParam) {
-		if (!(theParam instanceof UriParam)) {
-			return false;
-		}
-		UriParam uri = (UriParam) theParam;
-		return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
-	}
+    public static long calculateHashUri(
+            PartitionSettings thePartitionSettings,
+            PartitionablePartitionId theRequestPartitionId,
+            String theResourceType,
+            String theParamName,
+            String theUri) {
+        RequestPartitionId requestPartitionId =
+                PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+        return calculateHashUri(
+                thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUri);
+    }
 
-	public static long calculateHashUri(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUri) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashUri(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUri);
-	}
+    public static long calculateHashUri(
+            PartitionSettings thePartitionSettings,
+            RequestPartitionId theRequestPartitionId,
+            String theResourceType,
+            String theParamName,
+            String theUri) {
+        return hash(
+                thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
+    }
 
-	public static long calculateHashUri(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUri) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
-	}
+    @Override
+    public ResourceTable getResource() {
+        return myResource;
+    }
 
-
-	@Override
-	public ResourceTable getResource() {
-		return myResource;
-	}
-
-	@Override
-	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		myResource = theResource;
-		setResourceType(theResource.getResourceType());
-		return this;
-	}
+    @Override
+    public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+        myResource = theResource;
+        setResourceType(theResource.getResourceType());
+        return this;
+    }
 }

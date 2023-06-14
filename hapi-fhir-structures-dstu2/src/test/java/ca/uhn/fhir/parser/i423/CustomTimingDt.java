@@ -1,8 +1,5 @@
 package ca.uhn.fhir.parser.i423;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -19,16 +16,25 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.util.ElementUtil;
+import java.math.BigDecimal;
+import java.util.List;
 
 @DatatypeDef(name = "Timing")
 public class CustomTimingDt extends TimingDt {
 
-    /**
-     * repeat
-     */
-    @Child(name = FIELD_REPEAT, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {_Repeat.class})
-    @Description(shortDefinition = "When the event is to occur", formalDefinition = "A set of rules that describe when the event should occur.")
+    /** repeat */
+    @Child(
+            name = FIELD_REPEAT,
+            min = 0,
+            max = 1,
+            order = Child.REPLACE_PARENT,
+            summary = true,
+            type = {_Repeat.class})
+    @Description(
+            shortDefinition = "When the event is to occur",
+            formalDefinition = "A set of rules that describe when the event should occur.")
     protected _Repeat ourRepeat;
+
     public static final String FIELD_REPEAT = "repeat";
 
     @Override
@@ -42,8 +48,7 @@ public class CustomTimingDt extends TimingDt {
     }
 
     public _Repeat _getRepeat() {
-        if (ourRepeat == null)
-            ourRepeat = new _Repeat();
+        if (ourRepeat == null) ourRepeat = new _Repeat();
         return ourRepeat;
     }
 
@@ -54,92 +59,219 @@ public class CustomTimingDt extends TimingDt {
 
     @Block
     public static class _Repeat extends Repeat {
-        /**
-         * bounds
-         */
-        @Child(name = FIELD_BOUNDS, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {RangeDt.class, PeriodDt.class})
-        @Description(shortDefinition = "Length/Range of lengths, or (Start and/or end) limits", formalDefinition = "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.")
+        /** bounds */
+        @Child(
+                name = FIELD_BOUNDS,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {RangeDt.class, PeriodDt.class})
+        @Description(
+                shortDefinition = "Length/Range of lengths, or (Start and/or end) limits",
+                formalDefinition =
+                        "Either a duration for the length of the timing schedule, a range of"
+                            + " possible length, or outer bounds for start and/or end limits of the"
+                            + " timing schedule.")
         protected IDatatype ourBounds;
+
         public static final String FIELD_BOUNDS = "bounds";
-        /**
-         * count
-         */
-        @Child(name = FIELD_COUNT, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {IntegerDt.class})
-        @Description(shortDefinition = "Number of times to repeat", formalDefinition = "A total count of the desired number of repetitions.")
+
+        /** count */
+        @Child(
+                name = FIELD_COUNT,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {IntegerDt.class})
+        @Description(
+                shortDefinition = "Number of times to repeat",
+                formalDefinition = "A total count of the desired number of repetitions.")
         protected IntegerDt ourCount;
+
         public static final String FIELD_COUNT = "count";
-        /**
-         * duration
-         */
-        @Child(name = FIELD_DURATION, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {DecimalDt.class})
-        @Description(shortDefinition = "How long when it happens", formalDefinition = "How long this thing happens for when it happens.")
+
+        /** duration */
+        @Child(
+                name = FIELD_DURATION,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {DecimalDt.class})
+        @Description(
+                shortDefinition = "How long when it happens",
+                formalDefinition = "How long this thing happens for when it happens.")
         protected DecimalDt ourDuration;
+
         public static final String FIELD_DURATION = "duration";
-        /**
-         * durationMax
-         */
-        @Child(name = FIELD_DURATIONMAX, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {DecimalDt.class})
-        @Description(shortDefinition = "How long when it happens (Max)", formalDefinition = "The upper limit of how long this thing happens for when it happens.")
+
+        /** durationMax */
+        @Child(
+                name = FIELD_DURATIONMAX,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {DecimalDt.class})
+        @Description(
+                shortDefinition = "How long when it happens (Max)",
+                formalDefinition =
+                        "The upper limit of how long this thing happens for when it happens.")
         protected DecimalDt ourDurationMax;
+
         public static final String FIELD_DURATIONMAX = "durationMax";
-        /**
-         * durationUnits
-         */
-        @Child(name = FIELD_DURATIONUNITS, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {CodeDt.class})
-        @Description(shortDefinition = "s | min | h | d | wk | mo | a - unit of time (UCUM)", formalDefinition = "The units of time for the duration, in UCUM units.")
+
+        /** durationUnits */
+        @Child(
+                name = FIELD_DURATIONUNITS,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {CodeDt.class})
+        @Description(
+                shortDefinition = "s | min | h | d | wk | mo | a - unit of time (UCUM)",
+                formalDefinition = "The units of time for the duration, in UCUM units.")
         protected BoundCodeDt<UnitsOfTimeEnum> ourDurationUnits;
+
         public static final String FIELD_DURATIONUNITS = "durationUnits";
-        /**
-         * frequency
-         */
-        @Child(name = FIELD_FREQUENCY, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {IntegerDt.class})
-        @Description(shortDefinition = "Event occurs frequency times per period", formalDefinition = "The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).")
+
+        /** frequency */
+        @Child(
+                name = FIELD_FREQUENCY,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {IntegerDt.class})
+        @Description(
+                shortDefinition = "Event occurs frequency times per period",
+                formalDefinition =
+                        "The number of times to repeat the action within the specified period /"
+                                + " period range (i.e. both period and periodMax provided).")
         protected IntegerDt ourFrequency;
+
         public static final String FIELD_FREQUENCY = "frequency";
-        /**
-         * frequencyMax
-         */
-        @Child(name = FIELD_FREQUENCYMAX, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {IntegerDt.class})
-        @Description(shortDefinition = "Event occurs up to frequencyMax times per period", formalDefinition = "If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.")
+
+        /** frequencyMax */
+        @Child(
+                name = FIELD_FREQUENCYMAX,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {IntegerDt.class})
+        @Description(
+                shortDefinition = "Event occurs up to frequencyMax times per period",
+                formalDefinition =
+                        "If present, indicates that the frequency is a range - so repeat between"
+                            + " [frequency] and [frequencyMax] times within the period or period"
+                            + " range.")
         protected IntegerDt ourFrequencyMax;
+
         public static final String FIELD_FREQUENCYMAX = "frequencyMax";
-        /**
-         * period
-         */
-        @Child(name = FIELD_PERIOD, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {DecimalDt.class})
-        @Description(shortDefinition = "Event occurs frequency times per period", formalDefinition = "Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period.")
+
+        /** period */
+        @Child(
+                name = FIELD_PERIOD,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {DecimalDt.class})
+        @Description(
+                shortDefinition = "Event occurs frequency times per period",
+                formalDefinition =
+                        "Indicates the duration of time over which repetitions are to occur; e.g."
+                            + " to express \"3 times per day\", 3 would be the frequency and \"1"
+                            + " day\" would be the period.")
         protected DecimalDt ourPeriod;
+
         public static final String FIELD_PERIOD = "period";
-        /**
-         * periodMax
-         */
-        @Child(name = FIELD_PERIODMAX, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {DecimalDt.class})
-        @Description(shortDefinition = "Upper limit of period (3-4 hours)", formalDefinition = "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as \"do this once every 3-5 days.")
+
+        /** periodMax */
+        @Child(
+                name = FIELD_PERIODMAX,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {DecimalDt.class})
+        @Description(
+                shortDefinition = "Upper limit of period (3-4 hours)",
+                formalDefinition =
+                        "If present, indicates that the period is a range from [period] to"
+                            + " [periodMax], allowing expressing concepts such as \"do this once"
+                            + " every 3-5 days.")
         protected DecimalDt ourPeriodMax;
+
         public static final String FIELD_PERIODMAX = "periodMax";
-        /**
-         * periodUnits
-         */
-        @Child(name = FIELD_PERIODUNITS, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {CodeDt.class})
-        @Description(shortDefinition = "s | min | h | d | wk | mo | a - unit of time (UCUM)", formalDefinition = "The units of time for the period in UCUM units.")
+
+        /** periodUnits */
+        @Child(
+                name = FIELD_PERIODUNITS,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {CodeDt.class})
+        @Description(
+                shortDefinition = "s | min | h | d | wk | mo | a - unit of time (UCUM)",
+                formalDefinition = "The units of time for the period in UCUM units.")
         protected BoundCodeDt<UnitsOfTimeEnum> ourPeriodUnits;
+
         public static final String FIELD_PERIODUNITS = "periodUnits";
-        /**
-         * when
-         */
-        @Child(name = FIELD_WHEN, min = 0, max = 1, order = Child.REPLACE_PARENT, summary = true, type = {CodeDt.class})
-        @Description(shortDefinition = "Regular life events the event is tied to", formalDefinition = "A real world event that the occurrence of the event should be tied to.")
+
+        /** when */
+        @Child(
+                name = FIELD_WHEN,
+                min = 0,
+                max = 1,
+                order = Child.REPLACE_PARENT,
+                summary = true,
+                type = {CodeDt.class})
+        @Description(
+                shortDefinition = "Regular life events the event is tied to",
+                formalDefinition =
+                        "A real world event that the occurrence of the event should be tied to.")
         protected BoundCodeDt<EventTimingEnum> ourWhen;
+
         public static final String FIELD_WHEN = "when";
 
         @Override
         public boolean isEmpty() {
-            return super.isEmpty() && ElementUtil.isEmpty(ourBounds, ourCount, ourDuration, ourDurationMax, ourDurationUnits, ourFrequency, ourFrequencyMax, ourPeriod, ourPeriodMax, ourPeriodUnits, ourWhen);
+            return super.isEmpty()
+                    && ElementUtil.isEmpty(
+                            ourBounds,
+                            ourCount,
+                            ourDuration,
+                            ourDurationMax,
+                            ourDurationUnits,
+                            ourFrequency,
+                            ourFrequencyMax,
+                            ourPeriod,
+                            ourPeriodMax,
+                            ourPeriodUnits,
+                            ourWhen);
         }
 
         @Override
         public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-            return ElementUtil.allPopulatedChildElements(theType, ourBounds, ourCount, ourDuration, ourDurationMax, ourDurationUnits, ourFrequency, ourFrequencyMax, ourPeriod, ourPeriodMax, ourPeriodUnits, ourWhen);
+            return ElementUtil.allPopulatedChildElements(
+                    theType,
+                    ourBounds,
+                    ourCount,
+                    ourDuration,
+                    ourDurationMax,
+                    ourDurationUnits,
+                    ourFrequency,
+                    ourFrequencyMax,
+                    ourPeriod,
+                    ourPeriodMax,
+                    ourPeriodUnits,
+                    ourWhen);
         }
 
         public IDatatype _getBounds() {
@@ -152,8 +284,7 @@ public class CustomTimingDt extends TimingDt {
         }
 
         public IntegerDt _getCount() {
-            if (ourCount == null)
-                ourCount = new IntegerDt();
+            if (ourCount == null) ourCount = new IntegerDt();
             return ourCount;
         }
 
@@ -163,8 +294,7 @@ public class CustomTimingDt extends TimingDt {
         }
 
         public DecimalDt _getDuration() {
-            if (ourDuration == null)
-                ourDuration = new DecimalDt();
+            if (ourDuration == null) ourDuration = new DecimalDt();
             return ourDuration;
         }
 
@@ -174,8 +304,7 @@ public class CustomTimingDt extends TimingDt {
         }
 
         public DecimalDt _getDurationMax() {
-            if (ourDurationMax == null)
-                ourDurationMax = new DecimalDt();
+            if (ourDurationMax == null) ourDurationMax = new DecimalDt();
             return ourDurationMax;
         }
 
@@ -186,7 +315,8 @@ public class CustomTimingDt extends TimingDt {
 
         public BoundCodeDt<UnitsOfTimeEnum> _getDurationUnits() {
             if (ourDurationUnits == null)
-                ourDurationUnits = new BoundCodeDt<UnitsOfTimeEnum>(UnitsOfTimeEnum.VALUESET_BINDER);
+                ourDurationUnits =
+                        new BoundCodeDt<UnitsOfTimeEnum>(UnitsOfTimeEnum.VALUESET_BINDER);
             return ourDurationUnits;
         }
 
@@ -196,8 +326,7 @@ public class CustomTimingDt extends TimingDt {
         }
 
         public IntegerDt _getFrequency() {
-            if (ourFrequency == null)
-                ourFrequency = new IntegerDt();
+            if (ourFrequency == null) ourFrequency = new IntegerDt();
             return ourFrequency;
         }
 
@@ -207,8 +336,7 @@ public class CustomTimingDt extends TimingDt {
         }
 
         public IntegerDt _getFrequencyMax() {
-            if (ourFrequencyMax == null)
-                ourFrequencyMax = new IntegerDt();
+            if (ourFrequencyMax == null) ourFrequencyMax = new IntegerDt();
             return ourFrequencyMax;
         }
 
@@ -218,8 +346,7 @@ public class CustomTimingDt extends TimingDt {
         }
 
         public DecimalDt _getPeriod() {
-            if (ourPeriod == null)
-                ourPeriod = new DecimalDt();
+            if (ourPeriod == null) ourPeriod = new DecimalDt();
             return ourPeriod;
         }
 
@@ -229,8 +356,7 @@ public class CustomTimingDt extends TimingDt {
         }
 
         public DecimalDt _getPeriodMax() {
-            if (ourPeriodMax == null)
-                ourPeriodMax = new DecimalDt();
+            if (ourPeriodMax == null) ourPeriodMax = new DecimalDt();
             return ourPeriodMax;
         }
 
@@ -562,4 +688,3 @@ public class CustomTimingDt extends TimingDt {
         }
     }
 }
-

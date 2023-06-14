@@ -26,19 +26,18 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * Standard resource DAO
+ *
  * @param <T> The resource type
  */
 public class JpaResourceDao<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> {
 
-	/**
-	 * Constructor
-	 */
-	public JpaResourceDao() {
-		super();
-	}
+    /** Constructor */
+    public JpaResourceDao() {
+        super();
+    }
 
-
-	public static IBaseBundle throwProcessMessageNotImplemented() {
-		throw new NotImplementedOperationException(Msg.code(945) + "This operation is not yet implemented on this server");
-	}
+    public static IBaseBundle throwProcessMessageNotImplemented() {
+        throw new NotImplementedOperationException(
+                Msg.code(945) + "This operation is not yet implemented on this server");
+    }
 }

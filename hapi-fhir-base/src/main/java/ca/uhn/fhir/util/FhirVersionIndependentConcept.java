@@ -25,83 +25,79 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class FhirVersionIndependentConcept implements Comparable<FhirVersionIndependentConcept> {
 
-	private final String mySystem;
-	private final String mySystemVersion;
-	private final String myCode;
-	private final String myDisplay;
-	private int myHashCode;
+    private final String mySystem;
+    private final String mySystemVersion;
+    private final String myCode;
+    private final String myDisplay;
+    private int myHashCode;
 
-	/**
-	 * Constructor
-	 */
-	public FhirVersionIndependentConcept(String theSystem, String theCode) {
-		this(theSystem, theCode, null);
-	}
+    /** Constructor */
+    public FhirVersionIndependentConcept(String theSystem, String theCode) {
+        this(theSystem, theCode, null);
+    }
 
-	public FhirVersionIndependentConcept(String theSystem, String theCode, String theDisplay) {
-		this(theSystem, theCode, theDisplay, null);
-	}
+    public FhirVersionIndependentConcept(String theSystem, String theCode, String theDisplay) {
+        this(theSystem, theCode, theDisplay, null);
+    }
 
-	public FhirVersionIndependentConcept(String theSystem, String theCode, String theDisplay, String theSystemVersion) {
-		mySystem = theSystem;
-		mySystemVersion = theSystemVersion;
-		myCode = theCode;
-		myDisplay = theDisplay;
-		myHashCode = new HashCodeBuilder(17, 37)
-			.append(mySystem)
-			.append(myCode)
-			.toHashCode();
-	}
+    public FhirVersionIndependentConcept(
+            String theSystem, String theCode, String theDisplay, String theSystemVersion) {
+        mySystem = theSystem;
+        mySystemVersion = theSystemVersion;
+        myCode = theCode;
+        myDisplay = theDisplay;
+        myHashCode = new HashCodeBuilder(17, 37).append(mySystem).append(myCode).toHashCode();
+    }
 
-	public String getDisplay() {
-		return myDisplay;
-	}
+    public String getDisplay() {
+        return myDisplay;
+    }
 
-	public String getSystem() {
-		return mySystem;
-	}
+    public String getSystem() {
+        return mySystem;
+    }
 
-	public String getSystemVersion() {
-		return mySystemVersion;
-	}
+    public String getSystemVersion() {
+        return mySystemVersion;
+    }
 
-	public String getCode() {
-		return myCode;
-	}
+    public String getCode() {
+        return myCode;
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) {
-			return true;
-		}
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) {
+            return true;
+        }
 
-		if (theO == null || getClass() != theO.getClass()) {
-			return false;
-		}
+        if (theO == null || getClass() != theO.getClass()) {
+            return false;
+        }
 
-		FhirVersionIndependentConcept that = (FhirVersionIndependentConcept) theO;
+        FhirVersionIndependentConcept that = (FhirVersionIndependentConcept) theO;
 
-		return new EqualsBuilder()
-			.append(mySystem, that.mySystem)
-			.append(myCode, that.myCode)
-			.isEquals();
-	}
+        return new EqualsBuilder()
+                .append(mySystem, that.mySystem)
+                .append(myCode, that.myCode)
+                .isEquals();
+    }
 
-	@Override
-	public int hashCode() {
-		return myHashCode;
-	}
+    @Override
+    public int hashCode() {
+        return myHashCode;
+    }
 
-	@Override
-	public int compareTo(FhirVersionIndependentConcept theOther) {
-		CompareToBuilder b = new CompareToBuilder();
-		b.append(mySystem, theOther.getSystem());
-		b.append(myCode, theOther.getCode());
-		return b.toComparison();
-	}
+    @Override
+    public int compareTo(FhirVersionIndependentConcept theOther) {
+        CompareToBuilder b = new CompareToBuilder();
+        b.append(mySystem, theOther.getSystem());
+        b.append(myCode, theOther.getCode());
+        return b.toComparison();
+    }
 
-	@Override
-	public String toString() {
-		return "[" + mySystem + "|" + myCode + "]";
-	}
+    @Override
+    public String toString() {
+        return "[" + mySystem + "|" + myCode + "]";
+    }
 }

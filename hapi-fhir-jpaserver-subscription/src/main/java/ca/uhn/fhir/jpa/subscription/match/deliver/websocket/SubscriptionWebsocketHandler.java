@@ -20,11 +20,13 @@
 package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import java.io.IOException;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
@@ -39,179 +41,179 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.io.IOException;
-
 public class SubscriptionWebsocketHandler extends TextWebSocketHandler implements WebSocketHandler {
-	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
-	@Autowired
-	protected WebsocketConnectionValidator myWebsocketConnectionValidator;
-	@Autowired
-	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
+    private static Logger ourLog = LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
+    @Autowired protected WebsocketConnectionValidator myWebsocketConnectionValidator;
+    @Autowired SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
-	/**
-	 * Constructor
-	 */
-	public SubscriptionWebsocketHandler() {
-		super();
-	}
+    /** Constructor */
+    public SubscriptionWebsocketHandler() {
+        super();
+    }
 
-	private IState myState = new InitialState();
+    private IState myState = new InitialState();
 
-	@Override
-	public void afterConnectionClosed(WebSocketSession theSession, CloseStatus theStatus) throws Exception {
-		super.afterConnectionClosed(theSession, theStatus);
-		ourLog.info("Closing WebSocket connection from {}", theSession.getRemoteAddress());
-	}
+    @Override
+    public void afterConnectionClosed(WebSocketSession theSession, CloseStatus theStatus)
+            throws Exception {
+        super.afterConnectionClosed(theSession, theStatus);
+        ourLog.info("Closing WebSocket connection from {}", theSession.getRemoteAddress());
+    }
 
-	@Override
-	public void afterConnectionEstablished(WebSocketSession theSession) throws Exception {
-		super.afterConnectionEstablished(theSession);
-		ourLog.info("Incoming WebSocket connection from {}", theSession.getRemoteAddress());
-	}
+    @Override
+    public void afterConnectionEstablished(WebSocketSession theSession) throws Exception {
+        super.afterConnectionEstablished(theSession);
+        ourLog.info("Incoming WebSocket connection from {}", theSession.getRemoteAddress());
+    }
 
-	protected void handleFailure(Exception theE) {
-		ourLog.error("Failure during communication", theE);
-	}
+    protected void handleFailure(Exception theE) {
+        ourLog.error("Failure during communication", theE);
+    }
 
-	@Override
-	protected void handleTextMessage(WebSocketSession theSession, TextMessage theMessage) throws Exception {
-		ourLog.info("Textmessage: " + theMessage.getPayload());
-		myState.handleTextMessage(theSession, theMessage);
-	}
+    @Override
+    protected void handleTextMessage(WebSocketSession theSession, TextMessage theMessage)
+            throws Exception {
+        ourLog.info("Textmessage: " + theMessage.getPayload());
+        myState.handleTextMessage(theSession, theMessage);
+    }
 
-	@Override
-	public void handleTransportError(WebSocketSession theSession, Throwable theException) throws Exception {
-		super.handleTransportError(theSession, theException);
-		ourLog.error("Transport error", theException);
-	}
+    @Override
+    public void handleTransportError(WebSocketSession theSession, Throwable theException)
+            throws Exception {
+        super.handleTransportError(theSession, theException);
+        ourLog.error("Transport error", theException);
+    }
 
-	@PostConstruct
-	public synchronized void postConstruct() {
-		ourLog.info("Websocket connection has been created");
-	}
+    @PostConstruct
+    public synchronized void postConstruct() {
+        ourLog.info("Websocket connection has been created");
+    }
 
-	@PreDestroy
-	public synchronized void preDescroy() {
-		ourLog.info("Websocket connection is closing");
-		IState state = myState;
-		if (state != null) {
-			state.closing();
-		}
-	}
+    @PreDestroy
+    public synchronized void preDescroy() {
+        ourLog.info("Websocket connection is closing");
+        IState state = myState;
+        if (state != null) {
+            state.closing();
+        }
+    }
 
+    private interface IState {
 
-	private interface IState {
+        void closing();
 
-		void closing();
+        void handleTextMessage(WebSocketSession theSession, TextMessage theMessage);
+    }
 
-		void handleTextMessage(WebSocketSession theSession, TextMessage theMessage);
+    private class BoundStaticSubscriptionState implements IState, MessageHandler {
 
-	}
+        private final WebSocketSession mySession;
+        private final ActiveSubscription myActiveSubscription;
 
-	private class BoundStaticSubscriptionState implements IState, MessageHandler {
+        public BoundStaticSubscriptionState(
+                WebSocketSession theSession, ActiveSubscription theActiveSubscription) {
+            mySession = theSession;
+            myActiveSubscription = theActiveSubscription;
 
-		private final WebSocketSession mySession;
-		private final ActiveSubscription myActiveSubscription;
+            SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
+                    mySubscriptionChannelRegistry.getDeliveryReceiverChannel(
+                            theActiveSubscription.getChannelName());
+            subscriptionChannelWithHandlers.addHandler(this);
+        }
 
-		public BoundStaticSubscriptionState(WebSocketSession theSession, ActiveSubscription theActiveSubscription) {
-			mySession = theSession;
-			myActiveSubscription = theActiveSubscription;
+        @Override
+        public void closing() {
+            SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
+                    mySubscriptionChannelRegistry.getDeliveryReceiverChannel(
+                            myActiveSubscription.getChannelName());
+            subscriptionChannelWithHandlers.removeHandler(this);
+        }
 
-			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(theActiveSubscription.getChannelName());
-			subscriptionChannelWithHandlers.addHandler(this);
-		}
+        private void deliver() {
+            try {
+                String payload = "ping " + myActiveSubscription.getId();
+                ourLog.info("Sending WebSocket message: {}", payload);
+                mySession.sendMessage(new TextMessage(payload));
+            } catch (IOException e) {
+                handleFailure(e);
+            }
+        }
 
-		@Override
-		public void closing() {
-			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(myActiveSubscription.getChannelName());
-			subscriptionChannelWithHandlers.removeHandler(this);
-		}
+        @Override
+        public void handleMessage(Message<?> theMessage) {
+            if (!(theMessage.getPayload() instanceof ResourceDeliveryMessage)) {
+                return;
+            }
+            try {
+                ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
+                if (myActiveSubscription.getSubscription().equals(msg.getSubscription())) {
+                    deliver();
+                }
+            } catch (Exception e) {
+                ourLog.error("Failure handling subscription payload", e);
+                throw new MessagingException(
+                        theMessage, Msg.code(6) + "Failure handling subscription payload", e);
+            }
+        }
 
-		private void deliver() {
-			try {
-				String payload = "ping " + myActiveSubscription.getId();
-				ourLog.info("Sending WebSocket message: {}", payload);
-				mySession.sendMessage(new TextMessage(payload));
-			} catch (IOException e) {
-				handleFailure(e);
-			}
-		}
+        @Override
+        public void handleTextMessage(WebSocketSession theSession, TextMessage theMessage) {
+            try {
+                theSession.sendMessage(
+                        new TextMessage("Unexpected client message: " + theMessage.getPayload()));
+            } catch (IOException e) {
+                handleFailure(e);
+            }
+        }
+    }
 
-		@Override
-		public void handleMessage(Message<?> theMessage) {
-			if (!(theMessage.getPayload() instanceof ResourceDeliveryMessage)) {
-				return;
-			}
-			try {
-				ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-				if (myActiveSubscription.getSubscription().equals(msg.getSubscription())) {
-					deliver();
-				}
-			} catch (Exception e) {
-				ourLog.error("Failure handling subscription payload", e);
-				throw new MessagingException(theMessage, Msg.code(6) + "Failure handling subscription payload", e);
-			}
-		}
+    private class InitialState implements IState {
 
-		@Override
-		public void handleTextMessage(WebSocketSession theSession, TextMessage theMessage) {
-			try {
-				theSession.sendMessage(new TextMessage("Unexpected client message: " + theMessage.getPayload()));
-			} catch (IOException e) {
-				handleFailure(e);
-			}
-		}
-	}
+        private IIdType bindSimple(WebSocketSession theSession, String theBindString) {
+            IdType id = new IdType(theBindString);
 
-	private class InitialState implements IState {
+            WebsocketValidationResponse response = myWebsocketConnectionValidator.validate(id);
+            if (!response.isValid()) {
+                try {
+                    ourLog.warn(response.getMessage());
+                    theSession.close(
+                            new CloseStatus(
+                                    CloseStatus.PROTOCOL_ERROR.getCode(), response.getMessage()));
+                } catch (IOException e) {
+                    handleFailure(e);
+                }
+                return null;
+            }
 
-		private IIdType bindSimple(WebSocketSession theSession, String theBindString) {
-			IdType id = new IdType(theBindString);
+            myState =
+                    new BoundStaticSubscriptionState(theSession, response.getActiveSubscription());
 
-			WebsocketValidationResponse response = myWebsocketConnectionValidator.validate(id);
-			if (!response.isValid()) {
-				try {
-					ourLog.warn(response.getMessage());
-					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), response.getMessage()));
-				} catch (IOException e) {
-					handleFailure(e);
-				}
-				return null;
-			}
+            return id;
+        }
 
-			myState = new BoundStaticSubscriptionState(theSession, response.getActiveSubscription());
+        @Override
+        public void closing() {
+            // nothing
+        }
 
-			return id;
-		}
+        @Override
+        public void handleTextMessage(WebSocketSession theSession, TextMessage theMessage) {
+            String message = theMessage.getPayload();
+            if (message.startsWith("bind ")) {
+                String remaining = message.substring("bind ".length());
 
-		@Override
-		public void closing() {
-			// nothing
-		}
+                IIdType subscriptionId;
+                subscriptionId = bindSimple(theSession, remaining);
+                if (subscriptionId == null) {
+                    return;
+                }
 
-		@Override
-		public void handleTextMessage(WebSocketSession theSession, TextMessage theMessage) {
-			String message = theMessage.getPayload();
-			if (message.startsWith("bind ")) {
-				String remaining = message.substring("bind ".length());
-
-				IIdType subscriptionId;
-				subscriptionId = bindSimple(theSession, remaining);
-				if (subscriptionId == null) {
-					return;
-				}
-
-				try {
-					theSession.sendMessage(new TextMessage("bound " + subscriptionId.getIdPart()));
-				} catch (IOException e) {
-					handleFailure(e);
-				}
-
-			}
-		}
-
-	}
-
+                try {
+                    theSession.sendMessage(new TextMessage("bound " + subscriptionId.getIdPart()));
+                } catch (IOException e) {
+                    handleFailure(e);
+                }
+            }
+        }
+    }
 }

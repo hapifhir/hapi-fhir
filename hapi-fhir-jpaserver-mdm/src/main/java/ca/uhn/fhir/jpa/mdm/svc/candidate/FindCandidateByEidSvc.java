@@ -22,72 +22,83 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
-import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class FindCandidateByEidSvc extends BaseCandidateFinder {
 
-	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+    private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	@Autowired
-	private EIDHelper myEIDHelper;
-	@Autowired
-	private MdmResourceDaoSvc myMdmResourceDaoSvc;
-	@Autowired
-	private MdmLinkDaoSvc myMdmLinkDaoSvc;
-	@Autowired
-	MdmPartitionHelper myMdmPartitionHelper;
+    @Autowired private EIDHelper myEIDHelper;
+    @Autowired private MdmResourceDaoSvc myMdmResourceDaoSvc;
+    @Autowired private MdmLinkDaoSvc myMdmLinkDaoSvc;
+    @Autowired MdmPartitionHelper myMdmPartitionHelper;
 
-	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theIncomingResource) {
-		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
+    @Override
+    protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+            IAnyResource theIncomingResource) {
+        List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
-		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theIncomingResource);
-		if (!eidFromResource.isEmpty()) {
-			for (CanonicalEID eid : eidFromResource) {
-				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theIncomingResource.getIdElement().getResourceType(), myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theIncomingResource));
-				if (oFoundGoldenResource.isPresent()) {
-					IAnyResource foundGoldenResource = oFoundGoldenResource.get();
-					// Exclude manually declared NO_MATCH links from candidates
-					if (isNoMatch(foundGoldenResource, theIncomingResource)) {
-						continue;
-					}
-					IResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), foundGoldenResource);
-					MatchedGoldenResourceCandidate mpc = new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH);
-					ourLog.debug("Incoming Resource {} matched Golden Resource {} by EID {}", theIncomingResource.getIdElement().toUnqualifiedVersionless(), foundGoldenResource.getIdElement().toUnqualifiedVersionless(), eid);
+        List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theIncomingResource);
+        if (!eidFromResource.isEmpty()) {
+            for (CanonicalEID eid : eidFromResource) {
+                Optional<IAnyResource> oFoundGoldenResource =
+                        myMdmResourceDaoSvc.searchGoldenResourceByEID(
+                                eid.getValue(),
+                                theIncomingResource.getIdElement().getResourceType(),
+                                myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(
+                                        theIncomingResource));
+                if (oFoundGoldenResource.isPresent()) {
+                    IAnyResource foundGoldenResource = oFoundGoldenResource.get();
+                    // Exclude manually declared NO_MATCH links from candidates
+                    if (isNoMatch(foundGoldenResource, theIncomingResource)) {
+                        continue;
+                    }
+                    IResourcePersistentId pidOrNull =
+                            myIdHelperService.getPidOrNull(
+                                    RequestPartitionId.allPartitions(), foundGoldenResource);
+                    MatchedGoldenResourceCandidate mpc =
+                            new MatchedGoldenResourceCandidate(
+                                    pidOrNull, MdmMatchOutcome.EID_MATCH);
+                    ourLog.debug(
+                            "Incoming Resource {} matched Golden Resource {} by EID {}",
+                            theIncomingResource.getIdElement().toUnqualifiedVersionless(),
+                            foundGoldenResource.getIdElement().toUnqualifiedVersionless(),
+                            eid);
 
-					retval.add(mpc);
-				}
-			}
-		}
-		return retval;
-	}
+                    retval.add(mpc);
+                }
+            }
+        }
+        return retval;
+    }
 
-	private boolean isNoMatch(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
-		Optional<? extends IMdmLink> oLink = myMdmLinkDaoSvc.getLinkByGoldenResourceAndSourceResource(theGoldenResource, theSourceResource);
-		if (oLink.isEmpty()) {
-			return false;
-		}
-		IMdmLink link = oLink.get();
-		return link.isNoMatch();
-	}
+    private boolean isNoMatch(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
+        Optional<? extends IMdmLink> oLink =
+                myMdmLinkDaoSvc.getLinkByGoldenResourceAndSourceResource(
+                        theGoldenResource, theSourceResource);
+        if (oLink.isEmpty()) {
+            return false;
+        }
+        IMdmLink link = oLink.get();
+        return link.isNoMatch();
+    }
 
-	@Override
-	protected CandidateStrategyEnum getStrategy() {
-		return CandidateStrategyEnum.EID;
-	}
+    @Override
+    protected CandidateStrategyEnum getStrategy() {
+        return CandidateStrategyEnum.EID;
+    }
 }

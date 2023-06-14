@@ -23,44 +23,48 @@ import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class MdmClearJobParametersValidator implements IJobParametersValidator<MdmClearJobParameters> {
+public class MdmClearJobParametersValidator
+        implements IJobParametersValidator<MdmClearJobParameters> {
 
-	private final DaoRegistry myDaoRegistry;
-	private final IMdmSettings myMdmSettings;
+    private final DaoRegistry myDaoRegistry;
+    private final IMdmSettings myMdmSettings;
 
-	public MdmClearJobParametersValidator(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
-		myDaoRegistry = theDaoRegistry;
-		myMdmSettings = theMdmSettings;
-	}
+    public MdmClearJobParametersValidator(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
+        myDaoRegistry = theDaoRegistry;
+        myMdmSettings = theMdmSettings;
+    }
 
-	@Nullable
-	@Override
-	public List<String> validate(RequestDetails theRequestDetails, @Nonnull MdmClearJobParameters theParameters) {
-		if (myMdmSettings == null || !myMdmSettings.isEnabled()) {
-			return Collections.singletonList("Mdm is not enabled on this server");
-		}
-		List<String> retval = new ArrayList<>();
-		if (theParameters.getResourceNames() == null || theParameters.getResourceNames().isEmpty()) {
-			retval.add("Mdm Clear Job Parameters must define at least one resource type");
-		} else {
-			for (String resourceType : theParameters.getResourceNames()) {
-				if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
-					retval.add("Resource type '" + resourceType + "' is not supported on this server.");
-				}
-				if (!myMdmSettings.getMdmRules().getMdmTypes().contains(resourceType)) {
-					retval.add("There are no mdm rules for resource type '" + resourceType + "'");
-				}
-			}
-		}
+    @Nullable
+    @Override
+    public List<String> validate(
+            RequestDetails theRequestDetails, @Nonnull MdmClearJobParameters theParameters) {
+        if (myMdmSettings == null || !myMdmSettings.isEnabled()) {
+            return Collections.singletonList("Mdm is not enabled on this server");
+        }
+        List<String> retval = new ArrayList<>();
+        if (theParameters.getResourceNames() == null
+                || theParameters.getResourceNames().isEmpty()) {
+            retval.add("Mdm Clear Job Parameters must define at least one resource type");
+        } else {
+            for (String resourceType : theParameters.getResourceNames()) {
+                if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
+                    retval.add(
+                            "Resource type '"
+                                    + resourceType
+                                    + "' is not supported on this server.");
+                }
+                if (!myMdmSettings.getMdmRules().getMdmTypes().contains(resourceType)) {
+                    retval.add("There are no mdm rules for resource type '" + resourceType + "'");
+                }
+            }
+        }
 
-		return retval;
-	}
-
+        return retval;
+    }
 }

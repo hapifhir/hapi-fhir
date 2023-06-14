@@ -25,129 +25,127 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class TranslateConceptResult {
-	private String mySystem;
-	private String myCode;
-	private String myDisplay;
-	private String myEquivalence;
-	private String myConceptMapUrl;
-	private String myValueSet;
-	private String mySystemVersion;
+    private String mySystem;
+    private String myCode;
+    private String myDisplay;
+    private String myEquivalence;
+    private String myConceptMapUrl;
+    private String myValueSet;
+    private String mySystemVersion;
 
-	/**
-	 * Constructor
-	 */
-	public TranslateConceptResult() {
-		super();
-	}
+    /** Constructor */
+    public TranslateConceptResult() {
+        super();
+    }
 
-	public String getSystem() {
-		return mySystem;
-	}
+    public String getSystem() {
+        return mySystem;
+    }
 
-	public TranslateConceptResult setSystem(String theSystem) {
-		mySystem = theSystem;
-		return this;
-	}
+    public TranslateConceptResult setSystem(String theSystem) {
+        mySystem = theSystem;
+        return this;
+    }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("system", mySystem)
-			.append("code", myCode)
-			.append("display", myDisplay)
-			.append("equivalence", myEquivalence)
-			.append("conceptMapUrl", myConceptMapUrl)
-			.append("valueSet", myValueSet)
-			.append("systemVersion", mySystemVersion)
-			.toString();
-	}
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("system", mySystem)
+                .append("code", myCode)
+                .append("display", myDisplay)
+                .append("equivalence", myEquivalence)
+                .append("conceptMapUrl", myConceptMapUrl)
+                .append("valueSet", myValueSet)
+                .append("systemVersion", mySystemVersion)
+                .toString();
+    }
 
-	public String getCode() {
-		return myCode;
-	}
+    public String getCode() {
+        return myCode;
+    }
 
-	public TranslateConceptResult setCode(String theCode) {
-		myCode = theCode;
-		return this;
-	}
+    public TranslateConceptResult setCode(String theCode) {
+        myCode = theCode;
+        return this;
+    }
 
-	public String getDisplay() {
-		return myDisplay;
-	}
+    public String getDisplay() {
+        return myDisplay;
+    }
 
-	public TranslateConceptResult setDisplay(String theDisplay) {
-		myDisplay = theDisplay;
-		return this;
-	}
+    public TranslateConceptResult setDisplay(String theDisplay) {
+        myDisplay = theDisplay;
+        return this;
+    }
 
-	public String getEquivalence() {
-		return myEquivalence;
-	}
+    public String getEquivalence() {
+        return myEquivalence;
+    }
 
-	public TranslateConceptResult setEquivalence(String theEquivalence) {
-		myEquivalence = theEquivalence;
-		return this;
-	}
+    public TranslateConceptResult setEquivalence(String theEquivalence) {
+        myEquivalence = theEquivalence;
+        return this;
+    }
 
-	public String getSystemVersion() {
-		return mySystemVersion;
-	}
+    public String getSystemVersion() {
+        return mySystemVersion;
+    }
 
-	public void setSystemVersion(String theSystemVersion) {
-		mySystemVersion = theSystemVersion;
-	}
+    public void setSystemVersion(String theSystemVersion) {
+        mySystemVersion = theSystemVersion;
+    }
 
-	public String getValueSet() {
-		return myValueSet;
-	}
+    public String getValueSet() {
+        return myValueSet;
+    }
 
-	public TranslateConceptResult setValueSet(String theValueSet) {
-		myValueSet = theValueSet;
-		return this;
-	}
+    public TranslateConceptResult setValueSet(String theValueSet) {
+        myValueSet = theValueSet;
+        return this;
+    }
 
-	public String getConceptMapUrl() {
-		return myConceptMapUrl;
-	}
+    public String getConceptMapUrl() {
+        return myConceptMapUrl;
+    }
 
-	public TranslateConceptResult setConceptMapUrl(String theConceptMapUrl) {
-		myConceptMapUrl = theConceptMapUrl;
-		return this;
-	}
+    public TranslateConceptResult setConceptMapUrl(String theConceptMapUrl) {
+        myConceptMapUrl = theConceptMapUrl;
+        return this;
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) {
-			return true;
-		}
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) {
+            return true;
+        }
 
-		if (theO == null || getClass() != theO.getClass()) {
-			return false;
-		}
+        if (theO == null || getClass() != theO.getClass()) {
+            return false;
+        }
 
-		TranslateConceptResult that = (TranslateConceptResult) theO;
+        TranslateConceptResult that = (TranslateConceptResult) theO;
 
-		EqualsBuilder b = new EqualsBuilder();
-		b.append(mySystem, that.mySystem);
-		b.append(myCode, that.myCode);
-		b.append(myDisplay, that.myDisplay);
-		b.append(myEquivalence, that.myEquivalence);
-		b.append(myConceptMapUrl, that.myConceptMapUrl);
-		b.append(myValueSet, that.myValueSet);
-		b.append(mySystemVersion, that.mySystemVersion);
-		return b.isEquals();
-	}
+        EqualsBuilder b = new EqualsBuilder();
+        b.append(mySystem, that.mySystem);
+        b.append(myCode, that.myCode);
+        b.append(myDisplay, that.myDisplay);
+        b.append(myEquivalence, that.myEquivalence);
+        b.append(myConceptMapUrl, that.myConceptMapUrl);
+        b.append(myValueSet, that.myValueSet);
+        b.append(mySystemVersion, that.mySystemVersion);
+        return b.isEquals();
+    }
 
-	@Override
-	public int hashCode() {
-		HashCodeBuilder b = new HashCodeBuilder(17, 37);
-		b.append(mySystem);
-		b.append(myCode);
-		b.append(myDisplay);
-		b.append(myEquivalence);
-		b.append(myConceptMapUrl);
-		b.append(myValueSet);
-		b.append(mySystemVersion);
-		return b.toHashCode();
-	}
+    @Override
+    public int hashCode() {
+        HashCodeBuilder b = new HashCodeBuilder(17, 37);
+        b.append(mySystem);
+        b.append(myCode);
+        b.append(myDisplay);
+        b.append(myEquivalence);
+        b.append(myConceptMapUrl);
+        b.append(myValueSet);
+        b.append(mySystemVersion);
+        return b.toHashCode();
+    }
 }

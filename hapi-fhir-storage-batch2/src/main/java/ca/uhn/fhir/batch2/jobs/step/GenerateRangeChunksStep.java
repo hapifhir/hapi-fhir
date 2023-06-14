@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.batch2.jobs.step;
 
+import static ca.uhn.fhir.batch2.util.Batch2Constants.BATCH_START_DATE;
+
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -29,42 +31,42 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.util.Logs;
+import java.util.Date;
+import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
-import java.util.Date;
+public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters>
+        implements IFirstJobStepWorker<PT, PartitionedUrlChunkRangeJson> {
+    private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-import static ca.uhn.fhir.batch2.util.Batch2Constants.BATCH_START_DATE;
+    @Nonnull
+    @Override
+    public RunOutcome run(
+            @Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+            @Nonnull IJobDataSink<PartitionedUrlChunkRangeJson> theDataSink)
+            throws JobExecutionFailedException {
+        PT params = theStepExecutionDetails.getParameters();
 
-public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters> implements IFirstJobStepWorker<PT, PartitionedUrlChunkRangeJson> {
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+        Date start = BATCH_START_DATE;
+        Date end = new Date();
 
-	@Nonnull
-	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<PartitionedUrlChunkRangeJson> theDataSink) throws JobExecutionFailedException {
-		PT params = theStepExecutionDetails.getParameters();
+        if (params.getPartitionedUrls().isEmpty()) {
+            ourLog.info("Searching for All Resources from {} to {}", start, end);
+            PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();
+            nextRange.setStart(start);
+            nextRange.setEnd(end);
+            theDataSink.accept(nextRange);
+        } else {
+            for (PartitionedUrl nextPartitionedUrl : params.getPartitionedUrls()) {
+                ourLog.info("Searching for [{}]] from {} to {}", nextPartitionedUrl, start, end);
+                PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();
+                nextRange.setPartitionedUrl(nextPartitionedUrl);
+                nextRange.setStart(start);
+                nextRange.setEnd(end);
+                theDataSink.accept(nextRange);
+            }
+        }
 
-		Date start = BATCH_START_DATE;
-		Date end = new Date();
-
-		if (params.getPartitionedUrls().isEmpty()) {
-			ourLog.info("Searching for All Resources from {} to {}", start, end);
-			PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();
-			nextRange.setStart(start);
-			nextRange.setEnd(end);
-			theDataSink.accept(nextRange);
-		} else {
-			for (PartitionedUrl nextPartitionedUrl : params.getPartitionedUrls()) {
-				ourLog.info("Searching for [{}]] from {} to {}", nextPartitionedUrl, start, end);
-				PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();
-				nextRange.setPartitionedUrl(nextPartitionedUrl);
-				nextRange.setStart(start);
-				nextRange.setEnd(end);
-				theDataSink.accept(nextRange);
-			}
-		}
-
-		return RunOutcome.SUCCESS;
-	}
-
+        return RunOutcome.SUCCESS;
+    }
 }

@@ -21,22 +21,26 @@ package ca.uhn.fhir.jpa.model.search;
 
 public class QuantitySearchIndexData {
 
-	// unit is also referred as code
-	private final String myCode;
-	private final String mySystem;
-	private final double myValue;
+    // unit is also referred as code
+    private final String myCode;
+    private final String mySystem;
+    private final double myValue;
 
+    public QuantitySearchIndexData(String theCode, String theSystem, double theValue) {
+        myCode = theCode;
+        mySystem = theSystem;
+        myValue = theValue;
+    }
 
-	public QuantitySearchIndexData(String theCode, String theSystem, double theValue) {
-		myCode = theCode;
-		mySystem = theSystem;
-		myValue = theValue;
-	}
+    public String getCode() {
+        return myCode;
+    }
 
+    public String getSystem() {
+        return mySystem;
+    }
 
-	public String getCode() { return myCode; }
-
-	public String getSystem() { return mySystem; }
-
-	public double getValue() { return myValue; }
+    public double getValue() {
+        return myValue;
+    }
 }

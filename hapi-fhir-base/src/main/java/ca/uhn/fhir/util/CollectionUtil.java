@@ -24,13 +24,12 @@ import java.util.Set;
 
 public class CollectionUtil {
 
-	public static <T> Set<T> newSet(T... theValues) {
-		HashSet<T> retVal = new HashSet<T>();
+    public static <T> Set<T> newSet(T... theValues) {
+        HashSet<T> retVal = new HashSet<T>();
 
-		for (T t : theValues) {
-			retVal.add(t);
-		}
-		return retVal;
-	}
-
+        for (T t : theValues) {
+            retVal.add(t);
+        }
+        return retVal;
+    }
 }

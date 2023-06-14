@@ -26,37 +26,35 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.parser.neko.HtmlUnitNekoHtmlParser;
-import org.awaitility.Awaitility;
-
 import java.io.IOException;
 import java.net.URL;
+import org.awaitility.Awaitility;
 
 public class HtmlUtil {
 
-	private HtmlUtil() {
-	}
+    private HtmlUtil() {}
 
-	public static HtmlPage parseAsHtml(String theHtml) throws IOException {
-		return parseAsHtml(theHtml, new URL("http://foo"));
-	}
+    public static HtmlPage parseAsHtml(String theHtml) throws IOException {
+        return parseAsHtml(theHtml, new URL("http://foo"));
+    }
 
-	public static HtmlPage parseAsHtml(String theHtml, URL theUrl) throws IOException {
-		StringWebResponse response = new StringWebResponse(theHtml, theUrl);
-		WebClient client = new WebClient(BrowserVersion.BEST_SUPPORTED, false, null, -1);
-		client.getOptions().setCssEnabled(false);
-		client.getOptions().setJavaScriptEnabled(false);
+    public static HtmlPage parseAsHtml(String theHtml, URL theUrl) throws IOException {
+        StringWebResponse response = new StringWebResponse(theHtml, theUrl);
+        WebClient client = new WebClient(BrowserVersion.BEST_SUPPORTED, false, null, -1);
+        client.getOptions().setCssEnabled(false);
+        client.getOptions().setJavaScriptEnabled(false);
 
-		final HtmlPage page = new HtmlPage(response, client.getCurrentWindow());
-		HtmlUnitNekoHtmlParser htmlUnitNekoHtmlParser = new HtmlUnitNekoHtmlParser();
-		htmlUnitNekoHtmlParser.parse(response, page, false, false);
-		return page;
-	}
+        final HtmlPage page = new HtmlPage(response, client.getCurrentWindow());
+        HtmlUnitNekoHtmlParser htmlUnitNekoHtmlParser = new HtmlUnitNekoHtmlParser();
+        htmlUnitNekoHtmlParser.parse(response, page, false, false);
+        return page;
+    }
 
-	public static HtmlForm waitForForm(HtmlPage thePage, String theName) {
-		return Awaitility.await().until(() -> thePage.getFormByName(theName), t -> t != null);
-	}
+    public static HtmlForm waitForForm(HtmlPage thePage, String theName) {
+        return Awaitility.await().until(() -> thePage.getFormByName(theName), t -> t != null);
+    }
 
-	public static HtmlInput waitForInput(HtmlForm theForm, String theName) {
-		return Awaitility.await().until(() -> theForm.getInputByName(theName), t -> t != null);
-	}
+    public static HtmlInput waitForInput(HtmlForm theForm, String theName) {
+        return Awaitility.await().until(() -> theForm.getInputByName(theName), t -> t != null);
+    }
 }

@@ -1,16 +1,26 @@
 package ca.uhn.fhir.batch2.jobs.expunge;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.AfterEach;
@@ -23,90 +33,82 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class DeleteExpungeProviderTest {
-	public static final String TEST_JOB_ID = "test-job-id";
-	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeProviderTest.class);
+    public static final String TEST_JOB_ID = "test-job-id";
+    private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeProviderTest.class);
 
-	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+    private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
-	@RegisterExtension
-	public static RestfulServerExtension myServer = new RestfulServerExtension(ourCtx);
-	@RegisterExtension
-	private final HttpClientExtension myClient = new HttpClientExtension();
+    @RegisterExtension
+    public static RestfulServerExtension myServer = new RestfulServerExtension(ourCtx);
 
-	@Mock
-	private IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter;
-	private DeleteExpungeProvider myProvider;
+    @RegisterExtension private final HttpClientExtension myClient = new HttpClientExtension();
 
-	@BeforeEach
-	public void beforeEach() {
-		myProvider = new DeleteExpungeProvider(ourCtx, myDeleteExpungeJobSubmitter);
-		myServer.registerProvider(myProvider);
-	}
+    @Mock private IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter;
+    private DeleteExpungeProvider myProvider;
 
-	@AfterEach
-	public void afterEach() {
-		myServer.unregisterProvider(myProvider);
-	}
+    @BeforeEach
+    public void beforeEach() {
+        myProvider = new DeleteExpungeProvider(ourCtx, myDeleteExpungeJobSubmitter);
+        myServer.registerProvider(myProvider);
+    }
 
-	@Test
-	public void testSupplyingNoUrlsProvidesValidErrorMessage() throws IOException {
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_DELETE_EXPUNGE);
-		try(CloseableHttpResponse execute = myClient.execute(post)) {
-			String body = IOUtils.toString(execute.getEntity().getContent(), Charset.defaultCharset());
-			assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(400)));
-			assertThat(body, is(containsString("At least one `url` parameter to $delete-expunge must be provided.")));
-		}
-	}
+    @AfterEach
+    public void afterEach() {
+        myServer.unregisterProvider(myProvider);
+    }
 
-	@Test
-	public void testDeleteExpunge() {
-		// setup
-		Parameters input = new Parameters();
-		String url1 = "Observation?status=active";
-		String url2 = "Patient?active=false";
-		int batchSize = 2401;
-		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url1);
-		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url2);
-		input.addParameter(ProviderConstants.OPERATION_DELETE_CASCADE, new BooleanType(true));
-		input.addParameter(ProviderConstants.OPERATION_DELETE_CASCADE_MAX_ROUNDS, new IntegerType(44));
-		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new IntegerType(batchSize));
+    @Test
+    public void testSupplyingNoUrlsProvidesValidErrorMessage() throws IOException {
+        HttpPost post =
+                new HttpPost(
+                        myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_DELETE_EXPUNGE);
+        try (CloseableHttpResponse execute = myClient.execute(post)) {
+            String body =
+                    IOUtils.toString(execute.getEntity().getContent(), Charset.defaultCharset());
+            assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(400)));
+            assertThat(
+                    body,
+                    is(
+                            containsString(
+                                    "At least one `url` parameter to $delete-expunge must be"
+                                            + " provided.")));
+        }
+    }
 
-		when(myDeleteExpungeJobSubmitter.submitJob(any(), any(), anyBoolean(), any(), any())).thenReturn(TEST_JOB_ID);
+    @Test
+    public void testDeleteExpunge() {
+        // setup
+        Parameters input = new Parameters();
+        String url1 = "Observation?status=active";
+        String url2 = "Patient?active=false";
+        int batchSize = 2401;
+        input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url1);
+        input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url2);
+        input.addParameter(ProviderConstants.OPERATION_DELETE_CASCADE, new BooleanType(true));
+        input.addParameter(
+                ProviderConstants.OPERATION_DELETE_CASCADE_MAX_ROUNDS, new IntegerType(44));
+        input.addParameter(
+                ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new IntegerType(batchSize));
 
-		// Test
-		Parameters response = myServer
-			.getFhirClient()
-			.operation()
-			.onServer()
-			.named(ProviderConstants.OPERATION_DELETE_EXPUNGE)
-			.withParameters(input)
-			.execute();
+        when(myDeleteExpungeJobSubmitter.submitJob(any(), any(), anyBoolean(), any(), any()))
+                .thenReturn(TEST_JOB_ID);
 
-		// Verify
-		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		assertEquals(TEST_JOB_ID, BatchHelperR4.jobIdFromBatch2Parameters(response));
+        // Test
+        Parameters response =
+                myServer.getFhirClient()
+                        .operation()
+                        .onServer()
+                        .named(ProviderConstants.OPERATION_DELETE_EXPUNGE)
+                        .withParameters(input)
+                        .execute();
 
-		verify(myDeleteExpungeJobSubmitter, times(1)).submitJob(
-			eq(2401),
-			eq(List.of(url1, url2)),
-			eq(true),
-			eq(44),
-			any()
-		);
-	}
+        // Verify
+        ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+        assertEquals(TEST_JOB_ID, BatchHelperR4.jobIdFromBatch2Parameters(response));
 
+        verify(myDeleteExpungeJobSubmitter, times(1))
+                .submitJob(eq(2401), eq(List.of(url1, url2)), eq(true), eq(44), any());
+    }
 }

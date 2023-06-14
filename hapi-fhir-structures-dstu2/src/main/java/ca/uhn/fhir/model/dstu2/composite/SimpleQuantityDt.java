@@ -21,78 +21,71 @@ package ca.uhn.fhir.model.dstu2.composite;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.valueset.QuantityComparatorEnum;
 
-@DatatypeDef(name="SimpleQuantity", profileOf=QuantityDt.class) 
+@DatatypeDef(name = "SimpleQuantity", profileOf = QuantityDt.class)
 public class SimpleQuantityDt extends QuantityDt {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Constructor
-	 */
-	public SimpleQuantityDt() {
-		// nothing
-	}
+    /** Constructor */
+    public SimpleQuantityDt() {
+        // nothing
+    }
 
- 
-	/**
-	 * Constructor
-	 */
-	@SimpleSetter
-	public SimpleQuantityDt(@SimpleSetter.Parameter(name="theValue") double theValue) {
-		setValue(theValue);
-	}
+    /** Constructor */
+    @SimpleSetter
+    public SimpleQuantityDt(@SimpleSetter.Parameter(name = "theValue") double theValue) {
+        setValue(theValue);
+    }
 
-	/**
-	 * Constructor
-	 */
-	@SimpleSetter
-	public SimpleQuantityDt(@SimpleSetter.Parameter(name="theValue") long theValue) {
-		setValue(theValue);
-	}
-	
-	/**
-	 * Constructor
-	 */
-	@SimpleSetter
-	public SimpleQuantityDt(@SimpleSetter.Parameter(name = "theComparator") QuantityComparatorEnum theComparator, @SimpleSetter.Parameter(name = "theValue") double theValue,
-			@SimpleSetter.Parameter(name = "theUnits") String theUnits) {
-		setValue(theValue);
-		setComparator(theComparator);
-		setUnit(theUnits);
-	}
+    /** Constructor */
+    @SimpleSetter
+    public SimpleQuantityDt(@SimpleSetter.Parameter(name = "theValue") long theValue) {
+        setValue(theValue);
+    }
 
-	/**
-	 * Constructor
-	 */
-	@SimpleSetter
-	public SimpleQuantityDt(@SimpleSetter.Parameter(name = "theComparator") QuantityComparatorEnum theComparator, @SimpleSetter.Parameter(name = "theValue") long theValue,
-			@SimpleSetter.Parameter(name = "theUnits") String theUnits) {
-		setValue(theValue);
-		setComparator(theComparator);
-		setUnit(theUnits);
-	}
+    /** Constructor */
+    @SimpleSetter
+    public SimpleQuantityDt(
+            @SimpleSetter.Parameter(name = "theComparator") QuantityComparatorEnum theComparator,
+            @SimpleSetter.Parameter(name = "theValue") double theValue,
+            @SimpleSetter.Parameter(name = "theUnits") String theUnits) {
+        setValue(theValue);
+        setComparator(theComparator);
+        setUnit(theUnits);
+    }
 
-	/**
-	 * Constructor
-	 */
-	@SimpleSetter
-	public SimpleQuantityDt(@SimpleSetter.Parameter(name="theValue") double theValue, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
-		setValue(theValue);
-		setSystem(theSystem);
-		setUnit(theUnits);
-	}
+    /** Constructor */
+    @SimpleSetter
+    public SimpleQuantityDt(
+            @SimpleSetter.Parameter(name = "theComparator") QuantityComparatorEnum theComparator,
+            @SimpleSetter.Parameter(name = "theValue") long theValue,
+            @SimpleSetter.Parameter(name = "theUnits") String theUnits) {
+        setValue(theValue);
+        setComparator(theComparator);
+        setUnit(theUnits);
+    }
 
-	/**
-	 * Constructor
-	 */
-	@SimpleSetter
-	public SimpleQuantityDt(@SimpleSetter.Parameter(name="theValue") long theValue, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
-		setValue(theValue);
-		setSystem(theSystem);
-		setUnit(theUnits);
-	}
+    /** Constructor */
+    @SimpleSetter
+    public SimpleQuantityDt(
+            @SimpleSetter.Parameter(name = "theValue") double theValue,
+            @SimpleSetter.Parameter(name = "theSystem") String theSystem,
+            @SimpleSetter.Parameter(name = "theUnits") String theUnits) {
+        setValue(theValue);
+        setSystem(theSystem);
+        setUnit(theUnits);
+    }
 
+    /** Constructor */
+    @SimpleSetter
+    public SimpleQuantityDt(
+            @SimpleSetter.Parameter(name = "theValue") long theValue,
+            @SimpleSetter.Parameter(name = "theSystem") String theSystem,
+            @SimpleSetter.Parameter(name = "theUnits") String theUnits) {
+        setValue(theValue);
+        setSystem(theSystem);
+        setUnit(theUnits);
+    }
 }

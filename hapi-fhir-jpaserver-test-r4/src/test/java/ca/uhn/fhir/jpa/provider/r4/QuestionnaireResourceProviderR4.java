@@ -6,9 +6,8 @@ import org.hl7.fhir.r4.model.Questionnaire;
 
 public class QuestionnaireResourceProviderR4 extends BaseJpaResourceProvider<Questionnaire> {
 
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return Questionnaire.class;
-	}
-
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+        return Questionnaire.class;
+    }
 }

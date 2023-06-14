@@ -19,20 +19,19 @@
  */
 package ca.uhn.fhir.batch2.util;
 
+import java.util.Date;
 import org.hl7.fhir.r4.model.InstantType;
 
-import java.util.Date;
-
 public class Batch2Constants {
-	/**
-	 * The batch 2 system assumes that all records have a start date later than this date.  This date is used as a starting
-	 * date when performing operations that pull resources by time windows.
-	 */
-	public static final Date BATCH_START_DATE = new InstantType("2000-01-01T00:00:00Z").getValue();
+    /**
+     * The batch 2 system assumes that all records have a start date later than this date. This date
+     * is used as a starting date when performing operations that pull resources by time windows.
+     */
+    public static final Date BATCH_START_DATE = new InstantType("2000-01-01T00:00:00Z").getValue();
 
-	/**
-	 * This is a placeholder chunkid for the reduction step to allow it to be
-	 * used in the message handling
-	 */
-	public static final String REDUCTION_STEP_CHUNK_ID_PLACEHOLDER = "REDUCTION";
+    /**
+     * This is a placeholder chunkid for the reduction step to allow it to be used in the message
+     * handling
+     */
+    public static final String REDUCTION_STEP_CHUNK_ID_PLACEHOLDER = "REDUCTION";
 }

@@ -21,32 +21,32 @@ package ca.uhn.fhir.parser.json;
 
 public abstract class BaseJsonLikeArray extends BaseJsonLikeValue {
 
-	@Override
-	public ValueType getJsonType() {
-		return ValueType.ARRAY;
-	}
-	
-	@Override
-	public ScalarType getDataType() {
-		return null;
-	}
+    @Override
+    public ValueType getJsonType() {
+        return ValueType.ARRAY;
+    }
 
-	@Override
-	public boolean isArray() {
-		return true;
-	}
+    @Override
+    public ScalarType getDataType() {
+        return null;
+    }
 
-	@Override
-	public BaseJsonLikeArray getAsArray() {
-		return this;
-	}
+    @Override
+    public boolean isArray() {
+        return true;
+    }
 
-	@Override
-	public String getAsString() {
-		return null;
-	}
+    @Override
+    public BaseJsonLikeArray getAsArray() {
+        return this;
+    }
 
-	public abstract int size ();
-	
-	public abstract BaseJsonLikeValue get (int index);
+    @Override
+    public String getAsString() {
+        return null;
+    }
+
+    public abstract int size();
+
+    public abstract BaseJsonLikeValue get(int index);
 }

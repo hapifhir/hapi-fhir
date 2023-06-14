@@ -19,24 +19,23 @@
  */
 package org.hl7.fhir.converter;
 
+import java.util.IdentityHashMap;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.ValueSet;
 
-import java.util.IdentityHashMap;
-
 public class NullVersionConverterAdvisor10_50 extends BaseAdvisor_10_50 {
 
-	private IdentityHashMap<ValueSet, CodeSystem> myCodeSystems = new IdentityHashMap<>();
+    private IdentityHashMap<ValueSet, CodeSystem> myCodeSystems = new IdentityHashMap<>();
 
-	@Override
-	public void handleCodeSystem(CodeSystem tgtcs, ValueSet source) throws FHIRException {
-		myCodeSystems.put(source, tgtcs);
-	}
+    @Override
+    public void handleCodeSystem(CodeSystem tgtcs, ValueSet source) throws FHIRException {
+        myCodeSystems.put(source, tgtcs);
+    }
 
-	@Override
-	public CodeSystem getCodeSystem(ValueSet src) throws FHIRException {
-		return myCodeSystems.get(src);
-	}
+    @Override
+    public CodeSystem getCodeSystem(ValueSet src) throws FHIRException {
+        return myCodeSystems.get(src);
+    }
 }

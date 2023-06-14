@@ -26,9 +26,10 @@ package ca.uhn.fhir.rest.gclient;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface IOperationProcessMsgMode<T extends IBaseResource> extends IClientExecutable<IOperationProcessMsgMode<T>, T> {
-    
+public interface IOperationProcessMsgMode<T extends IBaseResource>
+        extends IClientExecutable<IOperationProcessMsgMode<T>, T> {
+
     <R extends IBaseResource> IOperationProcessMsgMode<R> asynchronous(Class<R> theResponseClass);
-    
+
     <R extends IBaseResource> IOperationProcessMsgMode<R> synchronous(Class<R> theResponseClass);
 }

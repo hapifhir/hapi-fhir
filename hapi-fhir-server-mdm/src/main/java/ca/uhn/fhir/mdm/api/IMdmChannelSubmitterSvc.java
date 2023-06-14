@@ -23,10 +23,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IMdmChannelSubmitterSvc {
 
-	/**
-	 * Given an IBaseResource, submit it to the MDM channel for processing.
-	 *
-	 * @param theResource the {@link IBaseResource} that should have MDM processing applied to it.
-	 */
-	void submitResourceToMdmChannel(IBaseResource theResource);
+    /**
+     * Given an IBaseResource, submit it to the MDM channel for processing.
+     *
+     * @param theResource the {@link IBaseResource} that should have MDM processing applied to it.
+     */
+    void submitResourceToMdmChannel(IBaseResource theResource);
 }

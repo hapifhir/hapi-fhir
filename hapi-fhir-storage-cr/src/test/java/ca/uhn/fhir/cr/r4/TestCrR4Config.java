@@ -1,10 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.TestCrConfig;
-import ca.uhn.fhir.cr.r4.IActivityDefinitionProcessorFactory;
-import ca.uhn.fhir.cr.r4.IPlanDefinitionProcessorFactory;
-import ca.uhn.fhir.cr.r4.IQuestionnaireProcessorFactory;
-import ca.uhn.fhir.cr.r4.IQuestionnaireResponseProcessorFactory;
 import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionOperationsProvider;
 import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
@@ -21,43 +17,45 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(TestCrConfig.class)
 public class TestCrR4Config {
-	@Bean
-	IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory(EvaluationSettings theEvaluationSettings) {
-		return r -> new ActivityDefinitionProcessor(r, theEvaluationSettings);
-	}
+    @Bean
+    IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory(
+            EvaluationSettings theEvaluationSettings) {
+        return r -> new ActivityDefinitionProcessor(r, theEvaluationSettings);
+    }
 
-	@Bean
-	public ActivityDefinitionOperationsProvider r4ActivityDefinitionOperationsProvider() {
-		return new ActivityDefinitionOperationsProvider();
-	}
+    @Bean
+    public ActivityDefinitionOperationsProvider r4ActivityDefinitionOperationsProvider() {
+        return new ActivityDefinitionOperationsProvider();
+    }
 
-	@Bean
-	IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory(EvaluationSettings theEvaluationSettings) {
-		return r -> new PlanDefinitionProcessor(r, theEvaluationSettings);
-	}
+    @Bean
+    IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory(
+            EvaluationSettings theEvaluationSettings) {
+        return r -> new PlanDefinitionProcessor(r, theEvaluationSettings);
+    }
 
-	@Bean
-	public PlanDefinitionOperationsProvider r4PlanDefinitionOperationsProvider() {
-		return new PlanDefinitionOperationsProvider();
-	}
+    @Bean
+    public PlanDefinitionOperationsProvider r4PlanDefinitionOperationsProvider() {
+        return new PlanDefinitionOperationsProvider();
+    }
 
-	@Bean
-	IQuestionnaireProcessorFactory r4QuestionnaireProcessorFactory() {
-		return r -> new QuestionnaireProcessor(r);
-	}
+    @Bean
+    IQuestionnaireProcessorFactory r4QuestionnaireProcessorFactory() {
+        return r -> new QuestionnaireProcessor(r);
+    }
 
-	@Bean
-	public QuestionnaireOperationsProvider r4QuestionnaireOperationsProvider() {
-		return new QuestionnaireOperationsProvider();
-	}
+    @Bean
+    public QuestionnaireOperationsProvider r4QuestionnaireOperationsProvider() {
+        return new QuestionnaireOperationsProvider();
+    }
 
-	@Bean
-	IQuestionnaireResponseProcessorFactory r4QuestionnaireResponseProcessorFactory() {
-		return r -> new QuestionnaireResponseProcessor(r);
-	}
+    @Bean
+    IQuestionnaireResponseProcessorFactory r4QuestionnaireResponseProcessorFactory() {
+        return r -> new QuestionnaireResponseProcessor(r);
+    }
 
-	@Bean
-	public QuestionnaireResponseOperationsProvider r4QuestionnaireResponseOperationsProvider() {
-		return new QuestionnaireResponseOperationsProvider();
-	}
+    @Bean
+    public QuestionnaireResponseOperationsProvider r4QuestionnaireResponseOperationsProvider() {
+        return new QuestionnaireResponseOperationsProvider();
+    }
 }

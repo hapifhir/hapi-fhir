@@ -26,83 +26,86 @@ import ca.uhn.fhir.util.CoverageIgnore;
 
 public abstract class BaseIdentifiableElement extends BaseElement implements IIdentifiableElement {
 
-	private static final long serialVersionUID = -7816838417076777914L;
-	private String myElementSpecificId;
+    private static final long serialVersionUID = -7816838417076777914L;
+    private String myElementSpecificId;
 
-	@Override
-	public String getElementSpecificId() {
-		return myElementSpecificId;
-	}
+    @Override
+    public String getElementSpecificId() {
+        return myElementSpecificId;
+    }
 
-	/**
-	 * @deprecated Use {@link #getElementSpecificId()} instead. This method will be removed because it is easily
-	 *             confused with other ID methods (such as patient#getIdentifier)
-	 */
-	@CoverageIgnore
-	@Deprecated
-	@Override
-	public IdDt getId() {
-		if (myElementSpecificId == null) {
-			return new LockedId();
-		}
-		return new LockedId(myElementSpecificId);
-	}
+    /**
+     * @deprecated Use {@link #getElementSpecificId()} instead. This method will be removed because
+     *     it is easily confused with other ID methods (such as patient#getIdentifier)
+     */
+    @CoverageIgnore
+    @Deprecated
+    @Override
+    public IdDt getId() {
+        if (myElementSpecificId == null) {
+            return new LockedId();
+        }
+        return new LockedId(myElementSpecificId);
+    }
 
-	@Override
-	public void setElementSpecificId(String theElementSpecificId) {
-		myElementSpecificId = theElementSpecificId;
-	}
+    @Override
+    public void setElementSpecificId(String theElementSpecificId) {
+        myElementSpecificId = theElementSpecificId;
+    }
 
-	/**
-	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
-	 *             confused with other ID methods (such as patient#getIdentifier)
-	 */
-	@CoverageIgnore
-	@Deprecated
-	@Override
-	public void setId(IdDt theId) {
-		if (theId == null) {
-			myElementSpecificId = null;
-		} else {
-			myElementSpecificId = theId.getValue();
-		}
-	}
+    /**
+     * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed
+     *     because it is easily confused with other ID methods (such as patient#getIdentifier)
+     */
+    @CoverageIgnore
+    @Deprecated
+    @Override
+    public void setId(IdDt theId) {
+        if (theId == null) {
+            myElementSpecificId = null;
+        } else {
+            myElementSpecificId = theId.getValue();
+        }
+    }
 
-	/**
-	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
-	 *             confused with other ID methods (such as patient#getIdentifier)
-	 */
-	@CoverageIgnore
-	@Override
-	@Deprecated
-	public void setId(String theId) {
-		myElementSpecificId = theId;
-	}
+    /**
+     * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed
+     *     because it is easily confused with other ID methods (such as patient#getIdentifier)
+     */
+    @CoverageIgnore
+    @Override
+    @Deprecated
+    public void setId(String theId) {
+        myElementSpecificId = theId;
+    }
 
-	@CoverageIgnore
-	private static class LockedId extends IdDt {
+    @CoverageIgnore
+    private static class LockedId extends IdDt {
 
-		@CoverageIgnore
-		public LockedId() {
-		}
+        @CoverageIgnore
+        public LockedId() {}
 
-		@CoverageIgnore
-		public LockedId(String theElementSpecificId) {
-			super(theElementSpecificId);
-		}
+        @CoverageIgnore
+        public LockedId(String theElementSpecificId) {
+            super(theElementSpecificId);
+        }
 
-		@Override
-		@CoverageIgnore
-		public IdDt setValue(String theValue) throws DataFormatException {
-			throw new UnsupportedOperationException(Msg.code(1899) + "Use IElement#setElementSpecificId(String) to set the element ID for an element");
-		}
+        @Override
+        @CoverageIgnore
+        public IdDt setValue(String theValue) throws DataFormatException {
+            throw new UnsupportedOperationException(
+                    Msg.code(1899)
+                            + "Use IElement#setElementSpecificId(String) to set the element ID for"
+                            + " an element");
+        }
 
-		@Override
-		@CoverageIgnore
-		public void setValueAsString(String theValue) throws DataFormatException {
-			throw new UnsupportedOperationException(Msg.code(1900) + "Use IElement#setElementSpecificId(String) to set the element ID for an element");
-		}
-
-	}
-
+        @Override
+        @CoverageIgnore
+        public void setValueAsString(String theValue) throws DataFormatException {
+            throw new UnsupportedOperationException(
+                    Msg.code(1900)
+                            + "Use IElement#setElementSpecificId(String) to set the element ID for"
+                            + " an element");
+        }
+    }
 }

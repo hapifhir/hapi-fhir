@@ -24,15 +24,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Spring batch Job configuration file. Contains all necessary plumbing to run a
- * Bulk Export job.
+ * Spring batch Job configuration file. Contains all necessary plumbing to run a Bulk Export job.
  */
 @Configuration
 public class BulkExportJobConfig {
 
-	@Bean
-	public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
-		return new MdmExpansionCacheSvc();
-	}
-
+    @Bean
+    public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
+        return new MdmExpansionCacheSvc();
+    }
 }

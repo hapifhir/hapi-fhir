@@ -21,111 +21,121 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
+import java.time.LocalDate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import java.time.LocalDate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Embeddable
 public class PartitionablePartitionId implements Cloneable {
 
-	static final String PARTITION_ID = "PARTITION_ID";
+    static final String PARTITION_ID = "PARTITION_ID";
 
-	@Column(name = PARTITION_ID, nullable = true, insertable = true, updatable = false)
-	private Integer myPartitionId;
-	@Column(name = "PARTITION_DATE", nullable = true, insertable = true, updatable = false)
-	private LocalDate myPartitionDate;
+    @Column(name = PARTITION_ID, nullable = true, insertable = true, updatable = false)
+    private Integer myPartitionId;
 
-	/**
-	 * Constructor
-	 */
-	public PartitionablePartitionId() {
-		super();
-	}
+    @Column(name = "PARTITION_DATE", nullable = true, insertable = true, updatable = false)
+    private LocalDate myPartitionDate;
 
-	/**
-	 * Constructor
-	 */
-	public PartitionablePartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
-		setPartitionId(thePartitionId);
-		setPartitionDate(thePartitionDate);
-	}
+    /** Constructor */
+    public PartitionablePartitionId() {
+        super();
+    }
 
-	@Nullable
-	public Integer getPartitionId() {
-		return myPartitionId;
-	}
+    /** Constructor */
+    public PartitionablePartitionId(
+            @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+        setPartitionId(thePartitionId);
+        setPartitionDate(thePartitionDate);
+    }
 
-	public PartitionablePartitionId setPartitionId(@Nullable Integer thePartitionId) {
-		myPartitionId = thePartitionId;
-		return this;
-	}
+    @Nullable
+    public Integer getPartitionId() {
+        return myPartitionId;
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (!(theO instanceof PartitionablePartitionId)) {
-			return false;
-		}
+    public PartitionablePartitionId setPartitionId(@Nullable Integer thePartitionId) {
+        myPartitionId = thePartitionId;
+        return this;
+    }
 
-		PartitionablePartitionId that = (PartitionablePartitionId) theO;
-		return new EqualsBuilder().append(myPartitionId, that.myPartitionId).append(myPartitionDate, that.myPartitionDate).isEquals();
-	}
+    @Override
+    public boolean equals(Object theO) {
+        if (!(theO instanceof PartitionablePartitionId)) {
+            return false;
+        }
 
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myPartitionId).append(myPartitionDate).toHashCode();
-	}
+        PartitionablePartitionId that = (PartitionablePartitionId) theO;
+        return new EqualsBuilder()
+                .append(myPartitionId, that.myPartitionId)
+                .append(myPartitionDate, that.myPartitionDate)
+                .isEquals();
+    }
 
-	@Nullable
-	public LocalDate getPartitionDate() {
-		return myPartitionDate;
-	}
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(myPartitionId)
+                .append(myPartitionDate)
+                .toHashCode();
+    }
 
-	public PartitionablePartitionId setPartitionDate(@Nullable LocalDate thePartitionDate) {
-		myPartitionDate = thePartitionDate;
-		return this;
-	}
+    @Nullable
+    public LocalDate getPartitionDate() {
+        return myPartitionDate;
+    }
 
-	@SuppressWarnings({"CloneDoesntDeclareCloneNotSupportedException", "MethodDoesntCallSuperMethod"})
-	@Override
-	protected PartitionablePartitionId clone() {
-		return new PartitionablePartitionId()
-			.setPartitionId(getPartitionId())
-			.setPartitionDate(getPartitionDate());
-	}
+    public PartitionablePartitionId setPartitionDate(@Nullable LocalDate thePartitionDate) {
+        myPartitionDate = thePartitionDate;
+        return this;
+    }
 
-	public RequestPartitionId toPartitionId() {
-		return RequestPartitionId.fromPartitionId(getPartitionId(), getPartitionDate());
-	}
+    @SuppressWarnings({
+        "CloneDoesntDeclareCloneNotSupportedException",
+        "MethodDoesntCallSuperMethod"
+    })
+    @Override
+    protected PartitionablePartitionId clone() {
+        return new PartitionablePartitionId()
+                .setPartitionId(getPartitionId())
+                .setPartitionDate(getPartitionDate());
+    }
 
-	@Override
-	public String toString() {
-		return "PartitionablePartitionId{" +
-			"myPartitionId=" + myPartitionId +
-			", myPartitionDate=" + myPartitionDate +
-			'}';
-	}
+    public RequestPartitionId toPartitionId() {
+        return RequestPartitionId.fromPartitionId(getPartitionId(), getPartitionDate());
+    }
 
-	@Nonnull
-	public static RequestPartitionId toRequestPartitionId(@Nullable PartitionablePartitionId theRequestPartitionId) {
-		if (theRequestPartitionId != null) {
-			return theRequestPartitionId.toPartitionId();
-		} else {
-			return RequestPartitionId.defaultPartition();
-		}
-	}
+    @Override
+    public String toString() {
+        return "PartitionablePartitionId{"
+                + "myPartitionId="
+                + myPartitionId
+                + ", myPartitionDate="
+                + myPartitionDate
+                + '}';
+    }
 
-	@Nonnull
-	public static PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId, @Nonnull PartitionSettings thePartitionSettings) {
-		Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
-		if (partitionId == null) {
-			partitionId = thePartitionSettings.getDefaultPartitionId();
-		}
-		return new PartitionablePartitionId(partitionId, theRequestPartitionId.getPartitionDate());
-	}
+    @Nonnull
+    public static RequestPartitionId toRequestPartitionId(
+            @Nullable PartitionablePartitionId theRequestPartitionId) {
+        if (theRequestPartitionId != null) {
+            return theRequestPartitionId.toPartitionId();
+        } else {
+            return RequestPartitionId.defaultPartition();
+        }
+    }
 
+    @Nonnull
+    public static PartitionablePartitionId toStoragePartition(
+            @Nonnull RequestPartitionId theRequestPartitionId,
+            @Nonnull PartitionSettings thePartitionSettings) {
+        Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
+        if (partitionId == null) {
+            partitionId = thePartitionSettings.getDefaultPartitionId();
+        }
+        return new PartitionablePartitionId(partitionId, theRequestPartitionId.getPartitionDate());
+    }
 }

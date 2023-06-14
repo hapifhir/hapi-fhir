@@ -37,90 +37,94 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionTestUtil {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionTestUtil.class);
-	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(SubscriptionTestUtil.class);
+    private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor =
+            new SubscriptionDebugLogInterceptor();
 
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
-	@Autowired
-	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
-	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
-	@Autowired
-	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
-	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
-	@Autowired
-	private IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
-	@Autowired
-	private IInterceptorService myInterceptorRegistry;
+    @Autowired private JpaStorageSettings myStorageSettings;
+    @Autowired private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
+    @Autowired private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+    @Autowired private SubscriptionRegistry mySubscriptionRegistry;
+    @Autowired private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
+    @Autowired private IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+    @Autowired private IInterceptorService myInterceptorRegistry;
 
-	public int getExecutorQueueSize() {
-		LinkedBlockingChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
-		return channel.getQueueSizeForUnitTest();
-	}
+    public int getExecutorQueueSize() {
+        LinkedBlockingChannel channel =
+                mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+        return channel.getQueueSizeForUnitTest();
+    }
 
-	// TODO KHS replace this and similar functions with CountdownLatch
-	public void waitForQueueToDrain() throws InterruptedException {
-		Thread.sleep(100);
-		ourLog.info("Executor work queue has {} items", getExecutorQueueSize());
-		if (getExecutorQueueSize() > 0) {
-			while (getExecutorQueueSize() > 0) {
-				Thread.sleep(50);
-			}
-			ourLog.info("Executor work queue has {} items", getExecutorQueueSize());
-		}
-		Thread.sleep(100);
+    // TODO KHS replace this and similar functions with CountdownLatch
+    public void waitForQueueToDrain() throws InterruptedException {
+        Thread.sleep(100);
+        ourLog.info("Executor work queue has {} items", getExecutorQueueSize());
+        if (getExecutorQueueSize() > 0) {
+            while (getExecutorQueueSize() > 0) {
+                Thread.sleep(50);
+            }
+            ourLog.info("Executor work queue has {} items", getExecutorQueueSize());
+        }
+        Thread.sleep(100);
 
-		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
-	}
+        myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
+    }
 
-	public void registerEmailInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
-		mySubscriptionSubmitInterceptorLoader.start();
-	}
+    public void registerEmailInterceptor() {
+        myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
+        mySubscriptionSubmitInterceptorLoader.start();
+    }
 
-	public void registerRestHookInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-		mySubscriptionSubmitInterceptorLoader.start();
-	}
+    public void registerRestHookInterceptor() {
+        myStorageSettings.addSupportedSubscriptionType(
+                Subscription.SubscriptionChannelType.RESTHOOK);
+        mySubscriptionSubmitInterceptorLoader.start();
+    }
 
-	public void registerMessageInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
-		mySubscriptionSubmitInterceptorLoader.start();
-	}
+    public void registerMessageInterceptor() {
+        myStorageSettings.addSupportedSubscriptionType(
+                Subscription.SubscriptionChannelType.MESSAGE);
+        mySubscriptionSubmitInterceptorLoader.start();
+    }
 
-	public void registerWebSocketInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
-		mySubscriptionSubmitInterceptorLoader.start();
-	}
+    public void registerWebSocketInterceptor() {
+        myStorageSettings.addSupportedSubscriptionType(
+                Subscription.SubscriptionChannelType.WEBSOCKET);
+        mySubscriptionSubmitInterceptorLoader.start();
+    }
 
-	public void unregisterSubscriptionInterceptor() {
-		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
-		mySubscriptionSubmitInterceptorLoader.unregisterInterceptorsForUnitTest();
-	}
+    public void unregisterSubscriptionInterceptor() {
+        myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
+        mySubscriptionSubmitInterceptorLoader.unregisterInterceptorsForUnitTest();
+    }
 
-	// TODO KHS call in all subscription base tests
-	public void registerSubscriptionLoggingInterceptor() {
-		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
-	}
+    // TODO KHS call in all subscription base tests
+    public void registerSubscriptionLoggingInterceptor() {
+        myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
+    }
 
-	public void unregisterSubscriptionLoggingInterceptor() {
-		myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
-	}
-	public int getExecutorQueueSizeForUnitTests() {
-		return getExecutorQueueSize();
-	}
+    public void unregisterSubscriptionLoggingInterceptor() {
+        myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
+    }
 
-	public void setEmailSender(IIdType theIdElement, EmailSenderImpl theEmailSender) {
-		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(theIdElement.getIdPart());
-		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(activeSubscription.getChannelName());
-		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) subscriptionChannelWithHandlers.getDeliveryHandlerForUnitTest();
-		subscriber.setEmailSender(theEmailSender);
-	}
+    public int getExecutorQueueSizeForUnitTests() {
+        return getExecutorQueueSize();
+    }
 
-	public int getActiveSubscriptionCount() {
-		return mySubscriptionRegistry.size();
-	}
+    public void setEmailSender(IIdType theIdElement, EmailSenderImpl theEmailSender) {
+        ActiveSubscription activeSubscription =
+                mySubscriptionRegistry.get(theIdElement.getIdPart());
+        SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
+                mySubscriptionChannelRegistry.getDeliveryReceiverChannel(
+                        activeSubscription.getChannelName());
+        SubscriptionDeliveringEmailSubscriber subscriber =
+                (SubscriptionDeliveringEmailSubscriber)
+                        subscriptionChannelWithHandlers.getDeliveryHandlerForUnitTest();
+        subscriber.setEmailSender(theEmailSender);
+    }
 
+    public int getActiveSubscriptionCount() {
+        return mySubscriptionRegistry.size();
+    }
 }

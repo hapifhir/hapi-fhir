@@ -25,16 +25,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * RESTful server method parameter annotation which indicates
- * that the parameter should be injected with the HTTP server base.
- * <p>
- * Parameters annotated with this annotation must be of
- * type {@link String}. The value provided will be a URL
- * indicating the server's base URL, with NO trailing '/'.
- * </p>
+ * RESTful server method parameter annotation which indicates that the parameter should be injected
+ * with the HTTP server base.
+ *
+ * <p>Parameters annotated with this annotation must be of type {@link String}. The value provided
+ * will be a URL indicating the server's base URL, with NO trailing '/'.
  */
-@Target(value=ElementType.PARAMETER)
+@Target(value = ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ServerBase {
-	// nothing
+    // nothing
 }

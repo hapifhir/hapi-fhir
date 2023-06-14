@@ -18,15 +18,14 @@
  * #L%
  */
 /**
- * Search for distinct Coding elements by the display text, or by partial codes for a given SearchParameter.
- * <p>
- * Main entrypoint - {@link ca.uhn.fhir.jpa.search.autocomplete.TokenAutocompleteSearch#search}
+ * Search for distinct Coding elements by the display text, or by partial codes for a given
+ * SearchParameter.
  *
- * This work depends on on the Hibernate Search infrastructure in {@link ca.uhn.fhir.jpa.dao.search}.
+ * <p>Main entrypoint - {@link ca.uhn.fhir.jpa.search.autocomplete.TokenAutocompleteSearch#search}
  *
- * Provides an interactive-autocomplete when browsing codes in a dataset.
+ * <p>This work depends on on the Hibernate Search infrastructure in {@link
+ * ca.uhn.fhir.jpa.dao.search}.
  *
- *
+ * <p>Provides an interactive-autocomplete when browsing codes in a dataset.
  */
 package ca.uhn.fhir.jpa.search.autocomplete;
-

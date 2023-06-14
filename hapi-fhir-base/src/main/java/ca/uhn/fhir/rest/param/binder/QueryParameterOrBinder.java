@@ -26,40 +26,50 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-
 import java.util.Collections;
 import java.util.List;
 
-public final class QueryParameterOrBinder extends BaseBinder<IQueryParameterOr<?>> implements IParamBinder<IQueryParameterOr<?>> {
+public final class QueryParameterOrBinder extends BaseBinder<IQueryParameterOr<?>>
+        implements IParamBinder<IQueryParameterOr<?>> {
 
-	public QueryParameterOrBinder(Class<? extends IQueryParameterOr<?>> theType, List<Class<? extends IQueryParameterType>> theCompositeTypes) {
-		super(theType, theCompositeTypes);
-	}
+    public QueryParameterOrBinder(
+            Class<? extends IQueryParameterOr<?>> theType,
+            List<Class<? extends IQueryParameterType>> theCompositeTypes) {
+        super(theType, theCompositeTypes);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<IQueryParameterOr<?>> encode(FhirContext theContext, IQueryParameterOr<?> theValue) throws InternalErrorException {
-		IQueryParameterOr<?> retVal = (theValue);
-		List<?> retVal2 = Collections.singletonList((IQueryParameterOr<?>)retVal);
-		return (List<IQueryParameterOr<?>>) retVal2;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<IQueryParameterOr<?>> encode(FhirContext theContext, IQueryParameterOr<?> theValue)
+            throws InternalErrorException {
+        IQueryParameterOr<?> retVal = (theValue);
+        List<?> retVal2 = Collections.singletonList((IQueryParameterOr<?>) retVal);
+        return (List<IQueryParameterOr<?>>) retVal2;
+    }
 
-	@Override
-	public IQueryParameterOr<?> parse(FhirContext theContext, String theParamName, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
-		IQueryParameterOr<?> dt;
-		try {
-			dt = newInstance();
-			if (theString.size() == 0 || theString.get(0).size() == 0) {
-				return dt;
-			}
-			if (theString.size() > 1) {
-				throw new InvalidRequestException(Msg.code(1953) + "Multiple values detected for non-repeatable parameter '" + theParamName + "'. This server is not configured to allow multiple (AND/OR) values for this param.");
-			}
-			
-			dt.setValuesAsQueryTokens(theContext, theParamName, theString.get(0));
-		} catch (SecurityException e) {
-			throw new InternalErrorException(Msg.code(1954) + e);
-		}
-		return dt;
-	}
+    @Override
+    public IQueryParameterOr<?> parse(
+            FhirContext theContext, String theParamName, List<QualifiedParamList> theString)
+            throws InternalErrorException, InvalidRequestException {
+        IQueryParameterOr<?> dt;
+        try {
+            dt = newInstance();
+            if (theString.size() == 0 || theString.get(0).size() == 0) {
+                return dt;
+            }
+            if (theString.size() > 1) {
+                throw new InvalidRequestException(
+                        Msg.code(1953)
+                                + "Multiple values detected for non-repeatable parameter '"
+                                + theParamName
+                                + "'. This server is not configured to allow multiple (AND/OR)"
+                                + " values for this param.");
+            }
+
+            dt.setValuesAsQueryTokens(theContext, theParamName, theString.get(0));
+        } catch (SecurityException e) {
+            throw new InternalErrorException(Msg.code(1954) + e);
+        }
+        return dt;
+    }
 }

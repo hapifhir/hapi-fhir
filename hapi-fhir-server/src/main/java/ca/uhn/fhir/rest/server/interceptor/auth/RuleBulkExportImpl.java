@@ -19,120 +19,155 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public class RuleBulkExportImpl extends BaseRule {
-	private String myGroupId;
-	private String myPatientId;
-	private BulkDataExportOptions.ExportStyle myWantExportStyle;
-	private Collection<String> myResourceTypes;
-	private boolean myWantAnyStyle;
+    private String myGroupId;
+    private String myPatientId;
+    private BulkDataExportOptions.ExportStyle myWantExportStyle;
+    private Collection<String> myResourceTypes;
+    private boolean myWantAnyStyle;
 
-	RuleBulkExportImpl(String theRuleName) {
-		super(theRuleName);
-	}
+    RuleBulkExportImpl(String theRuleName) {
+        super(theRuleName);
+    }
 
-	@Override
-	public AuthorizationInterceptor.Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
-		if (thePointcut != Pointcut.STORAGE_INITIATE_BULK_EXPORT) {
-			return null;
-		}
+    @Override
+    public AuthorizationInterceptor.Verdict applyRule(
+            RestOperationTypeEnum theOperation,
+            RequestDetails theRequestDetails,
+            IBaseResource theInputResource,
+            IIdType theInputResourceId,
+            IBaseResource theOutputResource,
+            IRuleApplier theRuleApplier,
+            Set<AuthorizationFlagsEnum> theFlags,
+            Pointcut thePointcut) {
+        if (thePointcut != Pointcut.STORAGE_INITIATE_BULK_EXPORT) {
+            return null;
+        }
 
-		if (theRequestDetails == null) {
-			return null;
-		}
+        if (theRequestDetails == null) {
+            return null;
+        }
 
-		BulkDataExportOptions options = (BulkDataExportOptions) theRequestDetails.getAttribute(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
+        BulkDataExportOptions options =
+                (BulkDataExportOptions)
+                        theRequestDetails.getAttribute(
+                                AuthorizationInterceptor
+                                        .REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
 
-		if (!myWantAnyStyle && options.getExportStyle() != myWantExportStyle) {
-			return null;
-		}
+        if (!myWantAnyStyle && options.getExportStyle() != myWantExportStyle) {
+            return null;
+        }
 
-		if (isNotEmpty(myResourceTypes)) {
-			if (isEmpty(options.getResourceTypes())) {
-				return null;
-			}
-			for (String next : options.getResourceTypes()) {
-				if (!myResourceTypes.contains(next)) {
-					return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY,this);
-				}
-			}
-		}
+        if (isNotEmpty(myResourceTypes)) {
+            if (isEmpty(options.getResourceTypes())) {
+                return null;
+            }
+            for (String next : options.getResourceTypes()) {
+                if (!myResourceTypes.contains(next)) {
+                    return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+                }
+            }
+        }
 
-		if (myWantAnyStyle || myWantExportStyle == BulkDataExportOptions.ExportStyle.SYSTEM) {
-			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
-		}
+        if (myWantAnyStyle || myWantExportStyle == BulkDataExportOptions.ExportStyle.SYSTEM) {
+            return newVerdict(
+                    theOperation,
+                    theRequestDetails,
+                    theInputResource,
+                    theInputResourceId,
+                    theOutputResource,
+                    theRuleApplier);
+        }
 
-		if (isNotBlank(myGroupId) && options.getGroupId() != null) {
-			String expectedGroupId = new IdDt(myGroupId).toUnqualifiedVersionless().getValue();
-			String actualGroupId = options.getGroupId().toUnqualifiedVersionless().getValue();
-			if (Objects.equals(expectedGroupId, actualGroupId)) {
-				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
-			}
-		}
+        if (isNotBlank(myGroupId) && options.getGroupId() != null) {
+            String expectedGroupId = new IdDt(myGroupId).toUnqualifiedVersionless().getValue();
+            String actualGroupId = options.getGroupId().toUnqualifiedVersionless().getValue();
+            if (Objects.equals(expectedGroupId, actualGroupId)) {
+                return newVerdict(
+                        theOperation,
+                        theRequestDetails,
+                        theInputResource,
+                        theInputResourceId,
+                        theOutputResource,
+                        theRuleApplier);
+            }
+        }
 
-		// TODO This is a _bad bad bad implementation_ but we are out of time.
-		// 1. If a claimed resource ID is present in the parameters, and the permission contains one, check for membership
-		// 2. If not a member, Deny.
-		if (myWantExportStyle == BulkDataExportOptions.ExportStyle.PATIENT && isNotBlank(myPatientId) && options.getPatientIds() != null) {
-			String expectedPatientId = new IdDt(myPatientId).toUnqualifiedVersionless().getValue();
-			String actualPatientIds = options.getPatientIds().stream().map(t -> t.toUnqualifiedVersionless().getValue()).collect(Collectors.joining(","));
-			if (actualPatientIds.contains(expectedPatientId)) {
-				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
-			} else {
-				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY,this);
-			}
-		}
-		return null;
-	}
+        // TODO This is a _bad bad bad implementation_ but we are out of time.
+        // 1. If a claimed resource ID is present in the parameters, and the permission contains
+        // one, check for membership
+        // 2. If not a member, Deny.
+        if (myWantExportStyle == BulkDataExportOptions.ExportStyle.PATIENT
+                && isNotBlank(myPatientId)
+                && options.getPatientIds() != null) {
+            String expectedPatientId = new IdDt(myPatientId).toUnqualifiedVersionless().getValue();
+            String actualPatientIds =
+                    options.getPatientIds().stream()
+                            .map(t -> t.toUnqualifiedVersionless().getValue())
+                            .collect(Collectors.joining(","));
+            if (actualPatientIds.contains(expectedPatientId)) {
+                return newVerdict(
+                        theOperation,
+                        theRequestDetails,
+                        theInputResource,
+                        theInputResourceId,
+                        theOutputResource,
+                        theRuleApplier);
+            } else {
+                return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+            }
+        }
+        return null;
+    }
 
-	public void setAppliesToGroupExportOnGroup(String theGroupId) {
-		myWantExportStyle = BulkDataExportOptions.ExportStyle.GROUP;
-		myGroupId = theGroupId;
-	}
+    public void setAppliesToGroupExportOnGroup(String theGroupId) {
+        myWantExportStyle = BulkDataExportOptions.ExportStyle.GROUP;
+        myGroupId = theGroupId;
+    }
 
-	public void setAppliesToPatientExportOnGroup(String theGroupId) {
-		myWantExportStyle = BulkDataExportOptions.ExportStyle.PATIENT;
-		myGroupId = theGroupId;
-	}
+    public void setAppliesToPatientExportOnGroup(String theGroupId) {
+        myWantExportStyle = BulkDataExportOptions.ExportStyle.PATIENT;
+        myGroupId = theGroupId;
+    }
 
-	public void setAppliesToPatientExport(String thePatientId) {
-		myWantExportStyle = BulkDataExportOptions.ExportStyle.PATIENT;
-		myPatientId = thePatientId;
-	}
+    public void setAppliesToPatientExport(String thePatientId) {
+        myWantExportStyle = BulkDataExportOptions.ExportStyle.PATIENT;
+        myPatientId = thePatientId;
+    }
 
-	public void setAppliesToSystem() {
-		myWantExportStyle = BulkDataExportOptions.ExportStyle.SYSTEM;
-	}
+    public void setAppliesToSystem() {
+        myWantExportStyle = BulkDataExportOptions.ExportStyle.SYSTEM;
+    }
 
-	public void setResourceTypes(Collection<String> theResourceTypes) {
-		myResourceTypes = theResourceTypes;
-	}
+    public void setResourceTypes(Collection<String> theResourceTypes) {
+        myResourceTypes = theResourceTypes;
+    }
 
-	public void setAppliesToAny() {
-		myWantAnyStyle = true;
-	}
+    public void setAppliesToAny() {
+        myWantAnyStyle = true;
+    }
 
-	String getGroupId() {
-		return myGroupId;
-	}
+    String getGroupId() {
+        return myGroupId;
+    }
 
-	BulkDataExportOptions.ExportStyle getWantExportStyle() {
-		return myWantExportStyle;
-	}
+    BulkDataExportOptions.ExportStyle getWantExportStyle() {
+        return myWantExportStyle;
+    }
 }

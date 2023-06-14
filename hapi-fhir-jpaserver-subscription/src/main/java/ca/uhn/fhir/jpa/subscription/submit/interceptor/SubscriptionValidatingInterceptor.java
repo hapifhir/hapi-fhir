@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -49,247 +51,315 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Optional;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 @Interceptor
 public class SubscriptionValidatingInterceptor {
 
-	@Autowired
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private StorageSettings myStorageSettings;
-	@Autowired
-	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
+    @Autowired private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+    @Autowired private DaoRegistry myDaoRegistry;
+    @Autowired private StorageSettings myStorageSettings;
+    @Autowired private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
-	private FhirContext myFhirContext;
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	@Autowired
-	private SubscriptionQueryValidator mySubscriptionQueryValidator;
+    private FhirContext myFhirContext;
+    @Autowired private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+    @Autowired private SubscriptionQueryValidator mySubscriptionQueryValidator;
 
-	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	public void resourcePreCreate(IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
-		validateSubmittedSubscription(theResource, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
-	}
+    @Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
+    public void resourcePreCreate(
+            IBaseResource theResource,
+            RequestDetails theRequestDetails,
+            RequestPartitionId theRequestPartitionId) {
+        validateSubmittedSubscription(
+                theResource,
+                theRequestDetails,
+                theRequestPartitionId,
+                Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+    }
 
-	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
-		validateSubmittedSubscription(theResource, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED);
-	}
+    @Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+    public void resourceUpdated(
+            IBaseResource theOldResource,
+            IBaseResource theResource,
+            RequestDetails theRequestDetails,
+            RequestPartitionId theRequestPartitionId) {
+        validateSubmittedSubscription(
+                theResource,
+                theRequestDetails,
+                theRequestPartitionId,
+                Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED);
+    }
 
-	@Autowired
-	public void setFhirContext(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
+    @Autowired
+    public void setFhirContext(FhirContext theFhirContext) {
+        myFhirContext = theFhirContext;
+    }
 
-	@VisibleForTesting
-	void validateSubmittedSubscription(IBaseResource theSubscription,
-												  RequestDetails theRequestDetails,
-												  RequestPartitionId theRequestPartitionId,
-												  Pointcut thePointcut) {
-		if (Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED != thePointcut && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED != thePointcut) {
-			throw new UnprocessableEntityException(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + thePointcut);
-		}
+    @VisibleForTesting
+    void validateSubmittedSubscription(
+            IBaseResource theSubscription,
+            RequestDetails theRequestDetails,
+            RequestPartitionId theRequestPartitionId,
+            Pointcut thePointcut) {
+        if (Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED != thePointcut
+                && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED != thePointcut) {
+            throw new UnprocessableEntityException(
+                    Msg.code(2267)
+                            + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED"
+                            + " or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: "
+                            + thePointcut);
+        }
 
-		if (!"Subscription".equals(myFhirContext.getResourceType(theSubscription))) {
-			return;
-		}
+        if (!"Subscription".equals(myFhirContext.getResourceType(theSubscription))) {
+            return;
+        }
 
-		CanonicalSubscription subscription;
-		try {
-			subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
-		} catch (InternalErrorException e) {
-			throw new UnprocessableEntityException(Msg.code(955) + e.getMessage());
-		}
-		boolean finished = false;
-		if (subscription.getStatus() == null) {
-			throw new UnprocessableEntityException(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server");
-		}
+        CanonicalSubscription subscription;
+        try {
+            subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+        } catch (InternalErrorException e) {
+            throw new UnprocessableEntityException(Msg.code(955) + e.getMessage());
+        }
+        boolean finished = false;
+        if (subscription.getStatus() == null) {
+            throw new UnprocessableEntityException(
+                    Msg.code(8)
+                            + "Can not process submitted Subscription - Subscription.status must be"
+                            + " populated on this server");
+        }
 
-		switch (subscription.getStatus()) {
-			case REQUESTED:
-			case ACTIVE:
-				break;
-			case ERROR:
-			case OFF:
-			case NULL:
-				finished = true;
-				break;
-		}
+        switch (subscription.getStatus()) {
+            case REQUESTED:
+            case ACTIVE:
+                break;
+            case ERROR:
+            case OFF:
+            case NULL:
+                finished = true;
+                break;
+        }
 
-		validatePermissions(theSubscription, subscription, theRequestDetails, theRequestPartitionId, thePointcut);
+        validatePermissions(
+                theSubscription,
+                subscription,
+                theRequestDetails,
+                theRequestPartitionId,
+                thePointcut);
 
-		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
+        mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
 
-		if (!finished) {
+        if (!finished) {
 
-			if (subscription.isTopicSubscription()) {
-				if (myFhirContext.getVersion().getVersion() != FhirVersionEnum.R4) { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic resource
-					Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getTopic());
-					if (!oTopic.isPresent()) {
-						throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: " + subscription.getTopic());
-					}
-				}
-			} else {
-				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
+            if (subscription.isTopicSubscription()) {
+                if (myFhirContext.getVersion().getVersion()
+                        != FhirVersionEnum
+                                .R4) { // In R4 topic subscriptions exist without a corresponidng
+                    // SubscriptionTopic resource
+                    Optional<IBaseResource> oTopic =
+                            findSubscriptionTopicByUrl(subscription.getTopic());
+                    if (!oTopic.isPresent()) {
+                        throw new UnprocessableEntityException(
+                                Msg.code(2322)
+                                        + "No SubscriptionTopic exists with topic: "
+                                        + subscription.getTopic());
+                    }
+                }
+            } else {
+                validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
 
-				if (subscription.getPayloadSearchCriteria() != null) {
-					validateQuery(subscription.getPayloadSearchCriteria(), "Subscription.extension(url='" + HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA + "')");
-				}
-			}
+                if (subscription.getPayloadSearchCriteria() != null) {
+                    validateQuery(
+                            subscription.getPayloadSearchCriteria(),
+                            "Subscription.extension(url='"
+                                    + HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA
+                                    + "')");
+                }
+            }
 
-			validateChannelType(subscription);
+            validateChannelType(subscription);
 
-			try {
-				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription);
-				mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, strategy);
-			} catch (InvalidRequestException | DataFormatException e) {
-				throw new UnprocessableEntityException(Msg.code(9) + "Invalid subscription criteria submitted: " + subscription.getCriteriaString() + " " + e.getMessage());
-			}
+            try {
+                SubscriptionMatchingStrategy strategy =
+                        mySubscriptionStrategyEvaluator.determineStrategy(subscription);
+                mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, strategy);
+            } catch (InvalidRequestException | DataFormatException e) {
+                throw new UnprocessableEntityException(
+                        Msg.code(9)
+                                + "Invalid subscription criteria submitted: "
+                                + subscription.getCriteriaString()
+                                + " "
+                                + e.getMessage());
+            }
 
-			if (subscription.getChannelType() == null) {
-				throw new UnprocessableEntityException(Msg.code(10) + "Subscription.channel.type must be populated on this server");
-			} else if (subscription.getChannelType() == CanonicalSubscriptionChannelType.MESSAGE) {
-				validateMessageSubscriptionEndpoint(subscription.getEndpointUrl());
-			}
+            if (subscription.getChannelType() == null) {
+                throw new UnprocessableEntityException(
+                        Msg.code(10)
+                                + "Subscription.channel.type must be populated on this server");
+            } else if (subscription.getChannelType() == CanonicalSubscriptionChannelType.MESSAGE) {
+                validateMessageSubscriptionEndpoint(subscription.getEndpointUrl());
+            }
+        }
+    }
 
+    protected void validatePermissions(
+            IBaseResource theSubscription,
+            CanonicalSubscription theCanonicalSubscription,
+            RequestDetails theRequestDetails,
+            RequestPartitionId theRequestPartitionId,
+            Pointcut thePointcut) {
+        // If the subscription has the cross partition tag
+        if (SubscriptionUtil.isCrossPartition(theSubscription)
+                && !(theRequestDetails instanceof SystemRequestDetails)) {
+            if (!myStorageSettings.isCrossPartitionSubscriptionEnabled()) {
+                throw new UnprocessableEntityException(
+                        Msg.code(2009)
+                                + "Cross partition subscription is not enabled on this server");
+            }
 
-		}
-	}
+            if (theRequestPartitionId == null
+                    && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED == thePointcut) {
+                return;
+            }
 
-	protected void validatePermissions(IBaseResource theSubscription,
-												  CanonicalSubscription theCanonicalSubscription,
-												  RequestDetails theRequestDetails,
-												  RequestPartitionId theRequestPartitionId,
-												  Pointcut thePointcut) {
-		// If the subscription has the cross partition tag
-		if (SubscriptionUtil.isCrossPartition(theSubscription) && !(theRequestDetails instanceof SystemRequestDetails)) {
-			if (!myStorageSettings.isCrossPartitionSubscriptionEnabled()){
-				throw new UnprocessableEntityException(Msg.code(2009) + "Cross partition subscription is not enabled on this server");
-			}
+            // if we have a partition id already, we'll use that
+            // otherwise we might end up with READ and CREATE pointcuts
+            // returning conflicting partitions (say, all vs default)
+            RequestPartitionId toCheckPartitionId =
+                    theRequestPartitionId != null
+                            ? theRequestPartitionId
+                            : determinePartition(theRequestDetails, theSubscription);
 
-			if (theRequestPartitionId == null && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED == thePointcut) {
-				return;
-			}
+            if (!toCheckPartitionId.isDefaultPartition()) {
+                throw new UnprocessableEntityException(
+                        Msg.code(2010)
+                                + "Cross partition subscription must be created on the default"
+                                + " partition");
+            }
+        }
+    }
 
-			// if we have a partition id already, we'll use that
-			// otherwise we might end up with READ and CREATE pointcuts
-			// returning conflicting partitions (say, all vs default)
-			RequestPartitionId toCheckPartitionId = theRequestPartitionId != null ?
-				theRequestPartitionId :
-				determinePartition(theRequestDetails, theSubscription);
+    private RequestPartitionId determinePartition(
+            RequestDetails theRequestDetails, IBaseResource theResource) {
+        switch (theRequestDetails.getRestOperationType()) {
+            case CREATE:
+                return myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
+                        theRequestDetails, theResource, "Subscription");
+            case UPDATE:
+                return myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
+                        theRequestDetails, "Subscription", theResource.getIdElement());
+            default:
+                return null;
+        }
+    }
 
-			if (!toCheckPartitionId.isDefaultPartition()) {
-				throw new UnprocessableEntityException(Msg.code(2010) + "Cross partition subscription must be created on the default partition");
-			}
-		}
-	}
+    public void validateQuery(String theQuery, String theFieldName) {
+        mySubscriptionQueryValidator.validateCriteria(theQuery, theFieldName);
+    }
 
-	private RequestPartitionId determinePartition(RequestDetails theRequestDetails, IBaseResource theResource) {
-		switch (theRequestDetails.getRestOperationType()) {
-			case CREATE:
-				return myRequestPartitionHelperSvc.determineCreatePartitionForRequest(theRequestDetails, theResource, "Subscription");
-			case UPDATE:
-				return myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequestDetails, "Subscription", theResource.getIdElement());
-			default:
-				return null;
-		}
-	}
+    private Optional<IBaseResource> findSubscriptionTopicByUrl(String theCriteria) {
+        myDaoRegistry.getResourceDao("SubscriptionTopic");
+        SearchParameterMap map = SearchParameterMap.newSynchronous();
+        map.add(SubscriptionTopic.SP_URL, new UriParam(theCriteria));
+        IFhirResourceDao subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
+        IBundleProvider search = subscriptionTopicDao.search(map, new SystemRequestDetails());
+        return search.getResources(0, 1).stream().findFirst();
+    }
 
-	public void validateQuery(String theQuery, String theFieldName) {
-		mySubscriptionQueryValidator.validateCriteria(theQuery, theFieldName);
-	}
+    public void validateMessageSubscriptionEndpoint(String theEndpointUrl) {
+        if (theEndpointUrl == null) {
+            throw new UnprocessableEntityException(
+                    Msg.code(16) + "No endpoint defined for message subscription");
+        }
 
-	private Optional<IBaseResource> findSubscriptionTopicByUrl(String theCriteria) {
-		myDaoRegistry.getResourceDao("SubscriptionTopic");
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add(SubscriptionTopic.SP_URL, new UriParam(theCriteria));
-		IFhirResourceDao subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
-		IBundleProvider search = subscriptionTopicDao.search(map, new SystemRequestDetails());
-		return search.getResources(0, 1).stream().findFirst();
-	}
+        try {
+            URI uri = new URI(theEndpointUrl);
 
-	public void validateMessageSubscriptionEndpoint(String theEndpointUrl) {
-		if (theEndpointUrl == null) {
-			throw new UnprocessableEntityException(Msg.code(16) + "No endpoint defined for message subscription");
-		}
+            if (!"channel".equals(uri.getScheme())) {
+                throw new UnprocessableEntityException(
+                        Msg.code(17)
+                                + "Only 'channel' protocol is supported for Subscriptions with"
+                                + " channel type 'message'");
+            }
+            String channelName = uri.getSchemeSpecificPart();
+            if (isBlank(channelName)) {
+                throw new UnprocessableEntityException(
+                        Msg.code(18)
+                                + "A channel name must appear after channel: in a message"
+                                + " Subscription endpoint");
+            }
+        } catch (URISyntaxException e) {
+            throw new UnprocessableEntityException(
+                    Msg.code(19) + "Invalid subscription endpoint uri " + theEndpointUrl, e);
+        }
+    }
 
-		try {
-			URI uri = new URI(theEndpointUrl);
+    @SuppressWarnings("WeakerAccess")
+    protected void validateChannelType(CanonicalSubscription theSubscription) {
+        if (theSubscription.getChannelType() == null) {
+            throw new UnprocessableEntityException(
+                    Msg.code(20) + "Subscription.channel.type must be populated");
+        } else if (theSubscription.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
+            validateChannelPayload(theSubscription);
+            validateChannelEndpoint(theSubscription);
+        }
+    }
 
-			if (!"channel".equals(uri.getScheme())) {
-				throw new UnprocessableEntityException(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'");
-			}
-			String channelName = uri.getSchemeSpecificPart();
-			if (isBlank(channelName)) {
-				throw new UnprocessableEntityException(Msg.code(18) + "A channel name must appear after channel: in a message Subscription endpoint");
-			}
-		} catch (URISyntaxException e) {
-			throw new UnprocessableEntityException(Msg.code(19) + "Invalid subscription endpoint uri " + theEndpointUrl, e);
-		}
-	}
+    @SuppressWarnings("WeakerAccess")
+    protected void validateChannelEndpoint(CanonicalSubscription theResource) {
+        if (isBlank(theResource.getEndpointUrl())) {
+            throw new UnprocessableEntityException(
+                    Msg.code(21)
+                            + "Rest-hook subscriptions must have Subscription.channel.endpoint"
+                            + " defined");
+        }
+    }
 
-	@SuppressWarnings("WeakerAccess")
-	protected void validateChannelType(CanonicalSubscription theSubscription) {
-		if (theSubscription.getChannelType() == null) {
-			throw new UnprocessableEntityException(Msg.code(20) + "Subscription.channel.type must be populated");
-		} else if (theSubscription.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
-			validateChannelPayload(theSubscription);
-			validateChannelEndpoint(theSubscription);
-		}
-	}
+    @SuppressWarnings("WeakerAccess")
+    protected void validateChannelPayload(CanonicalSubscription theResource) {
+        if (!isBlank(theResource.getPayloadString())
+                && EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
+            throw new UnprocessableEntityException(
+                    Msg.code(1985)
+                            + "Invalid value for Subscription.channel.payload: "
+                            + theResource.getPayloadString());
+        }
+    }
 
-	@SuppressWarnings("WeakerAccess")
-	protected void validateChannelEndpoint(CanonicalSubscription theResource) {
-		if (isBlank(theResource.getEndpointUrl())) {
-			throw new UnprocessableEntityException(Msg.code(21) + "Rest-hook subscriptions must have Subscription.channel.endpoint defined");
-		}
-	}
+    @SuppressWarnings("WeakerAccess")
+    @VisibleForTesting
+    public void setSubscriptionCanonicalizerForUnitTest(
+            SubscriptionCanonicalizer theSubscriptionCanonicalizer) {
+        mySubscriptionCanonicalizer = theSubscriptionCanonicalizer;
+    }
 
-	@SuppressWarnings("WeakerAccess")
-	protected void validateChannelPayload(CanonicalSubscription theResource) {
-		if (!isBlank(theResource.getPayloadString()) && EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
-			throw new UnprocessableEntityException(Msg.code(1985) + "Invalid value for Subscription.channel.payload: " + theResource.getPayloadString());
-		}
-	}
+    @SuppressWarnings("WeakerAccess")
+    @VisibleForTesting
+    public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+        myDaoRegistry = theDaoRegistry;
+    }
 
-	@SuppressWarnings("WeakerAccess")
-	@VisibleForTesting
-	public void setSubscriptionCanonicalizerForUnitTest(SubscriptionCanonicalizer theSubscriptionCanonicalizer) {
-		mySubscriptionCanonicalizer = theSubscriptionCanonicalizer;
-	}
+    @VisibleForTesting
+    public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
+        myStorageSettings = theStorageSettings;
+    }
 
-	@SuppressWarnings("WeakerAccess")
-	@VisibleForTesting
-	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
-	}
+    @VisibleForTesting
+    public void setRequestPartitionHelperSvcForUnitTest(
+            IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+        myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+    }
 
-	@VisibleForTesting
-	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
-		myStorageSettings = theStorageSettings;
-	}
-
-	@VisibleForTesting
-	public void setRequestPartitionHelperSvcForUnitTest(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-	}
-
-
-	@VisibleForTesting
-	@SuppressWarnings("WeakerAccess")
-	public void setSubscriptionStrategyEvaluatorForUnitTest(SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
-		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
-		mySubscriptionQueryValidator = new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator);
-	}
-
+    @VisibleForTesting
+    @SuppressWarnings("WeakerAccess")
+    public void setSubscriptionStrategyEvaluatorForUnitTest(
+            SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+        mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
+        mySubscriptionQueryValidator =
+                new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator);
+    }
 }

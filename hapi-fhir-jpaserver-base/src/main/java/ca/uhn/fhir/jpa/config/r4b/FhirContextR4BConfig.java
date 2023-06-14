@@ -19,22 +19,21 @@
  */
 package ca.uhn.fhir.jpa.config.r4b;
 
+import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.configureFhirContext;
+
 import ca.uhn.fhir.context.FhirContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.configureFhirContext;
-
 public class FhirContextR4BConfig {
 
-	@Bean(name = "primaryFhirContext")
-	@Primary
-	public FhirContext fhirContextR4B() {
-		FhirContext retVal = FhirContext.forR4B();
+    @Bean(name = "primaryFhirContext")
+    @Primary
+    public FhirContext fhirContextR4B() {
+        FhirContext retVal = FhirContext.forR4B();
 
-		configureFhirContext(retVal);
+        configureFhirContext(retVal);
 
-		return retVal;
-	}
-
+        return retVal;
+    }
 }

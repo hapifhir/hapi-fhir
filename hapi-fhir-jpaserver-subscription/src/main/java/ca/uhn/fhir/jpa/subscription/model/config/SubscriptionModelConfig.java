@@ -28,13 +28,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SubscriptionModelConfig {
 
-	@Bean
-	public SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
-		return new SubscriptionCanonicalizer(theFhirContext);
-	}
+    @Bean
+    public SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
+        return new SubscriptionCanonicalizer(theFhirContext);
+    }
 
-	@Bean
-	public SubscriptionStrategyEvaluator subscriptionStrategyEvaluator() {
-		return new SubscriptionStrategyEvaluator();
-	}
+    @Bean
+    public SubscriptionStrategyEvaluator subscriptionStrategyEvaluator() {
+        return new SubscriptionStrategyEvaluator();
+    }
 }

@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.partition;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -16,6 +20,10 @@ import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.ArrayList;
+import javax.servlet.ServletException;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
@@ -30,189 +38,203 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.ServletException;
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.ArrayList;
+public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test {
+    private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+    @Autowired
+    StoppableSubscriptionDeliveringRestHookSubscriber
+            myStoppableSubscriptionDeliveringRestHookSubscriber;
 
-public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test  {
-	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
+    @Autowired private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 
-	@Autowired
-	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+    static final String PARTITION_1 = "PART-1";
+    static final String PARTITION_2 = "PART-2";
 
-	@Autowired
-	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
+    protected MyReadWriteInterceptor myPartitionInterceptor;
+    protected LocalDate myPartitionDate;
+    protected LocalDate myPartitionDate2;
+    protected int myPartitionId;
+    protected int myPartitionId2;
 
-	static final String PARTITION_1 = "PART-1";
-	static final String PARTITION_2 = "PART-2";
+    @BeforeEach
+    public void beforeEach() throws ServletException {
+        myPartitionSettings.setPartitioningEnabled(true);
+        myPartitionSettings.setIncludePartitionInSearchHashes(
+                new PartitionSettings().isIncludePartitionInSearchHashes());
 
-	protected MyReadWriteInterceptor myPartitionInterceptor;
-	protected LocalDate myPartitionDate;
-	protected LocalDate myPartitionDate2;
-	protected int myPartitionId;
-	protected int myPartitionId2;
+        myStorageSettings.setUniqueIndexesEnabled(true);
 
+        myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 
-	@BeforeEach
-	public void beforeEach() throws ServletException {
-		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
+        myPartitionDate = LocalDate.of(2020, Month.JANUARY, 14);
+        myPartitionDate2 = LocalDate.of(2020, Month.JANUARY, 15);
+        myPartitionId = 1;
+        myPartitionId2 = 2;
 
-		myStorageSettings.setUniqueIndexesEnabled(true);
+        myPartitionInterceptor = new MyReadWriteInterceptor();
+        myPartitionInterceptor.setResultPartitionId(
+                RequestPartitionId.fromPartitionNames(PARTITION_1));
 
-		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
+        mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
-		myPartitionDate = LocalDate.of(2020, Month.JANUARY, 14);
-		myPartitionDate2 = LocalDate.of(2020, Month.JANUARY, 15);
-		myPartitionId = 1;
-		myPartitionId2 = 2;
+        myPartitionConfigSvc.createPartition(
+                new PartitionEntity().setId(1).setName(PARTITION_1), null);
+        myPartitionConfigSvc.createPartition(
+                new PartitionEntity().setId(2).setName(PARTITION_2), null);
 
-		myPartitionInterceptor = new MyReadWriteInterceptor();
-		myPartitionInterceptor.setResultPartitionId(RequestPartitionId.fromPartitionNames(PARTITION_1));
+        myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+    }
 
-		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
+    @AfterEach
+    @Override
+    public void afterUnregisterRestHookListener() {
+        myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
+        myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+        myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(
+                new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
 
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
+        myPartitionSettings.setPartitioningEnabled(false);
+        myPartitionSettings.setUnnamedPartitionMode(false);
 
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-	}
+        myStorageSettings.setExpungeEnabled(true);
+        myStorageSettings.setAllowMultipleDelete(true);
+        myDaoRegistry.getSystemDao().expunge(new ExpungeOptions().setExpungeEverything(true), null);
+        myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+        myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
-	@AfterEach
-	@Override
-	public void afterUnregisterRestHookListener() {
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
-		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
+        mySrdInterceptorService.unregisterInterceptorsIf(
+                t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
 
-		myPartitionSettings.setPartitioningEnabled(false);
-		myPartitionSettings.setUnnamedPartitionMode(false);
+        super.afterUnregisterRestHookListener();
+    }
 
-		myStorageSettings.setExpungeEnabled(true);
-		myStorageSettings.setAllowMultipleDelete(true);
-		myDaoRegistry.getSystemDao().expunge(new ExpungeOptions().setExpungeEverything(true), null);
-		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
-		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+    @Test
+    public void testCreateSubscriptionInPartition() throws Exception {
+        String payload = "application/fhir+json";
 
-		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
+        String code = "1000000050";
+        String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+        Subscription subscription = newSubscription(criteria1, payload);
 
-		super.afterUnregisterRestHookListener();
-	}
+        Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
-	@Test
-	public void testCreateSubscriptionInPartition() throws Exception {
-		String payload = "application/fhir+json";
+        myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
 
-		String code = "1000000050";
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		Subscription subscription = newSubscription(criteria1, payload);
+        waitForActivatedSubscriptionCount(1);
 
-		Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+        Observation observation = createBaseObservation(code, "SNOMED-CT");
+        myDaoRegistry.getResourceDao("Observation").create(observation, mySrd);
 
-		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
+        // Should see 1 subscription notification
+        waitForQueueToDrain();
+        Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate());
+        BaseSubscriptionsR4Test.ourObservationProvider.waitForUpdateCount(1);
 
-		waitForActivatedSubscriptionCount(1);
+        Assertions.assertEquals(
+                Constants.CT_FHIR_JSON_NEW,
+                BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().get(0));
+    }
 
-		Observation observation = createBaseObservation(code, "SNOMED-CT");
-		myDaoRegistry.getResourceDao("Observation").create(observation, mySrd);
+    @Test
+    public void testCreateSubscriptionInPartitionAndResourceInDifferentPartition()
+            throws Exception {
+        String payload = "application/fhir+json";
 
-		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate());
-		BaseSubscriptionsR4Test.ourObservationProvider.waitForUpdateCount(1);
+        String code = "1000000050";
+        String criteria1 = "Patient?active=true";
+        Subscription subscription = newSubscription(criteria1, payload);
 
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().get(0));
-	}
+        Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
-	@Test
-	public void testCreateSubscriptionInPartitionAndResourceInDifferentPartition() throws Exception {
-		String payload = "application/fhir+json";
+        myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
 
-		String code = "1000000050";
-		String criteria1 = "Patient?active=true";
-		Subscription subscription = newSubscription(criteria1, payload);
+        waitForActivatedSubscriptionCount(1);
 
-		Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+        Patient patient = new Patient();
+        patient.setActive(true);
+        myDaoRegistry
+                .getResourceDao("Patient")
+                .create(
+                        patient,
+                        new SystemRequestDetails()
+                                .setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
 
-		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
+        // Should see 0 subscription notification
+        waitForQueueToDrain();
+        Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourPatientProvider.getCountCreate());
 
-		waitForActivatedSubscriptionCount(1);
+        try {
+            // Should have 0 matching subscription, if we get 1 update count then the test fails
+            BaseSubscriptionsR4Test.ourPatientProvider.waitForUpdateCount(1);
+            fail();
+        } catch (ConditionTimeoutException e) {
+            Assertions.assertEquals(
+                    0, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
+        }
+    }
 
-		Patient patient = new Patient();
-		patient.setActive(true);
-		myDaoRegistry.getResourceDao("Patient").create(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
+    @Test
+    public void testManualTriggeredSubscriptionInPartition() throws Exception {
+        String payload = "application/fhir+json";
+        String code = "1000000050";
+        String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		// Should see 0 subscription notification
-		waitForQueueToDrain();
-		Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourPatientProvider.getCountCreate());
+        // Create the resource first
+        DaoMethodOutcome observationOutcome =
+                myDaoRegistry
+                        .getResourceDao("Observation")
+                        .create(createBaseObservation(code, "SNOMED-CT"), mySrd);
 
-		try {
-			// Should have 0 matching subscription, if we get 1 update count then the test fails
-			BaseSubscriptionsR4Test.ourPatientProvider.waitForUpdateCount(1);
-			fail();
-		} catch (ConditionTimeoutException e) {
-			Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
-		}
-	}
+        Observation observation = (Observation) observationOutcome.getResource();
 
-	@Test
-	public void testManualTriggeredSubscriptionInPartition() throws Exception {
-		String payload = "application/fhir+json";
-		String code = "1000000050";
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+        // Create the subscription now
+        DaoMethodOutcome subscriptionOutcome =
+                myDaoRegistry
+                        .getResourceDao("Subscription")
+                        .create(newSubscription(criteria1, payload), mySrd);
 
-		// Create the resource first
-		DaoMethodOutcome observationOutcome = myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd);
+        Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
-		Observation observation = (Observation) observationOutcome.getResource();
+        Subscription subscription = (Subscription) subscriptionOutcome.getResource();
 
-		// Create the subscription now
-		DaoMethodOutcome subscriptionOutcome = myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd);
+        waitForActivatedSubscriptionCount(1);
 
-		Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+        ArrayList<IPrimitiveType<String>> resourceIdList = new ArrayList<>();
+        resourceIdList.add(observation.getIdElement());
 
-		Subscription subscription = (Subscription) subscriptionOutcome.getResource();
+        Parameters resultParameters =
+                (Parameters)
+                        mySubscriptionTriggeringSvc.triggerSubscription(
+                                resourceIdList, null, subscription.getIdElement());
 
-		waitForActivatedSubscriptionCount(1);
+        waitForQueueToDrain();
+        Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate());
 
-		ArrayList<IPrimitiveType<String>> resourceIdList = new ArrayList<>();
-		resourceIdList.add(observation.getIdElement());
+        String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
+        assertThat(
+                responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+    }
 
+    @Interceptor
+    public static class MyReadWriteInterceptor {
+        private RequestPartitionId myReadPartitionId;
 
-		Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(resourceIdList, null, subscription.getIdElement());
+        public void setResultPartitionId(RequestPartitionId theRequestPartitionId) {
+            myReadPartitionId = theRequestPartitionId;
+        }
 
-		waitForQueueToDrain();
-		Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate());
+        @Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+        public RequestPartitionId read() {
+            RequestPartitionId retVal = myReadPartitionId;
+            ourLog.info("Returning partition for read: {}", retVal);
+            return retVal;
+        }
 
-		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
-	}
-
-	@Interceptor
-	public static class MyReadWriteInterceptor {
-		private RequestPartitionId myReadPartitionId;
-
-		public void setResultPartitionId(RequestPartitionId theRequestPartitionId) {
-			myReadPartitionId = theRequestPartitionId;
-		}
-
-		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		public RequestPartitionId read() {
-			RequestPartitionId retVal = myReadPartitionId;
-			ourLog.info("Returning partition for read: {}", retVal);
-			return retVal;
-		}
-
-		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		public RequestPartitionId create() {
-			RequestPartitionId retVal = myReadPartitionId;
-			ourLog.info("Returning partition for write: {}", retVal);
-			return retVal;
-		}
-	}
+        @Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
+        public RequestPartitionId create() {
+            RequestPartitionId retVal = myReadPartitionId;
+            ourLog.info("Returning partition for write: {}", retVal);
+            return retVal;
+        }
+    }
 }

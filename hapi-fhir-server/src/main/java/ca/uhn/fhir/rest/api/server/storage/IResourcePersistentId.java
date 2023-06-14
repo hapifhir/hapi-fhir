@@ -22,27 +22,28 @@ package ca.uhn.fhir.rest.api.server.storage;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IResourcePersistentId<T> {
-	IResourcePersistentId NOT_FOUND = new NotFoundPid();
+    IResourcePersistentId NOT_FOUND = new NotFoundPid();
 
-	IIdType getAssociatedResourceId();
+    IIdType getAssociatedResourceId();
 
-	IResourcePersistentId<T> setAssociatedResourceId(IIdType theAssociatedResourceId);
+    IResourcePersistentId<T> setAssociatedResourceId(IIdType theAssociatedResourceId);
 
-	T getId();
+    T getId();
 
-	Long getVersion();
-	/**
-	 * @param theVersion This should only be populated if a specific version is needed. If you want the current version,
-	 *                   leave this as <code>null</code>
-	 */
+    Long getVersion();
 
-	void setVersion(Long theVersion);
+    /**
+     * @param theVersion This should only be populated if a specific version is needed. If you want
+     *     the current version, leave this as <code>null</code>
+     */
+    void setVersion(Long theVersion);
 
-	/**
-	 * Note that, like Version, ResourceType is usually not populated.  It is only populated in scenarios where it
-	 * is needed downstream.
-	 */
+    /**
+     * Note that, like Version, ResourceType is usually not populated. It is only populated in
+     * scenarios where it is needed downstream.
+     */
 
-	// TODO KHS this is only used by batch.  Consider moving this to a new interface just for batch resource ids.
-	String getResourceType();
+    // TODO KHS this is only used by batch.  Consider moving this to a new interface just for batch
+    // resource ids.
+    String getResourceType();
 }

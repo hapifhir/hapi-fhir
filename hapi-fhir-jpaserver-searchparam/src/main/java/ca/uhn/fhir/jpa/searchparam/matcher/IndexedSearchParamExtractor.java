@@ -26,30 +26,41 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-
 public class IndexedSearchParamExtractor {
-	@Autowired
-	private FhirContext myContext;
-	@Autowired
-	private SearchParamExtractorService mySearchParamExtractorService;
+    @Autowired private FhirContext myContext;
+    @Autowired private SearchParamExtractorService mySearchParamExtractorService;
 
-	@Nonnull
-	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest) {
-		return extractIndexedSearchParams(theResource, theRequest, ISearchParamExtractor.ALL_PARAMS);
-	}
+    @Nonnull
+    public ResourceIndexedSearchParams extractIndexedSearchParams(
+            IBaseResource theResource, RequestDetails theRequest) {
+        return extractIndexedSearchParams(
+                theResource, theRequest, ISearchParamExtractor.ALL_PARAMS);
+    }
 
-	@Nonnull
-	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest, ISearchParamExtractor.ISearchParamFilter filter) {
-		ResourceTable entity = new ResourceTable();
-		TransactionDetails transactionDetails = new TransactionDetails();
-		String resourceType = myContext.getResourceType(theResource);
-		entity.setResourceType(resourceType);
-		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
-		mySearchParamExtractorService.extractFromResource(null, theRequest, resourceIndexedSearchParams, new ResourceIndexedSearchParams(), entity, theResource, transactionDetails, false, filter);
-		return resourceIndexedSearchParams;
-	}
+    @Nonnull
+    public ResourceIndexedSearchParams extractIndexedSearchParams(
+            IBaseResource theResource,
+            RequestDetails theRequest,
+            ISearchParamExtractor.ISearchParamFilter filter) {
+        ResourceTable entity = new ResourceTable();
+        TransactionDetails transactionDetails = new TransactionDetails();
+        String resourceType = myContext.getResourceType(theResource);
+        entity.setResourceType(resourceType);
+        ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
+        mySearchParamExtractorService.extractFromResource(
+                null,
+                theRequest,
+                resourceIndexedSearchParams,
+                new ResourceIndexedSearchParams(),
+                entity,
+                theResource,
+                transactionDetails,
+                false,
+                filter);
+        return resourceIndexedSearchParams;
+    }
 }

@@ -19,9 +19,14 @@
  */
 package ca.uhn.fhir.jpa.migrate;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -32,176 +37,177 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.sql.DataSource;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.SQLException;
-
 public enum DriverTypeEnum {
+    H2_EMBEDDED("org.h2.Driver", false),
+    DERBY_EMBEDDED("org.apache.derby.jdbc.EmbeddedDriver", true),
+    MARIADB_10_1("org.mariadb.jdbc.Driver", false),
 
-	H2_EMBEDDED("org.h2.Driver", false),
-	DERBY_EMBEDDED("org.apache.derby.jdbc.EmbeddedDriver", true),
-	MARIADB_10_1("org.mariadb.jdbc.Driver", false),
+    // Formerly com.mysql.jdbc.Driver
+    MYSQL_5_7("com.mysql.cj.jdbc.Driver", false),
 
-	// Formerly com.mysql.jdbc.Driver
-	MYSQL_5_7("com.mysql.cj.jdbc.Driver", false),
+    POSTGRES_9_4("org.postgresql.Driver", false),
 
-	POSTGRES_9_4("org.postgresql.Driver", false),
+    ORACLE_12C("oracle.jdbc.OracleDriver", false),
 
-	ORACLE_12C("oracle.jdbc.OracleDriver", false),
+    MSSQL_2012("com.microsoft.sqlserver.jdbc.SQLServerDriver", false),
 
-	MSSQL_2012("com.microsoft.sqlserver.jdbc.SQLServerDriver", false),
+    COCKROACHDB_21_1("org.postgresql.Driver", false),
+    ;
 
-	COCKROACHDB_21_1("org.postgresql.Driver", false),
+    private static final Logger ourLog = LoggerFactory.getLogger(DriverTypeEnum.class);
+    private String myDriverClassName;
+    private boolean myDerby;
 
-	;
+    /** Constructor */
+    DriverTypeEnum(String theDriverClassName, boolean theDerby) {
+        myDriverClassName = theDriverClassName;
+        myDerby = theDerby;
+    }
 
-	private static final Logger ourLog = LoggerFactory.getLogger(DriverTypeEnum.class);
-	private String myDriverClassName;
-	private boolean myDerby;
+    public static DriverTypeEnum fromDriverClassName(String theDriverClassName) {
+        for (DriverTypeEnum driverTypeEnum : DriverTypeEnum.values()) {
+            if (driverTypeEnum.myDriverClassName.equals(theDriverClassName)) {
+                return driverTypeEnum;
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * Constructor
-	 */
-	DriverTypeEnum(String theDriverClassName, boolean theDerby) {
-		myDriverClassName = theDriverClassName;
-		myDerby = theDerby;
-	}
+    public String getDriverClassName() {
+        return myDriverClassName;
+    }
 
-	public static DriverTypeEnum fromDriverClassName(String theDriverClassName) {
-		for (DriverTypeEnum driverTypeEnum : DriverTypeEnum.values()) {
-			if (driverTypeEnum.myDriverClassName.equals(theDriverClassName)) {
-				return driverTypeEnum;
-			}
-		}
-		return null;
-	}
+    public String getSchemaFilename() {
+        String retval;
+        switch (this) {
+            case H2_EMBEDDED:
+                retval = "hapifhirh2.sql";
+                break;
+            case DERBY_EMBEDDED:
+                retval = "derbytenseven.sql";
+                break;
+            case MYSQL_5_7:
+            case MARIADB_10_1:
+                retval = "mysql57.sql";
+                break;
+            case POSTGRES_9_4:
+                retval = "hapifhirpostgres94-complete.sql";
+                break;
+            case ORACLE_12C:
+                retval = "oracle12c.sql";
+                break;
+            case MSSQL_2012:
+                retval = "sqlserver2012.sql";
+                break;
+            case COCKROACHDB_21_1:
+                retval = "cockroachdb201.sql";
+                break;
+            default:
+                throw new ConfigurationException(
+                        Msg.code(45)
+                                + "No schema initialization script available for driver "
+                                + this);
+        }
+        return retval;
+    }
 
-	public String getDriverClassName() {
-		return myDriverClassName;
-	}
+    public ConnectionProperties newConnectionProperties(
+            String theUrl, String theUsername, String thePassword) {
 
-	public String getSchemaFilename() {
-		String retval;
-		switch (this) {
-			case H2_EMBEDDED:
-				retval = "hapifhirh2.sql";
-				break;
-			case DERBY_EMBEDDED:
-				retval = "derbytenseven.sql";
-				break;
-			case MYSQL_5_7:
-			case MARIADB_10_1:
-				retval = "mysql57.sql";
-				break;
-			case POSTGRES_9_4:
-				retval = "hapifhirpostgres94-complete.sql";
-				break;
-			case ORACLE_12C:
-				retval = "oracle12c.sql";
-				break;
-			case MSSQL_2012:
-				retval = "sqlserver2012.sql";
-				break;
-			case COCKROACHDB_21_1:
-				retval = "cockroachdb201.sql";
-				break;
-			default:
-				throw new ConfigurationException(Msg.code(45) + "No schema initialization script available for driver " + this);
-		}
-		return retval;
-	}
+        BasicDataSource dataSource =
+                new BasicDataSource() {
+                    @Override
+                    public Connection getConnection() throws SQLException {
+                        ourLog.debug("Creating new DB connection");
+                        return super.getConnection();
+                    }
+                };
+        dataSource.setDriverClassName(myDriverClassName);
+        dataSource.setUrl(theUrl);
+        dataSource.setUsername(theUsername);
+        dataSource.setPassword(thePassword);
 
-	public ConnectionProperties newConnectionProperties(String theUrl, String theUsername, String thePassword) {
+        // A check for WS-2020-0287
+        assert dataSource.getJmxName() == null;
 
-		BasicDataSource dataSource = new BasicDataSource() {
-			@Override
-			public Connection getConnection() throws SQLException {
-				ourLog.debug("Creating new DB connection");
-				return super.getConnection();
-			}
-		};
-		dataSource.setDriverClassName(myDriverClassName);
-		dataSource.setUrl(theUrl);
-		dataSource.setUsername(theUsername);
-		dataSource.setPassword(thePassword);
+        return newConnectionProperties(dataSource);
+    }
 
-		// A check for WS-2020-0287
-		assert dataSource.getJmxName() == null;
+    @Nonnull
+    public ConnectionProperties newConnectionProperties(DataSource theDataSource) {
+        try {
+            Class.forName(myDriverClassName).getConstructor().newInstance();
+        } catch (ClassNotFoundException
+                | InstantiationException
+                | IllegalAccessException
+                | NoSuchMethodException
+                | InvocationTargetException e) {
+            throw new InternalErrorException(
+                    Msg.code(46) + "Unable to find driver class: " + myDriverClassName, e);
+        }
 
-		return newConnectionProperties(dataSource);
-	}
+        DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
+        transactionManager.setDataSource(theDataSource);
+        transactionManager.afterPropertiesSet();
 
-	@Nonnull
-	public ConnectionProperties newConnectionProperties(DataSource theDataSource) {
-		try {
-			Class.forName(myDriverClassName).getConstructor().newInstance();
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-			throw new InternalErrorException(Msg.code(46) + "Unable to find driver class: " + myDriverClassName, e);
-		}
+        TransactionTemplate txTemplate = new TransactionTemplate();
+        txTemplate.setTransactionManager(transactionManager);
+        txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        txTemplate.afterPropertiesSet();
 
-		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
-		transactionManager.setDataSource(theDataSource);
-		transactionManager.afterPropertiesSet();
+        return new ConnectionProperties(theDataSource, txTemplate, this);
+    }
 
-		TransactionTemplate txTemplate = new TransactionTemplate();
-		txTemplate.setTransactionManager(transactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		txTemplate.afterPropertiesSet();
+    public static class ConnectionProperties implements AutoCloseable {
 
-		return new ConnectionProperties(theDataSource, txTemplate, this);
-	}
+        private final DriverTypeEnum myDriverType;
+        private final DataSource myDataSource;
+        private final TransactionTemplate myTxTemplate;
 
-	public static class ConnectionProperties implements AutoCloseable {
+        /** Constructor */
+        public ConnectionProperties(
+                DataSource theDataSource,
+                TransactionTemplate theTxTemplate,
+                DriverTypeEnum theDriverType) {
+            Validate.notNull(theDataSource);
+            Validate.notNull(theTxTemplate);
+            Validate.notNull(theDriverType);
 
-		private final DriverTypeEnum myDriverType;
-		private final DataSource myDataSource;
-		private final TransactionTemplate myTxTemplate;
+            myDataSource = theDataSource;
+            myTxTemplate = theTxTemplate;
+            myDriverType = theDriverType;
+        }
 
-		/**
-		 * Constructor
-		 */
-		public ConnectionProperties(DataSource theDataSource, TransactionTemplate theTxTemplate, DriverTypeEnum theDriverType) {
-			Validate.notNull(theDataSource);
-			Validate.notNull(theTxTemplate);
-			Validate.notNull(theDriverType);
+        public DriverTypeEnum getDriverType() {
+            return myDriverType;
+        }
 
-			myDataSource = theDataSource;
-			myTxTemplate = theTxTemplate;
-			myDriverType = theDriverType;
-		}
+        @Nonnull
+        public DataSource getDataSource() {
+            return myDataSource;
+        }
 
-		public DriverTypeEnum getDriverType() {
-			return myDriverType;
-		}
+        @Nonnull
+        public JdbcTemplate newJdbcTemplate() {
+            JdbcTemplate jdbcTemplate = new JdbcTemplate();
+            jdbcTemplate.setDataSource(myDataSource);
+            return jdbcTemplate;
+        }
 
-		@Nonnull
-		public DataSource getDataSource() {
-			return myDataSource;
-		}
+        @Nonnull
+        public TransactionTemplate getTxTemplate() {
+            return myTxTemplate;
+        }
 
-		@Nonnull
-		public JdbcTemplate newJdbcTemplate() {
-			JdbcTemplate jdbcTemplate = new JdbcTemplate();
-			jdbcTemplate.setDataSource(myDataSource);
-			return jdbcTemplate;
-		}
-
-		@Nonnull
-		public TransactionTemplate getTxTemplate() {
-			return myTxTemplate;
-		}
-
-		@Override
-		public void close() {
-			if (myDataSource instanceof DisposableBean) {
-				try {
-					((DisposableBean) myDataSource).destroy();
-				} catch (Exception e) {
-					ourLog.warn("Could not dispose of driver", e);
-				}
-			}
-		}
-	}
+        @Override
+        public void close() {
+            if (myDataSource instanceof DisposableBean) {
+                try {
+                    ((DisposableBean) myDataSource).destroy();
+                } catch (Exception e) {
+                    ourLog.warn("Could not dispose of driver", e);
+                }
+            }
+        }
+    }
 }

@@ -25,41 +25,35 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ResourceForeignKey {
-	public final String table;
-	public final String key;
+    public final String table;
+    public final String key;
 
-	public ResourceForeignKey(String theTable, String theKey) {
-		table = theTable;
-		key = theKey;
-	}
+    public ResourceForeignKey(String theTable, String theKey) {
+        table = theTable;
+        key = theKey;
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) return true;
 
-		if (theO == null || getClass() != theO.getClass()) return false;
+        if (theO == null || getClass() != theO.getClass()) return false;
 
-		ResourceForeignKey that = (ResourceForeignKey) theO;
+        ResourceForeignKey that = (ResourceForeignKey) theO;
 
-		return new EqualsBuilder()
-			.append(table, that.table)
-			.append(key, that.key)
-			.isEquals();
-	}
+        return new EqualsBuilder().append(table, that.table).append(key, that.key).isEquals();
+    }
 
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(table)
-			.append(key)
-			.toHashCode();
-	}
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(table).append(key).toHashCode();
+    }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("table", table)
-			.append("key", key)
-			.toString();
-	}
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("table", table)
+                .append("key", key)
+                .toString();
+    }
 }

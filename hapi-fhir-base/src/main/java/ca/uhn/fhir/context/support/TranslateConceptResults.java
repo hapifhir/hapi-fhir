@@ -19,75 +19,74 @@
  */
 package ca.uhn.fhir.context.support;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class TranslateConceptResults {
-	private List<TranslateConceptResult> myResults;
-	private String myMessage;
-	private boolean myResult;
+    private List<TranslateConceptResult> myResults;
+    private String myMessage;
+    private boolean myResult;
 
-	public TranslateConceptResults() {
-		super();
-		myResults = new ArrayList<>();
-	}
+    public TranslateConceptResults() {
+        super();
+        myResults = new ArrayList<>();
+    }
 
-	public List<TranslateConceptResult> getResults() {
-		return myResults;
-	}
+    public List<TranslateConceptResult> getResults() {
+        return myResults;
+    }
 
-	public void setResults(List<TranslateConceptResult> theResults) {
-		myResults = theResults;
-	}
+    public void setResults(List<TranslateConceptResult> theResults) {
+        myResults = theResults;
+    }
 
-	public String getMessage() {
-		return myMessage;
-	}
+    public String getMessage() {
+        return myMessage;
+    }
 
-	public void setMessage(String theMessage) {
-		myMessage = theMessage;
-	}
+    public void setMessage(String theMessage) {
+        myMessage = theMessage;
+    }
 
-	public boolean getResult() {
-		return myResult;
-	}
+    public boolean getResult() {
+        return myResult;
+    }
 
-	public void setResult(boolean theMatched) {
-		myResult = theMatched;
-	}
+    public void setResult(boolean theMatched) {
+        myResult = theMatched;
+    }
 
-	public int size() {
-		return getResults().size();
-	}
+    public int size() {
+        return getResults().size();
+    }
 
-	public boolean isEmpty() {
-		return getResults().isEmpty();
-	}
+    public boolean isEmpty() {
+        return getResults().isEmpty();
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) {
-			return true;
-		}
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) {
+            return true;
+        }
 
-		if (theO == null || getClass() != theO.getClass()) {
-			return false;
-		}
+        if (theO == null || getClass() != theO.getClass()) {
+            return false;
+        }
 
-		TranslateConceptResults that = (TranslateConceptResults) theO;
+        TranslateConceptResults that = (TranslateConceptResults) theO;
 
-		EqualsBuilder b = new EqualsBuilder();
-		b.append(myResults, that.myResults);
-		return b.isEquals();
-	}
+        EqualsBuilder b = new EqualsBuilder();
+        b.append(myResults, that.myResults);
+        return b.isEquals();
+    }
 
-	@Override
-	public int hashCode() {
-		HashCodeBuilder b = new HashCodeBuilder(17, 37);
-		b.append(myResults);
-		return b.toHashCode();
-	}
+    @Override
+    public int hashCode() {
+        HashCodeBuilder b = new HashCodeBuilder(17, 37);
+        b.append(myResults);
+        return b.toHashCode();
+    }
 }

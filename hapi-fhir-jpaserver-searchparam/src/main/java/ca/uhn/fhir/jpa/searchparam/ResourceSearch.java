@@ -24,40 +24,44 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * A resource type along with a search parameter map and partition id.  Everything you need to perform a search!
+ * A resource type along with a search parameter map and partition id. Everything you need to
+ * perform a search!
  */
 public class ResourceSearch {
-	private final RuntimeResourceDefinition myRuntimeResourceDefinition;
-	private final SearchParameterMap mySearchParameterMap;
-	private final RequestPartitionId myRequestPartitionId;
+    private final RuntimeResourceDefinition myRuntimeResourceDefinition;
+    private final SearchParameterMap mySearchParameterMap;
+    private final RequestPartitionId myRequestPartitionId;
 
-	public ResourceSearch(RuntimeResourceDefinition theRuntimeResourceDefinition, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId) {
-		myRuntimeResourceDefinition = theRuntimeResourceDefinition;
-		mySearchParameterMap = theSearchParameterMap;
-		myRequestPartitionId = theRequestPartitionId;
-	}
+    public ResourceSearch(
+            RuntimeResourceDefinition theRuntimeResourceDefinition,
+            SearchParameterMap theSearchParameterMap,
+            RequestPartitionId theRequestPartitionId) {
+        myRuntimeResourceDefinition = theRuntimeResourceDefinition;
+        mySearchParameterMap = theSearchParameterMap;
+        myRequestPartitionId = theRequestPartitionId;
+    }
 
-	public RuntimeResourceDefinition getRuntimeResourceDefinition() {
-		return myRuntimeResourceDefinition;
-	}
+    public RuntimeResourceDefinition getRuntimeResourceDefinition() {
+        return myRuntimeResourceDefinition;
+    }
 
-	public SearchParameterMap getSearchParameterMap() {
-		return mySearchParameterMap;
-	}
+    public SearchParameterMap getSearchParameterMap() {
+        return mySearchParameterMap;
+    }
 
-	public String getResourceName() {
-		return myRuntimeResourceDefinition.getName();
-	}
+    public String getResourceName() {
+        return myRuntimeResourceDefinition.getName();
+    }
 
-	public boolean isDeleteExpunge() {
-		return mySearchParameterMap.isDeleteExpunge();
-	}
+    public boolean isDeleteExpunge() {
+        return mySearchParameterMap.isDeleteExpunge();
+    }
 
-	public Class<? extends IBaseResource> getResourceType() {
-		return myRuntimeResourceDefinition.getImplementingClass();
-	}
+    public Class<? extends IBaseResource> getResourceType() {
+        return myRuntimeResourceDefinition.getImplementingClass();
+    }
 
-	public RequestPartitionId getRequestPartitionId() {
-		return myRequestPartitionId;
-	}
+    public RequestPartitionId getRequestPartitionId() {
+        return myRequestPartitionId;
+    }
 }

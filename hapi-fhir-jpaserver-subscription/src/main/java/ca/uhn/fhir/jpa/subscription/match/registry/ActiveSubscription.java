@@ -23,73 +23,72 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteri
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 public class ActiveSubscription {
 
-	private SubscriptionCriteriaParser.SubscriptionCriteria myCriteria;
+    private SubscriptionCriteriaParser.SubscriptionCriteria myCriteria;
 
-	private final String myChannelName;
-	private final String myId;
-	private CanonicalSubscription mySubscription;
-	private boolean flagForDeletion;
+    private final String myChannelName;
+    private final String myId;
+    private CanonicalSubscription mySubscription;
+    private boolean flagForDeletion;
 
-	private ChannelRetryConfiguration myRetryConfigurationParameters;
-	private final AtomicLong myDeliveriesCount = new AtomicLong();
+    private ChannelRetryConfiguration myRetryConfigurationParameters;
+    private final AtomicLong myDeliveriesCount = new AtomicLong();
 
-	public ActiveSubscription(CanonicalSubscription theSubscription, String theChannelName) {
-		myChannelName = theChannelName;
-		myId = theSubscription.getIdPart();
-		setSubscription(theSubscription);
-	}
+    public ActiveSubscription(CanonicalSubscription theSubscription, String theChannelName) {
+        myChannelName = theChannelName;
+        myId = theSubscription.getIdPart();
+        setSubscription(theSubscription);
+    }
 
-	public SubscriptionCriteriaParser.SubscriptionCriteria getCriteria() {
-		return myCriteria;
-	}
+    public SubscriptionCriteriaParser.SubscriptionCriteria getCriteria() {
+        return myCriteria;
+    }
 
-	public CanonicalSubscription getSubscription() {
-		return mySubscription;
-	}
+    public CanonicalSubscription getSubscription() {
+        return mySubscription;
+    }
 
-	public final void setSubscription(CanonicalSubscription theSubscription) {
-		mySubscription = theSubscription;
-		myCriteria = SubscriptionCriteriaParser.parse(theSubscription.getCriteriaString());
-	}
+    public final void setSubscription(CanonicalSubscription theSubscription) {
+        mySubscription = theSubscription;
+        myCriteria = SubscriptionCriteriaParser.parse(theSubscription.getCriteriaString());
+    }
 
-	public String getChannelName() {
-		return myChannelName;
-	}
+    public String getChannelName() {
+        return myChannelName;
+    }
 
-	public boolean isFlagForDeletion() {
-		return flagForDeletion;
-	}
+    public boolean isFlagForDeletion() {
+        return flagForDeletion;
+    }
 
-	public void setFlagForDeletion(boolean theFlagForDeletion) {
-		flagForDeletion = theFlagForDeletion;
-	}
+    public void setFlagForDeletion(boolean theFlagForDeletion) {
+        flagForDeletion = theFlagForDeletion;
+    }
 
-	public String getId() {
-		return myId;
-	}
+    public String getId() {
+        return myId;
+    }
 
-	public CanonicalSubscriptionChannelType getChannelType() {
-		return mySubscription.getChannelType();
-	}
+    public CanonicalSubscriptionChannelType getChannelType() {
+        return mySubscription.getChannelType();
+    }
 
-	public void setRetryConfiguration(ChannelRetryConfiguration theParams) {
-		myRetryConfigurationParameters = theParams;
-	}
+    public void setRetryConfiguration(ChannelRetryConfiguration theParams) {
+        myRetryConfigurationParameters = theParams;
+    }
 
-	public ChannelRetryConfiguration getRetryConfigurationParameters() {
-		return myRetryConfigurationParameters;
-	}
+    public ChannelRetryConfiguration getRetryConfigurationParameters() {
+        return myRetryConfigurationParameters;
+    }
 
-	public long getDeliveriesCount() {
-		return myDeliveriesCount.get();
-	}
+    public long getDeliveriesCount() {
+        return myDeliveriesCount.get();
+    }
 
-	public long incrementDeliveriesCount() {
-		return myDeliveriesCount.incrementAndGet();
-	}
+    public long incrementDeliveriesCount() {
+        return myDeliveriesCount.incrementAndGet();
+    }
 }

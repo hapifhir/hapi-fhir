@@ -19,44 +19,47 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
+import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
-import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
+import java.util.Collection;
+import java.util.Locale;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.Collection;
-import java.util.Locale;
-
 public class NicknameMatcher implements IMdmFieldMatcher {
-	private final NicknameSvc myNicknameSvc;
+    private final NicknameSvc myNicknameSvc;
 
-	public NicknameMatcher(NicknameSvc theNicknameSvc) {
-		myNicknameSvc = theNicknameSvc;
-	}
+    public NicknameMatcher(NicknameSvc theNicknameSvc) {
+        myNicknameSvc = theNicknameSvc;
+    }
 
-	public boolean matches(String theLeftString, String theRightString) {
-		String leftString = theLeftString.toLowerCase(Locale.ROOT);
-		String rightString = theRightString.toLowerCase(Locale.ROOT);
+    public boolean matches(String theLeftString, String theRightString) {
+        String leftString = theLeftString.toLowerCase(Locale.ROOT);
+        String rightString = theRightString.toLowerCase(Locale.ROOT);
 
-		Collection<String> leftNames = myNicknameSvc.getEquivalentNames(leftString);
-		if (leftNames.contains(rightString)) {
-			return true;
-		}
+        Collection<String> leftNames = myNicknameSvc.getEquivalentNames(leftString);
+        if (leftNames.contains(rightString)) {
+            return true;
+        }
 
-		Collection<String> rightNames = myNicknameSvc.getEquivalentNames(rightString);
-		return rightNames.contains(leftString);
-	}
+        Collection<String> rightNames = myNicknameSvc.getEquivalentNames(rightString);
+        return rightNames.contains(leftString);
+    }
 
-	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.getExact());
-			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
+    @Override
+    public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+        if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
+            String leftString =
+                    StringMatcherUtils.extractString(
+                            (IPrimitiveType<?>) theLeftBase, theParams.getExact());
+            String rightString =
+                    StringMatcherUtils.extractString(
+                            (IPrimitiveType<?>) theRightBase, theParams.getExact());
 
-			return matches(leftString, rightString);
-		}
-		return false;
-	}
+            return matches(leftString, rightString);
+        }
+        return false;
+    }
 }

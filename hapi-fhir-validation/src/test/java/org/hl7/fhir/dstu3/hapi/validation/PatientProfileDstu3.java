@@ -1,23 +1,26 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Reference;
-
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.ElementUtil;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
 
-@ResourceDef(name="Patient", profile = "http://hl7.org/fhir/StructureDefinition/Patient")
+@ResourceDef(name = "Patient", profile = "http://hl7.org/fhir/StructureDefinition/Patient")
 public class PatientProfileDstu3 extends Patient {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Child(name="owner", min=0, max=1)
-    @Extension(url="http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#owningOrganization", definedLocally=false, isModifier=false)
-    @Description(shortDefinition="The organization that owns this animal")
+    @Child(name = "owner", min = 0, max = 1)
+    @Extension(
+            url =
+                    "http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#owningOrganization",
+            definedLocally = false,
+            isModifier = false)
+    @Description(shortDefinition = "The organization that owns this animal")
     private Reference owningOrganization;
 
     public Reference getOwningOrganization() {
@@ -32,14 +35,22 @@ public class PatientProfileDstu3 extends Patient {
         return this;
     }
 
-    @Child(name="colorPrimary", min=0, max=1)
-    @Extension(url="http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorPrimary", definedLocally=false, isModifier=false)
-    @Description(shortDefinition="The animals primary color")
+    @Child(name = "colorPrimary", min = 0, max = 1)
+    @Extension(
+            url =
+                    "http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorPrimary",
+            definedLocally = false,
+            isModifier = false)
+    @Description(shortDefinition = "The animals primary color")
     private CodeableConcept colorPrimary;
 
-    @Child(name="colorSecondary", min=0, max=1)
-    @Extension(url="http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary", definedLocally=false, isModifier=false)
-    @Description(shortDefinition="The animals secondary color")
+    @Child(name = "colorSecondary", min = 0, max = 1)
+    @Extension(
+            url =
+                    "http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary",
+            definedLocally = false,
+            isModifier = false)
+    @Description(shortDefinition = "The animals secondary color")
     private CodeableConcept colorSecondary;
 
     public CodeableConcept getColorPrimary() {
@@ -66,8 +77,9 @@ public class PatientProfileDstu3 extends Patient {
 
     @Override
     public boolean isEmpty() {
-        return super.isEmpty() && ElementUtil.isEmpty(owningOrganization) &&  ElementUtil.isEmpty(colorPrimary)
-                && ElementUtil.isEmpty(colorSecondary) ;
+        return super.isEmpty()
+                && ElementUtil.isEmpty(owningOrganization)
+                && ElementUtil.isEmpty(colorPrimary)
+                && ElementUtil.isEmpty(colorSecondary);
     }
-
 }

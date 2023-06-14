@@ -19,12 +19,16 @@
  */
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.i18n.Msg;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
+import java.util.Date;
+import java.util.List;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -32,157 +36,158 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.Date;
-import java.util.List;
+public class TransactionProcessorVersionAdapterDstu3
+        implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
+    @Override
+    public void setResponseStatus(Bundle.BundleEntryComponent theBundleEntry, String theStatus) {
+        theBundleEntry.getResponse().setStatus(theStatus);
+    }
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+    @Override
+    public void setResponseLastModified(
+            Bundle.BundleEntryComponent theBundleEntry, Date theLastModified) {
+        theBundleEntry.getResponse().setLastModified(theLastModified);
+    }
 
-public class TransactionProcessorVersionAdapterDstu3 implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
-	@Override
-	public void setResponseStatus(Bundle.BundleEntryComponent theBundleEntry, String theStatus) {
-		theBundleEntry.getResponse().setStatus(theStatus);
-	}
+    @Override
+    public void setResource(Bundle.BundleEntryComponent theBundleEntry, IBaseResource theResource) {
+        theBundleEntry.setResource((Resource) theResource);
+    }
 
-	@Override
-	public void setResponseLastModified(Bundle.BundleEntryComponent theBundleEntry, Date theLastModified) {
-		theBundleEntry.getResponse().setLastModified(theLastModified);
-	}
+    @Override
+    public IBaseResource getResource(Bundle.BundleEntryComponent theBundleEntry) {
+        return theBundleEntry.getResource();
+    }
 
-	@Override
-	public void setResource(Bundle.BundleEntryComponent theBundleEntry, IBaseResource theResource) {
-		theBundleEntry.setResource((Resource) theResource);
-	}
+    @Override
+    public String getBundleType(Bundle theRequest) {
+        if (theRequest.getType() == null) {
+            return null;
+        }
+        return theRequest.getTypeElement().getValue().toCode();
+    }
 
-	@Override
-	public IBaseResource getResource(Bundle.BundleEntryComponent theBundleEntry) {
-		return theBundleEntry.getResource();
-	}
+    @Override
+    public void populateEntryWithOperationOutcome(
+            BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
+        OperationOutcome oo = new OperationOutcome();
+        oo.addIssue()
+                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                .setDiagnostics(theCaughtEx.getMessage())
+                .setCode(OperationOutcome.IssueType.EXCEPTION);
+        theEntry.getResponse().setOutcome(oo);
+    }
 
-	@Override
-	public String getBundleType(Bundle theRequest) {
-		if (theRequest.getType() == null) {
-			return null;
-		}
-		return theRequest.getTypeElement().getValue().toCode();
-	}
+    @Override
+    public Bundle createBundle(String theBundleType) {
+        Bundle resp = new Bundle();
+        try {
+            resp.setType(Bundle.BundleType.fromCode(theBundleType));
+        } catch (FHIRException theE) {
+            throw new InternalErrorException(
+                    Msg.code(548) + "Unknown bundle type: " + theBundleType);
+        }
+        return resp;
+    }
 
-	@Override
-	public void populateEntryWithOperationOutcome(BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
-		OperationOutcome oo = new OperationOutcome();
-		oo.addIssue()
-			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-			.setDiagnostics(theCaughtEx.getMessage())
-			.setCode(OperationOutcome.IssueType.EXCEPTION);
-		theEntry.getResponse().setOutcome(oo);
-	}
+    @Override
+    public List<Bundle.BundleEntryComponent> getEntries(Bundle theRequest) {
+        return theRequest.getEntry();
+    }
 
-	@Override
-	public Bundle createBundle(String theBundleType) {
-		Bundle resp = new Bundle();
-		try {
-			resp.setType(Bundle.BundleType.fromCode(theBundleType));
-		} catch (FHIRException theE) {
-			throw new InternalErrorException(Msg.code(548) + "Unknown bundle type: " + theBundleType);
-		}
-		return resp;
-	}
+    @Override
+    public void addEntry(Bundle theBundle, Bundle.BundleEntryComponent theEntry) {
+        theBundle.addEntry(theEntry);
+    }
 
-	@Override
-	public List<Bundle.BundleEntryComponent> getEntries(Bundle theRequest) {
-		return theRequest.getEntry();
-	}
+    @Override
+    public Bundle.BundleEntryComponent addEntry(Bundle theBundle) {
+        return theBundle.addEntry();
+    }
 
-	@Override
-	public void addEntry(Bundle theBundle, Bundle.BundleEntryComponent theEntry) {
-		theBundle.addEntry(theEntry);
-	}
+    @Override
+    public String getEntryRequestVerb(
+            FhirContext theContext, Bundle.BundleEntryComponent theEntry) {
+        String retVal = null;
+        Bundle.HTTPVerb value = theEntry.getRequest().getMethodElement().getValue();
+        if (value != null) {
+            retVal = value.toCode();
+        }
 
-	@Override
-	public Bundle.BundleEntryComponent addEntry(Bundle theBundle) {
-		return theBundle.addEntry();
-	}
+        /*
+         * This is a workaround for the fact that PATCH isn't a valid constant for
+         * DSTU3 Bundle.entry.request.method (it was added in R4)
+         */
+        if (isBlank(retVal)) {
+            Resource resource = theEntry.getResource();
+            boolean isPatch = BundleUtil.isDstu3TransactionPatch(theContext, resource);
 
-	@Override
-	public String getEntryRequestVerb(FhirContext theContext, Bundle.BundleEntryComponent theEntry) {
-		String retVal = null;
-		Bundle.HTTPVerb value = theEntry.getRequest().getMethodElement().getValue();
-		if (value != null) {
-			retVal = value.toCode();
-		}
+            if (isPatch) {
+                retVal = "PATCH";
+            }
+        }
+        return retVal;
+    }
 
-		/*
-		 * This is a workaround for the fact that PATCH isn't a valid constant for
-		 * DSTU3 Bundle.entry.request.method (it was added in R4)
-		 */
-		if (isBlank(retVal)) {
-			Resource resource = theEntry.getResource();
-			boolean isPatch = BundleUtil.isDstu3TransactionPatch(theContext, resource);
+    @Override
+    public String getFullUrl(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getFullUrl();
+    }
 
-			if (isPatch) {
-				retVal = "PATCH";
-			}
-		}
-		return retVal;
-	}
+    @Override
+    public void setFullUrl(Bundle.BundleEntryComponent theEntry, String theFullUrl) {
+        theEntry.setFullUrl(theFullUrl);
+    }
 
-	@Override
-	public String getFullUrl(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getFullUrl();
-	}
+    @Override
+    public String getEntryIfNoneExist(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getRequest().getIfNoneExist();
+    }
 
-	@Override
-	public void setFullUrl(Bundle.BundleEntryComponent theEntry, String theFullUrl) {
-		theEntry.setFullUrl(theFullUrl);
-	}
+    @Override
+    public String getEntryRequestUrl(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getRequest().getUrl();
+    }
 
-	@Override
-	public String getEntryIfNoneExist(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getRequest().getIfNoneExist();
-	}
+    @Override
+    public void setResponseLocation(
+            Bundle.BundleEntryComponent theEntry, String theResponseLocation) {
+        theEntry.getResponse().setLocation(theResponseLocation);
+    }
 
-	@Override
-	public String getEntryRequestUrl(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getRequest().getUrl();
-	}
+    @Override
+    public void setResponseETag(Bundle.BundleEntryComponent theEntry, String theEtag) {
+        theEntry.getResponse().setEtag(theEtag);
+    }
 
-	@Override
-	public void setResponseLocation(Bundle.BundleEntryComponent theEntry, String theResponseLocation) {
-		theEntry.getResponse().setLocation(theResponseLocation);
-	}
+    @Override
+    public String getEntryRequestIfMatch(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getRequest().getIfMatch();
+    }
 
-	@Override
-	public void setResponseETag(Bundle.BundleEntryComponent theEntry, String theEtag) {
-		theEntry.getResponse().setEtag(theEtag);
-	}
+    @Override
+    public String getEntryRequestIfNoneExist(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getRequest().getIfNoneExist();
+    }
 
-	@Override
-	public String getEntryRequestIfMatch(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getRequest().getIfMatch();
-	}
+    @Override
+    public String getEntryRequestIfNoneMatch(Bundle.BundleEntryComponent theEntry) {
+        return theEntry.getRequest().getIfNoneMatch();
+    }
 
-	@Override
-	public String getEntryRequestIfNoneExist(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getRequest().getIfNoneExist();
-	}
+    @Override
+    public void setResponseOutcome(
+            Bundle.BundleEntryComponent theEntry, IBaseOperationOutcome theOperationOutcome) {
+        theEntry.getResponse().setOutcome((Resource) theOperationOutcome);
+    }
 
-	@Override
-	public String getEntryRequestIfNoneMatch(Bundle.BundleEntryComponent theEntry) {
-		return theEntry.getRequest().getIfNoneMatch();
-	}
+    @Override
+    public void setRequestVerb(Bundle.BundleEntryComponent theEntry, String theVerb) {
+        theEntry.getRequest().setMethod(Bundle.HTTPVerb.fromCode(theVerb));
+    }
 
-	@Override
-	public void setResponseOutcome(Bundle.BundleEntryComponent theEntry, IBaseOperationOutcome theOperationOutcome) {
-		theEntry.getResponse().setOutcome((Resource) theOperationOutcome);
-	}
-
-	@Override
-	public void setRequestVerb(Bundle.BundleEntryComponent theEntry, String theVerb) {
-		theEntry.getRequest().setMethod(Bundle.HTTPVerb.fromCode(theVerb));
-	}
-
-	@Override
-	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
-		theEntry.getRequest().setUrl(theUrl);
-	}
-
+    @Override
+    public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
+        theEntry.getRequest().setUrl(theUrl);
+    }
 }

@@ -21,19 +21,13 @@ package ca.uhn.fhir.jpa.bulk.export.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-/**
- * This may be in a "jpa" package, but it is not a jpa model!
- */
+/** This may be in a "jpa" package, but it is not a jpa model! */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum BulkExportJobStatusEnum {
 
-	/**
-	 * Sorting OK!
-	 */
-
-	SUBMITTED,
-	BUILDING,
-	COMPLETE,
-	ERROR;
-
+    /** Sorting OK! */
+    SUBMITTED,
+    BUILDING,
+    COMPLETE,
+    ERROR;
 }

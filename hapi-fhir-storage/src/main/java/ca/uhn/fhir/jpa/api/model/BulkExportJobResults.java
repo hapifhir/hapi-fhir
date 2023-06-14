@@ -21,49 +21,47 @@ package ca.uhn.fhir.jpa.api.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class BulkExportJobResults implements IModelJson {
 
-	@JsonProperty("resourceType2BinaryIds")
-	private Map<String, List<String>> myResourceTypeToBinaryIds;
+    @JsonProperty("resourceType2BinaryIds")
+    private Map<String, List<String>> myResourceTypeToBinaryIds;
 
-	@JsonProperty("reportMessage")
-	private String myReportMsg;
+    @JsonProperty("reportMessage")
+    private String myReportMsg;
 
-	@JsonProperty("originalRequestUrl")
-	private String myOriginalRequestUrl;
+    @JsonProperty("originalRequestUrl")
+    private String myOriginalRequestUrl;
 
-	public BulkExportJobResults() {
-	}
+    public BulkExportJobResults() {}
 
-	public Map<String, List<String>> getResourceTypeToBinaryIds() {
-		if (myResourceTypeToBinaryIds == null) {
-			myResourceTypeToBinaryIds = new HashMap<>();
-		}
-		return myResourceTypeToBinaryIds;
-	}
+    public Map<String, List<String>> getResourceTypeToBinaryIds() {
+        if (myResourceTypeToBinaryIds == null) {
+            myResourceTypeToBinaryIds = new HashMap<>();
+        }
+        return myResourceTypeToBinaryIds;
+    }
 
-	public String getOriginalRequestUrl() {
-		return myOriginalRequestUrl;
-	}
+    public String getOriginalRequestUrl() {
+        return myOriginalRequestUrl;
+    }
 
-	public void setOriginalRequestUrl(String theOriginalRequestUrl) {
-		myOriginalRequestUrl = theOriginalRequestUrl;
-	}
+    public void setOriginalRequestUrl(String theOriginalRequestUrl) {
+        myOriginalRequestUrl = theOriginalRequestUrl;
+    }
 
-	public void setResourceTypeToBinaryIds(Map<String, List<String>> theResourceTypeToBinaryIds) {
-		myResourceTypeToBinaryIds = theResourceTypeToBinaryIds;
-	}
+    public void setResourceTypeToBinaryIds(Map<String, List<String>> theResourceTypeToBinaryIds) {
+        myResourceTypeToBinaryIds = theResourceTypeToBinaryIds;
+    }
 
-	public String getReportMsg() {
-		return myReportMsg;
-	}
+    public String getReportMsg() {
+        return myReportMsg;
+    }
 
-	public void setReportMsg(String theReportMsg) {
-		myReportMsg = theReportMsg;
-	}
+    public void setReportMsg(String theReportMsg) {
+        myReportMsg = theReportMsg;
+    }
 }

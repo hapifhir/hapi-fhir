@@ -20,24 +20,33 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ValueSet;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ValueSet;
 
 public class LoincTop2000LabResultsUsHandler extends BaseLoincTop2000LabResultsHandler {
 
-	public static final String TOP_2000_US_VS_ID = "top-2000-lab-observations-us";
-	public static final String TOP_2000_US_VS_URI = "http://loinc.org/vs/top-2000-lab-observations-us";
-	public static final String TOP_2000_US_VS_NAME = "Top 2000 Lab Results US";
+    public static final String TOP_2000_US_VS_ID = "top-2000-lab-observations-us";
+    public static final String TOP_2000_US_VS_URI =
+            "http://loinc.org/vs/top-2000-lab-observations-us";
+    public static final String TOP_2000_US_VS_NAME = "Top 2000 Lab Results US";
 
-	public LoincTop2000LabResultsUsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets,
-			List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
-		super(theCode2concept, theValueSets, TOP_2000_US_VS_ID, TOP_2000_US_VS_URI, TOP_2000_US_VS_NAME,
-			theConceptMaps, theUploadProperties, theCopyrightStatement);
-	}
-
-
+    public LoincTop2000LabResultsUsHandler(
+            Map<String, TermConcept> theCode2concept,
+            List<ValueSet> theValueSets,
+            List<ConceptMap> theConceptMaps,
+            Properties theUploadProperties,
+            String theCopyrightStatement) {
+        super(
+                theCode2concept,
+                theValueSets,
+                TOP_2000_US_VS_ID,
+                TOP_2000_US_VS_URI,
+                TOP_2000_US_VS_NAME,
+                theConceptMaps,
+                theUploadProperties,
+                theCopyrightStatement);
+    }
 }

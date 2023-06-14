@@ -21,33 +21,30 @@ package ca.uhn.fhir.batch2.jobs.export.models;
 
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 public class ResourceIdList extends BulkExportJobBase {
 
-	/**
-	 * List of Id objects for serialization
-	 */
-	@JsonProperty("ids")
-	private List<BatchResourceId> myBatchResourceIds;
+    /** List of Id objects for serialization */
+    @JsonProperty("ids")
+    private List<BatchResourceId> myBatchResourceIds;
 
-	@JsonProperty("resourceType")
-	private String myResourceType;
+    @JsonProperty("resourceType")
+    private String myResourceType;
 
-	public List<BatchResourceId> getIds() {
-		return myBatchResourceIds;
-	}
+    public List<BatchResourceId> getIds() {
+        return myBatchResourceIds;
+    }
 
-	public void setIds(List<BatchResourceId> theBatchResourceIds) {
-		myBatchResourceIds = theBatchResourceIds;
-	}
+    public void setIds(List<BatchResourceId> theBatchResourceIds) {
+        myBatchResourceIds = theBatchResourceIds;
+    }
 
-	public String getResourceType() {
-		return myResourceType;
-	}
+    public String getResourceType() {
+        return myResourceType;
+    }
 
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
-	}
+    public void setResourceType(String theResourceType) {
+        myResourceType = theResourceType;
+    }
 }

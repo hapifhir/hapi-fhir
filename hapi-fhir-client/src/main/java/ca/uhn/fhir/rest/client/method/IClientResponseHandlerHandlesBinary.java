@@ -19,21 +19,25 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-
 public interface IClientResponseHandlerHandlesBinary<T> extends IClientResponseHandler<T> {
 
-	/**
-	 * If this method returns true, {@link #invokeClient(String, InputStream, int, Map)} should be invoked instead of {@link #invokeClient(String, Reader, int, Map)}
-	 */
-	boolean isBinary();
-	
-	T invokeClientForBinary(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
+    /**
+     * If this method returns true, {@link #invokeClient(String, InputStream, int, Map)} should be
+     * invoked instead of {@link #invokeClient(String, Reader, int, Map)}
+     */
+    boolean isBinary();
 
+    T invokeClientForBinary(
+            String theResponseMimeType,
+            InputStream theResponseReader,
+            int theResponseStatusCode,
+            Map<String, List<String>> theHeaders)
+            throws IOException, BaseServerResponseException;
 }

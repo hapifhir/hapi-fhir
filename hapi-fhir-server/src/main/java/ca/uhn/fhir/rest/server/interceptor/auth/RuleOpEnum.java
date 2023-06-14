@@ -20,17 +20,15 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 enum RuleOpEnum {
-	READ,
-	WRITE, 
-	ALL,
-	/**
-	 * Transaction applies to both transaction and batch
-	 */
-	TRANSACTION, 
-	METADATA, 
-	DELETE,
-	OPERATION,
-	GRAPHQL,
-	CREATE,
-	PATCH
+    READ,
+    WRITE,
+    ALL,
+    /** Transaction applies to both transaction and batch */
+    TRANSACTION,
+    METADATA,
+    DELETE,
+    OPERATION,
+    GRAPHQL,
+    CREATE,
+    PATCH
 }

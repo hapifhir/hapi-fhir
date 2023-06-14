@@ -26,101 +26,104 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.hash.HashingInputStream;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import javax.annotation.Nonnull;
 import java.util.Date;
+import javax.annotation.Nonnull;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class StoredDetails implements IModelJson {
 
-	@JsonProperty("blobId")
-	private String myBlobId;
-	@JsonProperty("bytes")
-	private long myBytes;
-	@JsonProperty("contentType")
-	private String myContentType;
-	@JsonProperty("hash")
-	private String myHash;
-	@JsonProperty("published")
-	@JsonSerialize(using = JsonDateSerializer.class)
-	@JsonDeserialize(using = JsonDateDeserializer.class)
-	private Date myPublished;
+    @JsonProperty("blobId")
+    private String myBlobId;
 
-	/**
-	 * Constructor
-	 */
-	@SuppressWarnings("unused")
-	public StoredDetails() {
-		super();
-	}
+    @JsonProperty("bytes")
+    private long myBytes;
 
-	/**
-	 * Constructor
-	 */
-	public StoredDetails(@Nonnull String theBlobId, long theBytes, @Nonnull String theContentType, HashingInputStream theIs, Date thePublished) {
-		myBlobId = theBlobId;
-		myBytes = theBytes;
-		myContentType = theContentType;
-		myHash = theIs.hash().toString();
-		myPublished = thePublished;
-	}
+    @JsonProperty("contentType")
+    private String myContentType;
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("blobId", myBlobId)
-			.append("bytes", myBytes)
-			.append("contentType", myContentType)
-			.append("hash", myHash)
-			.append("published", myPublished)
-			.toString();
-	}
+    @JsonProperty("hash")
+    private String myHash;
 
-	public String getHash() {
-		return myHash;
-	}
+    @JsonProperty("published")
+    @JsonSerialize(using = JsonDateSerializer.class)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    private Date myPublished;
 
-	public StoredDetails setHash(String theHash) {
-		myHash = theHash;
-		return this;
-	}
+    /** Constructor */
+    @SuppressWarnings("unused")
+    public StoredDetails() {
+        super();
+    }
 
-	public Date getPublished() {
-		return myPublished;
-	}
+    /** Constructor */
+    public StoredDetails(
+            @Nonnull String theBlobId,
+            long theBytes,
+            @Nonnull String theContentType,
+            HashingInputStream theIs,
+            Date thePublished) {
+        myBlobId = theBlobId;
+        myBytes = theBytes;
+        myContentType = theContentType;
+        myHash = theIs.hash().toString();
+        myPublished = thePublished;
+    }
 
-	public StoredDetails setPublished(Date thePublished) {
-		myPublished = thePublished;
-		return this;
-	}
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("blobId", myBlobId)
+                .append("bytes", myBytes)
+                .append("contentType", myContentType)
+                .append("hash", myHash)
+                .append("published", myPublished)
+                .toString();
+    }
 
-	@Nonnull
-	public String getContentType() {
-		return myContentType;
-	}
+    public String getHash() {
+        return myHash;
+    }
 
-	public StoredDetails setContentType(String theContentType) {
-		myContentType = theContentType;
-		return this;
-	}
+    public StoredDetails setHash(String theHash) {
+        myHash = theHash;
+        return this;
+    }
 
-	@Nonnull
-	public String getBlobId() {
-		return myBlobId;
-	}
+    public Date getPublished() {
+        return myPublished;
+    }
 
-	public StoredDetails setBlobId(String theBlobId) {
-		myBlobId = theBlobId;
-		return this;
-	}
+    public StoredDetails setPublished(Date thePublished) {
+        myPublished = thePublished;
+        return this;
+    }
 
-	public long getBytes() {
-		return myBytes;
-	}
+    @Nonnull
+    public String getContentType() {
+        return myContentType;
+    }
 
-	public StoredDetails setBytes(long theBytes) {
-		myBytes = theBytes;
-		return this;
-	}
+    public StoredDetails setContentType(String theContentType) {
+        myContentType = theContentType;
+        return this;
+    }
 
+    @Nonnull
+    public String getBlobId() {
+        return myBlobId;
+    }
+
+    public StoredDetails setBlobId(String theBlobId) {
+        myBlobId = theBlobId;
+        return this;
+    }
+
+    public long getBytes() {
+        return myBytes;
+    }
+
+    public StoredDetails setBytes(long theBytes) {
+        myBytes = theBytes;
+        return this;
+    }
 }

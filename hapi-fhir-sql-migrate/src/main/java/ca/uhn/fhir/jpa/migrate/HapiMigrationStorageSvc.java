@@ -23,109 +23,104 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import org.flywaydb.core.api.MigrationVersion;
-
 import java.util.Optional;
 import java.util.Set;
+import org.flywaydb.core.api.MigrationVersion;
 
 public class HapiMigrationStorageSvc {
-	public static final String UNKNOWN_VERSION = "unknown";
-	public static final String LOCK_TYPE = "hapi-fhir-lock";
+    public static final String UNKNOWN_VERSION = "unknown";
+    public static final String LOCK_TYPE = "hapi-fhir-lock";
 
-	private final HapiMigrationDao myHapiMigrationDao;
+    private final HapiMigrationDao myHapiMigrationDao;
 
-	public HapiMigrationStorageSvc(HapiMigrationDao theHapiMigrationDao) {
-		myHapiMigrationDao = theHapiMigrationDao;
-	}
+    public HapiMigrationStorageSvc(HapiMigrationDao theHapiMigrationDao) {
+        myHapiMigrationDao = theHapiMigrationDao;
+    }
 
-	public String getMigrationTablename() {
-		return myHapiMigrationDao.getMigrationTablename();
-	}
+    public String getMigrationTablename() {
+        return myHapiMigrationDao.getMigrationTablename();
+    }
 
-	/**
-	 * Returns a list of migration tasks that have not yet been successfully run against the database
-	 * @param theTaskList the full list of tasks for this release
-	 * @return a list of tasks that have not yet been successfully run against the database
-	 */
+    /**
+     * Returns a list of migration tasks that have not yet been successfully run against the
+     * database
+     *
+     * @param theTaskList the full list of tasks for this release
+     * @return a list of tasks that have not yet been successfully run against the database
+     */
+    public MigrationTaskList diff(MigrationTaskList theTaskList) {
+        Set<MigrationVersion> appliedMigrationVersions = fetchAppliedMigrationVersions();
 
-	public MigrationTaskList diff(MigrationTaskList theTaskList) {
-		Set<MigrationVersion> appliedMigrationVersions = fetchAppliedMigrationVersions();
+        return theTaskList.diff(appliedMigrationVersions);
+    }
 
-		return theTaskList.diff(appliedMigrationVersions);
-	}
+    /**
+     * @return a list of migration versions that have been successfully run against the database
+     */
+    Set<MigrationVersion> fetchAppliedMigrationVersions() {
+        return myHapiMigrationDao.fetchSuccessfulMigrationVersions();
+    }
 
-	/**
-	 *
-	 * @return a list of migration versions that have been successfully run against the database
-	 */
-	Set<MigrationVersion> fetchAppliedMigrationVersions() {
-		return myHapiMigrationDao.fetchSuccessfulMigrationVersions();
-	}
+    /**
+     * @return the most recent version that was run against the database (used for logging purposes)
+     */
+    public String getLatestAppliedVersion() {
+        return fetchAppliedMigrationVersions().stream()
+                .sorted()
+                .map(MigrationVersion::toString)
+                .reduce((first, second) -> second)
+                .orElse(UNKNOWN_VERSION);
+    }
 
-	/**
-	 *
-	 * @return the most recent version that was run against the database (used for logging purposes)
-	 */
-	public String getLatestAppliedVersion() {
-		return fetchAppliedMigrationVersions().stream()
-			.sorted()
-			.map(MigrationVersion::toString)
-			.reduce((first, second) -> second)
-			.orElse(UNKNOWN_VERSION);
-	}
+    /** Save a migration task to the database */
+    public void saveTask(BaseTask theBaseTask, Integer theMillis, boolean theSuccess) {
+        HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(theBaseTask);
+        entity.setExecutionTime(theMillis);
+        entity.setSuccess(theSuccess);
+        myHapiMigrationDao.save(entity);
+    }
 
-	/**
-	 * Save a migration task to the database
-	 */
-	public void saveTask(BaseTask theBaseTask, Integer theMillis, boolean theSuccess) {
-		HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(theBaseTask);
-		entity.setExecutionTime(theMillis);
-		entity.setSuccess(theSuccess);
-		myHapiMigrationDao.save(entity);
-	}
+    /** Create the migration table if it does not already exist */
+    public boolean createMigrationTableIfRequired() {
+        return myHapiMigrationDao.createMigrationTableIfRequired();
+    }
 
-	/**
-	 * Create the migration table if it does not already exist
-	 */
+    /**
+     * @param theLockDescription value of the Description for the lock record
+     * @return true if the record was successfully deleted
+     */
+    public boolean deleteLockRecord(String theLockDescription) {
+        verifyNoOtherLocksPresent(theLockDescription);
 
-	public boolean createMigrationTableIfRequired() {
-		return myHapiMigrationDao.createMigrationTableIfRequired();
-	}
+        // Remove the locking row
+        return myHapiMigrationDao.deleteLockRecord(HapiMigrationLock.LOCK_PID, theLockDescription);
+    }
 
+    void verifyNoOtherLocksPresent(String theLockDescription) {
+        Optional<HapiMigrationEntity> otherLockFound =
+                myHapiMigrationDao.findFirstByPidAndNotDescription(
+                        HapiMigrationLock.LOCK_PID, theLockDescription);
 
-	/**
-	 *
-	 * @param  theLockDescription value of the Description for the lock record
-	 * @return true if the record was successfully deleted
-	 */
-	public boolean deleteLockRecord(String theLockDescription) {
-		verifyNoOtherLocksPresent(theLockDescription);
+        // Check that there are no other locks in place. This should not happen!
+        if (otherLockFound.isPresent()) {
+            throw new HapiMigrationException(
+                    Msg.code(2152) + "Internal error: on unlocking, a competing lock was found");
+        }
+    }
 
-		// Remove the locking row
-		return myHapiMigrationDao.deleteLockRecord(HapiMigrationLock.LOCK_PID, theLockDescription);
-	}
+    public boolean insertLockRecord(String theLockDescription) {
+        HapiMigrationEntity entity = new HapiMigrationEntity();
+        entity.setPid(HapiMigrationLock.LOCK_PID);
+        entity.setType(LOCK_TYPE);
+        entity.setDescription(theLockDescription);
+        entity.setExecutionTime(0);
+        entity.setSuccess(true);
 
-	void verifyNoOtherLocksPresent(String theLockDescription) {
-		Optional<HapiMigrationEntity> otherLockFound = myHapiMigrationDao.findFirstByPidAndNotDescription(HapiMigrationLock.LOCK_PID, theLockDescription);
+        return myHapiMigrationDao.save(entity);
+    }
 
-		// Check that there are no other locks in place. This should not happen!
-		if (otherLockFound.isPresent()) {
-			throw new HapiMigrationException(Msg.code(2152) + "Internal error: on unlocking, a competing lock was found");
-		}
-	}
-
-	public boolean insertLockRecord(String theLockDescription) {
-		HapiMigrationEntity entity = new HapiMigrationEntity();
-		entity.setPid(HapiMigrationLock.LOCK_PID);
-		entity.setType(LOCK_TYPE);
-		entity.setDescription(theLockDescription);
-		entity.setExecutionTime(0);
-		entity.setSuccess(true);
-
-		return myHapiMigrationDao.save(entity);
-	}
-
-	public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(Integer theLockPid, String theLockDescription) {
-		return myHapiMigrationDao.findFirstByPidAndNotDescription(theLockPid, theLockDescription);
-	}
+    public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(
+            Integer theLockPid, String theLockDescription) {
+        return myHapiMigrationDao.findFirstByPidAndNotDescription(theLockPid, theLockDescription);
+    }
 }

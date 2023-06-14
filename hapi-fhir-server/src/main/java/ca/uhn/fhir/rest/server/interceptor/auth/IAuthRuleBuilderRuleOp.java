@@ -19,61 +19,68 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import java.util.Collection;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Collection;
+public interface IAuthRuleBuilderRuleOp
+        extends IAuthRuleBuilderAppliesTo<IAuthRuleBuilderRuleOpClassifier> {
 
-public interface IAuthRuleBuilderRuleOp extends IAuthRuleBuilderAppliesTo<IAuthRuleBuilderRuleOpClassifier> {
+    /**
+     * Rule applies to the resource with the given ID (e.g. <code>Patient/123</code>)
+     *
+     * <p>See the following examples which show how theId is interpreted:
+     *
+     * <ul>
+     *   <li><b><code>http://example.com/Patient/123</code></b> - Any Patient resource with the ID
+     *       "123" will be matched (note: the base URL part is ignored)
+     *   <li><b><code>Patient/123</code></b> - Any Patient resource with the ID "123" will be
+     *       matched
+     *   <li><b><code>123</code></b> - Any resource of any type with the ID "123" will be matched
+     * </ul>
+     *
+     * @param theId The ID of the resource to apply (e.g. <code>Patient/123</code>)
+     * @throws IllegalArgumentException If theId does not contain an ID with at least an ID part
+     * @throws NullPointerException If theId is null
+     */
+    IAuthRuleFinished instance(String theId);
 
-	/**
-	 * Rule applies to the resource with the given ID (e.g. <code>Patient/123</code>)
-	 * <p>
-	 * See the following examples which show how theId is interpreted:
-	 * </p>
-	 * <ul>
-	 * <li><b><code>http://example.com/Patient/123</code></b> - Any Patient resource with the ID "123" will be matched (note: the base URL part is ignored)</li>
-	 * <li><b><code>Patient/123</code></b> - Any Patient resource with the ID "123" will be matched</li>
-	 * <li><b><code>123</code></b> - Any resource of any type with the ID "123" will be matched</li>
-	 * </ul>
-	 *
-	 * @param theId The ID of the resource to apply  (e.g. <code>Patient/123</code>)
-	 * @throws IllegalArgumentException If theId does not contain an ID with at least an ID part
-	 * @throws NullPointerException     If theId is null
-	 */
-	IAuthRuleFinished instance(String theId);
+    /**
+     * Rule applies to the resource with the given ID (e.g. <code>Patient/123</code>)
+     *
+     * <p>See the following examples which show how theId is interpreted:
+     *
+     * <ul>
+     *   <li><b><code>http://example.com/Patient/123</code></b> - Any Patient resource with the ID
+     *       "123" will be matched (note: the base URL part is ignored)
+     *   <li><b><code>Patient/123</code></b> - Any Patient resource with the ID "123" will be
+     *       matched
+     *   <li><b><code>123</code></b> - Any resource of any type with the ID "123" will be matched
+     * </ul>
+     *
+     * >*
+     *
+     * @param theId The ID of the resource to apply (e.g. <code>Patient/123</code>)
+     * @throws IllegalArgumentException If theId does not contain an ID with at least an ID part
+     * @throws NullPointerException If theId is null
+     */
+    IAuthRuleFinished instance(IIdType theId);
 
-	/**
-	 * Rule applies to the resource with the given ID (e.g. <code>Patient/123</code>)
-	 * <p>
-	 * See the following examples which show how theId is interpreted:
-	 * </p>
-	 * <ul>
-	 * <li><b><code>http://example.com/Patient/123</code></b> - Any Patient resource with the ID "123" will be matched (note: the base URL part is ignored)</li>
-	 * <li><b><code>Patient/123</code></b> - Any Patient resource with the ID "123" will be matched</li>
-	 * <li><b><code>123</code></b> - Any resource of any type with the ID "123" will be matched</li>
-	 * </ul>
-	 >*
-	 * @param theId The ID of the resource to apply  (e.g. <code>Patient/123</code>)
-	 * @throws IllegalArgumentException If theId does not contain an ID with at least an ID part
-	 * @throws NullPointerException     If theId is null
-	 */
-	IAuthRuleFinished instance(IIdType theId);
-
-	/**
-	 * Rule applies to the resource with the given ID (e.g. <code>Patient/123</code>)
-	 * <p>
-	 * See the following examples which show how theId is interpreted:
-	 * </p>
-	 * <ul>
-	 * <li><b><code>http://example.com/Patient/123</code></b> - Any Patient resource with the ID "123" will be matched (note: the base URL part is ignored)</li>
-	 * <li><b><code>Patient/123</code></b> - Any Patient resource with the ID "123" will be matched</li>
-	 * <li><b><code>123</code></b> - Any resource of any type with the ID "123" will be matched</li>
-	 * </ul>
-	 *
-	 * @param theIds The IDs of the resource to apply  (e.g. <code>Patient/123</code>)
-	 * @throws IllegalArgumentException If theId does not contain an ID with at least an ID part
-	 * @throws NullPointerException     If theId is null
-	 */
-	IAuthRuleFinished instances(Collection<IIdType> theIds);
-
+    /**
+     * Rule applies to the resource with the given ID (e.g. <code>Patient/123</code>)
+     *
+     * <p>See the following examples which show how theId is interpreted:
+     *
+     * <ul>
+     *   <li><b><code>http://example.com/Patient/123</code></b> - Any Patient resource with the ID
+     *       "123" will be matched (note: the base URL part is ignored)
+     *   <li><b><code>Patient/123</code></b> - Any Patient resource with the ID "123" will be
+     *       matched
+     *   <li><b><code>123</code></b> - Any resource of any type with the ID "123" will be matched
+     * </ul>
+     *
+     * @param theIds The IDs of the resource to apply (e.g. <code>Patient/123</code>)
+     * @throws IllegalArgumentException If theId does not contain an ID with at least an ID part
+     * @throws NullPointerException If theId is null
+     */
+    IAuthRuleFinished instances(Collection<IIdType> theIds);
 }

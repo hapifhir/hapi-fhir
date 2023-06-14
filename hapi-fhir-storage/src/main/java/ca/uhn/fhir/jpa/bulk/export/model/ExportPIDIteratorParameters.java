@@ -19,171 +19,158 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.model;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ExportPIDIteratorParameters {
-	/**
-	 * The primary resource type of interest
-	 */
-	private String myResourceType;
+    /** The primary resource type of interest */
+    private String myResourceType;
 
-	/**
-	 * The earliest date from which to retrieve records
-	 */
-	private Date myStartDate;
+    /** The earliest date from which to retrieve records */
+    private Date myStartDate;
 
-	/**
-	 * List of filters to be applied to the search.
-	 * Eg:
-	 * Patient/123?group=1
-	 * "group=1" would be the filter
-	 */
-	private List<String> myFilters;
+    /**
+     * List of filters to be applied to the search. Eg: Patient/123?group=1 "group=1" would be the
+     * filter
+     */
+    private List<String> myFilters;
 
-	/**
-	 * The ID of the BatchJob.
-	 * (Batch jobs are stored in Persistence, to keep track
-	 * of results/status).
-	 */
-	private String myInstanceId;
-	private String myChunkId;
-	/**
-	 * The export style
-	 */
-	private BulkDataExportOptions.ExportStyle myExportStyle;
-	/**
-	 * the group id
-	 */
-	private String myGroupId;
-	/**
-	 * For group export - whether or not to expand mdm
-	 */
-	private boolean myExpandMdm;
-	/**
-	 * The patient id
-	 */
-	private List<String> myPatientIds;
-	/**
-	 * The partition id
-	 */
-	private RequestPartitionId myPartitionId;
+    /**
+     * The ID of the BatchJob. (Batch jobs are stored in Persistence, to keep track of
+     * results/status).
+     */
+    private String myInstanceId;
 
-	/**
-	 * The list of resource types to recurse on.
-	 * This should always have at least one resource in it (the resource being requested)!
-	 */
-	private List<String> myRequestedResourceTypes;
+    private String myChunkId;
 
-	public String getChunkId() {
-		return myChunkId;
-	}
+    /** The export style */
+    private BulkDataExportOptions.ExportStyle myExportStyle;
 
-	public void setChunkId(String theChunkId) {
-		myChunkId = theChunkId;
-	}
+    /** the group id */
+    private String myGroupId;
 
-	public String getResourceType() {
-		return myResourceType;
-	}
+    /** For group export - whether or not to expand mdm */
+    private boolean myExpandMdm;
 
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
-	}
+    /** The patient id */
+    private List<String> myPatientIds;
 
-	public Date getStartDate() {
-		return myStartDate;
-	}
+    /** The partition id */
+    private RequestPartitionId myPartitionId;
 
-	public void setStartDate(Date theStartDate) {
-		myStartDate = theStartDate;
-	}
+    /**
+     * The list of resource types to recurse on. This should always have at least one resource in it
+     * (the resource being requested)!
+     */
+    private List<String> myRequestedResourceTypes;
 
-	public List<String> getFilters() {
-		return myFilters;
-	}
+    public String getChunkId() {
+        return myChunkId;
+    }
 
-	public void setFilters(List<String> theFilters) {
-		myFilters = theFilters;
-	}
+    public void setChunkId(String theChunkId) {
+        myChunkId = theChunkId;
+    }
 
-	public String getInstanceId() {
-		return myInstanceId;
-	}
+    public String getResourceType() {
+        return myResourceType;
+    }
 
-	public void setInstanceId(String theInstanceId) {
-		myInstanceId = theInstanceId;
-	}
+    public void setResourceType(String theResourceType) {
+        myResourceType = theResourceType;
+    }
 
-	public BulkDataExportOptions.ExportStyle getExportStyle() {
-		return myExportStyle;
-	}
+    public Date getStartDate() {
+        return myStartDate;
+    }
 
-	public void setExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
-		myExportStyle = theExportStyle;
-	}
+    public void setStartDate(Date theStartDate) {
+        myStartDate = theStartDate;
+    }
 
-	public String getGroupId() {
-		return myGroupId;
-	}
+    public List<String> getFilters() {
+        return myFilters;
+    }
 
-	public void setGroupId(String theGroupId) {
-		myGroupId = theGroupId;
-	}
+    public void setFilters(List<String> theFilters) {
+        myFilters = theFilters;
+    }
 
-	public boolean isExpandMdm() {
-		return myExpandMdm;
-	}
+    public String getInstanceId() {
+        return myInstanceId;
+    }
 
-	public void setExpandMdm(boolean theExpandMdm) {
-		myExpandMdm = theExpandMdm;
-	}
+    public void setInstanceId(String theInstanceId) {
+        myInstanceId = theInstanceId;
+    }
 
-	public List<String> getPatientIds() {
-		return myPatientIds;
-	}
+    public BulkDataExportOptions.ExportStyle getExportStyle() {
+        return myExportStyle;
+    }
 
-	public void setPatientIds(List<String> thePatientIds) {
-		myPatientIds = thePatientIds;
-	}
+    public void setExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
+        myExportStyle = theExportStyle;
+    }
 
-	public RequestPartitionId getPartitionIdOrAllPartitions() {
-		if (myPartitionId != null) {
-			return myPartitionId;
-		} else {
-			return RequestPartitionId.allPartitions();
-		}
-	}
+    public String getGroupId() {
+        return myGroupId;
+    }
 
-	public void setPartitionId(RequestPartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
-	}
+    public void setGroupId(String theGroupId) {
+        myGroupId = theGroupId;
+    }
 
-	public List<String> getRequestedResourceTypes() {
-		if (myRequestedResourceTypes == null) {
-			myRequestedResourceTypes = new ArrayList<>();
-			if (!isBlank(myResourceType)) {
-				myRequestedResourceTypes.add(myResourceType);
-			}
-		}
-		return myRequestedResourceTypes;
-	}
+    public boolean isExpandMdm() {
+        return myExpandMdm;
+    }
 
-	public void setRequestedResourceTypes(List<String> theRequestedResourceTypes) {
-		myRequestedResourceTypes = theRequestedResourceTypes;
-	}
+    public void setExpandMdm(boolean theExpandMdm) {
+        myExpandMdm = theExpandMdm;
+    }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-	}
+    public List<String> getPatientIds() {
+        return myPatientIds;
+    }
 
+    public void setPatientIds(List<String> thePatientIds) {
+        myPatientIds = thePatientIds;
+    }
+
+    public RequestPartitionId getPartitionIdOrAllPartitions() {
+        if (myPartitionId != null) {
+            return myPartitionId;
+        } else {
+            return RequestPartitionId.allPartitions();
+        }
+    }
+
+    public void setPartitionId(RequestPartitionId thePartitionId) {
+        myPartitionId = thePartitionId;
+    }
+
+    public List<String> getRequestedResourceTypes() {
+        if (myRequestedResourceTypes == null) {
+            myRequestedResourceTypes = new ArrayList<>();
+            if (!isBlank(myResourceType)) {
+                myRequestedResourceTypes.add(myResourceType);
+            }
+        }
+        return myRequestedResourceTypes;
+    }
+
+    public void setRequestedResourceTypes(List<String> theRequestedResourceTypes) {
+        myRequestedResourceTypes = theRequestedResourceTypes;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
 }

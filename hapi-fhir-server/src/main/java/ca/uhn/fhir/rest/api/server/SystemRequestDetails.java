@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
+import static java.util.Objects.nonNull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -35,202 +37,198 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static java.util.Objects.nonNull;
-
 /**
- * A default RequestDetails implementation that can be used for system calls to
- * Resource DAO methods when partitioning is enabled. Using a SystemRequestDetails
- * instance for system calls will ensure that any resource queries or updates will
- * use the DEFAULT partition when partitioning is enabled.
+ * A default RequestDetails implementation that can be used for system calls to Resource DAO methods
+ * when partitioning is enabled. Using a SystemRequestDetails instance for system calls will ensure
+ * that any resource queries or updates will use the DEFAULT partition when partitioning is enabled.
  */
 public class SystemRequestDetails extends RequestDetails {
-	private FhirContext myFhirContext;
-	private ListMultimap<String, String> myHeaders;
-	/**
-	 * If a SystemRequestDetails has a RequestPartitionId, it will take precedence over the tenantId
-	 */
-	private RequestPartitionId myRequestPartitionId;
+    private FhirContext myFhirContext;
+    private ListMultimap<String, String> myHeaders;
 
-	private IRestfulServerDefaults myServer = new MyRestfulServerDefaults();
+    /**
+     * If a SystemRequestDetails has a RequestPartitionId, it will take precedence over the tenantId
+     */
+    private RequestPartitionId myRequestPartitionId;
 
-	public SystemRequestDetails() {
-		this(new MyInterceptorBroadcaster());
-	}
+    private IRestfulServerDefaults myServer = new MyRestfulServerDefaults();
 
-	public SystemRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
-		super(theInterceptorBroadcaster);
-	}
+    public SystemRequestDetails() {
+        this(new MyInterceptorBroadcaster());
+    }
 
-	public SystemRequestDetails(RequestDetails theDetails) {
-		super(theDetails);
-		if (nonNull(theDetails.getServer())) { myServer = theDetails.getServer(); }
-	}
+    public SystemRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
+        super(theInterceptorBroadcaster);
+    }
 
-	public RequestPartitionId getRequestPartitionId() {
-		return myRequestPartitionId;
-	}
+    public SystemRequestDetails(RequestDetails theDetails) {
+        super(theDetails);
+        if (nonNull(theDetails.getServer())) {
+            myServer = theDetails.getServer();
+        }
+    }
 
-	public SystemRequestDetails setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
-		myRequestPartitionId = theRequestPartitionId;
-		return this;
-	}
+    public RequestPartitionId getRequestPartitionId() {
+        return myRequestPartitionId;
+    }
 
-	@Override
-	protected byte[] getByteStreamRequestContents() {
-		return new byte[0];
-	}
+    public SystemRequestDetails setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+        myRequestPartitionId = theRequestPartitionId;
+        return this;
+    }
 
-	@Override
-	public Charset getCharset() {
-		return null;
-	}
+    @Override
+    protected byte[] getByteStreamRequestContents() {
+        return new byte[0];
+    }
 
-	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
-	}
+    @Override
+    public Charset getCharset() {
+        return null;
+    }
 
-	public void setFhirContext(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
+    @Override
+    public FhirContext getFhirContext() {
+        return myFhirContext;
+    }
 
-	@Override
-	public String getHeader(String name) {
-		List<String> headers = getHeaders(name);
-		if (headers.isEmpty()) {
-			return null;
-		} else {
-			return headers.get(0);
-		}
-	}
+    public void setFhirContext(FhirContext theFhirContext) {
+        myFhirContext = theFhirContext;
+    }
 
-	@Override
-	public List<String> getHeaders(String name) {
-		ListMultimap<String, String> headers = myHeaders;
-		if (headers == null) {
-			headers = ImmutableListMultimap.of();
-		}
-		return headers.get(name);
-	}
+    @Override
+    public String getHeader(String name) {
+        List<String> headers = getHeaders(name);
+        if (headers.isEmpty()) {
+            return null;
+        } else {
+            return headers.get(0);
+        }
+    }
 
-	public void addHeader(String theName, String theValue) {
-		if (myHeaders == null) {
-			myHeaders = ArrayListMultimap.create();
-		}
-		myHeaders.put(theName, theValue);
-	}
+    @Override
+    public List<String> getHeaders(String name) {
+        ListMultimap<String, String> headers = myHeaders;
+        if (headers == null) {
+            headers = ImmutableListMultimap.of();
+        }
+        return headers.get(name);
+    }
 
-	@Override
-	public Object getAttribute(String theAttributeName) {
-		return null;
-	}
+    public void addHeader(String theName, String theValue) {
+        if (myHeaders == null) {
+            myHeaders = ArrayListMultimap.create();
+        }
+        myHeaders.put(theName, theValue);
+    }
 
-	@Override
-	public void setAttribute(String theAttributeName, Object theAttributeValue) {
+    @Override
+    public Object getAttribute(String theAttributeName) {
+        return null;
+    }
 
-	}
+    @Override
+    public void setAttribute(String theAttributeName, Object theAttributeValue) {}
 
-	@Override
-	public InputStream getInputStream() throws IOException {
-		return null;
-	}
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return null;
+    }
 
-	@Override
-	public Reader getReader() throws IOException {
-		return null;
-	}
+    @Override
+    public Reader getReader() throws IOException {
+        return null;
+    }
 
-	@Override
-	public IRestfulServerDefaults getServer() {
-		return myServer;
-	}
+    @Override
+    public IRestfulServerDefaults getServer() {
+        return myServer;
+    }
 
-	@Override
-	public String getServerBaseForRequest() {
-		return null;
-	}
+    @Override
+    public String getServerBaseForRequest() {
+        return null;
+    }
 
-	private static class MyRestfulServerDefaults implements IRestfulServerDefaults {
+    private static class MyRestfulServerDefaults implements IRestfulServerDefaults {
 
-		@Override
-		public AddProfileTagEnum getAddProfileTag() {
-			return null;
-		}
+        @Override
+        public AddProfileTagEnum getAddProfileTag() {
+            return null;
+        }
 
-		@Override
-		public EncodingEnum getDefaultResponseEncoding() {
-			return null;
-		}
+        @Override
+        public EncodingEnum getDefaultResponseEncoding() {
+            return null;
+        }
 
-		@Override
-		public ETagSupportEnum getETagSupport() {
-			return null;
-		}
+        @Override
+        public ETagSupportEnum getETagSupport() {
+            return null;
+        }
 
-		@Override
-		public ElementsSupportEnum getElementsSupport() {
-			return null;
-		}
+        @Override
+        public ElementsSupportEnum getElementsSupport() {
+            return null;
+        }
 
-		@Override
-		public FhirContext getFhirContext() {
-			return null;
-		}
+        @Override
+        public FhirContext getFhirContext() {
+            return null;
+        }
 
-		@Override
-		public List<IServerInterceptor> getInterceptors_() {
-			return null;
-		}
+        @Override
+        public List<IServerInterceptor> getInterceptors_() {
+            return null;
+        }
 
-		@Override
-		public IPagingProvider getPagingProvider() {
-			return null;
-		}
+        @Override
+        public IPagingProvider getPagingProvider() {
+            return null;
+        }
 
-		@Override
-		public boolean isDefaultPrettyPrint() {
-			return false;
-		}
+        @Override
+        public boolean isDefaultPrettyPrint() {
+            return false;
+        }
 
-		@Override
-		public IInterceptorService getInterceptorService() {
-			return null;
-		}
-	}
+        @Override
+        public IInterceptorService getInterceptorService() {
+            return null;
+        }
+    }
 
-	private static class MyInterceptorBroadcaster implements IInterceptorBroadcaster {
+    private static class MyInterceptorBroadcaster implements IInterceptorBroadcaster {
 
-		@Override
-		public boolean callHooks(Pointcut thePointcut, HookParams theParams) {
-			return true;
-		}
+        @Override
+        public boolean callHooks(Pointcut thePointcut, HookParams theParams) {
+            return true;
+        }
 
-		@Override
-		public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
-			return null;
-		}
+        @Override
+        public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
+            return null;
+        }
 
-		@Override
-		public boolean hasHooks(Pointcut thePointcut) {
-			return false;
-		}
-	}
+        @Override
+        public boolean hasHooks(Pointcut thePointcut) {
+            return false;
+        }
+    }
 
-	public static SystemRequestDetails forAllPartitions() {
-		return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions());
-	}
+    public static SystemRequestDetails forAllPartitions() {
+        return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions());
+    }
 
-	public static SystemRequestDetails newSystemRequestAllPartitions() {
-		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-		systemRequestDetails.setRequestPartitionId(RequestPartitionId.allPartitions());
-		return systemRequestDetails;
-	}
-
+    public static SystemRequestDetails newSystemRequestAllPartitions() {
+        SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+        systemRequestDetails.setRequestPartitionId(RequestPartitionId.allPartitions());
+        return systemRequestDetails;
+    }
 }

@@ -26,28 +26,28 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * This utility takes an input collection, breaks it up into chunks of a
- * given maximum chunk size, and then passes those chunks to a consumer for
- * processing. Use this to break up large tasks into smaller tasks.
+ * This utility takes an input collection, breaks it up into chunks of a given maximum chunk size,
+ * and then passes those chunks to a consumer for processing. Use this to break up large tasks into
+ * smaller tasks.
  *
  * @since 6.6.0
  * @param <T> The type for the chunks
  */
 public class TaskChunker<T> {
 
-	public void chunk(Collection<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
-		List<T> input;
-		if (theInput instanceof List) {
-			input = (List<T>) theInput;
-		} else {
-			input = new ArrayList<>(theInput);
-		}
-		for (int i = 0; i < input.size(); i += theChunkSize) {
-			int to = i + theChunkSize;
-			to = Math.min(to, input.size());
-			List<T> batch = input.subList(i, to);
-			theBatchConsumer.accept(batch);
-		}
-	}
-
+    public void chunk(
+            Collection<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
+        List<T> input;
+        if (theInput instanceof List) {
+            input = (List<T>) theInput;
+        } else {
+            input = new ArrayList<>(theInput);
+        }
+        for (int i = 0; i < input.size(); i += theChunkSize) {
+            int to = i + theChunkSize;
+            to = Math.min(to, input.size());
+            List<T> batch = input.subList(i, to);
+            theBatchConsumer.accept(batch);
+        }
+    }
 }

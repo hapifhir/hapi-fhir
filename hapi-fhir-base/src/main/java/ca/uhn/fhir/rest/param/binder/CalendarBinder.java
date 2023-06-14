@@ -19,23 +19,19 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
+import ca.uhn.fhir.model.primitive.InstantDt;
 import java.util.Calendar;
 
-import ca.uhn.fhir.model.primitive.InstantDt;
-
 public final class CalendarBinder extends BaseJavaPrimitiveBinder<Calendar> {
-	public CalendarBinder() {
-	}
+    public CalendarBinder() {}
 
-	@Override
-	protected String doEncode(Calendar theString) {
-		return new InstantDt(theString).getValueAsString();
-	}
+    @Override
+    protected String doEncode(Calendar theString) {
+        return new InstantDt(theString).getValueAsString();
+    }
 
-	@Override
-	protected Calendar doParse(String theString) {
-		return new InstantDt(theString).getValueAsCalendar();
-	}
-
-
+    @Override
+    protected Calendar doParse(String theString) {
+        return new InstantDt(theString).getValueAsCalendar();
+    }
 }

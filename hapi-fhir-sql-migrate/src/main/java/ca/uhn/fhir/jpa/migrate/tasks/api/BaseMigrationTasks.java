@@ -24,90 +24,97 @@ import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import java.util.Collection;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
 import org.flywaydb.core.api.MigrationVersion;
 
-import javax.annotation.Nonnull;
-import java.util.Collection;
-
 public class BaseMigrationTasks<T extends Enum> {
-	MigrationVersion lastVersion;
-	private Multimap<T, BaseTask> myTasks = MultimapBuilder.hashKeys().arrayListValues().build();
+    MigrationVersion lastVersion;
+    private Multimap<T, BaseTask> myTasks = MultimapBuilder.hashKeys().arrayListValues().build();
 
-	@SuppressWarnings("unchecked")
-	public MigrationTaskList getTaskList(@Nonnull T theFrom, @Nonnull T theTo) {
-		Validate.notNull(theFrom);
-		Validate.notNull(theTo);
-		Validate.isTrue(theFrom.ordinal() < theTo.ordinal(), "From version must be lower than to version");
+    @SuppressWarnings("unchecked")
+    public MigrationTaskList getTaskList(@Nonnull T theFrom, @Nonnull T theTo) {
+        Validate.notNull(theFrom);
+        Validate.notNull(theTo);
+        Validate.isTrue(
+                theFrom.ordinal() < theTo.ordinal(), "From version must be lower than to version");
 
-		MigrationTaskList retVal = new MigrationTaskList();
-		for (Object nextVersion : EnumUtils.getEnumList(theFrom.getClass())) {
-			if (((T) nextVersion).ordinal() <= theFrom.ordinal()) {
-				continue;
-			}
-			if (((T) nextVersion).ordinal() > theTo.ordinal()) {
-				continue;
-			}
+        MigrationTaskList retVal = new MigrationTaskList();
+        for (Object nextVersion : EnumUtils.getEnumList(theFrom.getClass())) {
+            if (((T) nextVersion).ordinal() <= theFrom.ordinal()) {
+                continue;
+            }
+            if (((T) nextVersion).ordinal() > theTo.ordinal()) {
+                continue;
+            }
 
-			Collection<BaseTask> nextValues = myTasks.get((T) nextVersion);
-			retVal.addAll(nextValues);
-		}
+            Collection<BaseTask> nextValues = myTasks.get((T) nextVersion);
+            retVal.addAll(nextValues);
+        }
 
-		return retVal;
-	}
+        return retVal;
+    }
 
-	public Builder forVersion(T theRelease) {
-		IAcceptsTasks sink = theTask -> {
-			theTask.validate();
-			myTasks.put(theRelease, theTask);
-		};
-		return new Builder(toReleaseName(theRelease), sink);
-	}
+    public Builder forVersion(T theRelease) {
+        IAcceptsTasks sink =
+                theTask -> {
+                    theTask.validate();
+                    myTasks.put(theRelease, theTask);
+                };
+        return new Builder(toReleaseName(theRelease), sink);
+    }
 
-	@Nonnull
-	protected String toReleaseName(T theRelease) {
-		return theRelease.name();
-	}
+    @Nonnull
+    protected String toReleaseName(T theRelease) {
+        return theRelease.name();
+    }
 
-	public MigrationTaskList getAllTasks(T[] theVersionEnumValues) {
-		MigrationTaskList retval = new MigrationTaskList();
-		for (T nextVersion : theVersionEnumValues) {
-			Collection<BaseTask> nextValues = myTasks.get(nextVersion);
-			if (nextValues != null) {
-				validate(nextValues);
-				retval.addAll(nextValues);
-			}
-		}
+    public MigrationTaskList getAllTasks(T[] theVersionEnumValues) {
+        MigrationTaskList retval = new MigrationTaskList();
+        for (T nextVersion : theVersionEnumValues) {
+            Collection<BaseTask> nextValues = myTasks.get(nextVersion);
+            if (nextValues != null) {
+                validate(nextValues);
+                retval.addAll(nextValues);
+            }
+        }
 
-		return retval;
-	}
+        return retval;
+    }
 
-	protected BaseTask getTaskWithVersion(String theMigrationVersion) {
-		// First normalize the version number
-		String expectedVersion = MigrationVersion.fromVersion(theMigrationVersion).getVersion();
+    protected BaseTask getTaskWithVersion(String theMigrationVersion) {
+        // First normalize the version number
+        String expectedVersion = MigrationVersion.fromVersion(theMigrationVersion).getVersion();
 
-		return myTasks.values().stream()
-			.filter(task -> expectedVersion.equals(task.getMigrationVersion()))
-			.findFirst()
-			.get();
-	}
+        return myTasks.values().stream()
+                .filter(task -> expectedVersion.equals(task.getMigrationVersion()))
+                .findFirst()
+                .get();
+    }
 
-	void validate(Collection<BaseTask> theTasks) {
-		for (BaseTask task : theTasks) {
-			task.validateVersion();
-			String version = task.getMigrationVersion();
-			MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
-			if (lastVersion != null) {
-				if (migrationVersion.compareTo(lastVersion) <= 0) {
-					throw new IllegalStateException(Msg.code(51) + "Migration version " + migrationVersion + " found after migration version " + lastVersion + ".  Migrations need to be in order by version number.");
-				}
-			}
-			lastVersion = migrationVersion;
-		}
-	}
+    void validate(Collection<BaseTask> theTasks) {
+        for (BaseTask task : theTasks) {
+            task.validateVersion();
+            String version = task.getMigrationVersion();
+            MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
+            if (lastVersion != null) {
+                if (migrationVersion.compareTo(lastVersion) <= 0) {
+                    throw new IllegalStateException(
+                            Msg.code(51)
+                                    + "Migration version "
+                                    + migrationVersion
+                                    + " found after migration version "
+                                    + lastVersion
+                                    + ".  Migrations need to be in order by version number.");
+                }
+            }
+            lastVersion = migrationVersion;
+        }
+    }
 
-	public interface IAcceptsTasks {
-		void addTask(BaseTask theTask);
-	}
+    public interface IAcceptsTasks {
+        void addTask(BaseTask theTask);
+    }
 }

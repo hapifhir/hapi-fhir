@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.batch2.jobs.services;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.jobs.export.BulkExportUtil;
@@ -36,101 +38,105 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
+import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
-
-import static org.slf4j.LoggerFactory.getLogger;
-
 public class Batch2JobRunnerImpl implements IBatch2JobRunner {
-	private static final Logger ourLog = getLogger(IBatch2JobRunner.class);
+    private static final Logger ourLog = getLogger(IBatch2JobRunner.class);
 
-	private final IJobCoordinator myJobCoordinator;
+    private final IJobCoordinator myJobCoordinator;
 
-	private final FhirContext myFhirContext;
+    private final FhirContext myFhirContext;
 
-	public Batch2JobRunnerImpl(IJobCoordinator theJobCoordinator, FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-		myJobCoordinator = theJobCoordinator;
-	}
+    public Batch2JobRunnerImpl(IJobCoordinator theJobCoordinator, FhirContext theFhirContext) {
+        myFhirContext = theFhirContext;
+        myJobCoordinator = theJobCoordinator;
+    }
 
-	@Override
-	public Batch2JobStartResponse startNewJob(RequestDetails theRequestDetails, Batch2BaseJobParameters theParameters) {
-		switch (theParameters.getJobDefinitionId()) {
-			case Batch2JobDefinitionConstants.BULK_EXPORT:
-				if (theParameters instanceof BulkExportParameters) {
-					return startBatch2BulkExportJob(theRequestDetails, (BulkExportParameters) theParameters);
-				}
-				else {
-					ourLog.error("Invalid parameters for " + Batch2JobDefinitionConstants.BULK_EXPORT);
-				}
-				break;
-			default:
-				// Dear future devs - add your case above
-				ourLog.error("Invalid JobDefinitionId " + theParameters.getJobDefinitionId());
-				break;
-		}
-		return null;
-	}
+    @Override
+    public Batch2JobStartResponse startNewJob(
+            RequestDetails theRequestDetails, Batch2BaseJobParameters theParameters) {
+        switch (theParameters.getJobDefinitionId()) {
+            case Batch2JobDefinitionConstants.BULK_EXPORT:
+                if (theParameters instanceof BulkExportParameters) {
+                    return startBatch2BulkExportJob(
+                            theRequestDetails, (BulkExportParameters) theParameters);
+                } else {
+                    ourLog.error(
+                            "Invalid parameters for " + Batch2JobDefinitionConstants.BULK_EXPORT);
+                }
+                break;
+            default:
+                // Dear future devs - add your case above
+                ourLog.error("Invalid JobDefinitionId " + theParameters.getJobDefinitionId());
+                break;
+        }
+        return null;
+    }
 
-	@Override
-	public Batch2JobInfo getJobInfo(String theJobId) {
-		JobInstance instance = myJobCoordinator.getInstance(theJobId);
-		if (instance == null) {
-			throw new ResourceNotFoundException(Msg.code(2240) + " : " + theJobId);
-		}
-		return fromJobInstanceToBatch2JobInfo(instance);
-	}
+    @Override
+    public Batch2JobInfo getJobInfo(String theJobId) {
+        JobInstance instance = myJobCoordinator.getInstance(theJobId);
+        if (instance == null) {
+            throw new ResourceNotFoundException(Msg.code(2240) + " : " + theJobId);
+        }
+        return fromJobInstanceToBatch2JobInfo(instance);
+    }
 
-	@Override
-	public Batch2JobOperationResult cancelInstance(String theJobId) throws ResourceNotFoundException {
-		JobOperationResultJson cancelResult = myJobCoordinator.cancelInstance(theJobId);
-		if (cancelResult == null) {
-			throw new ResourceNotFoundException(Msg.code(2195) + " : " + theJobId);
-		}
-		return fromJobOperationResultToBatch2JobOperationResult(cancelResult);
-	}
+    @Override
+    public Batch2JobOperationResult cancelInstance(String theJobId)
+            throws ResourceNotFoundException {
+        JobOperationResultJson cancelResult = myJobCoordinator.cancelInstance(theJobId);
+        if (cancelResult == null) {
+            throw new ResourceNotFoundException(Msg.code(2195) + " : " + theJobId);
+        }
+        return fromJobOperationResultToBatch2JobOperationResult(cancelResult);
+    }
 
-	private Batch2JobOperationResult fromJobOperationResultToBatch2JobOperationResult(@Nonnull JobOperationResultJson theResultJson) {
-		Batch2JobOperationResult result = new Batch2JobOperationResult();
-		result.setOperation(theResultJson.getOperation());
-		result.setMessage(theResultJson.getMessage());
-		result.setSuccess(theResultJson.getSuccess());
-		return result;
-	}
+    private Batch2JobOperationResult fromJobOperationResultToBatch2JobOperationResult(
+            @Nonnull JobOperationResultJson theResultJson) {
+        Batch2JobOperationResult result = new Batch2JobOperationResult();
+        result.setOperation(theResultJson.getOperation());
+        result.setMessage(theResultJson.getMessage());
+        result.setSuccess(theResultJson.getSuccess());
+        return result;
+    }
 
-	private Batch2JobInfo fromJobInstanceToBatch2JobInfo(@Nonnull JobInstance theInstance) {
-		Batch2JobInfo info = new Batch2JobInfo();
-		info.setJobId(theInstance.getInstanceId());
-		// should convert this to a more generic enum for all batch2 (which is what it seems like)
-		// or use the status enum only (combine with bulk export enum)
-		// on the Batch2JobInfo
-		info.setStatus(BulkExportUtil.fromBatchStatus(theInstance.getStatus()));
-		info.setCancelled(theInstance.isCancelled());
-		info.setStartTime(theInstance.getStartTime());
-		info.setEndTime(theInstance.getEndTime());
-		info.setReport(theInstance.getReport());
-		info.setErrorMsg(theInstance.getErrorMessage());
-		info.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
-		if ( Batch2JobDefinitionConstants.BULK_EXPORT.equals(theInstance.getJobDefinitionId())) {
-			BulkExportJobParameters parameters = theInstance.getParameters(BulkExportJobParameters.class);
-			info.setRequestPartitionId(parameters.getPartitionId());
-		}
+    private Batch2JobInfo fromJobInstanceToBatch2JobInfo(@Nonnull JobInstance theInstance) {
+        Batch2JobInfo info = new Batch2JobInfo();
+        info.setJobId(theInstance.getInstanceId());
+        // should convert this to a more generic enum for all batch2 (which is what it seems like)
+        // or use the status enum only (combine with bulk export enum)
+        // on the Batch2JobInfo
+        info.setStatus(BulkExportUtil.fromBatchStatus(theInstance.getStatus()));
+        info.setCancelled(theInstance.isCancelled());
+        info.setStartTime(theInstance.getStartTime());
+        info.setEndTime(theInstance.getEndTime());
+        info.setReport(theInstance.getReport());
+        info.setErrorMsg(theInstance.getErrorMessage());
+        info.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
+        if (Batch2JobDefinitionConstants.BULK_EXPORT.equals(theInstance.getJobDefinitionId())) {
+            BulkExportJobParameters parameters =
+                    theInstance.getParameters(BulkExportJobParameters.class);
+            info.setRequestPartitionId(parameters.getPartitionId());
+        }
 
-		return info;
-	}
+        return info;
+    }
 
-	private Batch2JobStartResponse startBatch2BulkExportJob(RequestDetails theRequestDetails, BulkExportParameters theParameters) {
-		JobInstanceStartRequest request = createStartRequest(theParameters);
-		BulkExportJobParameters parameters = BulkExportJobParameters.createFromExportJobParameters(theParameters);
-		request.setParameters(parameters);
-		return myJobCoordinator.startInstance(theRequestDetails, request);
-	}
+    private Batch2JobStartResponse startBatch2BulkExportJob(
+            RequestDetails theRequestDetails, BulkExportParameters theParameters) {
+        JobInstanceStartRequest request = createStartRequest(theParameters);
+        BulkExportJobParameters parameters =
+                BulkExportJobParameters.createFromExportJobParameters(theParameters);
+        request.setParameters(parameters);
+        return myJobCoordinator.startInstance(theRequestDetails, request);
+    }
 
-	private JobInstanceStartRequest createStartRequest(Batch2BaseJobParameters theParameters) {
-		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(theParameters.getJobDefinitionId());
-		request.setUseCache(theParameters.isUseExistingJobsFirst());
-		return request;
-	}
+    private JobInstanceStartRequest createStartRequest(Batch2BaseJobParameters theParameters) {
+        JobInstanceStartRequest request = new JobInstanceStartRequest();
+        request.setJobDefinitionId(theParameters.getJobDefinitionId());
+        request.setUseCache(theParameters.isUseExistingJobsFirst());
+        return request;
+    }
 }

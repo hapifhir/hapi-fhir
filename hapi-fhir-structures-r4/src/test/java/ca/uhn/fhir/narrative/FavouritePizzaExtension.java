@@ -10,36 +10,37 @@ import org.hl7.fhir.r4.model.StringType;
 @Block
 public class FavouritePizzaExtension extends BackboneElement {
 
-	@Child(name = "childBazExtension")
-	@ca.uhn.fhir.model.api.annotation.Extension(url = "toppings")
-	private StringType myToppings;
-	@Child(name = "childBarExtension")
-	@ca.uhn.fhir.model.api.annotation.Extension(url = "size")
-	private Quantity mySize;
+    @Child(name = "childBazExtension")
+    @ca.uhn.fhir.model.api.annotation.Extension(url = "toppings")
+    private StringType myToppings;
 
-	@Override
-	public BackboneElement copy() {
-		return null;
-	}
+    @Child(name = "childBarExtension")
+    @ca.uhn.fhir.model.api.annotation.Extension(url = "size")
+    private Quantity mySize;
 
-	@Override
-	public boolean isEmpty() {
-		return super.isEmpty() && ElementUtil.isEmpty(myToppings, mySize);
-	}
+    @Override
+    public BackboneElement copy() {
+        return null;
+    }
 
-	public StringType getToppings() {
-		return myToppings;
-	}
+    @Override
+    public boolean isEmpty() {
+        return super.isEmpty() && ElementUtil.isEmpty(myToppings, mySize);
+    }
 
-	public void setToppings(StringType theToppings) {
-		myToppings = theToppings;
-	}
+    public StringType getToppings() {
+        return myToppings;
+    }
 
-	public Quantity getSize() {
-		return mySize;
-	}
+    public void setToppings(StringType theToppings) {
+        myToppings = theToppings;
+    }
 
-	public void setSize(Quantity theSize) {
-		mySize = theSize;
-	}
+    public Quantity getSize() {
+        return mySize;
+    }
+
+    public void setSize(Quantity theSize) {
+        mySize = theSize;
+    }
 }

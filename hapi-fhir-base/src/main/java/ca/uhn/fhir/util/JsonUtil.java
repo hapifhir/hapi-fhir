@@ -27,88 +27,80 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 public class JsonUtil {
 
-	private static final ObjectMapper ourMapperPrettyPrint;
-	private static final ObjectMapper ourMapperNonPrettyPrint;
+    private static final ObjectMapper ourMapperPrettyPrint;
+    private static final ObjectMapper ourMapperNonPrettyPrint;
 
-	static {
-		ourMapperPrettyPrint = new ObjectMapper();
-		ourMapperPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperPrettyPrint.enable(SerializationFeature.INDENT_OUTPUT);
+    static {
+        ourMapperPrettyPrint = new ObjectMapper();
+        ourMapperPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        ourMapperPrettyPrint.enable(SerializationFeature.INDENT_OUTPUT);
 
-		ourMapperNonPrettyPrint = new ObjectMapper();
-		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
-	}
+        ourMapperNonPrettyPrint = new ObjectMapper();
+        ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
+    }
 
-	/**
-	 * Parse JSON
-	 */
-	public static <T> T deserialize(@Nonnull String theInput, @Nonnull Class<T> theType) {
-		try {
-			return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
-		} catch (IOException e) {
-			// Should not happen
-			throw new InternalErrorException(Msg.code(2060) + e);
-		}
-	}
+    /** Parse JSON */
+    public static <T> T deserialize(@Nonnull String theInput, @Nonnull Class<T> theType) {
+        try {
+            return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
+        } catch (IOException e) {
+            // Should not happen
+            throw new InternalErrorException(Msg.code(2060) + e);
+        }
+    }
 
-	/**
-	 * Parse JSON
-	 */
-	public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType) throws IOException {
-		return ourMapperPrettyPrint.readerForListOf(theType).readValue(theInput);
-	}
+    /** Parse JSON */
+    public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType)
+            throws IOException {
+        return ourMapperPrettyPrint.readerForListOf(theType).readValue(theInput);
+    }
 
-	/**
-	 * Encode JSON
-	 */
-	public static String serialize(@Nonnull Object theInput) {
-		return serialize(theInput, true);
-	}
+    /** Encode JSON */
+    public static String serialize(@Nonnull Object theInput) {
+        return serialize(theInput, true);
+    }
 
-	/**
-	 * Encode JSON
-	 */
-	public static String serialize(@Nonnull Object theInput, boolean thePrettyPrint) {
-		try {
-			StringWriter sw = new StringWriter();
-			if (thePrettyPrint) {
-				ourMapperPrettyPrint.writeValue(sw, theInput);
-			} else {
-				ourMapperNonPrettyPrint.writeValue(sw, theInput);
-			}
-			return sw.toString();
-		} catch (IOException e) {
-			// Should not happen
-			throw new InternalErrorException(Msg.code(2061) + e);
-		}
-	}
+    /** Encode JSON */
+    public static String serialize(@Nonnull Object theInput, boolean thePrettyPrint) {
+        try {
+            StringWriter sw = new StringWriter();
+            if (thePrettyPrint) {
+                ourMapperPrettyPrint.writeValue(sw, theInput);
+            } else {
+                ourMapperNonPrettyPrint.writeValue(sw, theInput);
+            }
+            return sw.toString();
+        } catch (IOException e) {
+            // Should not happen
+            throw new InternalErrorException(Msg.code(2061) + e);
+        }
+    }
 
-	/**
-	 * Encode JSON
-	 */
-	public static void serialize(@Nonnull Object theInput, @Nonnull Writer theWriter) throws IOException {
-		// Note: We append a string here rather than just having ourMapper write directly
-		// to the Writer because ourMapper seems to close the writer for some stupid
-		// reason.. There's probably a way of preventing that bit I'm not sure what that
-		// is and it's not a big deal here.
-		theWriter.append(serialize(theInput));
-	}
+    /** Encode JSON */
+    public static void serialize(@Nonnull Object theInput, @Nonnull Writer theWriter)
+            throws IOException {
+        // Note: We append a string here rather than just having ourMapper write directly
+        // to the Writer because ourMapper seems to close the writer for some stupid
+        // reason.. There's probably a way of preventing that bit I'm not sure what that
+        // is and it's not a big deal here.
+        theWriter.append(serialize(theInput));
+    }
 
-	public static String serializeOrInvalidRequest(IModelJson theJson) {
-		try {
-			return ourMapperNonPrettyPrint.writeValueAsString(theJson);
-		} catch (JsonProcessingException e) {
-			throw new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theJson.getClass(), e);
-		}
-	}
+    public static String serializeOrInvalidRequest(IModelJson theJson) {
+        try {
+            return ourMapperNonPrettyPrint.writeValueAsString(theJson);
+        } catch (JsonProcessingException e) {
+            throw new InvalidRequestException(
+                    Msg.code(1741) + "Failed to encode " + theJson.getClass(), e);
+        }
+    }
 }

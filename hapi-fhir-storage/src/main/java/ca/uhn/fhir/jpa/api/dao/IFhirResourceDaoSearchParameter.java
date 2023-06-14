@@ -21,6 +21,5 @@ package ca.uhn.fhir.jpa.api.dao;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface IFhirResourceDaoSearchParameter<T extends IBaseResource> extends IFhirResourceDao<T> {
-
-}
+public interface IFhirResourceDaoSearchParameter<T extends IBaseResource>
+        extends IFhirResourceDao<T> {}

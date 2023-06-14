@@ -20,67 +20,63 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Set;
-
 public class DropTableTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(DropTableTask.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(DropTableTask.class);
 
-	public DropTableTask(String theProductVersion, String theSchemaVersion) {
-		super(theProductVersion, theSchemaVersion);
-	}
+    public DropTableTask(String theProductVersion, String theSchemaVersion) {
+        super(theProductVersion, theSchemaVersion);
+    }
 
-	@Override
-	public void validate() {
-		super.validate();
-		setDescription("Drop table " + getTableName());
-	}
+    @Override
+    public void validate() {
+        super.validate();
+        setDescription("Drop table " + getTableName());
+    }
 
-	@Override
-	public void doExecute() throws SQLException {
-		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
-		if (!tableNames.contains(getTableName())) {
-			return;
-		}
+    @Override
+    public void doExecute() throws SQLException {
+        Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+        if (!tableNames.contains(getTableName())) {
+            return;
+        }
 
-		Set<String> foreignKeys = JdbcUtils.getForeignKeys(getConnectionProperties(), null, getTableName());
-		logInfo(ourLog, "Table {} has the following foreign keys: {}", getTableName(), foreignKeys);
+        Set<String> foreignKeys =
+                JdbcUtils.getForeignKeys(getConnectionProperties(), null, getTableName());
+        logInfo(ourLog, "Table {} has the following foreign keys: {}", getTableName(), foreignKeys);
 
-		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
-		logInfo(ourLog, "Table {} has the following indexes: {}", getTableName(), indexNames);
+        Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
+        logInfo(ourLog, "Table {} has the following indexes: {}", getTableName(), indexNames);
 
-		for (String next : foreignKeys) {
-			List<String> sql = DropForeignKeyTask.generateSql(getTableName(), next, getDriverType());
-			for (@Language("SQL") String nextSql : sql) {
-				executeSql(getTableName(), nextSql);
-			}
-		}
+        for (String next : foreignKeys) {
+            List<String> sql =
+                    DropForeignKeyTask.generateSql(getTableName(), next, getDriverType());
+            for (@Language("SQL") String nextSql : sql) {
+                executeSql(getTableName(), nextSql);
+            }
+        }
 
-		DropIndexTask theIndexTask = new DropIndexTask(getProductVersion(), getSchemaVersion());
-		theIndexTask
-			.setTableName(getTableName())
-			.setConnectionProperties(getConnectionProperties())
-			.setDriverType(getDriverType())
-			.setDryRun(isDryRun());
-		for (String nextIndex : indexNames) {
-			theIndexTask
-				.setIndexName(nextIndex)
-				.execute();
-		}
+        DropIndexTask theIndexTask = new DropIndexTask(getProductVersion(), getSchemaVersion());
+        theIndexTask
+                .setTableName(getTableName())
+                .setConnectionProperties(getConnectionProperties())
+                .setDriverType(getDriverType())
+                .setDryRun(isDryRun());
+        for (String nextIndex : indexNames) {
+            theIndexTask.setIndexName(nextIndex).execute();
+        }
 
-		logInfo(ourLog, "Dropping table: {}", getTableName());
+        logInfo(ourLog, "Dropping table: {}", getTableName());
 
-		@Language("SQL")
-		String sql = "DROP TABLE " + getTableName();
-		executeSql(getTableName(), sql);
-
-	}
-
-
+        @Language("SQL")
+        String sql = "DROP TABLE " + getTableName();
+        executeSql(getTableName(), sql);
+    }
 }

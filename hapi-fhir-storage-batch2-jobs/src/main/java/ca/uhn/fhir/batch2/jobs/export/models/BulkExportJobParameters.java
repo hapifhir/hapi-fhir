@@ -27,177 +27,173 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class BulkExportJobParameters extends BulkExportJobBase {
 
-	// list of resource types to export
-	@JsonProperty("resourceTypes")
-	private List<String> myResourceTypes;
+    // list of resource types to export
+    @JsonProperty("resourceTypes")
+    private List<String> myResourceTypes;
 
-	/**
-	 * The start date from when we should start
-	 * doing the export. (end date is assumed to be "now")
-	 */
-	@JsonSerialize(using = JsonDateSerializer.class)
-	@JsonDeserialize(using = JsonDateDeserializer.class)
-	@JsonProperty("since")
-	private Date mySince;
+    /**
+     * The start date from when we should start doing the export. (end date is assumed to be "now")
+     */
+    @JsonSerialize(using = JsonDateSerializer.class)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    @JsonProperty("since")
+    private Date mySince;
 
-	@JsonProperty("exportId")
-	private String myExportId;
+    @JsonProperty("exportId")
+    private String myExportId;
 
-	@JsonProperty("filters")
-	private List<String> myFilters;
+    @JsonProperty("filters")
+    private List<String> myFilters;
 
-	@JsonProperty("postFetchFilterUrls")
-	private List<String> myPostFetchFilterUrls;
+    @JsonProperty("postFetchFilterUrls")
+    private List<String> myPostFetchFilterUrls;
 
-	@JsonProperty("outputFormat")
-	private String myOutputFormat;
+    @JsonProperty("outputFormat")
+    private String myOutputFormat;
 
-	// TODO - move enum
-	@JsonProperty("exportStyle")
-	private BulkDataExportOptions.ExportStyle myExportStyle;
+    // TODO - move enum
+    @JsonProperty("exportStyle")
+    private BulkDataExportOptions.ExportStyle myExportStyle;
 
-	@JsonProperty("patientIds")
-	private List<String> myPatientIds;
+    @JsonProperty("patientIds")
+    private List<String> myPatientIds;
 
-	@JsonProperty("originalRequestUrl")
-	private String myOriginalRequestUrl;
+    @JsonProperty("originalRequestUrl")
+    private String myOriginalRequestUrl;
 
-	/**
-	 * The group id
-	 */
-	@JsonProperty("groupId")
-	private String myGroupId;
+    /** The group id */
+    @JsonProperty("groupId")
+    private String myGroupId;
 
-	@JsonProperty("expandMdm")
-	private boolean myExpandMdm;
+    @JsonProperty("expandMdm")
+    private boolean myExpandMdm;
 
-	@JsonProperty("partitionId")
-	private RequestPartitionId myPartitionId;
+    @JsonProperty("partitionId")
+    private RequestPartitionId myPartitionId;
 
-	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
-		BulkExportJobParameters params = new BulkExportJobParameters();
-		params.setResourceTypes(theParameters.getResourceTypes());
-		params.setExportStyle(theParameters.getExportStyle());
-		params.setExportIdentifier(theParameters.getExportIdentifier());
-		params.setFilters(theParameters.getFilters());
-		params.setPostFetchFilterUrls(theParameters.getPostFetchFilterUrls());
-		params.setGroupId(theParameters.getGroupId());
-		params.setOutputFormat(theParameters.getOutputFormat());
-		params.setSince(theParameters.getSince());
-		params.setExpandMdm(theParameters.isExpandMdm());
-		params.setPatientIds(theParameters.getPatientIds());
-		params.setOriginalRequestUrl(theParameters.getOriginalRequestUrl());
-		params.setPartitionId(theParameters.getPartitionId());
-		return params;
-	}
+    public static BulkExportJobParameters createFromExportJobParameters(
+            BulkExportParameters theParameters) {
+        BulkExportJobParameters params = new BulkExportJobParameters();
+        params.setResourceTypes(theParameters.getResourceTypes());
+        params.setExportStyle(theParameters.getExportStyle());
+        params.setExportIdentifier(theParameters.getExportIdentifier());
+        params.setFilters(theParameters.getFilters());
+        params.setPostFetchFilterUrls(theParameters.getPostFetchFilterUrls());
+        params.setGroupId(theParameters.getGroupId());
+        params.setOutputFormat(theParameters.getOutputFormat());
+        params.setSince(theParameters.getSince());
+        params.setExpandMdm(theParameters.isExpandMdm());
+        params.setPatientIds(theParameters.getPatientIds());
+        params.setOriginalRequestUrl(theParameters.getOriginalRequestUrl());
+        params.setPartitionId(theParameters.getPartitionId());
+        return params;
+    }
 
-	public String getExportIdentifier() {
-		return myExportId;
-	}
+    public String getExportIdentifier() {
+        return myExportId;
+    }
 
-	public List<String> getResourceTypes() {
-		if (myResourceTypes == null) {
-			myResourceTypes = new ArrayList<>();
-		}
-		return myResourceTypes;
-	}
+    public List<String> getResourceTypes() {
+        if (myResourceTypes == null) {
+            myResourceTypes = new ArrayList<>();
+        }
+        return myResourceTypes;
+    }
 
-	public void setExportIdentifier(String theExportId) {
-		myExportId = theExportId;
-	}
+    public void setExportIdentifier(String theExportId) {
+        myExportId = theExportId;
+    }
 
-	public void setResourceTypes(List<String> theResourceTypes) {
-		myResourceTypes = theResourceTypes;
-	}
+    public void setResourceTypes(List<String> theResourceTypes) {
+        myResourceTypes = theResourceTypes;
+    }
 
-	public Date getSince() {
-		return mySince;
-	}
+    public Date getSince() {
+        return mySince;
+    }
 
-	public void setSince(Date theSince) {
-		mySince = theSince;
-	}
+    public void setSince(Date theSince) {
+        mySince = theSince;
+    }
 
-	public List<String> getFilters() {
-		return myFilters;
-	}
+    public List<String> getFilters() {
+        return myFilters;
+    }
 
-	public void setFilters(List<String> theFilters) {
-		myFilters = theFilters;
-	}
+    public void setFilters(List<String> theFilters) {
+        myFilters = theFilters;
+    }
 
-	public List<String> getPostFetchFilterUrls() {
-		if (myPostFetchFilterUrls == null) {
-			myPostFetchFilterUrls = new ArrayList<>();
-		}
-		return myPostFetchFilterUrls;
-	}
+    public List<String> getPostFetchFilterUrls() {
+        if (myPostFetchFilterUrls == null) {
+            myPostFetchFilterUrls = new ArrayList<>();
+        }
+        return myPostFetchFilterUrls;
+    }
 
-	public void setPostFetchFilterUrls(List<String> thePostFetchFilterUrls) {
-		myPostFetchFilterUrls = thePostFetchFilterUrls;
-	}
+    public void setPostFetchFilterUrls(List<String> thePostFetchFilterUrls) {
+        myPostFetchFilterUrls = thePostFetchFilterUrls;
+    }
 
-	public String getOutputFormat() {
-		return myOutputFormat;
-	}
+    public String getOutputFormat() {
+        return myOutputFormat;
+    }
 
-	public void setOutputFormat(String theOutputFormat) {
-		myOutputFormat = theOutputFormat;
-	}
+    public void setOutputFormat(String theOutputFormat) {
+        myOutputFormat = theOutputFormat;
+    }
 
-	public BulkDataExportOptions.ExportStyle getExportStyle() {
-		return myExportStyle;
-	}
+    public BulkDataExportOptions.ExportStyle getExportStyle() {
+        return myExportStyle;
+    }
 
-	public void setExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
-		myExportStyle = theExportStyle;
-	}
+    public void setExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
+        myExportStyle = theExportStyle;
+    }
 
-	public List<String> getPatientIds() {
-		return myPatientIds;
-	}
+    public List<String> getPatientIds() {
+        return myPatientIds;
+    }
 
-	public void setPatientIds(List<String> thePatientIds) {
-		myPatientIds = thePatientIds;
-	}
+    public void setPatientIds(List<String> thePatientIds) {
+        myPatientIds = thePatientIds;
+    }
 
-	public String getGroupId() {
-		return myGroupId;
-	}
+    public String getGroupId() {
+        return myGroupId;
+    }
 
-	public void setGroupId(String theGroupId) {
-		myGroupId = theGroupId;
-	}
+    public void setGroupId(String theGroupId) {
+        myGroupId = theGroupId;
+    }
 
-	public boolean isExpandMdm() {
-		return myExpandMdm;
-	}
+    public boolean isExpandMdm() {
+        return myExpandMdm;
+    }
 
-	public void setExpandMdm(boolean theExpandMdm) {
-		myExpandMdm = theExpandMdm;
-	}
+    public void setExpandMdm(boolean theExpandMdm) {
+        myExpandMdm = theExpandMdm;
+    }
 
-	public String getOriginalRequestUrl() {
-		return myOriginalRequestUrl;
-	}
+    public String getOriginalRequestUrl() {
+        return myOriginalRequestUrl;
+    }
 
-	private void setOriginalRequestUrl(String theOriginalRequestUrl) {
-		this.myOriginalRequestUrl = theOriginalRequestUrl;
-	}
+    private void setOriginalRequestUrl(String theOriginalRequestUrl) {
+        this.myOriginalRequestUrl = theOriginalRequestUrl;
+    }
 
-	public RequestPartitionId getPartitionId() {
-		return myPartitionId;
-	}
+    public RequestPartitionId getPartitionId() {
+        return myPartitionId;
+    }
 
-	public void setPartitionId(RequestPartitionId thePartitionId) {
-		this.myPartitionId = thePartitionId;
-	}
-
+    public void setPartitionId(RequestPartitionId thePartitionId) {
+        this.myPartitionId = thePartitionId;
+    }
 }

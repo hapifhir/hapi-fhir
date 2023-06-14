@@ -21,99 +21,94 @@ package ca.uhn.fhir.rest.param;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class UriParam extends BaseParam implements IQueryParameterType {
 
-	private UriParamQualifierEnum myQualifier;
-	private String myValue;
+    private UriParamQualifierEnum myQualifier;
+    private String myValue;
 
-	/**
-	 * Constructor
-	 */
-	public UriParam() {
-		super();
-	}
+    /** Constructor */
+    public UriParam() {
+        super();
+    }
 
-	public UriParam(String theValue) {
-		setValue(theValue);
-	}
+    public UriParam(String theValue) {
+        setValue(theValue);
+    }
 
-	@Override
-	String doGetQueryParameterQualifier() {
-		return myQualifier != null ? myQualifier.getValue() : null;
-	}
+    @Override
+    String doGetQueryParameterQualifier() {
+        return myQualifier != null ? myQualifier.getValue() : null;
+    }
 
-	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
-		return ParameterUtil.escape(myValue);
-	}
+    @Override
+    String doGetValueAsQueryToken(FhirContext theContext) {
+        return ParameterUtil.escape(myValue);
+    }
 
-	@Override
-	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
-		myQualifier = UriParamQualifierEnum.forValue(theQualifier);
-		myValue = ParameterUtil.unescape(theValue);
-	}
+    @Override
+    void doSetValueAsQueryToken(
+            FhirContext theContext, String theParamName, String theQualifier, String theValue) {
+        myQualifier = UriParamQualifierEnum.forValue(theQualifier);
+        myValue = ParameterUtil.unescape(theValue);
+    }
 
-	/**
-	 * Gets the qualifier for this param (may be <code>null</code> and generally will be)
-	 */
-	public UriParamQualifierEnum getQualifier() {
-		return myQualifier;
-	}
+    /** Gets the qualifier for this param (may be <code>null</code> and generally will be) */
+    public UriParamQualifierEnum getQualifier() {
+        return myQualifier;
+    }
 
-	public String getValue() {
-		return myValue;
-	}
+    public String getValue() {
+        return myValue;
+    }
 
-	public StringDt getValueAsStringDt() {
-		return new StringDt(myValue);
-	}
+    public StringDt getValueAsStringDt() {
+        return new StringDt(myValue);
+    }
 
-	public UriDt getValueAsUriDt() {
-		return new UriDt(myValue);
-	}
+    public UriDt getValueAsUriDt() {
+        return new UriDt(myValue);
+    }
 
-	public String getValueNotNull() {
-		return defaultString(myValue);
-	}
+    public String getValueNotNull() {
+        return defaultString(myValue);
+    }
 
-	public boolean isEmpty() {
-		return StringUtils.isEmpty(myValue);
-	}
+    public boolean isEmpty() {
+        return StringUtils.isEmpty(myValue);
+    }
 
-	/**
-	 * Sets the qualifier for this param (may be <code>null</code> and generally will be)
-	 * 
-	 * @return Returns a reference to <code>this</code> for easy method chanining
-	 */
-	public UriParam setQualifier(UriParamQualifierEnum theQualifier) {
-		myQualifier = theQualifier;
-		return this;
-	}
+    /**
+     * Sets the qualifier for this param (may be <code>null</code> and generally will be)
+     *
+     * @return Returns a reference to <code>this</code> for easy method chanining
+     */
+    public UriParam setQualifier(UriParamQualifierEnum theQualifier) {
+        myQualifier = theQualifier;
+        return this;
+    }
 
-	/**
-	 * Sets the value for this param
-	 * 
-	 * @return Returns a reference to <code>this</code> for easy method chanining
-	 */
-	public UriParam setValue(String theValue) {
-		myValue = theValue;
-		return this;
-	}
+    /**
+     * Sets the value for this param
+     *
+     * @return Returns a reference to <code>this</code> for easy method chanining
+     */
+    public UriParam setValue(String theValue) {
+        myValue = theValue;
+        return this;
+    }
 
-	@Override
-	public String toString() {
-		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		builder.append("value", getValue());
-		return builder.toString();
-	}
-
+    @Override
+    public String toString() {
+        ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        builder.append("value", getValue());
+        return builder.toString();
+    }
 }

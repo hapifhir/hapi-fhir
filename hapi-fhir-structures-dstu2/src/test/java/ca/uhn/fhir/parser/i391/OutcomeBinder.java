@@ -15,9 +15,9 @@ class OutcomeBinder implements IValueSetEnumBinder<OutcomeEnum> {
 
     @Override
     public String toCodeString(OutcomeEnum theEnum) {
-        if (theEnum.equals(OutcomeEnum.ITEM1)){
+        if (theEnum.equals(OutcomeEnum.ITEM1)) {
             return "item1";
-        }else{
+        } else {
             return "item2";
         }
     }
@@ -31,4 +31,4 @@ class OutcomeBinder implements IValueSetEnumBinder<OutcomeEnum> {
     public OutcomeEnum fromCodeString(String theCodeString, String theSystemString) {
         return fromCodeString(theCodeString);
     }
-} 
+}

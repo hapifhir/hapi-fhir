@@ -46,42 +46,43 @@ import org.springframework.context.annotation.Primary;
 @Import({JpaConfig.class})
 public class HapiJpaConfig {
 
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
+    @Autowired private ISearchParamRegistry mySearchParamRegistry;
 
-	@Bean
-	public IHSearchSortHelper extendedFulltextSortHelper() {
-		return new HSearchSortHelperImpl(mySearchParamRegistry);
-	}
+    @Bean
+    public IHSearchSortHelper extendedFulltextSortHelper() {
+        return new HSearchSortHelperImpl(mySearchParamRegistry);
+    }
 
-	@Bean
-	public IFulltextSearchSvc fullTextSearchSvc() {
-		return new FulltextSearchSvcImpl();
-	}
+    @Bean
+    public IFulltextSearchSvc fullTextSearchSvc() {
+        return new FulltextSearchSvcImpl();
+    }
 
-	@Bean
-	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
-		return new StaleSearchDeletingSvcImpl();
-	}
+    @Bean
+    public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
+        return new StaleSearchDeletingSvcImpl();
+    }
 
-	@Primary
-	@Bean
-	public CachingValidationSupport validationSupportChain(JpaValidationSupportChain theJpaValidationSupportChain) {
-		return ValidationSupportConfigUtil.newCachingValidationSupport(theJpaValidationSupportChain);
-	}
+    @Primary
+    @Bean
+    public CachingValidationSupport validationSupportChain(
+            JpaValidationSupportChain theJpaValidationSupportChain) {
+        return ValidationSupportConfigUtil.newCachingValidationSupport(
+                theJpaValidationSupportChain);
+    }
 
-	@Bean
-	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		return new DatabaseBackedPagingProvider();
-	}
+    @Bean
+    public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
+        return new DatabaseBackedPagingProvider();
+    }
 
-	@Bean
-	public IResourceSupportedSvc resourceSupportedSvc(IDaoRegistry theDaoRegistry) {
-		return new DaoRegistryResourceSupportedSvc(theDaoRegistry);
-	}
+    @Bean
+    public IResourceSupportedSvc resourceSupportedSvc(IDaoRegistry theDaoRegistry) {
+        return new DaoRegistryResourceSupportedSvc(theDaoRegistry);
+    }
 
-	@Bean(name = "myResourceCountsCache")
-	public ResourceCountCache resourceCountsCache(IFhirSystemDao<?, ?> theSystemDao) {
-		return ResourceCountCacheUtil.newResourceCountCache(theSystemDao);
-	}
+    @Bean(name = "myResourceCountsCache")
+    public ResourceCountCache resourceCountsCache(IFhirSystemDao<?, ?> theSystemDao) {
+        return ResourceCountCacheUtil.newResourceCountCache(theSystemDao);
+    }
 }

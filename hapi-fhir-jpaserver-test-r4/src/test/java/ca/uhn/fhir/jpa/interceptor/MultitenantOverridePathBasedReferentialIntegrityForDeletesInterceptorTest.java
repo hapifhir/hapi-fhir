@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.r4.BaseMultitenantResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -17,129 +21,127 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
-
 /**
- * <p>Multitenant test version of {@link OverridePathBasedReferentialIntegrityForDeletesInterceptorTest}.</p>
+ * Multitenant test version of {@link
+ * OverridePathBasedReferentialIntegrityForDeletesInterceptorTest}.
  *
- * <p>Ensures the tenant is properly propagated down to the {@link ca.uhn.fhir.jpa.api.dao.DaoRegistry} when requesting
- * the conflicting resource.</p>
+ * <p>Ensures the tenant is properly propagated down to the {@link
+ * ca.uhn.fhir.jpa.api.dao.DaoRegistry} when requesting the conflicting resource.
  *
- * <p>This test runs a subset of tests from {@link OverridePathBasedReferentialIntegrityForDeletesInterceptorTest}
- * against the {@link BaseMultitenantResourceProviderR4Test}</p>
+ * <p>This test runs a subset of tests from {@link
+ * OverridePathBasedReferentialIntegrityForDeletesInterceptorTest} against the {@link
+ * BaseMultitenantResourceProviderR4Test}
  */
-public class MultitenantOverridePathBasedReferentialIntegrityForDeletesInterceptorTest extends BaseMultitenantResourceProviderR4Test {
+public class MultitenantOverridePathBasedReferentialIntegrityForDeletesInterceptorTest
+        extends BaseMultitenantResourceProviderR4Test {
 
-	@Autowired
-	private OverridePathBasedReferentialIntegrityForDeletesInterceptor mySvc;
+    @Autowired private OverridePathBasedReferentialIntegrityForDeletesInterceptor mySvc;
 
-	@Autowired
-	private CascadingDeleteInterceptor myCascadingDeleteInterceptor;
+    @Autowired private CascadingDeleteInterceptor myCascadingDeleteInterceptor;
 
-	RequestDetails requestDetails = new SystemRequestDetails();
+    RequestDetails requestDetails = new SystemRequestDetails();
 
-	@BeforeEach
-	public void beforeEach() {
-		requestDetails.setTenantId(TENANT_A);
-	}
+    @BeforeEach
+    public void beforeEach() {
+        requestDetails.setTenantId(TENANT_A);
+    }
 
-	@AfterEach
-	public void after() throws Exception {
-		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
-		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
+    @AfterEach
+    public void after() throws Exception {
+        myPartitionSettings.setAllowReferencesAcrossPartitions(
+                PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+        assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
 
-		myInterceptorRegistry.unregisterInterceptor(mySvc);
-		mySvc.clearPaths();
+        myInterceptorRegistry.unregisterInterceptor(mySvc);
+        mySvc.clearPaths();
 
-		super.after();
-	}
+        super.after();
+    }
 
-	@Test
-	public void testAllowDelete() {
+    @Test
+    public void testAllowDelete() {
 
-		mySvc.addPath("AuditEvent.agent.who");
-		myInterceptorRegistry.registerInterceptor(mySvc);
+        mySvc.addPath("AuditEvent.agent.who");
+        myInterceptorRegistry.registerInterceptor(mySvc);
 
-		Patient patient = new Patient();
-		patient.setId("P");
-		patient.setActive(true);
-		myPatientDao.update(patient, requestDetails);
+        Patient patient = new Patient();
+        patient.setId("P");
+        patient.setActive(true);
+        myPatientDao.update(patient, requestDetails);
 
-		AuditEvent audit = new AuditEvent();
-		audit.setId("A");
-		audit.addAgent().getWho().setReference("Patient/P");
-		myAuditEventDao.update(audit, requestDetails);
+        AuditEvent audit = new AuditEvent();
+        audit.setId("A");
+        audit.addAgent().getWho().setReference("Patient/P");
+        myAuditEventDao.update(audit, requestDetails);
 
-		// Delete should proceed
-		myPatientDao.delete(new IdType("Patient/P"), requestDetails);
+        // Delete should proceed
+        myPatientDao.delete(new IdType("Patient/P"), requestDetails);
 
-		// Make sure we're deleted
-		try {
-			myPatientDao.read(new IdType("Patient/P"), requestDetails);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
+        // Make sure we're deleted
+        try {
+            myPatientDao.read(new IdType("Patient/P"), requestDetails);
+            fail();
+        } catch (ResourceGoneException e) {
+            // good
+        }
 
-		// Search should still work
-		IBundleProvider searchOutcome = myAuditEventDao.search(SearchParameterMap.newSynchronous(AuditEvent.SP_AGENT, new ReferenceParam("Patient/P")), requestDetails);
-		assertEquals(1, searchOutcome.size());
-	}
+        // Search should still work
+        IBundleProvider searchOutcome =
+                myAuditEventDao.search(
+                        SearchParameterMap.newSynchronous(
+                                AuditEvent.SP_AGENT, new ReferenceParam("Patient/P")),
+                        requestDetails);
+        assertEquals(1, searchOutcome.size());
+    }
 
-	@Test
-	public void testWrongPath() {
-		mySvc.addPath("AuditEvent.identifier");
-		mySvc.addPath("Patient.agent.who");
-		myInterceptorRegistry.registerInterceptor(mySvc);
+    @Test
+    public void testWrongPath() {
+        mySvc.addPath("AuditEvent.identifier");
+        mySvc.addPath("Patient.agent.who");
+        myInterceptorRegistry.registerInterceptor(mySvc);
 
-		Patient patient = new Patient();
-		patient.setId("P");
-		patient.setActive(true);
-		myPatientDao.update(patient, requestDetails);
+        Patient patient = new Patient();
+        patient.setId("P");
+        patient.setActive(true);
+        myPatientDao.update(patient, requestDetails);
 
-		AuditEvent audit = new AuditEvent();
-		audit.setId("A");
-		audit.addAgent().getWho().setReference("Patient/P");
-		myAuditEventDao.update(audit, requestDetails);
+        AuditEvent audit = new AuditEvent();
+        audit.setId("A");
+        audit.addAgent().getWho().setReference("Patient/P");
+        myAuditEventDao.update(audit, requestDetails);
 
-		// Delete should proceed
-		try {
-			myPatientDao.delete(new IdType("Patient/P"), requestDetails);
-			fail();
-		} catch (ResourceVersionConflictException e) {
-			// good
-		}
+        // Delete should proceed
+        try {
+            myPatientDao.delete(new IdType("Patient/P"), requestDetails);
+            fail();
+        } catch (ResourceVersionConflictException e) {
+            // good
+        }
+    }
 
+    @Test
+    public void testCombineWithCascadeDeleteInterceptor() {
+        try {
+            myInterceptorRegistry.registerInterceptor(myCascadingDeleteInterceptor);
 
-	}
+            mySvc.addPath("AuditEvent.agent.who");
+            myInterceptorRegistry.registerInterceptor(mySvc);
 
-	@Test
-	public void testCombineWithCascadeDeleteInterceptor() {
-		try {
-			myInterceptorRegistry.registerInterceptor(myCascadingDeleteInterceptor);
+            Patient patient = new Patient();
+            patient.setId("P");
+            patient.setActive(true);
+            myPatientDao.update(patient, requestDetails);
 
-			mySvc.addPath("AuditEvent.agent.who");
-			myInterceptorRegistry.registerInterceptor(mySvc);
+            AuditEvent audit = new AuditEvent();
+            audit.setId("A");
+            audit.addAgent().getWho().setReference("Patient/P");
+            myAuditEventDao.update(audit, requestDetails);
 
-			Patient patient = new Patient();
-			patient.setId("P");
-			patient.setActive(true);
-			myPatientDao.update(patient, requestDetails);
+            // Delete should proceed
+            myPatientDao.delete(new IdType("Patient/P"), requestDetails);
 
-			AuditEvent audit = new AuditEvent();
-			audit.setId("A");
-			audit.addAgent().getWho().setReference("Patient/P");
-			myAuditEventDao.update(audit, requestDetails);
-
-			// Delete should proceed
-			myPatientDao.delete(new IdType("Patient/P"), requestDetails);
-
-		} finally {
-			myInterceptorRegistry.unregisterInterceptor(myCascadingDeleteInterceptor);
-		}
-
-	}
-
+        } finally {
+            myInterceptorRegistry.unregisterInterceptor(myCascadingDeleteInterceptor);
+        }
+    }
 }

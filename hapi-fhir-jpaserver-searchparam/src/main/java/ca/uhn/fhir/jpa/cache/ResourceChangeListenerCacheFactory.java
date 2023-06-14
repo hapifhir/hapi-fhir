@@ -26,10 +26,18 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ResourceChangeListenerCacheFactory {
-	@Autowired
-	ApplicationContext myApplicationContext;
+    @Autowired ApplicationContext myApplicationContext;
 
-	public ResourceChangeListenerCache newResourceChangeListenerCache(String theResourceName, SearchParameterMap theMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
-		return myApplicationContext.getBean(ResourceChangeListenerCache.class, theResourceName, theResourceChangeListener, theMap, theRemoteRefreshIntervalMs);
-	}
+    public ResourceChangeListenerCache newResourceChangeListenerCache(
+            String theResourceName,
+            SearchParameterMap theMap,
+            IResourceChangeListener theResourceChangeListener,
+            long theRemoteRefreshIntervalMs) {
+        return myApplicationContext.getBean(
+                ResourceChangeListenerCache.class,
+                theResourceName,
+                theResourceChangeListener,
+                theMap,
+                theRemoteRefreshIntervalMs);
+    }
 }

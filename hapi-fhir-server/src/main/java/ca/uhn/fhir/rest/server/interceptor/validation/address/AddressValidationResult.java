@@ -19,66 +19,73 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.validation.address;
 
-import org.hl7.fhir.instance.model.api.IBase;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.hl7.fhir.instance.model.api.IBase;
 
 public class AddressValidationResult {
 
-	private boolean myIsValid;
-	private String myValidatedAddressString;
-	private Map<String, String> myValidationResults = new HashMap<>();
-	private String myRawResponse;
-	private IBase myValidatedAddress;
+    private boolean myIsValid;
+    private String myValidatedAddressString;
+    private Map<String, String> myValidationResults = new HashMap<>();
+    private String myRawResponse;
+    private IBase myValidatedAddress;
 
-	public boolean isValid() {
-		return myIsValid;
-	}
+    public boolean isValid() {
+        return myIsValid;
+    }
 
-	public void setValid(boolean theIsValid) {
-		this.myIsValid = theIsValid;
-	}
+    public void setValid(boolean theIsValid) {
+        this.myIsValid = theIsValid;
+    }
 
-	public Map<String, String> getValidationResults() {
-		return myValidationResults;
-	}
+    public Map<String, String> getValidationResults() {
+        return myValidationResults;
+    }
 
-	public void setValidationResults(Map<String, String> myValidationResults) {
-		this.myValidationResults = myValidationResults;
-	}
+    public void setValidationResults(Map<String, String> myValidationResults) {
+        this.myValidationResults = myValidationResults;
+    }
 
-	public String getValidatedAddressString() {
-		return myValidatedAddressString;
-	}
+    public String getValidatedAddressString() {
+        return myValidatedAddressString;
+    }
 
-	public void setValidatedAddressString(String theValidatedAddressString) {
-		this.myValidatedAddressString = theValidatedAddressString;
-	}
+    public void setValidatedAddressString(String theValidatedAddressString) {
+        this.myValidatedAddressString = theValidatedAddressString;
+    }
 
-	public IBase getValidatedAddress() {
-		return myValidatedAddress;
-	}
+    public IBase getValidatedAddress() {
+        return myValidatedAddress;
+    }
 
-	public void setValidatedAddress(IBase theValidatedAddress) {
-		this.myValidatedAddress = theValidatedAddress;
-	}
+    public void setValidatedAddress(IBase theValidatedAddress) {
+        this.myValidatedAddress = theValidatedAddress;
+    }
 
-	public String getRawResponse() {
-		return myRawResponse;
-	}
+    public String getRawResponse() {
+        return myRawResponse;
+    }
 
-	public void setRawResponse(String theRawResponse) {
-		this.myRawResponse = theRawResponse;
-	}
+    public void setRawResponse(String theRawResponse) {
+        this.myRawResponse = theRawResponse;
+    }
 
-	@Override
-	public String toString() {
-		return
-			"  isValid=" + myIsValid +
-			", validatedAddressString='" + myValidatedAddressString + '\'' +
-			", validationResults=" + myValidationResults + '\'' +
-			", rawResponse='" + myRawResponse + '\'' +
-			", myValidatedAddress='" + myValidatedAddress + '\'';
-	}
+    @Override
+    public String toString() {
+        return "  isValid="
+                + myIsValid
+                + ", validatedAddressString='"
+                + myValidatedAddressString
+                + '\''
+                + ", validationResults="
+                + myValidationResults
+                + '\''
+                + ", rawResponse='"
+                + myRawResponse
+                + '\''
+                + ", myValidatedAddress='"
+                + myValidatedAddress
+                + '\'';
+    }
 }

@@ -24,48 +24,51 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BulkImportJobJson implements IModelJson {
 
-	@JsonProperty("processingMode")
-	private JobFileRowProcessingModeEnum myProcessingMode;
-	@JsonProperty("jobDescription")
-	private String myJobDescription;
-	@JsonProperty("fileCount")
-	private int myFileCount;
-	@JsonProperty("batchSize")
-	private int myBatchSize;
+    @JsonProperty("processingMode")
+    private JobFileRowProcessingModeEnum myProcessingMode;
 
-	public String getJobDescription() {
-		return myJobDescription;
-	}
+    @JsonProperty("jobDescription")
+    private String myJobDescription;
 
-	public BulkImportJobJson setJobDescription(String theJobDescription) {
-		myJobDescription = theJobDescription;
-		return this;
-	}
+    @JsonProperty("fileCount")
+    private int myFileCount;
 
-	public JobFileRowProcessingModeEnum getProcessingMode() {
-		return myProcessingMode;
-	}
+    @JsonProperty("batchSize")
+    private int myBatchSize;
 
-	public BulkImportJobJson setProcessingMode(JobFileRowProcessingModeEnum theProcessingMode) {
-		myProcessingMode = theProcessingMode;
-		return this;
-	}
+    public String getJobDescription() {
+        return myJobDescription;
+    }
 
-	public int getFileCount() {
-		return myFileCount;
-	}
+    public BulkImportJobJson setJobDescription(String theJobDescription) {
+        myJobDescription = theJobDescription;
+        return this;
+    }
 
-	public BulkImportJobJson setFileCount(int theFileCount) {
-		myFileCount = theFileCount;
-		return this;
-	}
+    public JobFileRowProcessingModeEnum getProcessingMode() {
+        return myProcessingMode;
+    }
 
-	public int getBatchSize() {
-		return myBatchSize;
-	}
+    public BulkImportJobJson setProcessingMode(JobFileRowProcessingModeEnum theProcessingMode) {
+        myProcessingMode = theProcessingMode;
+        return this;
+    }
 
-	public BulkImportJobJson setBatchSize(int theBatchSize) {
-		myBatchSize = theBatchSize;
-		return this;
-	}
+    public int getFileCount() {
+        return myFileCount;
+    }
+
+    public BulkImportJobJson setFileCount(int theFileCount) {
+        myFileCount = theFileCount;
+        return this;
+    }
+
+    public int getBatchSize() {
+        return myBatchSize;
+    }
+
+    public BulkImportJobJson setBatchSize(int theBatchSize) {
+        myBatchSize = theBatchSize;
+        return this;
+    }
 }

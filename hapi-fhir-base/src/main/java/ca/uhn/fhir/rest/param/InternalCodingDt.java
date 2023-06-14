@@ -32,284 +32,301 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.util.CoverageIgnore;
-
 import java.util.List;
 
 @CoverageIgnore
 public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype {
 
-	private static final long serialVersionUID = 993056016725918652L;
+    private static final long serialVersionUID = 993056016725918652L;
 
-	/**
-	 * Constructor
-	 */
-	public InternalCodingDt() {
-		super();
-	}
+    /** Constructor */
+    public InternalCodingDt() {
+        super();
+    }
 
-	/**
-	 * Creates a new Coding with the given system and code
-	 */
-	public InternalCodingDt(String theSystem, String theCode) {
-		setSystem(theSystem);
-		setCode(theCode);
-	}
+    /** Creates a new Coding with the given system and code */
+    public InternalCodingDt(String theSystem, String theCode) {
+        setSystem(theSystem);
+        setCode(theCode);
+    }
 
-	@Child(name = "system", type = UriDt.class, order = 0, min = 0, max = 1)
-	@Description(shortDefinition = "Identity of the terminology system", formalDefinition = "The identification of the code system that defines the meaning of the symbol in the code.")
-	private UriDt mySystem;
+    @Child(name = "system", type = UriDt.class, order = 0, min = 0, max = 1)
+    @Description(
+            shortDefinition = "Identity of the terminology system",
+            formalDefinition =
+                    "The identification of the code system that defines the meaning of the symbol"
+                            + " in the code.")
+    private UriDt mySystem;
 
-	@Child(name = "version", type = StringDt.class, order = 1, min = 0, max = 1)
-	@Description(shortDefinition = "Version of the system - if relevant", formalDefinition = "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged")
-	private StringDt myVersion;
+    @Child(name = "version", type = StringDt.class, order = 1, min = 0, max = 1)
+    @Description(
+            shortDefinition = "Version of the system - if relevant",
+            formalDefinition =
+                    "The version of the code system which was used when choosing this code. Note"
+                        + " that a well-maintained code system does not need the version reported,"
+                        + " because the meaning of codes is consistent across versions. However"
+                        + " this cannot consistently be assured. and When the meaning is not"
+                        + " guaranteed to be consistent, the version SHOULD be exchanged")
+    private StringDt myVersion;
 
-	@Child(name = "code", type = CodeDt.class, order = 2, min = 0, max = 1)
-	@Description(shortDefinition = "Symbol in syntax defined by the system", formalDefinition = "A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)")
-	private CodeDt myCode;
+    @Child(name = "code", type = CodeDt.class, order = 2, min = 0, max = 1)
+    @Description(
+            shortDefinition = "Symbol in syntax defined by the system",
+            formalDefinition =
+                    "A symbol in syntax defined by the system. The symbol may be a predefined code"
+                            + " or an expression in a syntax defined by the coding system (e.g."
+                            + " post-coordination)")
+    private CodeDt myCode;
 
-	@Child(name = "display", type = StringDt.class, order = 3, min = 0, max = 1)
-	@Description(shortDefinition = "Representation defined by the system", formalDefinition = "A representation of the meaning of the code in the system, following the rules of the system.")
-	private StringDt myDisplay;
+    @Child(name = "display", type = StringDt.class, order = 3, min = 0, max = 1)
+    @Description(
+            shortDefinition = "Representation defined by the system",
+            formalDefinition =
+                    "A representation of the meaning of the code in the system, following the rules"
+                            + " of the system.")
+    private StringDt myDisplay;
 
-	@Child(name = "primary", type = BooleanDt.class, order = 4, min = 0, max = 1)
-	@Description(shortDefinition = "If this code was chosen directly by the user", formalDefinition = "Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)")
-	private BooleanDt myPrimary;
+    @Child(name = "primary", type = BooleanDt.class, order = 4, min = 0, max = 1)
+    @Description(
+            shortDefinition = "If this code was chosen directly by the user",
+            formalDefinition =
+                    "Indicates that this code was chosen by a user directly - i.e. off a pick list"
+                            + " of available items (codes or displays)")
+    private BooleanDt myPrimary;
 
-	@Override
-	public boolean isEmpty() {
-		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(mySystem, myVersion, myCode, myDisplay, myPrimary);
-	}
+    @Override
+    public boolean isEmpty() {
+        return super.isBaseEmpty()
+                && ca.uhn.fhir.util.ElementUtil.isEmpty(
+                        mySystem, myVersion, myCode, myDisplay, myPrimary);
+    }
 
-	@Deprecated //override deprecated method
-	@Override
-	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myVersion, myCode, myDisplay, myPrimary);
-	}
+    @Deprecated // override deprecated method
+    @Override
+    public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+        return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(
+                theType, mySystem, myVersion, myCode, myDisplay, myPrimary);
+    }
 
-	/**
-	 * Gets the value(s) for <b>system</b> (Identity of the terminology system). creating it if it does not exist. Will not return <code>null</code>.
-	 *
-	 * <p>
-	 * <b>Definition:</b> The identification of the code system that defines the meaning of the symbol in the code.
-	 * </p>
-	 */
-	@Override
-	public UriDt getSystemElement() {
-		if (mySystem == null) {
-			mySystem = new UriDt();
-		}
-		return mySystem;
-	}
+    /**
+     * Gets the value(s) for <b>system</b> (Identity of the terminology system). creating it if it
+     * does not exist. Will not return <code>null</code>.
+     *
+     * <p><b>Definition:</b> The identification of the code system that defines the meaning of the
+     * symbol in the code.
+     */
+    @Override
+    public UriDt getSystemElement() {
+        if (mySystem == null) {
+            mySystem = new UriDt();
+        }
+        return mySystem;
+    }
 
-	/**
-	 * Sets the value(s) for <b>system</b> (Identity of the terminology system)
-	 *
-	 * <p>
-	 * <b>Definition:</b> The identification of the code system that defines the meaning of the symbol in the code.
-	 * </p>
-	 */
-	public InternalCodingDt setSystem(UriDt theValue) {
-		mySystem = theValue;
-		return this;
-	}
+    /**
+     * Sets the value(s) for <b>system</b> (Identity of the terminology system)
+     *
+     * <p><b>Definition:</b> The identification of the code system that defines the meaning of the
+     * symbol in the code.
+     */
+    public InternalCodingDt setSystem(UriDt theValue) {
+        mySystem = theValue;
+        return this;
+    }
 
-	/**
-	 * Sets the value for <b>system</b> (Identity of the terminology system)
-	 *
-	 * <p>
-	 * <b>Definition:</b> The identification of the code system that defines the meaning of the symbol in the code.
-	 * </p>
-	 */
-	@Override
-	public InternalCodingDt setSystem(String theUri) {
-		mySystem = new UriDt(theUri);
-		return this;
-	}
+    /**
+     * Sets the value for <b>system</b> (Identity of the terminology system)
+     *
+     * <p><b>Definition:</b> The identification of the code system that defines the meaning of the
+     * symbol in the code.
+     */
+    @Override
+    public InternalCodingDt setSystem(String theUri) {
+        mySystem = new UriDt(theUri);
+        return this;
+    }
 
-	/**
-	 * Gets the value(s) for <b>version</b> (Version of the system - if relevant). creating it if it does not exist. Will not return <code>null</code>.
-	 *
-	 * <p>
-	 * <b>Definition:</b> The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes
-	 * is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
-	 * </p>
-	 */
-	public StringDt getVersion() {
-		if (myVersion == null) {
-			myVersion = new StringDt();
-		}
-		return myVersion;
-	}
+    /**
+     * Gets the value(s) for <b>version</b> (Version of the system - if relevant). creating it if it
+     * does not exist. Will not return <code>null</code>.
+     *
+     * <p><b>Definition:</b> The version of the code system which was used when choosing this code.
+     * Note that a well-maintained code system does not need the version reported, because the
+     * meaning of codes is consistent across versions. However this cannot consistently be assured.
+     * and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
+     */
+    public StringDt getVersion() {
+        if (myVersion == null) {
+            myVersion = new StringDt();
+        }
+        return myVersion;
+    }
 
-	/**
-	 * Sets the value(s) for <b>version</b> (Version of the system - if relevant)
-	 *
-	 * <p>
-	 * <b>Definition:</b> The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes
-	 * is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
-	 * </p>
-	 */
-	public InternalCodingDt setVersion(StringDt theValue) {
-		myVersion = theValue;
-		return this;
-	}
+    /**
+     * Sets the value(s) for <b>version</b> (Version of the system - if relevant)
+     *
+     * <p><b>Definition:</b> The version of the code system which was used when choosing this code.
+     * Note that a well-maintained code system does not need the version reported, because the
+     * meaning of codes is consistent across versions. However this cannot consistently be assured.
+     * and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
+     */
+    public InternalCodingDt setVersion(StringDt theValue) {
+        myVersion = theValue;
+        return this;
+    }
 
-	/**
-	 * Sets the value for <b>version</b> (Version of the system - if relevant)
-	 *
-	 * <p>
-	 * <b>Definition:</b> The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes
-	 * is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
-	 * </p>
-	 */
-	public InternalCodingDt setVersion(String theString) {
-		myVersion = new StringDt(theString);
-		return this;
-	}
+    /**
+     * Sets the value for <b>version</b> (Version of the system - if relevant)
+     *
+     * <p><b>Definition:</b> The version of the code system which was used when choosing this code.
+     * Note that a well-maintained code system does not need the version reported, because the
+     * meaning of codes is consistent across versions. However this cannot consistently be assured.
+     * and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
+     */
+    public InternalCodingDt setVersion(String theString) {
+        myVersion = new StringDt(theString);
+        return this;
+    }
 
-	/**
-	 * Gets the value(s) for <b>code</b> (Symbol in syntax defined by the system). creating it if it does not exist. Will not return <code>null</code>.
-	 *
-	 * <p>
-	 * <b>Definition:</b> A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
-	 * </p>
-	 */
-	@Override
-	public CodeDt getCodeElement() {
-		if (myCode == null) {
-			myCode = new CodeDt();
-		}
-		return myCode;
-	}
+    /**
+     * Gets the value(s) for <b>code</b> (Symbol in syntax defined by the system). creating it if it
+     * does not exist. Will not return <code>null</code>.
+     *
+     * <p><b>Definition:</b> A symbol in syntax defined by the system. The symbol may be a
+     * predefined code or an expression in a syntax defined by the coding system (e.g.
+     * post-coordination)
+     */
+    @Override
+    public CodeDt getCodeElement() {
+        if (myCode == null) {
+            myCode = new CodeDt();
+        }
+        return myCode;
+    }
 
-	/**
-	 * Sets the value(s) for <b>code</b> (Symbol in syntax defined by the system)
-	 *
-	 * <p>
-	 * <b>Definition:</b> A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
-	 * </p>
-	 */
-	public InternalCodingDt setCode(CodeDt theValue) {
-		myCode = theValue;
-		return this;
-	}
+    /**
+     * Sets the value(s) for <b>code</b> (Symbol in syntax defined by the system)
+     *
+     * <p><b>Definition:</b> A symbol in syntax defined by the system. The symbol may be a
+     * predefined code or an expression in a syntax defined by the coding system (e.g.
+     * post-coordination)
+     */
+    public InternalCodingDt setCode(CodeDt theValue) {
+        myCode = theValue;
+        return this;
+    }
 
-	/**
-	 * Sets the value for <b>code</b> (Symbol in syntax defined by the system)
-	 *
-	 * <p>
-	 * <b>Definition:</b> A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
-	 * </p>
-	 */
-	@Override
-	public InternalCodingDt setCode(String theCode) {
-		myCode = new CodeDt(theCode);
-		return this;
-	}
+    /**
+     * Sets the value for <b>code</b> (Symbol in syntax defined by the system)
+     *
+     * <p><b>Definition:</b> A symbol in syntax defined by the system. The symbol may be a
+     * predefined code or an expression in a syntax defined by the coding system (e.g.
+     * post-coordination)
+     */
+    @Override
+    public InternalCodingDt setCode(String theCode) {
+        myCode = new CodeDt(theCode);
+        return this;
+    }
 
-	/**
-	 * Gets the value(s) for <b>display</b> (Representation defined by the system). creating it if it does not exist. Will not return <code>null</code>.
-	 *
-	 * <p>
-	 * <b>Definition:</b> A representation of the meaning of the code in the system, following the rules of the system.
-	 * </p>
-	 */
-	public StringDt getDisplay() {
-		if (myDisplay == null) {
-			myDisplay = new StringDt();
-		}
-		return myDisplay;
-	}
+    /**
+     * Gets the value(s) for <b>display</b> (Representation defined by the system). creating it if
+     * it does not exist. Will not return <code>null</code>.
+     *
+     * <p><b>Definition:</b> A representation of the meaning of the code in the system, following
+     * the rules of the system.
+     */
+    public StringDt getDisplay() {
+        if (myDisplay == null) {
+            myDisplay = new StringDt();
+        }
+        return myDisplay;
+    }
 
-	/**
-	 * Sets the value(s) for <b>display</b> (Representation defined by the system)
-	 *
-	 * <p>
-	 * <b>Definition:</b> A representation of the meaning of the code in the system, following the rules of the system.
-	 * </p>
-	 */
-	public InternalCodingDt setDisplay(StringDt theValue) {
-		myDisplay = theValue;
-		return this;
-	}
+    /**
+     * Sets the value(s) for <b>display</b> (Representation defined by the system)
+     *
+     * <p><b>Definition:</b> A representation of the meaning of the code in the system, following
+     * the rules of the system.
+     */
+    public InternalCodingDt setDisplay(StringDt theValue) {
+        myDisplay = theValue;
+        return this;
+    }
 
-	/**
-	 * Sets the value for <b>display</b> (Representation defined by the system)
-	 *
-	 * <p>
-	 * <b>Definition:</b> A representation of the meaning of the code in the system, following the rules of the system.
-	 * </p>
-	 */
-	@Override
-	public InternalCodingDt setDisplay(String theString) {
-		myDisplay = new StringDt(theString);
-		return this;
-	}
+    /**
+     * Sets the value for <b>display</b> (Representation defined by the system)
+     *
+     * <p><b>Definition:</b> A representation of the meaning of the code in the system, following
+     * the rules of the system.
+     */
+    @Override
+    public InternalCodingDt setDisplay(String theString) {
+        myDisplay = new StringDt(theString);
+        return this;
+    }
 
-	/**
-	 * Gets the value(s) for <b>primary</b> (If this code was chosen directly by the user). creating it if it does not exist. Will not return <code>null</code>.
-	 *
-	 * <p>
-	 * <b>Definition:</b> Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)
-	 * </p>
-	 */
-	public BooleanDt getPrimary() {
-		if (myPrimary == null) {
-			myPrimary = new BooleanDt();
-		}
-		return myPrimary;
-	}
+    /**
+     * Gets the value(s) for <b>primary</b> (If this code was chosen directly by the user). creating
+     * it if it does not exist. Will not return <code>null</code>.
+     *
+     * <p><b>Definition:</b> Indicates that this code was chosen by a user directly - i.e. off a
+     * pick list of available items (codes or displays)
+     */
+    public BooleanDt getPrimary() {
+        if (myPrimary == null) {
+            myPrimary = new BooleanDt();
+        }
+        return myPrimary;
+    }
 
-	/**
-	 * Sets the value(s) for <b>primary</b> (If this code was chosen directly by the user)
-	 *
-	 * <p>
-	 * <b>Definition:</b> Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)
-	 * </p>
-	 */
-	public InternalCodingDt setPrimary(BooleanDt theValue) {
-		myPrimary = theValue;
-		return this;
-	}
+    /**
+     * Sets the value(s) for <b>primary</b> (If this code was chosen directly by the user)
+     *
+     * <p><b>Definition:</b> Indicates that this code was chosen by a user directly - i.e. off a
+     * pick list of available items (codes or displays)
+     */
+    public InternalCodingDt setPrimary(BooleanDt theValue) {
+        myPrimary = theValue;
+        return this;
+    }
 
-	/**
-	 * Sets the value for <b>primary</b> (If this code was chosen directly by the user)
-	 *
-	 * <p>
-	 * <b>Definition:</b> Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)
-	 * </p>
-	 */
-	public InternalCodingDt setPrimary(boolean theBoolean) {
-		myPrimary = new BooleanDt(theBoolean);
-		return this;
-	}
+    /**
+     * Sets the value for <b>primary</b> (If this code was chosen directly by the user)
+     *
+     * <p><b>Definition:</b> Indicates that this code was chosen by a user directly - i.e. off a
+     * pick list of available items (codes or displays)
+     */
+    public InternalCodingDt setPrimary(boolean theBoolean) {
+        myPrimary = new BooleanDt(theBoolean);
+        return this;
+    }
 
-	/**
-	 * Gets the value(s) for <b>valueSet</b> (Set this coding was chosen from). creating it if it does not exist. Will not return <code>null</code>.
-	 *
-	 * <p>
-	 * <b>Definition:</b> The set of possible coded values this coding was chosen from or constrained by
-	 * </p>
-	 */
-	public BaseResourceReferenceDt getValueSet() {
-		throw new UnsupportedOperationException(Msg.code(1949));
-	}
+    /**
+     * Gets the value(s) for <b>valueSet</b> (Set this coding was chosen from). creating it if it
+     * does not exist. Will not return <code>null</code>.
+     *
+     * <p><b>Definition:</b> The set of possible coded values this coding was chosen from or
+     * constrained by
+     */
+    public BaseResourceReferenceDt getValueSet() {
+        throw new UnsupportedOperationException(Msg.code(1949));
+    }
 
-	@Override
-	public StringDt getDisplayElement() {
-		return getDisplay();
-	}
+    @Override
+    public StringDt getDisplayElement() {
+        return getDisplay();
+    }
 
-	@Deprecated //override deprecated method
-	@Override
-	public Boolean getMissing() {
-		throw new UnsupportedOperationException(Msg.code(1950));
-	}
+    @Deprecated // override deprecated method
+    @Override
+    public Boolean getMissing() {
+        throw new UnsupportedOperationException(Msg.code(1950));
+    }
 
-	@Deprecated //override deprecated method
-	@Override
-	public IQueryParameterType setMissing(Boolean theMissing) {
-		throw new UnsupportedOperationException(Msg.code(1951));
-	}
-
+    @Deprecated // override deprecated method
+    @Override
+    public IQueryParameterType setMissing(Boolean theMissing) {
+        throw new UnsupportedOperationException(Msg.code(1951));
+    }
 }

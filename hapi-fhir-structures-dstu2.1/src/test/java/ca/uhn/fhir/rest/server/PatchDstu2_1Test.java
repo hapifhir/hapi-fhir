@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -10,6 +12,8 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPatch;
@@ -30,159 +34,187 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class PatchDstu2_1Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatchDstu2_1Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2_1();
-	private static int ourPort;
-	private static Server ourServer;
-	private static String ourLastMethod;
-	private static PatchTypeEnum ourLastPatchType;
-	private static String ourLastBody;
-	private static IdType ourLastId;
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(PatchDstu2_1Test.class);
+    private static CloseableHttpClient ourClient;
+    private static FhirContext ourCtx = FhirContext.forDstu2_1();
+    private static int ourPort;
+    private static Server ourServer;
+    private static String ourLastMethod;
+    private static PatchTypeEnum ourLastPatchType;
+    private static String ourLastBody;
+    private static IdType ourLastId;
 
-	@BeforeEach
-	public void before() {
-		ourLastMethod = null;
-		ourLastBody = null;
-		ourLastId = null;
-	}
+    @BeforeEach
+    public void before() {
+        ourLastMethod = null;
+        ourLastBody = null;
+        ourLastId = null;
+    }
 
-	@Test
-	public void testPatchValidJson() throws Exception {
-		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
-		HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
-		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_JSON_PATCH)));
-		httpPatch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
-		try (CloseableHttpResponse status = ourClient.execute(httpPatch)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
-		}
+    @Test
+    public void testPatchValidJson() throws Exception {
+        String requestContents =
+                "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
+        HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
+        httpPatch.setEntity(
+                new StringEntity(requestContents, ContentType.parse(Constants.CT_JSON_PATCH)));
+        httpPatch.addHeader(
+                Constants.HEADER_PREFER,
+                Constants.HEADER_PREFER_RETURN
+                        + '='
+                        + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+        try (CloseableHttpResponse status = ourClient.execute(httpPatch)) {
+            String responseContent =
+                    IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+            ourLog.info(responseContent);
+            assertEquals(200, status.getStatusLine().getStatusCode());
+            assertEquals(
+                    "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div"
+                        + " xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>",
+                    responseContent);
+        }
 
-		assertEquals("patientPatch", ourLastMethod);
-		assertEquals("Patient/123", ourLastId.getValue());
-		assertEquals(requestContents, ourLastBody);
-		assertEquals(PatchTypeEnum.JSON_PATCH, ourLastPatchType);
-	}
+        assertEquals("patientPatch", ourLastMethod);
+        assertEquals("Patient/123", ourLastId.getValue());
+        assertEquals(requestContents, ourLastBody);
+        assertEquals(PatchTypeEnum.JSON_PATCH, ourLastPatchType);
+    }
 
-	@Test
-	public void testPatchValidXml() throws Exception {
-		String requestContents = "<root/>";
-		HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
-		httpPatch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
-		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_XML_PATCH)));
+    @Test
+    public void testPatchValidXml() throws Exception {
+        String requestContents = "<root/>";
+        HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
+        httpPatch.addHeader(
+                Constants.HEADER_PREFER,
+                Constants.HEADER_PREFER_RETURN
+                        + "="
+                        + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+        httpPatch.setEntity(
+                new StringEntity(requestContents, ContentType.parse(Constants.CT_XML_PATCH)));
 
-		try (CloseableHttpResponse status = ourClient.execute(httpPatch)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
-		}
+        try (CloseableHttpResponse status = ourClient.execute(httpPatch)) {
+            String responseContent =
+                    IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+            ourLog.info(responseContent);
+            assertEquals(200, status.getStatusLine().getStatusCode());
+            assertEquals(
+                    "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div"
+                        + " xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>",
+                    responseContent);
+        }
 
-		assertEquals("patientPatch", ourLastMethod);
-		assertEquals("Patient/123", ourLastId.getValue());
-		assertEquals(requestContents, ourLastBody);
-		assertEquals(PatchTypeEnum.XML_PATCH, ourLastPatchType);
-	}
+        assertEquals("patientPatch", ourLastMethod);
+        assertEquals("Patient/123", ourLastId.getValue());
+        assertEquals(requestContents, ourLastBody);
+        assertEquals(PatchTypeEnum.XML_PATCH, ourLastPatchType);
+    }
 
-	@Test
-	public void testPatchValidJsonWithCharset() throws Exception {
-		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
-		HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
-		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
-		CloseableHttpResponse status = ourClient.execute(httpPatch);
+    @Test
+    public void testPatchValidJsonWithCharset() throws Exception {
+        String requestContents =
+                "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
+        HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
+        httpPatch.setEntity(
+                new StringEntity(
+                        requestContents,
+                        ContentType.parse(
+                                Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
+        CloseableHttpResponse status = ourClient.execute(httpPatch);
 
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+        try {
+            String responseContent =
+                    IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+            ourLog.info(responseContent);
+            assertEquals(200, status.getStatusLine().getStatusCode());
+        } finally {
+            IOUtils.closeQuietly(status.getEntity().getContent());
+        }
 
-		assertEquals("patientPatch", ourLastMethod);
-		assertEquals("Patient/123", ourLastId.getValue());
-		assertEquals(requestContents, ourLastBody);
-	}
+        assertEquals("patientPatch", ourLastMethod);
+        assertEquals("Patient/123", ourLastId.getValue());
+        assertEquals(requestContents, ourLastBody);
+    }
 
-	@Test
-	public void testPatchInvalidMimeType() throws Exception {
-		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
-		HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
-		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse("text/plain; charset=UTF-8")));
-		CloseableHttpResponse status = ourClient.execute(httpPatch);
+    @Test
+    public void testPatchInvalidMimeType() throws Exception {
+        String requestContents =
+                "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
+        HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
+        httpPatch.setEntity(
+                new StringEntity(requestContents, ContentType.parse("text/plain; charset=UTF-8")));
+        CloseableHttpResponse status = ourClient.execute(httpPatch);
 
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(1965) + "Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>", responseContent);
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+        try {
+            String responseContent =
+                    IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+            ourLog.info(responseContent);
+            assertEquals(400, status.getStatusLine().getStatusCode());
+            assertEquals(
+                    "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity"
+                            + " value=\"error\"/><code value=\"processing\"/><diagnostics value=\""
+                            + Msg.code(1965)
+                            + "Invalid Content-Type for PATCH operation:"
+                            + " text/plain\"/></issue></OperationOutcome>",
+                    responseContent);
+        } finally {
+            IOUtils.closeQuietly(status.getEntity().getContent());
+        }
+    }
 
-	}
+    public static class DummyPatientResourceProvider implements IResourceProvider {
 
-	public static class DummyPatientResourceProvider implements IResourceProvider {
+        @Override
+        public Class<? extends IBaseResource> getResourceType() {
+            return Patient.class;
+        }
 
+        // @formatter:off
+        @Patch
+        public OperationOutcome patientPatch(
+                @IdParam IdType theId, PatchTypeEnum thePatchType, @ResourceParam String theBody) {
+            ourLastMethod = "patientPatch";
+            ourLastBody = theBody;
+            ourLastId = theId;
+            ourLastPatchType = thePatchType;
+            OperationOutcome retVal = new OperationOutcome();
+            retVal.getText().setDivAsString("<div>OK</div>");
+            return retVal;
+        }
+        // @formatter:on
 
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Patient.class;
-		}
+    }
 
-		//@formatter:off
-		@Patch
-		public OperationOutcome patientPatch(@IdParam IdType theId, PatchTypeEnum thePatchType, @ResourceParam String theBody) {
-			ourLastMethod = "patientPatch";
-			ourLastBody = theBody;
-			ourLastId = theId;
-			ourLastPatchType = thePatchType;
-			OperationOutcome retVal = new OperationOutcome();
-			retVal.getText().setDivAsString("<div>OK</div>");
-			return retVal;
-		}
-		//@formatter:on
+    @AfterAll
+    public static void afterClassClearContext() throws Exception {
+        JettyUtil.closeServer(ourServer);
+        TestUtil.randomizeLocaleAndTimezone();
+    }
 
-	}
+    @BeforeAll
+    public static void beforeClass() throws Exception {
+        ourServer = new Server(0);
 
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
+        DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+        ServletHandler proxyHandler = new ServletHandler();
+        RestfulServer servlet = new RestfulServer(ourCtx);
+        servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
+        servlet.setDefaultResponseEncoding(EncodingEnum.XML);
+        servlet.setResourceProviders(patientProvider);
 
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+        ServletHolder servletHolder = new ServletHolder(servlet);
+        proxyHandler.addServletWithMapping(servletHolder, "/*");
+        ourServer.setHandler(proxyHandler);
+        JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		servlet.setResourceProviders(patientProvider);
-
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
+        PoolingHttpClientConnectionManager connectionManager =
+                new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setConnectionManager(connectionManager);
+        ourClient = builder.build();
+    }
 }

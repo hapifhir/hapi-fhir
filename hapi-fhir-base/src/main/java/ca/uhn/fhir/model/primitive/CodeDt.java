@@ -26,45 +26,40 @@ import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 
-@DatatypeDef(name = "code", profileOf=StringDt.class)
+@DatatypeDef(name = "code", profileOf = StringDt.class)
 public class CodeDt extends BasePrimitive<String> implements Comparable<CodeDt> {
 
-	/**
-	 * Constructor
-	 */
-	public CodeDt() {
-		super();
-	}
+    /** Constructor */
+    public CodeDt() {
+        super();
+    }
 
-	/**
-	 * Constructor which accepts a string code
-	 */
-	@SimpleSetter()
-	public CodeDt(@SimpleSetter.Parameter(name = "theCode") String theCode) {
-		setValue(theCode);
-	}
+    /** Constructor which accepts a string code */
+    @SimpleSetter()
+    public CodeDt(@SimpleSetter.Parameter(name = "theCode") String theCode) {
+        setValue(theCode);
+    }
 
-	@Override
-	public boolean isEmpty() {
-		return super.isBaseEmpty() && isBlank(getValueAsString());
-	}
+    @Override
+    public boolean isEmpty() {
+        return super.isBaseEmpty() && isBlank(getValueAsString());
+    }
 
-	@Override
-	public int compareTo(CodeDt theCode) {
-		if (theCode == null) {
-			return 1;
-		}
-		return defaultString(getValue()).compareTo(defaultString(theCode.getValue()));
-	}
+    @Override
+    public int compareTo(CodeDt theCode) {
+        if (theCode == null) {
+            return 1;
+        }
+        return defaultString(getValue()).compareTo(defaultString(theCode.getValue()));
+    }
 
-	@Override
-	protected String parse(String theValue) {
-		return theValue.trim();
-	}
+    @Override
+    protected String parse(String theValue) {
+        return theValue.trim();
+    }
 
-	@Override
-	protected String encode(String theValue) {
-		return theValue;
-	}
-
+    @Override
+    protected String encode(String theValue) {
+        return theValue;
+    }
 }

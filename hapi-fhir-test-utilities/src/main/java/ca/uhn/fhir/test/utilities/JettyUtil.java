@@ -20,45 +20,36 @@
 
 package ca.uhn.fhir.test.utilities;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.StatisticsHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class JettyUtil {
-    
-    /**
-     * Gets the local port for the given server. The server must be started.
-     */
+
+    /** Gets the local port for the given server. The server must be started. */
     public static int getPortForStartedServer(Server server) {
         assert server.isStarted();
         Connector[] connectors = server.getConnectors();
         assert connectors.length == 1;
         return ((ServerConnector) (connectors[0])).getLocalPort();
     }
-    
-    /**
-     * Starts the given Jetty server, and configures it for graceful shutdown
-     */
+
+    /** Starts the given Jetty server, and configures it for graceful shutdown */
     public static void startServer(@Nonnull Server theServer) throws Exception {
-        //Needed for graceful shutdown, see https://github.com/eclipse/jetty.project/issues/2076#issuecomment-353717761
+        // Needed for graceful shutdown, see
+        // https://github.com/eclipse/jetty.project/issues/2076#issuecomment-353717761
         theServer.insertHandler(new StatisticsHandler());
         theServer.start();
     }
-    
-    /**
-     * Shut down the given Jetty server, and release held resources.
-     */
+
+    /** Shut down the given Jetty server, and release held resources. */
     public static void closeServer(@Nullable Server theServer) throws Exception {
-    	if (theServer != null) {
-			theServer.stop();
-			theServer.destroy();
-		}
+        if (theServer != null) {
+            theServer.stop();
+            theServer.destroy();
+        }
     }
-    
 }

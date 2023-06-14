@@ -19,18 +19,19 @@
  */
 package ca.uhn.fhir.context;
 
-import java.lang.reflect.Field;
-
-import org.hl7.fhir.instance.model.api.IBase;
-
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import java.lang.reflect.Field;
+import org.hl7.fhir.instance.model.api.IBase;
 
 public class RuntimeChildNarrativeDefinition extends RuntimeChildCompositeDatatypeDefinition {
 
-	public RuntimeChildNarrativeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IBase> theDatatype) {
-		super(theField, theElementName, theChildAnnotation,theDescriptionAnnotation, theDatatype);
-	}
-
-
+    public RuntimeChildNarrativeDefinition(
+            Field theField,
+            String theElementName,
+            Child theChildAnnotation,
+            Description theDescriptionAnnotation,
+            Class<? extends IBase> theDatatype) {
+        super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation, theDatatype);
+    }
 }

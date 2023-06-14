@@ -30,70 +30,85 @@ import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.history.Revisions;
-import org.springframework.data.history.Revision;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink<P>> {
-	int deleteWithAnyReferenceToPid(P thePid);
+    int deleteWithAnyReferenceToPid(P thePid);
 
-	int deleteWithAnyReferenceToPidAndMatchResultNot(P thePid, MdmMatchResultEnum theMatchResult);
+    int deleteWithAnyReferenceToPidAndMatchResultNot(P thePid, MdmMatchResultEnum theMatchResult);
 
-	List<MdmPidTuple<P>> expandPidsFromGroupPidGivenMatchResult(P theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
+    List<MdmPidTuple<P>> expandPidsFromGroupPidGivenMatchResult(
+            P theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+    List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResult(
+            P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+    List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(
+            P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<P> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
+    List<P> findPidByResourceNameAndThreshold(
+            String theResourceName, Date theHighThreshold, Pageable thePageable);
 
-	List<P> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable);
+    List<P> findPidByResourceNameAndThresholdAndPartitionId(
+            String theResourceName,
+            Date theHighThreshold,
+            List<Integer> thePartitionIds,
+            Pageable thePageable);
 
-	List<M> findAllById(List<P> thePids);
+    List<M> findAllById(List<P> thePids);
 
-	Optional<M> findById(P thePid);
+    Optional<M> findById(P thePid);
 
-	void deleteAll(List<M> theLinks);
+    void deleteAll(List<M> theLinks);
 
-	List<M> findAll(Example<M> theExample);
+    List<M> findAll(Example<M> theExample);
 
-	List<M> findAll();
+    List<M> findAll();
 
-	Long count();
+    Long count();
 
-	void deleteAll();
+    void deleteAll();
 
-	M save(M theMdmLink);
+    M save(M theMdmLink);
 
-	Optional<M> findOne(Example<M> theExample);
+    Optional<M> findOne(Example<M> theExample);
 
-	void delete(M theMdmLink);
+    void delete(M theMdmLink);
 
-	// TODO KHS is this method still required?  Probably not?  But leaving it in for now...
-	M validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
+    // TODO KHS is this method still required?  Probably not?  But leaving it in for now...
+    M validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
 
-	@Deprecated
-	Page<M> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
+    @Deprecated
+    Page<M> search(
+            IIdType theGoldenResourceId,
+            IIdType theSourceId,
+            MdmMatchResultEnum theMatchResult,
+            MdmLinkSourceEnum theLinkSource,
+            MdmPageRequest thePageRequest,
+            List<Integer> thePartitionId);
 
-	Page<M> search(MdmQuerySearchParameters theMdmQuerySearchParameters);
-	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
+    Page<M> search(MdmQuerySearchParameters theMdmQuerySearchParameters);
 
-	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
+    Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
-	// TODO: LD:  delete for good on the next bump
-	@Deprecated(since = "6.5.6", forRemoval = true)
-	default Revisions<Long, M> findHistory(P thePid) {
-		throw new UnsupportedOperationException(Msg.code(2296) + "Deprecated and not supported in non-JPA");
-	}
+    void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
 
-	default List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
-		throw new UnsupportedOperationException(Msg.code(2299) + "not yet implemented");
-	}
+    // TODO: LD:  delete for good on the next bump
+    @Deprecated(since = "6.5.6", forRemoval = true)
+    default Revisions<Long, M> findHistory(P thePid) {
+        throw new UnsupportedOperationException(
+                Msg.code(2296) + "Deprecated and not supported in non-JPA");
+    }
+
+    default List<MdmLinkWithRevision<M>> getHistoryForIds(
+            MdmHistorySearchParameters theMdmHistorySearchParameters) {
+        throw new UnsupportedOperationException(Msg.code(2299) + "not yet implemented");
+    }
 }

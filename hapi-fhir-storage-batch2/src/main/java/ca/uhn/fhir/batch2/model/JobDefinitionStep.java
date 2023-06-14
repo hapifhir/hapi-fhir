@@ -19,60 +19,62 @@
  */
 package ca.uhn.fhir.batch2.model;
 
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
-import ca.uhn.fhir.model.api.IModelJson;
-import org.apache.commons.lang3.Validate;
-
-import javax.annotation.Nonnull;
-
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 
-public class JobDefinitionStep<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.model.api.IModelJson;
+import javax.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 
-	private final String myStepId;
-	private final String myStepDescription;
-	protected final IJobStepWorker<PT, IT, OT> myJobStepWorker;
-	private final Class<IT> myInputType;
+public class JobDefinitionStep<
+        PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 
-	private final Class<OT> myOutputType;
+    private final String myStepId;
+    private final String myStepDescription;
+    protected final IJobStepWorker<PT, IT, OT> myJobStepWorker;
+    private final Class<IT> myInputType;
 
-	public JobDefinitionStep(@Nonnull String theStepId,
-									 @Nonnull String theStepDescription,
-									 @Nonnull IJobStepWorker<PT, IT, OT> theJobStepWorker,
-									 @Nonnull Class<IT> theInputType,
-									 @Nonnull Class<OT> theOutputType) {
-		Validate.notBlank(theStepId, "No step ID specified");
-		Validate.isTrue(theStepId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
-		Validate.notBlank(theStepDescription);
-		Validate.notNull(theInputType);
-		myStepId = theStepId;
-		myStepDescription = theStepDescription;
-		myJobStepWorker = theJobStepWorker;
-		myInputType = theInputType;
-		myOutputType = theOutputType;
-	}
+    private final Class<OT> myOutputType;
 
-	public String getStepId() {
-		return myStepId;
-	}
+    public JobDefinitionStep(
+            @Nonnull String theStepId,
+            @Nonnull String theStepDescription,
+            @Nonnull IJobStepWorker<PT, IT, OT> theJobStepWorker,
+            @Nonnull Class<IT> theInputType,
+            @Nonnull Class<OT> theOutputType) {
+        Validate.notBlank(theStepId, "No step ID specified");
+        Validate.isTrue(
+                theStepId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
+        Validate.notBlank(theStepDescription);
+        Validate.notNull(theInputType);
+        myStepId = theStepId;
+        myStepDescription = theStepDescription;
+        myJobStepWorker = theJobStepWorker;
+        myInputType = theInputType;
+        myOutputType = theOutputType;
+    }
 
-	public String getStepDescription() {
-		return myStepDescription;
-	}
+    public String getStepId() {
+        return myStepId;
+    }
 
-	public IJobStepWorker<PT, IT, OT> getJobStepWorker() {
-		return myJobStepWorker;
-	}
+    public String getStepDescription() {
+        return myStepDescription;
+    }
 
-	public Class<IT> getInputType() {
-		return myInputType;
-	}
+    public IJobStepWorker<PT, IT, OT> getJobStepWorker() {
+        return myJobStepWorker;
+    }
 
-	public Class<OT> getOutputType() {
-		return myOutputType;
-	}
+    public Class<IT> getInputType() {
+        return myInputType;
+    }
 
-	public boolean isReductionStep() {
-		return false;
-	}
+    public Class<OT> getOutputType() {
+        return myOutputType;
+    }
+
+    public boolean isReductionStep() {
+        return false;
+    }
 }

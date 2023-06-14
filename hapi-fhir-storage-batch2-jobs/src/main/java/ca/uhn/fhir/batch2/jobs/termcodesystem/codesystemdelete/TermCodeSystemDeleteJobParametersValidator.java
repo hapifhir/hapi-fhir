@@ -22,21 +22,23 @@ package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class TermCodeSystemDeleteJobParametersValidator implements IJobParametersValidator<TermCodeSystemDeleteJobParameters> {
+public class TermCodeSystemDeleteJobParametersValidator
+        implements IJobParametersValidator<TermCodeSystemDeleteJobParameters> {
 
-	@Nullable
-	@Override
-	public List<String> validate(RequestDetails theRequestDetails, @Nonnull TermCodeSystemDeleteJobParameters theParameters) {
-		List<String> errors = new ArrayList<>();
-		if (theParameters.getTermPid() <= 0) {
-			errors.add("Invalid Term Code System PID " + theParameters.getTermPid());
-		}
-		return errors;
-	}
+    @Nullable
+    @Override
+    public List<String> validate(
+            RequestDetails theRequestDetails,
+            @Nonnull TermCodeSystemDeleteJobParameters theParameters) {
+        List<String> errors = new ArrayList<>();
+        if (theParameters.getTermPid() <= 0) {
+            errors.add("Invalid Term Code System PID " + theParameters.getTermPid());
+        }
+        return errors;
+    }
 }

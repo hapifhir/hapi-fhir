@@ -19,8 +19,11 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
+import static org.apache.commons.lang3.StringUtils.left;
 
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
@@ -33,82 +36,85 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-
-import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
-@Table(name = "HFJ_BLK_IMPORT_JOBFILE", indexes = {
-	@Index(name = "IDX_BLKIM_JOBFILE_JOBID", columnList = "JOB_PID")
-})
+@Table(
+        name = "HFJ_BLK_IMPORT_JOBFILE",
+        indexes = {@Index(name = "IDX_BLKIM_JOBFILE_JOBID", columnList = "JOB_PID")})
 public class BulkImportJobFileEntity implements Serializable {
 
-	public static final int MAX_DESCRIPTION_LENGTH = 500;
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKIMJOBFILE_PID")
-	@SequenceGenerator(name = "SEQ_BLKIMJOBFILE_PID", sequenceName = "SEQ_BLKIMJOBFILE_PID")
-	@Column(name = "PID")
-	private Long myId;
+    public static final int MAX_DESCRIPTION_LENGTH = 500;
 
-	@ManyToOne
-	@JoinColumn(name = "JOB_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_BLKIMJOBFILE_JOB"))
-	private BulkImportJobEntity myJob;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKIMJOBFILE_PID")
+    @SequenceGenerator(name = "SEQ_BLKIMJOBFILE_PID", sequenceName = "SEQ_BLKIMJOBFILE_PID")
+    @Column(name = "PID")
+    private Long myId;
 
-	@Column(name = "FILE_SEQ", nullable = false)
-	private int myFileSequence;
-	@Column(name = "FILE_DESCRIPTION", nullable = true, length = MAX_DESCRIPTION_LENGTH)
-	private String myFileDescription;
-	@Lob
-	@Column(name = "JOB_CONTENTS", nullable = false)
-	private byte[] myContents;
-	@Column(name = "TENANT_NAME", nullable = true, length = PartitionEntity.MAX_NAME_LENGTH)
-	private String myTenantName;
+    @ManyToOne
+    @JoinColumn(
+            name = "JOB_PID",
+            referencedColumnName = "PID",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "FK_BLKIMJOBFILE_JOB"))
+    private BulkImportJobEntity myJob;
 
-	public String getFileDescription() {
-		return myFileDescription;
-	}
+    @Column(name = "FILE_SEQ", nullable = false)
+    private int myFileSequence;
 
-	public void setFileDescription(String theFileDescription) {
-		myFileDescription = left(theFileDescription, MAX_DESCRIPTION_LENGTH);
-	}
+    @Column(name = "FILE_DESCRIPTION", nullable = true, length = MAX_DESCRIPTION_LENGTH)
+    private String myFileDescription;
 
-	public BulkImportJobEntity getJob() {
-		return myJob;
-	}
+    @Lob
+    @Column(name = "JOB_CONTENTS", nullable = false)
+    private byte[] myContents;
 
-	public void setJob(BulkImportJobEntity theJob) {
-		myJob = theJob;
-	}
+    @Column(name = "TENANT_NAME", nullable = true, length = PartitionEntity.MAX_NAME_LENGTH)
+    private String myTenantName;
 
-	public int getFileSequence() {
-		return myFileSequence;
-	}
+    public String getFileDescription() {
+        return myFileDescription;
+    }
 
-	public void setFileSequence(int theFileSequence) {
-		myFileSequence = theFileSequence;
-	}
+    public void setFileDescription(String theFileDescription) {
+        myFileDescription = left(theFileDescription, MAX_DESCRIPTION_LENGTH);
+    }
 
-	public String getContents() {
-		return new String(myContents, StandardCharsets.UTF_8);
-	}
+    public BulkImportJobEntity getJob() {
+        return myJob;
+    }
 
-	public void setContents(String theContents) {
-		myContents = theContents.getBytes(StandardCharsets.UTF_8);
-	}
+    public void setJob(BulkImportJobEntity theJob) {
+        myJob = theJob;
+    }
 
+    public int getFileSequence() {
+        return myFileSequence;
+    }
 
-	public BulkImportJobFileJson toJson() {
-		return new BulkImportJobFileJson()
-			.setContents(getContents())
-			.setTenantName(getTenantName());
-	}
+    public void setFileSequence(int theFileSequence) {
+        myFileSequence = theFileSequence;
+    }
 
-	public String getTenantName() {
-		return myTenantName;
-	}
+    public String getContents() {
+        return new String(myContents, StandardCharsets.UTF_8);
+    }
 
-	public void setTenantName(String theTenantName) {
-		myTenantName = theTenantName;
-	}
+    public void setContents(String theContents) {
+        myContents = theContents.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public BulkImportJobFileJson toJson() {
+        return new BulkImportJobFileJson()
+                .setContents(getContents())
+                .setTenantName(getTenantName());
+    }
+
+    public String getTenantName() {
+        return myTenantName;
+    }
+
+    public void setTenantName(String theTenantName) {
+        myTenantName = theTenantName;
+    }
 }

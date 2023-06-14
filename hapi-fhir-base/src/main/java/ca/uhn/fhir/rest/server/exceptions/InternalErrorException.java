@@ -19,55 +19,48 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
- * Represents an <b>HTTP 500 Internal Error</b> response.
- * This status indicates that the server failed to successfully process the
- * request. This generally means that the server is misbehaving or is
- * misconfigured in some way, although a misbehaving server might also
- * send this status code in the case of a bad request message (although it
- * should not do this; an HTTP 4xx response is more appropriate in that
- * situation).
- * 
- * <p>
- * Note that a complete list of RESTful exceptions is available in the
- * <a href="./package-summary.html">Package Summary</a>.
- * </p>
- * 
+ * Represents an <b>HTTP 500 Internal Error</b> response. This status indicates that the server
+ * failed to successfully process the request. This generally means that the server is misbehaving
+ * or is misconfigured in some way, although a misbehaving server might also send this status code
+ * in the case of a bad request message (although it should not do this; an HTTP 4xx response is
+ * more appropriate in that situation).
+ *
+ * <p>Note that a complete list of RESTful exceptions is available in the <a
+ * href="./package-summary.html">Package Summary</a>.
+ *
  * @see UnprocessableEntityException Which should be used for business level validation failures
  */
 @CoverageIgnore
 public class InternalErrorException extends BaseServerResponseException {
 
-	public static final int STATUS_CODE = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
-	
-	private static final long serialVersionUID = 1L;
+    public static final int STATUS_CODE = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param theMessage
-	 *            The message
-	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
-	 */
-	public InternalErrorException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
-		super(STATUS_CODE, theMessage, theOperationOutcome);
-	}
+    private static final long serialVersionUID = 1L;
 
-	public InternalErrorException(String theMessage) {
-		super(STATUS_CODE, theMessage);
-	}
+    /**
+     * Constructor
+     *
+     * @param theMessage The message
+     * @param theOperationOutcome The OperationOutcome resource to return to the client
+     */
+    public InternalErrorException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
+        super(STATUS_CODE, theMessage, theOperationOutcome);
+    }
 
-	public InternalErrorException(String theMessage, Throwable theCause) {
-		super(STATUS_CODE, theMessage, theCause);
-	}
+    public InternalErrorException(String theMessage) {
+        super(STATUS_CODE, theMessage);
+    }
 
-	public InternalErrorException(Throwable theCause) {
-		super(STATUS_CODE, theCause);
-	}
+    public InternalErrorException(String theMessage, Throwable theCause) {
+        super(STATUS_CODE, theMessage, theCause);
+    }
 
+    public InternalErrorException(Throwable theCause) {
+        super(STATUS_CODE, theCause);
+    }
 }

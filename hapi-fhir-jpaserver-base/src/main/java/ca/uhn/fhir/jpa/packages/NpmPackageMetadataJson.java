@@ -27,127 +27,141 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
-
-import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 @Schema(description = "Represents an NPM package metadata response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+        creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class NpmPackageMetadataJson {
 
-	@JsonProperty("dist-tags")
-	private DistTags myDistTags;
-	@JsonProperty("modified")
-	@JsonSerialize(using = JsonDateSerializer.class)
-	@JsonDeserialize(using = JsonDateDeserializer.class)
-	private Date myModified;
-	@JsonProperty("name")
-	private String myName;
-	@JsonProperty("versions")
-	private Map<String, Version> myVersionIdToVersion;
+    @JsonProperty("dist-tags")
+    private DistTags myDistTags;
 
-	public void addVersion(Version theVersion) {
-		getVersions().put(theVersion.getVersion(), theVersion);
-	}
+    @JsonProperty("modified")
+    @JsonSerialize(using = JsonDateSerializer.class)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    private Date myModified;
 
-	@Nonnull
-	public Map<String, Version> getVersions() {
-		if (myVersionIdToVersion == null) {
-			myVersionIdToVersion = new LinkedHashMap<>();
-		}
-		return myVersionIdToVersion;
-	}
+    @JsonProperty("name")
+    private String myName;
 
-	public DistTags getDistTags() {
-		return myDistTags;
-	}
+    @JsonProperty("versions")
+    private Map<String, Version> myVersionIdToVersion;
 
-	public void setDistTags(DistTags theDistTags) {
-		myDistTags = theDistTags;
-	}
+    public void addVersion(Version theVersion) {
+        getVersions().put(theVersion.getVersion(), theVersion);
+    }
 
-	public void setModified(Date theModified) {
-		myModified = theModified;
-	}
+    @Nonnull
+    public Map<String, Version> getVersions() {
+        if (myVersionIdToVersion == null) {
+            myVersionIdToVersion = new LinkedHashMap<>();
+        }
+        return myVersionIdToVersion;
+    }
 
-	public void setName(String theName) {
-		myName = theName;
-	}
+    public DistTags getDistTags() {
+        return myDistTags;
+    }
 
+    public void setDistTags(DistTags theDistTags) {
+        myDistTags = theDistTags;
+    }
 
-	public static class DistTags {
+    public void setModified(Date theModified) {
+        myModified = theModified;
+    }
 
-		@JsonProperty("latest")
-		private String myLatest;
+    public void setName(String theName) {
+        myName = theName;
+    }
 
-		public String getLatest() {
-			return myLatest;
-		}
+    public static class DistTags {
 
-		public DistTags setLatest(String theLatest) {
-			myLatest = theLatest;
-			return this;
-		}
-	}
+        @JsonProperty("latest")
+        private String myLatest;
 
+        public String getLatest() {
+            return myLatest;
+        }
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-	public static class Version {
+        public DistTags setLatest(String theLatest) {
+            myLatest = theLatest;
+            return this;
+        }
+    }
 
-		@JsonProperty("name")
-		private String myName;
-		@JsonProperty("version")
-		private String myVersion;
-		@JsonProperty("description")
-		private String myDescription;
-		@JsonProperty("fhirVersion")
-		private String myFhirVersion;
-		@Schema(description = "The size of this package in bytes", example = "1000")
-		@JsonProperty("_bytes")
-		private long myBytes;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonAutoDetect(
+            creatorVisibility = JsonAutoDetect.Visibility.NONE,
+            fieldVisibility = JsonAutoDetect.Visibility.NONE,
+            getterVisibility = JsonAutoDetect.Visibility.NONE,
+            isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+            setterVisibility = JsonAutoDetect.Visibility.NONE)
+    public static class Version {
 
-		public String getName() {
-			return myName;
-		}
+        @JsonProperty("name")
+        private String myName;
 
-		public void setName(String theName) {
-			myName = theName;
-		}
+        @JsonProperty("version")
+        private String myVersion;
 
-		public String getDescription() {
-			return myDescription;
-		}
+        @JsonProperty("description")
+        private String myDescription;
 
-		public void setDescription(String theDescription) {
-			myDescription = theDescription;
-		}
+        @JsonProperty("fhirVersion")
+        private String myFhirVersion;
 
-		public String getFhirVersion() {
-			return myFhirVersion;
-		}
+        @Schema(description = "The size of this package in bytes", example = "1000")
+        @JsonProperty("_bytes")
+        private long myBytes;
 
-		public void setFhirVersion(String theFhirVersion) {
-			myFhirVersion = theFhirVersion;
-		}
+        public String getName() {
+            return myName;
+        }
 
-		public String getVersion() {
-			return myVersion;
-		}
+        public void setName(String theName) {
+            myName = theName;
+        }
 
-		public void setVersion(String theVersion) {
-			myVersion = theVersion;
-		}
+        public String getDescription() {
+            return myDescription;
+        }
 
-		public long getBytes() {
-			return myBytes;
-		}
+        public void setDescription(String theDescription) {
+            myDescription = theDescription;
+        }
 
-		public void setBytes(long theBytes) {
-			myBytes = theBytes;
-		}
-	}
+        public String getFhirVersion() {
+            return myFhirVersion;
+        }
+
+        public void setFhirVersion(String theFhirVersion) {
+            myFhirVersion = theFhirVersion;
+        }
+
+        public String getVersion() {
+            return myVersion;
+        }
+
+        public void setVersion(String theVersion) {
+            myVersion = theVersion;
+        }
+
+        public long getBytes() {
+            return myBytes;
+        }
+
+        public void setBytes(long theBytes) {
+            myBytes = theBytes;
+        }
+    }
 }

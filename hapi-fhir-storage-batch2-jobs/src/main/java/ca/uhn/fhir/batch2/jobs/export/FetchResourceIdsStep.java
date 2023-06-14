@@ -33,121 +33,131 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
-	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
+public class FetchResourceIdsStep
+        implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
+    private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
-	@Autowired
-	private IBulkExportProcessor myBulkExportProcessor;
+    @Autowired private IBulkExportProcessor myBulkExportProcessor;
 
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
+    @Autowired private JpaStorageSettings myStorageSettings;
 
-	@Nonnull
-	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
-								 @Nonnull IJobDataSink<ResourceIdList> theDataSink) throws JobExecutionFailedException {
-		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
-		ourLog.info("Fetching resource IDs for bulk export job instance[{}]", theStepExecutionDetails.getInstance().getInstanceId());
+    @Nonnull
+    @Override
+    public RunOutcome run(
+            @Nonnull
+                    StepExecutionDetails<BulkExportJobParameters, VoidModel>
+                            theStepExecutionDetails,
+            @Nonnull IJobDataSink<ResourceIdList> theDataSink)
+            throws JobExecutionFailedException {
+        BulkExportJobParameters params = theStepExecutionDetails.getParameters();
+        ourLog.info(
+                "Fetching resource IDs for bulk export job instance[{}]",
+                theStepExecutionDetails.getInstance().getInstanceId());
 
-		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
-		providerParams.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId());
-		providerParams.setChunkId(theStepExecutionDetails.getChunkId());
-		providerParams.setFilters(params.getFilters());
-		providerParams.setStartDate(params.getSince());
-		providerParams.setExportStyle(params.getExportStyle());
-		providerParams.setGroupId(params.getGroupId());
-		providerParams.setPatientIds(params.getPatientIds());
-		providerParams.setExpandMdm(params.isExpandMdm());
-		providerParams.setPartitionId(params.getPartitionId());
+        ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
+        providerParams.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId());
+        providerParams.setChunkId(theStepExecutionDetails.getChunkId());
+        providerParams.setFilters(params.getFilters());
+        providerParams.setStartDate(params.getSince());
+        providerParams.setExportStyle(params.getExportStyle());
+        providerParams.setGroupId(params.getGroupId());
+        providerParams.setPatientIds(params.getPatientIds());
+        providerParams.setExpandMdm(params.isExpandMdm());
+        providerParams.setPartitionId(params.getPartitionId());
 
-		/*
-		 * we set all the requested resource types here so that
-		 * when we recursively fetch resource types for a given patient/group
-		 * we don't recurse for types that they did not request
-		 */
-		providerParams.setRequestedResourceTypes(params.getResourceTypes());
+        /*
+         * we set all the requested resource types here so that
+         * when we recursively fetch resource types for a given patient/group
+         * we don't recurse for types that they did not request
+         */
+        providerParams.setRequestedResourceTypes(params.getResourceTypes());
 
-		int submissionCount = 0;
-		try {
-			Set<BatchResourceId> submittedBatchResourceIds = new HashSet<>();
+        int submissionCount = 0;
+        try {
+            Set<BatchResourceId> submittedBatchResourceIds = new HashSet<>();
 
-			/*
-			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
-			 */
-			for (String resourceType : params.getResourceTypes()) {
-				providerParams.setResourceType(resourceType);
+            /*
+             * We will fetch ids for each resource type in the ResourceTypes (_type filter).
+             */
+            for (String resourceType : params.getResourceTypes()) {
+                providerParams.setResourceType(resourceType);
 
-				// filters are the filters for searching
-				ourLog.info("Running FetchResourceIdsStep for resource type: {} with params: {}", resourceType, providerParams);
-				Iterator<IResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
-				List<BatchResourceId> idsToSubmit = new ArrayList<>();
+                // filters are the filters for searching
+                ourLog.info(
+                        "Running FetchResourceIdsStep for resource type: {} with params: {}",
+                        resourceType,
+                        providerParams);
+                Iterator<IResourcePersistentId> pidIterator =
+                        myBulkExportProcessor.getResourcePidIterator(providerParams);
+                List<BatchResourceId> idsToSubmit = new ArrayList<>();
 
-				if (!pidIterator.hasNext()) {
-					ourLog.debug("Bulk Export generated an iterator with no results!");
-				}
-				while (pidIterator.hasNext()) {
-					IResourcePersistentId pid = pidIterator.next();
+                if (!pidIterator.hasNext()) {
+                    ourLog.debug("Bulk Export generated an iterator with no results!");
+                }
+                while (pidIterator.hasNext()) {
+                    IResourcePersistentId pid = pidIterator.next();
 
-					BatchResourceId batchResourceId;
-					if (pid.getResourceType() != null) {
-						batchResourceId = BatchResourceId.getIdFromPID(pid, pid.getResourceType());
-					} else {
-						batchResourceId = BatchResourceId.getIdFromPID(pid, resourceType);
-					}
+                    BatchResourceId batchResourceId;
+                    if (pid.getResourceType() != null) {
+                        batchResourceId = BatchResourceId.getIdFromPID(pid, pid.getResourceType());
+                    } else {
+                        batchResourceId = BatchResourceId.getIdFromPID(pid, resourceType);
+                    }
 
-					if (!submittedBatchResourceIds.add(batchResourceId)) {
-						continue;
-					}
+                    if (!submittedBatchResourceIds.add(batchResourceId)) {
+                        continue;
+                    }
 
-					idsToSubmit.add(batchResourceId);
+                    idsToSubmit.add(batchResourceId);
 
-					// Make sure resources stored in each batch does not go over the max capacity
-					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()) {
-						submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
-						submissionCount++;
-						idsToSubmit = new ArrayList<>();
-					}
-				}
+                    // Make sure resources stored in each batch does not go over the max capacity
+                    if (idsToSubmit.size()
+                            >= myStorageSettings.getBulkExportFileMaximumCapacity()) {
+                        submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
+                        submissionCount++;
+                        idsToSubmit = new ArrayList<>();
+                    }
+                }
 
-				// if we have any other Ids left, submit them now
-				if (!idsToSubmit.isEmpty()) {
-					submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
-					submissionCount++;
-				}
-			}
-		} catch (Exception ex) {
-			ourLog.error(ex.getMessage(), ex);
+                // if we have any other Ids left, submit them now
+                if (!idsToSubmit.isEmpty()) {
+                    submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
+                    submissionCount++;
+                }
+            }
+        } catch (Exception ex) {
+            ourLog.error(ex.getMessage(), ex);
 
-			theDataSink.recoveredError(ex.getMessage());
+            theDataSink.recoveredError(ex.getMessage());
 
-			throw new JobExecutionFailedException(Msg.code(2239) + " : " + ex.getMessage());
-		}
+            throw new JobExecutionFailedException(Msg.code(2239) + " : " + ex.getMessage());
+        }
 
-		ourLog.info("Submitted {} groups of ids for processing", submissionCount);
-		return RunOutcome.SUCCESS;
-	}
+        ourLog.info("Submitted {} groups of ids for processing", submissionCount);
+        return RunOutcome.SUCCESS;
+    }
 
-	private void submitWorkChunk(List<BatchResourceId> theBatchResourceIds,
-										  String theResourceType,
-										  BulkExportJobParameters theParams,
-										  IJobDataSink<ResourceIdList> theDataSink) {
-		ResourceIdList idList = new ResourceIdList();
+    private void submitWorkChunk(
+            List<BatchResourceId> theBatchResourceIds,
+            String theResourceType,
+            BulkExportJobParameters theParams,
+            IJobDataSink<ResourceIdList> theDataSink) {
+        ResourceIdList idList = new ResourceIdList();
 
-		idList.setIds(theBatchResourceIds);
+        idList.setIds(theBatchResourceIds);
 
-		idList.setResourceType(theResourceType);
+        idList.setResourceType(theResourceType);
 
-		theDataSink.accept(idList);
-	}
+        theDataSink.accept(idList);
+    }
 }

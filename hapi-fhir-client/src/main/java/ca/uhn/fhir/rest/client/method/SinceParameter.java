@@ -24,8 +24,7 @@ import ca.uhn.fhir.rest.api.Constants;
 
 class SinceParameter extends SinceOrAtParameter {
 
-	public SinceParameter() {
-		super(Constants.PARAM_SINCE, Since.class);
-	}
-
+    public SinceParameter() {
+        super(Constants.PARAM_SINCE, Since.class);
+    }
 }

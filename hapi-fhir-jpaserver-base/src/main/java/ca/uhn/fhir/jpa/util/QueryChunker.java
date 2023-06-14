@@ -21,22 +21,18 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.util.TaskChunker;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * As always, Oracle can't handle things that other databases don't mind.. In this
- * case it doesn't like more than ~1000 IDs in a single load, so we break this up
- * if it's lots of IDs. I suppose maybe we should be doing this as a join anyhow
- * but this should work too. Sigh.
+ * As always, Oracle can't handle things that other databases don't mind.. In this case it doesn't
+ * like more than ~1000 IDs in a single load, so we break this up if it's lots of IDs. I suppose
+ * maybe we should be doing this as a join anyhow but this should work too. Sigh.
  */
 public class QueryChunker<T> extends TaskChunker<T> {
 
-	public void chunk(Collection<T> theInput, Consumer<List<T>> theBatchConsumer) {
-		chunk(theInput, SearchBuilder.getMaximumPageSize(), theBatchConsumer);
-	}
-
+    public void chunk(Collection<T> theInput, Consumer<List<T>> theBatchConsumer) {
+        chunk(theInput, SearchBuilder.getMaximumPageSize(), theBatchConsumer);
+    }
 }

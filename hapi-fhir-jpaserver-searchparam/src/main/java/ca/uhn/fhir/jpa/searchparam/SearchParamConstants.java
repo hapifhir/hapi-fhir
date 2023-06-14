@@ -21,5 +21,5 @@ package ca.uhn.fhir.jpa.searchparam;
 
 public class SearchParamConstants {
 
-	public static final String UCUM_NS = "http://unitsofmeasure.org";
+    public static final String UCUM_NS = "http://unitsofmeasure.org";
 }

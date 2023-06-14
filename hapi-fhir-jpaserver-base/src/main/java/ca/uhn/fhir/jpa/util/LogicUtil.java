@@ -23,28 +23,23 @@ import ca.uhn.fhir.util.CoverageIgnore;
 
 public class LogicUtil {
 
-	/**
-	 * Non instantiable
-	 */
-	@CoverageIgnore
-	private LogicUtil() {
-		// nothing
-	}
+    /** Non instantiable */
+    @CoverageIgnore
+    private LogicUtil() {
+        // nothing
+    }
 
-	/**
-	 * Returns true IF and ONLY IF exactly 1 of the provided boolean(s) is true
-	 */
-	public static boolean multiXor(boolean... theValues) {
-		boolean foundOne = false;
-		for (boolean next : theValues) {
-			if (next) {
-				if (foundOne) {
-					return false;
-				}
-				foundOne = true;
-			}
-		}
-		return foundOne;
-	}
-
+    /** Returns true IF and ONLY IF exactly 1 of the provided boolean(s) is true */
+    public static boolean multiXor(boolean... theValues) {
+        boolean foundOne = false;
+        for (boolean next : theValues) {
+            if (next) {
+                if (foundOne) {
+                    return false;
+                }
+                foundOne = true;
+            }
+        }
+        return foundOne;
+    }
 }

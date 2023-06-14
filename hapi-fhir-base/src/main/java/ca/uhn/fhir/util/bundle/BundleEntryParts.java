@@ -23,38 +23,43 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class BundleEntryParts {
-	private final RequestTypeEnum myRequestType;
-	private final IBaseResource myResource;
-	private final String myUrl;
-	private final String myConditionalUrl;
-	private final String myFullUrl;
+    private final RequestTypeEnum myRequestType;
+    private final IBaseResource myResource;
+    private final String myUrl;
+    private final String myConditionalUrl;
+    private final String myFullUrl;
 
-	public BundleEntryParts(String theFullUrl, RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource, String theConditionalUrl) {
-		super();
-		myFullUrl = theFullUrl;
-		myRequestType = theRequestType;
-		myUrl = theUrl;
-		myResource = theResource;
-		myConditionalUrl = theConditionalUrl;
-	}
+    public BundleEntryParts(
+            String theFullUrl,
+            RequestTypeEnum theRequestType,
+            String theUrl,
+            IBaseResource theResource,
+            String theConditionalUrl) {
+        super();
+        myFullUrl = theFullUrl;
+        myRequestType = theRequestType;
+        myUrl = theUrl;
+        myResource = theResource;
+        myConditionalUrl = theConditionalUrl;
+    }
 
-	public String getFullUrl() {
-		return myFullUrl;
-	}
+    public String getFullUrl() {
+        return myFullUrl;
+    }
 
-	public RequestTypeEnum getRequestType() {
-		return myRequestType;
-	}
+    public RequestTypeEnum getRequestType() {
+        return myRequestType;
+    }
 
-	public IBaseResource getResource() {
-		return myResource;
-	}
+    public IBaseResource getResource() {
+        return myResource;
+    }
 
-	public String getConditionalUrl() {
-		return myConditionalUrl;
-	}
+    public String getConditionalUrl() {
+        return myConditionalUrl;
+    }
 
-	public String getUrl() {
-		return myUrl;
-	}
+    public String getUrl() {
+        return myUrl;
+    }
 }

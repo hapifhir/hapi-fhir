@@ -23,26 +23,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Logs {
-	private static final Logger ourBatchTroubleshootingLog = LoggerFactory.getLogger("ca.uhn.fhir.log.batch_troubleshooting");
-	private static final Logger ourNarrativeGenerationTroubleshootingLog = LoggerFactory.getLogger("ca.uhn.fhir.log.narrative_generation_troubleshooting");
+    private static final Logger ourBatchTroubleshootingLog =
+            LoggerFactory.getLogger("ca.uhn.fhir.log.batch_troubleshooting");
+    private static final Logger ourNarrativeGenerationTroubleshootingLog =
+            LoggerFactory.getLogger("ca.uhn.fhir.log.narrative_generation_troubleshooting");
 
-	private static final Logger ourSubscriptionTroubleshootingLog = LoggerFactory.getLogger("ca.cdr.log.subscription_troubleshooting");
+    private static final Logger ourSubscriptionTroubleshootingLog =
+            LoggerFactory.getLogger("ca.cdr.log.subscription_troubleshooting");
 
-	private static final Logger ourSubscriptionTopicLog = LoggerFactory.getLogger("ca.uhn.fhir.log.subscription_topic_troubleshooting");
+    private static final Logger ourSubscriptionTopicLog =
+            LoggerFactory.getLogger("ca.uhn.fhir.log.subscription_topic_troubleshooting");
 
-	public static Logger getBatchTroubleshootingLog() {
-		return ourBatchTroubleshootingLog;
-	}
+    public static Logger getBatchTroubleshootingLog() {
+        return ourBatchTroubleshootingLog;
+    }
 
-	public static Logger getNarrativeGenerationTroubleshootingLog() {
-		return ourBatchTroubleshootingLog;
-	}
+    public static Logger getNarrativeGenerationTroubleshootingLog() {
+        return ourBatchTroubleshootingLog;
+    }
 
-	public static Logger getSubscriptionTroubleshootingLog() {
-		return ourSubscriptionTroubleshootingLog;
-	}
+    public static Logger getSubscriptionTroubleshootingLog() {
+        return ourSubscriptionTroubleshootingLog;
+    }
 
-	public static Logger getSubscriptionTopicLog() {
-		return ourSubscriptionTopicLog;
-	}
+    public static Logger getSubscriptionTopicLog() {
+        return ourSubscriptionTopicLog;
+    }
 }

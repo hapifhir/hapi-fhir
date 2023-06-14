@@ -7,34 +7,35 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public class MockProvider {
-	private IBundleProvider myBundleProvider = new SimpleBundleProvider();
-	private int myFailCount = 0;
-	private IBaseResource myReadResource;
+    private IBundleProvider myBundleProvider = new SimpleBundleProvider();
+    private int myFailCount = 0;
+    private IBaseResource myReadResource;
 
-	public void setBundleProvider(IBundleProvider theBundleProvider) {
-		myBundleProvider = theBundleProvider;
-	}
-	public void setReadResource(IBaseResource theReadResource) {
-		myReadResource = theReadResource;
-	}
+    public void setBundleProvider(IBundleProvider theBundleProvider) {
+        myBundleProvider = theBundleProvider;
+    }
 
-	public IBundleProvider search(SearchParameterMap theParams) {
-		if (myFailCount > 0) {
-			--myFailCount;
-			throw new RuntimeException("Mock Search Failed");
-		}
-		return myBundleProvider;
-	}
+    public void setReadResource(IBaseResource theReadResource) {
+        myReadResource = theReadResource;
+    }
 
-	public void setFailCount(int theFailCount) {
-		myFailCount = theFailCount;
-	}
+    public IBundleProvider search(SearchParameterMap theParams) {
+        if (myFailCount > 0) {
+            --myFailCount;
+            throw new RuntimeException("Mock Search Failed");
+        }
+        return myBundleProvider;
+    }
 
-	public int getFailCount() {
-		return myFailCount;
-	}
+    public void setFailCount(int theFailCount) {
+        myFailCount = theFailCount;
+    }
 
-	public IBaseResource read(IIdType theId) {
-		return myReadResource;
-	}
+    public int getFailCount() {
+        return myFailCount;
+    }
+
+    public IBaseResource read(IIdType theId) {
+        return myReadResource;
+    }
 }

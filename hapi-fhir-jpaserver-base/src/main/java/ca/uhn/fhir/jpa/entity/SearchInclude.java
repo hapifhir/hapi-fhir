@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.entity;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
@@ -33,81 +32,88 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-//@formatter:off
+// @formatter:off
 @Entity
-@Table(name = "HFJ_SEARCH_INCLUDE", indexes = {
-	@Index(name = "FK_SEARCHINC_SEARCH", columnList = "SEARCH_PID")
-})
-//@formatter:on
+@Table(
+        name = "HFJ_SEARCH_INCLUDE",
+        indexes = {@Index(name = "FK_SEARCHINC_SEARCH", columnList = "SEARCH_PID")})
+// @formatter:on
 public class SearchInclude implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH_INC")
-	@SequenceGenerator(name = "SEQ_SEARCH_INC", sequenceName = "SEQ_SEARCH_INC")
-	@Id
-	@Column(name = "PID")
-	private Long myId;
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH_INC")
+    @SequenceGenerator(name = "SEQ_SEARCH_INC", sequenceName = "SEQ_SEARCH_INC")
+    @Id
+    @Column(name = "PID")
+    private Long myId;
 
-	@Column(name = "REVINCLUDE", insertable = true, updatable = false, nullable = false)
-	private boolean myReverse;
+    @Column(name = "REVINCLUDE", insertable = true, updatable = false, nullable = false)
+    private boolean myReverse;
 
-	public boolean isReverse() {
-		return myReverse;
-	}
+    public boolean isReverse() {
+        return myReverse;
+    }
 
-	@Column(name = "SEARCH_INCLUDE", length = 200, insertable = true, updatable = false, nullable = false)
-	private String myInclude;
+    @Column(
+            name = "SEARCH_INCLUDE",
+            length = 200,
+            insertable = true,
+            updatable = false,
+            nullable = false)
+    private String myInclude;
 
-	@ManyToOne
-	@JoinColumn(name = "SEARCH_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_SEARCHINC_SEARCH"), insertable = true, updatable = false, nullable = false)
-	private Search mySearch;
+    @ManyToOne
+    @JoinColumn(
+            name = "SEARCH_PID",
+            referencedColumnName = "PID",
+            foreignKey = @ForeignKey(name = "FK_SEARCHINC_SEARCH"),
+            insertable = true,
+            updatable = false,
+            nullable = false)
+    private Search mySearch;
 
-	@Column(name="SEARCH_PID", insertable=false, updatable=false, nullable=false)
-	private Long mySearchPid;
+    @Column(name = "SEARCH_PID", insertable = false, updatable = false, nullable = false)
+    private Long mySearchPid;
 
-	@Column(name = "INC_RECURSE", insertable = true, updatable = false, nullable = false)
-	private boolean myRecurse;
+    @Column(name = "INC_RECURSE", insertable = true, updatable = false, nullable = false)
+    private boolean myRecurse;
 
-	/**
-	 * Constructor
-	 */
-	public SearchInclude() {
-		// nothing
-	}
+    /** Constructor */
+    public SearchInclude() {
+        // nothing
+    }
 
-	/**
-	 * Constructor
-	 */
-	public SearchInclude(Search theSearch, String theInclude, boolean theReverse, boolean theRecurse) {
-		mySearch = theSearch;
-		myInclude = theInclude;
-		myReverse = theReverse;
-		myRecurse = theRecurse;
-	}
+    /** Constructor */
+    public SearchInclude(
+            Search theSearch, String theInclude, boolean theReverse, boolean theRecurse) {
+        mySearch = theSearch;
+        myInclude = theInclude;
+        myReverse = theReverse;
+        myRecurse = theRecurse;
+    }
 
-	@Override
-	public boolean equals(Object theObj) {
-		if (!(theObj instanceof SearchInclude)) {
-			return false;
-		}
-		if (myId == null) {
-			return false;
-		}
-		return myId.equals(((SearchInclude) theObj).myId);
-	}
+    @Override
+    public boolean equals(Object theObj) {
+        if (!(theObj instanceof SearchInclude)) {
+            return false;
+        }
+        if (myId == null) {
+            return false;
+        }
+        return myId.equals(((SearchInclude) theObj).myId);
+    }
 
-	public String getInclude() {
-		return myInclude;
-	}
+    public String getInclude() {
+        return myInclude;
+    }
 
-	@Override
-	public int hashCode() {
-		return myId == null ? 0 : myId.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return myId == null ? 0 : myId.hashCode();
+    }
 
-	public boolean isRecurse() {
-		return myRecurse;
-	}
-
+    public boolean isRecurse() {
+        return myRecurse;
+    }
 }

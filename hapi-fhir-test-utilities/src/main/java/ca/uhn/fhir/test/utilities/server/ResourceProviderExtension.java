@@ -26,31 +26,29 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class ResourceProviderExtension<T> implements BeforeEachCallback, AfterEachCallback {
 
-	private final RestfulServerExtension myRestfulServerExtension;
-	private final T myProvider;
+    private final RestfulServerExtension myRestfulServerExtension;
+    private final T myProvider;
 
-	/**
-	 * Constructor
-	 */
-	public ResourceProviderExtension(RestfulServerExtension theRestfulServerExtension, T theProvider) {
-		Validate.notNull(theRestfulServerExtension);
-		Validate.notNull(theProvider);
-		myRestfulServerExtension = theRestfulServerExtension;
-		myProvider = theProvider;
-	}
+    /** Constructor */
+    public ResourceProviderExtension(
+            RestfulServerExtension theRestfulServerExtension, T theProvider) {
+        Validate.notNull(theRestfulServerExtension);
+        Validate.notNull(theProvider);
+        myRestfulServerExtension = theRestfulServerExtension;
+        myProvider = theProvider;
+    }
 
-	@Override
-	public void afterEach(ExtensionContext context) {
-		myRestfulServerExtension.getRestfulServer().unregisterProvider(myProvider);
-	}
+    @Override
+    public void afterEach(ExtensionContext context) {
+        myRestfulServerExtension.getRestfulServer().unregisterProvider(myProvider);
+    }
 
-	@Override
-	public void beforeEach(ExtensionContext context) {
-		myRestfulServerExtension.getRestfulServer().registerProvider(myProvider);
-	}
+    @Override
+    public void beforeEach(ExtensionContext context) {
+        myRestfulServerExtension.getRestfulServer().registerProvider(myProvider);
+    }
 
-	public T getProvider() {
-		return myProvider;
-	}
-
+    public T getProvider() {
+        return myProvider;
+    }
 }

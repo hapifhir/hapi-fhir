@@ -26,83 +26,89 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatchRequest;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
-
 public class SubscriptionDeliveryRequest {
-	// One of these two will be populated
-	private final IBaseResource myPayload;
-	private final IIdType myPayloadId;
-	private final ActiveSubscription myActiveSubscription;
-	private final RestOperationTypeEnum myRestOperationType;
-	private final RequestPartitionId myRequestPartitionId;
-	private final String myTransactionId;
+    // One of these two will be populated
+    private final IBaseResource myPayload;
+    private final IIdType myPayloadId;
+    private final ActiveSubscription myActiveSubscription;
+    private final RestOperationTypeEnum myRestOperationType;
+    private final RequestPartitionId myRequestPartitionId;
+    private final String myTransactionId;
 
-	public SubscriptionDeliveryRequest(IBaseBundle theBundlePayload, ActiveSubscription theActiveSubscription, SubscriptionTopicDispatchRequest theSubscriptionTopicDispatchRequest) {
-		myPayload = theBundlePayload;
-		myPayloadId = null;
-		myActiveSubscription = theActiveSubscription;
-		myRestOperationType = theSubscriptionTopicDispatchRequest.getRequestType();
-		myRequestPartitionId = theSubscriptionTopicDispatchRequest.getRequestPartitionId();
-		myTransactionId = theSubscriptionTopicDispatchRequest.getTransactionId();
-	}
+    public SubscriptionDeliveryRequest(
+            IBaseBundle theBundlePayload,
+            ActiveSubscription theActiveSubscription,
+            SubscriptionTopicDispatchRequest theSubscriptionTopicDispatchRequest) {
+        myPayload = theBundlePayload;
+        myPayloadId = null;
+        myActiveSubscription = theActiveSubscription;
+        myRestOperationType = theSubscriptionTopicDispatchRequest.getRequestType();
+        myRequestPartitionId = theSubscriptionTopicDispatchRequest.getRequestPartitionId();
+        myTransactionId = theSubscriptionTopicDispatchRequest.getTransactionId();
+    }
 
-	public SubscriptionDeliveryRequest(@Nonnull IBaseResource thePayload, @Nonnull ResourceModifiedMessage theMsg, @Nonnull ActiveSubscription theActiveSubscription) {
-		myPayload = thePayload;
-		myPayloadId = null;
-		myActiveSubscription = theActiveSubscription;
-		myRestOperationType = theMsg.getOperationType().asRestOperationType();
-		myRequestPartitionId = theMsg.getPartitionId();
-		myTransactionId = theMsg.getTransactionId();
-	}
+    public SubscriptionDeliveryRequest(
+            @Nonnull IBaseResource thePayload,
+            @Nonnull ResourceModifiedMessage theMsg,
+            @Nonnull ActiveSubscription theActiveSubscription) {
+        myPayload = thePayload;
+        myPayloadId = null;
+        myActiveSubscription = theActiveSubscription;
+        myRestOperationType = theMsg.getOperationType().asRestOperationType();
+        myRequestPartitionId = theMsg.getPartitionId();
+        myTransactionId = theMsg.getTransactionId();
+    }
 
-	public SubscriptionDeliveryRequest(@Nonnull IIdType thePayloadId, @Nonnull ResourceModifiedMessage theMsg, @Nonnull ActiveSubscription theActiveSubscription) {
-		myPayload = null;
-		myPayloadId = thePayloadId;
-		myActiveSubscription = theActiveSubscription;
-		myRestOperationType = theMsg.getOperationType().asRestOperationType();
-		myRequestPartitionId = theMsg.getPartitionId();
-		myTransactionId = theMsg.getTransactionId();
-	}
+    public SubscriptionDeliveryRequest(
+            @Nonnull IIdType thePayloadId,
+            @Nonnull ResourceModifiedMessage theMsg,
+            @Nonnull ActiveSubscription theActiveSubscription) {
+        myPayload = null;
+        myPayloadId = thePayloadId;
+        myActiveSubscription = theActiveSubscription;
+        myRestOperationType = theMsg.getOperationType().asRestOperationType();
+        myRequestPartitionId = theMsg.getPartitionId();
+        myTransactionId = theMsg.getTransactionId();
+    }
 
+    public IBaseResource getPayload() {
+        return myPayload;
+    }
 
+    public ActiveSubscription getActiveSubscription() {
+        return myActiveSubscription;
+    }
 
-	public IBaseResource getPayload() {
-		return myPayload;
-	}
+    public RestOperationTypeEnum getRestOperationType() {
+        return myRestOperationType;
+    }
 
-	public ActiveSubscription getActiveSubscription() {
-		return myActiveSubscription;
-	}
+    public BaseResourceModifiedMessage.OperationTypeEnum getOperationType() {
+        return BaseResourceModifiedMessage.OperationTypeEnum.from(myRestOperationType);
+    }
 
-	public RestOperationTypeEnum getRestOperationType() {
-		return myRestOperationType;
-	}
+    public RequestPartitionId getRequestPartitionId() {
+        return myRequestPartitionId;
+    }
 
-	public BaseResourceModifiedMessage.OperationTypeEnum getOperationType() {
-		return BaseResourceModifiedMessage.OperationTypeEnum.from(myRestOperationType);
-	}
+    public String getTransactionId() {
+        return myTransactionId;
+    }
 
-	public RequestPartitionId getRequestPartitionId() {
-		return myRequestPartitionId;
-	}
+    public CanonicalSubscription getSubscription() {
+        return myActiveSubscription.getSubscription();
+    }
 
-	public String getTransactionId() {
-		return myTransactionId;
-	}
+    public IIdType getPayloadId() {
+        return myPayloadId;
+    }
 
-	public CanonicalSubscription getSubscription() {
-		return myActiveSubscription.getSubscription();
-	}
-
-	public IIdType getPayloadId() {
-		return myPayloadId;
-	}
-
-	public boolean hasPayload() {
-		return myPayload != null;
-	}
+    public boolean hasPayload() {
+        return myPayload != null;
+    }
 }

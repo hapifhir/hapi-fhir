@@ -22,22 +22,23 @@ package ca.uhn.fhir.jpa.api.dao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import javax.servlet.http.HttpServletResponse;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IFhirResourceDaoObservation<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	/**
-	 * Returns a BundleProvider which can be used to implement the $lastn operation.
-	 *
-	 * @param paramMap           Parameters supported include Observation.subject, Observation.patient, Observation.code,
-	 *                           Observation.category, and max (the maximum number of Observations to return per specified subjects/patients,
-	 *                           codes, and/or categories.
-	 * @param theRequestDetails
-	 * @param theServletResponse
-	 * @return
-	 */
-	IBundleProvider observationsLastN(SearchParameterMap paramMap, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
-
+    /**
+     * Returns a BundleProvider which can be used to implement the $lastn operation.
+     *
+     * @param paramMap Parameters supported include Observation.subject, Observation.patient,
+     *     Observation.code, Observation.category, and max (the maximum number of Observations to
+     *     return per specified subjects/patients, codes, and/or categories.
+     * @param theRequestDetails
+     * @param theServletResponse
+     * @return
+     */
+    IBundleProvider observationsLastN(
+            SearchParameterMap paramMap,
+            RequestDetails theRequestDetails,
+            HttpServletResponse theServletResponse);
 }

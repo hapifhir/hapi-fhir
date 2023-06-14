@@ -23,40 +23,32 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.util.CoverageIgnore;
-
 import java.util.List;
 
 public abstract class BaseContainedDt implements IDatatype {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public abstract List<? extends IResource> getContainedResources();
+    public abstract List<? extends IResource> getContainedResources();
 
-	/**
-	 * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
-	 */
-	@Override
-	@CoverageIgnore
-	public List<String> getFormatCommentsPost() {
-		throw new UnsupportedOperationException(Msg.code(1901));
-	}
+    /** NOT SUPPORTED - Throws {@link UnsupportedOperationException} */
+    @Override
+    @CoverageIgnore
+    public List<String> getFormatCommentsPost() {
+        throw new UnsupportedOperationException(Msg.code(1901));
+    }
 
-	/**
-	 * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
-	 */
-	@Override
-	@CoverageIgnore
-	public List<String> getFormatCommentsPre() {
-		throw new UnsupportedOperationException(Msg.code(1902));
-	}
+    /** NOT SUPPORTED - Throws {@link UnsupportedOperationException} */
+    @Override
+    @CoverageIgnore
+    public List<String> getFormatCommentsPre() {
+        throw new UnsupportedOperationException(Msg.code(1902));
+    }
 
-	/**
-	 * Returns false
-	 */
-	@Override
-	@CoverageIgnore
-	public boolean hasFormatComment() {
-		return false;
-	}
-
+    /** Returns false */
+    @Override
+    @CoverageIgnore
+    public boolean hasFormatComment() {
+        return false;
+    }
 }

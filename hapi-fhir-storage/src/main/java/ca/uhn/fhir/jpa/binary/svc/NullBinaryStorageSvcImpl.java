@@ -23,79 +23,83 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
-	@Override
-	public long getMaximumBinarySize() {
-		return 0;
-	}
+    @Override
+    public long getMaximumBinarySize() {
+        return 0;
+    }
 
-	@Override
-	public boolean isValidBlobId(String theNewBlobId) {
-		return true;
-	}
+    @Override
+    public boolean isValidBlobId(String theNewBlobId) {
+        return true;
+    }
 
-	@Override
-	public void setMaximumBinarySize(long theMaximumBinarySize) {
-		// ignore
-	}
+    @Override
+    public void setMaximumBinarySize(long theMaximumBinarySize) {
+        // ignore
+    }
 
-	@Override
-	public int getMinimumBinarySize() {
-		return 0;
-	}
+    @Override
+    public int getMinimumBinarySize() {
+        return 0;
+    }
 
-	@Override
-	public void setMinimumBinarySize(int theMinimumBinarySize) {
-		// ignore
-	}
+    @Override
+    public void setMinimumBinarySize(int theMinimumBinarySize) {
+        // ignore
+    }
 
-	@Override
-	public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
-		return false;
-	}
+    @Override
+    public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
+        return false;
+    }
 
-	@Override
-	public String newBlobId() {
-		throw new UnsupportedOperationException(Msg.code(1345));
-	}
+    @Override
+    public String newBlobId() {
+        throw new UnsupportedOperationException(Msg.code(1345));
+    }
 
-	@Nonnull
-	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
-											 InputStream theInputStream, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException(Msg.code(1346));
-	}
+    @Nonnull
+    @Override
+    public StoredDetails storeBlob(
+            IIdType theResourceId,
+            String theBlobIdOrNull,
+            String theContentType,
+            InputStream theInputStream,
+            RequestDetails theRequestDetails) {
+        throw new UnsupportedOperationException(Msg.code(1346));
+    }
 
-	@Override
-	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
-		throw new UnsupportedOperationException(Msg.code(1347));
-	}
+    @Override
+    public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
+        throw new UnsupportedOperationException(Msg.code(1347));
+    }
 
-	@Override
-	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) {
-		throw new UnsupportedOperationException(Msg.code(1348));
-	}
+    @Override
+    public boolean writeBlob(
+            IIdType theResourceId, String theBlobId, OutputStream theOutputStream) {
+        throw new UnsupportedOperationException(Msg.code(1348));
+    }
 
-	@Override
-	public void expungeBlob(IIdType theIdElement, String theBlobId) {
-		throw new UnsupportedOperationException(Msg.code(1349));
-	}
+    @Override
+    public void expungeBlob(IIdType theIdElement, String theBlobId) {
+        throw new UnsupportedOperationException(Msg.code(1349));
+    }
 
-	@Override
-	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
-		throw new UnsupportedOperationException(Msg.code(1350));
-	}
+    @Override
+    public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
+        throw new UnsupportedOperationException(Msg.code(1350));
+    }
 
-	@Override
-	public byte[] fetchDataBlobFromBinary(IBaseBinary theResource) {
-		throw new UnsupportedOperationException(Msg.code(1351));
-	}
+    @Override
+    public byte[] fetchDataBlobFromBinary(IBaseBinary theResource) {
+        throw new UnsupportedOperationException(Msg.code(1351));
+    }
 }

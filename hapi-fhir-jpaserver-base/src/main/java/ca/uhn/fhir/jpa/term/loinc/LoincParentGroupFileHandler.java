@@ -19,40 +19,47 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static org.apache.commons.lang3.StringUtils.trim;
+
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+public class LoincParentGroupFileHandler extends BaseLoincHandler
+        implements IZipContentsHandlerCsv {
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
-import static org.apache.commons.lang3.StringUtils.trim;
+    public LoincParentGroupFileHandler(
+            Map<String, TermConcept> theCode2concept,
+            List<ValueSet> theValueSets,
+            List<ConceptMap> theConceptMaps,
+            Properties theUploadProperties) {
+        super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
+    }
 
-public class LoincParentGroupFileHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
+    @Override
+    public void accept(CSVRecord theRecord) {
+        // "ParentGroupId","ParentGroup","Status"
+        String parentGroupId = trim(theRecord.get("ParentGroupId"));
+        String codeSystemVersionId =
+                myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+        String valueSetId;
+        if (codeSystemVersionId != null) {
+            valueSetId = parentGroupId + "-" + codeSystemVersionId;
+        } else {
+            valueSetId = parentGroupId;
+        }
+        String parentGroupName = trim(theRecord.get("ParentGroup"));
 
-	public LoincParentGroupFileHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
-		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
-	}
-
-	@Override
-	public void accept(CSVRecord theRecord) {
-		// "ParentGroupId","ParentGroup","Status"
-		String parentGroupId = trim(theRecord.get("ParentGroupId"));
-		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
-		String valueSetId;
-		if (codeSystemVersionId != null) {
-			valueSetId = parentGroupId + "-" + codeSystemVersionId;
-		} else {
-			valueSetId = parentGroupId;
-		}
-		String parentGroupName = trim(theRecord.get("ParentGroup"));
-
-		getValueSet(valueSetId, LoincGroupFileHandler.VS_URI_PREFIX + parentGroupId, parentGroupName, null);
-	}
-
-
+        getValueSet(
+                valueSetId,
+                LoincGroupFileHandler.VS_URI_PREFIX + parentGroupId,
+                parentGroupName,
+                null);
+    }
 }

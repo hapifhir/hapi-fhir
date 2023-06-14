@@ -23,5 +23,5 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 
 public interface IFhirDalFactory {
-	FhirDal create(RequestDetails theRequestDetails);
+    FhirDal create(RequestDetails theRequestDetails);
 }

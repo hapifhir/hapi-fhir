@@ -22,32 +22,32 @@ package ca.uhn.fhir.rest.api;
 import java.util.HashMap;
 
 /**
- * Represents values for "handling" value as provided in the the <a href="http://hl7.org/fhir/search.html">FHIR Search Spec</a>.
+ * Represents values for "handling" value as provided in the the <a
+ * href="http://hl7.org/fhir/search.html">FHIR Search Spec</a>.
  */
 public enum PreferHandlingEnum {
+    STRICT(Constants.HEADER_PREFER_HANDLING_STRICT),
+    LENIENT(Constants.HEADER_PREFER_HANDLING_LENIENT);
 
-	STRICT(Constants.HEADER_PREFER_HANDLING_STRICT), LENIENT(Constants.HEADER_PREFER_HANDLING_LENIENT);
+    private static HashMap<String, PreferHandlingEnum> ourValues;
+    private String myHeaderValue;
 
-	private static HashMap<String, PreferHandlingEnum> ourValues;
-	private String myHeaderValue;
+    PreferHandlingEnum(String theHeaderValue) {
+        myHeaderValue = theHeaderValue;
+    }
 
-	PreferHandlingEnum(String theHeaderValue) {
-		myHeaderValue = theHeaderValue;
-	}
+    public String getHeaderValue() {
+        return myHeaderValue;
+    }
 
-	public String getHeaderValue() {
-		return myHeaderValue;
-	}
-
-	public static PreferHandlingEnum fromHeaderValue(String theHeaderValue) {
-		if (ourValues == null) {
-			HashMap<String, PreferHandlingEnum> values = new HashMap<>();
-			for (PreferHandlingEnum next : PreferHandlingEnum.values()) {
-				values.put(next.getHeaderValue(), next);
-			}
-			ourValues = values;
-		}
-		return ourValues.get(theHeaderValue);
-	}
-
+    public static PreferHandlingEnum fromHeaderValue(String theHeaderValue) {
+        if (ourValues == null) {
+            HashMap<String, PreferHandlingEnum> values = new HashMap<>();
+            for (PreferHandlingEnum next : PreferHandlingEnum.values()) {
+                values.put(next.getHeaderValue(), next);
+            }
+            ourValues = values;
+        }
+        return ourValues.get(theHeaderValue);
+    }
 }

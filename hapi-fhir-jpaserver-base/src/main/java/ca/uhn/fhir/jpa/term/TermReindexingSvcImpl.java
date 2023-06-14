@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -31,6 +33,8 @@ import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
+import java.util.Collection;
+import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
@@ -45,133 +49,138 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.Collection;
-import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJobs {
-	private static final Logger ourLog = LoggerFactory.getLogger(TermReindexingSvcImpl.class);
-	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
-	@Autowired
-	protected ITermConceptDao myConceptDao;
-	private ArrayListMultimap<Long, Long> myChildToParentPidCache;
-	@Autowired
-	private PlatformTransactionManager myTransactionMgr;
-	@Autowired
-	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
-	@Autowired
-	private ITermDeferredStorageSvc myDeferredStorageSvc;
-	@Autowired
-	private TermConceptDaoSvc myTermConceptDaoSvc;
+    private static final Logger ourLog = LoggerFactory.getLogger(TermReindexingSvcImpl.class);
+    private static boolean ourForceSaveDeferredAlwaysForUnitTest;
+    @Autowired protected ITermConceptDao myConceptDao;
+    private ArrayListMultimap<Long, Long> myChildToParentPidCache;
+    @Autowired private PlatformTransactionManager myTransactionMgr;
+    @Autowired private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
+    @Autowired private ITermDeferredStorageSvc myDeferredStorageSvc;
+    @Autowired private TermConceptDaoSvc myTermConceptDaoSvc;
 
-	@Override
-	public void processReindexing() {
-		if (myDeferredStorageSvc.isStorageQueueEmpty(true) == false && !ourForceSaveDeferredAlwaysForUnitTest) {
-			return;
-		}
+    @Override
+    public void processReindexing() {
+        if (myDeferredStorageSvc.isStorageQueueEmpty(true) == false
+                && !ourForceSaveDeferredAlwaysForUnitTest) {
+            return;
+        }
 
-		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
-		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		tt.execute(new TransactionCallbackWithoutResult() {
-			private void createParentsString(StringBuilder theParentsBuilder, Long theConceptPid) {
-				Validate.notNull(theConceptPid, "theConceptPid must not be null");
-				List<Long> parents = myChildToParentPidCache.get(theConceptPid);
-				if (parents.contains(-1L)) {
-					return;
-				} else if (parents.isEmpty()) {
-					Collection<Long> parentLinks = myConceptParentChildLinkDao.findAllWithChild(theConceptPid);
-					if (parentLinks.isEmpty()) {
-						myChildToParentPidCache.put(theConceptPid, -1L);
-						ourLog.info("Found {} parent concepts of concept {} (cache has {})", 0, theConceptPid, myChildToParentPidCache.size());
-						return;
-					} else {
-						for (Long next : parentLinks) {
-							myChildToParentPidCache.put(theConceptPid, next);
-						}
-						int parentCount = myChildToParentPidCache.get(theConceptPid).size();
-						ourLog.info("Found {} parent concepts of concept {} (cache has {})", parentCount, theConceptPid, myChildToParentPidCache.size());
-					}
-				}
+        TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
+        tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        tt.execute(
+                new TransactionCallbackWithoutResult() {
+                    private void createParentsString(
+                            StringBuilder theParentsBuilder, Long theConceptPid) {
+                        Validate.notNull(theConceptPid, "theConceptPid must not be null");
+                        List<Long> parents = myChildToParentPidCache.get(theConceptPid);
+                        if (parents.contains(-1L)) {
+                            return;
+                        } else if (parents.isEmpty()) {
+                            Collection<Long> parentLinks =
+                                    myConceptParentChildLinkDao.findAllWithChild(theConceptPid);
+                            if (parentLinks.isEmpty()) {
+                                myChildToParentPidCache.put(theConceptPid, -1L);
+                                ourLog.info(
+                                        "Found {} parent concepts of concept {} (cache has {})",
+                                        0,
+                                        theConceptPid,
+                                        myChildToParentPidCache.size());
+                                return;
+                            } else {
+                                for (Long next : parentLinks) {
+                                    myChildToParentPidCache.put(theConceptPid, next);
+                                }
+                                int parentCount = myChildToParentPidCache.get(theConceptPid).size();
+                                ourLog.info(
+                                        "Found {} parent concepts of concept {} (cache has {})",
+                                        parentCount,
+                                        theConceptPid,
+                                        myChildToParentPidCache.size());
+                            }
+                        }
 
-				for (Long nextParent : parents) {
-					if (theParentsBuilder.length() > 0) {
-						theParentsBuilder.append(' ');
-					}
-					theParentsBuilder.append(nextParent);
-					createParentsString(theParentsBuilder, nextParent);
-				}
+                        for (Long nextParent : parents) {
+                            if (theParentsBuilder.length() > 0) {
+                                theParentsBuilder.append(' ');
+                            }
+                            theParentsBuilder.append(nextParent);
+                            createParentsString(theParentsBuilder, nextParent);
+                        }
+                    }
 
-			}
+                    @Override
+                    protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+                        int maxResult = 1000;
+                        Page<TermConcept> concepts =
+                                myConceptDao.findResourcesRequiringReindexing(
+                                        PageRequest.of(0, maxResult));
+                        if (!concepts.hasContent()) {
+                            if (myChildToParentPidCache != null) {
+                                ourLog.info("Clearing parent concept cache");
+                                myChildToParentPidCache = null;
+                            }
+                            return;
+                        }
 
+                        if (myChildToParentPidCache == null) {
+                            myChildToParentPidCache = ArrayListMultimap.create();
+                        }
 
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				int maxResult = 1000;
-				Page<TermConcept> concepts = myConceptDao.findResourcesRequiringReindexing(PageRequest.of(0, maxResult));
-				if (!concepts.hasContent()) {
-					if (myChildToParentPidCache != null) {
-						ourLog.info("Clearing parent concept cache");
-						myChildToParentPidCache = null;
-					}
-					return;
-				}
+                        ourLog.info(
+                                "Indexing {} / {} concepts",
+                                concepts.getContent().size(),
+                                concepts.getTotalElements());
 
-				if (myChildToParentPidCache == null) {
-					myChildToParentPidCache = ArrayListMultimap.create();
-				}
+                        int count = 0;
+                        StopWatch stopwatch = new StopWatch();
 
-				ourLog.info("Indexing {} / {} concepts", concepts.getContent().size(), concepts.getTotalElements());
+                        for (TermConcept nextConcept : concepts) {
 
-				int count = 0;
-				StopWatch stopwatch = new StopWatch();
+                            if (isBlank(nextConcept.getParentPidsAsString())) {
+                                StringBuilder parentsBuilder = new StringBuilder();
+                                createParentsString(parentsBuilder, nextConcept.getId());
+                                nextConcept.setParentPids(parentsBuilder.toString());
+                            }
 
-				for (TermConcept nextConcept : concepts) {
+                            myTermConceptDaoSvc.saveConcept(nextConcept);
+                            count++;
+                        }
 
-					if (isBlank(nextConcept.getParentPidsAsString())) {
-						StringBuilder parentsBuilder = new StringBuilder();
-						createParentsString(parentsBuilder, nextConcept.getId());
-						nextConcept.setParentPids(parentsBuilder.toString());
-					}
+                        ourLog.info(
+                                "Indexed {} / {} concepts in {}ms - Avg {}ms / resource",
+                                count,
+                                concepts.getContent().size(),
+                                stopwatch.getMillis(),
+                                stopwatch.getMillisPerOperation(count));
+                    }
+                });
+    }
 
-					myTermConceptDaoSvc.saveConcept(nextConcept);
-					count++;
-				}
+    @Override
+    public void scheduleJobs(ISchedulerService theSchedulerService) {
+        // TODO KHS what does this mean?
+        // Register scheduled job to save deferred concepts
+        // In the future it would be great to make this a cluster-aware task somehow
+        ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
+        jobDefinition.setId(this.getClass().getName());
+        jobDefinition.setJobClass(Job.class);
+        theSchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
+    }
 
-				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", count, concepts.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count));
-			}
-		});
+    public static class Job implements HapiJob {
+        @Autowired private ITermReindexingSvc myTermReindexingSvc;
 
-	}
+        @Override
+        public void execute(JobExecutionContext theContext) {
+            myTermReindexingSvc.processReindexing();
+        }
+    }
 
-	@Override
-	public void scheduleJobs(ISchedulerService theSchedulerService) {
-		// TODO KHS what does this mean?
-		// Register scheduled job to save deferred concepts
-		// In the future it would be great to make this a cluster-aware task somehow
-		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(this.getClass().getName());
-		jobDefinition.setJobClass(Job.class);
-		theSchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
-	}
-
-	public static class Job implements HapiJob {
-		@Autowired
-		private ITermReindexingSvc myTermReindexingSvc;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTermReindexingSvc.processReindexing();
-		}
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting
-	public static void setForceSaveDeferredAlwaysForUnitTest(boolean theForceSaveDeferredAlwaysForUnitTest) {
-		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
-	}
-
-
+    /** This method is present only for unit tests, do not call from client code */
+    @VisibleForTesting
+    public static void setForceSaveDeferredAlwaysForUnitTest(
+            boolean theForceSaveDeferredAlwaysForUnitTest) {
+        ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
+    }
 }

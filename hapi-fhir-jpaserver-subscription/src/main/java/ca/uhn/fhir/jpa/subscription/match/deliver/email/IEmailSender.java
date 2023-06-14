@@ -21,6 +21,5 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.email;
 
 public interface IEmailSender {
 
-	void send(EmailDetails theDetails);
-
+    void send(EmailDetails theDetails);
 }

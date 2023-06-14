@@ -26,77 +26,76 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class PathAndRef {
 
-	private final String myPath;
-	private final IBaseReference myRef;
-	private final IBaseResource myResource;
-	private final String mySearchParamName;
-	private final boolean myCanonical;
+    private final String myPath;
+    private final IBaseReference myRef;
+    private final IBaseResource myResource;
+    private final String mySearchParamName;
+    private final boolean myCanonical;
 
-	/**
-	 * Constructor for a reference
-	 */
-	public PathAndRef(String theSearchParamName, String thePath, IBaseReference theRef, boolean theCanonical) {
-		super();
-		mySearchParamName = theSearchParamName;
-		myPath = thePath;
-		myRef = theRef;
-		myCanonical = theCanonical;
-		myResource = null;
-	}
+    /** Constructor for a reference */
+    public PathAndRef(
+            String theSearchParamName,
+            String thePath,
+            IBaseReference theRef,
+            boolean theCanonical) {
+        super();
+        mySearchParamName = theSearchParamName;
+        myPath = thePath;
+        myRef = theRef;
+        myCanonical = theCanonical;
+        myResource = null;
+    }
 
-	/**
-	 * Constructor for a resource (this is expected to be rare, only really covering
-	 * cases like the path Bundle.entry.resource)
-	 */
-	public PathAndRef(String theSearchParamName, String thePath, IBaseResource theResource) {
-		super();
-		mySearchParamName = theSearchParamName;
-		myPath = thePath;
-		myRef = null;
-		myCanonical = false;
-		myResource = theResource;
-	}
+    /**
+     * Constructor for a resource (this is expected to be rare, only really covering cases like the
+     * path Bundle.entry.resource)
+     */
+    public PathAndRef(String theSearchParamName, String thePath, IBaseResource theResource) {
+        super();
+        mySearchParamName = theSearchParamName;
+        myPath = thePath;
+        myRef = null;
+        myCanonical = false;
+        myResource = theResource;
+    }
 
-	/**
-	 * Note that this will generally be null, it is only used for cases like
-	 * indexing {@literal Bundle.entry.resource}. If this is populated, {@link #getRef()}
-	 * will be null and vice versa.
-	 *
-	 * @since 6.6.0
-	 */
-	public IBaseResource getResource() {
-		return myResource;
-	}
+    /**
+     * Note that this will generally be null, it is only used for cases like indexing {@literal
+     * Bundle.entry.resource}. If this is populated, {@link #getRef()} will be null and vice versa.
+     *
+     * @since 6.6.0
+     */
+    public IBaseResource getResource() {
+        return myResource;
+    }
 
-	public boolean isCanonical() {
-		return myCanonical;
-	}
+    public boolean isCanonical() {
+        return myCanonical;
+    }
 
-	public String getSearchParamName() {
-		return mySearchParamName;
-	}
+    public String getSearchParamName() {
+        return mySearchParamName;
+    }
 
-	public String getPath() {
-		return myPath;
-	}
+    public String getPath() {
+        return myPath;
+    }
 
-	/**
-	 * If this is populated, {@link #getResource()} will be null, and vice versa.
-	 */
-	public IBaseReference getRef() {
-		return myRef;
-	}
+    /** If this is populated, {@link #getResource()} will be null, and vice versa. */
+    public IBaseReference getRef() {
+        return myRef;
+    }
 
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("paramName", mySearchParamName);
-		if (myRef != null && myRef.getReferenceElement() != null) {
-			b.append("ref", myRef.getReferenceElement().getValue());
-		}
-		b.append("path", myPath);
-		b.append("resource", myResource);
-		b.append("canonical", myCanonical);
-		return b.toString();
-	}
+    @Override
+    public String toString() {
+        ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        b.append("paramName", mySearchParamName);
+        if (myRef != null && myRef.getReferenceElement() != null) {
+            b.append("ref", myRef.getReferenceElement().getValue());
+        }
+        b.append("path", myPath);
+        b.append("resource", myResource);
+        b.append("canonical", myCanonical);
+        return b.toString();
+    }
 }

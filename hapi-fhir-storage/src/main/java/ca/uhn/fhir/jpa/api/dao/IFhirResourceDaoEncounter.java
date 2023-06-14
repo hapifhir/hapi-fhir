@@ -22,16 +22,25 @@ package ca.uhn.fhir.jpa.api.dao;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import javax.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.servlet.http.HttpServletRequest;
-
 public interface IFhirResourceDaoEncounter<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdate, SortSpec theSort);
+    IBundleProvider encounterInstanceEverything(
+            HttpServletRequest theServletRequest,
+            IIdType theId,
+            IPrimitiveType<Integer> theCount,
+            IPrimitiveType<Integer> theOffset,
+            DateRangeParam theLastUpdate,
+            SortSpec theSort);
 
-	IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSortSpec);
-
+    IBundleProvider encounterTypeEverything(
+            HttpServletRequest theServletRequest,
+            IPrimitiveType<Integer> theCount,
+            IPrimitiveType<Integer> theOffset,
+            DateRangeParam theLastUpdated,
+            SortSpec theSortSpec);
 }

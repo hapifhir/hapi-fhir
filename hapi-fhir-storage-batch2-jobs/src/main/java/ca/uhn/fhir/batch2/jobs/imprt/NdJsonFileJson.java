@@ -24,25 +24,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class NdJsonFileJson implements IModelJson {
 
-	@JsonProperty("ndJsonText")
-	private String myNdJsonText;
-	@JsonProperty("sourceName")
-	private String mySourceName;
+    @JsonProperty("ndJsonText")
+    private String myNdJsonText;
 
-	public String getNdJsonText() {
-		return myNdJsonText;
-	}
+    @JsonProperty("sourceName")
+    private String mySourceName;
 
-	public NdJsonFileJson setNdJsonText(String theNdJsonText) {
-		myNdJsonText = theNdJsonText;
-		return this;
-	}
+    public String getNdJsonText() {
+        return myNdJsonText;
+    }
 
-	public String getSourceName() {
-		return mySourceName;
-	}
+    public NdJsonFileJson setNdJsonText(String theNdJsonText) {
+        myNdJsonText = theNdJsonText;
+        return this;
+    }
 
-	public void setSourceName(String theSourceName) {
-		mySourceName = theSourceName;
-	}
+    public String getSourceName() {
+        return mySourceName;
+    }
+
+    public void setSourceName(String theSourceName) {
+        mySourceName = theSourceName;
+    }
 }

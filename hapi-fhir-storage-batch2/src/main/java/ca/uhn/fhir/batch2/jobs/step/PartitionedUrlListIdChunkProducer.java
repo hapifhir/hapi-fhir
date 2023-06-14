@@ -25,34 +25,48 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.util.Logs;
-import org.slf4j.Logger;
-
+import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Date;
+import org.slf4j.Logger;
 
-public class PartitionedUrlListIdChunkProducer implements IIdChunkProducer<PartitionedUrlChunkRangeJson> {
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-	private final IBatch2DaoSvc myBatch2DaoSvc;
+public class PartitionedUrlListIdChunkProducer
+        implements IIdChunkProducer<PartitionedUrlChunkRangeJson> {
+    private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+    private final IBatch2DaoSvc myBatch2DaoSvc;
 
-	public PartitionedUrlListIdChunkProducer(IBatch2DaoSvc theBatch2DaoSvc) {
-		myBatch2DaoSvc = theBatch2DaoSvc;
-	}
+    public PartitionedUrlListIdChunkProducer(IBatch2DaoSvc theBatch2DaoSvc) {
+        myBatch2DaoSvc = theBatch2DaoSvc;
+    }
 
-	@Override
-	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, PartitionedUrlChunkRangeJson theData) {
-		PartitionedUrl partitionedUrl = theData.getPartitionedUrl();
+    @Override
+    public IResourcePidList fetchResourceIdsPage(
+            Date theNextStart,
+            Date theEnd,
+            @Nonnull Integer thePageSize,
+            @Nullable RequestPartitionId theRequestPartitionId,
+            PartitionedUrlChunkRangeJson theData) {
+        PartitionedUrl partitionedUrl = theData.getPartitionedUrl();
 
-		if (partitionedUrl == null) {
-			ourLog.info("Fetching resource ID chunk for everything - Range {} - {}", theNextStart, theEnd);
-			return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, theRequestPartitionId, null);
-		} else {
-			ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", partitionedUrl.getUrl(), theNextStart, theEnd);
-			RequestPartitionId requestPartitionId = partitionedUrl.getRequestPartitionId();
-			if (requestPartitionId == null) {
-				requestPartitionId = theRequestPartitionId;
-			}
-			return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, requestPartitionId, partitionedUrl.getUrl());
-		}
-	}
+        if (partitionedUrl == null) {
+            ourLog.info(
+                    "Fetching resource ID chunk for everything - Range {} - {}",
+                    theNextStart,
+                    theEnd);
+            return myBatch2DaoSvc.fetchResourceIdsPage(
+                    theNextStart, theEnd, thePageSize, theRequestPartitionId, null);
+        } else {
+            ourLog.info(
+                    "Fetching resource ID chunk for URL {} - Range {} - {}",
+                    partitionedUrl.getUrl(),
+                    theNextStart,
+                    theEnd);
+            RequestPartitionId requestPartitionId = partitionedUrl.getRequestPartitionId();
+            if (requestPartitionId == null) {
+                requestPartitionId = theRequestPartitionId;
+            }
+            return myBatch2DaoSvc.fetchResourceIdsPage(
+                    theNextStart, theEnd, thePageSize, requestPartitionId, partitionedUrl.getUrl());
+        }
+    }
 }

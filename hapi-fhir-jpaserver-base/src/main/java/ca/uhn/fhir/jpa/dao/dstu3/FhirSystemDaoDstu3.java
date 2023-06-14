@@ -23,47 +23,52 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import java.util.Collection;
+import java.util.List;
+import javax.persistence.TypedQuery;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-import javax.persistence.TypedQuery;
-import java.util.Collection;
-import java.util.List;
-
 public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
-	@Override
-	public Meta metaGetOperation(RequestDetails theRequestDetails) {
-		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)";
-		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
-		List<TagDefinition> tagDefinitions = q.getResultList();
+    @Override
+    public Meta metaGetOperation(RequestDetails theRequestDetails) {
+        String sql =
+                "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM"
+                        + " ResourceTag t)";
+        TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
+        List<TagDefinition> tagDefinitions = q.getResultList();
 
-		return toMeta(tagDefinitions);
-	}
+        return toMeta(tagDefinitions);
+    }
 
-	private Meta toMeta(Collection<TagDefinition> tagDefinitions) {
-		Meta retVal = new Meta();
-		for (TagDefinition next : tagDefinitions) {
-			switch (next.getTagType()) {
-				case PROFILE:
-					retVal.addProfile(next.getCode());
-					break;
-				case SECURITY_LABEL:
-					retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
-					break;
-				case TAG:
-					retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
-					break;
-			}
-		}
-		return retVal;
-	}
+    private Meta toMeta(Collection<TagDefinition> tagDefinitions) {
+        Meta retVal = new Meta();
+        for (TagDefinition next : tagDefinitions) {
+            switch (next.getTagType()) {
+                case PROFILE:
+                    retVal.addProfile(next.getCode());
+                    break;
+                case SECURITY_LABEL:
+                    retVal.addSecurity()
+                            .setSystem(next.getSystem())
+                            .setCode(next.getCode())
+                            .setDisplay(next.getDisplay());
+                    break;
+                case TAG:
+                    retVal.addTag()
+                            .setSystem(next.getSystem())
+                            .setCode(next.getCode())
+                            .setDisplay(next.getDisplay());
+                    break;
+            }
+        }
+        return retVal;
+    }
 
-	@Override
-	public IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
-		return JpaResourceDao.throwProcessMessageNotImplemented();
-	}
-
-
+    @Override
+    public IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
+        return JpaResourceDao.throwProcessMessageNotImplemented();
+    }
 }

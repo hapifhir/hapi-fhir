@@ -20,19 +20,21 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import java.util.Collection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
+public interface IResourceIndexedSearchParamUriDao
+        extends JpaRepository<ResourceIndexedSearchParamUri, Long>, IHapiFhirJpaRepository {
 
-public interface IResourceIndexedSearchParamUriDao extends JpaRepository<ResourceIndexedSearchParamUri, Long>, IHapiFhirJpaRepository {
-	
-	@Query("SELECT DISTINCT p.myUri FROM ResourceIndexedSearchParamUri p WHERE p.myHashIdentity = :hash_identity")
-	public Collection<String> findAllByHashIdentity(@Param("hash_identity") long theHashIdentity);
+    @Query(
+            "SELECT DISTINCT p.myUri FROM ResourceIndexedSearchParamUri p WHERE p.myHashIdentity ="
+                    + " :hash_identity")
+    public Collection<String> findAllByHashIdentity(@Param("hash_identity") long theHashIdentity);
 
-	@Modifying
-	@Query("delete from ResourceIndexedSearchParamUri t WHERE t.myResourcePid = :resid")
-	void deleteByResourceId(@Param("resid") Long theResourcePid);
+    @Modifying
+    @Query("delete from ResourceIndexedSearchParamUri t WHERE t.myResourcePid = :resid")
+    void deleteByResourceId(@Param("resid") Long theResourcePid);
 }

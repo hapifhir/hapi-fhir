@@ -28,6 +28,9 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.tls.KeyStoreType;
+import java.security.KeyStore;
+import java.util.List;
+import javax.servlet.Servlet;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -41,163 +44,170 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import javax.servlet.Servlet;
-import java.security.KeyStore;
-import java.util.List;
-
 public abstract class BaseRestServerHelper {
 
-	private final String SERVER_KEYSTORE_PATH = "/tls/server-keystore.p12";
-	private final String SERVER_TRUSTSTORE_PATH = "/tls/server-truststore.p12";
-	private final String PASSWORD = "changeit";
+    private final String SERVER_KEYSTORE_PATH = "/tls/server-keystore.p12";
+    private final String SERVER_TRUSTSTORE_PATH = "/tls/server-truststore.p12";
+    private final String PASSWORD = "changeit";
 
-	protected final FhirContext myFhirContext;
-	protected int myListenerPort;
-	protected int myHttpsListenerPort;
-	protected Server myListenerServer;
-	protected String myBase;
-	protected String mySecureBase;
-	protected IGenericClient myClient;
+    protected final FhirContext myFhirContext;
+    protected int myListenerPort;
+    protected int myHttpsListenerPort;
+    protected Server myListenerServer;
+    protected String myBase;
+    protected String mySecureBase;
+    protected IGenericClient myClient;
 
-	@RegisterExtension
-	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
+    @RegisterExtension
+    public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper =
+            new TlsAuthenticationTestHelper();
 
-	public BaseRestServerHelper(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
+    public BaseRestServerHelper(FhirContext theFhirContext) {
+        myFhirContext = theFhirContext;
+    }
 
-	protected void afterEach() throws Exception {
-		stop();
-	}
+    protected void afterEach() throws Exception {
+        stop();
+    }
 
-	public IGenericClient getClient() {
-		return myClient;
-	}
+    public IGenericClient getClient() {
+        return myClient;
+    }
 
-	protected void startServer(Servlet theServlet) throws Exception {
-		myListenerServer = new Server(0);
-		
-		myFhirContext.getRestfulClientFactory().setSocketTimeout(120000);
+    protected void startServer(Servlet theServlet) throws Exception {
+        myListenerServer = new Server(0);
 
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
+        myFhirContext.getRestfulClientFactory().setSocketTimeout(120000);
 
-		ServletHolder targetServletHolder = new ServletHolder();
-		targetServletHolder.setServlet(theServlet);
-		proxyHandler.addServlet(targetServletHolder, "/target/*");
+        ServletContextHandler proxyHandler = new ServletContextHandler();
+        proxyHandler.setContextPath("/");
 
-		myListenerServer.setHandler(proxyHandler);
+        ServletHolder targetServletHolder = new ServletHolder();
+        targetServletHolder.setServlet(theServlet);
+        proxyHandler.addServlet(targetServletHolder, "/target/*");
 
-		SslContextFactory.Server sslContextFactory = getSslContextFactory();
+        myListenerServer.setHandler(proxyHandler);
 
-		HttpConfiguration httpsConfig = new HttpConfiguration();
-		httpsConfig.setSecureScheme("https");
-		httpsConfig.setSecurePort(0);
+        SslContextFactory.Server sslContextFactory = getSslContextFactory();
 
-		ServerConnector sslConnector = new ServerConnector(myListenerServer,
-			new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
-			new HttpConnectionFactory(httpsConfig));
-		sslConnector.setPort(0);
+        HttpConfiguration httpsConfig = new HttpConfiguration();
+        httpsConfig.setSecureScheme("https");
+        httpsConfig.setSecurePort(0);
 
-		myListenerServer.addConnector(sslConnector);
-		myListenerServer.start();
+        ServerConnector sslConnector =
+                new ServerConnector(
+                        myListenerServer,
+                        new SslConnectionFactory(
+                                sslContextFactory, HttpVersion.HTTP_1_1.asString()),
+                        new HttpConnectionFactory(httpsConfig));
+        sslConnector.setPort(0);
 
-		assignHttpAndHttpsPorts();
+        myListenerServer.addConnector(sslConnector);
+        myListenerServer.start();
 
-		myBase = "http://localhost:" + myListenerPort + "/target";
-		mySecureBase = "https://localhost:" + myHttpsListenerPort + "/target";
+        assignHttpAndHttpsPorts();
 
-		myFhirContext.getRestfulClientFactory().setConnectTimeout(60000);
-		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        myBase = "http://localhost:" + myListenerPort + "/target";
+        mySecureBase = "https://localhost:" + myHttpsListenerPort + "/target";
 
-		myClient = myFhirContext.newRestfulGenericClient(myBase);
-		myClient.registerInterceptor(new LoggingInterceptor(false));
-	}
+        myFhirContext.getRestfulClientFactory().setConnectTimeout(60000);
+        myFhirContext
+                .getRestfulClientFactory()
+                .setServerValidationMode(ServerValidationModeEnum.NEVER);
 
-	private void assignHttpAndHttpsPorts() {
-		myListenerPort = ((ServerConnector)myListenerServer.getConnectors()[0]).getLocalPort();
-		myHttpsListenerPort = ((ServerConnector)myListenerServer.getConnectors()[1]).getLocalPort();
-	}
+        myClient = myFhirContext.newRestfulGenericClient(myBase);
+        myClient.registerInterceptor(new LoggingInterceptor(false));
+    }
 
-	private SslContextFactory.Server getSslContextFactory() throws Exception{
-		try {
-			SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
+    private void assignHttpAndHttpsPorts() {
+        myListenerPort = ((ServerConnector) myListenerServer.getConnectors()[0]).getLocalPort();
+        myHttpsListenerPort =
+                ((ServerConnector) myListenerServer.getConnectors()[1]).getLocalPort();
+    }
 
-			KeyStore keyStore = KeyStore.getInstance(KeyStoreType.PKCS12.toString());
-			keyStore.load(BaseRestServerHelper.class.getResourceAsStream(SERVER_KEYSTORE_PATH), PASSWORD.toCharArray());
-			sslContextFactory.setKeyStore(keyStore);
-			sslContextFactory.setKeyStorePassword(PASSWORD);
+    private SslContextFactory.Server getSslContextFactory() throws Exception {
+        try {
+            SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 
-			KeyStore trustStore = KeyStore.getInstance(KeyStoreType.PKCS12.toString());
-			trustStore.load(BaseRestServerHelper.class.getResourceAsStream(SERVER_TRUSTSTORE_PATH), PASSWORD.toCharArray());
-			sslContextFactory.setTrustStore(trustStore);
+            KeyStore keyStore = KeyStore.getInstance(KeyStoreType.PKCS12.toString());
+            keyStore.load(
+                    BaseRestServerHelper.class.getResourceAsStream(SERVER_KEYSTORE_PATH),
+                    PASSWORD.toCharArray());
+            sslContextFactory.setKeyStore(keyStore);
+            sslContextFactory.setKeyStorePassword(PASSWORD);
 
-			return sslContextFactory;
-		}
-		catch(Exception e){
-			throw new RuntimeException(Msg.code(2123)+"Failed to obtain SslContextFactory", e);
-		}
-	}
+            KeyStore trustStore = KeyStore.getInstance(KeyStoreType.PKCS12.toString());
+            trustStore.load(
+                    BaseRestServerHelper.class.getResourceAsStream(SERVER_TRUSTSTORE_PATH),
+                    PASSWORD.toCharArray());
+            sslContextFactory.setTrustStore(trustStore);
 
-	public String getBase() {
-		return myBase;
-	}
+            return sslContextFactory;
+        } catch (Exception e) {
+            throw new RuntimeException(Msg.code(2123) + "Failed to obtain SslContextFactory", e);
+        }
+    }
 
-	public String getSecureBase() {
-		return mySecureBase;
-	}
+    public String getBase() {
+        return myBase;
+    }
 
-	public void stop() throws Exception {
-		JettyUtil.closeServer(myListenerServer);
-	}
+    public String getSecureBase() {
+        return mySecureBase;
+    }
 
-	public abstract void clearDataAndCounts();
+    public void stop() throws Exception {
+        JettyUtil.closeServer(myListenerServer);
+    }
 
-	public abstract void setFailNextPut(boolean theFailNextPut);
+    public abstract void clearDataAndCounts();
 
-	public abstract List<Object> getInterceptors();
+    public abstract void setFailNextPut(boolean theFailNextPut);
 
-	public abstract void unregisterInterceptor(Object theNext);
+    public abstract List<Object> getInterceptors();
 
-	public abstract void clearCounts();
+    public abstract void unregisterInterceptor(Object theNext);
 
-	public abstract long getPatientCountSearch();
+    public abstract void clearCounts();
 
-	public abstract long getPatientCountDelete();
+    public abstract long getPatientCountSearch();
 
-	public abstract long getPatientCountUpdate();
+    public abstract long getPatientCountDelete();
 
-	public abstract long getPatientCountRead();
+    public abstract long getPatientCountUpdate();
 
-	public abstract long getObservationCountSearch();
+    public abstract long getPatientCountRead();
 
-	public abstract long getObservationCountDelete();
+    public abstract long getObservationCountSearch();
 
-	public abstract long getObservationCountUpdate();
+    public abstract long getObservationCountDelete();
 
-	public abstract long getObservationCountRead();
+    public abstract long getObservationCountUpdate();
 
-	public abstract boolean registerInterceptor(Object theInterceptorAdapter);
+    public abstract long getObservationCountRead();
 
-	public abstract IResourceProvider getObservationResourceProvider();
+    public abstract boolean registerInterceptor(Object theInterceptorAdapter);
 
-	public abstract IResourceProvider getPatientResourceProvider();
+    public abstract IResourceProvider getObservationResourceProvider();
 
-	public abstract IResourceProvider getConceptMapResourceProvider();
+    public abstract IResourceProvider getPatientResourceProvider();
 
-	public abstract IIdType createPatientWithId(String theId);
+    public abstract IResourceProvider getConceptMapResourceProvider();
 
-	public abstract IIdType createPatient(IBaseResource theBaseResource);
+    public abstract IIdType createPatientWithId(String theId);
 
-	public abstract IIdType createObservationForPatient(IIdType theFirstTargetPatientId);
+    public abstract IIdType createPatient(IBaseResource theBaseResource);
 
-	public abstract IIdType createObservation(IBaseResource theBaseResource);
+    public abstract IIdType createObservationForPatient(IIdType theFirstTargetPatientId);
 
-	public void setServerAddressStrategy(boolean theUseHttps){
-		String path = theUseHttps ? mySecureBase : myBase;
-		HardcodedServerAddressStrategy strategy = new HardcodedServerAddressStrategy(path);
-		setServerAddressStrategy(strategy);
-	}
+    public abstract IIdType createObservation(IBaseResource theBaseResource);
 
-	protected abstract void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy);
+    public void setServerAddressStrategy(boolean theUseHttps) {
+        String path = theUseHttps ? mySecureBase : myBase;
+        HardcodedServerAddressStrategy strategy = new HardcodedServerAddressStrategy(path);
+        setServerAddressStrategy(strategy);
+    }
+
+    protected abstract void setServerAddressStrategy(
+            IServerAddressStrategy theServerAddressStrategy);
 }

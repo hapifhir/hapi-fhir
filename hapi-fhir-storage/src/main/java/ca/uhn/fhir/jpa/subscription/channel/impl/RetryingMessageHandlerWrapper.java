@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.util.BaseUnrecoverableRuntimeException;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -36,57 +37,67 @@ import org.springframework.retry.policy.TimeoutRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.CannotCreateTransactionException;
 
-import javax.annotation.Nonnull;
-
 class RetryingMessageHandlerWrapper implements MessageHandler {
-	private static final Logger ourLog = LoggerFactory.getLogger(RetryingMessageHandlerWrapper.class);
-	private final MessageHandler myWrap;
-	private final String myChannelName;
+    private static final Logger ourLog =
+            LoggerFactory.getLogger(RetryingMessageHandlerWrapper.class);
+    private final MessageHandler myWrap;
+    private final String myChannelName;
 
-	RetryingMessageHandlerWrapper(MessageHandler theWrap, String theChannelName) {
-		myWrap = theWrap;
-		myChannelName = theChannelName;
-	}
+    RetryingMessageHandlerWrapper(MessageHandler theWrap, String theChannelName) {
+        myWrap = theWrap;
+        myChannelName = theChannelName;
+    }
 
-	@Override
-	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
-		RetryTemplate retryTemplate = new RetryTemplate();
-		final ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-		backOffPolicy.setInitialInterval(1000);
-		backOffPolicy.setMultiplier(1.1d);
-		retryTemplate.setBackOffPolicy(backOffPolicy);
+    @Override
+    public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
+        RetryTemplate retryTemplate = new RetryTemplate();
+        final ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+        backOffPolicy.setInitialInterval(1000);
+        backOffPolicy.setMultiplier(1.1d);
+        retryTemplate.setBackOffPolicy(backOffPolicy);
 
-		final TimeoutRetryPolicy retryPolicy = new TimeoutRetryPolicy();
-		retryPolicy.setTimeout(DateUtils.MILLIS_PER_MINUTE);
-		retryTemplate.setRetryPolicy(retryPolicy);
-		retryTemplate.setThrowLastExceptionOnExhausted(true);
-		RetryListener retryListener = new RetryListenerSupport() {
-			@Override
-			public <T, E extends Throwable> void onError(RetryContext theContext, RetryCallback<T, E> theCallback, Throwable theThrowable) {
-				ourLog.error("Failure {} processing message in channel[{}]: {}", theContext.getRetryCount(), myChannelName, theThrowable.toString());
-				ourLog.error("Failure", theThrowable);
-				if (theThrowable instanceof BaseUnrecoverableRuntimeException) {
-					theContext.setExhaustedOnly();
-				}
-				if (ExceptionUtils.indexOfThrowable(theThrowable, CannotCreateTransactionException.class) != -1) {
-					/*
-					 * This exception means that we can't open a transaction, which
-					 * means the EntityManager is closed. This can happen if we are shutting
-					 * down while there is still a message in the queue - No sense
-					 * retrying indefinitely in that case
-					 */
-					theContext.setExhaustedOnly();
-				}
-			}
-		};
-		retryTemplate.setListeners(new RetryListener[]{retryListener});
-		retryTemplate.execute(context -> {
-			myWrap.handleMessage(theMessage);
-			return null;
-		});
-	}
+        final TimeoutRetryPolicy retryPolicy = new TimeoutRetryPolicy();
+        retryPolicy.setTimeout(DateUtils.MILLIS_PER_MINUTE);
+        retryTemplate.setRetryPolicy(retryPolicy);
+        retryTemplate.setThrowLastExceptionOnExhausted(true);
+        RetryListener retryListener =
+                new RetryListenerSupport() {
+                    @Override
+                    public <T, E extends Throwable> void onError(
+                            RetryContext theContext,
+                            RetryCallback<T, E> theCallback,
+                            Throwable theThrowable) {
+                        ourLog.error(
+                                "Failure {} processing message in channel[{}]: {}",
+                                theContext.getRetryCount(),
+                                myChannelName,
+                                theThrowable.toString());
+                        ourLog.error("Failure", theThrowable);
+                        if (theThrowable instanceof BaseUnrecoverableRuntimeException) {
+                            theContext.setExhaustedOnly();
+                        }
+                        if (ExceptionUtils.indexOfThrowable(
+                                        theThrowable, CannotCreateTransactionException.class)
+                                != -1) {
+                            /*
+                             * This exception means that we can't open a transaction, which
+                             * means the EntityManager is closed. This can happen if we are shutting
+                             * down while there is still a message in the queue - No sense
+                             * retrying indefinitely in that case
+                             */
+                            theContext.setExhaustedOnly();
+                        }
+                    }
+                };
+        retryTemplate.setListeners(new RetryListener[] {retryListener});
+        retryTemplate.execute(
+                context -> {
+                    myWrap.handleMessage(theMessage);
+                    return null;
+                });
+    }
 
-	public MessageHandler getWrappedHandler() {
-		return myWrap;
-	}
+    public MessageHandler getWrappedHandler() {
+        return myWrap;
+    }
 }

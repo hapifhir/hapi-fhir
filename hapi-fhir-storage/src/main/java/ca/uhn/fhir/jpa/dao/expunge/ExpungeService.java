@@ -33,38 +33,61 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ExpungeService {
-	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
 
-	@Autowired
-	private IExpungeEverythingService myExpungeEverythingService;
-	@Autowired
-	private IResourceExpungeService myExpungeDaoService;
-	@Autowired
-	private ApplicationContext myApplicationContext;
+    @Autowired private IExpungeEverythingService myExpungeEverythingService;
+    @Autowired private IResourceExpungeService myExpungeDaoService;
+    @Autowired private ApplicationContext myApplicationContext;
 
-	protected ExpungeOperation getExpungeOperation(String theResourceName, IResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
-		return myApplicationContext.getBean(ExpungeOperation.class, theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
-	}
+    protected ExpungeOperation getExpungeOperation(
+            String theResourceName,
+            IResourcePersistentId theResourceId,
+            ExpungeOptions theExpungeOptions,
+            RequestDetails theRequestDetails) {
+        return myApplicationContext.getBean(
+                ExpungeOperation.class,
+                theResourceName,
+                theResourceId,
+                theExpungeOptions,
+                theRequestDetails);
+    }
 
-	public ExpungeOutcome expunge(String theResourceName, IResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
-		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId != null ? theResourceId.getId() : null, theResourceId != null ? theResourceId.getVersion() : null, theExpungeOptions);
-		ExpungeOperation expungeOperation = getExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequest);
+    public ExpungeOutcome expunge(
+            String theResourceName,
+            IResourcePersistentId theResourceId,
+            ExpungeOptions theExpungeOptions,
+            RequestDetails theRequest) {
+        ourLog.info(
+                "Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]",
+                theResourceName,
+                theResourceId != null ? theResourceId.getId() : null,
+                theResourceId != null ? theResourceId.getVersion() : null,
+                theExpungeOptions);
+        ExpungeOperation expungeOperation =
+                getExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequest);
 
-		if (theExpungeOptions.getLimit() < 1) {
-			throw new InvalidRequestException(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit " + theExpungeOptions.getLimit() + ".");
-		}
+        if (theExpungeOptions.getLimit() < 1) {
+            throw new InvalidRequestException(
+                    Msg.code(1087)
+                            + "Expunge limit may not be less than 1.  Received expunge limit "
+                            + theExpungeOptions.getLimit()
+                            + ".");
+        }
 
-		if (theResourceName == null && (theResourceId == null || (theResourceId.getId() == null && theResourceId.getVersion() == null))) {
-			if (theExpungeOptions.isExpungeEverything()) {
-				myExpungeEverythingService.expungeEverything(theRequest);
-				return new ExpungeOutcome().setDeletedCount(myExpungeEverythingService.getExpungeDeletedEntityCount());
-			}
-		}
+        if (theResourceName == null
+                && (theResourceId == null
+                        || (theResourceId.getId() == null && theResourceId.getVersion() == null))) {
+            if (theExpungeOptions.isExpungeEverything()) {
+                myExpungeEverythingService.expungeEverything(theRequest);
+                return new ExpungeOutcome()
+                        .setDeletedCount(myExpungeEverythingService.getExpungeDeletedEntityCount());
+            }
+        }
 
-		return expungeOperation.call();
-	}
+        return expungeOperation.call();
+    }
 
-	public void deleteAllSearchParams(IResourcePersistentId theResourceId) {
-		myExpungeDaoService.deleteAllSearchParams(theResourceId);
-	}
+    public void deleteAllSearchParams(IResourcePersistentId theResourceId) {
+        myExpungeDaoService.deleteAllSearchParams(theResourceId);
+    }
 }

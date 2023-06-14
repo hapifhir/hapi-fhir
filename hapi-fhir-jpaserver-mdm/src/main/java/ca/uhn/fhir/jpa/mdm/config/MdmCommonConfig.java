@@ -37,31 +37,26 @@ import org.springframework.context.annotation.Lazy;
 @Import(NicknameServiceConfig.class)
 @Configuration
 public class MdmCommonConfig {
-	@Bean
-	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
-		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
-	}
-	@Bean
-	@Lazy
-	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
-		return new MdmSearchExpandingInterceptor();
-	}
+    @Bean
+    MdmRuleValidator mdmRuleValidator(
+            FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
+        return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
+    }
 
-	@Bean
-	MdmLinkDeleteSvc mdmLinkDeleteSvc() {
-		return new MdmLinkDeleteSvc();
-	}
+    @Bean
+    @Lazy
+    public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
+        return new MdmSearchExpandingInterceptor();
+    }
 
-	@Bean
-	public IMatcherFactory matcherFactory(
-		FhirContext theFhirContext,
-		IMdmSettings theSettings,
-		NicknameSvc theNicknameSvc
-	) {
-		return new MdmMatcherFactory(
-			theFhirContext,
-			theSettings,
-			theNicknameSvc
-		);
-	}
+    @Bean
+    MdmLinkDeleteSvc mdmLinkDeleteSvc() {
+        return new MdmLinkDeleteSvc();
+    }
+
+    @Bean
+    public IMatcherFactory matcherFactory(
+            FhirContext theFhirContext, IMdmSettings theSettings, NicknameSvc theNicknameSvc) {
+        return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameSvc);
+    }
 }

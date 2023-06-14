@@ -21,20 +21,18 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.util.CoverageIgnore;
 
+public class ReferenceOrListParam extends BaseOrListParam<ReferenceOrListParam, ReferenceParam> {
 
-public class ReferenceOrListParam  extends BaseOrListParam<ReferenceOrListParam, ReferenceParam> {
+    @CoverageIgnore
+    @Override
+    ReferenceParam newInstance() {
+        return new ReferenceParam();
+    }
 
-	@CoverageIgnore
-	@Override
-	ReferenceParam newInstance() {
-		return new ReferenceParam();
-	}
-
-	@CoverageIgnore
-	@Override
-	public ReferenceOrListParam addOr(ReferenceParam theParameter) {
-		add(theParameter);
-		return this;
-	}
-
+    @CoverageIgnore
+    @Override
+    public ReferenceOrListParam addOr(ReferenceParam theParameter) {
+        add(theParameter);
+        return this;
+    }
 }

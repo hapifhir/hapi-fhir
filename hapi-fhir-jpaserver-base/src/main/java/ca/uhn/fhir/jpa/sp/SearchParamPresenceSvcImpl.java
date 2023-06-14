@@ -25,82 +25,80 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import com.google.common.annotations.VisibleForTesting;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 
-	@Autowired
-	private ISearchParamPresentDao mySearchParamPresentDao;
+    @Autowired private ISearchParamPresentDao mySearchParamPresentDao;
 
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
+    @Autowired private JpaStorageSettings myStorageSettings;
 
-	@VisibleForTesting
-	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
-		myStorageSettings = theStorageSettings;
-	}
+    @VisibleForTesting
+    public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+        myStorageSettings = theStorageSettings;
+    }
 
-	@Override
-	public AddRemoveCount updatePresence(ResourceTable theResource, Collection<SearchParamPresentEntity> thePresenceEntities) {
-		AddRemoveCount retVal = new AddRemoveCount();
-		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
-			return retVal;
-		}
+    @Override
+    public AddRemoveCount updatePresence(
+            ResourceTable theResource, Collection<SearchParamPresentEntity> thePresenceEntities) {
+        AddRemoveCount retVal = new AddRemoveCount();
+        if (myStorageSettings.getIndexMissingFields()
+                == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
+            return retVal;
+        }
 
-		// Find existing entries
-		Collection<SearchParamPresentEntity> existing = theResource.getSearchParamPresents();
-		Map<Long, SearchParamPresentEntity> existingHashToPresence = new HashMap<>();
-		for (SearchParamPresentEntity nextExistingEntity : existing) {
-			existingHashToPresence.put(nextExistingEntity.getHashPresence(), nextExistingEntity);
-		}
+        // Find existing entries
+        Collection<SearchParamPresentEntity> existing = theResource.getSearchParamPresents();
+        Map<Long, SearchParamPresentEntity> existingHashToPresence = new HashMap<>();
+        for (SearchParamPresentEntity nextExistingEntity : existing) {
+            existingHashToPresence.put(nextExistingEntity.getHashPresence(), nextExistingEntity);
+        }
 
-		// Find newly wanted set of entries
-		Map<Long, SearchParamPresentEntity> newHashToPresence = new HashMap<>();
-		for (SearchParamPresentEntity next : thePresenceEntities) {
-			newHashToPresence.put(next.getHashPresence(), next);
-		}
+        // Find newly wanted set of entries
+        Map<Long, SearchParamPresentEntity> newHashToPresence = new HashMap<>();
+        for (SearchParamPresentEntity next : thePresenceEntities) {
+            newHashToPresence.put(next.getHashPresence(), next);
+        }
 
-		// Delete any that should be deleted
-		List<SearchParamPresentEntity> toDelete = new ArrayList<>();
-		for (Entry<Long, SearchParamPresentEntity> nextEntry : existingHashToPresence.entrySet()) {
-			if (newHashToPresence.containsKey(nextEntry.getKey()) == false) {
-				toDelete.add(nextEntry.getValue());
-			}
-		}
-		// Add any that should be added
-		List<SearchParamPresentEntity> toAdd = new ArrayList<>();
-		for (Entry<Long, SearchParamPresentEntity> nextEntry : newHashToPresence.entrySet()) {
-			if (existingHashToPresence.containsKey(nextEntry.getKey()) == false) {
-				toAdd.add(nextEntry.getValue());
-			}
-		}
+        // Delete any that should be deleted
+        List<SearchParamPresentEntity> toDelete = new ArrayList<>();
+        for (Entry<Long, SearchParamPresentEntity> nextEntry : existingHashToPresence.entrySet()) {
+            if (newHashToPresence.containsKey(nextEntry.getKey()) == false) {
+                toDelete.add(nextEntry.getValue());
+            }
+        }
+        // Add any that should be added
+        List<SearchParamPresentEntity> toAdd = new ArrayList<>();
+        for (Entry<Long, SearchParamPresentEntity> nextEntry : newHashToPresence.entrySet()) {
+            if (existingHashToPresence.containsKey(nextEntry.getKey()) == false) {
+                toAdd.add(nextEntry.getValue());
+            }
+        }
 
-		// Try to reuse any entities we can
-		while (toDelete.size() > 0 && toAdd.size() > 0) {
-			SearchParamPresentEntity nextToDelete = toDelete.remove(toDelete.size() - 1);
-			SearchParamPresentEntity nextToAdd = toAdd.remove(toAdd.size() - 1);
-			nextToDelete.updateValues(nextToAdd);
-			mySearchParamPresentDao.save(nextToDelete);
-			retVal.addToAddCount(1);
-			retVal.addToRemoveCount(1);
-		}
+        // Try to reuse any entities we can
+        while (toDelete.size() > 0 && toAdd.size() > 0) {
+            SearchParamPresentEntity nextToDelete = toDelete.remove(toDelete.size() - 1);
+            SearchParamPresentEntity nextToAdd = toAdd.remove(toAdd.size() - 1);
+            nextToDelete.updateValues(nextToAdd);
+            mySearchParamPresentDao.save(nextToDelete);
+            retVal.addToAddCount(1);
+            retVal.addToRemoveCount(1);
+        }
 
-		mySearchParamPresentDao.deleteAll(toDelete);
-		retVal.addToRemoveCount(toDelete.size());
+        mySearchParamPresentDao.deleteAll(toDelete);
+        retVal.addToRemoveCount(toDelete.size());
 
-		mySearchParamPresentDao.saveAll(toAdd);
-		retVal.addToRemoveCount(toAdd.size());
+        mySearchParamPresentDao.saveAll(toAdd);
+        retVal.addToRemoveCount(toAdd.size());
 
-		return retVal;
-	}
-
+        return retVal;
+    }
 }

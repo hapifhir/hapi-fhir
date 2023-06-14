@@ -21,67 +21,67 @@ package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-
+import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
 
-abstract public class BaseResourcePidList implements IResourcePidList {
+public abstract class BaseResourcePidList implements IResourcePidList {
 
-	final List<IResourcePersistentId> myIds = new ArrayList<>();
+    final List<IResourcePersistentId> myIds = new ArrayList<>();
 
-	@Nullable
-	final Date myLastDate;
-	private final RequestPartitionId myRequestPartitionId;
+    @Nullable final Date myLastDate;
+    private final RequestPartitionId myRequestPartitionId;
 
-	BaseResourcePidList(Collection<IResourcePersistentId> theIds, Date theLastDate, RequestPartitionId theRequestPartitionId) {
-		myIds.addAll(theIds);
-		myLastDate = theLastDate;
-		myRequestPartitionId = theRequestPartitionId;
-	}
+    BaseResourcePidList(
+            Collection<IResourcePersistentId> theIds,
+            Date theLastDate,
+            RequestPartitionId theRequestPartitionId) {
+        myIds.addAll(theIds);
+        myLastDate = theLastDate;
+        myRequestPartitionId = theRequestPartitionId;
+    }
 
-	@Override
-	public RequestPartitionId getRequestPartitionId() {
-		return myRequestPartitionId;
-	}
+    @Override
+    public RequestPartitionId getRequestPartitionId() {
+        return myRequestPartitionId;
+    }
 
-	@Override
-	public Date getLastDate() {
-		return myLastDate;
-	}
+    @Override
+    public Date getLastDate() {
+        return myLastDate;
+    }
 
-	@Override
-	public int size() {
-		return myIds.size();
-	}
+    @Override
+    public int size() {
+        return myIds.size();
+    }
 
-	@Override
-	@Nonnull
-	public List<TypedResourcePid> getTypedResourcePids() {
-		List<TypedResourcePid> retval = new ArrayList<>();
-		for (int i = 0; i < myIds.size(); ++i) {
-			retval.add(new TypedResourcePid(getResourceType(i), myIds.get(i)));
-		}
-		return Collections.unmodifiableList(retval);
-	}
+    @Override
+    @Nonnull
+    public List<TypedResourcePid> getTypedResourcePids() {
+        List<TypedResourcePid> retval = new ArrayList<>();
+        for (int i = 0; i < myIds.size(); ++i) {
+            retval.add(new TypedResourcePid(getResourceType(i), myIds.get(i)));
+        }
+        return Collections.unmodifiableList(retval);
+    }
 
-	@Override
-	public boolean isEmpty() {
-		return myIds.isEmpty();
-	}
+    @Override
+    public boolean isEmpty() {
+        return myIds.isEmpty();
+    }
 
-	@Override
-	public List<IResourcePersistentId> getIds() {
-		return Collections.unmodifiableList(myIds);
-	}
+    @Override
+    public List<IResourcePersistentId> getIds() {
+        return Collections.unmodifiableList(myIds);
+    }
 
-	public IResourcePersistentId getId(int theIndex) {
-		return myIds.get(theIndex);
-	}
+    public IResourcePersistentId getId(int theIndex) {
+        return myIds.get(theIndex);
+    }
 
-	@Override
-	public String toString() {
-		return myIds.toString();
-	}
+    @Override
+    public String toString() {
+        return myIds.toString();
+    }
 }
-

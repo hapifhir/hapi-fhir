@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.length;
+
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.annotations.ColumnDefault;
-
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -45,219 +47,233 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.ColumnDefault;
 
-import static org.apache.commons.lang3.StringUtils.left;
-import static org.apache.commons.lang3.StringUtils.length;
-
-@Table(name = "TRM_VALUESET", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VALUESET_URL", columnNames = {"URL", "VER"})
-})
+@Table(
+        name = "TRM_VALUESET",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "IDX_VALUESET_URL",
+                    columnNames = {"URL", "VER"})
+        })
 @Entity()
 public class TermValueSet implements Serializable {
-	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
-	public static final int MAX_NAME_LENGTH = 200;
-	public static final int MAX_URL_LENGTH = 200;
-	public static final int MAX_VER_LENGTH = 200;
-	private static final long serialVersionUID = 1L;
-	@Id()
-	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_PID")
-	@Column(name = "PID")
-	private Long myId;
+    public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
+    public static final int MAX_NAME_LENGTH = 200;
+    public static final int MAX_URL_LENGTH = 200;
+    public static final int MAX_VER_LENGTH = 200;
+    private static final long serialVersionUID = 1L;
 
-	@Column(name = "URL", nullable = false, length = MAX_URL_LENGTH)
-	private String myUrl;
+    @Id()
+    @SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_PID")
+    @Column(name = "PID")
+    private Long myId;
 
-	@Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
-	private String myVersion;
+    @Column(name = "URL", nullable = false, length = MAX_URL_LENGTH)
+    private String myUrl;
 
-	@OneToOne()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
-	private ResourceTable myResource;
+    @Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
+    private String myVersion;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
-	private Long myResourcePid;
+    @OneToOne()
+    @JoinColumn(
+            name = "RES_ID",
+            referencedColumnName = "RES_ID",
+            nullable = false,
+            updatable = false,
+            foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
+    private ResourceTable myResource;
 
-	@Column(name = "VSNAME", nullable = true, length = MAX_NAME_LENGTH)
-	private String myName;
+    @Column(name = "RES_ID", insertable = false, updatable = false)
+    private Long myResourcePid;
 
-	@OneToMany(mappedBy = "myValueSet", fetch = FetchType.LAZY)
-	private List<TermValueSetConcept> myConcepts;
+    @Column(name = "VSNAME", nullable = true, length = MAX_NAME_LENGTH)
+    private String myName;
 
-	@Column(name = "TOTAL_CONCEPTS", nullable = false)
-	@ColumnDefault("0")
-	private Long myTotalConcepts;
+    @OneToMany(mappedBy = "myValueSet", fetch = FetchType.LAZY)
+    private List<TermValueSetConcept> myConcepts;
 
-	@Column(name = "TOTAL_CONCEPT_DESIGNATIONS", nullable = false)
-	@ColumnDefault("0")
-	private Long myTotalConceptDesignations;
+    @Column(name = "TOTAL_CONCEPTS", nullable = false)
+    @ColumnDefault("0")
+    private Long myTotalConcepts;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
-	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
+    @Column(name = "TOTAL_CONCEPT_DESIGNATIONS", nullable = false)
+    @ColumnDefault("0")
+    private Long myTotalConceptDesignations;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "EXPANDED_AT", nullable = true)
-	private Date myExpansionTimestamp;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
+    private TermValueSetPreExpansionStatusEnum myExpansionStatus;
 
-	@Transient
-	private transient Integer myHashCode;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "EXPANDED_AT", nullable = true)
+    private Date myExpansionTimestamp;
 
-	public TermValueSet() {
-		super();
-		myExpansionStatus = TermValueSetPreExpansionStatusEnum.NOT_EXPANDED;
-		myTotalConcepts = 0L;
-		myTotalConceptDesignations = 0L;
-	}
+    @Transient private transient Integer myHashCode;
 
-	public Date getExpansionTimestamp() {
-		return myExpansionTimestamp;
-	}
+    public TermValueSet() {
+        super();
+        myExpansionStatus = TermValueSetPreExpansionStatusEnum.NOT_EXPANDED;
+        myTotalConcepts = 0L;
+        myTotalConceptDesignations = 0L;
+    }
 
-	public void setExpansionTimestamp(Date theExpansionTimestamp) {
-		myExpansionTimestamp = theExpansionTimestamp;
-	}
+    public Date getExpansionTimestamp() {
+        return myExpansionTimestamp;
+    }
 
-	public Long getId() {
-		return myId;
-	}
+    public void setExpansionTimestamp(Date theExpansionTimestamp) {
+        myExpansionTimestamp = theExpansionTimestamp;
+    }
 
-	public String getUrl() {
-		return myUrl;
-	}
+    public Long getId() {
+        return myId;
+    }
 
-	public TermValueSet setUrl(@Nonnull String theUrl) {
-		ValidateUtil.isNotBlankOrThrowIllegalArgument(theUrl, "theUrl must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUrl, MAX_URL_LENGTH,
-			"URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
-		myUrl = theUrl;
-		return this;
-	}
+    public String getUrl() {
+        return myUrl;
+    }
 
-	public ResourceTable getResource() {
-		return myResource;
-	}
+    public TermValueSet setUrl(@Nonnull String theUrl) {
+        ValidateUtil.isNotBlankOrThrowIllegalArgument(theUrl, "theUrl must not be null or empty");
+        ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+                theUrl,
+                MAX_URL_LENGTH,
+                "URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
+        myUrl = theUrl;
+        return this;
+    }
 
-	public TermValueSet setResource(ResourceTable theResource) {
-		myResource = theResource;
-		return this;
-	}
+    public ResourceTable getResource() {
+        return myResource;
+    }
 
-	public String getName() {
-		return myName;
-	}
+    public TermValueSet setResource(ResourceTable theResource) {
+        myResource = theResource;
+        return this;
+    }
 
-	public TermValueSet setName(String theName) {
-		myName = left(theName, MAX_NAME_LENGTH);
-		return this;
-	}
+    public String getName() {
+        return myName;
+    }
 
-	public List<TermValueSetConcept> getConcepts() {
-		if (myConcepts == null) {
-			myConcepts = new ArrayList<>();
-		}
+    public TermValueSet setName(String theName) {
+        myName = left(theName, MAX_NAME_LENGTH);
+        return this;
+    }
 
-		return myConcepts;
-	}
+    public List<TermValueSetConcept> getConcepts() {
+        if (myConcepts == null) {
+            myConcepts = new ArrayList<>();
+        }
 
-	public Long getTotalConcepts() {
-		return myTotalConcepts;
-	}
+        return myConcepts;
+    }
 
-	public TermValueSet setTotalConcepts(Long theTotalConcepts) {
-		myTotalConcepts = theTotalConcepts;
-		return this;
-	}
+    public Long getTotalConcepts() {
+        return myTotalConcepts;
+    }
 
-	public TermValueSet decrementTotalConcepts() {
-		if (myTotalConcepts > 0) {
-			myTotalConcepts--;
-		}
-		return this;
-	}
+    public TermValueSet setTotalConcepts(Long theTotalConcepts) {
+        myTotalConcepts = theTotalConcepts;
+        return this;
+    }
 
-	public TermValueSet incrementTotalConcepts() {
-		myTotalConcepts++;
-		return this;
-	}
+    public TermValueSet decrementTotalConcepts() {
+        if (myTotalConcepts > 0) {
+            myTotalConcepts--;
+        }
+        return this;
+    }
 
-	public Long getTotalConceptDesignations() {
-		return myTotalConceptDesignations;
-	}
+    public TermValueSet incrementTotalConcepts() {
+        myTotalConcepts++;
+        return this;
+    }
 
-	public TermValueSet setTotalConceptDesignations(Long theTotalConceptDesignations) {
-		myTotalConceptDesignations = theTotalConceptDesignations;
-		return this;
-	}
+    public Long getTotalConceptDesignations() {
+        return myTotalConceptDesignations;
+    }
 
-	public TermValueSet decrementTotalConceptDesignations() {
-		if (myTotalConceptDesignations > 0) {
-			myTotalConceptDesignations--;
-		}
-		return this;
-	}
+    public TermValueSet setTotalConceptDesignations(Long theTotalConceptDesignations) {
+        myTotalConceptDesignations = theTotalConceptDesignations;
+        return this;
+    }
 
-	public TermValueSet incrementTotalConceptDesignations() {
-		myTotalConceptDesignations++;
-		return this;
-	}
+    public TermValueSet decrementTotalConceptDesignations() {
+        if (myTotalConceptDesignations > 0) {
+            myTotalConceptDesignations--;
+        }
+        return this;
+    }
 
-	public TermValueSetPreExpansionStatusEnum getExpansionStatus() {
-		return myExpansionStatus;
-	}
+    public TermValueSet incrementTotalConceptDesignations() {
+        myTotalConceptDesignations++;
+        return this;
+    }
 
-	public void setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
-		myExpansionStatus = theExpansionStatus;
-	}
+    public TermValueSetPreExpansionStatusEnum getExpansionStatus() {
+        return myExpansionStatus;
+    }
 
-	public String getVersion() {
-		return myVersion;
-	}
+    public void setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
+        myExpansionStatus = theExpansionStatus;
+    }
 
-	public TermValueSet setVersion(String theVersion) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theVersion, MAX_VER_LENGTH,
-			"Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
-		myVersion = theVersion;
-		return this;
-	}
+    public String getVersion() {
+        return myVersion;
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
+    public TermValueSet setVersion(String theVersion) {
+        ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+                theVersion,
+                MAX_VER_LENGTH,
+                "Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
+        myVersion = theVersion;
+        return this;
+    }
 
-		if (!(theO instanceof TermValueSet)) return false;
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) return true;
 
-		TermValueSet that = (TermValueSet) theO;
+        if (!(theO instanceof TermValueSet)) return false;
 
-		return new EqualsBuilder()
-			.append(getUrl(), that.getUrl())
-			.isEquals();
-	}
+        TermValueSet that = (TermValueSet) theO;
 
-	@Override
-	public int hashCode() {
-		if (myHashCode == null) {
-			myHashCode = getUrl().hashCode();
-		}
-		return myHashCode;
-	}
+        return new EqualsBuilder().append(getUrl(), that.getUrl()).isEquals();
+    }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("id", myId)
-			.append("url", myUrl)
-			.append(myResource != null ? ("resource=" + myResource.toString()) : ("resource=(null)"))
-			.append("resourcePid", myResourcePid)
-			.append("name", myName)
-			.append(myConcepts != null ? ("concepts - size=" + myConcepts.size()) : ("concepts=(null)"))
-			.append("totalConcepts", myTotalConcepts)
-			.append("totalConceptDesignations", myTotalConceptDesignations)
-			.append("expansionStatus", myExpansionStatus)
-			.toString();
-	}
+    @Override
+    public int hashCode() {
+        if (myHashCode == null) {
+            myHashCode = getUrl().hashCode();
+        }
+        return myHashCode;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("id", myId)
+                .append("url", myUrl)
+                .append(
+                        myResource != null
+                                ? ("resource=" + myResource.toString())
+                                : ("resource=(null)"))
+                .append("resourcePid", myResourcePid)
+                .append("name", myName)
+                .append(
+                        myConcepts != null
+                                ? ("concepts - size=" + myConcepts.size())
+                                : ("concepts=(null)"))
+                .append("totalConcepts", myTotalConcepts)
+                .append("totalConceptDesignations", myTotalConceptDesignations)
+                .append("expansionStatus", myExpansionStatus)
+                .toString();
+    }
 }

@@ -23,8 +23,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class ExpansionTooCostlyException extends InternalErrorException {
 
-	public ExpansionTooCostlyException(String theMessage) {
-		super(theMessage);
-	}
-
+    public ExpansionTooCostlyException(String theMessage) {
+        super(theMessage);
+    }
 }

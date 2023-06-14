@@ -21,35 +21,33 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
- * This interface can be used to validate the parameters
- * object supplied to start a job instance.
- * <p>
- * Batch2 automatically uses
- * <a href="https://www.baeldung.com/javax-validation">JSR 380</a>
- * to validate the parameters object supplied to job start requests.
- * <p>
- * However not all validation is possible using that API. For example
- * environment-specific rules, or rules about relationships between
- * multiple parameters.
+ * This interface can be used to validate the parameters object supplied to start a job instance.
  *
- * @see ca.uhn.fhir.batch2.model.JobDefinition.Builder#setParametersValidator(IJobParametersValidator)
+ * <p>Batch2 automatically uses <a href="https://www.baeldung.com/javax-validation">JSR 380</a> to
+ * validate the parameters object supplied to job start requests.
+ *
+ * <p>However not all validation is possible using that API. For example environment-specific rules,
+ * or rules about relationships between multiple parameters.
+ *
+ * @see
+ *     ca.uhn.fhir.batch2.model.JobDefinition.Builder#setParametersValidator(IJobParametersValidator)
  */
 public interface IJobParametersValidator<T extends IModelJson> {
 
-	/**
-	 * Validate the given job parameters.
-	 *
-	 * @param theRequestDetails The request details associated with the start request
-	 * @param theParameters     The parameters object to validate
-	 * @return Any strings returned by this method are treated as validation failures and returned to the client initiating the job. Return <code>null</code> or an empty list to indicate that no validation failures occurred.
-	 */
-	@Nullable
-	List<String> validate(RequestDetails theRequestDetails, @Nonnull T theParameters);
-
+    /**
+     * Validate the given job parameters.
+     *
+     * @param theRequestDetails The request details associated with the start request
+     * @param theParameters The parameters object to validate
+     * @return Any strings returned by this method are treated as validation failures and returned
+     *     to the client initiating the job. Return <code>null</code> or an empty list to indicate
+     *     that no validation failures occurred.
+     */
+    @Nullable
+    List<String> validate(RequestDetails theRequestDetails, @Nonnull T theParameters);
 }

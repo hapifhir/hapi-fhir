@@ -25,28 +25,25 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * On the {@link Update}, {@link Create} and {@link Delete} operation methods, this annotation
- * can be used to mark a {@link String} parameter which will be populated with the 
- * conditional "search" URL for the operation, if an incoming client invocation is
- * a conditional operation. For non-conditional invocations, the value will be set to
- * <code>null</code> so it is important to handle <code>null</code>.
- * <p>
- * Parameters annotated with this annotation <b>must be of type {@link String}</b>
- * </p>
+ * On the {@link Update}, {@link Create} and {@link Delete} operation methods, this annotation can
+ * be used to mark a {@link String} parameter which will be populated with the conditional "search"
+ * URL for the operation, if an incoming client invocation is a conditional operation. For
+ * non-conditional invocations, the value will be set to <code>null</code> so it is important to
+ * handle <code>null</code>.
+ *
+ * <p>Parameters annotated with this annotation <b>must be of type {@link String}</b>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface ConditionalUrlParam {
 
-	/**
-	 * Does this param support operating over multiple objects without throwing an error? This
-	 * should be set to <code>true</code> only for conditional delete operations if the server
-	 * supports multiple deletes via a conditional URL.
-	 * <p>
-	 * Note that this flag is only a hint to the Conformance statement generator,
-	 * it does not actually affect how the server itself works.
-	 * </p>  
-	 */
-	boolean supportsMultiple() default false;
-	
+    /**
+     * Does this param support operating over multiple objects without throwing an error? This
+     * should be set to <code>true</code> only for conditional delete operations if the server
+     * supports multiple deletes via a conditional URL.
+     *
+     * <p>Note that this flag is only a hint to the Conformance statement generator, it does not
+     * actually affect how the server itself works.
+     */
+    boolean supportsMultiple() default false;
 }

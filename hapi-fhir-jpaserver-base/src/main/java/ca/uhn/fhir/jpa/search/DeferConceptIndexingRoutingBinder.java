@@ -27,26 +27,34 @@ import org.hibernate.search.mapper.pojo.bridge.runtime.RoutingBridgeRouteContext
 import org.hibernate.search.mapper.pojo.route.DocumentRoutes;
 
 public class DeferConceptIndexingRoutingBinder implements RoutingBinder {
-	@Override
-	public void bind(RoutingBindingContext theRoutingBindingContext) {
-		theRoutingBindingContext.dependencies().use("myIndexStatus");
+    @Override
+    public void bind(RoutingBindingContext theRoutingBindingContext) {
+        theRoutingBindingContext.dependencies().use("myIndexStatus");
 
-		theRoutingBindingContext.bridge(TermConcept.class, new TermConceptBridge());
-	}
+        theRoutingBindingContext.bridge(TermConcept.class, new TermConceptBridge());
+    }
 
-	private class TermConceptBridge implements RoutingBridge<TermConcept> {
-		@Override
-		public void route(DocumentRoutes theDocumentRoutes, Object theO, TermConcept theTermConcept, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
-			if (theTermConcept.getIndexStatus() == null) {
-				theDocumentRoutes.notIndexed();
-			} else {
-				theDocumentRoutes.addRoute();
-			}
-		}
+    private class TermConceptBridge implements RoutingBridge<TermConcept> {
+        @Override
+        public void route(
+                DocumentRoutes theDocumentRoutes,
+                Object theO,
+                TermConcept theTermConcept,
+                RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+            if (theTermConcept.getIndexStatus() == null) {
+                theDocumentRoutes.notIndexed();
+            } else {
+                theDocumentRoutes.addRoute();
+            }
+        }
 
-		@Override
-		public void previousRoutes(DocumentRoutes theDocumentRoutes, Object theO, TermConcept theTermConcept, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
-			theDocumentRoutes.addRoute();
-		}
-	}
+        @Override
+        public void previousRoutes(
+                DocumentRoutes theDocumentRoutes,
+                Object theO,
+                TermConcept theTermConcept,
+                RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+            theDocumentRoutes.addRoute();
+        }
+    }
 }

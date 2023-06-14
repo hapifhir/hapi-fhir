@@ -35,36 +35,47 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnaireResponseOperationsProvider {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
-	@Autowired
-	IQuestionnaireResponseProcessorFactory myR4QuestionnaireResponseProcessorFactory;
+    @Autowired IRepositoryFactory myRepositoryFactory;
+    @Autowired IQuestionnaireResponseProcessorFactory myR4QuestionnaireResponseProcessorFactory;
 
-	/**
-	 * Implements the <a href=
-	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse-extract.html>$extract</a>
-	 * operation found in the
-	 * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
-	 *
-	 * @param theId                    The id of the QuestionnaireResponse to extract data from.
-	 * @param theQuestionnaireResponse The QuestionnaireResponse to extract data from. Used when the operation is invoked at the 'type' level.
-	 * @param theRequestDetails        The details (such as tenant) of this request. Usually
-	 *                                 autopopulated HAPI.
-	 * @return The resulting FHIR resource produced after extracting data. This will either be a single resource or a Transaction Bundle that contains multiple resources.
-	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
-	public IBaseBundle extract(@IdParam IdType theId, @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
-										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return myR4QuestionnaireResponseProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.extract(theId, theQuestionnaireResponse, null, null, null);
-	}
+    /**
+     * Implements the <a href=
+     * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse-extract.html>$extract</a>
+     * operation found in the <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data
+     * Capture (SDC) IG</a>.
+     *
+     * @param theId The id of the QuestionnaireResponse to extract data from.
+     * @param theQuestionnaireResponse The QuestionnaireResponse to extract data from. Used when the
+     *     operation is invoked at the 'type' level.
+     * @param theRequestDetails The details (such as tenant) of this request. Usually autopopulated
+     *     HAPI.
+     * @return The resulting FHIR resource produced after extracting data. This will either be a
+     *     single resource or a Transaction Bundle that contains multiple resources.
+     */
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_EXTRACT,
+            idempotent = true,
+            type = QuestionnaireResponse.class)
+    public IBaseBundle extract(
+            @IdParam IdType theId,
+            @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
+            RequestDetails theRequestDetails)
+            throws InternalErrorException, FHIRException {
+        return myR4QuestionnaireResponseProcessorFactory
+                .create(myRepositoryFactory.create(theRequestDetails))
+                .extract(theId, theQuestionnaireResponse, null, null, null);
+    }
 
-	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
-	public IBaseBundle extract(@ResourceParam QuestionnaireResponse theQuestionnaireResponse,
-										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return myR4QuestionnaireResponseProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.extract(null, theQuestionnaireResponse, null, null, null);
-	}
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_EXTRACT,
+            idempotent = true,
+            type = QuestionnaireResponse.class)
+    public IBaseBundle extract(
+            @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
+            RequestDetails theRequestDetails)
+            throws InternalErrorException, FHIRException {
+        return myR4QuestionnaireResponseProcessorFactory
+                .create(myRepositoryFactory.create(theRequestDetails))
+                .extract(null, theQuestionnaireResponse, null, null, null);
+    }
 }

@@ -19,67 +19,60 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
-
+import java.util.Collections;
+import java.util.List;
 import javax.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-/**
- * Utility methods for working with {@link IBundleProvider}
- */
+/** Utility methods for working with {@link IBundleProvider} */
 public class BundleProviders {
 
-	/** Non instantiable */
-	@CoverageIgnore
-	private BundleProviders() {
-		//nothing
-	}
+    /** Non instantiable */
+    @CoverageIgnore
+    private BundleProviders() {
+        // nothing
+    }
 
-	/**
-	 * Create a new unmodifiable empty resource list with the current time as the publish date.
-	 */
-	public static IBundleProvider newEmptyList() {
-		final InstantDt published = InstantDt.withCurrentTime();
-		return new IBundleProvider() {
-			@Nonnull
-			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-				return Collections.emptyList();
-			}
+    /** Create a new unmodifiable empty resource list with the current time as the publish date. */
+    public static IBundleProvider newEmptyList() {
+        final InstantDt published = InstantDt.withCurrentTime();
+        return new IBundleProvider() {
+            @Nonnull
+            @Override
+            public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+                return Collections.emptyList();
+            }
 
-			@Override
-			public Integer size() {
-				return 0;
-			}
+            @Override
+            public Integer size() {
+                return 0;
+            }
 
-			@Override
-			public InstantDt getPublished() {
-				return published;
-			}
+            @Override
+            public InstantDt getPublished() {
+                return published;
+            }
 
-			@Override
-			public Integer preferredPageSize() {
-				return null;
-			}
+            @Override
+            public Integer preferredPageSize() {
+                return null;
+            }
 
-			@Override
-			public String getUuid() {
-				return null;
-			}
-		};
-	}
+            @Override
+            public String getUuid() {
+                return null;
+            }
+        };
+    }
 
-	public static IBundleProvider newList(IBaseResource theResource) {
-		return new SimpleBundleProvider(theResource);
-	}
+    public static IBundleProvider newList(IBaseResource theResource) {
+        return new SimpleBundleProvider(theResource);
+    }
 
-	public static IBundleProvider newList(List<IBaseResource> theResources) {
-		return new SimpleBundleProvider(theResources);
-	}
+    public static IBundleProvider newList(List<IBaseResource> theResources) {
+        return new SimpleBundleProvider(theResources);
+    }
 }

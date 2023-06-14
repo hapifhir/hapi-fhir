@@ -27,35 +27,48 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ResourceOperationMessage extends BaseResourceModifiedMessage {
 
-	public ResourceOperationMessage() {
-	}
+    public ResourceOperationMessage() {}
 
-	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
-		super(theFhirContext, theResource, theOperationType);
-	}
+    public ResourceOperationMessage(
+            FhirContext theFhirContext,
+            IBaseResource theResource,
+            OperationTypeEnum theOperationType) {
+        super(theFhirContext, theResource, theOperationType);
+    }
 
-	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
-		super(theFhirContext, theNewResource, theOperationType, theRequest);
-	}
+    public ResourceOperationMessage(
+            FhirContext theFhirContext,
+            IBaseResource theNewResource,
+            OperationTypeEnum theOperationType,
+            RequestDetails theRequest) {
+        super(theFhirContext, theNewResource, theOperationType, theRequest);
+    }
 
-	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		super(theFhirContext, theNewResource, theOperationType, theRequest, theRequestPartitionId);
-	}
+    public ResourceOperationMessage(
+            FhirContext theFhirContext,
+            IBaseResource theNewResource,
+            OperationTypeEnum theOperationType,
+            RequestDetails theRequest,
+            RequestPartitionId theRequestPartitionId) {
+        super(theFhirContext, theNewResource, theOperationType, theRequest, theRequestPartitionId);
+    }
 
-	/**
-	 * If you are using a non-fhir-resource payload, you may set the payload directly here instead of using the constructor.
-	 * @param thePayload the payload of the message.
-	 */
-	public void setPayload(String thePayload) {
-		this.myPayload = thePayload;
-	}
+    /**
+     * If you are using a non-fhir-resource payload, you may set the payload directly here instead
+     * of using the constructor.
+     *
+     * @param thePayload the payload of the message.
+     */
+    public void setPayload(String thePayload) {
+        this.myPayload = thePayload;
+    }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("operationType", myOperationType)
-			.append("payloadId", myPayloadId)
-			.append("partitionId", myPartitionId)
-			.toString();
-	}
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("operationType", myOperationType)
+                .append("payloadId", myPayloadId)
+                .append("partitionId", myPartitionId)
+                .toString();
+    }
 }

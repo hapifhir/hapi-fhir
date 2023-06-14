@@ -10,14 +10,12 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 @ResourceDef(name = "Patient", profile = "Patient")
 public class CustomPatientDstu2 extends Patient {
 
-
     private static final long serialVersionUID = 1L;
 
     @Child(name = "homeless", order = 1)
     @Extension(url = "/StructureDefinition/homeless", definedLocally = true, isModifier = false)
     @Description(shortDefinition = "The patient being homeless, true if homeless")
     private BooleanDt homeless;
-
 
     public BooleanDt getHomeless() {
         return homeless;

@@ -24,10 +24,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum JobFileRowProcessingModeEnum {
 
-	/**
-	 * Sorting OK
-	 */
-
-	FHIR_TRANSACTION
-
+    /** Sorting OK */
+    FHIR_TRANSACTION
 }

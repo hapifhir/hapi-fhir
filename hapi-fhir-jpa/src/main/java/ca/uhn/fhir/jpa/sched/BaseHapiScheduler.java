@@ -26,6 +26,11 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
@@ -43,197 +48,197 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
-import javax.annotation.Nonnull;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
 public abstract class BaseHapiScheduler implements IHapiScheduler {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiScheduler.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiScheduler.class);
 
-	private static final AtomicInteger ourNextSchedulerId = new AtomicInteger();
+    private static final AtomicInteger ourNextSchedulerId = new AtomicInteger();
 
-	private final String myThreadNamePrefix;
-	private final AutowiringSpringBeanJobFactory mySpringBeanJobFactory;
-	private final SchedulerFactoryBean myFactory = new SchedulerFactoryBean();
-	private final Properties myProperties = new Properties();
+    private final String myThreadNamePrefix;
+    private final AutowiringSpringBeanJobFactory mySpringBeanJobFactory;
+    private final SchedulerFactoryBean myFactory = new SchedulerFactoryBean();
+    private final Properties myProperties = new Properties();
 
-	private Scheduler myScheduler;
-	private String myInstanceName;
+    private Scheduler myScheduler;
+    private String myInstanceName;
 
-	public BaseHapiScheduler(String theThreadNamePrefix, AutowiringSpringBeanJobFactory theSpringBeanJobFactory) {
-		myThreadNamePrefix = theThreadNamePrefix;
-		mySpringBeanJobFactory = theSpringBeanJobFactory;
-	}
+    public BaseHapiScheduler(
+            String theThreadNamePrefix, AutowiringSpringBeanJobFactory theSpringBeanJobFactory) {
+        myThreadNamePrefix = theThreadNamePrefix;
+        mySpringBeanJobFactory = theSpringBeanJobFactory;
+    }
 
+    void setInstanceName(String theInstanceName) {
+        myInstanceName = theInstanceName;
+    }
 
-	void setInstanceName(String theInstanceName) {
-		myInstanceName = theInstanceName;
-	}
+    int nextSchedulerId() {
+        return ourNextSchedulerId.getAndIncrement();
+    }
 
+    @Override
+    public void init() throws SchedulerException {
+        setProperties();
+        myFactory.setQuartzProperties(myProperties);
+        myFactory.setBeanName(myInstanceName);
+        myFactory.setSchedulerName(myThreadNamePrefix);
+        myFactory.setJobFactory(mySpringBeanJobFactory);
+        massageJobFactory(myFactory);
+        try {
+            Validate.notBlank(myInstanceName, "No instance name supplied");
+            myFactory.afterPropertiesSet();
+        } catch (Exception e) {
+            throw new SchedulerException(Msg.code(1633) + e);
+        }
 
-	int nextSchedulerId() {
-		return ourNextSchedulerId.getAndIncrement();
-	}
+        myScheduler = myFactory.getScheduler();
+        myScheduler.standby();
+    }
 
-	@Override
-	public void init() throws SchedulerException {
-		setProperties();
-		myFactory.setQuartzProperties(myProperties);
-		myFactory.setBeanName(myInstanceName);
-		myFactory.setSchedulerName(myThreadNamePrefix);
-		myFactory.setJobFactory(mySpringBeanJobFactory);
-		massageJobFactory(myFactory);
-		try {
-			Validate.notBlank(myInstanceName, "No instance name supplied");
-			myFactory.afterPropertiesSet();
-		} catch (Exception e) {
-			throw new SchedulerException(Msg.code(1633) + e);
-		}
+    protected void massageJobFactory(SchedulerFactoryBean theFactory) {
+        // nothing by default
+    }
 
-		myScheduler = myFactory.getScheduler();
-		myScheduler.standby();
-	}
+    protected void setProperties() {
+        addProperty("org.quartz.threadPool.threadCount", "4");
+        myProperties.setProperty(
+                StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME,
+                myInstanceName + "-" + nextSchedulerId());
+        addProperty("org.quartz.threadPool.threadNamePrefix", getThreadPrefix());
+    }
 
-	protected void massageJobFactory(SchedulerFactoryBean theFactory) {
-		// nothing by default
-	}
+    @Nonnull
+    private String getThreadPrefix() {
+        return myThreadNamePrefix + "-" + myInstanceName;
+    }
 
-	protected void setProperties() {
-		addProperty("org.quartz.threadPool.threadCount", "4");
-		myProperties.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName + "-" + nextSchedulerId());
-		addProperty("org.quartz.threadPool.threadNamePrefix", getThreadPrefix());
-	}
+    protected void addProperty(String key, String value) {
+        myProperties.put(key, value);
+    }
 
-	@Nonnull
-	private String getThreadPrefix() {
-		return myThreadNamePrefix + "-" + myInstanceName;
-	}
+    @Override
+    public void start() {
+        if (myScheduler == null) {
+            throw new ConfigurationException(
+                    Msg.code(1634) + "Attempt to start uninitialized scheduler");
+        }
+        try {
+            ourLog.info("Starting scheduler {}", getThreadPrefix());
+            myScheduler.start();
+        } catch (SchedulerException e) {
+            ourLog.error("Failed to start up scheduler", e);
+            throw new ConfigurationException(Msg.code(1635) + "Failed to start up scheduler", e);
+        }
+    }
 
-	protected void addProperty(String key, String value) {
-		myProperties.put(key, value);
-	}
+    @Override
+    public void shutdown() {
+        if (myScheduler == null) {
+            return;
+        }
+        try {
+            myScheduler.shutdown(true);
+        } catch (SchedulerException e) {
+            ourLog.error("Failed to shut down scheduler", e);
+            throw new ConfigurationException(Msg.code(1636) + "Failed to shut down scheduler", e);
+        }
+    }
 
-	@Override
-	public void start() {
-		if (myScheduler == null) {
-			throw new ConfigurationException(Msg.code(1634) + "Attempt to start uninitialized scheduler");
-		}
-		try {
-			ourLog.info("Starting scheduler {}", getThreadPrefix());
-			myScheduler.start();
-		} catch (SchedulerException e) {
-			ourLog.error("Failed to start up scheduler", e);
-			throw new ConfigurationException(Msg.code(1635) + "Failed to start up scheduler", e);
-		}
-	}
+    @Override
+    public boolean isStarted() {
+        try {
+            return myScheduler != null && myScheduler.isStarted();
+        } catch (SchedulerException e) {
+            ourLog.error("Failed to determine scheduler status", e);
+            return false;
+        }
+    }
 
-	@Override
-	public void shutdown() {
-		if (myScheduler == null) {
-			return;
-		}
-		try {
-			myScheduler.shutdown(true);
-		} catch (SchedulerException e) {
-			ourLog.error("Failed to shut down scheduler", e);
-			throw new ConfigurationException(Msg.code(1636) + "Failed to shut down scheduler", e);
-		}
-	}
+    @Override
+    public void clear() throws SchedulerException {
+        myScheduler.clear();
+    }
 
-	@Override
-	public boolean isStarted() {
-		try {
-			return myScheduler != null && myScheduler.isStarted();
-		} catch (SchedulerException e) {
-			ourLog.error("Failed to determine scheduler status", e);
-			return false;
-		}
-	}
+    @Override
+    public void logStatusForUnitTest() {
+        try {
+            Set<JobKey> keys = myScheduler.getJobKeys(GroupMatcher.anyGroup());
+            String keysString =
+                    keys.stream().map(t -> t.getName()).collect(Collectors.joining(", "));
+            ourLog.info("Local scheduler has jobs: {}", keysString);
+        } catch (SchedulerException e) {
+            ourLog.error("Failed to get log status for scheduler", e);
+            throw new InternalErrorException(
+                    Msg.code(1637) + "Failed to get log status for scheduler", e);
+        }
+    }
 
-	@Override
-	public void clear() throws SchedulerException {
-		myScheduler.clear();
-	}
+    @Override
+    public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+        Validate.isTrue(theIntervalMillis >= 100);
 
-	@Override
-	public void logStatusForUnitTest() {
-		try {
-			Set<JobKey> keys = myScheduler.getJobKeys(GroupMatcher.anyGroup());
-			String keysString = keys.stream().map(t -> t.getName()).collect(Collectors.joining(", "));
-			ourLog.info("Local scheduler has jobs: {}", keysString);
-		} catch (SchedulerException e) {
-			ourLog.error("Failed to get log status for scheduler", e);
-			throw new InternalErrorException(Msg.code(1637) + "Failed to get log status for scheduler", e);
-		}
-	}
+        Validate.notNull(theJobDefinition);
+        Validate.notNull(theJobDefinition.getJobClass());
+        Validate.notBlank(theJobDefinition.getId());
 
-	@Override
-	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-		Validate.isTrue(theIntervalMillis >= 100);
+        TriggerKey triggerKey = theJobDefinition.toTriggerKey();
+        JobDetailImpl jobDetail = buildJobDetail(theJobDefinition);
 
-		Validate.notNull(theJobDefinition);
-		Validate.notNull(theJobDefinition.getJobClass());
-		Validate.notBlank(theJobDefinition.getId());
+        ScheduleBuilder<? extends Trigger> schedule =
+                SimpleScheduleBuilder.simpleSchedule()
+                        .withIntervalInMilliseconds(theIntervalMillis)
+                        .withMisfireHandlingInstructionIgnoreMisfires() // We ignore misfires in
+                        // cases of multiple JVMs
+                        // each trying to fire.
+                        .repeatForever();
 
-		TriggerKey triggerKey = theJobDefinition.toTriggerKey();
-		JobDetailImpl jobDetail = buildJobDetail(theJobDefinition);
+        Trigger trigger =
+                TriggerBuilder.newTrigger()
+                        .forJob(jobDetail)
+                        .withIdentity(triggerKey)
+                        .startNow()
+                        .withSchedule(schedule)
+                        .build();
 
-		ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder
-			.simpleSchedule()
-			.withIntervalInMilliseconds(theIntervalMillis)
-			.withMisfireHandlingInstructionIgnoreMisfires()//We ignore misfires in cases of multiple JVMs each trying to fire.
-			.repeatForever();
+        Set<? extends Trigger> triggers = Sets.newHashSet(trigger);
+        try {
+            myScheduler.scheduleJob(jobDetail, triggers, true);
+        } catch (SchedulerException e) {
+            ourLog.error("Failed to schedule job", e);
+            throw new InternalErrorException(Msg.code(1638) + e);
+        }
+    }
 
-		Trigger trigger = TriggerBuilder.newTrigger()
-			.forJob(jobDetail)
-			.withIdentity(triggerKey)
-			.startNow()
-			.withSchedule(schedule)
-			.build();
+    @Nonnull
+    private JobDetailImpl buildJobDetail(ScheduledJobDefinition theJobDefinition) {
+        JobDetailImpl jobDetail = new NonConcurrentJobDetailImpl();
+        jobDetail.setJobClass(theJobDefinition.getJobClass());
+        jobDetail.setKey(theJobDefinition.toJobKey());
+        jobDetail.setJobDataMap(new JobDataMap(theJobDefinition.getJobData()));
+        return jobDetail;
+    }
 
-		Set<? extends Trigger> triggers = Sets.newHashSet(trigger);
-		try {
-			myScheduler.scheduleJob(jobDetail, triggers, true);
-		} catch (SchedulerException e) {
-			ourLog.error("Failed to schedule job", e);
-			throw new InternalErrorException(Msg.code(1638) + e);
-		}
+    @VisibleForTesting
+    @Override
+    public Set<JobKey> getJobKeysForUnitTest() throws SchedulerException {
+        return myScheduler.getJobKeys(GroupMatcher.anyGroup());
+    }
 
-	}
+    private static class NonConcurrentJobDetailImpl extends JobDetailImpl {
+        private static final long serialVersionUID = 5716197221121989740L;
 
-	@Nonnull
-	private JobDetailImpl buildJobDetail(ScheduledJobDefinition theJobDefinition) {
-		JobDetailImpl jobDetail = new NonConcurrentJobDetailImpl();
-		jobDetail.setJobClass(theJobDefinition.getJobClass());
-		jobDetail.setKey(theJobDefinition.toJobKey());
-		jobDetail.setJobDataMap(new JobDataMap(theJobDefinition.getJobData()));
-		return jobDetail;
-	}
+        // All HAPI FHIR jobs shouldn't allow concurrent execution
+        @Override
+        public boolean isConcurrentExectionDisallowed() {
+            return true;
+        }
+    }
 
-	@VisibleForTesting
-	@Override
-	public Set<JobKey> getJobKeysForUnitTest() throws SchedulerException {
-		return myScheduler.getJobKeys(GroupMatcher.anyGroup());
-	}
-
-	private static class NonConcurrentJobDetailImpl extends JobDetailImpl {
-		private static final long serialVersionUID = 5716197221121989740L;
-
-		// All HAPI FHIR jobs shouldn't allow concurrent execution
-		@Override
-		public boolean isConcurrentExectionDisallowed() {
-			return true;
-		}
-	}
-
-	@Override
-	public void triggerJobImmediately(ScheduledJobDefinition theJobDefinition) {
-		try {
-			myScheduler.triggerJob(theJobDefinition.toJobKey());
-		} catch (SchedulerException e) {
-			ourLog.error("Error triggering scheduled job with key {}", theJobDefinition);
-		}
-	}
+    @Override
+    public void triggerJobImmediately(ScheduledJobDefinition theJobDefinition) {
+        try {
+            myScheduler.triggerJob(theJobDefinition.toJobKey());
+        } catch (SchedulerException e) {
+            ourLog.error("Error triggering scheduled job with key {}", theJobDefinition);
+        }
+    }
 }

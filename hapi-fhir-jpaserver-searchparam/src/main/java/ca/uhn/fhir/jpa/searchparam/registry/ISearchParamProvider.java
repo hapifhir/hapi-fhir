@@ -25,7 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface ISearchParamProvider {
-	IBundleProvider search(SearchParameterMap theParams);
+    IBundleProvider search(SearchParameterMap theParams);
 
-	IBaseResource read(IIdType theSearchParamId);
+    IBaseResource read(IIdType theSearchParamId);
 }

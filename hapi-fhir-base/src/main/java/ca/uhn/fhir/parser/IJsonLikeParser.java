@@ -22,47 +22,48 @@ package ca.uhn.fhir.parser;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
+import java.io.IOException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.io.IOException;
-
 /**
- * An extension to the parser interface that is implemented by parsers that understand a generalized form of
- * JSON data. This generalized form uses Map-like, List-like, and scalar elements to construct resources.
- * <p>
- * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread or
- * every message being parsed/encoded.
- * </p>
+ * An extension to the parser interface that is implemented by parsers that understand a generalized
+ * form of JSON data. This generalized form uses Map-like, List-like, and scalar elements to
+ * construct resources.
+ *
+ * <p>Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser
+ * instance for every thread or every message being parsed/encoded.
  */
 public interface IJsonLikeParser extends IParser {
 
-	void encodeResourceToJsonLikeWriter(IBaseResource theResource, BaseJsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException;
+    void encodeResourceToJsonLikeWriter(
+            IBaseResource theResource, BaseJsonLikeWriter theJsonLikeWriter)
+            throws IOException, DataFormatException;
 
-	/**
-	 * Parses a resource from a JSON-like data structure
-	 * 
-	 * @param theResourceType
-	 *           The resource type to use. This can be used to explicitly specify a class which extends a built-in type
-	 *           (e.g. a custom type extending the default Patient class)
-	 * @param theJsonLikeStructure
-	 *           The JSON-like structure to parse
-	 * @return A parsed resource
-	 * @throws DataFormatException
-	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
-	 */
-	<T extends IBaseResource> T parseResource(Class<T> theResourceType, JsonLikeStructure theJsonLikeStructure) throws DataFormatException;
+    /**
+     * Parses a resource from a JSON-like data structure
+     *
+     * @param theResourceType The resource type to use. This can be used to explicitly specify a
+     *     class which extends a built-in type (e.g. a custom type extending the default Patient
+     *     class)
+     * @param theJsonLikeStructure The JSON-like structure to parse
+     * @return A parsed resource
+     * @throws DataFormatException If the resource can not be parsed because the data is not
+     *     recognized or invalid for any reason
+     */
+    <T extends IBaseResource> T parseResource(
+            Class<T> theResourceType, JsonLikeStructure theJsonLikeStructure)
+            throws DataFormatException;
 
-	/**
-	 * Parses a resource from a JSON-like data structure
-	 * 
-	 * @param theJsonLikeStructure
-	 *           The JSON-like structure to parse
-	 * @return A parsed resource. Note that the returned object will be an instance of {@link IResource} or
-	 *         {@link IAnyResource} depending on the specific FhirContext which created this parser.
-	 * @throws DataFormatException
-	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
-	 */
-	IBaseResource parseResource(JsonLikeStructure theJsonLikeStructure) throws DataFormatException;
-
+    /**
+     * Parses a resource from a JSON-like data structure
+     *
+     * @param theJsonLikeStructure The JSON-like structure to parse
+     * @return A parsed resource. Note that the returned object will be an instance of {@link
+     *     IResource} or {@link IAnyResource} depending on the specific FhirContext which created
+     *     this parser.
+     * @throws DataFormatException If the resource can not be parsed because the data is not
+     *     recognized or invalid for any reason
+     */
+    IBaseResource parseResource(JsonLikeStructure theJsonLikeStructure) throws DataFormatException;
 }

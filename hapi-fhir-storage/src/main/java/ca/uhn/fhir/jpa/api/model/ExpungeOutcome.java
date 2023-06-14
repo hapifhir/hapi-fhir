@@ -20,14 +20,14 @@
 package ca.uhn.fhir.jpa.api.model;
 
 public class ExpungeOutcome {
-	private int myDeletedCount;
+    private int myDeletedCount;
 
-	public int getDeletedCount() {
-		return myDeletedCount;
-	}
+    public int getDeletedCount() {
+        return myDeletedCount;
+    }
 
-	public ExpungeOutcome setDeletedCount(int theDeletedCount) {
-		myDeletedCount = theDeletedCount;
-		return this;
-	}
+    public ExpungeOutcome setDeletedCount(int theDeletedCount) {
+        myDeletedCount = theDeletedCount;
+        return this;
+    }
 }

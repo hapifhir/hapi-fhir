@@ -1,5 +1,9 @@
 package ca.uhn.fhir.parser.i391;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -9,78 +13,71 @@ import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-/**
- * See #391
- */
+/** See #391 */
 public class TestOutcomeTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeDstu2Test.class);
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(CustomTypeDstu2Test.class);
 
-	@Test
-	public void testCustomDataTypeBugN2_UnknownElement() {
-		CustomBlock nameDt = new CustomBlock();
-		nameDt.ourValue = new StringDt("testText");
+    @Test
+    public void testCustomDataTypeBugN2_UnknownElement() {
+        CustomBlock nameDt = new CustomBlock();
+        nameDt.ourValue = new StringDt("testText");
 
-		CustomOperationOutcome outcome = new CustomOperationOutcome();
-		outcome.element2 = nameDt;
+        CustomOperationOutcome outcome = new CustomOperationOutcome();
+        outcome.element2 = nameDt;
 
-		IParser parser = FhirContext.forDstu2().newXmlParser();
-		String outcomeString = parser.setPrettyPrint(true).encodeResourceToString(outcome);		
-		ourLog.info(outcomeString);
-		
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\">" + 
-				"<meta>" + 
-				"<profile value=\"http://hl7.org/fhir/profiles/custom-operation-outcome\"/>" + 
-				"</meta>" + 
-				"<extension url=\"#someElement2\">" + 
-				"<valueString value=\"testText\"/>" + 
-				"</extension>" + 
-				"</OperationOutcome>", parser.setPrettyPrint(false).encodeResourceToString(outcome));
-		
-		CustomOperationOutcome parsedOutcome = parser.parseResource(CustomOperationOutcome.class, outcomeString);
-		ourLog.info(outcomeString);
+        IParser parser = FhirContext.forDstu2().newXmlParser();
+        String outcomeString = parser.setPrettyPrint(true).encodeResourceToString(outcome);
+        ourLog.info(outcomeString);
 
-//		assertNotNull(parsedOutcome.element2);
-//		assertNotNull(parsedOutcome.element2.ourValue);
-	}
+        assertEquals(
+                "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><meta><profile"
+                    + " value=\"http://hl7.org/fhir/profiles/custom-operation-outcome\"/></meta><extension"
+                    + " url=\"#someElement2\"><valueString value=\"testText\"/>"
+                    + "</extension></OperationOutcome>",
+                parser.setPrettyPrint(false).encodeResourceToString(outcome));
 
-	@Test
-	public void testParseBoundCodeDtJson() {
-		IParser jsonParser = FhirContext.forDstu2().newJsonParser();
+        CustomOperationOutcome parsedOutcome =
+                parser.parseResource(CustomOperationOutcome.class, outcomeString);
+        ourLog.info(outcomeString);
 
-		TestOutcome outcome = new TestOutcome();
-		outcome.setElement(new BoundCodeDt<OutcomeEnum>(new OutcomeBinder(), OutcomeEnum.ITEM1));
+        //		assertNotNull(parsedOutcome.element2);
+        //		assertNotNull(parsedOutcome.element2.ourValue);
+    }
 
-		String xmlResource = jsonParser.encodeResourceToString(outcome);
-		TestOutcome operationOutcome = jsonParser.parseResource(TestOutcome.class, xmlResource);
+    @Test
+    public void testParseBoundCodeDtJson() {
+        IParser jsonParser = FhirContext.forDstu2().newJsonParser();
 
-		assertNotNull(operationOutcome.getElement());
-		assertTrue(operationOutcome.getElement() instanceof BoundCodeDt);
-		assertEquals(outcome.getElement(), operationOutcome.getElement());
-	}
+        TestOutcome outcome = new TestOutcome();
+        outcome.setElement(new BoundCodeDt<OutcomeEnum>(new OutcomeBinder(), OutcomeEnum.ITEM1));
 
-	@Test
-	public void testParseBoundCodeDtXml() {
-		IParser xmlParser = FhirContext.forDstu2().newXmlParser();
+        String xmlResource = jsonParser.encodeResourceToString(outcome);
+        TestOutcome operationOutcome = jsonParser.parseResource(TestOutcome.class, xmlResource);
 
-		TestOutcome outcome = new TestOutcome();
-		outcome.setElement(new BoundCodeDt<OutcomeEnum>(new OutcomeBinder(), OutcomeEnum.ITEM1));
+        assertNotNull(operationOutcome.getElement());
+        assertTrue(operationOutcome.getElement() instanceof BoundCodeDt);
+        assertEquals(outcome.getElement(), operationOutcome.getElement());
+    }
 
-		String xmlResource = xmlParser.encodeResourceToString(outcome);
-		TestOutcome operationOutcome = xmlParser.parseResource(TestOutcome.class, xmlResource);
+    @Test
+    public void testParseBoundCodeDtXml() {
+        IParser xmlParser = FhirContext.forDstu2().newXmlParser();
 
-		assertNotNull(operationOutcome.getElement());
-		assertTrue(operationOutcome.getElement() instanceof BoundCodeDt);
-		assertEquals(outcome.getElement(), operationOutcome.getElement());
-	}
+        TestOutcome outcome = new TestOutcome();
+        outcome.setElement(new BoundCodeDt<OutcomeEnum>(new OutcomeBinder(), OutcomeEnum.ITEM1));
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.randomizeLocaleAndTimezone();
-	}
+        String xmlResource = xmlParser.encodeResourceToString(outcome);
+        TestOutcome operationOutcome = xmlParser.parseResource(TestOutcome.class, xmlResource);
 
+        assertNotNull(operationOutcome.getElement());
+        assertTrue(operationOutcome.getElement() instanceof BoundCodeDt);
+        assertEquals(outcome.getElement(), operationOutcome.getElement());
+    }
+
+    @AfterAll
+    public static void afterClassClearContext() {
+        TestUtil.randomizeLocaleAndTimezone();
+    }
 }

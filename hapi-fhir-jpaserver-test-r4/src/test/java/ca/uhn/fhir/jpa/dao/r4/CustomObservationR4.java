@@ -29,20 +29,19 @@ import org.hl7.fhir.r4.model.StringType;
 @ResourceDef(name = "Observation", profile = CustomObservationR4.PROFILE)
 public class CustomObservationR4 extends Observation {
 
-	public static final String PROFILE = "http://custom_ObservationR4";
-	
-	private static final long serialVersionUID = 1L;
+    public static final String PROFILE = "http://custom_ObservationR4";
 
-	@Extension(definedLocally = false, isModifier = false, url = "http://eyeColour")
-	@Child(name = "eyeColour")
-	private StringType myEyeColour;
+    private static final long serialVersionUID = 1L;
 
-	public StringType getEyeColour() {
-		return myEyeColour;
-	}
+    @Extension(definedLocally = false, isModifier = false, url = "http://eyeColour")
+    @Child(name = "eyeColour")
+    private StringType myEyeColour;
 
-	public void setEyeColour(StringType theEyeColour) {
-		myEyeColour = theEyeColour;
-	}
-	
+    public StringType getEyeColour() {
+        return myEyeColour;
+    }
+
+    public void setEyeColour(StringType theEyeColour) {
+        myEyeColour = theEyeColour;
+    }
 }

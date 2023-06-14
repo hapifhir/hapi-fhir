@@ -23,15 +23,12 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 
 public class QuantityNormalizedPredicateBuilder extends BaseQuantityPredicateBuilder {
 
-	/**
-	 * Constructor
-	 */
-	public QuantityNormalizedPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_QUANTITY_NRML"));
-		
-		myColumnHashIdentitySystemUnits = getTable().addColumn("HASH_IDENTITY_SYS_UNITS");
-		myColumnHashIdentityUnits = getTable().addColumn("HASH_IDENTITY_AND_UNITS");
-		myColumnValue = getTable().addColumn("SP_VALUE");
-	}
+    /** Constructor */
+    public QuantityNormalizedPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+        super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_QUANTITY_NRML"));
 
+        myColumnHashIdentitySystemUnits = getTable().addColumn("HASH_IDENTITY_SYS_UNITS");
+        myColumnHashIdentityUnits = getTable().addColumn("HASH_IDENTITY_AND_UNITS");
+        myColumnValue = getTable().addColumn("SP_VALUE");
+    }
 }

@@ -19,95 +19,111 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Set;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
-	private Integer myIdParameterIndex;
+    private Integer myIdParameterIndex;
 
-	public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, Update.class, theProvider);
+    public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+        super(theMethod, theContext, Update.class, theProvider);
 
-		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
-	}
+        myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
+    }
 
+    @Override
+    protected BaseHttpClientInvocation createClientInvocation(
+            Object[] theArgs, IBaseResource theResource) {
+        IIdType idDt = (IIdType) theArgs[myIdParameterIndex];
+        if (idDt == null) {
+            throw new NullPointerException(Msg.code(1447) + "ID can not be null");
+        }
 
-	@Override
-	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IBaseResource theResource) {
-		IIdType idDt = (IIdType) theArgs[myIdParameterIndex];
-		if (idDt == null) {
-			throw new NullPointerException(Msg.code(1447) + "ID can not be null");
-		}
+        FhirContext context = getContext();
 
-		FhirContext context = getContext();
+        HttpPutClientInvocation retVal =
+                MethodUtil.createUpdateInvocation(theResource, null, idDt, context);
 
-		HttpPutClientInvocation retVal = MethodUtil.createUpdateInvocation(theResource, null, idDt, context);
+        for (int idx = 0; idx < theArgs.length; idx++) {
+            IParameter nextParam = getParameters().get(idx);
+            nextParam.translateClientArgumentIntoQueryArgument(
+                    getContext(), theArgs[idx], null, null);
+        }
 
-		for (int idx = 0; idx < theArgs.length; idx++) {
-			IParameter nextParam = getParameters().get(idx);
-			nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, null);
-		}
+        return retVal;
+    }
 
-		return retVal;
-	}
+    @Override
+    protected String getMatchingOperation() {
+        return null;
+    }
 
-	@Override
-	protected String getMatchingOperation() {
-		return null;
-	}
+    @Override
+    public RestOperationTypeEnum getRestOperationType() {
+        return RestOperationTypeEnum.UPDATE;
+    }
 
-	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return RestOperationTypeEnum.UPDATE;
-	}
+    /*
+     * @Override public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) { if
+     * (super.incomingServerRequestMatchesMethod(theRequest)) { if (myVersionIdParameterIndex != null) { if
+     * (theRequest.getVersionId() == null) { return false; } } else { if (theRequest.getVersionId() != null) { return
+     * false; } } return true; } else { return false; } }
+     */
 
-	/*
-	 * @Override public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) { if
-	 * (super.incomingServerRequestMatchesMethod(theRequest)) { if (myVersionIdParameterIndex != null) { if
-	 * (theRequest.getVersionId() == null) { return false; } } else { if (theRequest.getVersionId() != null) { return
-	 * false; } } return true; } else { return false; } }
-	 */
+    @Override
+    protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
+        return Collections.singleton(RequestTypeEnum.PUT);
+    }
 
-	@Override
-	protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
-		return Collections.singleton(RequestTypeEnum.PUT);
-	}
-
-	@Override
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
-		if (isBlank(theMatchUrl)) {
-			if (isBlank(theUrlId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
-				throw new InvalidRequestException(Msg.code(1448) + msg);
-			}
-			if (isBlank(theResourceId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
-				throw new InvalidRequestException(Msg.code(1449) + msg);
-			}
-			if (!theResourceId.equals(theUrlId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
-				throw new InvalidRequestException(Msg.code(1450) + msg);
-			}
-		} else {
-			theResource.setId((IIdType)null);
-		}
-		
-	}
+    @Override
+    protected void validateResourceIdAndUrlIdForNonConditionalOperation(
+            IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
+        if (isBlank(theMatchUrl)) {
+            if (isBlank(theUrlId)) {
+                String msg =
+                        getContext()
+                                .getLocalizer()
+                                .getMessage(
+                                        BaseOutcomeReturningMethodBindingWithResourceParam.class,
+                                        "noIdInUrlForUpdate");
+                throw new InvalidRequestException(Msg.code(1448) + msg);
+            }
+            if (isBlank(theResourceId)) {
+                String msg =
+                        getContext()
+                                .getLocalizer()
+                                .getMessage(
+                                        BaseOutcomeReturningMethodBindingWithResourceParam.class,
+                                        "noIdInBodyForUpdate");
+                throw new InvalidRequestException(Msg.code(1449) + msg);
+            }
+            if (!theResourceId.equals(theUrlId)) {
+                String msg =
+                        getContext()
+                                .getLocalizer()
+                                .getMessage(
+                                        BaseOutcomeReturningMethodBindingWithResourceParam.class,
+                                        "incorrectIdForUpdate",
+                                        theResourceId,
+                                        theUrlId);
+                throw new InvalidRequestException(Msg.code(1450) + msg);
+            }
+        } else {
+            theResource.setId((IIdType) null);
+        }
+    }
 }

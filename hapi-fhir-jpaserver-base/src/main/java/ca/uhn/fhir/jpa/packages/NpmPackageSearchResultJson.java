@@ -23,129 +23,152 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Schema(description = "Represents an NPM package search response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+        creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class NpmPackageSearchResultJson {
 
-	@JsonProperty("objects")
-	private List<ObjectElement> myObjects;
-	@JsonProperty("total")
-	private int myTotal;
+    @JsonProperty("objects")
+    private List<ObjectElement> myObjects;
 
-	public List<ObjectElement> getObjects() {
-		if (myObjects == null) {
-			myObjects = new ArrayList<>();
-		}
-		return myObjects;
-	}
+    @JsonProperty("total")
+    private int myTotal;
 
-	public ObjectElement addObject() {
-		ObjectElement object = new ObjectElement();
-		getObjects().add(object);
-		return object;
-	}
+    public List<ObjectElement> getObjects() {
+        if (myObjects == null) {
+            myObjects = new ArrayList<>();
+        }
+        return myObjects;
+    }
 
-	public int getTotal() {
-		return myTotal;
-	}
+    public ObjectElement addObject() {
+        ObjectElement object = new ObjectElement();
+        getObjects().add(object);
+        return object;
+    }
 
-	public void setTotal(int theTotal) {
-		myTotal = theTotal;
-	}
+    public int getTotal() {
+        return myTotal;
+    }
 
-	public boolean hasPackageWithId(String thePackageId) {
-		return getObjects().stream().anyMatch(t -> t.getPackage().getName().equals(thePackageId));
-	}
+    public void setTotal(int theTotal) {
+        myTotal = theTotal;
+    }
 
-	public Package getPackageWithId(String thePackageId) {
-		return getObjects().stream().map(t -> t.getPackage()).filter(t -> t.getName().equals(thePackageId)).findFirst().orElseThrow(() -> new IllegalArgumentException());
-	}
+    public boolean hasPackageWithId(String thePackageId) {
+        return getObjects().stream().anyMatch(t -> t.getPackage().getName().equals(thePackageId));
+    }
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-	public static class ObjectElement {
+    public Package getPackageWithId(String thePackageId) {
+        return getObjects().stream()
+                .map(t -> t.getPackage())
+                .filter(t -> t.getName().equals(thePackageId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException());
+    }
 
-		@JsonProperty("package")
-		private Package myPackage;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonAutoDetect(
+            creatorVisibility = JsonAutoDetect.Visibility.NONE,
+            fieldVisibility = JsonAutoDetect.Visibility.NONE,
+            getterVisibility = JsonAutoDetect.Visibility.NONE,
+            isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+            setterVisibility = JsonAutoDetect.Visibility.NONE)
+    public static class ObjectElement {
 
-		public Package getPackage() {
-			if (myPackage == null) {
-				myPackage = new Package();
-			}
-			return myPackage;
-		}
-	}
+        @JsonProperty("package")
+        private Package myPackage;
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-	public static class Package {
+        public Package getPackage() {
+            if (myPackage == null) {
+                myPackage = new Package();
+            }
+            return myPackage;
+        }
+    }
 
-		@JsonProperty("name")
-		private String myName;
-		@JsonProperty("version")
-		private String myVersion;
-		@JsonProperty("description")
-		private String myDescription;
-		@JsonProperty("fhirVersion")
-		private List<String> myFhirVersion;
-		@Schema(description = "The size of this package in bytes", example = "1000")
-		@JsonProperty("_bytes")
-		private long myBytes;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonAutoDetect(
+            creatorVisibility = JsonAutoDetect.Visibility.NONE,
+            fieldVisibility = JsonAutoDetect.Visibility.NONE,
+            getterVisibility = JsonAutoDetect.Visibility.NONE,
+            isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+            setterVisibility = JsonAutoDetect.Visibility.NONE)
+    public static class Package {
 
-		public long getBytes() {
-			return myBytes;
-		}
+        @JsonProperty("name")
+        private String myName;
 
-		public Package setBytes(long theBytes) {
-			myBytes = theBytes;
-			return this;
-		}
+        @JsonProperty("version")
+        private String myVersion;
 
-		public String getName() {
-			return myName;
-		}
+        @JsonProperty("description")
+        private String myDescription;
 
-		public Package setName(String theName) {
-			myName = theName;
-			return this;
-		}
+        @JsonProperty("fhirVersion")
+        private List<String> myFhirVersion;
 
-		public String getDescription() {
-			return myDescription;
-		}
+        @Schema(description = "The size of this package in bytes", example = "1000")
+        @JsonProperty("_bytes")
+        private long myBytes;
 
-		public Package setDescription(String theDescription) {
-			myDescription = theDescription;
-			return this;
-		}
+        public long getBytes() {
+            return myBytes;
+        }
 
-		public List<String> getFhirVersion() {
-			if (myFhirVersion == null) {
-				myFhirVersion = new ArrayList<>();
-			}
-			return myFhirVersion;
-		}
+        public Package setBytes(long theBytes) {
+            myBytes = theBytes;
+            return this;
+        }
 
-		public String getVersion() {
-			return myVersion;
-		}
+        public String getName() {
+            return myName;
+        }
 
-		public Package setVersion(String theVersion) {
-			myVersion = theVersion;
-			return this;
-		}
+        public Package setName(String theName) {
+            myName = theName;
+            return this;
+        }
 
-		public Package addFhirVersion(String theFhirVersionId) {
-			if (!getFhirVersion().contains(theFhirVersionId)) {
-				getFhirVersion().add(theFhirVersionId);
-				getFhirVersion().sort(PackageVersionComparator.INSTANCE);
-			}
-			return this;
-		}
-	}
+        public String getDescription() {
+            return myDescription;
+        }
+
+        public Package setDescription(String theDescription) {
+            myDescription = theDescription;
+            return this;
+        }
+
+        public List<String> getFhirVersion() {
+            if (myFhirVersion == null) {
+                myFhirVersion = new ArrayList<>();
+            }
+            return myFhirVersion;
+        }
+
+        public String getVersion() {
+            return myVersion;
+        }
+
+        public Package setVersion(String theVersion) {
+            myVersion = theVersion;
+            return this;
+        }
+
+        public Package addFhirVersion(String theFhirVersionId) {
+            if (!getFhirVersion().contains(theFhirVersionId)) {
+                getFhirVersion().add(theFhirVersionId);
+                getFhirVersion().sort(PackageVersionComparator.INSTANCE);
+            }
+            return this;
+        }
+    }
 }

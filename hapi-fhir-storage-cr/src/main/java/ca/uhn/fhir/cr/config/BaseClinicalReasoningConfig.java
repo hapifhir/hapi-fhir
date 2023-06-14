@@ -40,6 +40,11 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -57,7 +62,6 @@ import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
@@ -76,236 +80,272 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
-
-
 @Configuration
 @Import({AdapterConfiguration.class, BaseRepositoryConfig.class})
 public abstract class BaseClinicalReasoningConfig {
 
-	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
+    private static final Logger ourLogger =
+            LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
 
-   @Bean
-	EvaluationSettings evaluationSettings(CqlOptions theCqlOptions, Map<ModelIdentifier, Model> theGlobalModelCache, Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> theGlobalLibraryCache) {
-		var evaluationSettings = new EvaluationSettings();
-		evaluationSettings.setCqlOptions(theCqlOptions);
-		evaluationSettings.setModelCache(theGlobalModelCache);
-		evaluationSettings.setLibraryCache(theGlobalLibraryCache);
+    @Bean
+    EvaluationSettings evaluationSettings(
+            CqlOptions theCqlOptions,
+            Map<ModelIdentifier, Model> theGlobalModelCache,
+            Map<
+                            org.cqframework.cql.elm.execution.VersionedIdentifier,
+                            org.cqframework.cql.elm.execution.Library>
+                    theGlobalLibraryCache) {
+        var evaluationSettings = new EvaluationSettings();
+        evaluationSettings.setCqlOptions(theCqlOptions);
+        evaluationSettings.setModelCache(theGlobalModelCache);
+        evaluationSettings.setLibraryCache(theGlobalLibraryCache);
 
-		return evaluationSettings;
-	}
-	@Bean
-	CrProviderFactory cqlProviderFactory() {
-		return new CrProviderFactory();
-	}
+        return evaluationSettings;
+    }
 
-	@Bean
-	CrProviderLoader cqlProviderLoader(FhirContext theFhirContext, ResourceProviderFactory theResourceProviderFactory, CrProviderFactory theCqlProviderFactory) {
-		return new CrProviderLoader(theFhirContext, theResourceProviderFactory, theCqlProviderFactory);
-	}
+    @Bean
+    CrProviderFactory cqlProviderFactory() {
+        return new CrProviderFactory();
+    }
 
-	@Bean
-	public CrProperties crProperties() {
-		return new CrProperties();
-	}
+    @Bean
+    CrProviderLoader cqlProviderLoader(
+            FhirContext theFhirContext,
+            ResourceProviderFactory theResourceProviderFactory,
+            CrProviderFactory theCqlProviderFactory) {
+        return new CrProviderLoader(
+                theFhirContext, theResourceProviderFactory, theCqlProviderFactory);
+    }
 
-	@Bean
-	public CrProperties.CqlProperties cqlProperties(CrProperties theCrProperties) {
-		return theCrProperties.getCqlProperties();
-	}
+    @Bean
+    public CrProperties crProperties() {
+        return new CrProperties();
+    }
 
-	@Bean
-	public CrProperties.MeasureProperties measureProperties(CrProperties theCrProperties) {
-		return theCrProperties.getMeasureProperties();
-	}
+    @Bean
+    public CrProperties.CqlProperties cqlProperties(CrProperties theCrProperties) {
+        return theCrProperties.getCqlProperties();
+    }
 
-	@Bean
-	public MeasureEvaluationOptions measureEvaluationOptions(CrProperties theCrProperties) {
-		return theCrProperties.getMeasureProperties().getMeasureEvaluationOptions();
-	}
+    @Bean
+    public CrProperties.MeasureProperties measureProperties(CrProperties theCrProperties) {
+        return theCrProperties.getMeasureProperties();
+    }
 
-	@Bean
-	public CqlOptions cqlOptions(CrProperties theCrProperties) {
-		return theCrProperties.getCqlProperties().getCqlOptions();
-	}
+    @Bean
+    public MeasureEvaluationOptions measureEvaluationOptions(CrProperties theCrProperties) {
+        return theCrProperties.getMeasureProperties().getMeasureEvaluationOptions();
+    }
 
-	@Bean
-	public CqlExceptionHandlingInterceptor cqlExceptionHandlingInterceptor() {
-		return new CqlExceptionHandlingInterceptor();
-	}
+    @Bean
+    public CqlOptions cqlOptions(CrProperties theCrProperties) {
+        return theCrProperties.getCqlProperties().getCqlOptions();
+    }
 
-	@Bean
-	public CqlTranslatorOptions cqlTranslatorOptions(FhirContext theFhirContext, CrProperties.CqlProperties theCqlProperties) {
-		CqlTranslatorOptions options = theCqlProperties.getCqlOptions().getCqlTranslatorOptions();
+    @Bean
+    public CqlExceptionHandlingInterceptor cqlExceptionHandlingInterceptor() {
+        return new CqlExceptionHandlingInterceptor();
+    }
 
-		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)
-			&& (options.getCompatibilityLevel().equals("1.5") || options.getCompatibilityLevel().equals("1.4"))) {
-			ourLogger.warn("{} {} {}",
-				"This server is configured to use CQL version > 1.4 and FHIR version <= DSTU3.",
-				"Most available CQL content for DSTU3 and below is for CQL versions 1.3.",
-				"If your CQL content causes translation errors, try setting the CQL compatibility level to 1.3");
-		}
+    @Bean
+    public CqlTranslatorOptions cqlTranslatorOptions(
+            FhirContext theFhirContext, CrProperties.CqlProperties theCqlProperties) {
+        CqlTranslatorOptions options = theCqlProperties.getCqlOptions().getCqlTranslatorOptions();
 
-		return options;
-	}
+        if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)
+                && (options.getCompatibilityLevel().equals("1.5")
+                        || options.getCompatibilityLevel().equals("1.4"))) {
+            ourLogger.warn(
+                    "{} {} {}",
+                    "This server is configured to use CQL version > 1.4 and FHIR version <= DSTU3.",
+                    "Most available CQL content for DSTU3 and below is for CQL versions 1.3.",
+                    "If your CQL content causes translation errors, try setting the CQL"
+                            + " compatibility level to 1.3");
+        }
 
-	@Bean
-	@Scope("prototype")
-	public ModelManager modelManager(
-		Map<ModelIdentifier, Model> theGlobalModelCache) {
-		return new ModelManager(theGlobalModelCache);
-	}
+        return options;
+    }
 
-	@Bean
-	public SearchParameterResolver searchParameterResolver(FhirContext theFhirContext) {
-		return new SearchParameterResolver(theFhirContext);
-	}
+    @Bean
+    @Scope("prototype")
+    public ModelManager modelManager(Map<ModelIdentifier, Model> theGlobalModelCache) {
+        return new ModelManager(theGlobalModelCache);
+    }
 
-	@Bean
-	IFhirDalFactory fhirDalFactory(DaoRegistry theDaoRegistry) {
-		return rd -> new HapiFhirDal(theDaoRegistry, rd);
-	}
+    @Bean
+    public SearchParameterResolver searchParameterResolver(FhirContext theFhirContext) {
+        return new SearchParameterResolver(theFhirContext);
+    }
 
-	@Bean
-	IDataProviderFactory dataProviderFactory(ModelResolver theModelResolver, DaoRegistry theDaoRegistry,
-														  SearchParameterResolver theSearchParameterResolver) {
-		return (rd, t) -> {
-			HapiFhirRetrieveProvider provider = new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, rd);
-			if (t != null) {
-				provider.setTerminologyProvider(t);
-				provider.setExpandValueSets(true);
-				provider.setMaxCodesPerQuery(500);
-				provider.setModelResolver(theModelResolver);
-			}
-			return new CompositeDataProvider(theModelResolver, provider);
-		};
-	}
+    @Bean
+    IFhirDalFactory fhirDalFactory(DaoRegistry theDaoRegistry) {
+        return rd -> new HapiFhirDal(theDaoRegistry, rd);
+    }
 
-	@Bean
-	org.opencds.cqf.cql.evaluator.builder.DataProviderFactory builderDataProviderFactory(FhirContext theFhirContext, ModelResolver theModelResolver) {
-		return new org.opencds.cqf.cql.evaluator.builder.DataProviderFactory() {
-			@Override
-			public DataProviderComponents create(EndpointInfo theEndpointInfo) {
-				// to do implement endpoint
-				return null;
-			}
+    @Bean
+    IDataProviderFactory dataProviderFactory(
+            ModelResolver theModelResolver,
+            DaoRegistry theDaoRegistry,
+            SearchParameterResolver theSearchParameterResolver) {
+        return (rd, t) -> {
+            HapiFhirRetrieveProvider provider =
+                    new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, rd);
+            if (t != null) {
+                provider.setTerminologyProvider(t);
+                provider.setExpandValueSets(true);
+                provider.setMaxCodesPerQuery(500);
+                provider.setModelResolver(theModelResolver);
+            }
+            return new CompositeDataProvider(theModelResolver, provider);
+        };
+    }
 
-			@Override
-			public DataProviderComponents create(IBaseBundle theDataBundle) {
-				return new DataProviderComponents(Constants.FHIR_MODEL_URI, theModelResolver,
-					new BundleRetrieveProvider(theFhirContext, theDataBundle));
-			}
-		};
+    @Bean
+    org.opencds.cqf.cql.evaluator.builder.DataProviderFactory builderDataProviderFactory(
+            FhirContext theFhirContext, ModelResolver theModelResolver) {
+        return new org.opencds.cqf.cql.evaluator.builder.DataProviderFactory() {
+            @Override
+            public DataProviderComponents create(EndpointInfo theEndpointInfo) {
+                // to do implement endpoint
+                return null;
+            }
 
-	}
+            @Override
+            public DataProviderComponents create(IBaseBundle theDataBundle) {
+                return new DataProviderComponents(
+                        Constants.FHIR_MODEL_URI,
+                        theModelResolver,
+                        new BundleRetrieveProvider(theFhirContext, theDataBundle));
+            }
+        };
+    }
 
-	@Bean
-	public HapiFhirRetrieveProvider fhirRetrieveProvider(DaoRegistry theDaoRegistry,
-																		  SearchParameterResolver theSearchParameterResolver) {
-		return new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver);
-	}
+    @Bean
+    public HapiFhirRetrieveProvider fhirRetrieveProvider(
+            DaoRegistry theDaoRegistry, SearchParameterResolver theSearchParameterResolver) {
+        return new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver);
+    }
 
-	@Bean
-	public ITerminologyProviderFactory terminologyProviderFactory(
-		IValidationSupport theValidationSupport,
-		Map<org.cqframework.cql.elm.execution.VersionedIdentifier, List<Code>> theGlobalCodeCache) {
-		return rd -> new HapiTerminologyProvider(theValidationSupport, theGlobalCodeCache,
-			rd);
-	}
+    @Bean
+    public ITerminologyProviderFactory terminologyProviderFactory(
+            IValidationSupport theValidationSupport,
+            Map<org.cqframework.cql.elm.execution.VersionedIdentifier, List<Code>>
+                    theGlobalCodeCache) {
+        return rd -> new HapiTerminologyProvider(theValidationSupport, theGlobalCodeCache, rd);
+    }
 
-	@Bean
-	ILibrarySourceProviderFactory librarySourceProviderFactory(DaoRegistry theDaoRegistry) {
-		return rd -> new HapiLibrarySourceProvider(theDaoRegistry, rd);
-	}
+    @Bean
+    ILibrarySourceProviderFactory librarySourceProviderFactory(DaoRegistry theDaoRegistry) {
+        return rd -> new HapiLibrarySourceProvider(theDaoRegistry, rd);
+    }
 
-	@Bean
-	@Scope("prototype")
-	ILibraryLoaderFactory libraryLoaderFactory(
-		Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> theGlobalLibraryCache,
-		ModelManager theModelManager, CqlTranslatorOptions theCqlTranslatorOptions, CrProperties.CqlProperties theCqlProperties) {
-		return lcp -> {
+    @Bean
+    @Scope("prototype")
+    ILibraryLoaderFactory libraryLoaderFactory(
+            Map<
+                            org.cqframework.cql.elm.execution.VersionedIdentifier,
+                            org.cqframework.cql.elm.execution.Library>
+                    theGlobalLibraryCache,
+            ModelManager theModelManager,
+            CqlTranslatorOptions theCqlTranslatorOptions,
+            CrProperties.CqlProperties theCqlProperties) {
+        return lcp -> {
+            if (theCqlProperties.getCqlOptions().useEmbeddedLibraries()) {
+                lcp.add(new FhirLibrarySourceProvider());
+            }
 
-			if (theCqlProperties.getCqlOptions().useEmbeddedLibraries()) {
-				lcp.add(new FhirLibrarySourceProvider());
-			}
+            return new TranslatingLibraryLoader(
+                    theModelManager, lcp, theCqlTranslatorOptions, theGlobalLibraryCache);
+        };
+    }
 
-			return new TranslatingLibraryLoader(theModelManager, lcp, theCqlTranslatorOptions, theGlobalLibraryCache);
-		};
-	}
+    // TODO: Use something like caffeine caching for this so that growth is limited.
+    @Bean
+    public Map<
+                    org.cqframework.cql.elm.execution.VersionedIdentifier,
+                    org.cqframework.cql.elm.execution.Library>
+            globalLibraryCache() {
+        return new ConcurrentHashMap<>();
+    }
 
-	// TODO: Use something like caffeine caching for this so that growth is limited.
-	@Bean
-	public Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> globalLibraryCache() {
-		return new ConcurrentHashMap<>();
-	}
+    @Bean
+    public Map<org.cqframework.cql.elm.execution.VersionedIdentifier, List<Code>>
+            globalCodeCache() {
+        return new ConcurrentHashMap<>();
+    }
 
-	@Bean
-	public Map<org.cqframework.cql.elm.execution.VersionedIdentifier, List<Code>> globalCodeCache() {
-		return new ConcurrentHashMap<>();
-	}
+    @Bean
+    public Map<ModelIdentifier, Model> globalModelCache() {
+        return new ConcurrentHashMap<>();
+    }
 
-	@Bean
-	public Map<ModelIdentifier, Model> globalModelCache() {
-		return new ConcurrentHashMap<>();
-	}
+    @Bean
+    @Primary
+    public ElmCacheResourceChangeListener elmCacheResourceChangeListener(
+            IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
+            DaoRegistry theDaoRegistry,
+            Map<
+                            org.cqframework.cql.elm.execution.VersionedIdentifier,
+                            org.cqframework.cql.elm.execution.Library>
+                    theGlobalLibraryCache) {
+        ElmCacheResourceChangeListener listener =
+                new ElmCacheResourceChangeListener(theDaoRegistry, theGlobalLibraryCache);
+        theResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+                "Library", SearchParameterMap.newSynchronous(), listener, 1000);
+        return listener;
+    }
 
-	@Bean
-	@Primary
-	public ElmCacheResourceChangeListener elmCacheResourceChangeListener(
-		IResourceChangeListenerRegistry theResourceChangeListenerRegistry, DaoRegistry theDaoRegistry,
-		Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> theGlobalLibraryCache) {
-		ElmCacheResourceChangeListener listener = new ElmCacheResourceChangeListener(theDaoRegistry, theGlobalLibraryCache);
-		theResourceChangeListenerRegistry.registerResourceResourceChangeListener("Library",
-			SearchParameterMap.newSynchronous(), listener, 1000);
-		return listener;
-	}
+    @Bean
+    @Primary
+    public CodeCacheResourceChangeListener codeCacheResourceChangeListener(
+            IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
+            DaoRegistry theDaoRegistry,
+            Map<org.cqframework.cql.elm.execution.VersionedIdentifier, List<Code>>
+                    theGlobalCodeCache) {
+        CodeCacheResourceChangeListener listener =
+                new CodeCacheResourceChangeListener(theDaoRegistry, theGlobalCodeCache);
+        theResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+                "ValueSet", SearchParameterMap.newSynchronous(), listener, 1000);
+        return listener;
+    }
 
-	@Bean
-	@Primary
-	public CodeCacheResourceChangeListener codeCacheResourceChangeListener(
-		IResourceChangeListenerRegistry theResourceChangeListenerRegistry, DaoRegistry theDaoRegistry,
-		Map<org.cqframework.cql.elm.execution.VersionedIdentifier, List<Code>> theGlobalCodeCache) {
-		CodeCacheResourceChangeListener listener = new CodeCacheResourceChangeListener(theDaoRegistry, theGlobalCodeCache);
-		theResourceChangeListenerRegistry.registerResourceResourceChangeListener("ValueSet",
-			SearchParameterMap.newSynchronous(), listener, 1000);
-		return listener;
-	}
+    @Bean
+    public ModelResolver modelResolver(FhirContext theFhirContext) {
+        switch (theFhirContext.getVersion().getVersion()) {
+            case R4:
+                return new CachingModelResolverDecorator(new R4FhirModelResolver());
+            case DSTU3:
+                return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
+            default:
+                throw new IllegalStateException(
+                        Msg.code(2224)
+                                + "CQL support not yet implemented for this FHIR version. Please"
+                                + " change versions or disable the CQL plugin.");
+        }
+    }
 
-	@Bean
-	public ModelResolver modelResolver(FhirContext theFhirContext) {
-		switch (theFhirContext.getVersion().getVersion()) {
-			case R4:
-				return new CachingModelResolverDecorator(new R4FhirModelResolver());
-			case DSTU3:
-				return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
-			default:
-				throw new IllegalStateException(Msg.code(2224) + "CQL support not yet implemented for this FHIR version. Please change versions or disable the CQL plugin.");
-		}
-	}
+    @Bean
+    public LibraryVersionSelector libraryVersionSelector(AdapterFactory theAdapterFactory) {
+        return new LibraryVersionSelector(theAdapterFactory);
+    }
 
-	@Bean
-	public LibraryVersionSelector libraryVersionSelector(AdapterFactory theAdapterFactory) {
-		return new LibraryVersionSelector(theAdapterFactory);
-	}
+    @Bean
+    public Executor cqlExecutor() {
+        CqlForkJoinWorkerThreadFactory factory = new CqlForkJoinWorkerThreadFactory();
+        ForkJoinPool myCommonPool =
+                new ForkJoinPool(
+                        Math.min(32767, Runtime.getRuntime().availableProcessors()),
+                        factory,
+                        null,
+                        false);
 
-	@Bean
-	public Executor cqlExecutor() {
-		CqlForkJoinWorkerThreadFactory factory = new CqlForkJoinWorkerThreadFactory();
-		ForkJoinPool myCommonPool = new ForkJoinPool(Math.min(32767, Runtime.getRuntime().availableProcessors()),
-			factory,
-			null, false);
+        return new DelegatingSecurityContextExecutor(
+                myCommonPool, SecurityContextHolder.getContext());
+    }
 
-		return new DelegatingSecurityContextExecutor(myCommonPool,
-			SecurityContextHolder.getContext());
-	}
-
-	@Bean
-	public PreExpandedValidationSupportLoader preExpandedValidationSupportLoader(ValidationSupportChain theSupportChain,
-																										  FhirContext theFhirContext) {
-		return new PreExpandedValidationSupportLoader(theSupportChain, theFhirContext);
-	}
+    @Bean
+    public PreExpandedValidationSupportLoader preExpandedValidationSupportLoader(
+            ValidationSupportChain theSupportChain, FhirContext theFhirContext) {
+        return new PreExpandedValidationSupportLoader(theSupportChain, theFhirContext);
+    }
 }

@@ -20,42 +20,44 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-
+import java.io.Serializable;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
-import java.io.Serializable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 /**
- * This is a copy of (@link {@link BasePartitionable} used ONLY for entities that are audited by Hibernate Envers.
- * <p>
- * The reason for this is Envers will generate _AUD table schema for all auditable tables, even those marked as {@link NotAudited}.
- * <p>
- * Should we make more entities envers auditable in the future, they would need to extend this class and not {@link BasePartitionable}.
+ * This is a copy of (@link {@link BasePartitionable} used ONLY for entities that are audited by
+ * Hibernate Envers.
+ *
+ * <p>The reason for this is Envers will generate _AUD table schema for all auditable tables, even
+ * those marked as {@link NotAudited}.
+ *
+ * <p>Should we make more entities envers auditable in the future, they would need to extend this
+ * class and not {@link BasePartitionable}.
  */
 @Audited
 @MappedSuperclass
 public class AuditableBasePartitionable implements Serializable {
-	@Embedded
-	private PartitionablePartitionId myPartitionId;
+    @Embedded private PartitionablePartitionId myPartitionId;
 
-	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
-	@SuppressWarnings("unused")
-	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
-	private Integer myPartitionIdValue;
+    /** This is here to support queries only, do not set this field directly */
+    @SuppressWarnings("unused")
+    @Column(
+            name = PartitionablePartitionId.PARTITION_ID,
+            insertable = false,
+            updatable = false,
+            nullable = true)
+    private Integer myPartitionIdValue;
 
-	@Nullable
-	public PartitionablePartitionId getPartitionId() {
-		return myPartitionId;
-	}
+    @Nullable
+    public PartitionablePartitionId getPartitionId() {
+        return myPartitionId;
+    }
 
-	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
-	}
-
+    public void setPartitionId(PartitionablePartitionId thePartitionId) {
+        myPartitionId = thePartitionId;
+    }
 }

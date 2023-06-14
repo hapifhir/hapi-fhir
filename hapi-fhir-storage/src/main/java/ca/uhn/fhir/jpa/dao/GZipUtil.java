@@ -21,38 +21,36 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
-import org.apache.commons.io.IOUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import org.apache.commons.io.IOUtils;
 
 public class GZipUtil {
 
-	public static String decompress(byte[] theResource) {
-		GZIPInputStream is;
-		try {
-			is = new GZIPInputStream(new ByteArrayInputStream(theResource));
-			return IOUtils.toString(is, "UTF-8");
-		} catch (IOException e) {
-			throw new DataFormatException(Msg.code(516) + "Failed to decompress contents", e);
-		}
-	}
+    public static String decompress(byte[] theResource) {
+        GZIPInputStream is;
+        try {
+            is = new GZIPInputStream(new ByteArrayInputStream(theResource));
+            return IOUtils.toString(is, "UTF-8");
+        } catch (IOException e) {
+            throw new DataFormatException(Msg.code(516) + "Failed to decompress contents", e);
+        }
+    }
 
-	public static byte[] compress(String theEncoded) {
-		try {
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			GZIPOutputStream gos = new GZIPOutputStream(os);
-			IOUtils.write(theEncoded, gos, "UTF-8");
-			gos.close();
-			os.close();
-			byte[] retVal = os.toByteArray();
-			return retVal;
-		} catch (IOException e) {
-			throw new DataFormatException(Msg.code(517) + "Compress contents", e);
-		}
-	}
-
+    public static byte[] compress(String theEncoded) {
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            GZIPOutputStream gos = new GZIPOutputStream(os);
+            IOUtils.write(theEncoded, gos, "UTF-8");
+            gos.close();
+            os.close();
+            byte[] retVal = os.toByteArray();
+            return retVal;
+        } catch (IOException e) {
+            throw new DataFormatException(Msg.code(517) + "Compress contents", e);
+        }
+    }
 }

@@ -22,31 +22,26 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 
 public abstract class BaseChannelSettings implements IChannelSettings {
-	private boolean myQualifyChannelName = true;
+    private boolean myQualifyChannelName = true;
 
-	private ChannelRetryConfiguration myRetryConfigurationParameters;
+    private ChannelRetryConfiguration myRetryConfigurationParameters;
 
+    /** Default true. Used by IChannelNamer to decide how to qualify the channel name. */
+    @Override
+    public boolean isQualifyChannelName() {
+        return myQualifyChannelName;
+    }
 
-	/**
-	 * Default true.  Used by IChannelNamer to decide how to qualify the channel name.
-	 */
-	@Override
-	public boolean isQualifyChannelName() {
-		return myQualifyChannelName;
-	}
+    /** Default true. Used by IChannelNamer to decide how to qualify the channel name. */
+    public void setQualifyChannelName(boolean theQualifyChannelName) {
+        myQualifyChannelName = theQualifyChannelName;
+    }
 
-	/**
-	 * Default true.  Used by IChannelNamer to decide how to qualify the channel name.
-	 */
-	public void setQualifyChannelName(boolean theQualifyChannelName) {
-		myQualifyChannelName = theQualifyChannelName;
-	}
+    public void setRetryConfiguration(ChannelRetryConfiguration theParams) {
+        myRetryConfigurationParameters = theParams;
+    }
 
-	public void setRetryConfiguration(ChannelRetryConfiguration theParams) {
-		myRetryConfigurationParameters = theParams;
-	}
-
-	public ChannelRetryConfiguration getRetryConfigurationParameters() {
-		return myRetryConfigurationParameters;
-	}
+    public ChannelRetryConfiguration getRetryConfigurationParameters() {
+        return myRetryConfigurationParameters;
+    }
 }

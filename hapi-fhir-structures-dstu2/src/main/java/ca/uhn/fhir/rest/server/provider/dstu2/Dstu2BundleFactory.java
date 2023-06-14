@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.provider.dstu2;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.IResource;
@@ -37,216 +39,228 @@ import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import javax.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
-	private String myBase;
-	private Bundle myBundle;
-	private FhirContext myContext;
+    private String myBase;
+    private Bundle myBundle;
+    private FhirContext myContext;
 
-	public Dstu2BundleFactory(FhirContext theContext) {
-		myContext = theContext;
-	}
+    public Dstu2BundleFactory(FhirContext theContext) {
+        myContext = theContext;
+    }
 
-	@Override
-	public void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
-		ensureBundle();
+    @Override
+    public void addResourcesToBundle(
+            List<IBaseResource> theResult,
+            BundleTypeEnum theBundleType,
+            String theServerBase,
+            BundleInclusionRule theBundleInclusionRule,
+            Set<Include> theIncludes) {
+        ensureBundle();
 
-		List<IResource> includedResources = new ArrayList<IResource>();
-		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
+        List<IResource> includedResources = new ArrayList<IResource>();
+        Set<IdDt> addedResourceIds = new HashSet<IdDt>();
 
-		for (IBaseResource next : theResult) {
-			if (next.getIdElement().isEmpty() == false) {
-				addedResourceIds.add((IdDt) next.getIdElement());
-			}
-		}
+        for (IBaseResource next : theResult) {
+            if (next.getIdElement().isEmpty() == false) {
+                addedResourceIds.add((IdDt) next.getIdElement());
+            }
+        }
 
-		for (IBaseResource nextBaseRes : theResult) {
-			IResource next = (IResource) nextBaseRes;
+        for (IBaseResource nextBaseRes : theResult) {
+            IResource next = (IResource) nextBaseRes;
 
-			Set<String> containedIds = new HashSet<String>();
-			for (IResource nextContained : next.getContained().getContainedResources()) {
-				if (nextContained.getId().isEmpty() == false) {
-					containedIds.add(nextContained.getId().getValue());
-				}
-			}
+            Set<String> containedIds = new HashSet<String>();
+            for (IResource nextContained : next.getContained().getContainedResources()) {
+                if (nextContained.getId().isEmpty() == false) {
+                    containedIds.add(nextContained.getId().getValue());
+                }
+            }
 
-			List<ResourceReferenceInfo> references = myContext.newTerser().getAllResourceReferences(next);
-			do {
-				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
+            List<ResourceReferenceInfo> references =
+                    myContext.newTerser().getAllResourceReferences(next);
+            do {
+                List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
 
-				for (ResourceReferenceInfo nextRefInfo : references) {
-					if (theBundleInclusionRule != null && !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
-						continue;
-					}
+                for (ResourceReferenceInfo nextRefInfo : references) {
+                    if (theBundleInclusionRule != null
+                            && !theBundleInclusionRule.shouldIncludeReferencedResource(
+                                    nextRefInfo, theIncludes)) {
+                        continue;
+                    }
 
-					IResource nextRes = (IResource) nextRefInfo.getResourceReference().getResource();
-					if (nextRes != null) {
-						if (nextRes.getId().hasIdPart()) {
-							if (containedIds.contains(nextRes.getId().getValue())) {
-								// Don't add contained IDs as top level resources
-								continue;
-							}
+                    IResource nextRes =
+                            (IResource) nextRefInfo.getResourceReference().getResource();
+                    if (nextRes != null) {
+                        if (nextRes.getId().hasIdPart()) {
+                            if (containedIds.contains(nextRes.getId().getValue())) {
+                                // Don't add contained IDs as top level resources
+                                continue;
+                            }
 
-							IdDt id = nextRes.getId();
-							if (id.hasResourceType() == false) {
-								String resName = myContext.getResourceType(nextRes);
-								id = id.withResourceType(resName);
-							}
+                            IdDt id = nextRes.getId();
+                            if (id.hasResourceType() == false) {
+                                String resName = myContext.getResourceType(nextRes);
+                                id = id.withResourceType(resName);
+                            }
 
-							if (!addedResourceIds.contains(id)) {
-								addedResourceIds.add(id);
-								addedResourcesThisPass.add(nextRes);
-							}
+                            if (!addedResourceIds.contains(id)) {
+                                addedResourceIds.add(id);
+                                addedResourcesThisPass.add(nextRes);
+                            }
+                        }
+                    }
+                }
 
-						}
-					}
-				}
+                includedResources.addAll(addedResourcesThisPass);
 
-				includedResources.addAll(addedResourcesThisPass);
+                // Linked resources may themselves have linked resources
+                references = new ArrayList<ResourceReferenceInfo>();
+                for (IResource iResource : addedResourcesThisPass) {
+                    List<ResourceReferenceInfo> newReferences =
+                            myContext.newTerser().getAllResourceReferences(iResource);
+                    references.addAll(newReferences);
+                }
+            } while (references.isEmpty() == false);
 
-				// Linked resources may themselves have linked resources
-				references = new ArrayList<ResourceReferenceInfo>();
-				for (IResource iResource : addedResourcesThisPass) {
-					List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
-					references.addAll(newReferences);
-				}
-			} while (references.isEmpty() == false);
+            Entry entry = myBundle.addEntry().setResource(next);
+            BundleEntryTransactionMethodEnum httpVerb =
+                    ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(next);
+            if (httpVerb != null) {
+                entry.getRequest().getMethodElement().setValueAsString(httpVerb.getCode());
+            }
+            populateBundleEntryFullUrl(next, entry);
 
-			Entry entry = myBundle.addEntry().setResource(next);
-			BundleEntryTransactionMethodEnum httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(next);
-			if (httpVerb != null) {
-				entry.getRequest().getMethodElement().setValueAsString(httpVerb.getCode());
-			}
-			populateBundleEntryFullUrl(next, entry);
+            BundleEntrySearchModeEnum searchMode =
+                    ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next);
+            if (searchMode != null) {
+                entry.getSearch().getModeElement().setValue(searchMode.getCode());
+            }
+        }
 
-			BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next);
-			if (searchMode != null) {
-				entry.getSearch().getModeElement().setValue(searchMode.getCode());
-			}
-		}
+        /*
+         * Actually add the resources to the bundle
+         */
+        for (IResource next : includedResources) {
+            Entry entry = myBundle.addEntry();
+            entry.setResource(next).getSearch().setMode(SearchEntryModeEnum.INCLUDE);
+            populateBundleEntryFullUrl(next, entry);
+        }
+    }
 
-		/*
-		 * Actually add the resources to the bundle
-		 */
-		for (IResource next : includedResources) {
-			Entry entry = myBundle.addEntry();
-			entry.setResource(next).getSearch().setMode(SearchEntryModeEnum.INCLUDE);
-			populateBundleEntryFullUrl(next, entry);
-		}
+    @Override
+    public void addRootPropertiesToBundle(
+            String theId,
+            @Nonnull BundleLinks theBundleLinks,
+            Integer theTotalResults,
+            IPrimitiveType<Date> theLastUpdated) {
+        ensureBundle();
 
-	}
+        myBase = theBundleLinks.serverBase;
 
-	@Override
-	public void addRootPropertiesToBundle(String theId, @Nonnull BundleLinks theBundleLinks, Integer theTotalResults,
-													  IPrimitiveType<Date> theLastUpdated) {
-		ensureBundle();
+        if (myBundle.getIdElement().isEmpty()) {
+            myBundle.setId(theId);
+        }
 
-		myBase = theBundleLinks.serverBase;
+        if (ResourceMetadataKeyEnum.UPDATED.get(myBundle) == null) {
+            ResourceMetadataKeyEnum.UPDATED.put(myBundle, (InstantDt) theLastUpdated);
+        }
 
-		if (myBundle.getIdElement().isEmpty()) {
-			myBundle.setId(theId);
-		}
+        if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theBundleLinks.getSelf())) {
+            myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theBundleLinks.getSelf());
+        }
+        if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theBundleLinks.getNext())) {
+            myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theBundleLinks.getNext());
+        }
+        if (!hasLink(Constants.LINK_PREVIOUS, myBundle) && isNotBlank(theBundleLinks.getPrev())) {
+            myBundle.addLink()
+                    .setRelation(Constants.LINK_PREVIOUS)
+                    .setUrl(theBundleLinks.getPrev());
+        }
 
-		if (ResourceMetadataKeyEnum.UPDATED.get(myBundle) == null) {
-			ResourceMetadataKeyEnum.UPDATED.put(myBundle, (InstantDt) theLastUpdated);
-		}
+        addTotalResultsToBundle(theTotalResults, theBundleLinks.bundleType);
+    }
 
-		if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theBundleLinks.getSelf())) {
-			myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theBundleLinks.getSelf());
-		}
-		if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theBundleLinks.getNext())) {
-			myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theBundleLinks.getNext());
-		}
-		if (!hasLink(Constants.LINK_PREVIOUS, myBundle) && isNotBlank(theBundleLinks.getPrev())) {
-			myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theBundleLinks.getPrev());
-		}
+    @Override
+    public void addTotalResultsToBundle(Integer theTotalResults, BundleTypeEnum theBundleType) {
+        ensureBundle();
 
-		addTotalResultsToBundle(theTotalResults, theBundleLinks.bundleType);
-	}
+        if (myBundle.getId().isEmpty()) {
+            myBundle.setId(UUID.randomUUID().toString());
+        }
 
-	@Override
-	public void addTotalResultsToBundle(Integer theTotalResults, BundleTypeEnum theBundleType) {
-		ensureBundle();
+        if (myBundle.getTypeElement().isEmpty() && theBundleType != null) {
+            myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
+        }
 
-		if (myBundle.getId().isEmpty()) {
-			myBundle.setId(UUID.randomUUID().toString());
-		}
+        if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
+            myBundle.getTotalElement().setValue(theTotalResults);
+        }
+    }
 
-		if (myBundle.getTypeElement().isEmpty() && theBundleType != null) {
-			myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
-		}
+    private void ensureBundle() {
+        if (myBundle == null) {
+            myBundle = new Bundle();
+        }
+    }
 
-		if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
-			myBundle.getTotalElement().setValue(theTotalResults);
-		}
-	}
+    @Override
+    public IResource getResourceBundle() {
+        return myBundle;
+    }
 
-	private void ensureBundle() {
-		if (myBundle == null) {
-			myBundle = new Bundle();
-		}
-	}
+    private boolean hasLink(String theLinkType, Bundle theBundle) {
+        for (Link next : theBundle.getLink()) {
+            if (theLinkType.equals(next.getRelation())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public IResource getResourceBundle() {
-		return myBundle;
-	}
+    @Override
+    public void initializeWithBundleResource(IBaseResource theBundle) {
+        myBundle = (Bundle) theBundle;
+    }
 
-	private boolean hasLink(String theLinkType, Bundle theBundle) {
-		for (Link next : theBundle.getLink()) {
-			if (theLinkType.equals(next.getRelation())) {
-				return true;
-			}
-		}
-		return false;
-	}
+    private void populateBundleEntryFullUrl(IResource next, Entry entry) {
+        if (next.getId().hasBaseUrl()) {
+            entry.setFullUrl(next.getId().toVersionless().getValue());
+        } else {
+            if (isNotBlank(myBase) && next.getId().hasIdPart()) {
+                IdDt id = next.getId().toVersionless();
+                id = id.withServerBase(myBase, myContext.getResourceType(next));
+                entry.setFullUrl(id.getValue());
+            }
+        }
+    }
 
-	@Override
-	public void initializeWithBundleResource(IBaseResource theBundle) {
-		myBundle = (Bundle) theBundle;
-	}
-
-	private void populateBundleEntryFullUrl(IResource next, Entry entry) {
-		if (next.getId().hasBaseUrl()) {
-			entry.setFullUrl(next.getId().toVersionless().getValue());
-		} else {
-			if (isNotBlank(myBase) && next.getId().hasIdPart()) {
-				IdDt id = next.getId().toVersionless();
-				id = id.withServerBase(myBase, myContext.getResourceType(next));
-				entry.setFullUrl(id.getValue());
-			}
-		}
-	}
-
-	@Override
-	public List<IBaseResource> toListOfResources() {
-		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
-		for (Entry next : myBundle.getEntry()) {
-			if (next.getResource() != null) {
-				retVal.add(next.getResource());
-			} else if (next.getResponse().getLocationElement().isEmpty() == false) {
-				IdDt id = new IdDt(next.getResponse().getLocation());
-				String resourceType = id.getResourceType();
-				if (isNotBlank(resourceType)) {
-					IResource res = (IResource) myContext.getResourceDefinition(resourceType).newInstance();
-					res.setId(id);
-					retVal.add(res);
-				}
-			}
-		}
-		return retVal;
-	}
-
+    @Override
+    public List<IBaseResource> toListOfResources() {
+        ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
+        for (Entry next : myBundle.getEntry()) {
+            if (next.getResource() != null) {
+                retVal.add(next.getResource());
+            } else if (next.getResponse().getLocationElement().isEmpty() == false) {
+                IdDt id = new IdDt(next.getResponse().getLocation());
+                String resourceType = id.getResourceType();
+                if (isNotBlank(resourceType)) {
+                    IResource res =
+                            (IResource) myContext.getResourceDefinition(resourceType).newInstance();
+                    res.setId(id);
+                    retVal.add(res);
+                }
+            }
+        }
+        return retVal;
+    }
 }

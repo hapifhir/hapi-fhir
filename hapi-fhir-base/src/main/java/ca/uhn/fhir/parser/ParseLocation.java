@@ -19,47 +19,41 @@
  */
 package ca.uhn.fhir.parser;
 
-import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
-
 import static org.apache.commons.lang3.StringUtils.defaultString;
+
+import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 
 class ParseLocation implements IParseLocation {
 
-	private String myParentElementName;
+    private String myParentElementName;
 
-	/**
-	 * Constructor
-	 */
-	ParseLocation() {
-		super();
-	}
+    /** Constructor */
+    ParseLocation() {
+        super();
+    }
 
-	/**
-	 * Constructor
-	 */
-	ParseLocation(String theParentElementName) {
-		setParentElementName(theParentElementName);
-	}
+    /** Constructor */
+    ParseLocation(String theParentElementName) {
+        setParentElementName(theParentElementName);
+    }
 
-	@Override
-	public String getParentElementName() {
-		return myParentElementName;
-	}
+    @Override
+    public String getParentElementName() {
+        return myParentElementName;
+    }
 
-	ParseLocation setParentElementName(String theParentElementName) {
-		myParentElementName = theParentElementName;
-		return this;
-	}
+    ParseLocation setParentElementName(String theParentElementName) {
+        myParentElementName = theParentElementName;
+        return this;
+    }
 
-	@Override
-	public String toString() {
-		return "[element=\"" + defaultString(myParentElementName) + "\"]";
-	}
+    @Override
+    public String toString() {
+        return "[element=\"" + defaultString(myParentElementName) + "\"]";
+    }
 
-	/**
-	 * Factory method
-	 */
-	static ParseLocation fromElementName(String theChildName) {
-		return new ParseLocation(theChildName);
-	}
+    /** Factory method */
+    static ParseLocation fromElementName(String theChildName) {
+        return new ParseLocation(theChildName);
+    }
 }

@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.partition;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -28,48 +30,44 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
-
 import javax.annotation.Nonnull;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 /**
- * This interceptor uses the request tenant ID (as supplied to the server using
- * {@link ca.uhn.fhir.rest.server.RestfulServer#setTenantIdentificationStrategy(ITenantIdentificationStrategy)}
+ * This interceptor uses the request tenant ID (as supplied to the server using {@link
+ * ca.uhn.fhir.rest.server.RestfulServer#setTenantIdentificationStrategy(ITenantIdentificationStrategy)}
  * to indicate the partition ID. With this interceptor registered, The server treats the tenant name
- * supplied by the {@link ITenantIdentificationStrategy tenant identification strategy} as a partition name.
- * <p>
- * Partition names (aka tenant IDs) must be registered in advance using the partition management operations.
- * </p>
+ * supplied by the {@link ITenantIdentificationStrategy tenant identification strategy} as a
+ * partition name.
+ *
+ * <p>Partition names (aka tenant IDs) must be registered in advance using the partition management
+ * operations.
  *
  * @since 5.0.0
  */
 @Interceptor
 public class RequestTenantPartitionInterceptor {
 
-	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)
-	public RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
-		return extractPartitionIdFromRequest(theRequestDetails);
-	}
+    @Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)
+    public RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
+        return extractPartitionIdFromRequest(theRequestDetails);
+    }
 
-	@Nonnull
-	protected RequestPartitionId extractPartitionIdFromRequest(RequestDetails theRequestDetails) {
+    @Nonnull
+    protected RequestPartitionId extractPartitionIdFromRequest(RequestDetails theRequestDetails) {
 
-		// We will use the tenant ID that came from the request as the partition name
-		String tenantId = theRequestDetails.getTenantId();
-		if (isBlank(tenantId)) {
-			if (theRequestDetails instanceof SystemRequestDetails) {
-				SystemRequestDetails requestDetails = (SystemRequestDetails) theRequestDetails;
-				if (requestDetails.getRequestPartitionId() != null) {
-					return requestDetails.getRequestPartitionId();
-				}
-				return RequestPartitionId.defaultPartition();
-			}
-			throw new InternalErrorException(Msg.code(343) + "No partition ID has been specified");
-		}
+        // We will use the tenant ID that came from the request as the partition name
+        String tenantId = theRequestDetails.getTenantId();
+        if (isBlank(tenantId)) {
+            if (theRequestDetails instanceof SystemRequestDetails) {
+                SystemRequestDetails requestDetails = (SystemRequestDetails) theRequestDetails;
+                if (requestDetails.getRequestPartitionId() != null) {
+                    return requestDetails.getRequestPartitionId();
+                }
+                return RequestPartitionId.defaultPartition();
+            }
+            throw new InternalErrorException(Msg.code(343) + "No partition ID has been specified");
+        }
 
-		return RequestPartitionId.fromPartitionName(tenantId);
-	}
-
-
+        return RequestPartitionId.fromPartitionName(tenantId);
+    }
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -15,68 +17,60 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 @ContextConfiguration(classes = {MdmHelperConfig.class})
-public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
+public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test {
 
-	@RegisterExtension
-	@Autowired
-	public MdmHelperR4 myMdmHelper;
+    @RegisterExtension @Autowired public MdmHelperR4 myMdmHelper;
 
-	@Autowired
-	private IInterceptorService myInterceptorService;
+    @Autowired private IInterceptorService myInterceptorService;
 
-	private PatientNameModifierMdmPreProcessingInterceptor myPreProcessingInterceptor = new PatientNameModifierMdmPreProcessingInterceptor();
-	private PatientInterceptorWrapper myPatientInterceptorWrapper;
-	@BeforeEach
-	public void beforeEach(){
-		// we wrap the preProcessing interceptor to catch the return value;
-		myPatientInterceptorWrapper = new PatientInterceptorWrapper(myPreProcessingInterceptor);
-		myInterceptorService.registerInterceptor(myPatientInterceptorWrapper);
-	}
+    private PatientNameModifierMdmPreProcessingInterceptor myPreProcessingInterceptor =
+            new PatientNameModifierMdmPreProcessingInterceptor();
+    private PatientInterceptorWrapper myPatientInterceptorWrapper;
 
-	@AfterEach
-	public void afterEach(){
-		myInterceptorService.unregisterInterceptor(myPatientInterceptorWrapper);
-	}
+    @BeforeEach
+    public void beforeEach() {
+        // we wrap the preProcessing interceptor to catch the return value;
+        myPatientInterceptorWrapper = new PatientInterceptorWrapper(myPreProcessingInterceptor);
+        myInterceptorService.registerInterceptor(myPatientInterceptorWrapper);
+    }
 
-	@Test
-	public void whenInterceptorIsRegisteredThenInterceptorIsCalled() throws InterruptedException {
+    @AfterEach
+    public void afterEach() {
+        myInterceptorService.unregisterInterceptor(myPatientInterceptorWrapper);
+    }
 
-		Patient aPatient = buildPatientWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
+    @Test
+    public void whenInterceptorIsRegisteredThenInterceptorIsCalled() throws InterruptedException {
 
-		myMdmHelper.createWithLatch(aPatient);
+        Patient aPatient = buildPatientWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
 
-		Patient interceptedResource = (Patient) myPatientInterceptorWrapper.getReturnedValue();
+        myMdmHelper.createWithLatch(aPatient);
 
-		assertEquals(0, interceptedResource.getName().size());
+        Patient interceptedResource = (Patient) myPatientInterceptorWrapper.getReturnedValue();
 
-	}
+        assertEquals(0, interceptedResource.getName().size());
+    }
 
-	public static class PatientInterceptorWrapper {
+    public static class PatientInterceptorWrapper {
 
-		private PatientNameModifierMdmPreProcessingInterceptor myPatientInterceptor;
+        private PatientNameModifierMdmPreProcessingInterceptor myPatientInterceptor;
 
-		private IBaseResource myReturnedValue;
+        private IBaseResource myReturnedValue;
 
-		public PatientInterceptorWrapper(PatientNameModifierMdmPreProcessingInterceptor thePatientInterceptor) {
-			myPatientInterceptor = thePatientInterceptor;
-		}
+        public PatientInterceptorWrapper(
+                PatientNameModifierMdmPreProcessingInterceptor thePatientInterceptor) {
+            myPatientInterceptor = thePatientInterceptor;
+        }
 
-		@Hook(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)
-		public void invoke(IBaseResource theResource) {
-			myPatientInterceptor.invoke(theResource);
-			myReturnedValue = theResource;
-		}
+        @Hook(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)
+        public void invoke(IBaseResource theResource) {
+            myPatientInterceptor.invoke(theResource);
+            myReturnedValue = theResource;
+        }
 
-		public IBaseResource getReturnedValue() {
-			return myReturnedValue;
-		}
-	}
-
+        public IBaseResource getReturnedValue() {
+            return myReturnedValue;
+        }
+    }
 }
-
-
-
-

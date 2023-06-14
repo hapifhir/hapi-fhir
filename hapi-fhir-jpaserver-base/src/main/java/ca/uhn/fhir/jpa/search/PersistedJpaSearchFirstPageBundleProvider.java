@@ -30,105 +30,108 @@ import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundleProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaSearchFirstPageBundleProvider.class);
-	private final SearchTask mySearchTask;
-	private final ISearchBuilder mySearchBuilder;
+    private static final Logger ourLog =
+            LoggerFactory.getLogger(PersistedJpaSearchFirstPageBundleProvider.class);
+    private final SearchTask mySearchTask;
+    private final ISearchBuilder mySearchBuilder;
 
-	/**
-	 * Constructor
-	 */
-	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		super(theRequest, theSearch.getUuid());
+    /** Constructor */
+    public PersistedJpaSearchFirstPageBundleProvider(
+            Search theSearch,
+            SearchTask theSearchTask,
+            ISearchBuilder theSearchBuilder,
+            RequestDetails theRequest,
+            RequestPartitionId theRequestPartitionId) {
+        super(theRequest, theSearch.getUuid());
 
-		assert theSearch.getSearchType() != SearchTypeEnum.HISTORY;
+        assert theSearch.getSearchType() != SearchTypeEnum.HISTORY;
 
-		setSearchEntity(theSearch);
-		mySearchTask = theSearchTask;
-		mySearchBuilder = theSearchBuilder;
-		super.setRequestPartitionId(theRequestPartitionId);
-	}
+        setSearchEntity(theSearch);
+        mySearchTask = theSearchTask;
+        mySearchBuilder = theSearchBuilder;
+        super.setRequestPartitionId(theRequestPartitionId);
+    }
 
-	@Nonnull
-	@Override
-	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		ensureSearchEntityLoaded();
-		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
+    @Nonnull
+    @Override
+    public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+        ensureSearchEntityLoaded();
+        QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 
-		mySearchTask.awaitInitialSync();
+        mySearchTask.awaitInitialSync();
 
-		ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
-		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
-		ourLog.trace("Done fetching search resource PIDs");
+        ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
+        final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
+        ourLog.trace("Done fetching search resource PIDs");
 
-		RequestPartitionId requestPartitionId = getRequestPartitionId();
+        RequestPartitionId requestPartitionId = getRequestPartitionId();
 
-		List<IBaseResource> retVal = myTxService
-			.withRequest(myRequest)
-			.withRequestPartitionId(requestPartitionId)
-			.execute(() -> toResourceList(mySearchBuilder, pids));
+        List<IBaseResource> retVal =
+                myTxService
+                        .withRequest(myRequest)
+                        .withRequestPartitionId(requestPartitionId)
+                        .execute(() -> toResourceList(mySearchBuilder, pids));
 
-		long totalCountWanted = theToIndex - theFromIndex;
-		long totalCountMatch = (int) retVal
-			.stream()
-			.filter(t -> !isInclude(t))
-			.count();
+        long totalCountWanted = theToIndex - theFromIndex;
+        long totalCountMatch = (int) retVal.stream().filter(t -> !isInclude(t)).count();
 
-		if (totalCountMatch < totalCountWanted) {
-			if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET
-				|| ((getSearchEntity().getStatus() == SearchStatusEnum.FINISHED && getSearchEntity().getNumFound() >= theToIndex))) {
+        if (totalCountMatch < totalCountWanted) {
+            if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET
+                    || ((getSearchEntity().getStatus() == SearchStatusEnum.FINISHED
+                            && getSearchEntity().getNumFound() >= theToIndex))) {
 
-				/*
-				 * This is a bit of complexity to account for the possibility that
-				 * the consent service has filtered some results.
-				 */
-				Set<String> existingIds = retVal
-					.stream()
-					.map(t -> t.getIdElement().getValue())
-					.filter(t -> t != null)
-					.collect(Collectors.toSet());
+                /*
+                 * This is a bit of complexity to account for the possibility that
+                 * the consent service has filtered some results.
+                 */
+                Set<String> existingIds =
+                        retVal.stream()
+                                .map(t -> t.getIdElement().getValue())
+                                .filter(t -> t != null)
+                                .collect(Collectors.toSet());
 
-				long remainingWanted = totalCountWanted - totalCountMatch;
-				long fromIndex = theToIndex - remainingWanted;
-				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex);
-				remaining.forEach(t -> {
-					if (!existingIds.contains(t.getIdElement().getValue())) {
-						retVal.add(t);
-					}
-				});
-			}
-		}
-		ourLog.trace("Loaded resources to return");
+                long remainingWanted = totalCountWanted - totalCountMatch;
+                long fromIndex = theToIndex - remainingWanted;
+                List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex);
+                remaining.forEach(
+                        t -> {
+                            if (!existingIds.contains(t.getIdElement().getValue())) {
+                                retVal.add(t);
+                            }
+                        });
+            }
+        }
+        ourLog.trace("Loaded resources to return");
 
-		return retVal;
-	}
+        return retVal;
+    }
 
-	private boolean isInclude(IBaseResource theResource) {
-		BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(theResource);
-		return BundleEntrySearchModeEnum.INCLUDE.equals(searchMode);
-	}
+    private boolean isInclude(IBaseResource theResource) {
+        BundleEntrySearchModeEnum searchMode =
+                ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(theResource);
+        return BundleEntrySearchModeEnum.INCLUDE.equals(searchMode);
+    }
 
-	@Override
-	public Integer size() {
-		ourLog.trace("size() - Waiting for initial sync");
-		Integer size = mySearchTask.awaitInitialSync();
-		ourLog.trace("size() - Finished waiting for local sync");
+    @Override
+    public Integer size() {
+        ourLog.trace("size() - Waiting for initial sync");
+        Integer size = mySearchTask.awaitInitialSync();
+        ourLog.trace("size() - Finished waiting for local sync");
 
-		ensureSearchEntityLoaded();
-		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
-		if (size != null) {
-			return size;
-		}
-		return super.size();
-	}
-
+        ensureSearchEntityLoaded();
+        QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
+        if (size != null) {
+            return size;
+        }
+        return super.size();
+    }
 }

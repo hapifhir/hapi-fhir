@@ -19,35 +19,32 @@
  */
 package ca.uhn.fhir.rest.client.api;
 
-/**
- * Represents an HTTP header field.
- */
+/** Represents an HTTP header field. */
 public class Header {
-	
-	public final String myName;
-	public final String myValue;
+
+    public final String myName;
+    public final String myValue;
 
     public Header(String myName, String myValue) {
-		this.myName = myName;
-		this.myValue = myValue;
-	}
+        this.myName = myName;
+        this.myValue = myValue;
+    }
 
-	/**
+    /**
      * Get the name of the Header.
      *
-     * @return the name of the Header,  never {@code null}
+     * @return the name of the Header, never {@code null}
      */
     public String getName() {
-    	return myName;
+        return myName;
     }
 
     /**
      * Get the value of the Header.
      *
-     * @return the value of the Header,  may be {@code null}
+     * @return the value of the Header, may be {@code null}
      */
     public String getValue() {
-    	return myValue;
+        return myValue;
     }
-
 }

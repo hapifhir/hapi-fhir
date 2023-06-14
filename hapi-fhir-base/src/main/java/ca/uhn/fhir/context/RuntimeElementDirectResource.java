@@ -23,13 +23,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class RuntimeElementDirectResource extends BaseRuntimeElementDefinition<IBaseResource> {
 
-	public RuntimeElementDirectResource(boolean theStandardType) {
-		super("DirectChildResource", IBaseResource.class, theStandardType);
-	}
+    public RuntimeElementDirectResource(boolean theStandardType) {
+        super("DirectChildResource", IBaseResource.class, theStandardType);
+    }
 
-	@Override
-	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
-		return ChildTypeEnum.RESOURCE;
-	}
-
+    @Override
+    public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+        return ChildTypeEnum.RESOURCE;
+    }
 }

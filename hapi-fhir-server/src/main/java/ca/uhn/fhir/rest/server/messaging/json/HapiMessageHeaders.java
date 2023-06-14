@@ -19,86 +19,85 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
+import static java.util.Objects.isNull;
+
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.messaging.MessageHeaders;
-
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Objects.isNull;
+import org.springframework.messaging.MessageHeaders;
 
 /**
  * This class is for holding headers for BaseJsonMessages. Any serializable data can be thrown into
- * the header map. There are also three special headers, defined by the constants in this class, which are for use
- * in message handling retrying. There are also matching helper functions for fetching those special variables; however
- * they can also be accessed in standard map fashion with a `get` on the map.
+ * the header map. There are also three special headers, defined by the constants in this class,
+ * which are for use in message handling retrying. There are also matching helper functions for
+ * fetching those special variables; however they can also be accessed in standard map fashion with
+ * a `get` on the map.
  */
 public class HapiMessageHeaders implements IModelJson {
-	public static final String RETRY_COUNT_KEY = "retryCount";
-	public static final String FIRST_FAILURE_KEY = "firstFailureTimestamp";
-	public static final String LAST_FAILURE_KEY = "lastFailureTimestamp";
+    public static final String RETRY_COUNT_KEY = "retryCount";
+    public static final String FIRST_FAILURE_KEY = "firstFailureTimestamp";
+    public static final String LAST_FAILURE_KEY = "lastFailureTimestamp";
 
-	@JsonProperty(RETRY_COUNT_KEY)
-	private Integer myRetryCount = 0;
-	@JsonProperty(FIRST_FAILURE_KEY)
-	private Long myFirstFailureTimestamp;
-	@JsonProperty(LAST_FAILURE_KEY)
-	private Long myLastFailureTimestamp;
+    @JsonProperty(RETRY_COUNT_KEY)
+    private Integer myRetryCount = 0;
 
-	@JsonProperty("customHeaders")
-	private final Map<String, Object> headers;
+    @JsonProperty(FIRST_FAILURE_KEY)
+    private Long myFirstFailureTimestamp;
 
-	public HapiMessageHeaders(Map<String, Object> theHeaders) {
-		headers = theHeaders;
-	}
+    @JsonProperty(LAST_FAILURE_KEY)
+    private Long myLastFailureTimestamp;
 
-	public HapiMessageHeaders() {
-		headers = new HashMap<>();
-	}
+    @JsonProperty("customHeaders")
+    private final Map<String, Object> headers;
 
-	public Integer getRetryCount() {
-		if (isNull(this.myRetryCount)) {
-			return 0;
-		}
-		return this.myRetryCount;
-	}
+    public HapiMessageHeaders(Map<String, Object> theHeaders) {
+        headers = theHeaders;
+    }
 
-	public Long getFirstFailureTimestamp() {
-		return this.myFirstFailureTimestamp;
-	}
+    public HapiMessageHeaders() {
+        headers = new HashMap<>();
+    }
 
-	public Long getLastFailureTimestamp() {
-		return this.myLastFailureTimestamp;
-	}
+    public Integer getRetryCount() {
+        if (isNull(this.myRetryCount)) {
+            return 0;
+        }
+        return this.myRetryCount;
+    }
 
-	public void setRetryCount(Integer theRetryCount) {
-		this.myRetryCount = theRetryCount;
-	}
+    public Long getFirstFailureTimestamp() {
+        return this.myFirstFailureTimestamp;
+    }
 
-	public void setLastFailureTimestamp(Long theLastFailureTimestamp) {
-		this.myLastFailureTimestamp = theLastFailureTimestamp;
-	}
+    public Long getLastFailureTimestamp() {
+        return this.myLastFailureTimestamp;
+    }
 
+    public void setRetryCount(Integer theRetryCount) {
+        this.myRetryCount = theRetryCount;
+    }
 
-	public void setFirstFailureTimestamp(Long theFirstFailureTimestamp) {
-		this.myFirstFailureTimestamp = theFirstFailureTimestamp;
-	}
+    public void setLastFailureTimestamp(Long theLastFailureTimestamp) {
+        this.myLastFailureTimestamp = theLastFailureTimestamp;
+    }
 
+    public void setFirstFailureTimestamp(Long theFirstFailureTimestamp) {
+        this.myFirstFailureTimestamp = theFirstFailureTimestamp;
+    }
 
-	public Map<String, Object> getCustomHeaders() {
-		if (this.headers == null) {
-			return new HashMap<>();
-		}
-		return this.headers;
-	}
+    public Map<String, Object> getCustomHeaders() {
+        if (this.headers == null) {
+            return new HashMap<>();
+        }
+        return this.headers;
+    }
 
-	public MessageHeaders toMessageHeaders() {
-		Map<String, Object> returnedHeaders = new HashMap<>(this.headers);
-		returnedHeaders.put(RETRY_COUNT_KEY, myRetryCount);
-		returnedHeaders.put(FIRST_FAILURE_KEY, myFirstFailureTimestamp);
-		returnedHeaders.put(LAST_FAILURE_KEY, myLastFailureTimestamp);
-		return new MessageHeaders(returnedHeaders);
-	}
-
+    public MessageHeaders toMessageHeaders() {
+        Map<String, Object> returnedHeaders = new HashMap<>(this.headers);
+        returnedHeaders.put(RETRY_COUNT_KEY, myRetryCount);
+        returnedHeaders.put(FIRST_FAILURE_KEY, myFirstFailureTimestamp);
+        returnedHeaders.put(LAST_FAILURE_KEY, myLastFailureTimestamp);
+        return new MessageHeaders(returnedHeaders);
+    }
 }

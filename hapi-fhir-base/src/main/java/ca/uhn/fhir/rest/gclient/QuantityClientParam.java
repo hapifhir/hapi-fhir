@@ -24,160 +24,162 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
-/**
- * Quantity parameter type for use in fluent client interfaces
- */
+/** Quantity parameter type for use in fluent client interfaces */
 @SuppressWarnings("deprecation")
-public class QuantityClientParam extends BaseClientParam  implements IParam {
+public class QuantityClientParam extends BaseClientParam implements IParam {
 
-	private String myParamName;
+    private String myParamName;
 
-	public QuantityClientParam(String theParamName) {
-		myParamName = theParamName;
-	}
+    public QuantityClientParam(String theParamName) {
+        myParamName = theParamName;
+    }
 
-	public IMatches<IAndUnits> approximately() {
-		return new NumberClientParam.IMatches<IAndUnits>() {
-			@Override
-			public IAndUnits number(long theNumber) {
-				return new AndUnits(ParamPrefixEnum.APPROXIMATE, Long.toString(theNumber));
-			}
+    public IMatches<IAndUnits> approximately() {
+        return new NumberClientParam.IMatches<IAndUnits>() {
+            @Override
+            public IAndUnits number(long theNumber) {
+                return new AndUnits(ParamPrefixEnum.APPROXIMATE, Long.toString(theNumber));
+            }
 
-			@Override
-			public IAndUnits number(String theNumber) {
-				return new AndUnits(ParamPrefixEnum.APPROXIMATE, theNumber);
-			}
-		};
-	}
+            @Override
+            public IAndUnits number(String theNumber) {
+                return new AndUnits(ParamPrefixEnum.APPROXIMATE, theNumber);
+            }
+        };
+    }
 
-	public IMatches<IAndUnits> exactly() {
-		return new NumberClientParam.IMatches<IAndUnits>() {
-			@Override
-			public IAndUnits number(long theNumber) {
-				return new AndUnits(null, Long.toString(theNumber));
-			}
+    public IMatches<IAndUnits> exactly() {
+        return new NumberClientParam.IMatches<IAndUnits>() {
+            @Override
+            public IAndUnits number(long theNumber) {
+                return new AndUnits(null, Long.toString(theNumber));
+            }
 
-			@Override
-			public IAndUnits number(String theNumber) {
-				return new AndUnits(null, theNumber);
-			}
-		};
-	}
+            @Override
+            public IAndUnits number(String theNumber) {
+                return new AndUnits(null, theNumber);
+            }
+        };
+    }
 
-	@Override
-	public String getParamName() {
-		return myParamName;
-	}
+    @Override
+    public String getParamName() {
+        return myParamName;
+    }
 
-	public IMatches<IAndUnits> greaterThan() {
-		return new NumberClientParam.IMatches<IAndUnits>() {
-			@Override
-			public IAndUnits number(long theNumber) {
-				return new AndUnits(ParamPrefixEnum.GREATERTHAN, Long.toString(theNumber));
-			}
+    public IMatches<IAndUnits> greaterThan() {
+        return new NumberClientParam.IMatches<IAndUnits>() {
+            @Override
+            public IAndUnits number(long theNumber) {
+                return new AndUnits(ParamPrefixEnum.GREATERTHAN, Long.toString(theNumber));
+            }
 
-			@Override
-			public IAndUnits number(String theNumber) {
-				return new AndUnits(ParamPrefixEnum.GREATERTHAN, theNumber);
-			}
-		};
-	}
+            @Override
+            public IAndUnits number(String theNumber) {
+                return new AndUnits(ParamPrefixEnum.GREATERTHAN, theNumber);
+            }
+        };
+    }
 
-	public IMatches<IAndUnits> greaterThanOrEquals() {
-		return new NumberClientParam.IMatches<IAndUnits>() {
-			@Override
-			public IAndUnits number(long theNumber) {
-				return new AndUnits(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, Long.toString(theNumber));
-			}
+    public IMatches<IAndUnits> greaterThanOrEquals() {
+        return new NumberClientParam.IMatches<IAndUnits>() {
+            @Override
+            public IAndUnits number(long theNumber) {
+                return new AndUnits(
+                        ParamPrefixEnum.GREATERTHAN_OR_EQUALS, Long.toString(theNumber));
+            }
 
-			@Override
-			public IAndUnits number(String theNumber) {
-				return new AndUnits(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theNumber);
-			}
-		};
-	}
+            @Override
+            public IAndUnits number(String theNumber) {
+                return new AndUnits(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theNumber);
+            }
+        };
+    }
 
-	public IMatches<IAndUnits> lessThan() {
-		return new NumberClientParam.IMatches<IAndUnits>() {
-			@Override
-			public IAndUnits number(long theNumber) {
-				return new AndUnits(ParamPrefixEnum.LESSTHAN, Long.toString(theNumber));
-			}
+    public IMatches<IAndUnits> lessThan() {
+        return new NumberClientParam.IMatches<IAndUnits>() {
+            @Override
+            public IAndUnits number(long theNumber) {
+                return new AndUnits(ParamPrefixEnum.LESSTHAN, Long.toString(theNumber));
+            }
 
-			@Override
-			public IAndUnits number(String theNumber) {
-				return new AndUnits(ParamPrefixEnum.LESSTHAN, theNumber);
-			}
-		};
-	}
+            @Override
+            public IAndUnits number(String theNumber) {
+                return new AndUnits(ParamPrefixEnum.LESSTHAN, theNumber);
+            }
+        };
+    }
 
-	public IMatches<IAndUnits> lessThanOrEquals() {
-		return new NumberClientParam.IMatches<IAndUnits>() {
-			@Override
-			public IAndUnits number(long theNumber) {
-				return new AndUnits(ParamPrefixEnum.LESSTHAN_OR_EQUALS, Long.toString(theNumber));
-			}
+    public IMatches<IAndUnits> lessThanOrEquals() {
+        return new NumberClientParam.IMatches<IAndUnits>() {
+            @Override
+            public IAndUnits number(long theNumber) {
+                return new AndUnits(ParamPrefixEnum.LESSTHAN_OR_EQUALS, Long.toString(theNumber));
+            }
 
-			@Override
-			public IAndUnits number(String theNumber) {
-				return new AndUnits(ParamPrefixEnum.LESSTHAN_OR_EQUALS, theNumber);
-			}
-		};
-	}
+            @Override
+            public IAndUnits number(String theNumber) {
+                return new AndUnits(ParamPrefixEnum.LESSTHAN_OR_EQUALS, theNumber);
+            }
+        };
+    }
 
-	/**
-	 * Use the given quantity prefix
-	 * 
-	 * @param thePrefix The prefix, or <code>null</code> for no prefix
-	 */
-	public IMatches<IAndUnits> withPrefix(final ParamPrefixEnum thePrefix) {
-		return new NumberClientParam.IMatches<IAndUnits>() {
-			@Override
-			public IAndUnits number(long theNumber) {
-				return new AndUnits(thePrefix, Long.toString(theNumber));
-			}
+    /**
+     * Use the given quantity prefix
+     *
+     * @param thePrefix The prefix, or <code>null</code> for no prefix
+     */
+    public IMatches<IAndUnits> withPrefix(final ParamPrefixEnum thePrefix) {
+        return new NumberClientParam.IMatches<IAndUnits>() {
+            @Override
+            public IAndUnits number(long theNumber) {
+                return new AndUnits(thePrefix, Long.toString(theNumber));
+            }
 
-			@Override
-			public IAndUnits number(String theNumber) {
-				return new AndUnits(thePrefix, theNumber);
-			}
-		};
-	}
+            @Override
+            public IAndUnits number(String theNumber) {
+                return new AndUnits(thePrefix, theNumber);
+            }
+        };
+    }
 
-	public interface IAndUnits {
+    public interface IAndUnits {
 
-		ICriterion<QuantityClientParam> andNoUnits();
+        ICriterion<QuantityClientParam> andNoUnits();
 
-		ICriterion<QuantityClientParam> andUnits(String theUnits);
+        ICriterion<QuantityClientParam> andUnits(String theUnits);
 
-		ICriterion<QuantityClientParam> andUnits(String theSystem, String theUnits);
-	}
+        ICriterion<QuantityClientParam> andUnits(String theSystem, String theUnits);
+    }
 
-	private class AndUnits implements IAndUnits {
+    private class AndUnits implements IAndUnits {
 
-		private ParamPrefixEnum myPrefix;
-		private String myValue;
+        private ParamPrefixEnum myPrefix;
+        private String myValue;
 
-		public AndUnits(ParamPrefixEnum thePrefix, String theNumber) {
-			myPrefix = thePrefix;
-			myValue = theNumber;
-		}
+        public AndUnits(ParamPrefixEnum thePrefix, String theNumber) {
+            myPrefix = thePrefix;
+            myValue = theNumber;
+        }
 
-		@Override
-		public ICriterion<QuantityClientParam> andNoUnits() {
-			return andUnits(null, null);
-		}
+        @Override
+        public ICriterion<QuantityClientParam> andNoUnits() {
+            return andUnits(null, null);
+        }
 
-		@Override
-		public ICriterion<QuantityClientParam> andUnits(String theUnits) {
-			return andUnits(null, theUnits);
-		}
+        @Override
+        public ICriterion<QuantityClientParam> andUnits(String theUnits) {
+            return andUnits(null, theUnits);
+        }
 
-		@Override
-		public ICriterion<QuantityClientParam> andUnits(String theSystem, String theUnits) {
-			return new QuantityCriterion(getParamName(), myPrefix, myValue , defaultString(theSystem) , defaultString(theUnits));
-		}
-
-	}
-
+        @Override
+        public ICriterion<QuantityClientParam> andUnits(String theSystem, String theUnits) {
+            return new QuantityCriterion(
+                    getParamName(),
+                    myPrefix,
+                    myValue,
+                    defaultString(theSystem),
+                    defaultString(theUnits));
+        }
+    }
 }

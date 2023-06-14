@@ -22,223 +22,212 @@ package ca.uhn.fhir.batch2.model;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.Logs;
 import com.google.common.collect.Maps;
-import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import org.slf4j.Logger;
 
 /**
- * Status of a Batch2 Job Instance.
- * The initial state is QUEUED.
- * The terminal states are COMPLETED, CANCELLED, or FAILED.
+ * Status of a Batch2 Job Instance. The initial state is QUEUED. The terminal states are COMPLETED,
+ * CANCELLED, or FAILED.
  */
 public enum StatusEnum {
 
-	/**
-	 * Task is waiting to execute and should begin with no intervention required.
-	 */
-	QUEUED(true, false, true),
+    /** Task is waiting to execute and should begin with no intervention required. */
+    QUEUED(true, false, true),
 
-	/**
-	 * Task is current executing
-	 */
-	IN_PROGRESS(true, false, true),
+    /** Task is current executing */
+    IN_PROGRESS(true, false, true),
 
-	/**
-	 * For reduction steps
-	 */
-	FINALIZE(true, false, true),
+    /** For reduction steps */
+    FINALIZE(true, false, true),
 
-	/**
-	 * Task completed successfully
-	 */
-	COMPLETED(false, true, false),
+    /** Task completed successfully */
+    COMPLETED(false, true, false),
 
-	/**
-	 * Chunk execution resulted in an error but the error may be transient (or transient status is unknown).
-	 * The job may still complete successfully.
-	 * @deprecated this is basically a synonym for IN_PROGRESS - display should use the presence of an error message on the instance
-	 * to indicate that there has been a transient error.
-	 */
-	@Deprecated(since = "6.6")
-		// wipmb For 6.8 - remove all inbound transitions, and allow transition back to IN_PROGRESS. use message in ui to show danger status
-	ERRORED(true, false, true),
+    /**
+     * Chunk execution resulted in an error but the error may be transient (or transient status is
+     * unknown). The job may still complete successfully.
+     *
+     * @deprecated this is basically a synonym for IN_PROGRESS - display should use the presence of
+     *     an error message on the instance to indicate that there has been a transient error.
+     */
+    @Deprecated(since = "6.6")
+    // wipmb For 6.8 - remove all inbound transitions, and allow transition back to IN_PROGRESS. use
+    // message in ui to show danger status
+    ERRORED(true, false, true),
 
-	/**
-	 * Task has failed and is known to be unrecoverable. There is no reason to believe that retrying will
-	 * result in a different outcome.
-	 */
-	FAILED(true, true, false),
+    /**
+     * Task has failed and is known to be unrecoverable. There is no reason to believe that retrying
+     * will result in a different outcome.
+     */
+    FAILED(true, true, false),
 
-	/**
-	 * Task has been cancelled by the user.
-	 */
-	CANCELLED(true, true, false);
+    /** Task has been cancelled by the user. */
+    CANCELLED(true, true, false);
 
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+    private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	/** Map from state to Set of legal inbound states */
-	static final Map<StatusEnum, Set<StatusEnum>> ourFromStates;
-	/** Map from state to Set of legal outbound states */
-	static final Map<StatusEnum, Set<StatusEnum>> ourToStates;
+    /** Map from state to Set of legal inbound states */
+    static final Map<StatusEnum, Set<StatusEnum>> ourFromStates;
 
-	static {
-		EnumMap<StatusEnum, Set<StatusEnum>> fromStates = new EnumMap<>(StatusEnum.class);
-		EnumMap<StatusEnum, Set<StatusEnum>> toStates = new EnumMap<>(StatusEnum.class);
+    /** Map from state to Set of legal outbound states */
+    static final Map<StatusEnum, Set<StatusEnum>> ourToStates;
 
-		for (StatusEnum nextEnum: StatusEnum.values()) {
-			fromStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
-			toStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
-		}
-		for (StatusEnum nextPriorEnum: StatusEnum.values()) {
-			for (StatusEnum nextNextEnum: StatusEnum.values()) {
-				if (isLegalStateTransition(nextPriorEnum, nextNextEnum)) {
-					fromStates.get(nextNextEnum).add(nextPriorEnum);
-					toStates.get(nextPriorEnum).add(nextNextEnum);
-				}
-			}
-		}
+    static {
+        EnumMap<StatusEnum, Set<StatusEnum>> fromStates = new EnumMap<>(StatusEnum.class);
+        EnumMap<StatusEnum, Set<StatusEnum>> toStates = new EnumMap<>(StatusEnum.class);
 
-		ourFromStates = Maps.immutableEnumMap(fromStates);
-		ourToStates = Maps.immutableEnumMap(toStates);
-	}
+        for (StatusEnum nextEnum : StatusEnum.values()) {
+            fromStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
+            toStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
+        }
+        for (StatusEnum nextPriorEnum : StatusEnum.values()) {
+            for (StatusEnum nextNextEnum : StatusEnum.values()) {
+                if (isLegalStateTransition(nextPriorEnum, nextNextEnum)) {
+                    fromStates.get(nextNextEnum).add(nextPriorEnum);
+                    toStates.get(nextPriorEnum).add(nextNextEnum);
+                }
+            }
+        }
 
-	private final boolean myIncomplete;
-	private final boolean myEnded;
-	private final boolean myIsCancellable;
-	private static StatusEnum[] ourIncompleteStatuses;
-	private static Set<StatusEnum> ourEndedStatuses;
-	private static Set<StatusEnum> ourNotEndedStatuses;
+        ourFromStates = Maps.immutableEnumMap(fromStates);
+        ourToStates = Maps.immutableEnumMap(toStates);
+    }
 
-	StatusEnum(boolean theIncomplete, boolean theEnded, boolean theIsCancellable) {
-		myIncomplete = theIncomplete;
-		myEnded = theEnded;
-		myIsCancellable = theIsCancellable;
-	}
+    private final boolean myIncomplete;
+    private final boolean myEnded;
+    private final boolean myIsCancellable;
+    private static StatusEnum[] ourIncompleteStatuses;
+    private static Set<StatusEnum> ourEndedStatuses;
+    private static Set<StatusEnum> ourNotEndedStatuses;
 
-	/**
-	 * Statuses that represent a job that has not yet completed. I.e.
-	 * all statuses except {@link #COMPLETED}
-	 */
-	public static StatusEnum[] getIncompleteStatuses() {
-		StatusEnum[] retVal = ourIncompleteStatuses;
-		if (retVal == null) {
-			EnumSet<StatusEnum> incompleteSet = EnumSet.noneOf(StatusEnum.class);
-			for (StatusEnum next : values()) {
-				if (next.myIncomplete) {
-					incompleteSet.add(next);
-				}
-			}
-			ourIncompleteStatuses = incompleteSet.toArray(new StatusEnum[0]);
-			retVal = ourIncompleteStatuses;
-		}
-		return retVal;
-	}
+    StatusEnum(boolean theIncomplete, boolean theEnded, boolean theIsCancellable) {
+        myIncomplete = theIncomplete;
+        myEnded = theEnded;
+        myIsCancellable = theIsCancellable;
+    }
 
-	/**
-	 * Statuses that represent a job that has ended. I.e.
-	 * all statuses except {@link #QUEUED and #COMPLETED}
-	 */
-	@Nonnull
-	public static Set<StatusEnum> getEndedStatuses() {
-		Set<StatusEnum> retVal = ourEndedStatuses;
-		if (retVal == null) {
-			initializeStaticEndedStatuses();
-		}
-		retVal = ourEndedStatuses;
-		return retVal;
-	}
+    /**
+     * Statuses that represent a job that has not yet completed. I.e. all statuses except {@link
+     * #COMPLETED}
+     */
+    public static StatusEnum[] getIncompleteStatuses() {
+        StatusEnum[] retVal = ourIncompleteStatuses;
+        if (retVal == null) {
+            EnumSet<StatusEnum> incompleteSet = EnumSet.noneOf(StatusEnum.class);
+            for (StatusEnum next : values()) {
+                if (next.myIncomplete) {
+                    incompleteSet.add(next);
+                }
+            }
+            ourIncompleteStatuses = incompleteSet.toArray(new StatusEnum[0]);
+            retVal = ourIncompleteStatuses;
+        }
+        return retVal;
+    }
 
-	/**
-	 * Statuses that represent a job that has not ended. I.e.
-	 * {@link #QUEUED and #COMPLETED}
-	 */
-	@Nonnull
-	public static Set<StatusEnum> getNotEndedStatuses() {
-		Set<StatusEnum> retVal = ourNotEndedStatuses;
-		if (retVal == null) {
-			initializeStaticEndedStatuses();
-		}
-		retVal = ourNotEndedStatuses;
-		return retVal;
-	}
+    /**
+     * Statuses that represent a job that has ended. I.e. all statuses except {@link #QUEUED and
+     * #COMPLETED}
+     */
+    @Nonnull
+    public static Set<StatusEnum> getEndedStatuses() {
+        Set<StatusEnum> retVal = ourEndedStatuses;
+        if (retVal == null) {
+            initializeStaticEndedStatuses();
+        }
+        retVal = ourEndedStatuses;
+        return retVal;
+    }
 
-	private static void initializeStaticEndedStatuses() {
-		EnumSet<StatusEnum> endedSet = EnumSet.noneOf(StatusEnum.class);
-		EnumSet<StatusEnum> notEndedSet = EnumSet.noneOf(StatusEnum.class);
-		for (StatusEnum next : values()) {
-			if (next.myEnded) {
-				endedSet.add(next);
-			} else {
-				notEndedSet.add(next);
-			}
-		}
-		ourEndedStatuses = Collections.unmodifiableSet(endedSet);
-		ourNotEndedStatuses = Collections.unmodifiableSet(notEndedSet);
-	}
+    /** Statuses that represent a job that has not ended. I.e. {@link #QUEUED and #COMPLETED} */
+    @Nonnull
+    public static Set<StatusEnum> getNotEndedStatuses() {
+        Set<StatusEnum> retVal = ourNotEndedStatuses;
+        if (retVal == null) {
+            initializeStaticEndedStatuses();
+        }
+        retVal = ourNotEndedStatuses;
+        return retVal;
+    }
 
-	public static boolean isLegalStateTransition(StatusEnum theOrigStatus, StatusEnum theNewStatus) {
-		boolean canTransition;
-		switch (theOrigStatus) {
-			case QUEUED:
-				// initial state can transition to anything
-				canTransition = true;
-				break;
-			case IN_PROGRESS:
-			case ERRORED:
-				canTransition = theNewStatus != QUEUED;
-				break;
-			case CANCELLED:
-				// terminal state cannot transition
-				canTransition =  false;
-				break;
-			case COMPLETED:
-				canTransition =  false;
-				break;
-			case FAILED:
-				canTransition = theNewStatus == FAILED;
-				break;
-			case FINALIZE:
-				canTransition = theNewStatus != QUEUED && theNewStatus != IN_PROGRESS;
-				break;
-			default:
-				throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
-		}
+    private static void initializeStaticEndedStatuses() {
+        EnumSet<StatusEnum> endedSet = EnumSet.noneOf(StatusEnum.class);
+        EnumSet<StatusEnum> notEndedSet = EnumSet.noneOf(StatusEnum.class);
+        for (StatusEnum next : values()) {
+            if (next.myEnded) {
+                endedSet.add(next);
+            } else {
+                notEndedSet.add(next);
+            }
+        }
+        ourEndedStatuses = Collections.unmodifiableSet(endedSet);
+        ourNotEndedStatuses = Collections.unmodifiableSet(notEndedSet);
+    }
 
-		if (!canTransition) {
-			// we have a bug?
-			ourLog.debug("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
-		}
-		return canTransition;
-	}
+    public static boolean isLegalStateTransition(
+            StatusEnum theOrigStatus, StatusEnum theNewStatus) {
+        boolean canTransition;
+        switch (theOrigStatus) {
+            case QUEUED:
+                // initial state can transition to anything
+                canTransition = true;
+                break;
+            case IN_PROGRESS:
+            case ERRORED:
+                canTransition = theNewStatus != QUEUED;
+                break;
+            case CANCELLED:
+                // terminal state cannot transition
+                canTransition = false;
+                break;
+            case COMPLETED:
+                canTransition = false;
+                break;
+            case FAILED:
+                canTransition = theNewStatus == FAILED;
+                break;
+            case FINALIZE:
+                canTransition = theNewStatus != QUEUED && theNewStatus != IN_PROGRESS;
+                break;
+            default:
+                throw new IllegalStateException(
+                        Msg.code(2131) + "Unknown batch state " + theOrigStatus);
+        }
 
-	public boolean isIncomplete() {
-		return myIncomplete;
-	}
+        if (!canTransition) {
+            // we have a bug?
+            ourLog.debug(
+                    "Tried to execute an illegal state transition. [origStatus={}, newStatus={}]",
+                    theOrigStatus,
+                    theNewStatus);
+        }
+        return canTransition;
+    }
 
-	public boolean isEnded() {
-		return myEnded;
-	}
+    public boolean isIncomplete() {
+        return myIncomplete;
+    }
 
-	public boolean isCancellable() {
-		return myIsCancellable;
-	}
+    public boolean isEnded() {
+        return myEnded;
+    }
 
-	/**
-	 * States that may transition to this state.
-	 */
-	public Set<StatusEnum> getPriorStates() {
-		return ourFromStates.get(this);
-	}
+    public boolean isCancellable() {
+        return myIsCancellable;
+    }
 
-	/**
-	 * States this state may transotion to.
-	 */
-	public Set<StatusEnum> getNextStates() {
-		return ourToStates.get(this);
-	}
+    /** States that may transition to this state. */
+    public Set<StatusEnum> getPriorStates() {
+        return ourFromStates.get(this);
+    }
+
+    /** States this state may transotion to. */
+    public Set<StatusEnum> getNextStates() {
+        return ourToStates.get(this);
+    }
 }

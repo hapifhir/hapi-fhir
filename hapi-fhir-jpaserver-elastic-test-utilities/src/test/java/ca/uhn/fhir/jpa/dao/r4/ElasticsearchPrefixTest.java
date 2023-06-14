@@ -1,8 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
+
 import ca.uhn.fhir.jpa.config.ElasticsearchWithPrefixConfig;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+import java.io.IOException;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
@@ -16,12 +21,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
-import java.io.IOException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
-
 @RequiresDocker
 @ExtendWith(SpringExtension.class)
 // we don't reuse this context, so discard it and release our elastic container.
@@ -29,25 +28,29 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 @ContextConfiguration(classes = {ElasticsearchWithPrefixConfig.class})
 public class ElasticsearchPrefixTest {
 
-	@Autowired
-	ElasticsearchContainer elasticsearchContainer;
+    @Autowired ElasticsearchContainer elasticsearchContainer;
 
-	public static String ELASTIC_PREFIX = "hapi-fhir";
-	@Test
-	public void test() throws IOException {
-		//Given
-		RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
-			"http", elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200), "", "");
+    public static String ELASTIC_PREFIX = "hapi-fhir";
 
-		//When
-		RestClient lowLevelClient = elasticsearchHighLevelRestClient.getLowLevelClient();
-		Response get = lowLevelClient.performRequest(new Request("GET", "/_cat/indices"));
-		String catIndexes = EntityUtils.toString(get.getEntity());
+    @Test
+    public void test() throws IOException {
+        // Given
+        RestHighLevelClient elasticsearchHighLevelRestClient =
+                ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
+                        "http",
+                        elasticsearchContainer.getHost()
+                                + ":"
+                                + elasticsearchContainer.getMappedPort(9200),
+                        "",
+                        "");
 
-		//Then
-		assertThat(catIndexes, containsString(ELASTIC_PREFIX + "-resourcetable-000001"));
-		assertThat(catIndexes, containsString(ELASTIC_PREFIX + "-termconcept-000001"));
+        // When
+        RestClient lowLevelClient = elasticsearchHighLevelRestClient.getLowLevelClient();
+        Response get = lowLevelClient.performRequest(new Request("GET", "/_cat/indices"));
+        String catIndexes = EntityUtils.toString(get.getEntity());
 
-	}
-
+        // Then
+        assertThat(catIndexes, containsString(ELASTIC_PREFIX + "-resourcetable-000001"));
+        assertThat(catIndexes, containsString(ELASTIC_PREFIX + "-termconcept-000001"));
+    }
 }

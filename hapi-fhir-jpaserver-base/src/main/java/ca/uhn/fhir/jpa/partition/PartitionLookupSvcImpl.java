@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.partition;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -38,6 +40,12 @@ import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.sl.cache.CacheLoader;
 import ca.uhn.fhir.sl.cache.LoadingCache;
 import ca.uhn.fhir.util.ICallable;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,219 +56,265 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
-	private static final Pattern PARTITION_NAME_VALID_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
-	private static final Logger ourLog = LoggerFactory.getLogger(PartitionLookupSvcImpl.class);
+    private static final Pattern PARTITION_NAME_VALID_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
+    private static final Logger ourLog = LoggerFactory.getLogger(PartitionLookupSvcImpl.class);
 
-	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private IInterceptorService myInterceptorService;
-	@Autowired
-	private IPartitionDao myPartitionDao;
+    @Autowired private PartitionSettings myPartitionSettings;
+    @Autowired private IInterceptorService myInterceptorService;
+    @Autowired private IPartitionDao myPartitionDao;
 
-	private LoadingCache<String, PartitionEntity> myNameToPartitionCache;
-	private LoadingCache<Integer, PartitionEntity> myIdToPartitionCache;
-	@Autowired
-	private FhirContext myFhirCtx;
-	@Autowired
-	private PlatformTransactionManager myTxManager;
-	private TransactionTemplate myTxTemplate;
+    private LoadingCache<String, PartitionEntity> myNameToPartitionCache;
+    private LoadingCache<Integer, PartitionEntity> myIdToPartitionCache;
+    @Autowired private FhirContext myFhirCtx;
+    @Autowired private PlatformTransactionManager myTxManager;
+    private TransactionTemplate myTxTemplate;
 
-	/**
-	 * Constructor
-	 */
-	public PartitionLookupSvcImpl() {
-		super();
-	}
+    /** Constructor */
+    public PartitionLookupSvcImpl() {
+        super();
+    }
 
-	@Override
-	@PostConstruct
-	public void start() {
-		myNameToPartitionCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), new NameToPartitionCacheLoader());
-		myIdToPartitionCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), new IdToPartitionCacheLoader());
-		myTxTemplate = new TransactionTemplate(myTxManager);
-	}
+    @Override
+    @PostConstruct
+    public void start() {
+        myNameToPartitionCache =
+                CacheFactory.build(TimeUnit.MINUTES.toMillis(1), new NameToPartitionCacheLoader());
+        myIdToPartitionCache =
+                CacheFactory.build(TimeUnit.MINUTES.toMillis(1), new IdToPartitionCacheLoader());
+        myTxTemplate = new TransactionTemplate(myTxManager);
+    }
 
-	@Override
-	public PartitionEntity getPartitionByName(String theName) {
-		Validate.notBlank(theName, "The name must not be null or blank");
-		validateNotInUnnamedPartitionMode();
-		if (JpaConstants.DEFAULT_PARTITION_NAME.equals(theName)) {
-			return null;
-		}
-		return myNameToPartitionCache.get(theName);
-	}
+    @Override
+    public PartitionEntity getPartitionByName(String theName) {
+        Validate.notBlank(theName, "The name must not be null or blank");
+        validateNotInUnnamedPartitionMode();
+        if (JpaConstants.DEFAULT_PARTITION_NAME.equals(theName)) {
+            return null;
+        }
+        return myNameToPartitionCache.get(theName);
+    }
 
-	@Override
-	public PartitionEntity getPartitionById(Integer thePartitionId) {
-		validatePartitionIdSupplied(myFhirCtx, thePartitionId);
-		if (myPartitionSettings.isUnnamedPartitionMode()) {
-			return new PartitionEntity().setId(thePartitionId);
-		}
-		if (myPartitionSettings.getDefaultPartitionId() != null && myPartitionSettings.getDefaultPartitionId().equals(thePartitionId)) {
-			return new PartitionEntity().setId(thePartitionId).setName(JpaConstants.DEFAULT_PARTITION_NAME);
-		}
-		return myIdToPartitionCache.get(thePartitionId);
-	}
+    @Override
+    public PartitionEntity getPartitionById(Integer thePartitionId) {
+        validatePartitionIdSupplied(myFhirCtx, thePartitionId);
+        if (myPartitionSettings.isUnnamedPartitionMode()) {
+            return new PartitionEntity().setId(thePartitionId);
+        }
+        if (myPartitionSettings.getDefaultPartitionId() != null
+                && myPartitionSettings.getDefaultPartitionId().equals(thePartitionId)) {
+            return new PartitionEntity()
+                    .setId(thePartitionId)
+                    .setName(JpaConstants.DEFAULT_PARTITION_NAME);
+        }
+        return myIdToPartitionCache.get(thePartitionId);
+    }
 
-	@Override
-	public void clearCaches() {
-		myNameToPartitionCache.invalidateAll();
-		myIdToPartitionCache.invalidateAll();
-	}
+    @Override
+    public void clearCaches() {
+        myNameToPartitionCache.invalidateAll();
+        myIdToPartitionCache.invalidateAll();
+    }
 
-	@Override
-	@Transactional
-	public PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails) {
-		validateNotInUnnamedPartitionMode();
-		validateHaveValidPartitionIdAndName(thePartition);
-		validatePartitionNameDoesntAlreadyExist(thePartition.getName());
+    @Override
+    @Transactional
+    public PartitionEntity createPartition(
+            PartitionEntity thePartition, RequestDetails theRequestDetails) {
+        validateNotInUnnamedPartitionMode();
+        validateHaveValidPartitionIdAndName(thePartition);
+        validatePartitionNameDoesntAlreadyExist(thePartition.getName());
 
-		ourLog.info("Creating new partition with ID {} and Name {}", thePartition.getId(), thePartition.getName());
+        ourLog.info(
+                "Creating new partition with ID {} and Name {}",
+                thePartition.getId(),
+                thePartition.getName());
 
-		PartitionEntity retVal = myPartitionDao.save(thePartition);
+        PartitionEntity retVal = myPartitionDao.save(thePartition);
 
-		// Interceptor call: STORAGE_PARTITION_CREATED
-		if (myInterceptorService.hasHooks(Pointcut.STORAGE_PARTITION_CREATED)) {
-			HookParams params = new HookParams()
-				.add(RequestPartitionId.class, thePartition.toRequestPartitionId())
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			myInterceptorService.callHooks(Pointcut.STORAGE_PARTITION_CREATED, params);
-		}
+        // Interceptor call: STORAGE_PARTITION_CREATED
+        if (myInterceptorService.hasHooks(Pointcut.STORAGE_PARTITION_CREATED)) {
+            HookParams params =
+                    new HookParams()
+                            .add(RequestPartitionId.class, thePartition.toRequestPartitionId())
+                            .add(RequestDetails.class, theRequestDetails)
+                            .addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+            myInterceptorService.callHooks(Pointcut.STORAGE_PARTITION_CREATED, params);
+        }
 
-		return retVal;
-	}
+        return retVal;
+    }
 
-	@Override
-	@Transactional
-	public PartitionEntity updatePartition(PartitionEntity thePartition) {
-		validateNotInUnnamedPartitionMode();
-		validateHaveValidPartitionIdAndName(thePartition);
+    @Override
+    @Transactional
+    public PartitionEntity updatePartition(PartitionEntity thePartition) {
+        validateNotInUnnamedPartitionMode();
+        validateHaveValidPartitionIdAndName(thePartition);
 
-		Optional<PartitionEntity> existingPartitionOpt = myPartitionDao.findById(thePartition.getId());
-		if (existingPartitionOpt.isPresent() == false) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", thePartition.getId());
-			throw new InvalidRequestException(Msg.code(1307) + msg);
-		}
+        Optional<PartitionEntity> existingPartitionOpt =
+                myPartitionDao.findById(thePartition.getId());
+        if (existingPartitionOpt.isPresent() == false) {
+            String msg =
+                    myFhirCtx
+                            .getLocalizer()
+                            .getMessageSanitized(
+                                    PartitionLookupSvcImpl.class,
+                                    "unknownPartitionId",
+                                    thePartition.getId());
+            throw new InvalidRequestException(Msg.code(1307) + msg);
+        }
 
-		PartitionEntity existingPartition = existingPartitionOpt.get();
-		if (!thePartition.getName().equalsIgnoreCase(existingPartition.getName())) {
-			validatePartitionNameDoesntAlreadyExist(thePartition.getName());
-		}
+        PartitionEntity existingPartition = existingPartitionOpt.get();
+        if (!thePartition.getName().equalsIgnoreCase(existingPartition.getName())) {
+            validatePartitionNameDoesntAlreadyExist(thePartition.getName());
+        }
 
-		existingPartition.setName(thePartition.getName());
-		existingPartition.setDescription(thePartition.getDescription());
-		myPartitionDao.save(existingPartition);
-		clearCaches();
-		return existingPartition;
-	}
+        existingPartition.setName(thePartition.getName());
+        existingPartition.setDescription(thePartition.getDescription());
+        myPartitionDao.save(existingPartition);
+        clearCaches();
+        return existingPartition;
+    }
 
-	@Override
-	@Transactional
-	public void deletePartition(Integer thePartitionId) {
-		validatePartitionIdSupplied(myFhirCtx, thePartitionId);
-		validateNotInUnnamedPartitionMode();
+    @Override
+    @Transactional
+    public void deletePartition(Integer thePartitionId) {
+        validatePartitionIdSupplied(myFhirCtx, thePartitionId);
+        validateNotInUnnamedPartitionMode();
 
-		Optional<PartitionEntity> partition = myPartitionDao.findById(thePartitionId);
-		if (!partition.isPresent()) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", thePartitionId);
-			throw new IllegalArgumentException(Msg.code(1308) + msg);
-		}
+        Optional<PartitionEntity> partition = myPartitionDao.findById(thePartitionId);
+        if (!partition.isPresent()) {
+            String msg =
+                    myFhirCtx
+                            .getLocalizer()
+                            .getMessageSanitized(
+                                    PartitionLookupSvcImpl.class,
+                                    "unknownPartitionId",
+                                    thePartitionId);
+            throw new IllegalArgumentException(Msg.code(1308) + msg);
+        }
 
-		myPartitionDao.delete(partition.get());
+        myPartitionDao.delete(partition.get());
 
-		clearCaches();
-	}
+        clearCaches();
+    }
 
-	@Override
-	public List<PartitionEntity> listPartitions() {
-		List<PartitionEntity> allPartitions = myPartitionDao.findAll();
-		return allPartitions;
-	}
+    @Override
+    public List<PartitionEntity> listPartitions() {
+        List<PartitionEntity> allPartitions = myPartitionDao.findAll();
+        return allPartitions;
+    }
 
-	private void validatePartitionNameDoesntAlreadyExist(String theName) {
-		if (myPartitionDao.findForName(theName).isPresent()) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDuplicatePartitionName", theName);
-			throw new InvalidRequestException(Msg.code(1309) + msg);
-		}
-	}
+    private void validatePartitionNameDoesntAlreadyExist(String theName) {
+        if (myPartitionDao.findForName(theName).isPresent()) {
+            String msg =
+                    myFhirCtx
+                            .getLocalizer()
+                            .getMessageSanitized(
+                                    PartitionLookupSvcImpl.class,
+                                    "cantCreateDuplicatePartitionName",
+                                    theName);
+            throw new InvalidRequestException(Msg.code(1309) + msg);
+        }
+    }
 
-	private void validateHaveValidPartitionIdAndName(PartitionEntity thePartition) {
-		if (thePartition.getId() == null || isBlank(thePartition.getName())) {
-			String msg = myFhirCtx.getLocalizer().getMessage(PartitionLookupSvcImpl.class, "missingPartitionIdOrName");
-			throw new InvalidRequestException(Msg.code(1310) + msg);
-		}
+    private void validateHaveValidPartitionIdAndName(PartitionEntity thePartition) {
+        if (thePartition.getId() == null || isBlank(thePartition.getName())) {
+            String msg =
+                    myFhirCtx
+                            .getLocalizer()
+                            .getMessage(PartitionLookupSvcImpl.class, "missingPartitionIdOrName");
+            throw new InvalidRequestException(Msg.code(1310) + msg);
+        }
 
-		if (thePartition.getName().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDefaultPartition");
-			throw new InvalidRequestException(Msg.code(1311) + msg);
-		}
+        if (thePartition.getName().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
+            String msg =
+                    myFhirCtx
+                            .getLocalizer()
+                            .getMessageSanitized(
+                                    PartitionLookupSvcImpl.class, "cantCreateDefaultPartition");
+            throw new InvalidRequestException(Msg.code(1311) + msg);
+        }
 
-		if (!PARTITION_NAME_VALID_PATTERN.matcher(thePartition.getName()).matches()) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", thePartition.getName());
-			throw new InvalidRequestException(Msg.code(1312) + msg);
-		}
+        if (!PARTITION_NAME_VALID_PATTERN.matcher(thePartition.getName()).matches()) {
+            String msg =
+                    myFhirCtx
+                            .getLocalizer()
+                            .getMessageSanitized(
+                                    PartitionLookupSvcImpl.class,
+                                    "invalidName",
+                                    thePartition.getName());
+            throw new InvalidRequestException(Msg.code(1312) + msg);
+        }
+    }
 
-	}
+    private void validateNotInUnnamedPartitionMode() {
+        if (myPartitionSettings.isUnnamedPartitionMode()) {
+            throw new MethodNotAllowedException(
+                    Msg.code(1313) + "Can not invoke this operation in unnamed partition mode");
+        }
+    }
 
-	private void validateNotInUnnamedPartitionMode() {
-		if (myPartitionSettings.isUnnamedPartitionMode()) {
-			throw new MethodNotAllowedException(Msg.code(1313) + "Can not invoke this operation in unnamed partition mode");
-		}
-	}
+    private PartitionEntity lookupPartitionByName(@Nonnull String theName) {
+        return executeInTransaction(() -> myPartitionDao.findForName(theName))
+                .orElseThrow(
+                        () -> {
+                            String msg =
+                                    myFhirCtx
+                                            .getLocalizer()
+                                            .getMessageSanitized(
+                                                    PartitionLookupSvcImpl.class,
+                                                    "invalidName",
+                                                    theName);
+                            return new ResourceNotFoundException(msg);
+                        });
+    }
 
-	private PartitionEntity lookupPartitionByName(@Nonnull String theName) {
-		return executeInTransaction(() -> myPartitionDao.findForName(theName))
-			.orElseThrow(() -> {
-				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", theName);
-				return new ResourceNotFoundException(msg);
-			});
-	}
+    private PartitionEntity lookupPartitionById(@Nonnull Integer theId) {
+        return executeInTransaction(() -> myPartitionDao.findById(theId))
+                .orElseThrow(
+                        () -> {
+                            String msg =
+                                    myFhirCtx
+                                            .getLocalizer()
+                                            .getMessageSanitized(
+                                                    PartitionLookupSvcImpl.class,
+                                                    "unknownPartitionId",
+                                                    theId);
+                            return new ResourceNotFoundException(msg);
+                        });
+    }
 
-	private PartitionEntity lookupPartitionById(@Nonnull Integer theId) {
-		return executeInTransaction(() -> myPartitionDao.findById(theId))
-			.orElseThrow(() -> {
-				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
-				return new ResourceNotFoundException(msg);
-			});
-	}
+    protected <T> T executeInTransaction(ICallable<T> theCallable) {
+        return myTxTemplate.execute(tx -> theCallable.call());
+    }
 
-	protected <T> T executeInTransaction(ICallable<T> theCallable) {
-		return myTxTemplate.execute(tx -> theCallable.call());
-	}
+    private class NameToPartitionCacheLoader
+            implements @NonNull CacheLoader<String, PartitionEntity> {
+        @Nullable
+        @Override
+        public PartitionEntity load(@NonNull String theName) {
+            return lookupPartitionByName(theName);
+        }
+    }
 
-	private class NameToPartitionCacheLoader implements @NonNull CacheLoader<String, PartitionEntity> {
-		@Nullable
-		@Override
-		public PartitionEntity load(@NonNull String theName) {
-			return lookupPartitionByName(theName);
-		}
-	}
+    private class IdToPartitionCacheLoader
+            implements @NonNull CacheLoader<Integer, PartitionEntity> {
+        @Nullable
+        @Override
+        public PartitionEntity load(@NonNull Integer theId) {
+            return lookupPartitionById(theId);
+        }
+    }
 
-	private class IdToPartitionCacheLoader implements @NonNull CacheLoader<Integer, PartitionEntity> {
-		@Nullable
-		@Override
-		public PartitionEntity load(@NonNull Integer theId) {
-			return lookupPartitionById(theId);
-		}
-	}
-
-	public static void validatePartitionIdSupplied(FhirContext theFhirContext, Integer thePartitionId) {
-		if (thePartitionId == null) {
-			String msg = theFhirContext.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "noIdSupplied");
-			throw new InvalidRequestException(Msg.code(1314) + msg);
-		}
-	}
+    public static void validatePartitionIdSupplied(
+            FhirContext theFhirContext, Integer thePartitionId) {
+        if (thePartitionId == null) {
+            String msg =
+                    theFhirContext
+                            .getLocalizer()
+                            .getMessageSanitized(PartitionLookupSvcImpl.class, "noIdSupplied");
+            throw new InvalidRequestException(Msg.code(1314) + msg);
+        }
+    }
 }

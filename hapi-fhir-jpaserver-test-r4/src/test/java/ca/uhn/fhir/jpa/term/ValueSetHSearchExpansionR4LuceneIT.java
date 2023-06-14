@@ -8,11 +8,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * This class runs all parent class tests using Lucene configuration
- * There is also a LuceneFilesystem configuration available, for debugging purposes
+ * This class runs all parent class tests using Lucene configuration There is also a
+ * LuceneFilesystem configuration available, for debugging purposes
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
-public class ValueSetHSearchExpansionR4LuceneIT extends BaseValueSetHSearchExpansionR4Test {
-
-}
+@ContextConfiguration(
+        classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
+public class ValueSetHSearchExpansionR4LuceneIT extends BaseValueSetHSearchExpansionR4Test {}

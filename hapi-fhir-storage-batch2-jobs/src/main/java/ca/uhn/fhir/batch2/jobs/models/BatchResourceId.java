@@ -27,56 +27,61 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class BatchResourceId implements IModelJson {
 
-	@JsonProperty("type")
-	private String myResourceType;
-	@JsonProperty("id")
-	private String myId;
+    @JsonProperty("type")
+    private String myResourceType;
 
-	@Override
-	public String toString() {
-		// We put a space in here and not a "/" since this is a PID, not
-		// a resource ID
-		return "[" + myResourceType + " " + myId + "]";
-	}
+    @JsonProperty("id")
+    private String myId;
 
-	public String getResourceType() {
-		return myResourceType;
-	}
+    @Override
+    public String toString() {
+        // We put a space in here and not a "/" since this is a PID, not
+        // a resource ID
+        return "[" + myResourceType + " " + myId + "]";
+    }
 
-	public BatchResourceId setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
-		return this;
-	}
+    public String getResourceType() {
+        return myResourceType;
+    }
 
-	public String getId() {
-		return myId;
-	}
+    public BatchResourceId setResourceType(String theResourceType) {
+        myResourceType = theResourceType;
+        return this;
+    }
 
-	public BatchResourceId setId(String theId) {
-		myId = theId;
-		return this;
-	}
+    public String getId() {
+        return myId;
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
+    public BatchResourceId setId(String theId) {
+        myId = theId;
+        return this;
+    }
 
-		if (theO == null || getClass() != theO.getClass()) return false;
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) return true;
 
-		BatchResourceId batchResourceId = (BatchResourceId) theO;
+        if (theO == null || getClass() != theO.getClass()) return false;
 
-		return new EqualsBuilder().append(myResourceType, batchResourceId.myResourceType).append(myId, batchResourceId.myId).isEquals();
-	}
+        BatchResourceId batchResourceId = (BatchResourceId) theO;
 
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myResourceType).append(myId).toHashCode();
-	}
+        return new EqualsBuilder()
+                .append(myResourceType, batchResourceId.myResourceType)
+                .append(myId, batchResourceId.myId)
+                .isEquals();
+    }
 
-	public static BatchResourceId getIdFromPID(IResourcePersistentId thePID, String theResourceType) {
-		BatchResourceId batchResourceId = new BatchResourceId();
-		batchResourceId.setId(thePID.getId().toString());
-		batchResourceId.setResourceType(theResourceType);
-		return batchResourceId;
-	}
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(myResourceType).append(myId).toHashCode();
+    }
+
+    public static BatchResourceId getIdFromPID(
+            IResourcePersistentId thePID, String theResourceType) {
+        BatchResourceId batchResourceId = new BatchResourceId();
+        batchResourceId.setId(thePID.getId().toString());
+        batchResourceId.setResourceType(theResourceType);
+        return batchResourceId;
+    }
 }

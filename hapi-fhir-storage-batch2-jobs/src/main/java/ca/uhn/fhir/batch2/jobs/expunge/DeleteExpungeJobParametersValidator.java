@@ -26,41 +26,49 @@ import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ValidateUtil;
-
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
-public class DeleteExpungeJobParametersValidator implements IJobParametersValidator<DeleteExpungeJobParameters> {
-	private final IUrlListValidator myUrlListValidator;
-	private final IDeleteExpungeSvc<?> myDeleteExpungeSvc;
-	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+public class DeleteExpungeJobParametersValidator
+        implements IJobParametersValidator<DeleteExpungeJobParameters> {
+    private final IUrlListValidator myUrlListValidator;
+    private final IDeleteExpungeSvc<?> myDeleteExpungeSvc;
+    private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
-	public DeleteExpungeJobParametersValidator(IUrlListValidator theUrlListValidator, IDeleteExpungeSvc<?> theDeleteExpungeSvc, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		myUrlListValidator = theUrlListValidator;
-		myDeleteExpungeSvc = theDeleteExpungeSvc;
-		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-	}
+    public DeleteExpungeJobParametersValidator(
+            IUrlListValidator theUrlListValidator,
+            IDeleteExpungeSvc<?> theDeleteExpungeSvc,
+            IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+        myUrlListValidator = theUrlListValidator;
+        myDeleteExpungeSvc = theDeleteExpungeSvc;
+        myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+    }
 
-	@Nullable
-	@Override
-	public List<String> validate(RequestDetails theRequestDetails, @Nonnull DeleteExpungeJobParameters theParameters) {
+    @Nullable
+    @Override
+    public List<String> validate(
+            RequestDetails theRequestDetails, @Nonnull DeleteExpungeJobParameters theParameters) {
 
-		// Make sure cascade is supported if requested
-		if (theParameters.isCascade() && !myDeleteExpungeSvc.isCascadeSupported()) {
-			return List.of("Cascading delete is not supported on this server");
-		}
+        // Make sure cascade is supported if requested
+        if (theParameters.isCascade() && !myDeleteExpungeSvc.isCascadeSupported()) {
+            return List.of("Cascading delete is not supported on this server");
+        }
 
-		// Verify that the user has access to all requested partitions
-		myRequestPartitionHelperSvc.validateHasPartitionPermissions(theRequestDetails, null, theParameters.getRequestPartitionId());
+        // Verify that the user has access to all requested partitions
+        myRequestPartitionHelperSvc.validateHasPartitionPermissions(
+                theRequestDetails, null, theParameters.getRequestPartitionId());
 
-		for (PartitionedUrl partitionedUrl : theParameters.getPartitionedUrls()) {
-			String url = partitionedUrl.getUrl();
-			ValidateUtil.isTrueOrThrowInvalidRequest(url.matches("[a-zA-Z]+\\?.*"), "Delete expunge URLs must be in the format [resourceType]?[parameters]");
-			if (partitionedUrl.getRequestPartitionId() != null) {
-				myRequestPartitionHelperSvc.validateHasPartitionPermissions(theRequestDetails, null, partitionedUrl.getRequestPartitionId());
-			}
-		}
-		return myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
-	}
+        for (PartitionedUrl partitionedUrl : theParameters.getPartitionedUrls()) {
+            String url = partitionedUrl.getUrl();
+            ValidateUtil.isTrueOrThrowInvalidRequest(
+                    url.matches("[a-zA-Z]+\\?.*"),
+                    "Delete expunge URLs must be in the format [resourceType]?[parameters]");
+            if (partitionedUrl.getRequestPartitionId() != null) {
+                myRequestPartitionHelperSvc.validateHasPartitionPermissions(
+                        theRequestDetails, null, partitionedUrl.getRequestPartitionId());
+            }
+        }
+        return myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
+    }
 }

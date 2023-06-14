@@ -19,31 +19,30 @@
  */
 package ca.uhn.fhir.util.rdf;
 
+import java.io.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 
-import java.io.*;
-
 public class RDFUtil {
 
-	public static Model initializeRDFModel() {
-		// Create the model
-		return ModelFactory.createDefaultModel();
-	}
+    public static Model initializeRDFModel() {
+        // Create the model
+        return ModelFactory.createDefaultModel();
+    }
 
-	public static Model readRDFToModel(final Reader reader, final Lang lang) {
-		Model rdfModel = initializeRDFModel();
-		RDFDataMgr.read(rdfModel, reader, null, lang);
-		return rdfModel;
-	}
+    public static Model readRDFToModel(final Reader reader, final Lang lang) {
+        Model rdfModel = initializeRDFModel();
+        RDFDataMgr.read(rdfModel, reader, null, lang);
+        return rdfModel;
+    }
 
-	public static void writeRDFModel(Writer writer, Model rdfModel, Lang lang) {
-		// This writes to the provided Writer.
-		// Jena has deprecated methods that use a generic Writer
-		// writer could be explicitly casted to StringWriter in order to hit a
-		// non-deprecated overload
-		RDFDataMgr.write(writer, rdfModel, lang);
-	}
+    public static void writeRDFModel(Writer writer, Model rdfModel, Lang lang) {
+        // This writes to the provided Writer.
+        // Jena has deprecated methods that use a generic Writer
+        // writer could be explicitly casted to StringWriter in order to hit a
+        // non-deprecated overload
+        RDFDataMgr.write(writer, rdfModel, lang);
+    }
 }

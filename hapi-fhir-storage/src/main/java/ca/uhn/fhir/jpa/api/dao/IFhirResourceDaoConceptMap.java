@@ -25,5 +25,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFhirResourceDao<T> {
-	TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails);
+    TranslateConceptResults translate(
+            TranslationRequest theTranslationRequest, RequestDetails theRequestDetails);
 }

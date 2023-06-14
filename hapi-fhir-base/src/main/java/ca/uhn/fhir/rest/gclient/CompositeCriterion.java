@@ -23,33 +23,35 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class CompositeCriterion<A extends IParam, B extends IParam> implements ICompositeWithLeft<B>, ICriterion<B>, ICriterionInternal {
+public class CompositeCriterion<A extends IParam, B extends IParam>
+        implements ICompositeWithLeft<B>, ICriterion<B>, ICriterionInternal {
 
-	private ICriterion<B> myRight;
-	private String myName;
-	private ICriterion<A> myLeft;
+    private ICriterion<B> myRight;
+    private String myName;
+    private ICriterion<A> myLeft;
 
-	public CompositeCriterion(String theName, ICriterion<A> theLeft) {
-		myName = theName;
-		myLeft = theLeft;
-	}
+    public CompositeCriterion(String theName, ICriterion<A> theLeft) {
+        myName = theName;
+        myLeft = theLeft;
+    }
 
-	@Override
-	public ICriterion<B> withRight(ICriterion<B> theRight) {
-		myRight = theRight;
-		return this;
-	}
+    @Override
+    public ICriterion<B> withRight(ICriterion<B> theRight) {
+        myRight = theRight;
+        return this;
+    }
 
-	@Override
-	public String getParameterValue(FhirContext theContext) {
-		ICriterionInternal left = (ICriterionInternal) myLeft;
-		ICriterionInternal right = (ICriterionInternal) myRight;
-		return defaultString(left.getParameterValue(theContext)) + '$' + defaultString(right.getParameterValue(theContext));
-	}
+    @Override
+    public String getParameterValue(FhirContext theContext) {
+        ICriterionInternal left = (ICriterionInternal) myLeft;
+        ICriterionInternal right = (ICriterionInternal) myRight;
+        return defaultString(left.getParameterValue(theContext))
+                + '$'
+                + defaultString(right.getParameterValue(theContext));
+    }
 
-	@Override
-	public String getParameterName() {
-		return myName;
-	}
-
+    @Override
+    public String getParameterName() {
+        return myName;
+    }
 }

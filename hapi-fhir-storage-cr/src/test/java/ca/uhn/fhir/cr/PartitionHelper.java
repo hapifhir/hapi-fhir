@@ -1,5 +1,7 @@
 package ca.uhn.fhir.cr;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -13,63 +15,58 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-
 public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
-	private static final Logger ourLog = LoggerFactory.getLogger(PartitionHelper.class);
-	protected final MyTestInterceptor myInterceptor = new MyTestInterceptor();
+    private static final Logger ourLog = LoggerFactory.getLogger(PartitionHelper.class);
+    protected final MyTestInterceptor myInterceptor = new MyTestInterceptor();
 
-	@Autowired
-	IInterceptorService myIInterceptorService;
-	@Autowired
-	PartitionSettings myPartitionSettings;
+    @Autowired IInterceptorService myIInterceptorService;
+    @Autowired PartitionSettings myPartitionSettings;
 
-	@Override
-	public void beforeEach(ExtensionContext context) throws Exception {
-		myPartitionSettings.setPartitioningEnabled(true);
-		myIInterceptorService.registerInterceptor(myInterceptor);
-	}
+    @Override
+    public void beforeEach(ExtensionContext context) throws Exception {
+        myPartitionSettings.setPartitioningEnabled(true);
+        myIInterceptorService.registerInterceptor(myInterceptor);
+    }
 
-	@Override
-	public void afterEach(ExtensionContext context) throws Exception {
-		myIInterceptorService.unregisterInterceptor(myInterceptor);
-		myPartitionSettings.setPartitioningEnabled(false);
-		myInterceptor.clear();
-	}
+    @Override
+    public void afterEach(ExtensionContext context) throws Exception {
+        myIInterceptorService.unregisterInterceptor(myInterceptor);
+        myPartitionSettings.setPartitioningEnabled(false);
+        myInterceptor.clear();
+    }
 
-	public void clear() {
-		myInterceptor.clear();
-	}
+    public void clear() {
+        myInterceptor.clear();
+    }
 
-	public boolean wasCalled() {
-		return myInterceptor.wasCalled();
-	}
+    public boolean wasCalled() {
+        return myInterceptor.wasCalled();
+    }
 
-	public static class MyTestInterceptor {
-		private boolean myCalled = false;
+    public static class MyTestInterceptor {
+        private boolean myCalled = false;
 
-		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		RequestPartitionId partitionIdentifyRead(RequestDetails theRequestDetails) {
-			myCalled = true;
-			if (theRequestDetails == null) {
-				ourLog.info("useful breakpoint :-)");
-			}
-			assertNotNull(theRequestDetails);
-			return RequestPartitionId.defaultPartition();
-		}
+        @Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+        RequestPartitionId partitionIdentifyRead(RequestDetails theRequestDetails) {
+            myCalled = true;
+            if (theRequestDetails == null) {
+                ourLog.info("useful breakpoint :-)");
+            }
+            assertNotNull(theRequestDetails);
+            return RequestPartitionId.defaultPartition();
+        }
 
-		public void clear() {
-			myCalled = false;
-		}
+        public void clear() {
+            myCalled = false;
+        }
 
-		public boolean wasCalled() {
-			return myCalled;
-		}
+        public boolean wasCalled() {
+            return myCalled;
+        }
 
-		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
-			return RequestPartitionId.defaultPartition();
-		}
-	}
+        @Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
+        RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
+            return RequestPartitionId.defaultPartition();
+        }
+    }
 }

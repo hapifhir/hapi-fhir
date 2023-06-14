@@ -29,5 +29,6 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
  */
 @FunctionalInterface
 public interface IDataProviderFactory {
-	DataProvider create(RequestDetails theRequestDetails, TerminologyProvider theTerminologyProvider);
+    DataProvider create(
+            RequestDetails theRequestDetails, TerminologyProvider theTerminologyProvider);
 }

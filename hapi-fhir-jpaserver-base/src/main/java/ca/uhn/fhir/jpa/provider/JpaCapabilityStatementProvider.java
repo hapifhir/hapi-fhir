@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -31,6 +33,8 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import java.util.Map;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -39,114 +43,129 @@ import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
 import org.hl7.fhir.r4.model.Meta;
 
-import javax.annotation.Nonnull;
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-/**
- * R4+ Only
- */
+/** R4+ Only */
 public class JpaCapabilityStatementProvider extends ServerCapabilityStatementProvider {
 
-	private final FhirContext myContext;
-	private JpaStorageSettings myStorageSettings;
-	private String myImplementationDescription;
-	private boolean myIncludeResourceCounts;
-	private IFhirSystemDao<?, ?> mySystemDao;
+    private final FhirContext myContext;
+    private JpaStorageSettings myStorageSettings;
+    private String myImplementationDescription;
+    private boolean myIncludeResourceCounts;
+    private IFhirSystemDao<?, ?> mySystemDao;
 
-	/**
-	 * Constructor
-	 */
-	public JpaCapabilityStatementProvider(@Nonnull RestfulServer theRestfulServer, @Nonnull IFhirSystemDao<?, ?> theSystemDao, @Nonnull JpaStorageSettings theStorageSettings, @Nonnull ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
-		super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
+    /** Constructor */
+    public JpaCapabilityStatementProvider(
+            @Nonnull RestfulServer theRestfulServer,
+            @Nonnull IFhirSystemDao<?, ?> theSystemDao,
+            @Nonnull JpaStorageSettings theStorageSettings,
+            @Nonnull ISearchParamRegistry theSearchParamRegistry,
+            IValidationSupport theValidationSupport) {
+        super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
 
-		Validate.notNull(theRestfulServer);
-		Validate.notNull(theSystemDao);
-		Validate.notNull(theStorageSettings);
-		Validate.notNull(theSearchParamRegistry);
+        Validate.notNull(theRestfulServer);
+        Validate.notNull(theSystemDao);
+        Validate.notNull(theStorageSettings);
+        Validate.notNull(theSearchParamRegistry);
 
-		myContext = theRestfulServer.getFhirContext();
-		mySystemDao = theSystemDao;
-		myStorageSettings = theStorageSettings;
-		setIncludeResourceCounts(true);
-	}
+        myContext = theRestfulServer.getFhirContext();
+        mySystemDao = theSystemDao;
+        myStorageSettings = theStorageSettings;
+        setIncludeResourceCounts(true);
+    }
 
-	@Override
-	protected void postProcess(FhirTerser theTerser, IBaseConformance theCapabilityStatement) {
-		super.postProcess(theTerser, theCapabilityStatement);
+    @Override
+    protected void postProcess(FhirTerser theTerser, IBaseConformance theCapabilityStatement) {
+        super.postProcess(theTerser, theCapabilityStatement);
 
-		if (isNotBlank(myImplementationDescription)) {
-			theTerser.setElement(theCapabilityStatement, "implementation.description", myImplementationDescription);
-		}
+        if (isNotBlank(myImplementationDescription)) {
+            theTerser.setElement(
+                    theCapabilityStatement,
+                    "implementation.description",
+                    myImplementationDescription);
+        }
 
-		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_JSON_NEW);
-		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_XML_NEW);
-		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_JSON_PATCH);
-		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_XML_PATCH);
-	}
+        theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_JSON_NEW);
+        theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_XML_NEW);
+        theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_JSON_PATCH);
+        theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_XML_PATCH);
+    }
 
-	@Override
-	protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
-		super.postProcessRest(theTerser, theRest);
+    @Override
+    protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
+        super.postProcessRest(theTerser, theRest);
 
-		if (myStorageSettings.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				ExtensionUtil.setExtension(myContext, theRest, Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL, "uri", myStorageSettings.getWebsocketContextPath());
-			}
-		}
+        if (myStorageSettings
+                .getSupportedSubscriptionTypes()
+                .contains(
+                        org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
+            if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
+                ExtensionUtil.setExtension(
+                        myContext,
+                        theRest,
+                        Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL,
+                        "uri",
+                        myStorageSettings.getWebsocketContextPath());
+            }
+        }
+    }
 
-	}
+    @Override
+    protected void postProcessRestResource(
+            FhirTerser theTerser, IBase theResource, String theResourceName) {
+        super.postProcessRestResource(theTerser, theResource, theResourceName);
 
-	@Override
-	protected void postProcessRestResource(FhirTerser theTerser, IBase theResource, String theResourceName) {
-		super.postProcessRestResource(theTerser, theResource, theResourceName);
+        theTerser.addElement(
+                theResource, "versioning", ResourceVersionPolicy.VERSIONEDUPDATE.toCode());
 
-		theTerser.addElement(theResource, "versioning", ResourceVersionPolicy.VERSIONEDUPDATE.toCode());
+        if (myStorageSettings.isAllowMultipleDelete()) {
+            theTerser.addElement(
+                    theResource, "conditionalDelete", ConditionalDeleteStatus.MULTIPLE.toCode());
+        } else {
+            theTerser.addElement(
+                    theResource, "conditionalDelete", ConditionalDeleteStatus.SINGLE.toCode());
+        }
 
-		if (myStorageSettings.isAllowMultipleDelete()) {
-			theTerser.addElement(theResource, "conditionalDelete", ConditionalDeleteStatus.MULTIPLE.toCode());
-		} else {
-			theTerser.addElement(theResource, "conditionalDelete", ConditionalDeleteStatus.SINGLE.toCode());
-		}
+        // Add resource counts
+        if (myIncludeResourceCounts) {
+            Map<String, Long> counts = mySystemDao.getResourceCountsFromCache();
+            if (counts != null) {
+                Long count = counts.get(theResourceName);
+                if (count != null) {
+                    ExtensionUtil.setExtension(
+                            myContext,
+                            theResource,
+                            ExtensionConstants.CONF_RESOURCE_COUNT,
+                            "decimal",
+                            Long.toString(count));
+                }
+            }
+        }
+    }
 
-		// Add resource counts
-		if (myIncludeResourceCounts) {
-			Map<String, Long> counts = mySystemDao.getResourceCountsFromCache();
-			if (counts != null) {
-				Long count = counts.get(theResourceName);
-				if (count != null) {
-					ExtensionUtil.setExtension(myContext, theResource, ExtensionConstants.CONF_RESOURCE_COUNT, "decimal", Long.toString(count));
-				}
-			}
-		}
+    public boolean isIncludeResourceCounts() {
+        return myIncludeResourceCounts;
+    }
 
-	}
+    public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
+        myIncludeResourceCounts = theIncludeResourceCounts;
+    }
 
-	public boolean isIncludeResourceCounts() {
-		return myIncludeResourceCounts;
-	}
+    public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+        this.myStorageSettings = theStorageSettings;
+    }
 
-	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
-		myIncludeResourceCounts = theIncludeResourceCounts;
-	}
+    @CoverageIgnore
+    public void setImplementationDescription(String theImplDesc) {
+        myImplementationDescription = theImplDesc;
+    }
 
-	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
-		this.myStorageSettings = theStorageSettings;
-	}
+    @CoverageIgnore
+    public void setSystemDao(IFhirSystemDao<Bundle, Meta> mySystemDao) {
+        this.mySystemDao = mySystemDao;
+    }
 
-	@CoverageIgnore
-	public void setImplementationDescription(String theImplDesc) {
-		myImplementationDescription = theImplDesc;
-	}
-
-	@CoverageIgnore
-	public void setSystemDao(IFhirSystemDao<Bundle, Meta> mySystemDao) {
-		this.mySystemDao = mySystemDao;
-	}
-
-	@Override
-	protected boolean searchParamEnabled(String theSearchParam) {
-		return !Constants.PARAM_FILTER.equals(theSearchParam) || myStorageSettings.isFilterParameterEnabled();
-	}
+    @Override
+    protected boolean searchParamEnabled(String theSearchParam) {
+        return !Constants.PARAM_FILTER.equals(theSearchParam)
+                || myStorageSettings.isFilterParameterEnabled();
+    }
 }

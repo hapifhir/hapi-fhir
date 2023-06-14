@@ -21,24 +21,25 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.model.api.IModelJson;
-
 import javax.annotation.Nonnull;
 
 /**
  * Reduction step worker.
+ *
  * @param <PT> Job Parameter Type
  * @param <IT> Input Parameter type (real input for step is ListResult of IT
  * @param <OT> Output Job Report Type
  */
-public interface IReductionStepWorker<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-	extends IJobStepWorker<PT, IT, OT> {
+public interface IReductionStepWorker<
+                PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+        extends IJobStepWorker<PT, IT, OT> {
 
-	/**
-	 *
-	 * If an exception is thrown, the workchunk will be marked as failed.
-	 * @param theChunkDetails - the workchunk details for reduction
-	 * @return
-	 */
-	@Nonnull
-	ChunkOutcome consume(ChunkExecutionDetails<PT, IT> theChunkDetails);
+    /**
+     * If an exception is thrown, the workchunk will be marked as failed.
+     *
+     * @param theChunkDetails - the workchunk details for reduction
+     * @return
+     */
+    @Nonnull
+    ChunkOutcome consume(ChunkExecutionDetails<PT, IT> theChunkDetails);
 }

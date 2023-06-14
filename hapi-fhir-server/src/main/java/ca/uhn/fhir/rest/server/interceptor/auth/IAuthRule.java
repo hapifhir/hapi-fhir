@@ -23,39 +23,43 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Set;
-
 /**
- * Note: At this time, this interface is considered internal API to HAPI FHIR,
- * and is subject to change without warning. Create your own implementations at
- * your own risk. If you have use cases that are not met by the current
- * implementation, please consider raising them on the HAPI FHIR
+ * Note: At this time, this interface is considered internal API to HAPI FHIR, and is subject to
+ * change without warning. Create your own implementations at your own risk. If you have use cases
+ * that are not met by the current implementation, please consider raising them on the HAPI FHIR
  * Google Group.
  */
 public interface IAuthRule {
 
-	/**
-	 * Applies the rule and returns a policy decision, or <code>null</code> if the rule does not apply
-	 *
-	 * @param theOperation       The operation type
-	 * @param theRequestDetails  The request
-	 * @param theInputResource   The resource being input by the client, or <code>null</code>
-	 * @param theInputResourceId TODO
-	 * @param theOutputResource  The resource being returned by the server, or <code>null</code>
-	 * @param theRuleApplier     The rule applying module (this can be used by rules to apply the rule set to
-	 *                           nested objects in the request, such as nested requests in a transaction)
-	 * @param theFlags           The flags configured in the authorization interceptor
-	 * @param thePointcut        The pointcut hook that triggered this call
-	 * @return Returns a policy decision, or <code>null</code> if the rule does not apply
-	 */
-	Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut);
+    /**
+     * Applies the rule and returns a policy decision, or <code>null</code> if the rule does not
+     * apply
+     *
+     * @param theOperation The operation type
+     * @param theRequestDetails The request
+     * @param theInputResource The resource being input by the client, or <code>null</code>
+     * @param theInputResourceId TODO
+     * @param theOutputResource The resource being returned by the server, or <code>null</code>
+     * @param theRuleApplier The rule applying module (this can be used by rules to apply the rule
+     *     set to nested objects in the request, such as nested requests in a transaction)
+     * @param theFlags The flags configured in the authorization interceptor
+     * @param thePointcut The pointcut hook that triggered this call
+     * @return Returns a policy decision, or <code>null</code> if the rule does not apply
+     */
+    Verdict applyRule(
+            RestOperationTypeEnum theOperation,
+            RequestDetails theRequestDetails,
+            IBaseResource theInputResource,
+            IIdType theInputResourceId,
+            IBaseResource theOutputResource,
+            IRuleApplier theRuleApplier,
+            Set<AuthorizationFlagsEnum> theFlags,
+            Pointcut thePointcut);
 
-	/**
-	 * Returns a name for this rule, to be used in logs and error messages
-	 */
-	String getName();
-
+    /** Returns a name for this rule, to be used in logs and error messages */
+    String getName();
 }

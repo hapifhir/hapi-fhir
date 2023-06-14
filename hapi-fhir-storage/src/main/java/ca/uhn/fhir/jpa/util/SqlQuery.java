@@ -19,126 +19,148 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import static org.apache.commons.lang3.StringUtils.trim;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.lang3.Validate;
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.trim;
+import org.apache.commons.lang3.Validate;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 
 public class SqlQuery {
-	private final String myThreadName = Thread.currentThread().getName();
-	private final String mySql;
-	private final List<String> myParams;
-	private final long myQueryTimestamp;
-	private final long myElapsedTime;
-	private final StackTraceElement[] myStackTrace;
-	private final int mySize;
-	private final LanguageEnum myLanguage;
-	private final String myNamespace;
-	private final RequestPartitionId myRequestPartitionId;
+    private final String myThreadName = Thread.currentThread().getName();
+    private final String mySql;
+    private final List<String> myParams;
+    private final long myQueryTimestamp;
+    private final long myElapsedTime;
+    private final StackTraceElement[] myStackTrace;
+    private final int mySize;
+    private final LanguageEnum myLanguage;
+    private final String myNamespace;
+    private final RequestPartitionId myRequestPartitionId;
 
-	public SqlQuery(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize, RequestPartitionId theRequestPartitionId) {
-		this(null, theSql, theParams, theQueryTimestamp, theElapsedTime, theStackTraceElements, theSize, LanguageEnum.SQL, theRequestPartitionId);
-	}
+    public SqlQuery(
+            String theSql,
+            List<String> theParams,
+            long theQueryTimestamp,
+            long theElapsedTime,
+            StackTraceElement[] theStackTraceElements,
+            int theSize,
+            RequestPartitionId theRequestPartitionId) {
+        this(
+                null,
+                theSql,
+                theParams,
+                theQueryTimestamp,
+                theElapsedTime,
+                theStackTraceElements,
+                theSize,
+                LanguageEnum.SQL,
+                theRequestPartitionId);
+    }
 
-	public SqlQuery(String theNamespace, String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize, LanguageEnum theLanguage, RequestPartitionId theRequestPartitionId) {
-		Validate.notNull(theLanguage, "theLanguage must not be null");
+    public SqlQuery(
+            String theNamespace,
+            String theSql,
+            List<String> theParams,
+            long theQueryTimestamp,
+            long theElapsedTime,
+            StackTraceElement[] theStackTraceElements,
+            int theSize,
+            LanguageEnum theLanguage,
+            RequestPartitionId theRequestPartitionId) {
+        Validate.notNull(theLanguage, "theLanguage must not be null");
 
-		myNamespace = theNamespace;
-		mySql = theSql;
-		myParams = Collections.unmodifiableList(theParams);
-		myQueryTimestamp = theQueryTimestamp;
-		myElapsedTime = theElapsedTime;
-		myStackTrace = theStackTraceElements;
-		mySize = theSize;
-		myLanguage = theLanguage;
-		myRequestPartitionId = theRequestPartitionId;
-	}
+        myNamespace = theNamespace;
+        mySql = theSql;
+        myParams = Collections.unmodifiableList(theParams);
+        myQueryTimestamp = theQueryTimestamp;
+        myElapsedTime = theElapsedTime;
+        myStackTrace = theStackTraceElements;
+        mySize = theSize;
+        myLanguage = theLanguage;
+        myRequestPartitionId = theRequestPartitionId;
+    }
 
-	public RequestPartitionId getRequestPartitionId() {
-		return myRequestPartitionId;
-	}
+    public RequestPartitionId getRequestPartitionId() {
+        return myRequestPartitionId;
+    }
 
-	public String getNamespace() {
-		return myNamespace;
-	}
+    public String getNamespace() {
+        return myNamespace;
+    }
 
-	public long getQueryTimestamp() {
-		return myQueryTimestamp;
-	}
+    public long getQueryTimestamp() {
+        return myQueryTimestamp;
+    }
 
-	public long getElapsedTime() {
-		return myElapsedTime;
-	}
+    public long getElapsedTime() {
+        return myElapsedTime;
+    }
 
-	public String getThreadName() {
-		return myThreadName;
-	}
+    public String getThreadName() {
+        return myThreadName;
+    }
 
-	public String getSql(boolean theInlineParams, boolean theFormat) {
-		return getSql(theInlineParams, theFormat, false);
-	}
+    public String getSql(boolean theInlineParams, boolean theFormat) {
+        return getSql(theInlineParams, theFormat, false);
+    }
 
-	public LanguageEnum getLanguage() {
-		return myLanguage;
-	}
+    public LanguageEnum getLanguage() {
+        return myLanguage;
+    }
 
-	public String getSql(boolean theInlineParams, boolean theFormat, boolean theSanitizeParams) {
-		String retVal = mySql;
-		if (theFormat) {
-			if (getLanguage() == LanguageEnum.SQL) {
-				retVal = new BasicFormatterImpl().format(retVal);
+    public String getSql(boolean theInlineParams, boolean theFormat, boolean theSanitizeParams) {
+        String retVal = mySql;
+        if (theFormat) {
+            if (getLanguage() == LanguageEnum.SQL) {
+                retVal = new BasicFormatterImpl().format(retVal);
 
-				// BasicFormatterImpl annoyingly adds a newline at the very start of its output
-				while (retVal.startsWith("\n")) {
-					retVal = retVal.substring(1);
-				}
-			}
-		}
+                // BasicFormatterImpl annoyingly adds a newline at the very start of its output
+                while (retVal.startsWith("\n")) {
+                    retVal = retVal.substring(1);
+                }
+            }
+        }
 
-		if (theInlineParams) {
-			List<String> nextParams = new ArrayList<>(myParams);
-			int idx = 0;
-			while (nextParams.size() > 0) {
-				idx = retVal.indexOf("?", idx);
-				if (idx == -1) {
-					break;
-				}
-				String nextParamValue = nextParams.remove(0);
-				if (theSanitizeParams) {
-					nextParamValue = UrlUtil.sanitizeUrlPart(nextParamValue);
-				}
-				String nextSubstitution = "'" + nextParamValue + "'";
-				retVal = retVal.substring(0, idx) + nextSubstitution + retVal.substring(idx + 1);
-				idx += nextSubstitution.length();
-			}
-		}
+        if (theInlineParams) {
+            List<String> nextParams = new ArrayList<>(myParams);
+            int idx = 0;
+            while (nextParams.size() > 0) {
+                idx = retVal.indexOf("?", idx);
+                if (idx == -1) {
+                    break;
+                }
+                String nextParamValue = nextParams.remove(0);
+                if (theSanitizeParams) {
+                    nextParamValue = UrlUtil.sanitizeUrlPart(nextParamValue);
+                }
+                String nextSubstitution = "'" + nextParamValue + "'";
+                retVal = retVal.substring(0, idx) + nextSubstitution + retVal.substring(idx + 1);
+                idx += nextSubstitution.length();
+            }
+        }
 
-		return trim(retVal);
-	}
+        return trim(retVal);
+    }
 
-	public StackTraceElement[] getStackTrace() {
-		return myStackTrace;
-	}
+    public StackTraceElement[] getStackTrace() {
+        return myStackTrace;
+    }
 
-	public int getSize() {
-		return mySize;
-	}
+    public int getSize() {
+        return mySize;
+    }
 
-	@Override
-	public String toString() {
-		return getSql(true, true);
-	}
+    @Override
+    public String toString() {
+        return getSql(true, true);
+    }
 
-	public enum LanguageEnum {
-
-		SQL,
-		JSON
-
-	}
+    public enum LanguageEnum {
+        SQL,
+        JSON
+    }
 }

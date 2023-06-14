@@ -19,9 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,77 +28,81 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ActiveSubscriptionCache {
-	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscriptionCache.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscriptionCache.class);
 
-	private final Map<String, ActiveSubscription> myCache = new ConcurrentHashMap<>();
+    private final Map<String, ActiveSubscription> myCache = new ConcurrentHashMap<>();
 
-	public ActiveSubscription get(String theIdPart) {
-		return myCache.get(theIdPart);
-	}
+    public ActiveSubscription get(String theIdPart) {
+        return myCache.get(theIdPart);
+    }
 
-	public Collection<ActiveSubscription> getAll() {
-		return Collections.unmodifiableCollection(myCache.values());
-	}
+    public Collection<ActiveSubscription> getAll() {
+        return Collections.unmodifiableCollection(myCache.values());
+    }
 
-	public int size() {
-		return myCache.size();
-	}
+    public int size() {
+        return myCache.size();
+    }
 
-	public void put(String theSubscriptionId, ActiveSubscription theActiveSubscription) {
-		myCache.put(theSubscriptionId, theActiveSubscription);
-	}
+    public void put(String theSubscriptionId, ActiveSubscription theActiveSubscription) {
+        myCache.put(theSubscriptionId, theActiveSubscription);
+    }
 
-	public synchronized ActiveSubscription remove(String theSubscriptionId) {
-		Validate.notBlank(theSubscriptionId);
+    public synchronized ActiveSubscription remove(String theSubscriptionId) {
+        Validate.notBlank(theSubscriptionId);
 
-		ActiveSubscription activeSubscription = myCache.get(theSubscriptionId);
-		if (activeSubscription == null) {
-			return null;
-		}
+        ActiveSubscription activeSubscription = myCache.get(theSubscriptionId);
+        if (activeSubscription == null) {
+            return null;
+        }
 
-		myCache.remove(theSubscriptionId);
-		return activeSubscription;
-	}
+        myCache.remove(theSubscriptionId);
+        return activeSubscription;
+    }
 
-	List<String> markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(Collection<String> theAllIds) {
-		List<String> retval = new ArrayList<>();
-		for (String next : new ArrayList<>(myCache.keySet())) {
-			ActiveSubscription activeSubscription = myCache.get(next);
-			if (theAllIds.contains(next)) {
-				// In case we got a false positive from a race condition on a previous sync, unset the flag.
-				activeSubscription.setFlagForDeletion(false);
-			} else {
-				if (activeSubscription.isFlagForDeletion()) {
-					ourLog.info("Unregistering Subscription/{}", next);
-					retval.add(next);
-				} else {
-					activeSubscription.setFlagForDeletion(true);
-				}
-			}
-		}
-		return retval;
-	}
+    List<String> markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(
+            Collection<String> theAllIds) {
+        List<String> retval = new ArrayList<>();
+        for (String next : new ArrayList<>(myCache.keySet())) {
+            ActiveSubscription activeSubscription = myCache.get(next);
+            if (theAllIds.contains(next)) {
+                // In case we got a false positive from a race condition on a previous sync, unset
+                // the flag.
+                activeSubscription.setFlagForDeletion(false);
+            } else {
+                if (activeSubscription.isFlagForDeletion()) {
+                    ourLog.info("Unregistering Subscription/{}", next);
+                    retval.add(next);
+                } else {
+                    activeSubscription.setFlagForDeletion(true);
+                }
+            }
+        }
+        return retval;
+    }
 
-	/**
-	 * R4B and R5 only
-	 * @param theTopic
-	 * @return a list of all subscriptions that are subscribed to the given topic
-	 */
-	public List<ActiveSubscription> getTopicSubscriptionsForTopic(String theTopic) {
-		assert !isBlank(theTopic);
-		return getAll().stream()
-			.filter(as -> as.getSubscription().isTopicSubscription())
-			.filter(as -> theTopic.equals(as.getSubscription().getTopic()))
-			.collect(Collectors.toList());
-	}
+    /**
+     * R4B and R5 only
+     *
+     * @param theTopic
+     * @return a list of all subscriptions that are subscribed to the given topic
+     */
+    public List<ActiveSubscription> getTopicSubscriptionsForTopic(String theTopic) {
+        assert !isBlank(theTopic);
+        return getAll().stream()
+                .filter(as -> as.getSubscription().isTopicSubscription())
+                .filter(as -> theTopic.equals(as.getSubscription().getTopic()))
+                .collect(Collectors.toList());
+    }
 
-	public List<ActiveSubscription> getAllNonTopicSubscriptions() {
-		return getAll().stream()
-			.filter(as -> !as.getSubscription().isTopicSubscription())
-			.collect(Collectors.toList());
-	}
+    public List<ActiveSubscription> getAllNonTopicSubscriptions() {
+        return getAll().stream()
+                .filter(as -> !as.getSubscription().isTopicSubscription())
+                .collect(Collectors.toList());
+    }
 }

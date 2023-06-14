@@ -23,39 +23,40 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ModifiableBundleEntry {
-	private final BundleEntryParts myBundleEntryParts;
-	private final BundleEntryMutator myBundleEntryMutator;
+    private final BundleEntryParts myBundleEntryParts;
+    private final BundleEntryMutator myBundleEntryMutator;
 
-	public ModifiableBundleEntry(BundleEntryParts theBundleEntryParts, BundleEntryMutator theBundleEntryMutator) {
-		myBundleEntryParts = theBundleEntryParts;
-		myBundleEntryMutator = theBundleEntryMutator;
-	}
+    public ModifiableBundleEntry(
+            BundleEntryParts theBundleEntryParts, BundleEntryMutator theBundleEntryMutator) {
+        myBundleEntryParts = theBundleEntryParts;
+        myBundleEntryMutator = theBundleEntryMutator;
+    }
 
-	BundleEntryParts getBundleEntryParts() {
-		return myBundleEntryParts;
-	}
+    BundleEntryParts getBundleEntryParts() {
+        return myBundleEntryParts;
+    }
 
-	public void setRequestUrl(FhirContext theFhirContext, String theRequestUrl) {
-		myBundleEntryMutator.setRequestUrl(theFhirContext, theRequestUrl);
-	}
+    public void setRequestUrl(FhirContext theFhirContext, String theRequestUrl) {
+        myBundleEntryMutator.setRequestUrl(theFhirContext, theRequestUrl);
+    }
 
-	public String getFullUrl() {
-		return myBundleEntryParts.getFullUrl();
-	}
+    public String getFullUrl() {
+        return myBundleEntryParts.getFullUrl();
+    }
 
-	public String getRequestUrl() {
-		return myBundleEntryParts.getUrl();
-	}
+    public String getRequestUrl() {
+        return myBundleEntryParts.getUrl();
+    }
 
-	public IBaseResource getResource() {
-		return myBundleEntryParts.getResource();
-	}
+    public IBaseResource getResource() {
+        return myBundleEntryParts.getResource();
+    }
 
-	public void setFullUrl(String theFullUrl) {
-		myBundleEntryMutator.setFullUrl(theFullUrl);
-	}
+    public void setFullUrl(String theFullUrl) {
+        myBundleEntryMutator.setFullUrl(theFullUrl);
+    }
 
-	public void setResource(IBaseResource theUpdatedResource) {
-		myBundleEntryMutator.setResource(theUpdatedResource);
-	}
+    public void setResource(IBaseResource theUpdatedResource) {
+        myBundleEntryMutator.setResource(theUpdatedResource);
+    }
 }

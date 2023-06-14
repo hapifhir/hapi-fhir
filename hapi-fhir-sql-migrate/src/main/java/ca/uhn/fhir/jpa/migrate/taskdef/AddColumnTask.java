@@ -21,79 +21,105 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import java.sql.SQLException;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
-import java.util.Set;
-
 public class AddColumnTask extends BaseTableColumnTypeTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
 
-	public AddColumnTask() {
-		this(null, null);
-		setDryRun(true);
-		myCheckForExistingTables = false;
-	}
+    public AddColumnTask() {
+        this(null, null);
+        setDryRun(true);
+        myCheckForExistingTables = false;
+    }
 
-	public AddColumnTask(String theProductVersion, String theSchemaVersion) {
-		super(theProductVersion, theSchemaVersion);
-	}
+    public AddColumnTask(String theProductVersion, String theSchemaVersion) {
+        super(theProductVersion, theSchemaVersion);
+    }
 
-	@Override
-	public void validate() {
-		super.validate();
-		setDescription("Add column " + getColumnName() + " on table " + getTableName());
-	}
+    @Override
+    public void validate() {
+        super.validate();
+        setDescription("Add column " + getColumnName() + " on table " + getTableName());
+    }
 
-	@Override
-	public void doExecute() throws SQLException {
-		if (myCheckForExistingTables) {
-			Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
-			if (columnNames.contains(getColumnName())) {
-				logInfo(ourLog, "Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
-				return;
-			}
-		}
+    @Override
+    public void doExecute() throws SQLException {
+        if (myCheckForExistingTables) {
+            Set<String> columnNames =
+                    JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
+            if (columnNames.contains(getColumnName())) {
+                logInfo(
+                        ourLog,
+                        "Column {} already exists on table {} - No action performed",
+                        getColumnName(),
+                        getTableName());
+                return;
+            }
+        }
 
-		String typeStatement = getTypeStatement();
+        String typeStatement = getTypeStatement();
 
-		String sql;
-		switch (getDriverType()) {
-			case MYSQL_5_7:
-			case MARIADB_10_1:
-				// Quote the column name as "SYSTEM" is a reserved word in MySQL
-				sql = "alter table " + getTableName() + " add column `" + getColumnName() + "` " + typeStatement;
-				break;
-			case DERBY_EMBEDDED:
-			case POSTGRES_9_4:
-				sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + typeStatement;
-				break;
-			case MSSQL_2012:
-			case ORACLE_12C:
-			case H2_EMBEDDED:
-				sql = "alter table " + getTableName() + " add " + getColumnName() + " " + typeStatement;
-				break;
-			default:
-				throw new IllegalStateException(Msg.code(60));
-		}
+        String sql;
+        switch (getDriverType()) {
+            case MYSQL_5_7:
+            case MARIADB_10_1:
+                // Quote the column name as "SYSTEM" is a reserved word in MySQL
+                sql =
+                        "alter table "
+                                + getTableName()
+                                + " add column `"
+                                + getColumnName()
+                                + "` "
+                                + typeStatement;
+                break;
+            case DERBY_EMBEDDED:
+            case POSTGRES_9_4:
+                sql =
+                        "alter table "
+                                + getTableName()
+                                + " add column "
+                                + getColumnName()
+                                + " "
+                                + typeStatement;
+                break;
+            case MSSQL_2012:
+            case ORACLE_12C:
+            case H2_EMBEDDED:
+                sql =
+                        "alter table "
+                                + getTableName()
+                                + " add "
+                                + getColumnName()
+                                + " "
+                                + typeStatement;
+                break;
+            default:
+                throw new IllegalStateException(Msg.code(60));
+        }
 
-		logInfo(ourLog, "Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
-		executeSql(getTableName(), sql);
-	}
+        logInfo(
+                ourLog,
+                "Adding column {} of type {} to table {}",
+                getColumnName(),
+                getSqlType(),
+                getTableName());
+        executeSql(getTableName(), sql);
+    }
 
-	public String getTypeStatement() {
-		String type = getSqlType();
-		String nullable = getSqlNotNull();
-		if (isNullable()) {
-			nullable = "";
-		}
-		if (myPrettyPrint) {
-			nullable = nullable.trim();
-		}
-		String space = isNullable() ? "" : " ";
-		return type + space + nullable;
-	}
-
+    public String getTypeStatement() {
+        String type = getSqlType();
+        String nullable = getSqlNotNull();
+        if (isNullable()) {
+            nullable = "";
+        }
+        if (myPrettyPrint) {
+            nullable = nullable.trim();
+        }
+        String space = isNullable() ? "" : " ";
+        return type + space + nullable;
+    }
 }

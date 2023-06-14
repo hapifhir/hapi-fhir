@@ -21,90 +21,103 @@ package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.annotation.Nonnull;
 
 public class JobWorkNotification implements IModelJson {
 
-	@JsonProperty(value = "jobDefinitionId")
-	private String myJobDefinitionId;
+    @JsonProperty(value = "jobDefinitionId")
+    private String myJobDefinitionId;
 
-	@JsonProperty(value = "jobDefinitionVersion")
-	private int myJobDefinitionVersion;
+    @JsonProperty(value = "jobDefinitionVersion")
+    private int myJobDefinitionVersion;
 
-	@JsonProperty(value = "targetStepId")
-	private String myTargetStepId;
+    @JsonProperty(value = "targetStepId")
+    private String myTargetStepId;
 
-	@JsonProperty(value = "chunkId")
-	private String myChunkId;
+    @JsonProperty(value = "chunkId")
+    private String myChunkId;
 
-	@JsonProperty(value = "instanceId")
-	private String myInstanceId;
+    @JsonProperty(value = "instanceId")
+    private String myInstanceId;
 
-	public JobWorkNotification() {
-	}
+    public JobWorkNotification() {}
 
-	public JobWorkNotification(@Nonnull String theJobDefinitionId, int jobDefinitionVersion, @Nonnull String theInstanceId, @Nonnull String theTargetStepId, @Nonnull String theChunkId) {
-		setJobDefinitionId(theJobDefinitionId);
-		setJobDefinitionVersion(jobDefinitionVersion);
-		setChunkId(theChunkId);
-		setInstanceId(theInstanceId);
-		setTargetStepId(theTargetStepId);
-	}
-
-    public JobWorkNotification(JobInstance theInstance, String theNextStepId, String theNextChunkId) {
-		this(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion(), theInstance.getInstanceId(), theNextStepId, theNextChunkId);
+    public JobWorkNotification(
+            @Nonnull String theJobDefinitionId,
+            int jobDefinitionVersion,
+            @Nonnull String theInstanceId,
+            @Nonnull String theTargetStepId,
+            @Nonnull String theChunkId) {
+        setJobDefinitionId(theJobDefinitionId);
+        setJobDefinitionVersion(jobDefinitionVersion);
+        setChunkId(theChunkId);
+        setInstanceId(theInstanceId);
+        setTargetStepId(theTargetStepId);
     }
 
-    public static JobWorkNotification firstStepNotification(JobDefinition<?> theJobDefinition, String theInstanceId, String theChunkId) {
-		String firstStepId = theJobDefinition.getFirstStepId();
-		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
-		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
-		return new JobWorkNotification(jobDefinitionId, jobDefinitionVersion, theInstanceId, firstStepId, theChunkId);
-	}
+    public JobWorkNotification(
+            JobInstance theInstance, String theNextStepId, String theNextChunkId) {
+        this(
+                theInstance.getJobDefinitionId(),
+                theInstance.getJobDefinitionVersion(),
+                theInstance.getInstanceId(),
+                theNextStepId,
+                theNextChunkId);
+    }
 
-	public String getJobDefinitionId() {
-		return myJobDefinitionId;
-	}
+    public static JobWorkNotification firstStepNotification(
+            JobDefinition<?> theJobDefinition, String theInstanceId, String theChunkId) {
+        String firstStepId = theJobDefinition.getFirstStepId();
+        String jobDefinitionId = theJobDefinition.getJobDefinitionId();
+        int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
+        return new JobWorkNotification(
+                jobDefinitionId, jobDefinitionVersion, theInstanceId, firstStepId, theChunkId);
+    }
 
-	public void setJobDefinitionId(String theJobDefinitionId) {
-		myJobDefinitionId = theJobDefinitionId;
-	}
+    public String getJobDefinitionId() {
+        return myJobDefinitionId;
+    }
 
-	public int getJobDefinitionVersion() {
-		return myJobDefinitionVersion;
-	}
+    public void setJobDefinitionId(String theJobDefinitionId) {
+        myJobDefinitionId = theJobDefinitionId;
+    }
 
-	public void setJobDefinitionVersion(int theJobDefinitionVersion) {
-		myJobDefinitionVersion = theJobDefinitionVersion;
-	}
+    public int getJobDefinitionVersion() {
+        return myJobDefinitionVersion;
+    }
 
-	public String getTargetStepId() {
-		return myTargetStepId;
-	}
+    public void setJobDefinitionVersion(int theJobDefinitionVersion) {
+        myJobDefinitionVersion = theJobDefinitionVersion;
+    }
 
-	public void setTargetStepId(String theTargetStepId) {
-		myTargetStepId = theTargetStepId;
-	}
+    public String getTargetStepId() {
+        return myTargetStepId;
+    }
 
-	public String getChunkId() {
-		return myChunkId;
-	}
+    public void setTargetStepId(String theTargetStepId) {
+        myTargetStepId = theTargetStepId;
+    }
 
-	public void setChunkId(String theChunkId) {
-		myChunkId = theChunkId;
-	}
+    public String getChunkId() {
+        return myChunkId;
+    }
 
-	public void setInstanceId(String theInstanceId) {
-		myInstanceId = theInstanceId;
-	}
+    public void setChunkId(String theChunkId) {
+        myChunkId = theChunkId;
+    }
 
-	public String getInstanceId() {
-		return myInstanceId;
-	}
+    public void setInstanceId(String theInstanceId) {
+        myInstanceId = theInstanceId;
+    }
 
-	@Override
-	public String toString() {
-		return String.format("job[%s] instance[%s] step[%s] chunk[%s]", myJobDefinitionId, myInstanceId, myTargetStepId, myChunkId);
-	}
+    public String getInstanceId() {
+        return myInstanceId;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "job[%s] instance[%s] step[%s] chunk[%s]",
+                myJobDefinitionId, myInstanceId, myTargetStepId, myChunkId);
+    }
 }

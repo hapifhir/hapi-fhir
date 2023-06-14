@@ -19,48 +19,51 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Set;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Set;
 import javax.annotation.Nonnull;
 
-public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody {
+public class DeleteMethodBinding
+        extends BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody {
 
-	public DeleteMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, theProvider, Delete.class, theMethod.getAnnotation(Delete.class).type());
-	}
+    public DeleteMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+        super(
+                theMethod,
+                theContext,
+                theProvider,
+                Delete.class,
+                theMethod.getAnnotation(Delete.class).type());
+    }
 
-	@Nonnull
-	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return RestOperationTypeEnum.DELETE;
-	}
+    @Nonnull
+    @Override
+    public RestOperationTypeEnum getRestOperationType() {
+        return RestOperationTypeEnum.DELETE;
+    }
 
-	@Override
-	protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
-		return Collections.singleton(RequestTypeEnum.DELETE);
-	}
+    @Override
+    protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
+        return Collections.singleton(RequestTypeEnum.DELETE);
+    }
 
-	@Override
-	protected boolean allowVoidReturnType() {
-		return true;
-	}
+    @Override
+    protected boolean allowVoidReturnType() {
+        return true;
+    }
 
-	@Override
-	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
-		theParams[getIdParameterIndex()] = theRequest.getId();
-	}
+    @Override
+    protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
+        theParams[getIdParameterIndex()] = theRequest.getId();
+    }
 
-	@Override
-	protected String getMatchingOperation() {
-		return null;
-	}
-
+    @Override
+    protected String getMatchingOperation() {
+        return null;
+    }
 }

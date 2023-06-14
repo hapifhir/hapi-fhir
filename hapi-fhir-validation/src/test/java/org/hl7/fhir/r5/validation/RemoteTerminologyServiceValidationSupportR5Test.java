@@ -11,25 +11,31 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class RemoteTerminologyServiceValidationSupportR5Test {
-	private static final String ANY_NONBLANK_VALUE = "anything";
-	private static FhirContext ourCtx = FhirContext.forR5Cached();
-	@RegisterExtension
-	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
+    private static final String ANY_NONBLANK_VALUE = "anything";
+    private static FhirContext ourCtx = FhirContext.forR5Cached();
 
-	private RemoteTerminologyServiceValidationSupport mySvc;
+    @RegisterExtension
+    public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
-	@BeforeEach
-	public void before() {
-		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
-		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
-		mySvc.setBaseUrl(baseUrl);
-	}
+    private RemoteTerminologyServiceValidationSupport mySvc;
 
-	@Test
-	public void testLookupCode_R5_ThrowsException() {
-		Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-			IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(
-				new ValidationSupportContext(ourCtx.getValidationSupport()), ANY_NONBLANK_VALUE, ANY_NONBLANK_VALUE);
-		});
-	}
+    @BeforeEach
+    public void before() {
+        String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
+        mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
+        mySvc.setBaseUrl(baseUrl);
+    }
+
+    @Test
+    public void testLookupCode_R5_ThrowsException() {
+        Assertions.assertThrows(
+                UnsupportedOperationException.class,
+                () -> {
+                    IValidationSupport.LookupCodeResult outcome =
+                            mySvc.lookupCode(
+                                    new ValidationSupportContext(ourCtx.getValidationSupport()),
+                                    ANY_NONBLANK_VALUE,
+                                    ANY_NONBLANK_VALUE);
+                });
+    }
 }

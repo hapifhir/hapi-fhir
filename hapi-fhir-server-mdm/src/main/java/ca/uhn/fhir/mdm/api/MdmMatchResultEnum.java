@@ -21,36 +21,29 @@ package ca.uhn.fhir.mdm.api;
 
 public enum MdmMatchResultEnum {
 
-	/**
-	 * Manually confirmed to not be a match.
-	 */
-	NO_MATCH,
+    /** Manually confirmed to not be a match. */
+    NO_MATCH,
 
-	/**
-	 * Enough of a match to warrant manual review.
-	 */
-	POSSIBLE_MATCH,
+    /** Enough of a match to warrant manual review. */
+    POSSIBLE_MATCH,
 
-	/**
-	 * Strong enough match to consider matched.
-	 */
-	MATCH,
+    /** Strong enough match to consider matched. */
+    MATCH,
 
-	/**
-	 * Link between two Golden Records resources indicating they may be duplicates.
-	 */
-	POSSIBLE_DUPLICATE,
+    /** Link between two Golden Records resources indicating they may be duplicates. */
+    POSSIBLE_DUPLICATE,
 
-	/**
-	 * Link between Golden Record and Source Resource pointing to the Golden Record for that Source Resource
-	 */
-	GOLDEN_RECORD,
+    /**
+     * Link between Golden Record and Source Resource pointing to the Golden Record for that Source
+     * Resource
+     */
+    GOLDEN_RECORD,
 
-	/**
-	 * Link between two Golden Resources resulting from a merge. One golden resource is deactivated. The inactive golden
-	 * resource points to the active golden resource after the merge. The source resource points to the inactive golden
-	 * resource after the merge.
-	 */
-	REDIRECT
-	// Stored in database as ORDINAL.  Only add new values to bottom!
+    /**
+     * Link between two Golden Resources resulting from a merge. One golden resource is deactivated.
+     * The inactive golden resource points to the active golden resource after the merge. The source
+     * resource points to the inactive golden resource after the merge.
+     */
+    REDIRECT
+    // Stored in database as ORDINAL.  Only add new values to bottom!
 }

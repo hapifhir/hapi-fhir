@@ -30,36 +30,33 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriAndListParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public class ResourceMetaParams {
-	/**
-	 * These are parameters which are supported by searches
-	 */
-	public static final Map<String, Class<? extends IQueryParameterAnd<?>>> RESOURCE_META_AND_PARAMS;
-	/**
-	 * These are parameters which are supported by searches
-	 */
-	public static final Map<String, Class<? extends IQueryParameterType>> RESOURCE_META_PARAMS;
+    /** These are parameters which are supported by searches */
+    public static final Map<String, Class<? extends IQueryParameterAnd<?>>>
+            RESOURCE_META_AND_PARAMS;
 
-	static {
-		Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<>();
-		Map<String, Class<? extends IQueryParameterAnd<?>>> resourceMetaAndParams = new HashMap<>();
-		resourceMetaParams.put(IAnyResource.SP_RES_ID, StringParam.class);
-		resourceMetaAndParams.put(IAnyResource.SP_RES_ID, StringAndListParam.class);
-		resourceMetaParams.put(Constants.PARAM_TAG, TokenParam.class);
-		resourceMetaAndParams.put(Constants.PARAM_TAG, TokenAndListParam.class);
-		resourceMetaParams.put(Constants.PARAM_PROFILE, UriParam.class);
-		resourceMetaAndParams.put(Constants.PARAM_PROFILE, UriAndListParam.class);
-		resourceMetaParams.put(Constants.PARAM_SECURITY, TokenParam.class);
-		resourceMetaAndParams.put(Constants.PARAM_SECURITY, TokenAndListParam.class);
-		resourceMetaParams.put(Constants.PARAM_HAS, HasParam.class);
-		resourceMetaAndParams.put(Constants.PARAM_HAS, HasAndListParam.class);
-		RESOURCE_META_PARAMS = Collections.unmodifiableMap(resourceMetaParams);
-		RESOURCE_META_AND_PARAMS = Collections.unmodifiableMap(resourceMetaAndParams);
-	}
+    /** These are parameters which are supported by searches */
+    public static final Map<String, Class<? extends IQueryParameterType>> RESOURCE_META_PARAMS;
+
+    static {
+        Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<>();
+        Map<String, Class<? extends IQueryParameterAnd<?>>> resourceMetaAndParams = new HashMap<>();
+        resourceMetaParams.put(IAnyResource.SP_RES_ID, StringParam.class);
+        resourceMetaAndParams.put(IAnyResource.SP_RES_ID, StringAndListParam.class);
+        resourceMetaParams.put(Constants.PARAM_TAG, TokenParam.class);
+        resourceMetaAndParams.put(Constants.PARAM_TAG, TokenAndListParam.class);
+        resourceMetaParams.put(Constants.PARAM_PROFILE, UriParam.class);
+        resourceMetaAndParams.put(Constants.PARAM_PROFILE, UriAndListParam.class);
+        resourceMetaParams.put(Constants.PARAM_SECURITY, TokenParam.class);
+        resourceMetaAndParams.put(Constants.PARAM_SECURITY, TokenAndListParam.class);
+        resourceMetaParams.put(Constants.PARAM_HAS, HasParam.class);
+        resourceMetaAndParams.put(Constants.PARAM_HAS, HasAndListParam.class);
+        RESOURCE_META_PARAMS = Collections.unmodifiableMap(resourceMetaParams);
+        RESOURCE_META_AND_PARAMS = Collections.unmodifiableMap(resourceMetaAndParams);
+    }
 }

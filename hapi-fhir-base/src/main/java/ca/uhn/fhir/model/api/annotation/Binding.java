@@ -24,15 +24,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Field annotation for fields which are bound to a given valueset
- */
+/** Field annotation for fields which are bound to a given valueset */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = { ElementType.FIELD })
+@Target(value = {ElementType.FIELD})
 public @interface Binding {
 
-	/**
-	 * The canonical URL of the valueset
-	 */
-	String valueSet();
+    /** The canonical URL of the valueset */
+    String valueSet();
 }

@@ -26,19 +26,19 @@ import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
 public class JpaHapiTransactionService extends HapiTransactionService {
 
-	private volatile Boolean myCustomIsolationSupported;
+    private volatile Boolean myCustomIsolationSupported;
 
-	@Override
-	public boolean isCustomIsolationSupported() {
-		if (myCustomIsolationSupported == null) {
-			if (myTransactionManager instanceof JpaTransactionManager) {
-				JpaDialect jpaDialect = ((JpaTransactionManager) myTransactionManager).getJpaDialect();
-				myCustomIsolationSupported = (jpaDialect instanceof HibernateJpaDialect);
-			} else {
-				myCustomIsolationSupported = false;
-			}
-		}
-		return myCustomIsolationSupported;
-	}
-
+    @Override
+    public boolean isCustomIsolationSupported() {
+        if (myCustomIsolationSupported == null) {
+            if (myTransactionManager instanceof JpaTransactionManager) {
+                JpaDialect jpaDialect =
+                        ((JpaTransactionManager) myTransactionManager).getJpaDialect();
+                myCustomIsolationSupported = (jpaDialect instanceof HibernateJpaDialect);
+            } else {
+                myCustomIsolationSupported = false;
+            }
+        }
+        return myCustomIsolationSupported;
+    }
 }

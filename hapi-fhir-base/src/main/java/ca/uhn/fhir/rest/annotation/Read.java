@@ -19,54 +19,53 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import java.lang.annotation.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import java.lang.annotation.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * RESTful method annotation to be used for the FHIR <a href="http://hl7.org/implement/standards/fhir/http.html#read">read</a> and <a
+ * RESTful method annotation to be used for the FHIR <a
+ * href="http://hl7.org/implement/standards/fhir/http.html#read">read</a> and <a
  * href="http://hl7.org/implement/standards/fhir/http.html#vread">vread</a> method.
- * 
- * <p>
- * If this method has a parameter annotated with the {@link IdParam} annotation and a parameter annotated with the {@link VersionIdParam} annotation, the method will be treated as a vread method. If
- * the method has only a parameter annotated with the {@link IdParam} annotation, it will be treated as a read operation.
- * the
- * </p>
- * <p>
- * If you wish for your server to support both read and vread operations, you will need
- * two methods annotated with this annotation.
- * </p>
+ *
+ * <p>If this method has a parameter annotated with the {@link IdParam} annotation and a parameter
+ * annotated with the {@link VersionIdParam} annotation, the method will be treated as a vread
+ * method. If the method has only a parameter annotated with the {@link IdParam} annotation, it will
+ * be treated as a read operation. the
+ *
+ * <p>If you wish for your server to support both read and vread operations, you will need two
+ * methods annotated with this annotation.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Read {
 
-	/**
-	 * The return type for this method. This generally does not need to be populated for IResourceProvider in a server implementation, but often does need to be populated in
-	 * client implementations using {@link IBasicClient} or {@link IRestfulClient}, or in plain providers on a server.
-	 * <p>
-	 * This value also does not need to be populated if the return type for a method annotated with this annotation is sufficient to determine the type of resource provided. E.g. if the method returns
-	 * <code>Patient</code> or <code>List&lt;Patient&gt;</code>, the server/client will automatically determine that the Patient resource is the return type, and this value may be left blank.
-	 * </p>
-	 */
-	// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
-	Class<? extends IBaseResource> type() default IBaseResource.class;
+    /**
+     * The return type for this method. This generally does not need to be populated for
+     * IResourceProvider in a server implementation, but often does need to be populated in client
+     * implementations using {@link IBasicClient} or {@link IRestfulClient}, or in plain providers
+     * on a server.
+     *
+     * <p>This value also does not need to be populated if the return type for a method annotated
+     * with this annotation is sufficient to determine the type of resource provided. E.g. if the
+     * method returns <code>Patient</code> or <code>List&lt;Patient&gt;</code>, the server/client
+     * will automatically determine that the Patient resource is the return type, and this value may
+     * be left blank.
+     */
+    // NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
+    Class<? extends IBaseResource> type() default IBaseResource.class;
 
-	/**
-	 * This method allows the return type for this method to be specified in a
-	 * non-type-specific way, using the text name of the resource, e.g. "Patient".
-	 *
-	 * This attribute should be populate, or {@link #type()} should be, but not both.
-	 *
-	 * @since 5.4.0
-	 */
-	String typeName() default "";
+    /**
+     * This method allows the return type for this method to be specified in a non-type-specific
+     * way, using the text name of the resource, e.g. "Patient".
+     *
+     * <p>This attribute should be populate, or {@link #type()} should be, but not both.
+     *
+     * @since 5.4.0
+     */
+    String typeName() default "";
 
-	/**
-	 * If set to true (default is false), this method supports vread operation as well as read
-	 */
-	boolean version() default false;
+    /** If set to true (default is false), this method supports vread operation as well as read */
+    boolean version() default false;
 }

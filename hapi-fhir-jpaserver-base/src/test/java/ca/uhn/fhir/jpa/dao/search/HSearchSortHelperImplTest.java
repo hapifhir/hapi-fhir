@@ -1,11 +1,20 @@
 package ca.uhn.fhir.jpa.dao.search;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import java.util.List;
+import java.util.Optional;
 import org.hamcrest.Matchers;
 import org.hibernate.search.engine.search.sort.dsl.CompositeSortComponentsStep;
 import org.hibernate.search.engine.search.sort.dsl.FieldSortMissingValueBehaviorStep;
@@ -19,111 +28,110 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"rawtypes", "unchecked"})
 class HSearchSortHelperImplTest {
 
-	@InjectMocks
-	@Spy private HSearchSortHelperImpl tested;
+    @InjectMocks @Spy private HSearchSortHelperImpl tested;
 
-	@Mock private ISearchParamRegistry mockSearchParamRegistry;
-	@Mock private ResourceSearchParams mockResourceSearchParams;
-	@Mock private RuntimeSearchParam mockRuntimeSearchParam;
+    @Mock private ISearchParamRegistry mockSearchParamRegistry;
+    @Mock private ResourceSearchParams mockResourceSearchParams;
+    @Mock private RuntimeSearchParam mockRuntimeSearchParam;
 
-	@Mock private SearchSortFactory mockSearchSortFactory;
-	@Mock private CompositeSortComponentsStep mockCompositeSortComponentsStep;
-	@Mock private FieldSortOptionsStep mockFieldSortOptionsStep;
-	@Mock private SortFinalStep mockSortFinalStep;
-	@Mock private FieldSortMissingValueBehaviorStep mockFieldSortMissingValueBehaviorStep;
+    @Mock private SearchSortFactory mockSearchSortFactory;
+    @Mock private CompositeSortComponentsStep mockCompositeSortComponentsStep;
+    @Mock private FieldSortOptionsStep mockFieldSortOptionsStep;
+    @Mock private SortFinalStep mockSortFinalStep;
+    @Mock private FieldSortMissingValueBehaviorStep mockFieldSortMissingValueBehaviorStep;
 
+    /** Validates gets from map theParamType and replaces '*' in name by theParamName */
+    @Test
+    void testGetSortPropertyList() {
+        SortSpec sortSpec = new SortSpec();
+        sortSpec.setParamName("_tag");
 
+        List<String> sortPropertyList =
+                tested.getSortPropertyList(RestSearchParameterTypeEnum.TOKEN, "the-param-name");
 
-	/**
-	 * Validates gets from map theParamType and replaces '*' in name by theParamName
-	 */
-	@Test
-	void testGetSortPropertyList() {
-		SortSpec sortSpec = new SortSpec();
-		sortSpec.setParamName("_tag");
+        assertThat(
+                sortPropertyList,
+                Matchers.contains(
+                        "nsp.the-param-name.token.system", "nsp.the-param-name.token.code"));
+    }
 
-		List<String> sortPropertyList = tested.getSortPropertyList(RestSearchParameterTypeEnum.TOKEN, "the-param-name");
+    /**
+     * Validates invokes SearchParamRegistry.getActiveSearchParams for received resourceTypeName and
+     * returns the RuntimeSearchParam for the param name
+     */
+    @Test
+    void testGetParamType() {
+        SortSpec sortSpec = new SortSpec();
+        sortSpec.setParamName("_tag");
+        when(mockSearchParamRegistry.getActiveSearchParams("Observation"))
+                .thenReturn(mockResourceSearchParams);
+        when(mockResourceSearchParams.get("the-param-name")).thenReturn(mockRuntimeSearchParam);
+        when(mockRuntimeSearchParam.getParamType()).thenReturn(RestSearchParameterTypeEnum.TOKEN);
 
-		assertThat(sortPropertyList, Matchers.contains("nsp.the-param-name.token.system", "nsp.the-param-name.token.code"));
-	}
+        Optional<RestSearchParameterTypeEnum> paramType =
+                tested.getParamType("Observation", "the-param-name");
 
-	/**
-	 * Validates invokes SearchParamRegistry.getActiveSearchParams for received resourceTypeName and returns the
-	 * RuntimeSearchParam for the param name
-	 */
-	@Test
-	void testGetParamType() {
-		SortSpec sortSpec = new SortSpec();
-		sortSpec.setParamName("_tag");
-		when(mockSearchParamRegistry.getActiveSearchParams("Observation")).thenReturn(mockResourceSearchParams);
-		when(mockResourceSearchParams.get("the-param-name")).thenReturn(mockRuntimeSearchParam);
-		when(mockRuntimeSearchParam.getParamType()).thenReturn(RestSearchParameterTypeEnum.TOKEN);
+        verify(mockSearchParamRegistry, times(1)).getActiveSearchParams("Observation");
+        verify(mockResourceSearchParams, times(1)).get("the-param-name");
+        assertFalse(paramType.isEmpty());
+    }
 
-		Optional<RestSearchParameterTypeEnum> paramType = tested.getParamType("Observation", "the-param-name");
+    @Test
+    void testGetSortClause() {
+        SortSpec sortSpec = new SortSpec();
+        sortSpec.setParamName("_tag");
+        sortSpec.setOrder(SortOrderEnum.DESC);
+        doReturn(Optional.of(RestSearchParameterTypeEnum.TOKEN))
+                .when(tested)
+                .getParamType("Observation", "_tag");
+        doReturn(List.of("aaa._tag.bbb.ccc", "ddd._tag.eee.fff"))
+                .when(tested)
+                .getSortPropertyList(RestSearchParameterTypeEnum.TOKEN, "_tag");
+        when(mockSearchSortFactory.composite()).thenReturn(mockCompositeSortComponentsStep);
+        when(mockSearchSortFactory.field("aaa._tag.bbb.ccc")).thenReturn(mockFieldSortOptionsStep);
+        when(mockSearchSortFactory.field("ddd._tag.eee.fff")).thenReturn(mockFieldSortOptionsStep);
+        when(mockFieldSortOptionsStep.missing()).thenReturn(mockFieldSortMissingValueBehaviorStep);
 
-		verify(mockSearchParamRegistry, times(1)).getActiveSearchParams("Observation");
-		verify(mockResourceSearchParams, times(1)).get("the-param-name");
-		assertFalse(paramType.isEmpty());
-	}
+        Optional<SortFinalStep> sortFieldStepOpt =
+                tested.getSortClause(mockSearchSortFactory, sortSpec, "Observation");
 
-	@Test
-	void testGetSortClause() {
-		SortSpec sortSpec = new SortSpec();
-		sortSpec.setParamName("_tag");
-		sortSpec.setOrder(SortOrderEnum.DESC);
-		doReturn(Optional.of(RestSearchParameterTypeEnum.TOKEN)).when(tested).getParamType("Observation", "_tag");
-		doReturn(List.of("aaa._tag.bbb.ccc", "ddd._tag.eee.fff")).when(tested).getSortPropertyList(RestSearchParameterTypeEnum.TOKEN, "_tag");
-		when(mockSearchSortFactory.composite()).thenReturn(mockCompositeSortComponentsStep);
-		when(mockSearchSortFactory.field("aaa._tag.bbb.ccc")).thenReturn(mockFieldSortOptionsStep);
-		when(mockSearchSortFactory.field("ddd._tag.eee.fff")).thenReturn(mockFieldSortOptionsStep);
-		when(mockFieldSortOptionsStep.missing()).thenReturn(mockFieldSortMissingValueBehaviorStep);
+        assertFalse(sortFieldStepOpt.isEmpty());
+        verify(mockSearchSortFactory, times(1)).composite();
+        verify(mockSearchSortFactory, times(1)).field("aaa._tag.bbb.ccc");
+        verify(mockSearchSortFactory, times(1)).field("ddd._tag.eee.fff");
+        verify(mockFieldSortOptionsStep, times(2)).desc();
+        verify(mockFieldSortMissingValueBehaviorStep, times(2)).last();
+    }
 
-		Optional<SortFinalStep> sortFieldStepOpt = tested.getSortClause(mockSearchSortFactory, sortSpec, "Observation");
+    @Test
+    void testGetSortClauses() {
+        SortSpec sortSpec = new SortSpec();
+        sortSpec.setParamName("_tag");
 
-		assertFalse(sortFieldStepOpt.isEmpty());
-		verify(mockSearchSortFactory, times(1)).composite();
-		verify(mockSearchSortFactory, times(1)).field("aaa._tag.bbb.ccc");
-		verify(mockSearchSortFactory, times(1)).field("ddd._tag.eee.fff");
-		verify(mockFieldSortOptionsStep, times(2)).desc();
-		verify(mockFieldSortMissingValueBehaviorStep, times(2)).last();
-	}
+        SortSpec sortSpec2 = new SortSpec();
+        sortSpec2.setParamName("param-name-B");
+        sortSpec2.setOrder(SortOrderEnum.ASC);
 
-	@Test
-	void testGetSortClauses() {
-		SortSpec sortSpec = new SortSpec();
-		sortSpec.setParamName("_tag");
+        sortSpec.setChain(sortSpec2);
 
-		SortSpec sortSpec2 = new SortSpec();
-		sortSpec2.setParamName("param-name-B");
-		sortSpec2.setOrder(SortOrderEnum.ASC);
+        when(mockSearchSortFactory.composite()).thenReturn(mockCompositeSortComponentsStep);
+        doReturn(Optional.of(mockSortFinalStep))
+                .when(tested)
+                .getSortClause(mockSearchSortFactory, sortSpec, "Observation");
+        doReturn(Optional.of(mockSortFinalStep))
+                .when(tested)
+                .getSortClause(mockSearchSortFactory, sortSpec2, "Observation");
 
-		sortSpec.setChain(sortSpec2);
+        SortFinalStep sortFinalStep =
+                tested.getSortClauses(mockSearchSortFactory, sortSpec, "Observation");
 
-		when(mockSearchSortFactory.composite()).thenReturn(mockCompositeSortComponentsStep);
-		doReturn(Optional.of(mockSortFinalStep)).when(tested).getSortClause(mockSearchSortFactory, sortSpec, "Observation");
-		doReturn(Optional.of(mockSortFinalStep)).when(tested).getSortClause(mockSearchSortFactory, sortSpec2, "Observation");
-
-		SortFinalStep sortFinalStep = tested.getSortClauses(mockSearchSortFactory, sortSpec, "Observation");
-
-		verify(mockSearchSortFactory, times(1)).composite();
-		verify(tested, times(1)).getSortClause(mockSearchSortFactory, sortSpec, "Observation");
-		verify(tested, times(1)).getSortClause(mockSearchSortFactory, sortSpec2, "Observation");
-		verify(mockCompositeSortComponentsStep, times(2)).add(mockSortFinalStep);
-
-	}
-
+        verify(mockSearchSortFactory, times(1)).composite();
+        verify(tested, times(1)).getSortClause(mockSearchSortFactory, sortSpec, "Observation");
+        verify(tested, times(1)).getSortClause(mockSearchSortFactory, sortSpec2, "Observation");
+        verify(mockCompositeSortComponentsStep, times(2)).add(mockSortFinalStep);
+    }
 }

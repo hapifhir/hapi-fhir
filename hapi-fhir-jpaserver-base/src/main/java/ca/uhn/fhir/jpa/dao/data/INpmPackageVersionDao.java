@@ -20,25 +20,29 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+public interface INpmPackageVersionDao
+        extends JpaRepository<NpmPackageVersionEntity, Long>, IHapiFhirJpaRepository {
 
-public interface INpmPackageVersionDao extends JpaRepository<NpmPackageVersionEntity, Long>, IHapiFhirJpaRepository {
+    @Query("SELECT p FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id")
+    Collection<NpmPackageVersionEntity> findByPackageId(@Param("id") String thePackageId);
 
-	@Query("SELECT p FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id")
-	Collection<NpmPackageVersionEntity> findByPackageId(@Param("id") String thePackageId);
+    @Query(
+            "SELECT p FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND p.myVersionId ="
+                    + " :version")
+    Optional<NpmPackageVersionEntity> findByPackageIdAndVersion(
+            @Param("id") String thePackageId, @Param("version") String thePackageVersion);
 
-	@Query("SELECT p FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND p.myVersionId = :version")
-	Optional<NpmPackageVersionEntity> findByPackageIdAndVersion(@Param("id") String thePackageId, @Param("version") String thePackageVersion);
-
-	/**
-	 * Uses a "like" expression on the version ID
-	 */
-	@Query("SELECT p.myVersionId FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND p.myVersionId like :version")
-	List<String> findVersionIdsByPackageIdAndLikeVersion(@Param("id") String theId, @Param("version") String thePartialVersionString);
+    /** Uses a "like" expression on the version ID */
+    @Query(
+            "SELECT p.myVersionId FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND"
+                    + " p.myVersionId like :version")
+    List<String> findVersionIdsByPackageIdAndLikeVersion(
+            @Param("id") String theId, @Param("version") String thePartialVersionString);
 }

@@ -19,21 +19,20 @@
  */
 package ca.uhn.fhir.jpa.config.dstu3;
 
+import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.configureFhirContext;
+
 import ca.uhn.fhir.context.FhirContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.configureFhirContext;
-
 public class FhirContextDstu3Config {
-	@Primary
-	@Bean(name = "primaryFhirContext")
-	public FhirContext fhirContextDstu3() {
-		FhirContext retVal = FhirContext.forDstu3();
+    @Primary
+    @Bean(name = "primaryFhirContext")
+    public FhirContext fhirContextDstu3() {
+        FhirContext retVal = FhirContext.forDstu3();
 
-		configureFhirContext(retVal);
+        configureFhirContext(retVal);
 
-		return retVal;
-	}
-
+        return retVal;
+    }
 }

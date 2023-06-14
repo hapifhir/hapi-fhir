@@ -27,63 +27,59 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.Validate;
 
 /**
- * HTTP interceptor to be used for adding HTTP Authorization using "bearer tokens" to requests. Bearer tokens are used for protocols such as OAUTH2 (see the
- * <a href="http://tools.ietf.org/html/rfc6750">RFC 6750</a> specification on bearer token usage for more information).
- * <p>
- * This interceptor adds a header resembling the following:<br>
+ * HTTP interceptor to be used for adding HTTP Authorization using "bearer tokens" to requests.
+ * Bearer tokens are used for protocols such as OAUTH2 (see the <a
+ * href="http://tools.ietf.org/html/rfc6750">RFC 6750</a> specification on bearer token usage for
+ * more information).
+ *
+ * <p>This interceptor adds a header resembling the following:<br>
  * &nbsp;&nbsp;&nbsp;<code>Authorization: Bearer dsfu9sd90fwp34.erw0-reu</code><br>
  * where the token portion (at the end of the header) is supplied by the invoking code.
- * </p>
- * <p>
- * See the <a href="https://hapifhir.io/hapi-fhir/docs/interceptors/built_in_client_interceptors.html">HAPI Documentation</a> for information on how to use this class.
- * </p>
+ *
+ * <p>See the <a
+ * href="https://hapifhir.io/hapi-fhir/docs/interceptors/built_in_client_interceptors.html">HAPI
+ * Documentation</a> for information on how to use this class.
  */
 public class BearerTokenAuthInterceptor implements IClientInterceptor {
 
-	private String myToken;
+    private String myToken;
 
-	/**
-	 * Constructor. If this constructor is used, a token must be supplied later
-	 */
-	@CoverageIgnore
-	public BearerTokenAuthInterceptor() {
-		// nothing
-	}
+    /** Constructor. If this constructor is used, a token must be supplied later */
+    @CoverageIgnore
+    public BearerTokenAuthInterceptor() {
+        // nothing
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param theToken
-	 *           The bearer token to use (must not be null)
-	 */
-	public BearerTokenAuthInterceptor(String theToken) {
-		Validate.notNull(theToken, "theToken must not be null");
-		myToken = theToken;
-	}
+    /**
+     * Constructor
+     *
+     * @param theToken The bearer token to use (must not be null)
+     */
+    public BearerTokenAuthInterceptor(String theToken) {
+        Validate.notNull(theToken, "theToken must not be null");
+        myToken = theToken;
+    }
 
-	/**
-	 * Returns the bearer token to use
-	 */
-	public String getToken() {
-		return myToken;
-	}
+    /** Returns the bearer token to use */
+    public String getToken() {
+        return myToken;
+    }
 
-	@Override
-	public void interceptRequest(IHttpRequest theRequest) {
-		theRequest.addHeader(Constants.HEADER_AUTHORIZATION, (Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + myToken));
-	}
+    @Override
+    public void interceptRequest(IHttpRequest theRequest) {
+        theRequest.addHeader(
+                Constants.HEADER_AUTHORIZATION,
+                (Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + myToken));
+    }
 
-	@Override
-	public void interceptResponse(IHttpResponse theResponse) {
-		// nothing
-	}
+    @Override
+    public void interceptResponse(IHttpResponse theResponse) {
+        // nothing
+    }
 
-	/**
-	 * Sets the bearer token to use
-	 */
-	public void setToken(String theToken) {
-		Validate.notNull(theToken, "theToken must not be null");
-		myToken = theToken;
-	}
-
+    /** Sets the bearer token to use */
+    public void setToken(String theToken) {
+        Validate.notNull(theToken, "theToken must not be null");
+        myToken = theToken;
+    }
 }

@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.model.cross;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-
 import java.util.Date;
 
 public class JpaResourceLookup implements IResourceLookup {
@@ -28,7 +27,7 @@ public class JpaResourceLookup implements IResourceLookup {
     private final Long myResourcePid;
     private final Date myDeletedAt;
 
-	public JpaResourceLookup(String theResourceType, Long theResourcePid, Date theDeletedAt) {
+    public JpaResourceLookup(String theResourceType, Long theResourcePid, Date theDeletedAt) {
         myResourceType = theResourceType;
         myResourcePid = theResourcePid;
         myDeletedAt = theDeletedAt;
@@ -44,8 +43,8 @@ public class JpaResourceLookup implements IResourceLookup {
         return myDeletedAt;
     }
 
-	@Override
-	public JpaPid getPersistentId() {
-		return JpaPid.fromId(myResourcePid);
-	}
+    @Override
+    public JpaPid getPersistentId() {
+        return JpaPid.fromId(myResourcePid);
+    }
 }

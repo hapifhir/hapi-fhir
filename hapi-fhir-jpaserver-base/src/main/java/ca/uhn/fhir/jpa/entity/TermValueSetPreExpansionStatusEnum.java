@@ -24,53 +24,64 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This enum is used to indicate the pre-expansion status of a given ValueSet in the terminology tables. In this context,
- * an expanded ValueSet has its included concepts stored in the terminology tables as well.
+ * This enum is used to indicate the pre-expansion status of a given ValueSet in the terminology
+ * tables. In this context, an expanded ValueSet has its included concepts stored in the terminology
+ * tables as well.
  */
 public enum TermValueSetPreExpansionStatusEnum {
-	/*
-	 * Sorting agnostic.
-	 */
+    /*
+     * Sorting agnostic.
+     */
 
-	NOT_EXPANDED("notExpanded", "The ValueSet is waiting to be picked up and pre-expanded by a scheduled task."),
-	EXPANSION_IN_PROGRESS("expansionInProgress", "The ValueSet has been picked up by a scheduled task and pre-expansion is in progress."),
-	EXPANDED("expanded", "The ValueSet has been picked up by a scheduled task and pre-expansion is complete."),
-	FAILED_TO_EXPAND("failedToExpand", "The ValueSet has been picked up by a scheduled task and pre-expansion has failed.");
+    NOT_EXPANDED(
+            "notExpanded",
+            "The ValueSet is waiting to be picked up and pre-expanded by a scheduled task."),
+    EXPANSION_IN_PROGRESS(
+            "expansionInProgress",
+            "The ValueSet has been picked up by a scheduled task and pre-expansion is in"
+                    + " progress."),
+    EXPANDED(
+            "expanded",
+            "The ValueSet has been picked up by a scheduled task and pre-expansion is complete."),
+    FAILED_TO_EXPAND(
+            "failedToExpand",
+            "The ValueSet has been picked up by a scheduled task and pre-expansion has failed.");
 
-	private static Map<String, TermValueSetPreExpansionStatusEnum> ourValues;
-	private String myCode;
-	private String myDescription;
+    private static Map<String, TermValueSetPreExpansionStatusEnum> ourValues;
+    private String myCode;
+    private String myDescription;
 
-	TermValueSetPreExpansionStatusEnum(String theCode, String theDescription) {
-		myCode = theCode;
-		myDescription = theDescription;
-	}
+    TermValueSetPreExpansionStatusEnum(String theCode, String theDescription) {
+        myCode = theCode;
+        myDescription = theDescription;
+    }
 
-	public String getCode() {
-		return myCode;
-	}
+    public String getCode() {
+        return myCode;
+    }
 
-	public String getDescription() {
-		return myDescription;
-	}
+    public String getDescription() {
+        return myDescription;
+    }
 
-	public static TermValueSetPreExpansionStatusEnum fromCode(String theCode) {
-		if (ourValues == null) {
-			HashMap<String, TermValueSetPreExpansionStatusEnum> values = new HashMap<String, TermValueSetPreExpansionStatusEnum>();
-			for (TermValueSetPreExpansionStatusEnum next : values()) {
-				values.put(next.getCode(), next);
-			}
-			ourValues = Collections.unmodifiableMap(values);
-		}
-		return ourValues.get(theCode);
-	}
+    public static TermValueSetPreExpansionStatusEnum fromCode(String theCode) {
+        if (ourValues == null) {
+            HashMap<String, TermValueSetPreExpansionStatusEnum> values =
+                    new HashMap<String, TermValueSetPreExpansionStatusEnum>();
+            for (TermValueSetPreExpansionStatusEnum next : values()) {
+                values.put(next.getCode(), next);
+            }
+            ourValues = Collections.unmodifiableMap(values);
+        }
+        return ourValues.get(theCode);
+    }
 
-	/**
-	 * Convert from Enum ordinal to Enum type.
-	 *
-	 * Usage:
-	 *
-	 * <code>TermValueSetExpansionStatusEnum termValueSetExpansionStatusEnum = TermValueSetExpansionStatusEnum.values[ordinal];</code>
-	 */
-	public static final TermValueSetPreExpansionStatusEnum values[] = values();
+    /**
+     * Convert from Enum ordinal to Enum type.
+     *
+     * <p>Usage: <code>
+     * TermValueSetExpansionStatusEnum termValueSetExpansionStatusEnum = TermValueSetExpansionStatusEnum.values[ordinal];
+     * </code>
+     */
+    public static final TermValueSetPreExpansionStatusEnum values[] = values();
 }

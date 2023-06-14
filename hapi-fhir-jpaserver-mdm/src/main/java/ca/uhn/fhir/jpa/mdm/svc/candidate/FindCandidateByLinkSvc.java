@@ -23,42 +23,47 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class FindCandidateByLinkSvc extends BaseCandidateFinder {
-	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+    private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	/**
-	 * Attempt to find a currently matching Golden Resource, based on the presence of an {@link IMdmLink} entity.
-	 *
-	 * @param theTarget the {@link IAnyResource} that we want to find candidate Golden Resources for.
-	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
-	 */
-	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
-		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
+    /**
+     * Attempt to find a currently matching Golden Resource, based on the presence of an {@link
+     * IMdmLink} entity.
+     *
+     * @param theTarget the {@link IAnyResource} that we want to find candidate Golden Resources
+     *     for.
+     * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
+     */
+    @Override
+    protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+            IAnyResource theTarget) {
+        List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
-		IResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTarget);
-		if (targetPid != null) {
-			Optional<? extends IMdmLink> oLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(targetPid);
-			if (oLink.isPresent()) {
-				IResourcePersistentId goldenResourcePid = oLink.get().getGoldenResourcePersistenceId();
-				ourLog.debug("Resource previously linked. Using existing link.");
-					retval.add(new MatchedGoldenResourceCandidate(goldenResourcePid, oLink.get()));
-			}
-		}
-		return retval;
-	}
+        IResourcePersistentId targetPid =
+                myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTarget);
+        if (targetPid != null) {
+            Optional<? extends IMdmLink> oLink =
+                    myMdmLinkDaoSvc.getMatchedLinkForSourcePid(targetPid);
+            if (oLink.isPresent()) {
+                IResourcePersistentId goldenResourcePid =
+                        oLink.get().getGoldenResourcePersistenceId();
+                ourLog.debug("Resource previously linked. Using existing link.");
+                retval.add(new MatchedGoldenResourceCandidate(goldenResourcePid, oLink.get()));
+            }
+        }
+        return retval;
+    }
 
-	@Override
-	protected CandidateStrategyEnum getStrategy() {
-		return CandidateStrategyEnum.LINK;
-	}
+    @Override
+    protected CandidateStrategyEnum getStrategy() {
+        return CandidateStrategyEnum.LINK;
+    }
 }

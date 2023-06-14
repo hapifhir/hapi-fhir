@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.mdm.svc;
 
+import static ca.uhn.fhir.mdm.api.IMdmSettings.EMPI_CHANNEL_NAME;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -34,47 +36,58 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 
-import static ca.uhn.fhir.mdm.api.IMdmSettings.EMPI_CHANNEL_NAME;
-
 /**
- * This class is responsible for manual submissions of {@link IAnyResource} resources onto the MDM Channel.
+ * This class is responsible for manual submissions of {@link IAnyResource} resources onto the MDM
+ * Channel.
  */
 public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
-	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+    private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	private MessageChannel myMdmChannelProducer;
+    private MessageChannel myMdmChannelProducer;
 
-	private FhirContext myFhirContext;
+    private FhirContext myFhirContext;
 
-	private IChannelFactory myChannelFactory;
+    private IChannelFactory myChannelFactory;
 
-	@Override
-	public void submitResourceToMdmChannel(IBaseResource theResource) {
-		ResourceModifiedJsonMessage resourceModifiedJsonMessage = new ResourceModifiedJsonMessage();
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, theResource, ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED, null, (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
-		resourceModifiedMessage.setOperationType(ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED);
-		resourceModifiedJsonMessage.setPayload(resourceModifiedMessage);
-		boolean success = getMdmChannelProducer().send(resourceModifiedJsonMessage);
-		if (!success) {
-			ourLog.error("Failed to submit {} to MDM Channel.", resourceModifiedMessage.getPayloadId());
-		}
-	}
+    @Override
+    public void submitResourceToMdmChannel(IBaseResource theResource) {
+        ResourceModifiedJsonMessage resourceModifiedJsonMessage = new ResourceModifiedJsonMessage();
+        ResourceModifiedMessage resourceModifiedMessage =
+                new ResourceModifiedMessage(
+                        myFhirContext,
+                        theResource,
+                        ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED,
+                        null,
+                        (RequestPartitionId)
+                                theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+        resourceModifiedMessage.setOperationType(
+                ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED);
+        resourceModifiedJsonMessage.setPayload(resourceModifiedMessage);
+        boolean success = getMdmChannelProducer().send(resourceModifiedJsonMessage);
+        if (!success) {
+            ourLog.error(
+                    "Failed to submit {} to MDM Channel.", resourceModifiedMessage.getPayloadId());
+        }
+    }
 
-	@Autowired
-	public MdmChannelSubmitterSvcImpl(FhirContext theFhirContext, IChannelFactory theIChannelFactory) {
-		myFhirContext = theFhirContext;
-		myChannelFactory = theIChannelFactory;
-	}
+    @Autowired
+    public MdmChannelSubmitterSvcImpl(
+            FhirContext theFhirContext, IChannelFactory theIChannelFactory) {
+        myFhirContext = theFhirContext;
+        myChannelFactory = theIChannelFactory;
+    }
 
-	private void init() {
-		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
-		myMdmChannelProducer = myChannelFactory.getOrCreateProducer(EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
-	}
+    private void init() {
+        ChannelProducerSettings channelSettings = new ChannelProducerSettings();
+        myMdmChannelProducer =
+                myChannelFactory.getOrCreateProducer(
+                        EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
+    }
 
-	private MessageChannel getMdmChannelProducer() {
-		if (myMdmChannelProducer == null) {
-			init();
-		}
-		return myMdmChannelProducer;
-	}
+    private MessageChannel getMdmChannelProducer() {
+        if (myMdmChannelProducer == null) {
+            init();
+        }
+        return myMdmChannelProducer;
+    }
 }

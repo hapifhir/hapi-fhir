@@ -23,55 +23,57 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Schema(description = "Represents an NPM package installation response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+        creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PackageInstallOutcomeJson {
 
-	@JsonProperty("messages")
-	private List<String> myMessage;
+    @JsonProperty("messages")
+    private List<String> myMessage;
 
-	@JsonProperty("resourcesInstalled")
-	private Map<String, Integer> myResourcesInstalled;
+    @JsonProperty("resourcesInstalled")
+    private Map<String, Integer> myResourcesInstalled;
 
+    public List<String> getMessage() {
+        if (myMessage == null) {
+            myMessage = new ArrayList<>();
+        }
+        return myMessage;
+    }
 
+    public Map<String, Integer> getResourcesInstalled() {
+        if (myResourcesInstalled == null) {
+            myResourcesInstalled = new HashMap<>();
+        }
+        return myResourcesInstalled;
+    }
 
-	public List<String> getMessage() {
-		if (myMessage == null) {
-			myMessage = new ArrayList<>();
-		}
-		return myMessage;
-	}
+    public void incrementResourcesInstalled(String theResourceType) {
+        Integer existing = getResourcesInstalled().get(theResourceType);
+        if (existing == null) {
+            getResourcesInstalled().put(theResourceType, 1);
+        } else {
+            getResourcesInstalled().put(theResourceType, existing + 1);
+        }
+    }
 
-	public Map<String, Integer> getResourcesInstalled() {
-		if (myResourcesInstalled == null) {
-			myResourcesInstalled = new HashMap<>();
-		}
-		return myResourcesInstalled;
-	}
-
-	public void incrementResourcesInstalled(String theResourceType) {
-		Integer existing = getResourcesInstalled().get(theResourceType);
-		if (existing == null) {
-			getResourcesInstalled().put(theResourceType, 1);
-		} else {
-			getResourcesInstalled().put(theResourceType, existing + 1);
-		}
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("message", myMessage)
-			.append("resourcesInstalled", myResourcesInstalled)
-			.toString();
-	}
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("message", myMessage)
+                .append("resourcesInstalled", myResourcesInstalled)
+                .toString();
+    }
 }

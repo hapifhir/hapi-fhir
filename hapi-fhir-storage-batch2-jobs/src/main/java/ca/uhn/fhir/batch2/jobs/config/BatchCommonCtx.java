@@ -29,13 +29,16 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.context.annotation.Bean;
 
 public class BatchCommonCtx {
-	@Bean
-	UrlPartitioner urlPartitioner(MatchUrlService theMatchUrlService, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new UrlPartitioner(theMatchUrlService, theRequestPartitionHelperSvc);
-	}
+    @Bean
+    UrlPartitioner urlPartitioner(
+            MatchUrlService theMatchUrlService,
+            IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+        return new UrlPartitioner(theMatchUrlService, theRequestPartitionHelperSvc);
+    }
 
-	@Bean
-	public IBatch2JobRunner batch2JobRunner(IJobCoordinator theJobCoordinator, FhirContext theFhirContext) {
-		return new Batch2JobRunnerImpl(theJobCoordinator, theFhirContext);
-	}
+    @Bean
+    public IBatch2JobRunner batch2JobRunner(
+            IJobCoordinator theJobCoordinator, FhirContext theFhirContext) {
+        return new Batch2JobRunnerImpl(theJobCoordinator, theFhirContext);
+    }
 }

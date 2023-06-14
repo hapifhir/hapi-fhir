@@ -19,75 +19,78 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
-import org.apache.commons.csv.CSVRecord;
-
-import javax.annotation.Nonnull;
-import java.util.List;
-
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import java.util.List;
+import javax.annotation.Nonnull;
+import org.apache.commons.csv.CSVRecord;
+
 public class LoincLinguisticVariantsHandler implements IZipContentsHandlerCsv {
 
-	private final List<LinguisticVariant> myLinguisticVariants;
+    private final List<LinguisticVariant> myLinguisticVariants;
 
-	public LoincLinguisticVariantsHandler(List<LinguisticVariant> thelinguisticVariants) {
-		myLinguisticVariants = thelinguisticVariants;
-	}
+    public LoincLinguisticVariantsHandler(List<LinguisticVariant> thelinguisticVariants) {
+        myLinguisticVariants = thelinguisticVariants;
+    }
 
-	@Override
-	public void accept(CSVRecord theRecord) {
-		
-		String id = trim(theRecord.get("ID"));
-		if (isBlank(id)) {
-			return;
-		}
+    @Override
+    public void accept(CSVRecord theRecord) {
 
-		String isoLanguage = trim(theRecord.get("ISO_LANGUAGE"));
-		if (isBlank(isoLanguage)) {
-			return;
-		}
-		
-		String isoCountry = trim(theRecord.get("ISO_COUNTRY"));
-		if (isBlank(isoCountry)) {
-			return;
-		}
-		
-		String languageName = trim(theRecord.get("LANGUAGE_NAME"));
-		if (isBlank(languageName)) {
-			return;
-		}
-		
-		LinguisticVariant linguisticVariant = new LinguisticVariant(id, isoLanguage, isoCountry, languageName);
-		myLinguisticVariants.add(linguisticVariant);
-	}
+        String id = trim(theRecord.get("ID"));
+        if (isBlank(id)) {
+            return;
+        }
 
-	public static class LinguisticVariant {
+        String isoLanguage = trim(theRecord.get("ISO_LANGUAGE"));
+        if (isBlank(isoLanguage)) {
+            return;
+        }
 
-		private String myId;
-		private String myIsoLanguage;
-		private String myIsoCountry;
-		private String myLanguageName;
+        String isoCountry = trim(theRecord.get("ISO_COUNTRY"));
+        if (isBlank(isoCountry)) {
+            return;
+        }
 
-		public LinguisticVariant(@Nonnull String theId, @Nonnull String theIsoLanguage, @Nonnull String theIsoCountry, @Nonnull String theLanguageName) {
-			this.myId = theId;
-			this.myIsoLanguage = theIsoLanguage;
-			this.myIsoCountry = theIsoCountry;
-			this.myLanguageName = theLanguageName;
-		}
+        String languageName = trim(theRecord.get("LANGUAGE_NAME"));
+        if (isBlank(languageName)) {
+            return;
+        }
 
-		public String getLinguisticVariantFileName() {
-			return myIsoLanguage + myIsoCountry + myId + "LinguisticVariant.csv";
-		}
+        LinguisticVariant linguisticVariant =
+                new LinguisticVariant(id, isoLanguage, isoCountry, languageName);
+        myLinguisticVariants.add(linguisticVariant);
+    }
 
-		public String getLanguageName() {
-			return myLanguageName;
-		}
-		
-		public String getLanguageCode() {
-			return myIsoLanguage + "-" + myIsoCountry;
-		}
-	}
+    public static class LinguisticVariant {
 
+        private String myId;
+        private String myIsoLanguage;
+        private String myIsoCountry;
+        private String myLanguageName;
+
+        public LinguisticVariant(
+                @Nonnull String theId,
+                @Nonnull String theIsoLanguage,
+                @Nonnull String theIsoCountry,
+                @Nonnull String theLanguageName) {
+            this.myId = theId;
+            this.myIsoLanguage = theIsoLanguage;
+            this.myIsoCountry = theIsoCountry;
+            this.myLanguageName = theLanguageName;
+        }
+
+        public String getLinguisticVariantFileName() {
+            return myIsoLanguage + myIsoCountry + myId + "LinguisticVariant.csv";
+        }
+
+        public String getLanguageName() {
+            return myLanguageName;
+        }
+
+        public String getLanguageCode() {
+            return myIsoLanguage + "-" + myIsoCountry;
+        }
+    }
 }

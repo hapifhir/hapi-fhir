@@ -25,21 +25,20 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 public class EmptyFieldMatcher implements IMdmFieldMatcher {
 
-	public EmptyFieldMatcher() {
-	}
+    public EmptyFieldMatcher() {}
 
-	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-		for (IBase b : new IBase[] {theLeftBase, theRightBase}) {
-			if (b != null && !b.isEmpty()) {
-				return false;
-			}
-		}
-		return true;
-	}
+    @Override
+    public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+        for (IBase b : new IBase[] {theLeftBase, theRightBase}) {
+            if (b != null && !b.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	@Override
-	public boolean isMatchingEmptyFields() {
-		return true;
-	}
+    @Override
+    public boolean isMatchingEmptyFields() {
+        return true;
+    }
 }

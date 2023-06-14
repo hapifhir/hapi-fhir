@@ -21,25 +21,25 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
-public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
+public interface IForcedIdDao
+        extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
 
-	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid IN (:resource_pids)")
-	List<ForcedId> findAllByResourcePid(@Param("resource_pids") List<Long> theResourcePids);
+    @Query("SELECT f FROM ForcedId f WHERE f.myResourcePid IN (:resource_pids)")
+    List<ForcedId> findAllByResourcePid(@Param("resource_pids") List<Long> theResourcePids);
 
-	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
-	Optional<ForcedId> findByResourcePid(@Param("resource_pid") Long theResourcePid);
+    @Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
+    Optional<ForcedId> findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
-	@Modifying
-	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")
-	void deleteByPid(@Param("pid") Long theId);
+    @Modifying
+    @Query("DELETE FROM ForcedId t WHERE t.myId = :pid")
+    void deleteByPid(@Param("pid") Long theId);
 }

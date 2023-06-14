@@ -19,40 +19,42 @@
  */
 package ca.uhn.fhir.jpa.term.custom;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
+
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.util.ValidateUtil;
-import org.apache.commons.csv.CSVRecord;
-
 import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import org.apache.commons.csv.CSVRecord;
 
 public class HierarchyHandler implements IZipContentsHandlerCsv {
 
-	public static final String PARENT = "PARENT";
-	public static final String CHILD = "CHILD";
-	private final Map<String, TermConcept> myCode2Concept;
+    public static final String PARENT = "PARENT";
+    public static final String CHILD = "CHILD";
+    private final Map<String, TermConcept> myCode2Concept;
 
-	public HierarchyHandler(Map<String, TermConcept> theCode2concept) {
-		myCode2Concept = theCode2concept;
-	}
+    public HierarchyHandler(Map<String, TermConcept> theCode2concept) {
+        myCode2Concept = theCode2concept;
+    }
 
-	@Override
-	public void accept(CSVRecord theRecord) {
-		String parent = trim(theRecord.get(PARENT));
-		String child = trim(theRecord.get(CHILD));
-		if (isNotBlank(parent) && isNotBlank(child)) {
+    @Override
+    public void accept(CSVRecord theRecord) {
+        String parent = trim(theRecord.get(PARENT));
+        String child = trim(theRecord.get(CHILD));
+        if (isNotBlank(parent) && isNotBlank(child)) {
 
-			TermConcept childConcept = myCode2Concept.get(child);
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(childConcept, "Child code %s not found in file", child);
+            TermConcept childConcept = myCode2Concept.get(child);
+            ValidateUtil.isNotNullOrThrowUnprocessableEntity(
+                    childConcept, "Child code %s not found in file", child);
 
-			TermConcept parentConcept = myCode2Concept.get(parent);
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(parentConcept, "Parent code %s not found in file", child);
+            TermConcept parentConcept = myCode2Concept.get(parent);
+            ValidateUtil.isNotNullOrThrowUnprocessableEntity(
+                    parentConcept, "Parent code %s not found in file", child);
 
-			parentConcept.addChild(childConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-		}
-	}
+            parentConcept.addChild(
+                    childConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+        }
+    }
 }

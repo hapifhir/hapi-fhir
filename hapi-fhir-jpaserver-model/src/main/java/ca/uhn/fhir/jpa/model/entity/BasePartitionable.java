@@ -19,45 +19,49 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import java.io.Serializable;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
-import java.io.Serializable;
 
 /**
- * This is the base class for entities with partitioning that does NOT include Hibernate Envers logging.
- * <p>
- * If your entity needs Envers auditing, please have it extend {@link AuditableBasePartitionable} instead.
+ * This is the base class for entities with partitioning that does NOT include Hibernate Envers
+ * logging.
+ *
+ * <p>If your entity needs Envers auditing, please have it extend {@link AuditableBasePartitionable}
+ * instead.
  */
 @MappedSuperclass
 public abstract class BasePartitionable implements Serializable {
 
+    @Embedded private PartitionablePartitionId myPartitionId;
 
-	@Embedded
-	private PartitionablePartitionId myPartitionId;
+    /** This is here to support queries only, do not set this field directly */
+    @SuppressWarnings("unused")
+    @Column(
+            name = PartitionablePartitionId.PARTITION_ID,
+            insertable = false,
+            updatable = false,
+            nullable = true)
+    private Integer myPartitionIdValue;
 
-	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
-	@SuppressWarnings("unused")
-	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
-	private Integer myPartitionIdValue;
+    @Nullable
+    public PartitionablePartitionId getPartitionId() {
+        return myPartitionId;
+    }
 
-	@Nullable
-	public PartitionablePartitionId getPartitionId() {
-		return myPartitionId;
-	}
+    public void setPartitionId(PartitionablePartitionId thePartitionId) {
+        myPartitionId = thePartitionId;
+    }
 
-	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
-	}
-
-	@Override
-	public String toString() {
-		return "BasePartitionable{" +
-			"myPartitionId=" + myPartitionId +
-			", myPartitionIdValue=" + myPartitionIdValue +
-			'}';
-	}
+    @Override
+    public String toString() {
+        return "BasePartitionable{"
+                + "myPartitionId="
+                + myPartitionId
+                + ", myPartitionIdValue="
+                + myPartitionIdValue
+                + '}';
+    }
 }

@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.rest.api.Constants;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGTH;
 
+import ca.uhn.fhir.rest.api.Constants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -34,77 +33,87 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGTH;
-
-@Table(name = "HFJ_RES_VER_PROV", indexes = {
-	@Index(name = "IDX_RESVERPROV_SOURCEURI", columnList = "SOURCE_URI"),
-	@Index(name = "IDX_RESVERPROV_REQUESTID", columnList = "REQUEST_ID"),
-	@Index(name = "IDX_RESVERPROV_RES_PID", columnList = "RES_PID")
-})
+@Table(
+        name = "HFJ_RES_VER_PROV",
+        indexes = {
+            @Index(name = "IDX_RESVERPROV_SOURCEURI", columnList = "SOURCE_URI"),
+            @Index(name = "IDX_RESVERPROV_REQUESTID", columnList = "REQUEST_ID"),
+            @Index(name = "IDX_RESVERPROV_RES_PID", columnList = "RES_PID")
+        })
 @Entity
 public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 
+    @Id
+    @Column(name = "RES_VER_PID")
+    private Long myId;
 
-	@Id
-	@Column(name = "RES_VER_PID")
-	private Long myId;
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "RES_VER_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID"), nullable = false, insertable = false, updatable = false)
-	@MapsId
-	private ResourceHistoryTable myResourceHistoryTable;
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "RES_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"), nullable = false)
-	private ResourceTable myResourceTable;
-	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
-	private String mySourceUri;
-	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
-	private String myRequestId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "RES_VER_PID",
+            referencedColumnName = "PID",
+            foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID"),
+            nullable = false,
+            insertable = false,
+            updatable = false)
+    @MapsId
+    private ResourceHistoryTable myResourceHistoryTable;
 
-	/**
-	 * Constructor
-	 */
-	public ResourceHistoryProvenanceEntity() {
-		super();
-	}
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "RES_PID",
+            referencedColumnName = "RES_ID",
+            foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"),
+            nullable = false)
+    private ResourceTable myResourceTable;
 
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("resourceId", myResourceTable.getId());
-		b.append("sourceUri", mySourceUri);
-		b.append("requestId", myRequestId);
-		return b.toString();
-	}
+    @Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
+    private String mySourceUri;
 
-	public void setResourceTable(ResourceTable theResourceTable) {
-		myResourceTable = theResourceTable;
-	}
+    @Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
+    private String myRequestId;
 
-	public void setResourceHistoryTable(ResourceHistoryTable theResourceHistoryTable) {
-		myResourceHistoryTable = theResourceHistoryTable;
-	}
+    /** Constructor */
+    public ResourceHistoryProvenanceEntity() {
+        super();
+    }
 
-	public String getSourceUri() {
-		return mySourceUri;
-	}
+    @Override
+    public String toString() {
+        ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        b.append("resourceId", myResourceTable.getId());
+        b.append("sourceUri", mySourceUri);
+        b.append("requestId", myRequestId);
+        return b.toString();
+    }
 
-	public void setSourceUri(String theSourceUri) {
-		mySourceUri = theSourceUri;
-	}
+    public void setResourceTable(ResourceTable theResourceTable) {
+        myResourceTable = theResourceTable;
+    }
 
-	public String getRequestId() {
-		return myRequestId;
-	}
+    public void setResourceHistoryTable(ResourceHistoryTable theResourceHistoryTable) {
+        myResourceHistoryTable = theResourceHistoryTable;
+    }
 
-	public void setRequestId(String theRequestId) {
-		myRequestId = theRequestId;
-	}
+    public String getSourceUri() {
+        return mySourceUri;
+    }
 
-	public Long getId() {
-		return myId;
-	}
+    public void setSourceUri(String theSourceUri) {
+        mySourceUri = theSourceUri;
+    }
 
+    public String getRequestId() {
+        return myRequestId;
+    }
 
+    public void setRequestId(String theRequestId) {
+        myRequestId = theRequestId;
+    }
+
+    public Long getId() {
+        return myId;
+    }
 }

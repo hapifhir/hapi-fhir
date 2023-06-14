@@ -1,5 +1,13 @@
 package ca.uhn.fhir.jpa.reindex;
 
+import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
+import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -21,246 +29,278 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
-import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 public class ReindexStepTest extends BaseJpaR4Test {
 
-	@Autowired
-	private ReindexStep myReindexStep;
+    @Autowired private ReindexStep myReindexStep;
 
-	@Mock
-	private IJobDataSink<VoidModel> myDataSink;
+    @Mock private IJobDataSink<VoidModel> myDataSink;
 
-	@Captor
-	private ArgumentCaptor<String> myErrorCaptor;
+    @Captor private ArgumentCaptor<String> myErrorCaptor;
 
-	@AfterEach
-	public void after() {
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-	}
+    @AfterEach
+    public void after() {
+        myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+    }
 
-	@Test
-	public void testReindex_NoActionNeeded() {
+    @Test
+    public void testReindex_NoActionNeeded() {
 
-		// Setup
+        // Setup
 
-		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
-		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
+        Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
+        Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+        ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+        data.addTypedPid("Patient", id0);
+        data.addTypedPid("Patient", id1);
 
-		// Execute
+        // Execute
 
-		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
+        myCaptureQueriesListener.clear();
+        RunOutcome outcome =
+                myReindexStep.doReindex(
+                        data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
-		// Verify
-		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
-	}
+        // Verify
+        assertEquals(2, outcome.getRecordsProcessed());
+        assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
+        assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+        myCaptureQueriesListener.logUpdateQueries();
+        assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+        assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+        assertEquals(1, myCaptureQueriesListener.getCommitCount());
+        assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+    }
 
+    @Test
+    public void testReindex_NoActionNeeded_IndexMissingFieldsEnabled() {
 
-	@Test
-	public void testReindex_NoActionNeeded_IndexMissingFieldsEnabled() {
+        // Setup
 
-		// Setup
+        myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+        Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
+        Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
-		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
-		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
+        ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+        data.addTypedPid("Patient", id0);
+        data.addTypedPid("Patient", id1);
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+        // Execute
 
-		// Execute
+        myCaptureQueriesListener.clear();
+        RunOutcome outcome =
+                myReindexStep.doReindex(
+                        data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
-		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
+        // Verify
+        assertEquals(2, outcome.getRecordsProcessed());
+        assertEquals(8, myCaptureQueriesListener.logSelectQueries().size());
+        assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+        assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+        assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+        assertEquals(1, myCaptureQueriesListener.getCommitCount());
+        assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+    }
 
-		// Verify
-		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(8, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
-	}
+    @Test
+    public void testReindex_IndexesWereMissing() {
 
+        // Setup
 
-	@Test
-	public void testReindex_IndexesWereMissing() {
+        Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
+        Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
-		// Setup
+        ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+        data.addTypedPid("Patient", id0);
+        data.addTypedPid("Patient", id1);
 
-		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
-		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
+        runInTransaction(
+                () -> {
+                    myResourceIndexedSearchParamStringDao.deleteByResourceId(id0);
+                    myResourceIndexedSearchParamTokenDao.deleteByResourceId(id0);
+                });
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+        // Execute
 
-		runInTransaction(() -> {
-			myResourceIndexedSearchParamStringDao.deleteByResourceId(id0);
-			myResourceIndexedSearchParamTokenDao.deleteByResourceId(id0);
-		});
+        myCaptureQueriesListener.clear();
+        RunOutcome outcome =
+                myReindexStep.doReindex(
+                        data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
-		// Execute
+        // Verify
+        assertEquals(2, outcome.getRecordsProcessed());
+        assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
+        // name, family, phonetic, deceased, active
+        assertEquals(5, myCaptureQueriesListener.countInsertQueries());
+        assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+        assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+        assertEquals(1, myCaptureQueriesListener.getCommitCount());
+        assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+    }
 
-		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
+    @Test
+    public void testReindex_IndexesAddedAndRemoved_IndexMissingFieldsEnabled() {
 
-		// Verify
-		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
-		// name, family, phonetic, deceased, active
-		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
-	}
+        // Setup
 
+        myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+        boolean markResourcesForReindexingUponSearchParameterChange =
+                myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
+        myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(
+                false); // if this were true, it would set up a lot of reindex jobs extraneous to
+        // the one we're trying to test
 
-	@Test
-	public void testReindex_IndexesAddedAndRemoved_IndexMissingFieldsEnabled() {
+        IIdType orgId = createOrganization(withId("ORG"));
+        Long id0 =
+                createPatient(withActiveTrue(), withFamily("SIMPSON"), withOrganization(orgId))
+                        .getIdPartAsLong();
+        Long id1 =
+                createPatient(withActiveTrue(), withFamily("FLANDERS"), withOrganization(orgId))
+                        .getIdPartAsLong();
 
-		// Setup
+        ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+        data.addTypedPid("Patient", id0);
+        data.addTypedPid("Patient", id1);
 
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-		boolean markResourcesForReindexingUponSearchParameterChange = myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);	// if this were true, it would set up a lot of reindex jobs extraneous to the one we're trying to test
+        SearchParameter sp = new SearchParameter();
+        sp.setType(Enumerations.SearchParamType.STRING);
+        sp.addBase("Patient");
+        sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+        sp.setCode("family2");
+        sp.setExpression("Patient.name.family");
+        mySearchParameterDao.create(sp);
 
-		IIdType orgId = createOrganization(withId("ORG"));
-		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON"), withOrganization(orgId)).getIdPartAsLong();
-		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS"), withOrganization(orgId)).getIdPartAsLong();
+        sp = new SearchParameter();
+        sp.setType(Enumerations.SearchParamType.REFERENCE);
+        sp.addBase("Patient");
+        sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+        sp.setCode(Patient.SP_ORGANIZATION + "2");
+        sp.setExpression("Patient.managingOrganization");
+        mySearchParameterDao.create(sp);
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+        sp = new SearchParameter();
+        sp.setType(Enumerations.SearchParamType.STRING);
+        sp.addBase("Patient");
+        sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+        sp.setCode("family");
+        sp.setExpression("Patient.name.family");
+        mySearchParameterDao.create(sp);
 
-		SearchParameter sp = new SearchParameter();
-		sp.setType(Enumerations.SearchParamType.STRING);
-		sp.addBase("Patient");
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.setCode("family2");
-		sp.setExpression("Patient.name.family");
-		mySearchParameterDao.create(sp);
+        sp = new SearchParameter();
+        sp.setType(Enumerations.SearchParamType.REFERENCE);
+        sp.addBase("Patient");
+        sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+        sp.setCode(Patient.SP_ORGANIZATION);
+        sp.setExpression("Patient.managingOrganization");
+        mySearchParameterDao.create(sp);
 
-		sp = new SearchParameter();
-		sp.setType(Enumerations.SearchParamType.REFERENCE);
-		sp.addBase("Patient");
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.setCode(Patient.SP_ORGANIZATION + "2");
-		sp.setExpression("Patient.managingOrganization");
-		mySearchParameterDao.create(sp);
+        mySearchParamRegistry.forceRefresh();
 
-		sp = new SearchParameter();
-		sp.setType(Enumerations.SearchParamType.STRING);
-		sp.addBase("Patient");
-		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		sp.setCode("family");
-		sp.setExpression("Patient.name.family");
-		mySearchParameterDao.create(sp);
+        // Execute
 
-		sp = new SearchParameter();
-		sp.setType(Enumerations.SearchParamType.REFERENCE);
-		sp.addBase("Patient");
-		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		sp.setCode(Patient.SP_ORGANIZATION);
-		sp.setExpression("Patient.managingOrganization");
-		mySearchParameterDao.create(sp);
+        myCaptureQueriesListener.clear();
+        RunOutcome outcome =
+                myReindexStep.doReindex(
+                        data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
-		mySearchParamRegistry.forceRefresh();
+        // Verify
+        assertEquals(2, outcome.getRecordsProcessed());
+        assertEquals(10, myCaptureQueriesListener.logSelectQueries().size());
+        assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+        assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
+        assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+        assertEquals(1, myCaptureQueriesListener.getCommitCount());
+        assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 
-		// Execute
+        myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(
+                markResourcesForReindexingUponSearchParameterChange);
+    }
 
-		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
+    @Test
+    public void testReindex_OneResourceReindexFailedButOthersSucceeded() {
 
-		// Verify
-		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(10, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+        // Setup
 
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(markResourcesForReindexingUponSearchParameterChange);
-	}
+        Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
+        Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
+        Long idPatientToInvalidate = createPatient().getIdPartAsLong();
+        Long idObservation =
+                createObservation(withSubject(new IdType("Patient/" + idPatientToInvalidate)))
+                        .getIdPartAsLong();
 
-	@Test
-	public void testReindex_OneResourceReindexFailedButOthersSucceeded() {
+        ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+        data.addTypedPid("Patient", id0);
+        data.addTypedPid("Patient", id1);
+        data.addTypedPid("Patient", idPatientToInvalidate);
+        data.addTypedPid("Observation", idObservation);
 
-		// Setup
+        runInTransaction(
+                () -> {
+                    // Swap in some invalid text, which will cause an error when we go to reindex
+                    assertEquals(
+                            1,
+                            myEntityManager
+                                    .createNativeQuery(
+                                            "UPDATE HFJ_RES_VER SET RES_TEXT = null WHERE RES_ID = "
+                                                    + idPatientToInvalidate)
+                                    .executeUpdate());
+                    assertEquals(
+                            1,
+                            myEntityManager
+                                    .createNativeQuery(
+                                            "UPDATE HFJ_RES_VER SET RES_TEXT_VC = 'ABCDEFG' WHERE"
+                                                    + " RES_ID = "
+                                                    + idPatientToInvalidate)
+                                    .executeUpdate());
 
-		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
-		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
-		Long idPatientToInvalidate = createPatient().getIdPartAsLong();
-		Long idObservation = createObservation(withSubject(new IdType("Patient/" + idPatientToInvalidate))).getIdPartAsLong();
+                    // Also set the current index status to errored on one, so it can be reset
+                    assertEquals(
+                            1,
+                            myEntityManager
+                                    .createNativeQuery(
+                                            "UPDATE HFJ_RESOURCE SET SP_INDEX_STATUS = 2 WHERE"
+                                                    + " RES_ID = "
+                                                    + id0)
+                                    .executeUpdate());
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
-		data.addTypedPid("Patient", idPatientToInvalidate);
-		data.addTypedPid("Observation", idObservation);
+                    myResourceIndexedSearchParamStringDao.deleteByResourceId(id0);
+                    myResourceIndexedSearchParamTokenDao.deleteByResourceId(id0);
+                });
 
-		runInTransaction(() -> {
-			// Swap in some invalid text, which will cause an error when we go to reindex
-			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_RES_VER SET RES_TEXT = null WHERE RES_ID = " + idPatientToInvalidate).executeUpdate());
-			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_RES_VER SET RES_TEXT_VC = 'ABCDEFG' WHERE RES_ID = " + idPatientToInvalidate).executeUpdate());
+        // Execute
 
-			// Also set the current index status to errored on one, so it can be reset
-			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE SET SP_INDEX_STATUS = 2 WHERE RES_ID = " + id0).executeUpdate());
+        myCaptureQueriesListener.clear();
+        RunOutcome outcome =
+                myReindexStep.doReindex(
+                        data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
-			myResourceIndexedSearchParamStringDao.deleteByResourceId(id0);
-			myResourceIndexedSearchParamTokenDao.deleteByResourceId(id0);
-		});
+        // Verify
+        assertEquals(4, outcome.getRecordsProcessed());
+        assertEquals(9, myCaptureQueriesListener.logSelectQueries().size());
+        assertEquals(5, myCaptureQueriesListener.countInsertQueries());
+        assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
+        assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+        assertEquals(1, myCaptureQueriesListener.getCommitCount());
+        assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 
-		// Execute
+        verify(myDataSink, times(1)).recoveredError(myErrorCaptor.capture());
+        String message = myErrorCaptor.getValue();
+        message =
+                message.replace(
+                        "Observation.subject.where(resolve() is Patient)",
+                        "Observation.subject"); // depending on whether subject or patient gets
+        // indexed first
+        assertThat(message, containsString("HAPI-0928: Failed to parse database resource"));
 
-		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
+        runInTransaction(
+                () -> {
+                    ResourceTable table =
+                            myResourceTableDao.findById(idPatientToInvalidate).orElseThrow();
+                    assertEquals(INDEX_STATUS_INDEXING_FAILED, table.getIndexStatus());
 
-		// Verify
-		assertEquals(4, outcome.getRecordsProcessed());
-		assertEquals(9, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
-
-		verify(myDataSink, times(1)).recoveredError(myErrorCaptor.capture());
-		String message = myErrorCaptor.getValue();
-		message = message.replace("Observation.subject.where(resolve() is Patient)", "Observation.subject"); // depending on whether subject or patient gets indexed first
-		assertThat(message, containsString("HAPI-0928: Failed to parse database resource"));
-
-		runInTransaction(() -> {
-			ResourceTable table = myResourceTableDao.findById(idPatientToInvalidate).orElseThrow();
-			assertEquals(INDEX_STATUS_INDEXING_FAILED, table.getIndexStatus());
-
-			table = myResourceTableDao.findById(id0).orElseThrow();
-			assertEquals(INDEX_STATUS_INDEXED, table.getIndexStatus());
-		});
-	}
-
-
+                    table = myResourceTableDao.findById(id0).orElseThrow();
+                    assertEquals(INDEX_STATUS_INDEXED, table.getIndexStatus());
+                });
+    }
 }

@@ -19,50 +19,56 @@
  */
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-
 public class RuntimeChildDirectResource extends BaseRuntimeDeclaredChildDefinition {
 
-//	private RuntimeElemContainedResources myElem;
-	private FhirContext myContext;
+    //	private RuntimeElemContainedResources myElem;
+    private FhirContext myContext;
 
-	RuntimeChildDirectResource(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
-		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
-	}
+    RuntimeChildDirectResource(
+            Field theField,
+            Child theChildAnnotation,
+            Description theDescriptionAnnotation,
+            String theElementName)
+            throws ConfigurationException {
+        super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
+    }
 
-	@Override
-	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
-		return new RuntimeElementDirectResource(false);
-	}
+    @Override
+    public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
+        return new RuntimeElementDirectResource(false);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
-		return myContext.getResourceDefinition((Class<? extends IBaseResource>) theType);
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(
+            Class<? extends IBase> theType) {
+        return myContext.getResourceDefinition((Class<? extends IBaseResource>) theType);
+    }
 
-	@Override
-	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-		return getElementName();
-	}
+    @Override
+    public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
+        return getElementName();
+    }
 
-	@Override
-	public Set<String> getValidChildNames() {
-		return Collections.singleton(getElementName());
-	}
+    @Override
+    public Set<String> getValidChildNames() {
+        return Collections.singleton(getElementName());
+    }
 
-	@Override
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		myContext = theContext;
-	}
-
+    @Override
+    void sealAndInitialize(
+            FhirContext theContext,
+            Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+                    theClassToElementDefinitions) {
+        myContext = theContext;
+    }
 }

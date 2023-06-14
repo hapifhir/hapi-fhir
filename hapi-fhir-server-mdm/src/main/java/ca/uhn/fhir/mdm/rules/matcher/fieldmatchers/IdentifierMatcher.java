@@ -28,30 +28,33 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 public class IdentifierMatcher implements IMdmFieldMatcher {
 
-	private boolean isEmpty(StringDt theValue) {
-		if (theValue == null) {
-			return true;
-		}
-		return theValue.isEmpty();
-	}
+    private boolean isEmpty(StringDt theValue) {
+        if (theValue == null) {
+            return true;
+        }
+        return theValue.isEmpty();
+    }
 
-	/**
-	 * @return true if the two fhir identifiers are the same.  If @param theIdentifierSystem is not null, then the
-	 * matcher only returns true if the identifier systems also match this system.
-	 * @throws UnsupportedOperationException if either Base is not an Identifier instance
-	 */
-	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-		CanonicalIdentifier left = IdentifierUtil.identifierDtFromIdentifier(theLeftBase);
-		if (theParams.getIdentifierSystem() != null) {
-			if (!theParams.getIdentifierSystem().equals(left.getSystemElement().getValueAsString())) {
-				return false;
-			}
-		}
-		CanonicalIdentifier right = IdentifierUtil.identifierDtFromIdentifier(theRightBase);
-		if (isEmpty(left.getValueElement()) || isEmpty(right.getValueElement())) {
-			return false;
-		}
-		return left.equals(right);
-	}
+    /**
+     * @return true if the two fhir identifiers are the same. If @param theIdentifierSystem is not
+     *     null, then the matcher only returns true if the identifier systems also match this
+     *     system.
+     * @throws UnsupportedOperationException if either Base is not an Identifier instance
+     */
+    @Override
+    public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+        CanonicalIdentifier left = IdentifierUtil.identifierDtFromIdentifier(theLeftBase);
+        if (theParams.getIdentifierSystem() != null) {
+            if (!theParams
+                    .getIdentifierSystem()
+                    .equals(left.getSystemElement().getValueAsString())) {
+                return false;
+            }
+        }
+        CanonicalIdentifier right = IdentifierUtil.identifierDtFromIdentifier(theRightBase);
+        if (isEmpty(left.getValueElement()) || isEmpty(right.getValueElement())) {
+            return false;
+        }
+        return left.equals(right);
+    }
 }

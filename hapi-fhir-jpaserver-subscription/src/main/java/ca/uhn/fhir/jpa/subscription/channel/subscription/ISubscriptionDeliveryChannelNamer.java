@@ -22,5 +22,5 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 
 public interface ISubscriptionDeliveryChannelNamer {
-	String nameFromSubscription(CanonicalSubscription theCanonicalSubscription);
+    String nameFromSubscription(CanonicalSubscription theCanonicalSubscription);
 }

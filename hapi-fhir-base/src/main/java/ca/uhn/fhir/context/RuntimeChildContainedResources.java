@@ -23,66 +23,76 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefinition {
 
-	private BaseRuntimeElementDefinition<?> myElem;
+    private BaseRuntimeElementDefinition<?> myElem;
 
-	RuntimeChildContainedResources(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
-		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
-	}
+    RuntimeChildContainedResources(
+            Field theField,
+            Child theChildAnnotation,
+            Description theDescriptionAnnotation,
+            String theElementName)
+            throws ConfigurationException {
+        super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
+    }
 
-	@Override
-	public int getMax() {
-		return Child.MAX_UNLIMITED;
-	}
+    @Override
+    public int getMax() {
+        return Child.MAX_UNLIMITED;
+    }
 
-	@Override
-	public int getMin() {
-		return 0;
-	}
+    @Override
+    public int getMin() {
+        return 0;
+    }
 
-	@Override
-	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
-		assert theName.equals(getElementName());
-		return myElem;
-	}
+    @Override
+    public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
+        assert theName.equals(getElementName());
+        return myElem;
+    }
 
-	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
-		return myElem;
-	}
+    @Override
+    public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(
+            Class<? extends IBase> theType) {
+        return myElem;
+    }
 
-	@Override
-	public String getChildNameByDatatype(Class<? extends IBase> theType) {
-		return getElementName();
-	}
+    @Override
+    public String getChildNameByDatatype(Class<? extends IBase> theType) {
+        return getElementName();
+    }
 
-	@Override
-	public Set<String> getValidChildNames() {
-		return Collections.singleton(getElementName());
-	}
+    @Override
+    public Set<String> getValidChildNames() {
+        return Collections.singleton(getElementName());
+    }
 
-	@Override
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		Class<?> actualType = theContext.getVersion().getContainedType();
-		if (BaseContainedDt.class.isAssignableFrom(actualType)) {
-			@SuppressWarnings("unchecked")
-			Class<? extends BaseContainedDt> type = (Class<? extends BaseContainedDt>) actualType;
-			myElem = new RuntimeElemContainedResources(type, false);
-		} else if (List.class.isAssignableFrom(actualType)) {
-			myElem = new RuntimeElemContainedResourceList(IBaseResource.class, false);
-		} else {
-			throw new ConfigurationException(Msg.code(1735) + "Fhir Version definition returned invalid contained type: " + actualType);
-		}
-	}
-
+    @Override
+    void sealAndInitialize(
+            FhirContext theContext,
+            Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+                    theClassToElementDefinitions) {
+        Class<?> actualType = theContext.getVersion().getContainedType();
+        if (BaseContainedDt.class.isAssignableFrom(actualType)) {
+            @SuppressWarnings("unchecked")
+            Class<? extends BaseContainedDt> type = (Class<? extends BaseContainedDt>) actualType;
+            myElem = new RuntimeElemContainedResources(type, false);
+        } else if (List.class.isAssignableFrom(actualType)) {
+            myElem = new RuntimeElemContainedResourceList(IBaseResource.class, false);
+        } else {
+            throw new ConfigurationException(
+                    Msg.code(1735)
+                            + "Fhir Version definition returned invalid contained type: "
+                            + actualType);
+        }
+    }
 }

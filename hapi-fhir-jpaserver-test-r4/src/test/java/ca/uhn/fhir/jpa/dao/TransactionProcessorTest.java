@@ -1,5 +1,10 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
@@ -18,6 +23,8 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.r4.model.Bundle;
@@ -38,119 +45,103 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TransactionProcessorTest.MyConfig.class)
 public class TransactionProcessorTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessorTest.class);
-	@Autowired
-	private TransactionProcessor myTransactionProcessor;
-	@MockBean
-	private DaoRegistry myDaoRegistry;
-	@MockBean
-	private EntityManagerFactory myEntityManagerFactory;
-	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
-	private EntityManager myEntityManager;
-	@MockBean
-	private PlatformTransactionManager myPlatformTransactionManager;
-	@MockBean
-	private MatchResourceUrlService myMatchResourceUrlService;
-	@MockBean
-	private InMemoryResourceMatcher myInMemoryResourceMatcher;
-	@MockBean
-	private IIdHelperService myIdHelperService;
-	@MockBean
-	private PartitionSettings myPartitionSettings;
-	@MockBean
-	private MatchUrlService myMatchUrlService;
-	@MockBean
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	@MockBean
-	private IResourceVersionSvc myResourceVersionSvc;
-	@MockBean
-	private SearchParamMatcher mySearchParamMatcher;
-	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
-	private SessionImpl mySession;
-	@MockBean
-	private IFhirSystemDao<Bundle, Meta> mySystemDao;
+    private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessorTest.class);
+    @Autowired private TransactionProcessor myTransactionProcessor;
+    @MockBean private DaoRegistry myDaoRegistry;
+    @MockBean private EntityManagerFactory myEntityManagerFactory;
 
-	@BeforeEach
-	public void before() {
-		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
-		when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
-	}
+    @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
+    private EntityManager myEntityManager;
 
+    @MockBean private PlatformTransactionManager myPlatformTransactionManager;
+    @MockBean private MatchResourceUrlService myMatchResourceUrlService;
+    @MockBean private InMemoryResourceMatcher myInMemoryResourceMatcher;
+    @MockBean private IIdHelperService myIdHelperService;
+    @MockBean private PartitionSettings myPartitionSettings;
+    @MockBean private MatchUrlService myMatchUrlService;
+    @MockBean private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+    @MockBean private IResourceVersionSvc myResourceVersionSvc;
+    @MockBean private SearchParamMatcher mySearchParamMatcher;
 
-	@Test
-	public void testTransactionWithDisabledResourceType() {
+    @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
+    private SessionImpl mySession;
 
-		Bundle input = new Bundle();
-		input.setType(Bundle.BundleType.TRANSACTION);
+    @MockBean private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
-		MedicationKnowledge medKnowledge = new MedicationKnowledge();
-		medKnowledge.setStatus(MedicationKnowledge.MedicationKnowledgeStatus.ACTIVE);
-		input
-			.addEntry()
-			.setResource(medKnowledge)
-			.getRequest()
-			.setMethod(Bundle.HTTPVerb.POST)
-			.setUrl("/MedicationKnowledge");
+    @BeforeEach
+    public void before() {
+        myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
+        when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
+    }
 
-		try {
-			myTransactionProcessor.transaction(null, input, false);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(544) + "Resource MedicationKnowledge is not supported on this server. Supported resource types: []", e.getMessage());
-		}
-	}
+    @Test
+    public void testTransactionWithDisabledResourceType() {
 
+        Bundle input = new Bundle();
+        input.setType(Bundle.BundleType.TRANSACTION);
 
-	@Configuration
-	@Import(ThreadPoolFactoryConfig.class)
-	public static class MyConfig {
+        MedicationKnowledge medKnowledge = new MedicationKnowledge();
+        medKnowledge.setStatus(MedicationKnowledge.MedicationKnowledgeStatus.ACTIVE);
+        input.addEntry()
+                .setResource(medKnowledge)
+                .getRequest()
+                .setMethod(Bundle.HTTPVerb.POST)
+                .setUrl("/MedicationKnowledge");
 
-		@Bean
-		public DaoRegistry daoRegistry() {
-			return new DaoRegistry();
-		}
+        try {
+            myTransactionProcessor.transaction(null, input, false);
+            fail();
+        } catch (InvalidRequestException e) {
+            assertEquals(
+                    Msg.code(544)
+                            + "Resource MedicationKnowledge is not supported on this server."
+                            + " Supported resource types: []",
+                    e.getMessage());
+        }
+    }
 
-		@Bean
-		public FhirContext fhirContext() {
-			return FhirContext.forR4Cached();
-		}
+    @Configuration
+    @Import(ThreadPoolFactoryConfig.class)
+    public static class MyConfig {
 
-		@Bean
-		public JpaStorageSettings storageSettings() {
-			return new JpaStorageSettings();
-		}
+        @Bean
+        public DaoRegistry daoRegistry() {
+            return new DaoRegistry();
+        }
 
-		@Bean
-		public TransactionProcessor transactionProcessor() {
-			return new TransactionProcessor();
-		}
+        @Bean
+        public FhirContext fhirContext() {
+            return FhirContext.forR4Cached();
+        }
 
-		@Bean
-		public InterceptorService interceptorService() {
-			return new InterceptorService();
-		}
+        @Bean
+        public JpaStorageSettings storageSettings() {
+            return new JpaStorageSettings();
+        }
 
-		@Bean
-		public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
-			return new TransactionProcessorVersionAdapterR4();
-		}
+        @Bean
+        public TransactionProcessor transactionProcessor() {
+            return new TransactionProcessor();
+        }
 
-		@Bean
-		public IHapiTransactionService hapiTransactionService() {
-			return new NonTransactionalHapiTransactionService();
-		}
+        @Bean
+        public InterceptorService interceptorService() {
+            return new InterceptorService();
+        }
 
-	}
+        @Bean
+        public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent>
+                versionAdapter() {
+            return new TransactionProcessorVersionAdapterR4();
+        }
+
+        @Bean
+        public IHapiTransactionService hapiTransactionService() {
+            return new NonTransactionalHapiTransactionService();
+        }
+    }
 }

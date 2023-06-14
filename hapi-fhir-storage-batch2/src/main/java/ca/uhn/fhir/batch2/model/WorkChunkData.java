@@ -23,17 +23,14 @@ import ca.uhn.fhir.model.api.IModelJson;
 
 public class WorkChunkData<OT extends IModelJson> {
 
-	private final OT myData;
+    private final OT myData;
 
-	/**
-	 * Constructor
-	 */
-	public WorkChunkData(OT theData) {
-		myData = theData;
-	}
+    /** Constructor */
+    public WorkChunkData(OT theData) {
+        myData = theData;
+    }
 
-	public OT getData() {
-		return myData;
-	}
-
+    public OT getData() {
+        return myData;
+    }
 }

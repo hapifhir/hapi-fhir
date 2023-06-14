@@ -28,27 +28,32 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
-
 import javax.annotation.Nonnull;
 
-public class DeleteCodeSystemVersionFinalStep implements ILastJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
+public class DeleteCodeSystemVersionFinalStep
+        implements ILastJobStepWorker<
+                TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
 
-	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
+    private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
 
-	public DeleteCodeSystemVersionFinalStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
-		myTermCodeSystemSvc = theCodeSystemDeleteJobSvc;
-	}
+    public DeleteCodeSystemVersionFinalStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+        myTermCodeSystemSvc = theCodeSystemDeleteJobSvc;
+    }
 
-	@Nonnull
-	@Override
-	public RunOutcome run(
-		@Nonnull StepExecutionDetails<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> theStepExecutionDetails,
-		@Nonnull IJobDataSink<VoidModel> theDataSink
-	) throws JobExecutionFailedException {
-		long versionPid = theStepExecutionDetails.getParameters().getCodeSystemVersionPid();
+    @Nonnull
+    @Override
+    public RunOutcome run(
+            @Nonnull
+                    StepExecutionDetails<
+                                    TermCodeSystemDeleteVersionJobParameters,
+                                    CodeSystemVersionPIDResult>
+                            theStepExecutionDetails,
+            @Nonnull IJobDataSink<VoidModel> theDataSink)
+            throws JobExecutionFailedException {
+        long versionPid = theStepExecutionDetails.getParameters().getCodeSystemVersionPid();
 
-		myTermCodeSystemSvc.deleteCodeSystemVersion(versionPid);
+        myTermCodeSystemSvc.deleteCodeSystemVersion(versionPid);
 
-		return RunOutcome.SUCCESS;
-	}
+        return RunOutcome.SUCCESS;
+    }
 }

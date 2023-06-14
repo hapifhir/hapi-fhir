@@ -22,6 +22,9 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleBuilder;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.UUID;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -32,158 +35,151 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.UUID;
-
 @SuppressWarnings("unused")
 public class BundleBuilderExamples {
 
-	private FhirContext myFhirContext;
-	private IGenericClient myFhirClient;
+    private FhirContext myFhirContext;
+    private IGenericClient myFhirClient;
 
-	public void update() throws FHIRException {
-		//START SNIPPET: update
-		// Create a TransactionBuilder
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
+    public void update() throws FHIRException {
+        // START SNIPPET: update
+        // Create a TransactionBuilder
+        BundleBuilder builder = new BundleBuilder(myFhirContext);
 
-		// Create a Patient to update
-		Patient patient = new Patient();
-		patient.setId("http://foo/Patient/123");
-		patient.setActive(true);
+        // Create a Patient to update
+        Patient patient = new Patient();
+        patient.setId("http://foo/Patient/123");
+        patient.setActive(true);
 
-		// Add the patient as an update (aka PUT) to the Bundle
-		builder.addTransactionUpdateEntry(patient);
+        // Add the patient as an update (aka PUT) to the Bundle
+        builder.addTransactionUpdateEntry(patient);
 
-		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: update
-	}
+        // Execute the transaction
+        IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+        // END SNIPPET: update
+    }
 
-	public void updateConditional() throws FHIRException {
-		//START SNIPPET: updateConditional
-		// Create a TransactionBuilder
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
+    public void updateConditional() throws FHIRException {
+        // START SNIPPET: updateConditional
+        // Create a TransactionBuilder
+        BundleBuilder builder = new BundleBuilder(myFhirContext);
 
-		// Create a Patient to update
-		Patient patient = new Patient();
-		patient.setActive(true);
-		patient.addIdentifier().setSystem("http://foo").setValue("bar");
+        // Create a Patient to update
+        Patient patient = new Patient();
+        patient.setActive(true);
+        patient.addIdentifier().setSystem("http://foo").setValue("bar");
 
-		// Add the patient as an update (aka PUT) to the Bundle
-		builder.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://foo|bar");
+        // Add the patient as an update (aka PUT) to the Bundle
+        builder.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://foo|bar");
 
-		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: updateConditional
-	}
+        // Execute the transaction
+        IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+        // END SNIPPET: updateConditional
+    }
 
-	public void create() throws FHIRException {
-		//START SNIPPET: create
-		// Create a TransactionBuilder
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
+    public void create() throws FHIRException {
+        // START SNIPPET: create
+        // Create a TransactionBuilder
+        BundleBuilder builder = new BundleBuilder(myFhirContext);
 
-		// Create a Patient to create
-		Patient patient = new Patient();
-		patient.setActive(true);
+        // Create a Patient to create
+        Patient patient = new Patient();
+        patient.setActive(true);
 
-		// Add the patient as a create (aka POST) to the Bundle
-		builder.addTransactionCreateEntry(patient);
+        // Add the patient as a create (aka POST) to the Bundle
+        builder.addTransactionCreateEntry(patient);
 
-		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: create
-	}
+        // Execute the transaction
+        IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+        // END SNIPPET: create
+    }
 
-	public void createConditional() throws FHIRException {
-		//START SNIPPET: createConditional
-		// Create a TransactionBuilder
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
+    public void createConditional() throws FHIRException {
+        // START SNIPPET: createConditional
+        // Create a TransactionBuilder
+        BundleBuilder builder = new BundleBuilder(myFhirContext);
 
-		// Create a Patient to create
-		Patient patient = new Patient();
-		patient.setActive(true);
-		patient.addIdentifier().setSystem("http://foo").setValue("bar");
+        // Create a Patient to create
+        Patient patient = new Patient();
+        patient.setActive(true);
+        patient.addIdentifier().setSystem("http://foo").setValue("bar");
 
-		// Add the patient as a create (aka POST) to the Bundle
-		builder.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://foo|bar");
+        // Add the patient as a create (aka POST) to the Bundle
+        builder.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://foo|bar");
 
-		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: createConditional
-	}
+        // Execute the transaction
+        IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+        // END SNIPPET: createConditional
+    }
 
-	public void patch() throws FHIRException {
-		//START SNIPPET: patch
+    public void patch() throws FHIRException {
+        // START SNIPPET: patch
 
-		// Create a FHIR Patch object
-		Parameters patch = new Parameters();
-		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
-		op.addPart().setName("type").setValue(new CodeType("replace"));
-		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
-		op.addPart().setName("value").setValue(new BooleanType(false));
+        // Create a FHIR Patch object
+        Parameters patch = new Parameters();
+        Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+        op.addPart().setName("type").setValue(new CodeType("replace"));
+        op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+        op.addPart().setName("value").setValue(new BooleanType(false));
 
-		// Create a TransactionBuilder
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
+        // Create a TransactionBuilder
+        BundleBuilder builder = new BundleBuilder(myFhirContext);
 
-		// Create a target object (this is the ID of the resource that will be patched)
-		IIdType targetId = new IdType("Patient/123");
+        // Create a target object (this is the ID of the resource that will be patched)
+        IIdType targetId = new IdType("Patient/123");
 
-		// Add the patch to the bundle
-		builder.addTransactionFhirPatchEntry(targetId, patch);
+        // Add the patch to the bundle
+        builder.addTransactionFhirPatchEntry(targetId, patch);
 
-		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: patch
-	}
+        // Execute the transaction
+        IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+        // END SNIPPET: patch
+    }
 
-	public void patchConditional() throws FHIRException {
-		//START SNIPPET: patchConditional
+    public void patchConditional() throws FHIRException {
+        // START SNIPPET: patchConditional
 
-		// Create a FHIR Patch object
-		Parameters patch = new Parameters();
-		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
-		op.addPart().setName("type").setValue(new CodeType("replace"));
-		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
-		op.addPart().setName("value").setValue(new BooleanType(false));
+        // Create a FHIR Patch object
+        Parameters patch = new Parameters();
+        Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+        op.addPart().setName("type").setValue(new CodeType("replace"));
+        op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+        op.addPart().setName("value").setValue(new BooleanType(false));
 
-		// Create a TransactionBuilder
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
+        // Create a TransactionBuilder
+        BundleBuilder builder = new BundleBuilder(myFhirContext);
 
-		// Add the patch to the bundle with a conditional URL
-		String conditionalUrl = "Patient?identifier=http://foo|123";
-		builder.addTransactionFhirPatchEntry(patch).conditional(conditionalUrl);
+        // Add the patch to the bundle with a conditional URL
+        String conditionalUrl = "Patient?identifier=http://foo|123";
+        builder.addTransactionFhirPatchEntry(patch).conditional(conditionalUrl);
 
+        // Execute the transaction
+        IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+        // END SNIPPET: patchConditional
+    }
 
-		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: patchConditional
-	}
+    public void customizeBundle() throws FHIRException {
+        // START SNIPPET: customizeBundle
+        // Create a TransactionBuilder
+        BundleBuilder builder = new BundleBuilder(myFhirContext);
+        // Set bundle type to be searchset
+        builder.setBundleField("type", "searchset")
+                .setBundleField("id", UUID.randomUUID().toString())
+                .setMetaField("lastUpdated", builder.newPrimitive("instant", new Date()));
 
-	public void customizeBundle() throws FHIRException {
-		//START SNIPPET: customizeBundle
-		// Create a TransactionBuilder
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		// Set bundle type to be searchset
-		builder
-			.setBundleField("type", "searchset")
-			.setBundleField("id", UUID.randomUUID().toString())
-			.setMetaField("lastUpdated", builder.newPrimitive("instant", new Date()));
+        // Create bundle entry
+        IBase entry = builder.addEntry();
 
-		// Create bundle entry
-		IBase entry = builder.addEntry();
+        // Create a Patient to create
+        Patient patient = new Patient();
+        patient.setActive(true);
+        patient.addIdentifier().setSystem("http://foo").setValue("bar");
+        builder.addToEntry(entry, "resource", patient);
 
-		// Create a Patient to create
-		Patient patient = new Patient();
-		patient.setActive(true);
-		patient.addIdentifier().setSystem("http://foo").setValue("bar");
-		builder.addToEntry(entry, "resource", patient);
-
-		// Add search results
-		IBase search = builder.addSearch(entry);
-		builder.setSearchField(search, "mode", "match");
-		builder.setSearchField(search, "score", builder.newPrimitive("decimal", BigDecimal.ONE));
-		//END SNIPPET: customizeBundle
-	}
-
+        // Add search results
+        IBase search = builder.addSearch(entry);
+        builder.setSearchField(search, "mode", "match");
+        builder.setSearchField(search, "score", builder.newPrimitive("decimal", BigDecimal.ONE));
+        // END SNIPPET: customizeBundle
+    }
 }

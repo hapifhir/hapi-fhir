@@ -20,16 +20,15 @@
 package ca.uhn.fhir.i18n;
 
 public final class Msg {
-	private static final String ERROR_CODE_PREFIX = "HAPI";
+    private static final String ERROR_CODE_PREFIX = "HAPI";
 
-	/**
-	 * IMPORTANT: Please update the table in the following link after you add a new code:
-	 * https://github.com/hapifhir/hapi-fhir/wiki/Bumping-Error-Code
-	 */
+    /**
+     * IMPORTANT: Please update the table in the following link after you add a new code:
+     * https://github.com/hapifhir/hapi-fhir/wiki/Bumping-Error-Code
+     */
+    private Msg() {}
 
-	private Msg() {}
-
-	public static String code(int theCode) {
-		return String.format("%s-%04d: ", ERROR_CODE_PREFIX, theCode);
-	}
+    public static String code(int theCode) {
+        return String.format("%s-%04d: ", ERROR_CODE_PREFIX, theCode);
+    }
 }

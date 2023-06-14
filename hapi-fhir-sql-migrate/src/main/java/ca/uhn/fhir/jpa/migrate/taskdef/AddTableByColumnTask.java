@@ -21,177 +21,176 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class AddTableByColumnTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AddTableByColumnTask.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(AddTableByColumnTask.class);
 
-	private final List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
-	private List<String> myPkColumns;
-	private final List<ForeignKeyContainer> myFKColumns = new ArrayList<>();
+    private final List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
+    private List<String> myPkColumns;
+    private final List<ForeignKeyContainer> myFKColumns = new ArrayList<>();
 
-	public AddTableByColumnTask() {
-		this(null, null);
-		setDryRun(true);
-		myCheckForExistingTables = false;
-	}
+    public AddTableByColumnTask() {
+        this(null, null);
+        setDryRun(true);
+        myCheckForExistingTables = false;
+    }
 
-	public AddTableByColumnTask(String theProductVersion, String theSchemaVersion) {
-		super(theProductVersion, theSchemaVersion);
-	}
+    public AddTableByColumnTask(String theProductVersion, String theSchemaVersion) {
+        super(theProductVersion, theSchemaVersion);
+    }
 
-	@Override
-	public void validate() {
-		super.validate();
-		setDescription("Add table " + getTableName());
-	}
+    @Override
+    public void validate() {
+        super.validate();
+        setDescription("Add table " + getTableName());
+    }
 
-	public void addAddColumnTask(AddColumnTask theTask) {
-		Validate.notNull(theTask);
-		myAddColumnTasks.add(theTask);
-	}
+    public void addAddColumnTask(AddColumnTask theTask) {
+        Validate.notNull(theTask);
+        myAddColumnTasks.add(theTask);
+    }
 
-	public void setPkColumns(List<String> thePkColumns) {
-		myPkColumns = thePkColumns;
-	}
+    public void setPkColumns(List<String> thePkColumns) {
+        myPkColumns = thePkColumns;
+    }
 
-	public void addForeignKey(ForeignKeyContainer theForeignKeyContainer) {
-		myFKColumns.add(theForeignKeyContainer);
-	}
+    public void addForeignKey(ForeignKeyContainer theForeignKeyContainer) {
+        myFKColumns.add(theForeignKeyContainer);
+    }
 
-	public List<String> getPkColumns() {
-		return myPkColumns;
-	}
+    public List<String> getPkColumns() {
+        return myPkColumns;
+    }
 
-	public String generateSQLCreateScript() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("CREATE TABLE ");
-		sb.append(getTableName());
-		sb.append(" (");
-		if (myPrettyPrint) {
-			sb.append("\n");
-		} else {
-			sb.append(" ");
-		}
+    public String generateSQLCreateScript() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE TABLE ");
+        sb.append(getTableName());
+        sb.append(" (");
+        if (myPrettyPrint) {
+            sb.append("\n");
+        } else {
+            sb.append(" ");
+        }
 
-		for (AddColumnTask next : myAddColumnTasks) {
-			next.setDriverType(getDriverType());
-			next.setTableName(getTableName());
-			next.validate();
+        for (AddColumnTask next : myAddColumnTasks) {
+            next.setDriverType(getDriverType());
+            next.setTableName(getTableName());
+            next.validate();
 
-			if (myPrettyPrint) {
-				sb.append("\t");
-			}
+            if (myPrettyPrint) {
+                sb.append("\t");
+            }
 
-			sb.append(next.getColumnName());
-			sb.append(" ");
-			sb.append(next.getTypeStatement());
-			sb.append(",");
-			if (myPrettyPrint) {
-				sb.append("\n");
-			} else {
-				sb.append(" ");
-			}
-		}
+            sb.append(next.getColumnName());
+            sb.append(" ");
+            sb.append(next.getTypeStatement());
+            sb.append(",");
+            if (myPrettyPrint) {
+                sb.append("\n");
+            } else {
+                sb.append(" ");
+            }
+        }
 
-		// primary keys
-		if (myPrettyPrint) {
-			sb.append("\t");
-		} else {
-			sb.append(" ");
-		}
-		sb.append("PRIMARY KEY (");
-		for (int i = 0; i < myPkColumns.size(); i++) {
-			if (i > 0) {
-				sb.append(", ");
-			}
-			sb.append(myPkColumns.get(i));
-		}
+        // primary keys
+        if (myPrettyPrint) {
+            sb.append("\t");
+        } else {
+            sb.append(" ");
+        }
+        sb.append("PRIMARY KEY (");
+        for (int i = 0; i < myPkColumns.size(); i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(myPkColumns.get(i));
+        }
 
-		boolean hasForeignKeys = !myFKColumns.isEmpty();
+        boolean hasForeignKeys = !myFKColumns.isEmpty();
 
-		sb.append(")");
-		if (hasForeignKeys) {
-			sb.append(",");
-		}
-		if (myPrettyPrint) {
-			sb.append("\n");
-		} else {
-			sb.append(" ");
-		}
+        sb.append(")");
+        if (hasForeignKeys) {
+            sb.append(",");
+        }
+        if (myPrettyPrint) {
+            sb.append("\n");
+        } else {
+            sb.append(" ");
+        }
 
-		DriverTypeEnum sqlEngine = getDriverType();
+        DriverTypeEnum sqlEngine = getDriverType();
 
-		// foreign keys
-		if (!myFKColumns.isEmpty()) {
-			for (int i =0; i < myFKColumns.size(); i++) {
-				if (i > 0) {
-					sb.append(", ");
-				}
-				ForeignKeyContainer fk = myFKColumns.get(i);
-				if (myPrettyPrint) {
-					sb.append("\t");
-				}
-				sb.append(fk.generateSQL(sqlEngine, myPrettyPrint));
-				if (myPrettyPrint) {
-					sb.append("\n");
-				} else {
-					sb.append(" ");
-				}
-			}
-		}
+        // foreign keys
+        if (!myFKColumns.isEmpty()) {
+            for (int i = 0; i < myFKColumns.size(); i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                ForeignKeyContainer fk = myFKColumns.get(i);
+                if (myPrettyPrint) {
+                    sb.append("\t");
+                }
+                sb.append(fk.generateSQL(sqlEngine, myPrettyPrint));
+                if (myPrettyPrint) {
+                    sb.append("\n");
+                } else {
+                    sb.append(" ");
+                }
+            }
+        }
 
-		sb.append(")");
+        sb.append(")");
 
-		switch (sqlEngine) {
-			case MARIADB_10_1:
-			case MYSQL_5_7:
-				sb.append(" engine=InnoDB");
-				break;
-			case DERBY_EMBEDDED:
-			case POSTGRES_9_4:
-			case ORACLE_12C:
-			case MSSQL_2012:
-			case H2_EMBEDDED:
-			case COCKROACHDB_21_1:
-				break;
-		}
+        switch (sqlEngine) {
+            case MARIADB_10_1:
+            case MYSQL_5_7:
+                sb.append(" engine=InnoDB");
+                break;
+            case DERBY_EMBEDDED:
+            case POSTGRES_9_4:
+            case ORACLE_12C:
+            case MSSQL_2012:
+            case H2_EMBEDDED:
+            case COCKROACHDB_21_1:
+                break;
+        }
 
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 
-	@Override
-	public void doExecute() throws SQLException {
-		if (myCheckForExistingTables && JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
-			logInfo(ourLog, "Already have table named {} - No action performed", getTableName());
-			return;
-		}
+    @Override
+    public void doExecute() throws SQLException {
+        if (myCheckForExistingTables
+                && JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
+            logInfo(ourLog, "Already have table named {} - No action performed", getTableName());
+            return;
+        }
 
-		executeSql(getTableName(), generateSQLCreateScript());
+        executeSql(getTableName(), generateSQLCreateScript());
+    }
 
-	}
+    @Override
+    protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+        super.generateEquals(theBuilder, theOtherObject);
+        AddTableByColumnTask otherObject = (AddTableByColumnTask) theOtherObject;
+        theBuilder.append(myAddColumnTasks, otherObject.myAddColumnTasks);
+        theBuilder.append(myPkColumns, otherObject.myPkColumns);
+    }
 
-	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-		super.generateEquals(theBuilder, theOtherObject);
-		AddTableByColumnTask otherObject = (AddTableByColumnTask) theOtherObject;
-		theBuilder.append(myAddColumnTasks, otherObject.myAddColumnTasks);
-		theBuilder.append(myPkColumns, otherObject.myPkColumns);
-	}
-
-	@Override
-	protected void generateHashCode(HashCodeBuilder theBuilder) {
-		super.generateHashCode(theBuilder);
-		theBuilder.append(myAddColumnTasks);
-		theBuilder.append(myPkColumns);
-	}
+    @Override
+    protected void generateHashCode(HashCodeBuilder theBuilder) {
+        super.generateHashCode(theBuilder);
+        theBuilder.append(myAddColumnTasks);
+        theBuilder.append(myPkColumns);
+    }
 }

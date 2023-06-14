@@ -20,22 +20,21 @@
 package ca.uhn.fhir.jpa.migrate.tasks.api;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-
 import java.util.List;
 
 public interface ISchemaInitializationProvider {
 
-	List<String> getSqlStatements(DriverTypeEnum theDriverType);
+    List<String> getSqlStatements(DriverTypeEnum theDriverType);
 
-	String getSchemaExistsIndicatorTable();
+    String getSchemaExistsIndicatorTable();
 
-	String getSchemaDescription();
+    String getSchemaDescription();
 
-	ISchemaInitializationProvider setSchemaDescription(String theSchemaDescription);
+    ISchemaInitializationProvider setSchemaDescription(String theSchemaDescription);
 
-	boolean canInitializeSchema();
+    boolean canInitializeSchema();
 
-	default boolean isEnabled() {
-		return true;
-	}
+    default boolean isEnabled() {
+        return true;
+    }
 }

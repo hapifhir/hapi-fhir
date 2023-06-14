@@ -19,15 +19,13 @@
  */
 package ca.uhn.test.concurrency;
 
-
 import ca.uhn.fhir.interceptor.api.HookParams;
-
 import java.util.List;
 
 public interface IPointcutLatch {
-	void clear();
+    void clear();
 
-	void setExpectedCount(int count);
+    void setExpectedCount(int count);
 
-	List<HookParams> awaitExpected() throws InterruptedException;
+    List<HookParams> awaitExpected() throws InterruptedException;
 }

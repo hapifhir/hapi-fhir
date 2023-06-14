@@ -19,45 +19,48 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static org.apache.commons.lang3.StringUtils.trim;
+
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import java.util.*;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.*;
+public class LoincUniversalOrderSetHandler extends BaseLoincHandler
+        implements IZipContentsHandlerCsv {
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
-import static org.apache.commons.lang3.StringUtils.trim;
+    public static final String VS_ID_BASE = "loinc-universal-order-set";
+    public static final String VS_URI = "http://loinc.org/vs/loinc-universal-order-set";
+    public static final String VS_NAME = "LOINC Universal Order Set";
 
-public class LoincUniversalOrderSetHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
+    public LoincUniversalOrderSetHandler(
+            Map<String, TermConcept> theCode2concept,
+            List<ValueSet> theValueSets,
+            List<ConceptMap> theConceptMaps,
+            Properties theUploadProperties) {
+        super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
+    }
 
-	public static final String VS_ID_BASE = "loinc-universal-order-set";
-	public static final String VS_URI = "http://loinc.org/vs/loinc-universal-order-set";
-	public static final String VS_NAME = "LOINC Universal Order Set";
+    @Override
+    public void accept(CSVRecord theRecord) {
+        String loincNumber = trim(theRecord.get("LOINC_NUM"));
+        String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
+        String orderObs = trim(theRecord.get("ORDER_OBS"));
 
-	public LoincUniversalOrderSetHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
-		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
-	}
+        String codeSystemVersionId =
+                myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+        String valueSetId;
+        if (codeSystemVersionId != null) {
+            valueSetId = VS_ID_BASE + "-" + codeSystemVersionId;
+        } else {
+            valueSetId = VS_ID_BASE;
+        }
 
-	@Override
-	public void accept(CSVRecord theRecord) {
-		String loincNumber = trim(theRecord.get("LOINC_NUM"));
-		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
-		String orderObs = trim(theRecord.get("ORDER_OBS"));
-
-		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
-		String valueSetId;
-		if (codeSystemVersionId != null) {
-			valueSetId = VS_ID_BASE + "-" + codeSystemVersionId;
-		} else {
-			valueSetId = VS_ID_BASE;
-		}
-
-		ValueSet valueSet = getValueSet(valueSetId, VS_URI, VS_NAME, null);
-		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
-	}
-
-
+        ValueSet valueSet = getValueSet(valueSetId, VS_URI, VS_NAME, null);
+        addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
+    }
 }

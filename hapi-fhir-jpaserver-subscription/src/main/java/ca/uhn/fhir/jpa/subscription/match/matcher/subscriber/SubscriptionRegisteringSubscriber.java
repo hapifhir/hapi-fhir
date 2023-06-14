@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -38,96 +39,92 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
-import javax.annotation.Nonnull;
-
 /**
- * Responsible for transitioning subscription resources from REQUESTED to ACTIVE
- * Once activated, the subscription is added to the SubscriptionRegistry.
- * <p>
- * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
+ * Responsible for transitioning subscription resources from REQUESTED to ACTIVE Once activated, the
+ * subscription is added to the SubscriptionRegistry.
+ *
+ * <p>Also validates criteria. If invalid, rejects the subscription without persisting the
+ * subscription.
  */
 public class SubscriptionRegisteringSubscriber implements MessageHandler {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+    private static final Logger ourLog =
+            LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
+    @Autowired private FhirContext myFhirContext;
+    @Autowired private SubscriptionRegistry mySubscriptionRegistry;
+    @Autowired private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+    @Autowired private DaoRegistry myDaoRegistry;
 
-	/**
-	 * Constructor
-	 */
-	public SubscriptionRegisteringSubscriber() {
-		super();
-	}
+    /** Constructor */
+    public SubscriptionRegisteringSubscriber() {
+        super();
+    }
 
-	@Override
-	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
-		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
-			ourLog.warn("Received message of unexpected type on matching channel: {}", theMessage);
-			return;
-		}
+    @Override
+    public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
+        if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
+            ourLog.warn("Received message of unexpected type on matching channel: {}", theMessage);
+            return;
+        }
 
-		ResourceModifiedMessage payload = ((ResourceModifiedJsonMessage) theMessage).getPayload();
+        ResourceModifiedMessage payload = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 
-		if (!payload.hasPayloadType(this.myFhirContext, "Subscription")) {
-			return;
-		}
+        if (!payload.hasPayloadType(this.myFhirContext, "Subscription")) {
+            return;
+        }
 
-		switch (payload.getOperationType()) {
-			case MANUALLY_TRIGGERED:
-			case TRANSACTION:
-				return;
-			case CREATE:
-			case UPDATE:
-			case DELETE:
-				break;
-		}
+        switch (payload.getOperationType()) {
+            case MANUALLY_TRIGGERED:
+            case TRANSACTION:
+                return;
+            case CREATE:
+            case UPDATE:
+            case DELETE:
+                break;
+        }
 
-		// We read the resource back from the DB instead of using the supplied copy for
-		// two reasons:
-		// - in order to store partition id in the userdata of the resource for partitioned subscriptions
-		// - in case we're processing out of order and a create-then-delete has been processed backwards (or vice versa)
+        // We read the resource back from the DB instead of using the supplied copy for
+        // two reasons:
+        // - in order to store partition id in the userdata of the resource for partitioned
+        // subscriptions
+        // - in case we're processing out of order and a create-then-delete has been processed
+        // backwards (or vice versa)
 
-		IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
-		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
-		RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
-		IBaseResource payloadResource = subscriptionDao.read(payloadId, systemRequestDetails, true);
-		if (payloadResource == null) {
-			// Only for unit test
-			payloadResource = payload.getPayload(myFhirContext);
-		}
-		if (payloadResource.isDeleted()) {
-			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
-			return;
-		}
+        IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
+        IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+        RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
+        IBaseResource payloadResource = subscriptionDao.read(payloadId, systemRequestDetails, true);
+        if (payloadResource == null) {
+            // Only for unit test
+            payloadResource = payload.getPayload(myFhirContext);
+        }
+        if (payloadResource.isDeleted()) {
+            mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
+            return;
+        }
 
-		String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(payloadResource);
-		if ("active".equals(statusString)) {
-			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payloadResource);
-		} else {
-			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
-		}
+        String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(payloadResource);
+        if ("active".equals(statusString)) {
+            mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payloadResource);
+        } else {
+            mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
+        }
+    }
 
-	}
-
-	/**
-	 * There were some situations where the RequestDetails attempted to use the default partition
-	 * and the partition name was a list containing null values (i.e. using the package installer to STORE_AND_INSTALL
-	 * Subscriptions while partitioning was enabled). If any partition matches these criteria,
-	 * {@link RequestPartitionId#defaultPartition()} is used to obtain the default partition.
-	 */
-	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
-		RequestPartitionId payloadPartitionId = payload.getPartitionId();
-		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
-			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is enabled
-			// creates a corrupt default partition.  This resets it to a clean one.
-			payloadPartitionId = RequestPartitionId.defaultPartition();
-		}
-		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
-	}
-
+    /**
+     * There were some situations where the RequestDetails attempted to use the default partition
+     * and the partition name was a list containing null values (i.e. using the package installer to
+     * STORE_AND_INSTALL Subscriptions while partitioning was enabled). If any partition matches
+     * these criteria, {@link RequestPartitionId#defaultPartition()} is used to obtain the default
+     * partition.
+     */
+    private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
+        RequestPartitionId payloadPartitionId = payload.getPartitionId();
+        if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
+            // This may look redundant but the package installer STORE_AND_INSTALL Subscriptions
+            // when partitioning is enabled
+            // creates a corrupt default partition.  This resets it to a clean one.
+            payloadPartitionId = RequestPartitionId.defaultPartition();
+        }
+        return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
+    }
 }

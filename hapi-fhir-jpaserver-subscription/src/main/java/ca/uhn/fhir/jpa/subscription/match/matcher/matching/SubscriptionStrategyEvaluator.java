@@ -27,38 +27,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionStrategyEvaluator {
 
-	@Autowired
-	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+    @Autowired private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
-	/**
-	 * Constructor
-	 */
-	public SubscriptionStrategyEvaluator() {
-		super();
-	}
+    /** Constructor */
+    public SubscriptionStrategyEvaluator() {
+        super();
+    }
 
-	public SubscriptionMatchingStrategy determineStrategy(CanonicalSubscription theSubscription) {
-		if (theSubscription.isTopicSubscription()) {
-			return SubscriptionMatchingStrategy.TOPIC;
-		}
-		String criteriaString = theSubscription.getCriteriaString();
-		return determineStrategy(criteriaString);
-	}
+    public SubscriptionMatchingStrategy determineStrategy(CanonicalSubscription theSubscription) {
+        if (theSubscription.isTopicSubscription()) {
+            return SubscriptionMatchingStrategy.TOPIC;
+        }
+        String criteriaString = theSubscription.getCriteriaString();
+        return determineStrategy(criteriaString);
+    }
 
-	public SubscriptionMatchingStrategy determineStrategy(String criteriaString) {
-		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(criteriaString);
-		if (criteria == null) {
-			return SubscriptionMatchingStrategy.DATABASE;
-		}
-		if (criteria.getCriteria() == null) {
-			return SubscriptionMatchingStrategy.IN_MEMORY;
-		} else {
-			InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory(criteriaString);
-			if (result.supported()) {
-				return SubscriptionMatchingStrategy.IN_MEMORY;
-			} else {
-				return SubscriptionMatchingStrategy.DATABASE;
-			}
-		}
-	}
+    public SubscriptionMatchingStrategy determineStrategy(String criteriaString) {
+        SubscriptionCriteriaParser.SubscriptionCriteria criteria =
+                SubscriptionCriteriaParser.parse(criteriaString);
+        if (criteria == null) {
+            return SubscriptionMatchingStrategy.DATABASE;
+        }
+        if (criteria.getCriteria() == null) {
+            return SubscriptionMatchingStrategy.IN_MEMORY;
+        } else {
+            InMemoryMatchResult result =
+                    myInMemoryResourceMatcher.canBeEvaluatedInMemory(criteriaString);
+            if (result.supported()) {
+                return SubscriptionMatchingStrategy.IN_MEMORY;
+            } else {
+                return SubscriptionMatchingStrategy.DATABASE;
+            }
+        }
+    }
 }

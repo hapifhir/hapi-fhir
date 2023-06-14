@@ -20,22 +20,23 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+public interface IResourceIndexedComboStringUniqueDao
+        extends JpaRepository<ResourceIndexedComboStringUnique, Long> {
 
-public interface IResourceIndexedComboStringUniqueDao extends JpaRepository<ResourceIndexedComboStringUnique, Long> {
+    @Query("SELECT r FROM ResourceIndexedComboStringUnique r WHERE r.myIndexString = :str")
+    ResourceIndexedComboStringUnique findByQueryString(@Param("str") String theQueryString);
 
-	@Query("SELECT r FROM ResourceIndexedComboStringUnique r WHERE r.myIndexString = :str")
-	ResourceIndexedComboStringUnique findByQueryString(@Param("str") String theQueryString);
+    @Query("SELECT r FROM ResourceIndexedComboStringUnique r WHERE r.myResourceId = :resId")
+    List<ResourceIndexedComboStringUnique> findAllForResourceIdForUnitTest(
+            @Param("resId") Long theResourceId);
 
-	@Query("SELECT r FROM ResourceIndexedComboStringUnique r WHERE r.myResourceId = :resId")
-	List<ResourceIndexedComboStringUnique> findAllForResourceIdForUnitTest(@Param("resId") Long theResourceId);
-
-	@Modifying
-	@Query("delete from ResourceIndexedComboStringUnique t WHERE t.myResourceId = :resid")
-	void deleteByResourceId(@Param("resid") Long theResourcePid);
+    @Modifying
+    @Query("delete from ResourceIndexedComboStringUnique t WHERE t.myResourceId = :resid")
+    void deleteByResourceId(@Param("resid") Long theResourcePid);
 }

@@ -27,47 +27,60 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public class MdmControllerUtil {
-	public static MdmMatchResultEnum extractMatchResultOrNull(String theMatchResult) {
-		if (theMatchResult == null) {
-			return null;
-		}
-		return MdmMatchResultEnum.valueOf(theMatchResult);
-	}
+    public static MdmMatchResultEnum extractMatchResultOrNull(String theMatchResult) {
+        if (theMatchResult == null) {
+            return null;
+        }
+        return MdmMatchResultEnum.valueOf(theMatchResult);
+    }
 
-	public static MdmLinkSourceEnum extractLinkSourceOrNull(String theLinkSource) {
-		if (theLinkSource == null) {
-			return null;
-		}
-		return MdmLinkSourceEnum.valueOf(theLinkSource);
-	}
+    public static MdmLinkSourceEnum extractLinkSourceOrNull(String theLinkSource) {
+        if (theLinkSource == null) {
+            return null;
+        }
+        return MdmLinkSourceEnum.valueOf(theLinkSource);
+    }
 
-	public static IIdType extractGoldenResourceIdDtOrNull(String theName, String theGoldenResourceId) {
-		if (theGoldenResourceId == null) {
-			return null;
-		}
-		return getGoldenIdDtOrThrowException(theName, theGoldenResourceId);
-	}
+    public static IIdType extractGoldenResourceIdDtOrNull(
+            String theName, String theGoldenResourceId) {
+        if (theGoldenResourceId == null) {
+            return null;
+        }
+        return getGoldenIdDtOrThrowException(theName, theGoldenResourceId);
+    }
 
-	public static IIdType extractSourceIdDtOrNull(String theName, String theSourceId) {
-		if (theSourceId == null) {
-			return null;
-		}
-		return getSourceIdDtOrThrowException(theName, theSourceId);
-	}
+    public static IIdType extractSourceIdDtOrNull(String theName, String theSourceId) {
+        if (theSourceId == null) {
+            return null;
+        }
+        return getSourceIdDtOrThrowException(theName, theSourceId);
+    }
 
-	static IdDt getGoldenIdDtOrThrowException(String theParamName, String theId) {
-		IdDt goldenResourceId = new IdDt(theId);
-		if (goldenResourceId.getIdPart() == null) {
-			throw new InvalidRequestException(Msg.code(1505) + theParamName + " is '" + theId + "'.  must have form <resourceType>/<id> where <id> is the id of the resource");
-		}
-		return goldenResourceId;
-	}
+    static IdDt getGoldenIdDtOrThrowException(String theParamName, String theId) {
+        IdDt goldenResourceId = new IdDt(theId);
+        if (goldenResourceId.getIdPart() == null) {
+            throw new InvalidRequestException(
+                    Msg.code(1505)
+                            + theParamName
+                            + " is '"
+                            + theId
+                            + "'.  must have form <resourceType>/<id> where <id> is the id of the"
+                            + " resource");
+        }
+        return goldenResourceId;
+    }
 
-	public static IIdType getSourceIdDtOrThrowException(String theParamName, String theSourceId) {
-		IdDt sourceId = new IdDt(theSourceId);
-		if (sourceId.getIdPart() == null) {
-			throw new InvalidRequestException(Msg.code(1506) + theParamName + " is '" + theSourceId + "'.  must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
-		}
-		return sourceId;
-	}
+    public static IIdType getSourceIdDtOrThrowException(String theParamName, String theSourceId) {
+        IdDt sourceId = new IdDt(theSourceId);
+        if (sourceId.getIdPart() == null) {
+            throw new InvalidRequestException(
+                    Msg.code(1506)
+                            + theParamName
+                            + " is '"
+                            + theSourceId
+                            + "'.  must have form <resourceType>/<id>  where <id> is the id of the"
+                            + " resource and <resourceType> is the type of the resource");
+        }
+        return sourceId;
+    }
 }

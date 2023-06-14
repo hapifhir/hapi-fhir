@@ -20,46 +20,43 @@
 package ca.uhn.fhir.model.dstu2.composite;
 
 import ca.uhn.fhir.i18n.Msg;
-import java.util.ArrayList;
-import java.util.List;
-
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import java.util.ArrayList;
+import java.util.List;
 
 @DatatypeDef(name = "contained")
 public class ContainedDt extends BaseContainedDt {
 
-	@Child(name = "resource", type = IResource.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
-	private List<IResource> myContainedResources;
+    @Child(name = "resource", type = IResource.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    private List<IResource> myContainedResources;
 
-	@Override
-	public List<IResource> getContainedResources() {
-		if (myContainedResources == null) {
-			myContainedResources = new ArrayList<IResource>();
-		}
-		return myContainedResources;
-	}
+    @Override
+    public List<IResource> getContainedResources() {
+        if (myContainedResources == null) {
+            myContainedResources = new ArrayList<IResource>();
+        }
+        return myContainedResources;
+    }
 
-	public void setContainedResources(List<IResource> theContainedResources) {
-		myContainedResources = theContainedResources;
-	}
+    public void setContainedResources(List<IResource> theContainedResources) {
+        myContainedResources = theContainedResources;
+    }
 
-	@Override
-	public boolean isEmpty() {
-		return myContainedResources == null || myContainedResources.size() == 0;
-	}
+    @Override
+    public boolean isEmpty() {
+        return myContainedResources == null || myContainedResources.size() == 0;
+    }
 
-	@Override
-	public Object getUserData(String theName) {
-		throw new UnsupportedOperationException(Msg.code(580));
-	}
+    @Override
+    public Object getUserData(String theName) {
+        throw new UnsupportedOperationException(Msg.code(580));
+    }
 
-	@Override
-	public void setUserData(String theName, Object theValue) {
-		throw new UnsupportedOperationException(Msg.code(581));
-	}
-
+    @Override
+    public void setUserData(String theName, Object theValue) {
+        throw new UnsupportedOperationException(Msg.code(581));
+    }
 }

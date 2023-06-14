@@ -23,31 +23,30 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DeleteExpungeJobParameters extends PartitionedUrlListJobParameters {
-	@JsonProperty("cascade")
-	private boolean myCascade;
-	@JsonProperty("cascadeMaxRounds")
-	private Integer myCascadeMaxRounds;
+    @JsonProperty("cascade")
+    private boolean myCascade;
 
-	/**
-	 * Constructor
-	 */
-	public DeleteExpungeJobParameters() {
-		super();
-	}
+    @JsonProperty("cascadeMaxRounds")
+    private Integer myCascadeMaxRounds;
 
-	public Integer getCascadeMaxRounds() {
-		return myCascadeMaxRounds;
-	}
+    /** Constructor */
+    public DeleteExpungeJobParameters() {
+        super();
+    }
 
-	public void setCascadeMaxRounds(Integer theCascadeMaxRounds) {
-		myCascadeMaxRounds = theCascadeMaxRounds;
-	}
+    public Integer getCascadeMaxRounds() {
+        return myCascadeMaxRounds;
+    }
 
-	public boolean isCascade() {
-		return myCascade;
-	}
+    public void setCascadeMaxRounds(Integer theCascadeMaxRounds) {
+        myCascadeMaxRounds = theCascadeMaxRounds;
+    }
 
-	public void setCascade(boolean theCascade) {
-		myCascade = theCascade;
-	}
+    public boolean isCascade() {
+        return myCascade;
+    }
+
+    public void setCascade(boolean theCascade) {
+        myCascade = theCascade;
+    }
 }

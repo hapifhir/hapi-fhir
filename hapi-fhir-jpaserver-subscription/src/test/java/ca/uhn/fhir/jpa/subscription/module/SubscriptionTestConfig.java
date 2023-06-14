@@ -40,26 +40,23 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class SubscriptionTestConfig {
 
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private IChannelNamer myChannelNamer;
+    @Autowired private FhirContext myFhirContext;
+    @Autowired private IChannelNamer myChannelNamer;
 
-	@Primary
-	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
-	public IValidationSupport validationSupportChainR4() {
-		return myFhirContext.getValidationSupport();
-	}
+    @Primary
+    @Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
+    public IValidationSupport validationSupportChainR4() {
+        return myFhirContext.getValidationSupport();
+    }
 
-	@Bean
-	public IChannelFactory subscribableChannelFactory() {
-		return new LinkedBlockingChannelFactory(myChannelNamer);
-	}
+    @Bean
+    public IChannelFactory subscribableChannelFactory() {
+        return new LinkedBlockingChannelFactory(myChannelNamer);
+    }
 
-	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
-		return new SubscriptionChannelFactory(theQueueChannelFactory);
-	}
-
-
+    @Bean
+    public SubscriptionChannelFactory subscriptionChannelFactory(
+            IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
+        return new SubscriptionChannelFactory(theQueueChannelFactory);
+    }
 }

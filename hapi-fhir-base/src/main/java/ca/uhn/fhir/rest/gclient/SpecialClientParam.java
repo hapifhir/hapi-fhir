@@ -19,27 +19,17 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.rest.api.Constants;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import java.util.Arrays;
-import java.util.List;
-
-/**
- * 
- */
+/** */
 public class SpecialClientParam extends BaseClientParam implements IParam {
 
-	private final String myParamName;
+    private final String myParamName;
 
-	public SpecialClientParam(String theParamName) {
-		myParamName = theParamName;
-	}
+    public SpecialClientParam(String theParamName) {
+        myParamName = theParamName;
+    }
 
-	@Override
-	public String getParamName() {
-		return myParamName;
-	}
-
-
+    @Override
+    public String getParamName() {
+        return myParamName;
+    }
 }

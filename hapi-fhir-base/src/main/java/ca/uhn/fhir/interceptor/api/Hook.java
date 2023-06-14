@@ -20,16 +20,14 @@
 package ca.uhn.fhir.interceptor.api;
 
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation should be placed on interceptor methods. The
- * {@link Pointcut value=Pointcut} property determines which event
- * is actually being invoked. See the Pointcut JavaDoc for information
- * on available method parameters for a given hook.
+ * This annotation should be placed on interceptor methods. The {@link Pointcut value=Pointcut}
+ * property determines which event is actually being invoked. See the Pointcut JavaDoc for
+ * information on available method parameters for a given hook.
  *
  * @see Interceptor
  */
@@ -37,18 +35,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Hook {
 
-	/**
-	 * Provides the specific point where this method should be invoked
-	 */
-	Pointcut value();
+    /** Provides the specific point where this method should be invoked */
+    Pointcut value();
 
-	/**
-	 * The order that interceptors should be called in. Lower numbers happen before higher numbers. Default is 0
-	 * and allowable values can be positive or negative or 0.
-	 * <p>
-	 * If no order is specified, or the order is set to <code>0</code> (the default order),
-	 * the order specified at the interceptor type level will take precedence.
-	 * </p>
-	 */
-	int order() default Interceptor.DEFAULT_ORDER;
+    /**
+     * The order that interceptors should be called in. Lower numbers happen before higher numbers.
+     * Default is 0 and allowable values can be positive or negative or 0.
+     *
+     * <p>If no order is specified, or the order is set to <code>0</code> (the default order), the
+     * order specified at the interceptor type level will take precedence.
+     */
+    int order() default Interceptor.DEFAULT_ORDER;
 }

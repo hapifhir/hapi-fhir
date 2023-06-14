@@ -20,33 +20,30 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.util.ExtensionUtil;
+import java.util.Collection;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-
 /**
  * Hook for Consent pre-save additions.
  *
- * @deprecated - we just use Consumer now
- * TODO delete this.
+ * @deprecated - we just use Consumer now TODO delete this.
  */
 @Deprecated(since = "6.3.6", forRemoval = true)
 public interface IConsentExtensionProvider extends IMemberMatchConsentHook {
-	Logger ourLog = LoggerFactory.getLogger(IConsentExtensionProvider.class);
+    Logger ourLog = LoggerFactory.getLogger(IConsentExtensionProvider.class);
 
-	Collection<IBaseExtension> getConsentExtension(IBaseResource theConsentResource);
+    Collection<IBaseExtension> getConsentExtension(IBaseResource theConsentResource);
 
-	default void accept(IBaseResource theResource) {
-		Collection<IBaseExtension> extensions = getConsentExtension(theResource);
+    default void accept(IBaseResource theResource) {
+        Collection<IBaseExtension> extensions = getConsentExtension(theResource);
 
-		for (IBaseExtension ext : extensions) {
-			IBaseExtension<?, ?> e = ExtensionUtil.addExtension(theResource, ext.getUrl());
-			e.setValue(ext.getValue());
-		}
-		ourLog.trace("{} extension(s) added to Consent", extensions.size());
-	}
-
+        for (IBaseExtension ext : extensions) {
+            IBaseExtension<?, ?> e = ExtensionUtil.addExtension(theResource, ext.getUrl());
+            e.setValue(ext.getValue());
+        }
+        ourLog.trace("{} extension(s) added to Consent", extensions.size());
+    }
 }

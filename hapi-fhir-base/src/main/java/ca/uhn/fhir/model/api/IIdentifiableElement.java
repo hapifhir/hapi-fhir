@@ -23,37 +23,36 @@ import ca.uhn.fhir.model.primitive.IdDt;
 
 public interface IIdentifiableElement extends IElement {
 
-	/**
-	 * Used to retrieve an ID for this specific element within a resource. These are used for IDREF referenced between
-	 * elements within a single resource, and do not have any other purpose.
-	 */
-	String getElementSpecificId();
+    /**
+     * Used to retrieve an ID for this specific element within a resource. These are used for IDREF
+     * referenced between elements within a single resource, and do not have any other purpose.
+     */
+    String getElementSpecificId();
 
-	/**
-	 * @deprecated Use {@link #getElementSpecificId()} instead. This method will be removed because it is easily
-	 *             confused with other ID methods (such as patient#getIdentifier)
-	 */
-	@Deprecated
-	IdDt getId();
+    /**
+     * @deprecated Use {@link #getElementSpecificId()} instead. This method will be removed because
+     *     it is easily confused with other ID methods (such as patient#getIdentifier)
+     */
+    @Deprecated
+    IdDt getId();
 
-	/**
-	 * Used to set an ID for this specific element within a resource. These are used for IDREF referenced between
-	 * elements within a single resource, and do not have any other purpose.
-	 */
-	void setElementSpecificId(String theElementSpecificId);
+    /**
+     * Used to set an ID for this specific element within a resource. These are used for IDREF
+     * referenced between elements within a single resource, and do not have any other purpose.
+     */
+    void setElementSpecificId(String theElementSpecificId);
 
-	/**
-	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
-	 *             confused with other ID methods (such as patient#getIdentifier)
-	 */
-	@Deprecated
-	void setId(IdDt theId);
+    /**
+     * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed
+     *     because it is easily confused with other ID methods (such as patient#getIdentifier)
+     */
+    @Deprecated
+    void setId(IdDt theId);
 
-	/**
-	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
-	 *             confused with other ID methods (such as patient#getIdentifier)
-	 */
-	@Deprecated
-	void setId(String theId);
-
+    /**
+     * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed
+     *     because it is easily confused with other ID methods (such as patient#getIdentifier)
+     */
+    @Deprecated
+    void setId(String theId);
 }

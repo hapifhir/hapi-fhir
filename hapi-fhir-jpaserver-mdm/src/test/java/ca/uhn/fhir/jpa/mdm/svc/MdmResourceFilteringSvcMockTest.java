@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -13,32 +16,25 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(SpringExtension.class)
 class MdmResourceFilteringSvcMockTest {
 
-	@MockBean
-	private IMdmSettings myMdmSettings;
-	@MockBean
-	MdmSearchParamSvc myMdmSearchParamSvc;
-	@MockBean
-	FhirContext myFhirContext;
-	@Autowired
-	private MdmResourceFilteringSvc myMdmResourceFilteringSvc;
+    @MockBean private IMdmSettings myMdmSettings;
+    @MockBean MdmSearchParamSvc myMdmSearchParamSvc;
+    @MockBean FhirContext myFhirContext;
+    @Autowired private MdmResourceFilteringSvc myMdmResourceFilteringSvc;
 
-	@Configuration
-	static class SpringConfig {
-		@Bean
-		MdmResourceFilteringSvc mdmResourceFilteringSvc() {
-			return new MdmResourceFilteringSvc();
-		}
-	}
+    @Configuration
+    static class SpringConfig {
+        @Bean
+        MdmResourceFilteringSvc mdmResourceFilteringSvc() {
+            return new MdmResourceFilteringSvc();
+        }
+    }
 
-	@Test
-	public void testEmptyCriteriaShouldBeProcessed() {
-		when(myMdmSettings.getMdmRules()).thenReturn(new MdmRulesJson());
-		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(new Patient()));
-	}
+    @Test
+    public void testEmptyCriteriaShouldBeProcessed() {
+        when(myMdmSettings.getMdmRules()).thenReturn(new MdmRulesJson());
+        assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(new Patient()));
+    }
 }

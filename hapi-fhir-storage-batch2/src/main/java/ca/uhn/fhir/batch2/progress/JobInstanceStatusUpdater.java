@@ -30,63 +30,81 @@ import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 public class JobInstanceStatusUpdater {
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-	private final JobDefinitionRegistry myJobDefinitionRegistry;
+    private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+    private final JobDefinitionRegistry myJobDefinitionRegistry;
 
-	public JobInstanceStatusUpdater(JobDefinitionRegistry theJobDefinitionRegistry) {
-		myJobDefinitionRegistry = theJobDefinitionRegistry;
-	}
+    public JobInstanceStatusUpdater(JobDefinitionRegistry theJobDefinitionRegistry) {
+        myJobDefinitionRegistry = theJobDefinitionRegistry;
+    }
 
-	/**
-	 * Update the status on the instance, and call any completion handlers when entering a completion state.
-	 * @param theJobInstance the instance to mutate
-	 * @param theNewStatus target status
-	 * @return was the state change allowed?
-	 */
-	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
-		StatusEnum origStatus = theJobInstance.getStatus();
-		if (origStatus == theNewStatus) {
-			return false;
-		}
-		if (!StatusEnum.isLegalStateTransition(origStatus, theNewStatus)) {
-			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theNewStatus);
-			return false;
-		}
-		theJobInstance.setStatus(theNewStatus);
-		ourLog.debug("Updating job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theNewStatus);
-		handleStatusChange(theJobInstance);
+    /**
+     * Update the status on the instance, and call any completion handlers when entering a
+     * completion state.
+     *
+     * @param theJobInstance the instance to mutate
+     * @param theNewStatus target status
+     * @return was the state change allowed?
+     */
+    public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
+        StatusEnum origStatus = theJobInstance.getStatus();
+        if (origStatus == theNewStatus) {
+            return false;
+        }
+        if (!StatusEnum.isLegalStateTransition(origStatus, theNewStatus)) {
+            ourLog.error(
+                    "Ignoring illegal state transition for job instance {} of type {} from {} to"
+                            + " {}",
+                    theJobInstance.getInstanceId(),
+                    theJobInstance.getJobDefinitionId(),
+                    origStatus,
+                    theNewStatus);
+            return false;
+        }
+        theJobInstance.setStatus(theNewStatus);
+        ourLog.debug(
+                "Updating job instance {} of type {} from {} to {}",
+                theJobInstance.getInstanceId(),
+                theJobInstance.getJobDefinitionId(),
+                origStatus,
+                theNewStatus);
+        handleStatusChange(theJobInstance);
 
-		return true;
-	}
+        return true;
+    }
 
-	private <PT extends IModelJson> void handleStatusChange(JobInstance theJobInstance) {
-		JobDefinition<PT> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(theJobInstance);
-		assert definition != null;
+    private <PT extends IModelJson> void handleStatusChange(JobInstance theJobInstance) {
+        JobDefinition<PT> definition =
+                myJobDefinitionRegistry.getJobDefinitionOrThrowException(theJobInstance);
+        assert definition != null;
 
-		switch (theJobInstance.getStatus()) {
-			case COMPLETED:
-				invokeCompletionHandler(theJobInstance, definition, definition.getCompletionHandler());
-				break;
-			case FAILED:
-			case CANCELLED:
-				invokeCompletionHandler(theJobInstance, definition, definition.getErrorHandler());
-				break;
-			case QUEUED:
-			case ERRORED:
-			case IN_PROGRESS:
-			case FINALIZE:
-			default:
-				// do nothing
-		}
-	}
+        switch (theJobInstance.getStatus()) {
+            case COMPLETED:
+                invokeCompletionHandler(
+                        theJobInstance, definition, definition.getCompletionHandler());
+                break;
+            case FAILED:
+            case CANCELLED:
+                invokeCompletionHandler(theJobInstance, definition, definition.getErrorHandler());
+                break;
+            case QUEUED:
+            case ERRORED:
+            case IN_PROGRESS:
+            case FINALIZE:
+            default:
+                // do nothing
+        }
+    }
 
-	private <PT extends IModelJson> void invokeCompletionHandler(JobInstance theJobInstance, JobDefinition<PT> theJobDefinition, IJobCompletionHandler<PT> theJobCompletionHandler) {
-		if (theJobCompletionHandler == null) {
-			return;
-		}
-		PT jobParameters = theJobInstance.getParameters(theJobDefinition.getParametersType());
-		JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, theJobInstance);
-		theJobCompletionHandler.jobComplete(completionDetails);
-	}
-
+    private <PT extends IModelJson> void invokeCompletionHandler(
+            JobInstance theJobInstance,
+            JobDefinition<PT> theJobDefinition,
+            IJobCompletionHandler<PT> theJobCompletionHandler) {
+        if (theJobCompletionHandler == null) {
+            return;
+        }
+        PT jobParameters = theJobInstance.getParameters(theJobDefinition.getParametersType());
+        JobCompletionDetails<PT> completionDetails =
+                new JobCompletionDetails<>(jobParameters, theJobInstance);
+        theJobCompletionHandler.jobComplete(completionDetails);
+    }
 }

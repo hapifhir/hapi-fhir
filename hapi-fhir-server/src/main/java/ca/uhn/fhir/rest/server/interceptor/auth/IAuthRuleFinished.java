@@ -19,41 +19,39 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import javax.annotation.Nullable;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public interface IAuthRuleFinished {
 
-	/**
-	 * Start another rule
-	 */
-	IAuthRuleBuilder andThen();
+    /** Start another rule */
+    IAuthRuleBuilder andThen();
 
-	/**
-	 * Build the rule list
-	 */
-	List<IAuthRule> build();
+    /** Build the rule list */
+    List<IAuthRule> build();
 
-	/**
-	 * Add an additional tester that will be queried if all other conditions
-	 * of this rule already match. For example, given the following rule
-	 * <pre>
-	 * return new RuleBuilder()
-	 *   .allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).withTester(myTester)
-	 *   .build();
-	 * </pre>
-	 * ..the tester will be invoked on any $everything operations on Patient
-	 * resources as a final check as to whether the rule applies or not. In this
-	 * example, the tester is not invoked for other operations.
-	 *
-	 * @param theTester The tester to add, or <code>null</code>
-	 */
-	IAuthRuleFinished withTester(@Nullable IAuthRuleTester theTester);
+    /**
+     * Add an additional tester that will be queried if all other conditions of this rule already
+     * match. For example, given the following rule
+     *
+     * <pre>
+     * return new RuleBuilder()
+     *   .allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).withTester(myTester)
+     *   .build();
+     * </pre>
+     *
+     * ..the tester will be invoked on any $everything operations on Patient resources as a final
+     * check as to whether the rule applies or not. In this example, the tester is not invoked for
+     * other operations.
+     *
+     * @param theTester The tester to add, or <code>null</code>
+     */
+    IAuthRuleFinished withTester(@Nullable IAuthRuleTester theTester);
 
-	/**
-	 * Narrow this rule to resources matching the given FHIR query.
-	 * @param theQueryParameters a FHIR query parameter string.  E.g. category=laboratory&date=ge2021
-	 */
-	IAuthRuleFinished withFilterTester(String theQueryParameters);
-
+    /**
+     * Narrow this rule to resources matching the given FHIR query.
+     *
+     * @param theQueryParameters a FHIR query parameter string. E.g. category=laboratory&date=ge2021
+     */
+    IAuthRuleFinished withFilterTester(String theQueryParameters);
 }

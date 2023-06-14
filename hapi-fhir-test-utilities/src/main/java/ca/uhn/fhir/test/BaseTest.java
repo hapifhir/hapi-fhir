@@ -21,27 +21,27 @@ package ca.uhn.fhir.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ClasspathUtil;
+import java.io.IOException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.io.IOException;
-
 public abstract class BaseTest {
 
-	static {
-		ToStringBuilder.setDefaultStyle(ToStringStyle.SHORT_PREFIX_STYLE);
-	}
+    static {
+        ToStringBuilder.setDefaultStyle(ToStringStyle.SHORT_PREFIX_STYLE);
+    }
 
-	protected String loadResource(String theClasspath) throws IOException {
-		return ClasspathUtil.loadResource(theClasspath);
-	}
+    protected String loadResource(String theClasspath) throws IOException {
+        return ClasspathUtil.loadResource(theClasspath);
+    }
 
-	protected String loadCompressedResource(String theClasspath) throws IOException {
-		return ClasspathUtil.loadCompressedResource(theClasspath);
-	}
+    protected String loadCompressedResource(String theClasspath) throws IOException {
+        return ClasspathUtil.loadCompressedResource(theClasspath);
+    }
 
-	protected <T extends IBaseResource> T loadResource(FhirContext theCtx, Class<T> theType, String theClasspath) throws IOException {
-		return ClasspathUtil.loadResource(theCtx, theType, theClasspath);
-	}
+    protected <T extends IBaseResource> T loadResource(
+            FhirContext theCtx, Class<T> theType, String theClasspath) throws IOException {
+        return ClasspathUtil.loadResource(theCtx, theType, theClasspath);
+    }
 }

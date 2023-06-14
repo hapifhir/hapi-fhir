@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.batch2.jobs.importpull;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -29,47 +31,52 @@ import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.importpull.models.BulkImportFilePartitionResult;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
+import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
+public class FetchPartitionedFilesStep
+        implements IFirstJobStepWorker<
+                Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> {
+    private static final Logger ourLog = getLogger(FetchPartitionedFilesStep.class);
 
-import static org.slf4j.LoggerFactory.getLogger;
+    private final IBulkDataImportSvc myBulkDataImportSvc;
 
-public class FetchPartitionedFilesStep implements IFirstJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> {
-	private static final Logger ourLog = getLogger(FetchPartitionedFilesStep.class);
+    public FetchPartitionedFilesStep(IBulkDataImportSvc theBulkDataImportSvc) {
+        myBulkDataImportSvc = theBulkDataImportSvc;
+    }
 
-	private final IBulkDataImportSvc myBulkDataImportSvc;
+    @Nonnull
+    @Override
+    public RunOutcome run(
+            @Nonnull
+                    StepExecutionDetails<Batch2BulkImportPullJobParameters, VoidModel>
+                            theStepExecutionDetails,
+            @Nonnull IJobDataSink<BulkImportFilePartitionResult> theDataSink)
+            throws JobExecutionFailedException {
+        String jobId = theStepExecutionDetails.getParameters().getJobId();
 
-	public FetchPartitionedFilesStep(IBulkDataImportSvc theBulkDataImportSvc) {
-		myBulkDataImportSvc = theBulkDataImportSvc;
-	}
+        ourLog.info("Start FetchPartitionedFilesStep for jobID {} ", jobId);
 
-	@Nonnull
-	@Override
-	public RunOutcome run(
-		@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, VoidModel> theStepExecutionDetails,
-		@Nonnull IJobDataSink<BulkImportFilePartitionResult> theDataSink
-	) throws JobExecutionFailedException {
-		String jobId = theStepExecutionDetails.getParameters().getJobId();
+        BulkImportJobJson job = myBulkDataImportSvc.fetchJob(jobId);
 
-		ourLog.info("Start FetchPartitionedFilesStep for jobID {} ", jobId);
+        for (int i = 0; i < job.getFileCount(); i++) {
+            String fileDescription = myBulkDataImportSvc.getFileDescription(jobId, i);
 
-		BulkImportJobJson job = myBulkDataImportSvc.fetchJob(jobId);
+            BulkImportFilePartitionResult result = new BulkImportFilePartitionResult();
+            result.setFileIndex(i);
+            result.setProcessingMode(job.getProcessingMode());
+            result.setFileDescription(fileDescription);
+            result.setJobDescription(job.getJobDescription());
 
-		for (int i = 0; i < job.getFileCount(); i++) {
-			String fileDescription = myBulkDataImportSvc.getFileDescription(jobId, i);
+            theDataSink.accept(result);
+        }
 
-			BulkImportFilePartitionResult result = new BulkImportFilePartitionResult();
-			result.setFileIndex(i);
-			result.setProcessingMode(job.getProcessingMode());
-			result.setFileDescription(fileDescription);
-			result.setJobDescription(job.getJobDescription());
+        ourLog.info(
+                "FetchPartitionedFilesStep complete for jobID {}.  Submitted {} files to next"
+                        + " step.",
+                jobId,
+                job.getFileCount());
 
-			theDataSink.accept(result);
-		}
-
-		ourLog.info("FetchPartitionedFilesStep complete for jobID {}.  Submitted {} files to next step.", jobId, job.getFileCount());
-
-		return RunOutcome.SUCCESS;
-	}
+        return RunOutcome.SUCCESS;
+    }
 }

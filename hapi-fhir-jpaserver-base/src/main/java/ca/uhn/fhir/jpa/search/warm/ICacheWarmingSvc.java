@@ -20,5 +20,5 @@
 package ca.uhn.fhir.jpa.search.warm;
 
 public interface ICacheWarmingSvc {
-	void performWarmingPass();
+    void performWarmingPass();
 }

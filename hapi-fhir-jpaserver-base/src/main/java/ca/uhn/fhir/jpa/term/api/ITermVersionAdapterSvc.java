@@ -26,20 +26,19 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
 /**
- * This interface is used to handle differences in versions of FHIR for the terminology
- * server. It is really just an internal interface used by the
- * {@link ITermReadSvc terminology read service}.
+ * This interface is used to handle differences in versions of FHIR for the terminology server. It
+ * is really just an internal interface used by the {@link ITermReadSvc terminology read service}.
  */
 public interface ITermVersionAdapterSvc {
 
-	default IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource) {
-		return createOrUpdateCodeSystem(theCodeSystemResource, null);
-	}
+    default IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource) {
+        return createOrUpdateCodeSystem(theCodeSystemResource, null);
+    }
 
-	IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails);
+    IIdType createOrUpdateCodeSystem(
+            CodeSystem theCodeSystemResource, RequestDetails theRequestDetails);
 
-	void createOrUpdateConceptMap(ConceptMap theNextConceptMap);
+    void createOrUpdateConceptMap(ConceptMap theNextConceptMap);
 
-	void createOrUpdateValueSet(ValueSet theValueSet);
-
+    void createOrUpdateValueSet(ValueSet theValueSet);
 }

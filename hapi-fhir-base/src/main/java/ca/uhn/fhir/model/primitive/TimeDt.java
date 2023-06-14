@@ -24,35 +24,28 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 
 /**
- * Represents a Time datatype, per the FHIR specification. A time is a specification of hours and minutes (and optionally milliseconds), with NO date and NO timezone information attached. It is
+ * Represents a Time datatype, per the FHIR specification. A time is a specification of hours and
+ * minutes (and optionally milliseconds), with NO date and NO timezone information attached. It is
  * expressed as a string in the form <code>HH:mm:ss[.SSSS]</code>
- * 
- * <p>
- * This datatype is not valid in FHIR DSTU1
- * </p>
- * 
+ *
+ * <p>This datatype is not valid in FHIR DSTU1
+ *
  * @since FHIR DSTU 2 / HAPI 0.8
- * 
- *        TODO: have a way of preventing this from being used in DSTU1 resources
- *        TODO: validate time?
+ *     <p>TODO: have a way of preventing this from being used in DSTU1 resources TODO: validate
+ *     time?
  */
 @DatatypeDef(name = "time")
 public class TimeDt extends StringDt implements IQueryParameterType {
 
-	/**
-	 * Create a new String
-	 */
-	public TimeDt() {
-		super();
-	}
+    /** Create a new String */
+    public TimeDt() {
+        super();
+    }
 
-	/**
-	 * Create a new String
-	 */
-	@SimpleSetter
-	public TimeDt(@SimpleSetter.Parameter(name = "theString") String theValue) {
-		this();
-		setValue(theValue);
-	}
-
+    /** Create a new String */
+    @SimpleSetter
+    public TimeDt(@SimpleSetter.Parameter(name = "theString") String theValue) {
+        this();
+        setValue(theValue);
+    }
 }

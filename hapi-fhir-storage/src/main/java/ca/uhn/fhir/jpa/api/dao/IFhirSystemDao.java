@@ -25,73 +25,70 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Note that this interface is not considered a stable interface. While it is possible to build applications
- * that use it directly, please be aware that we may modify methods, add methods, or even remove methods from
- * time to time, even within minor point releases.
+ * Note that this interface is not considered a stable interface. While it is possible to build
+ * applications that use it directly, please be aware that we may modify methods, add methods, or
+ * even remove methods from time to time, even within minor point releases.
  *
- * @param <T>  The bundle type
+ * @param <T> The bundle type
  * @param <MT> The Meta datatype type
  */
 public interface IFhirSystemDao<T, MT> extends IDao {
 
-	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
+    ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
 
-	Map<String, Long> getResourceCounts();
+    Map<String, Long> getResourceCounts();
 
-	/**
-	 * Returns a cached count of resources using a cache that regularly
-	 * refreshes in the background. This method will never block, and may return null if nothing is in the cache.
-	 */
-	@Nullable
-	Map<String, Long> getResourceCountsFromCache();
+    /**
+     * Returns a cached count of resources using a cache that regularly refreshes in the background.
+     * This method will never block, and may return null if nothing is in the cache.
+     */
+    @Nullable
+    Map<String, Long> getResourceCountsFromCache();
 
+    IBundleProvider history(
+            Date theDate, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
-	IBundleProvider history(Date theDate, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
+    /**
+     * Not supported for DSTU1
+     *
+     * @param theRequestDetails TODO
+     */
+    @Transactional
+    MT metaGetOperation(RequestDetails theRequestDetails);
 
-	/**
-	 * Not supported for DSTU1
-	 *
-	 * @param theRequestDetails TODO
-	 */
-	@Transactional
-	MT metaGetOperation(RequestDetails theRequestDetails);
+    /** Implementations may implement this method to implement the $process-message operation */
+    IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage);
 
-	/**
-	 * Implementations may implement this method to implement the $process-message
-	 * operation
-	 */
-	IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage);
+    /**
+     * Executes a FHIR transaction using a new database transaction. This method must not be called
+     * from within a DB transaction.
+     */
+    T transaction(RequestDetails theRequestDetails, T theResources);
 
-	/**
-	 * Executes a FHIR transaction using a new database transaction. This method must
-	 * not be called from within a DB transaction.
-	 */
-	T transaction(RequestDetails theRequestDetails, T theResources);
+    /**
+     * Executes a FHIR transaction nested inside the current database transaction. This form of the
+     * transaction processor can handle write operations only (no reads)
+     */
+    default T transactionNested(RequestDetails theRequestDetails, T theResources) {
+        throw new UnsupportedOperationException(Msg.code(570));
+    }
 
-	/**
-	 * Executes a FHIR transaction nested inside the current database transaction.
-	 * This form of the transaction processor can handle write operations only (no reads)
-	 */
-	default T transactionNested(RequestDetails theRequestDetails, T theResources) {
-		throw new UnsupportedOperationException(Msg.code(570));
-	}
-
-	/**
-	 * Preload resources from the database in batch. This method is purely
-	 * a performance optimization and must be purely idempotent.
-	 *
-	 * @param thePreFetchIndexes Should resource indexes be loaded
-	 */
-	default <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds, boolean thePreFetchIndexes) {
-		// nothing by default
-	}
+    /**
+     * Preload resources from the database in batch. This method is purely a performance
+     * optimization and must be purely idempotent.
+     *
+     * @param thePreFetchIndexes Should resource indexes be loaded
+     */
+    default <P extends IResourcePersistentId> void preFetchResources(
+            List<P> theResolvedIds, boolean thePreFetchIndexes) {
+        // nothing by default
+    }
 }

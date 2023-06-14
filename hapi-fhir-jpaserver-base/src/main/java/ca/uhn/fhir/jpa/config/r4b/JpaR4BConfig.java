@@ -49,45 +49,57 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 @Import({
-	FhirContextR4BConfig.class,
-	GeneratedDaoAndResourceProviderConfigR4B.class,
-	JpaConfig.class
+    FhirContextR4BConfig.class,
+    GeneratedDaoAndResourceProviderConfigR4B.class,
+    JpaConfig.class
 })
 public class JpaR4BConfig {
 
-	@Bean
-	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
-		return new TermVersionAdapterSvcR4B();
-	}
+    @Bean
+    public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
+        return new TermVersionAdapterSvcR4B();
+    }
 
-	@Bean
-	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
-		return new TransactionProcessorVersionAdapterR4B();
-	}
+    @Bean
+    public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+        return new TransactionProcessorVersionAdapterR4B();
+    }
 
-	@Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
-	@Lazy
-	public GraphQLProvider graphQLProvider(FhirContext theFhirContext, IGraphQLStorageServices theGraphqlStorageServices, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
-		return new GraphQLProviderWithIntrospection(theFhirContext, theValidationSupport, theGraphqlStorageServices, theSearchParamRegistry, theDaoRegistry);
-	}
+    @Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
+    @Lazy
+    public GraphQLProvider graphQLProvider(
+            FhirContext theFhirContext,
+            IGraphQLStorageServices theGraphqlStorageServices,
+            IValidationSupport theValidationSupport,
+            ISearchParamRegistry theSearchParamRegistry,
+            IDaoRegistry theDaoRegistry) {
+        return new GraphQLProviderWithIntrospection(
+                theFhirContext,
+                theValidationSupport,
+                theGraphqlStorageServices,
+                theSearchParamRegistry,
+                theDaoRegistry);
+    }
 
-	@Bean(name = "mySystemDaoR4B")
-	public IFhirSystemDao<Bundle, Meta> systemDaoR4() {
-		ca.uhn.fhir.jpa.dao.r4b.FhirSystemDaoR4B retVal = new ca.uhn.fhir.jpa.dao.r4b.FhirSystemDaoR4B();
-		return retVal;
-	}
+    @Bean(name = "mySystemDaoR4B")
+    public IFhirSystemDao<Bundle, Meta> systemDaoR4() {
+        ca.uhn.fhir.jpa.dao.r4b.FhirSystemDaoR4B retVal =
+                new ca.uhn.fhir.jpa.dao.r4b.FhirSystemDaoR4B();
+        return retVal;
+    }
 
-	@Bean(name = "mySystemProviderR4B")
-	public JpaSystemProvider<Bundle, Meta> systemProviderR4(FhirContext theFhirContext) {
-		JpaSystemProvider<Bundle, Meta> retVal = new JpaSystemProvider<>();
-		retVal.setContext(theFhirContext);
-		retVal.setDao(systemDaoR4());
-		return retVal;
-	}
+    @Bean(name = "mySystemProviderR4B")
+    public JpaSystemProvider<Bundle, Meta> systemProviderR4(FhirContext theFhirContext) {
+        JpaSystemProvider<Bundle, Meta> retVal = new JpaSystemProvider<>();
+        retVal.setContext(theFhirContext);
+        retVal.setDao(systemDaoR4());
+        return retVal;
+    }
 
-	@Bean
-	public ITermLoaderSvc termLoaderService(ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
-		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
-	}
-
+    @Bean
+    public ITermLoaderSvc termLoaderService(
+            ITermDeferredStorageSvc theDeferredStorageSvc,
+            ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
+        return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
+    }
 }

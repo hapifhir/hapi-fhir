@@ -24,25 +24,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Batch2BulkImportPullJobParameters implements IModelJson {
 
-	@JsonProperty("jobId")
-	private String myJobId;
+    @JsonProperty("jobId")
+    private String myJobId;
 
-	@JsonProperty("batchSize")
-	private long myBatchSize;
+    @JsonProperty("batchSize")
+    private long myBatchSize;
 
-	public String getJobId() {
-		return myJobId;
-	}
+    public String getJobId() {
+        return myJobId;
+    }
 
-	public void setJobId(String theJobId) {
-		myJobId = theJobId;
-	}
+    public void setJobId(String theJobId) {
+        myJobId = theJobId;
+    }
 
-	public long getBatchSize() {
-		return myBatchSize;
-	}
+    public long getBatchSize() {
+        return myBatchSize;
+    }
 
-	public void setBatchSize(long theBatchSize) {
-		myBatchSize = theBatchSize;
-	}
+    public void setBatchSize(long theBatchSize) {
+        myBatchSize = theBatchSize;
+    }
 }

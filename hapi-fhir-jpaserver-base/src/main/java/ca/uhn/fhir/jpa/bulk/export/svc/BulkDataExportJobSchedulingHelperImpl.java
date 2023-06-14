@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.svc;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -34,7 +36,14 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
-import com.google.common.annotations.VisibleForTesting;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -49,182 +58,201 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+public class BulkDataExportJobSchedulingHelperImpl
+        implements IBulkDataExportJobSchedulingHelper, IHasScheduledJobs {
+    private static final Logger ourLog = getLogger(BulkDataExportJobSchedulingHelperImpl.class);
 
-import static org.slf4j.LoggerFactory.getLogger;
+    private final DaoRegistry myDaoRegistry;
 
-public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJobSchedulingHelper, IHasScheduledJobs {
-	private static final Logger ourLog = getLogger(BulkDataExportJobSchedulingHelperImpl.class);
+    private final PlatformTransactionManager myTxManager;
+    private final JpaStorageSettings myDaoConfig;
+    private final BulkExportHelperService myBulkExportHelperSvc;
+    private final IJobPersistence myJpaJobPersistence;
+    private TransactionTemplate myTxTemplate;
 
-	private final DaoRegistry myDaoRegistry;
+    public BulkDataExportJobSchedulingHelperImpl(
+            DaoRegistry theDaoRegistry,
+            PlatformTransactionManager theTxManager,
+            JpaStorageSettings theDaoConfig,
+            BulkExportHelperService theBulkExportHelperSvc,
+            IJobPersistence theJpaJobPersistence,
+            TransactionTemplate theTxTemplate) {
+        myDaoRegistry = theDaoRegistry;
+        myTxManager = theTxManager;
+        myDaoConfig = theDaoConfig;
+        myBulkExportHelperSvc = theBulkExportHelperSvc;
+        myJpaJobPersistence = theJpaJobPersistence;
+        myTxTemplate = theTxTemplate;
+    }
 
-	private final PlatformTransactionManager myTxManager;
-	private final JpaStorageSettings myDaoConfig;
-	private final BulkExportHelperService myBulkExportHelperSvc;
-	private final IJobPersistence myJpaJobPersistence;
-	private TransactionTemplate myTxTemplate;
+    @PostConstruct
+    public void start() {
+        myTxTemplate = new TransactionTemplate(myTxManager);
+    }
 
-	public BulkDataExportJobSchedulingHelperImpl(DaoRegistry theDaoRegistry, PlatformTransactionManager theTxManager, JpaStorageSettings theDaoConfig, BulkExportHelperService theBulkExportHelperSvc, IJobPersistence theJpaJobPersistence, TransactionTemplate theTxTemplate) {
-		myDaoRegistry = theDaoRegistry;
-		myTxManager = theTxManager;
-		myDaoConfig = theDaoConfig;
-		myBulkExportHelperSvc = theBulkExportHelperSvc;
-		myJpaJobPersistence = theJpaJobPersistence;
-		myTxTemplate = theTxTemplate;
-	}
+    @Override
+    public void scheduleJobs(ISchedulerService theSchedulerService) {
+        // job to cleanup unneeded BulkExportJobEntities that are persisted, but unwanted
+        ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+        jobDetail.setId(PurgeExpiredFilesJob.class.getName());
+        jobDetail.setJobClass(PurgeExpiredFilesJob.class);
+        theSchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
+    }
 
-	@PostConstruct
-	public void start() {
-		myTxTemplate = new TransactionTemplate(myTxManager);
-	}
+    @Override
+    @Transactional(propagation = Propagation.NEVER)
+    public synchronized void cancelAndPurgeAllJobs() {
+        // This is called by unit test code that also calls ExpungeEverythingService,
+        // which explicitly deletes both Batch2WorkChunkEntity and Batch2JobInstanceEntity, as well
+        // as ResourceTable, in
+        // which Binary's are stored
+        // Long story short, this method no longer needs to do anything
+    }
 
-	@Override
-	public void scheduleJobs(ISchedulerService theSchedulerService) {
-		// job to cleanup unneeded BulkExportJobEntities that are persisted, but unwanted
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(PurgeExpiredFilesJob.class.getName());
-		jobDetail.setJobClass(PurgeExpiredFilesJob.class);
-		theSchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
-	}
+    /** This method is called by the scheduler to run a pass of the generator */
+    @Transactional(propagation = Propagation.NEVER)
+    @Override
+    public void purgeExpiredFiles() {
+        if (!myDaoConfig.isEnableTaskBulkExportJobExecution()) {
+            ourLog.debug("bulk export disabled:  doing nothing");
+            return;
+        }
 
-	@Override
-	@Transactional(propagation = Propagation.NEVER)
-	public synchronized void cancelAndPurgeAllJobs() {
-		// This is called by unit test code that also calls ExpungeEverythingService,
-		// which explicitly deletes both Batch2WorkChunkEntity and Batch2JobInstanceEntity, as well as ResourceTable, in
-		// which Binary's are stored
-		// Long story short, this method no longer needs to do anything
-	}
+        final List<JobInstance> jobInstancesToDelete =
+                myTxTemplate.execute(
+                        t ->
+                                myJpaJobPersistence.fetchInstances(
+                                        Batch2JobDefinitionConstants.BULK_EXPORT,
+                                        StatusEnum.getEndedStatuses(),
+                                        computeCutoffFromConfig(),
+                                        PageRequest.of(0, 50)));
 
-	/**
-	 * This method is called by the scheduler to run a pass of the
-	 * generator
-	 */
-	@Transactional(propagation = Propagation.NEVER)
-	@Override
-	public void purgeExpiredFiles() {
-		if (!myDaoConfig.isEnableTaskBulkExportJobExecution()) {
-			ourLog.debug("bulk export disabled:  doing nothing");
-			return;
-		}
+        if (jobInstancesToDelete == null || jobInstancesToDelete.isEmpty()) {
+            ourLog.debug("No batch 2 bulk export jobs found!  Nothing to do!");
+            ourLog.info("Finished bulk export job deletion with nothing to do");
+            return;
+        }
 
-		final List<JobInstance> jobInstancesToDelete = myTxTemplate.execute(t ->
-			myJpaJobPersistence.fetchInstances(Batch2JobDefinitionConstants.BULK_EXPORT,
-				StatusEnum.getEndedStatuses(),
-				computeCutoffFromConfig(),
-				PageRequest.of(0, 50))
-		);
+        for (JobInstance jobInstance : jobInstancesToDelete) {
+            ourLog.info("Deleting batch 2 bulk export job: {}", jobInstance);
 
-		if (jobInstancesToDelete == null || jobInstancesToDelete.isEmpty()) {
-			ourLog.debug("No batch 2 bulk export jobs found!  Nothing to do!");
-			ourLog.info("Finished bulk export job deletion with nothing to do");
-			return;
-		}
+            myTxTemplate.execute(
+                    t -> {
+                        final Optional<JobInstance> optJobInstanceForInstanceId =
+                                myJpaJobPersistence.fetchInstance(jobInstance.getInstanceId());
 
-		for (JobInstance jobInstance : jobInstancesToDelete) {
-			ourLog.info("Deleting batch 2 bulk export job: {}", jobInstance);
+                        if (optJobInstanceForInstanceId.isEmpty()) {
+                            ourLog.error(
+                                    "Can't find job instance for ID: {} despite having retrieved it"
+                                            + " in the first step",
+                                    jobInstance.getInstanceId());
+                            return null;
+                        }
 
-			myTxTemplate.execute(t -> {
-				final Optional<JobInstance> optJobInstanceForInstanceId = myJpaJobPersistence.fetchInstance(jobInstance.getInstanceId());
+                        final JobInstance jobInstanceForInstanceId =
+                                optJobInstanceForInstanceId.get();
+                        ourLog.info("Deleting bulk export job: {}", jobInstanceForInstanceId);
 
-				if (optJobInstanceForInstanceId.isEmpty()) {
-					ourLog.error("Can't find job instance for ID: {} despite having retrieved it in the first step", jobInstance.getInstanceId());
-					return null;
-				}
+                        // We need to keep these for investigation but we also need a process to
+                        // manually delete these jobs once we're done investigating
+                        if (StatusEnum.FAILED == jobInstanceForInstanceId.getStatus()) {
+                            ourLog.info(
+                                    "skipping because the status is FAILED for ID: {}"
+                                            + jobInstanceForInstanceId.getInstanceId());
+                            return null;
+                        }
 
-				final JobInstance jobInstanceForInstanceId = optJobInstanceForInstanceId.get();
-				ourLog.info("Deleting bulk export job: {}", jobInstanceForInstanceId);
+                        purgeBinariesIfNeeded(
+                                jobInstanceForInstanceId, jobInstanceForInstanceId.getReport());
 
-				// We need to keep these for investigation but we also need a process to manually delete these jobs once we're done investigating
-				if (StatusEnum.FAILED == jobInstanceForInstanceId.getStatus()) {
-					ourLog.info("skipping because the status is FAILED for ID: {}" + jobInstanceForInstanceId.getInstanceId());
-					return null;
-				}
+                        final String batch2BulkExportJobInstanceId =
+                                jobInstanceForInstanceId.getInstanceId();
+                        ourLog.debug(
+                                "*** About to delete batch 2 bulk export job with ID {}",
+                                batch2BulkExportJobInstanceId);
 
-				purgeBinariesIfNeeded(jobInstanceForInstanceId, jobInstanceForInstanceId.getReport());
+                        myJpaJobPersistence.deleteInstanceAndChunks(batch2BulkExportJobInstanceId);
 
-				final String batch2BulkExportJobInstanceId = jobInstanceForInstanceId.getInstanceId();
-				ourLog.debug("*** About to delete batch 2 bulk export job with ID {}", batch2BulkExportJobInstanceId);
+                        ourLog.info(
+                                "Finished deleting bulk export job: {}",
+                                jobInstance.getInstanceId());
 
-				myJpaJobPersistence.deleteInstanceAndChunks(batch2BulkExportJobInstanceId);
+                        return null;
+                    });
 
-				ourLog.info("Finished deleting bulk export job: {}", jobInstance.getInstanceId());
+            ourLog.info("Finished deleting bulk export jobs");
+        }
+    }
 
-				return null;
-			});
+    private void purgeBinariesIfNeeded(
+            JobInstance theJobInstanceForInstanceId, String theJobInstanceReportString) {
+        final Optional<BulkExportJobResults> optBulkExportJobResults =
+                getBulkExportJobResults(theJobInstanceReportString);
 
-			ourLog.info("Finished deleting bulk export jobs");
-		}
-	}
+        if (optBulkExportJobResults.isPresent()) {
+            final BulkExportJobResults bulkExportJobResults = optBulkExportJobResults.get();
+            ourLog.debug(
+                    "job: {} resource type to binary ID: {}",
+                    theJobInstanceForInstanceId.getInstanceId(),
+                    bulkExportJobResults.getResourceTypeToBinaryIds());
 
-	private void purgeBinariesIfNeeded(JobInstance theJobInstanceForInstanceId, String theJobInstanceReportString) {
-		final Optional<BulkExportJobResults> optBulkExportJobResults = getBulkExportJobResults(theJobInstanceReportString);
+            final Map<String, List<String>> resourceTypeToBinaryIds =
+                    bulkExportJobResults.getResourceTypeToBinaryIds();
+            for (String resourceType : resourceTypeToBinaryIds.keySet()) {
+                final List<String> binaryIds = resourceTypeToBinaryIds.get(resourceType);
+                for (String binaryId : binaryIds) {
+                    ourLog.info("Purging batch 2 bulk export binary: {}", binaryId);
+                    IIdType id = myBulkExportHelperSvc.toId(binaryId);
+                    getBinaryDao().delete(id, new SystemRequestDetails());
+                }
+            }
+        } // else we can't know what the binary IDs are, so delete this job and move on
+    }
 
-		if (optBulkExportJobResults.isPresent()) {
-			final BulkExportJobResults bulkExportJobResults = optBulkExportJobResults.get();
-			ourLog.debug("job: {} resource type to binary ID: {}", theJobInstanceForInstanceId.getInstanceId(), bulkExportJobResults.getResourceTypeToBinaryIds());
+    @SuppressWarnings("unchecked")
+    private IFhirResourceDao<IBaseBinary> getBinaryDao() {
+        return myDaoRegistry.getResourceDao(Binary.class.getSimpleName());
+    }
 
-			final Map<String, List<String>> resourceTypeToBinaryIds = bulkExportJobResults.getResourceTypeToBinaryIds();
-			for (String resourceType : resourceTypeToBinaryIds.keySet()) {
-				final List<String> binaryIds = resourceTypeToBinaryIds.get(resourceType);
-				for (String binaryId : binaryIds) {
-					ourLog.info("Purging batch 2 bulk export binary: {}", binaryId);
-					IIdType id = myBulkExportHelperSvc.toId(binaryId);
-					getBinaryDao().delete(id, new SystemRequestDetails());
-				}
-			}
-		} // else we can't know what the binary IDs are, so delete this job and move on
-	}
+    @Nonnull
+    private Optional<BulkExportJobResults> getBulkExportJobResults(
+            String theJobInstanceReportString) {
+        if (StringUtils.isBlank(theJobInstanceReportString)) {
+            ourLog.error(
+                    String.format(
+                            "Cannot parse job report string because it's null or blank: %s",
+                            theJobInstanceReportString));
+            return Optional.empty();
+        }
 
-	@SuppressWarnings("unchecked")
-	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
-		return myDaoRegistry.getResourceDao(Binary.class.getSimpleName());
-	}
+        try {
+            return Optional.of(
+                    JsonUtil.deserialize(theJobInstanceReportString, BulkExportJobResults.class));
+        } catch (Exception theException) {
+            ourLog.error(
+                    String.format("Cannot parse job report string: %s", theJobInstanceReportString),
+                    theException);
+            return Optional.empty();
+        }
+    }
 
-	@Nonnull
-	private Optional<BulkExportJobResults> getBulkExportJobResults(String theJobInstanceReportString) {
-		if (StringUtils.isBlank(theJobInstanceReportString)) {
-			ourLog.error(String.format("Cannot parse job report string because it's null or blank: %s", theJobInstanceReportString));
-			return Optional.empty();
-		}
+    @Nonnull
+    private Date computeCutoffFromConfig() {
+        final int bulkExportFileRetentionPeriodHours =
+                myDaoConfig.getBulkExportFileRetentionPeriodHours();
 
-		try {
-			return Optional.of(JsonUtil.deserialize(theJobInstanceReportString, BulkExportJobResults.class));
-		} catch (Exception theException) {
-			ourLog.error(String.format("Cannot parse job report string: %s", theJobInstanceReportString), theException);
-			return Optional.empty();
-		}
-	}
+        final LocalDateTime cutoffLocalDateTime =
+                LocalDateTime.now().minusHours(bulkExportFileRetentionPeriodHours);
 
-	@Nonnull
-	private Date computeCutoffFromConfig() {
-		final int bulkExportFileRetentionPeriodHours = myDaoConfig.getBulkExportFileRetentionPeriodHours();
+        return Date.from(cutoffLocalDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
 
-		final LocalDateTime cutoffLocalDateTime = LocalDateTime.now()
-			.minusHours(bulkExportFileRetentionPeriodHours);
+    public static class PurgeExpiredFilesJob implements HapiJob {
+        @Autowired private IBulkDataExportJobSchedulingHelper myTarget;
 
-		return Date.from(cutoffLocalDateTime
-			.atZone(ZoneId.systemDefault())
-			.toInstant());
-	}
-
-
-	public static class PurgeExpiredFilesJob implements HapiJob {
-		@Autowired
-		private IBulkDataExportJobSchedulingHelper myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.purgeExpiredFiles();
-		}
-	}
+        @Override
+        public void execute(JobExecutionContext theContext) {
+            myTarget.purgeExpiredFiles();
+        }
+    }
 }
-

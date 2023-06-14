@@ -29,25 +29,33 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSvcImpl;
 import ca.uhn.fhir.jpa.reindex.Batch2DaoSvcImpl;
+import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
-import javax.persistence.EntityManager;
-
 public class Batch2SupportConfig {
 
-	@Bean
-	public IBatch2DaoSvc batch2DaoSvc() {
-		return new Batch2DaoSvcImpl();
-	}
+    @Bean
+    public IBatch2DaoSvc batch2DaoSvc() {
+        return new Batch2DaoSvcImpl();
+    }
 
-	@Bean
-	public IDeleteExpungeSvc deleteExpungeSvc(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, @Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
-		return new DeleteExpungeSvcImpl(theEntityManager, theDeleteExpungeSqlBuilder, theFullTextSearchSvc);
-	}
+    @Bean
+    public IDeleteExpungeSvc deleteExpungeSvc(
+            EntityManager theEntityManager,
+            DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder,
+            @Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
+        return new DeleteExpungeSvcImpl(
+                theEntityManager, theDeleteExpungeSqlBuilder, theFullTextSearchSvc);
+    }
 
-	@Bean
-	DeleteExpungeSqlBuilder deleteExpungeSqlBuilder(ResourceTableFKProvider theResourceTableFKProvider, JpaStorageSettings theStorageSettings, IIdHelperService theIdHelper, IResourceLinkDao theResourceLinkDao) {
-		return new DeleteExpungeSqlBuilder(theResourceTableFKProvider, theStorageSettings, theIdHelper, theResourceLinkDao);
-	}
+    @Bean
+    DeleteExpungeSqlBuilder deleteExpungeSqlBuilder(
+            ResourceTableFKProvider theResourceTableFKProvider,
+            JpaStorageSettings theStorageSettings,
+            IIdHelperService theIdHelper,
+            IResourceLinkDao theResourceLinkDao) {
+        return new DeleteExpungeSqlBuilder(
+                theResourceTableFKProvider, theStorageSettings, theIdHelper, theResourceLinkDao);
+    }
 }

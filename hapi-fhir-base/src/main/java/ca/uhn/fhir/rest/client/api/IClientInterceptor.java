@@ -21,29 +21,23 @@ package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-
 import java.io.IOException;
 
 /**
- * This interface represents an interceptor which can be used to access (and optionally change or take actions upon)
- * requests that are being sent by the HTTP client, and responses received by it.
- * <p>
- * See the <a href="https://hapifhir.io/hapi-fhir/docs/interceptors/client_interceptors.html">HAPI Documentation Client Interceptor</a>
- * page for more information on how to use this feature.
- * </p> 
+ * This interface represents an interceptor which can be used to access (and optionally change or
+ * take actions upon) requests that are being sent by the HTTP client, and responses received by it.
+ *
+ * <p>See the <a
+ * href="https://hapifhir.io/hapi-fhir/docs/interceptors/client_interceptors.html">HAPI
+ * Documentation Client Interceptor</a> page for more information on how to use this feature.
  */
 public interface IClientInterceptor {
 
-	/**
-	 * Fired by the client just before invoking the HTTP client request
-	 */
-	@Hook(Pointcut.CLIENT_REQUEST)
-	void interceptRequest(IHttpRequest theRequest);
-	
-	/**
-	 * Fired by the client upon receiving an HTTP response, prior to processing that response
-	 */
-	@Hook(Pointcut.CLIENT_RESPONSE)
-	void interceptResponse(IHttpResponse theResponse) throws IOException;
+    /** Fired by the client just before invoking the HTTP client request */
+    @Hook(Pointcut.CLIENT_REQUEST)
+    void interceptRequest(IHttpRequest theRequest);
 
+    /** Fired by the client upon receiving an HTTP response, prior to processing that response */
+    @Hook(Pointcut.CLIENT_RESPONSE)
+    void interceptResponse(IHttpResponse theResponse) throws IOException;
 }

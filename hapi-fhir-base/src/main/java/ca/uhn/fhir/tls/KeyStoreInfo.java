@@ -21,14 +21,15 @@ package ca.uhn.fhir.tls;
 
 public class KeyStoreInfo extends BaseStoreInfo {
 
-	private final char[] myKeyPass;
+    private final char[] myKeyPass;
 
-	public KeyStoreInfo(String theFilePath, String theStorePass, String theKeyPass, String theAlias) {
-		super(theFilePath, theStorePass, theAlias);
-		this.myKeyPass = toCharArray(theKeyPass);
-	}
+    public KeyStoreInfo(
+            String theFilePath, String theStorePass, String theKeyPass, String theAlias) {
+        super(theFilePath, theStorePass, theAlias);
+        this.myKeyPass = toCharArray(theKeyPass);
+    }
 
-	public char[] getKeyPass() {
-		return myKeyPass;
-	}
+    public char[] getKeyPass() {
+        return myKeyPass;
+    }
 }

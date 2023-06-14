@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.websocket;
 
+import static org.hamcrest.Matchers.contains;
+
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.FhirDstu2Util;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -23,119 +25,121 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.Matchers.contains;
-
 /**
- * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
- * subscription
- * <p>
- * Note: This test only returns a ping with the subscription id, Check FhirSubscriptionWithSubscriptionIdDstu3Test for
- * a test that returns the xml of the observation
- * <p>
- * To execute the following test, execute it the following way:
- * 0. execute 'clean' test
- * 1. Execute the 'createSubscription' test
- * 2. Update the subscription id in the 'attachWebSocket' test
- * 3. Execute the 'attachWebSocket' test
- * 4. Execute the 'sendObservation' test
- * 5. Look in the 'attachWebSocket' terminal execution and wait for your ping with the subscription id
+ * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with
+ * the id of the subscription
+ *
+ * <p>Note: This test only returns a ping with the subscription id, Check
+ * FhirSubscriptionWithSubscriptionIdDstu3Test for a test that returns the xml of the observation
+ *
+ * <p>To execute the following test, execute it the following way: 0. execute 'clean' test 1.
+ * Execute the 'createSubscription' test 2. Update the subscription id in the 'attachWebSocket' test
+ * 3. Execute the 'attachWebSocket' test 4. Execute the 'sendObservation' test 5. Look in the
+ * 'attachWebSocket' terminal execution and wait for your ping with the subscription id
  */
 public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDstu2Test {
-	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithSubscriptionIdDstu2Test.class);
-	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
-	private String myPatientId;
-	private String mySubscriptionId;
-	@Autowired
-	private SubscriptionTestUtil mySubscriptionTestUtil;
+    private static final Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(WebsocketWithSubscriptionIdDstu2Test.class);
 
-	@Override
-	@AfterEach
-	public void after() throws Exception {
-		super.after();
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-	}
+    @RegisterExtension
+    private final WebsocketSubscriptionClient myWebsocketClientExtension =
+            new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
 
-	@Override
-	@BeforeEach
-	public void before() throws Exception {
-		super.before();
+    private String myPatientId;
+    private String mySubscriptionId;
+    @Autowired private SubscriptionTestUtil mySubscriptionTestUtil;
 
-		mySubscriptionTestUtil.registerWebSocketInterceptor();
+    @Override
+    @AfterEach
+    public void after() throws Exception {
+        super.after();
+        mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+    }
 
-		/*
-		 * Create patient
-		 */
+    @Override
+    @BeforeEach
+    public void before() throws Exception {
+        super.before();
 
-		Patient patient = FhirDstu2Util.getPatient();
-		MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
-		myPatientId = methodOutcome.getId().getIdPart();
+        mySubscriptionTestUtil.registerWebSocketInterceptor();
 
-		/*
-		 * Create subscription
-		 */
-		Subscription subscription = new Subscription();
-		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
-		// subscription.setCriteria("Observation?subject=Patient/" + PATIENT_ID);
-		subscription.setCriteria("Observation?code=SNOMED-CT|82313006");
+        /*
+         * Create patient
+         */
 
-		Channel channel = new Channel();
-		channel.setType(SubscriptionChannelTypeEnum.WEBSOCKET);
-		channel.setPayload("application/json");
-		subscription.setChannel(channel);
+        Patient patient = FhirDstu2Util.getPatient();
+        MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
+        myPatientId = methodOutcome.getId().getIdPart();
 
-		methodOutcome = myClient.create().resource(subscription).execute();
-		mySubscriptionId = methodOutcome.getId().getIdPart();
+        /*
+         * Create subscription
+         */
+        Subscription subscription = new Subscription();
+        subscription.setReason(
+                "Monitor new neonatal function (note, age will be determined by the monitor)");
+        subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
+        // subscription.setCriteria("Observation?subject=Patient/" + PATIENT_ID);
+        subscription.setCriteria("Observation?code=SNOMED-CT|82313006");
 
-		myWebsocketClientExtension.bind(mySubscriptionId);
-	}
+        Channel channel = new Channel();
+        channel.setType(SubscriptionChannelTypeEnum.WEBSOCKET);
+        channel.setPayload("application/json");
+        subscription.setChannel(channel);
 
-	@Test
-	public void createObservation() {
-		Observation observation = new Observation();
-		CodeableConceptDt cc = new CodeableConceptDt();
-		observation.setCode(cc);
-		CodingDt coding = cc.addCoding();
-		coding.setCode("82313006");
-		coding.setSystem("SNOMED-CT");
-		ResourceReferenceDt reference = new ResourceReferenceDt();
-		reference.setReference("Patient/" + myPatientId);
-		observation.setSubject(reference);
-		observation.setStatus(ObservationStatusEnum.FINAL);
+        methodOutcome = myClient.create().resource(subscription).execute();
+        mySubscriptionId = methodOutcome.getId().getIdPart();
 
-		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
-		String observationId = methodOutcome2.getId().getIdPart();
-		observation.setId(observationId);
+        myWebsocketClientExtension.bind(mySubscriptionId);
+    }
 
-		ourLog.info("Observation id generated by server is: " + observationId);
+    @Test
+    public void createObservation() {
+        Observation observation = new Observation();
+        CodeableConceptDt cc = new CodeableConceptDt();
+        observation.setCode(cc);
+        CodingDt coding = cc.addCoding();
+        coding.setCode("82313006");
+        coding.setSystem("SNOMED-CT");
+        ResourceReferenceDt reference = new ResourceReferenceDt();
+        reference.setReference("Patient/" + myPatientId);
+        observation.setSubject(reference);
+        observation.setStatus(ObservationStatusEnum.FINAL);
 
-		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
-		waitForSize(2, myWebsocketClientExtension.getMessages());
-		MatcherAssert.assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
-	}
+        MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
+        String observationId = methodOutcome2.getId().getIdPart();
+        observation.setId(observationId);
 
-	@Test
-	public void createObservationThatDoesNotMatch() {
-		Observation observation = new Observation();
-		CodeableConceptDt cc = new CodeableConceptDt();
-		observation.setCode(cc);
-		CodingDt coding = cc.addCoding();
-		coding.setCode("8231");
-		coding.setSystem("SNOMED-CT");
-		ResourceReferenceDt reference = new ResourceReferenceDt();
-		reference.setReference("Patient/" + myPatientId);
-		observation.setSubject(reference);
-		observation.setStatus(ObservationStatusEnum.FINAL);
+        ourLog.info("Observation id generated by server is: " + observationId);
 
-		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
-		String observationId = methodOutcome2.getId().getIdPart();
-		observation.setId(observationId);
+        ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
+        waitForSize(2, myWebsocketClientExtension.getMessages());
+        MatcherAssert.assertThat(
+                myWebsocketClientExtension.getMessages(),
+                contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
+    }
 
-		ourLog.info("Observation id generated by server is: " + observationId);
+    @Test
+    public void createObservationThatDoesNotMatch() {
+        Observation observation = new Observation();
+        CodeableConceptDt cc = new CodeableConceptDt();
+        observation.setCode(cc);
+        CodingDt coding = cc.addCoding();
+        coding.setCode("8231");
+        coding.setSystem("SNOMED-CT");
+        ResourceReferenceDt reference = new ResourceReferenceDt();
+        reference.setReference("Patient/" + myPatientId);
+        observation.setSubject(reference);
+        observation.setStatus(ObservationStatusEnum.FINAL);
 
-		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
-		waitForSize(1, myWebsocketClientExtension.getMessages());
-		MatcherAssert.assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId));
-	}
+        MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
+        String observationId = methodOutcome2.getId().getIdPart();
+        observation.setId(observationId);
+
+        ourLog.info("Observation id generated by server is: " + observationId);
+
+        ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
+        waitForSize(1, myWebsocketClientExtension.getMessages());
+        MatcherAssert.assertThat(
+                myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId));
+    }
 }

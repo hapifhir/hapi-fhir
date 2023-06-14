@@ -24,9 +24,9 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
 public class HapiClearMigrationLockCommand extends BaseClearMigrationLockCommand {
-	@Override
-	public void run(CommandLine theCommandLine) throws ParseException {
-		setMigrationTableName(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
-		super.run(theCommandLine);
-	}
+    @Override
+    public void run(CommandLine theCommandLine) throws ParseException {
+        setMigrationTableName(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+        super.run(theCommandLine);
+    }
 }

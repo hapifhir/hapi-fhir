@@ -1,20 +1,21 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Subscription;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class SubscriptionTopicSerializationTest {
-	FhirContext ourFhirContext = FhirContext.forR5Cached();
+    FhirContext ourFhirContext = FhirContext.forR5Cached();
 
-	@Test
-	void testSubscriptionDerialization() {
-		@Language("json")
-		String input = """
+    @Test
+    void testSubscriptionDerialization() {
+        @Language("json")
+        String input =
+                """
 			{
 			  "resourceType": "Subscription",
 			  "id": "2",
@@ -36,19 +37,25 @@ public class SubscriptionTopicSerializationTest {
 			}
 			""";
 
-		Subscription subscription = ourFhirContext.newJsonParser().parseResource(Subscription.class, input);
-		assertEquals("Subscription", subscription.getResourceType().name());
-		assertEquals("Encounter", subscription.getFilterByFirstRep().getResourceType());
+        Subscription subscription =
+                ourFhirContext.newJsonParser().parseResource(Subscription.class, input);
+        assertEquals("Subscription", subscription.getResourceType().name());
+        assertEquals("Encounter", subscription.getFilterByFirstRep().getResourceType());
 
-		// Also test the other direction
-		String serialized = ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription);
-		assertEquals(input.trim(), serialized);
-	}
+        // Also test the other direction
+        String serialized =
+                ourFhirContext
+                        .newJsonParser()
+                        .setPrettyPrint(true)
+                        .encodeResourceToString(subscription);
+        assertEquals(input.trim(), serialized);
+    }
 
-	@Test
-	void testSubscriptionDerializationInBundle() {
-		@Language("json")
-		String input = """
+    @Test
+    void testSubscriptionDerializationInBundle() {
+        @Language("json")
+        String input =
+                """
 {
   "resourceType": "Bundle",
   "id": "bundle-transaction",
@@ -82,13 +89,14 @@ public class SubscriptionTopicSerializationTest {
 }
 			""";
 
-		Bundle bundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, input);
-		Subscription subscription = (Subscription) bundle.getEntry().get(0).getResource();
-		assertEquals("Subscription", subscription.getResourceType().name());
-		assertEquals("Encounter", subscription.getFilterByFirstRep().getResourceType());
+        Bundle bundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, input);
+        Subscription subscription = (Subscription) bundle.getEntry().get(0).getResource();
+        assertEquals("Subscription", subscription.getResourceType().name());
+        assertEquals("Encounter", subscription.getFilterByFirstRep().getResourceType());
 
-		// Also test the other direction
-		String serialized = ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
-		assertEquals(input.trim(), serialized);
-	}
+        // Also test the other direction
+        String serialized =
+                ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+        assertEquals(input.trim(), serialized);
+    }
 }

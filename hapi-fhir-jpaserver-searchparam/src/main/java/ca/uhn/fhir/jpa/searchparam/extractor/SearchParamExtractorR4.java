@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -26,12 +28,17 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import com.google.common.annotations.VisibleForTesting;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.ExpressionNode;
 import org.hl7.fhir.r4.model.IdType;
@@ -41,155 +48,163 @@ import org.hl7.fhir.r4.model.TypeDetails;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
-import javax.annotation.PostConstruct;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+public class SearchParamExtractorR4 extends BaseSearchParamExtractor
+        implements ISearchParamExtractor {
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+    private Cache<String, ExpressionNode> myParsedFhirPathCache;
+    private FHIRPathEngine myFhirPathEngine;
 
-public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements ISearchParamExtractor {
+    /** Constructor */
+    public SearchParamExtractorR4() {
+        super();
+    }
 
-	private Cache<String, ExpressionNode> myParsedFhirPathCache;
-	private FHIRPathEngine myFhirPathEngine;
+    // This constructor is used by tests
+    @VisibleForTesting
+    public SearchParamExtractorR4(
+            StorageSettings theStorageSettings,
+            PartitionSettings thePartitionSettings,
+            FhirContext theCtx,
+            ISearchParamRegistry theSearchParamRegistry) {
+        super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
+        initFhirPath();
+        start();
+    }
 
-	/**
-	 * Constructor
-	 */
-	public SearchParamExtractorR4() {
-		super();
-	}
+    @Override
+    public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
+        return () -> {
+            ExpressionNode parsed =
+                    myParsedFhirPathCache.get(theSinglePath, path -> myFhirPathEngine.parse(path));
+            return myFhirPathEngine.evaluate(
+                    theResource,
+                    (Base) theResource,
+                    (Base) theResource,
+                    (Base) theResource,
+                    parsed);
+        };
+    }
 
-	// This constructor is used by tests
-	@VisibleForTesting
-	public SearchParamExtractorR4(StorageSettings theStorageSettings, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
-		super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
-		initFhirPath();
-		start();
-	}
+    @Override
+    @PostConstruct
+    public void start() {
+        super.start();
+        if (myFhirPathEngine == null) {
+            initFhirPath();
+        }
+    }
 
-	@Override
-	public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
-		return () -> {
-			ExpressionNode parsed = myParsedFhirPathCache.get(theSinglePath, path -> myFhirPathEngine.parse(path));
-			return myFhirPathEngine.evaluate(theResource, (Base) theResource, (Base) theResource, (Base) theResource, parsed);
-		};
-	}
+    public void initFhirPath() {
+        IWorkerContext worker =
+                new HapiWorkerContext(getContext(), getContext().getValidationSupport());
+        myFhirPathEngine = new FHIRPathEngine(worker);
+        myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
 
+        myParsedFhirPathCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(10));
+    }
 
-	@Override
-	@PostConstruct
-	public void start() {
-		super.start();
-		if (myFhirPathEngine == null) {
-			initFhirPath();
-		}
-	}
+    private class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
 
-	public void initFhirPath() {
-		IWorkerContext worker = new HapiWorkerContext(getContext(), getContext().getValidationSupport());
-		myFhirPathEngine = new FHIRPathEngine(worker);
-		myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
+        private final Map<String, Base> myResourceTypeToStub =
+                Collections.synchronizedMap(new HashMap<>());
 
-		myParsedFhirPathCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(10));
-	}
+        @Override
+        public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext)
+                throws PathEngineException {
+            return Collections.emptyList();
+        }
 
+        @Override
+        public TypeDetails resolveConstantType(Object appContext, String name)
+                throws PathEngineException {
+            return null;
+        }
 
-	private class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
+        @Override
+        public boolean log(String argument, List<Base> focus) {
+            return false;
+        }
 
-		private final Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
+        @Override
+        public FunctionDetails resolveFunction(String functionName) {
+            return null;
+        }
 
-		@Override
-		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
-			return Collections.emptyList();
-		}
+        @Override
+        public TypeDetails checkFunction(
+                Object appContext, String functionName, List<TypeDetails> parameters)
+                throws PathEngineException {
+            return null;
+        }
 
-		@Override
-		public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
-			return null;
-		}
+        @Override
+        public List<Base> executeFunction(
+                Object appContext,
+                List<Base> focus,
+                String functionName,
+                List<List<Base>> parameters) {
+            return null;
+        }
 
-		@Override
-		public boolean log(String argument, List<Base> focus) {
-			return false;
-		}
+        @Override
+        public Base resolveReference(Object theAppContext, String theUrl, Base theRefContext)
+                throws FHIRException {
+            Base retVal = resolveResourceInBundleWithPlaceholderId(theAppContext, theUrl);
+            if (retVal != null) {
+                return retVal;
+            }
 
-		@Override
-		public FunctionDetails resolveFunction(String functionName) {
-			return null;
-		}
+            /*
+             * When we're doing resolution within the SearchParamExtractor, if we want
+             * to do a resolve() it's just to check the type, so there is no point
+             * going through the heavyweight test. We can just return a stub and
+             * that's good enough since we're just doing something like
+             *    Encounter.patient.where(resolve() is Patient)
+             */
+            IdType url = new IdType(theUrl);
+            if (isNotBlank(url.getResourceType())) {
 
-		@Override
-		public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
-			return null;
-		}
+                retVal = myResourceTypeToStub.get(url.getResourceType());
+                if (retVal != null) {
+                    return retVal;
+                }
 
-		@Override
-		public List<Base> executeFunction(Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
-			return null;
-		}
+                ResourceType resourceType = ResourceType.fromCode(url.getResourceType());
+                if (resourceType != null) {
+                    retVal =
+                            new Resource() {
+                                private static final long serialVersionUID = -5303169871827706447L;
 
+                                @Override
+                                public Resource copy() {
+                                    return this;
+                                }
 
-		@Override
-		public Base resolveReference(Object theAppContext, String theUrl, Base theRefContext) throws FHIRException {
-			Base retVal = resolveResourceInBundleWithPlaceholderId(theAppContext, theUrl);
-			if (retVal != null) {
-				return retVal;
-			}
+                                @Override
+                                public ResourceType getResourceType() {
+                                    return resourceType;
+                                }
 
-			/*
-			 * When we're doing resolution within the SearchParamExtractor, if we want
-			 * to do a resolve() it's just to check the type, so there is no point
-			 * going through the heavyweight test. We can just return a stub and
-			 * that's good enough since we're just doing something like
-			 *    Encounter.patient.where(resolve() is Patient)
-			 */
-			IdType url = new IdType(theUrl);
-			if (isNotBlank(url.getResourceType())) {
+                                @Override
+                                public String fhirType() {
+                                    return url.getResourceType();
+                                }
+                            };
+                    myResourceTypeToStub.put(url.getResourceType(), retVal);
+                }
+            }
+            return retVal;
+        }
 
-				retVal = myResourceTypeToStub.get(url.getResourceType());
-				if (retVal != null) {
-					return retVal;
-				}
+        @Override
+        public boolean conformsToProfile(Object appContext, Base item, String url)
+                throws FHIRException {
+            return false;
+        }
 
-				ResourceType resourceType = ResourceType.fromCode(url.getResourceType());
-				if (resourceType != null) {
-					retVal = new Resource() {
-						private static final long serialVersionUID = -5303169871827706447L;
-
-						@Override
-						public Resource copy() {
-							return this;
-						}
-
-						@Override
-						public ResourceType getResourceType() {
-							return resourceType;
-						}
-
-						@Override
-						public String fhirType() {
-							return url.getResourceType();
-						}
-
-					};
-					myResourceTypeToStub.put(url.getResourceType(), retVal);
-				}
-			}
-			return retVal;
-		}
-
-		@Override
-		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
-			return false;
-		}
-
-		@Override
-		public ValueSet resolveValueSet(Object appContext, String url) {
-			return null;
-		}
-	}
-
+        @Override
+        public ValueSet resolveValueSet(Object appContext, String url) {
+            return null;
+        }
+    }
 }

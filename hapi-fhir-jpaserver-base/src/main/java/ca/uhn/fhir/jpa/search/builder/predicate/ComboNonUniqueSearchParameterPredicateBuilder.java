@@ -27,20 +27,19 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-	private final DbColumn myColumnIndexString;
+    private final DbColumn myColumnIndexString;
 
-	/**
-	 * Constructor
-	 */
-	public ComboNonUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMB_TOK_NU"));
+    /** Constructor */
+    public ComboNonUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+        super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMB_TOK_NU"));
 
-		myColumnIndexString = getTable().addColumn("IDX_STRING");
-	}
+        myColumnIndexString = getTable().addColumn("IDX_STRING");
+    }
 
-
-	public Condition createPredicateHashComplete(RequestPartitionId theRequestPartitionId, String theIndexString) {
-		BinaryCondition predicate = BinaryCondition.equalTo(myColumnIndexString, generatePlaceholder(theIndexString));
-		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
-	}
+    public Condition createPredicateHashComplete(
+            RequestPartitionId theRequestPartitionId, String theIndexString) {
+        BinaryCondition predicate =
+                BinaryCondition.equalTo(myColumnIndexString, generatePlaceholder(theIndexString));
+        return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
+    }
 }

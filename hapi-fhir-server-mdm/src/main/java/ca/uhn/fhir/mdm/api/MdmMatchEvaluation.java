@@ -21,15 +21,16 @@ package ca.uhn.fhir.mdm.api;
 
 public class MdmMatchEvaluation {
 
-	public final boolean match;
-	public final double score;
+    public final boolean match;
+    public final double score;
 
-	public MdmMatchEvaluation(boolean theMatch, double theScore) {
-		match = theMatch;
-		score = theScore;
-	}
+    public MdmMatchEvaluation(boolean theMatch, double theScore) {
+        match = theMatch;
+        score = theScore;
+    }
 
-	public static MdmMatchEvaluation max(MdmMatchEvaluation theLeft, MdmMatchEvaluation theRight) {
-		return new MdmMatchEvaluation(theLeft.match | theRight.match, Math.max(theLeft.score, theRight.score));
-	}
+    public static MdmMatchEvaluation max(MdmMatchEvaluation theLeft, MdmMatchEvaluation theRight) {
+        return new MdmMatchEvaluation(
+                theLeft.match | theRight.match, Math.max(theLeft.score, theRight.score));
+    }
 }

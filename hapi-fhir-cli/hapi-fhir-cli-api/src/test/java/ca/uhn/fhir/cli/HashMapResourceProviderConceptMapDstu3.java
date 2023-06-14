@@ -20,6 +20,8 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -32,101 +34,97 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import com.google.common.base.Charsets;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.hl7.fhir.dstu3.model.ConceptMap;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.hl7.fhir.dstu3.model.ConceptMap;
 
 /**
- * This is a subclass to implement FHIR operations specific to DSTU3 ConceptMap
- * resources. Its superclass, {@link HashMapResourceProvider}, is a simple
- * implementation of the resource provider interface that uses a HashMap to
- * store all resources in memory.
- * <p>
- * This subclass currently supports the following FHIR operations:
- * </p>
+ * This is a subclass to implement FHIR operations specific to DSTU3 ConceptMap resources. Its
+ * superclass, {@link HashMapResourceProvider}, is a simple implementation of the resource provider
+ * interface that uses a HashMap to store all resources in memory.
+ *
+ * <p>This subclass currently supports the following FHIR operations:
+ *
  * <ul>
- * <li>Search for DSTU3 ConceptMap resources by ConceptMap.url</li>
- * <li>Conditional update for DSTU3 ConceptMap resources by ConceptMap.url</li>
+ *   <li>Search for DSTU3 ConceptMap resources by ConceptMap.url
+ *   <li>Conditional update for DSTU3 ConceptMap resources by ConceptMap.url
  * </ul>
  */
 public class HashMapResourceProviderConceptMapDstu3 extends HashMapResourceProvider<ConceptMap> {
-	@SuppressWarnings("unchecked")
-	public HashMapResourceProviderConceptMapDstu3(FhirContext theFhirContext) {
-		super(theFhirContext, ConceptMap.class);
+    @SuppressWarnings("unchecked")
+    public HashMapResourceProviderConceptMapDstu3(FhirContext theFhirContext) {
+        super(theFhirContext, ConceptMap.class);
 
-		FhirVersionEnum fhirVersion = theFhirContext.getVersion().getVersion();
-		if (fhirVersion != FhirVersionEnum.DSTU3) {
-			throw new IllegalStateException("Requires FHIR version DSTU3. Unsupported FHIR version provided: " + fhirVersion);
-		}
+        FhirVersionEnum fhirVersion = theFhirContext.getVersion().getVersion();
+        if (fhirVersion != FhirVersionEnum.DSTU3) {
+            throw new IllegalStateException(
+                    "Requires FHIR version DSTU3. Unsupported FHIR version provided: "
+                            + fhirVersion);
+        }
+    }
 
+    @Search
+    public List<ConceptMap> searchByUrl(
+            @RequiredParam(name = ConceptMap.SP_URL) String theConceptMapUrl) {
 
-	}
+        List<ConceptMap> retVal = new ArrayList<>();
 
-	@Search
-	public List<ConceptMap> searchByUrl(
-		@RequiredParam(name=ConceptMap.SP_URL) String theConceptMapUrl) {
+        for (TreeMap<Long, ConceptMap> next : myIdToVersionToResourceMap.values()) {
+            if (!next.isEmpty()) {
+                ConceptMap conceptMap = next.lastEntry().getValue();
+                if (theConceptMapUrl.equals(conceptMap.getUrl())) retVal.add(conceptMap);
+                break;
+            }
+        }
 
-		List<ConceptMap> retVal = new ArrayList<>();
+        return retVal;
+    }
 
-		for (TreeMap<Long, ConceptMap> next : myIdToVersionToResourceMap.values()) {
-			if (!next.isEmpty()) {
-				ConceptMap conceptMap = next.lastEntry().getValue();
-				if (theConceptMapUrl.equals(conceptMap.getUrl()))
-				retVal.add(conceptMap);
-				break;
-			}
-		}
+    @Override
+    @Update
+    public MethodOutcome update(
+            @ResourceParam ConceptMap theConceptMap,
+            @ConditionalUrlParam String theConditional,
+            RequestDetails theRequestDetails) {
 
-		return retVal;
-	}
+        MethodOutcome methodOutcome = new MethodOutcome();
 
-	@Override
-	@Update
-	public MethodOutcome update(
-		@ResourceParam ConceptMap theConceptMap,
-		@ConditionalUrlParam String theConditional,
-		RequestDetails theRequestDetails) {
+        if (theConditional != null) {
 
-		MethodOutcome methodOutcome = new MethodOutcome();
+            String url = null;
 
-		if (theConditional != null) {
+            try {
+                List<NameValuePair> params =
+                        URLEncodedUtils.parse(new URI(theConditional), Charsets.UTF_8);
+                for (NameValuePair param : params) {
+                    if (param.getName().equalsIgnoreCase("url")) {
+                        url = param.getValue();
+                        break;
+                    }
+                }
+            } catch (URISyntaxException urise) {
+                throw new InvalidRequestException(urise);
+            }
 
-			String url = null;
+            if (isNotBlank(url)) {
+                List<ConceptMap> conceptMaps = searchByUrl(url);
 
-			try {
-				List<NameValuePair> params = URLEncodedUtils.parse(new URI(theConditional), Charsets.UTF_8);
-				for (NameValuePair param : params) {
-					if (param.getName().equalsIgnoreCase("url")) {
-						url = param.getValue();
-						break;
-					}
-				}
-			} catch (URISyntaxException urise) {
-				throw new InvalidRequestException(urise);
-			}
+                if (!conceptMaps.isEmpty()) {
+                    methodOutcome = super.update(conceptMaps.get(0), null, theRequestDetails);
+                } else {
+                    methodOutcome = create(theConceptMap, theRequestDetails);
+                }
+            }
 
-			if (isNotBlank(url)) {
-				List<ConceptMap> conceptMaps = searchByUrl(url);
+        } else {
+            methodOutcome = super.update(theConceptMap, null, theRequestDetails);
+        }
 
-				if (!conceptMaps.isEmpty()) {
-					methodOutcome = super.update(conceptMaps.get(0), null, theRequestDetails);
-				} else {
-					methodOutcome = create(theConceptMap, theRequestDetails);
-				}
-			}
-
-		} else {
-			methodOutcome = super.update(theConceptMap, null, theRequestDetails);
-		}
-
-		return methodOutcome;
-	}
+        return methodOutcome;
+    }
 }

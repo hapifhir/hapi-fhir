@@ -28,70 +28,91 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
-import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
+import ca.uhn.fhir.util.Logs;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nonnull;
+import org.slf4j.Logger;
 
-class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> extends BaseDataSink<PT,IT,OT> {
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+        extends BaseDataSink<PT, IT, OT> {
+    private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	private final BatchJobSender myBatchJobSender;
-	private final IJobPersistence myJobPersistence;
-	private final String myJobDefinitionId;
-	private final int myJobDefinitionVersion;
-	private final JobDefinitionStep<PT, OT, ?> myTargetStep;
-	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
-	private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
-	private final boolean myGatedExecution;
+    private final BatchJobSender myBatchJobSender;
+    private final IJobPersistence myJobPersistence;
+    private final String myJobDefinitionId;
+    private final int myJobDefinitionVersion;
+    private final JobDefinitionStep<PT, OT, ?> myTargetStep;
+    private final AtomicInteger myChunkCounter = new AtomicInteger(0);
+    private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
+    private final boolean myGatedExecution;
 
-	JobDataSink(@Nonnull BatchJobSender theBatchJobSender,
-					@Nonnull IJobPersistence theJobPersistence,
-					@Nonnull JobDefinition<?> theDefinition,
-					@Nonnull String theInstanceId,
-					@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
-		super(theInstanceId, theJobWorkCursor);
-		myBatchJobSender = theBatchJobSender;
-		myJobPersistence = theJobPersistence;
-		myJobDefinitionId = theDefinition.getJobDefinitionId();
-		myJobDefinitionVersion = theDefinition.getJobDefinitionVersion();
-		myTargetStep = theJobWorkCursor.nextStep;
-		myGatedExecution = theDefinition.isGatedExecution();
-	}
+    JobDataSink(
+            @Nonnull BatchJobSender theBatchJobSender,
+            @Nonnull IJobPersistence theJobPersistence,
+            @Nonnull JobDefinition<?> theDefinition,
+            @Nonnull String theInstanceId,
+            @Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+        super(theInstanceId, theJobWorkCursor);
+        myBatchJobSender = theBatchJobSender;
+        myJobPersistence = theJobPersistence;
+        myJobDefinitionId = theDefinition.getJobDefinitionId();
+        myJobDefinitionVersion = theDefinition.getJobDefinitionVersion();
+        myTargetStep = theJobWorkCursor.nextStep;
+        myGatedExecution = theDefinition.isGatedExecution();
+    }
 
-	@Override
-	public void accept(WorkChunkData<OT> theData) {
-		String instanceId = getInstanceId();
-		String targetStepId = myTargetStep.getStepId();
+    @Override
+    public void accept(WorkChunkData<OT> theData) {
+        String instanceId = getInstanceId();
+        String targetStepId = myTargetStep.getStepId();
 
-		int sequence = myChunkCounter.getAndIncrement();
-		OT dataValue = theData.getData();
-		String dataValueString = JsonUtil.serialize(dataValue, false);
+        int sequence = myChunkCounter.getAndIncrement();
+        OT dataValue = theData.getData();
+        String dataValueString = JsonUtil.serialize(dataValue, false);
 
-		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
-		String chunkId = myJobPersistence.onWorkChunkCreate(batchWorkChunk);
-		myLastChunkId.set(chunkId);
+        WorkChunkCreateEvent batchWorkChunk =
+                new WorkChunkCreateEvent(
+                        myJobDefinitionId,
+                        myJobDefinitionVersion,
+                        targetStepId,
+                        instanceId,
+                        sequence,
+                        dataValueString);
+        String chunkId = myJobPersistence.onWorkChunkCreate(batchWorkChunk);
+        myLastChunkId.set(chunkId);
 
-		if (!myGatedExecution) {
-			JobWorkNotification workNotification = new JobWorkNotification(myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
-			myBatchJobSender.sendWorkChannelMessage(workNotification);
-		}
-	}
+        if (!myGatedExecution) {
+            JobWorkNotification workNotification =
+                    new JobWorkNotification(
+                            myJobDefinitionId,
+                            myJobDefinitionVersion,
+                            instanceId,
+                            targetStepId,
+                            chunkId);
+            myBatchJobSender.sendWorkChannelMessage(workNotification);
+        }
+    }
 
-	@Override
-	public int getWorkChunkCount() {
-		return myChunkCounter.get();
-	}
+    @Override
+    public int getWorkChunkCount() {
+        return myChunkCounter.get();
+    }
 
-	public String getOnlyChunkId() {
-		if (getWorkChunkCount() != 1) {
-			String msg = String.format("Expected this sink to have exactly one work chunk but there are %d.  Job %s v%s step %s", getWorkChunkCount(), myJobDefinitionId, myJobDefinitionVersion, myTargetStep);
-			throw new IllegalStateException(Msg.code(2082) + msg);
-		}
-		return myLastChunkId.get();
-	}
+    public String getOnlyChunkId() {
+        if (getWorkChunkCount() != 1) {
+            String msg =
+                    String.format(
+                            "Expected this sink to have exactly one work chunk but there are %d. "
+                                    + " Job %s v%s step %s",
+                            getWorkChunkCount(),
+                            myJobDefinitionId,
+                            myJobDefinitionVersion,
+                            myTargetStep);
+            throw new IllegalStateException(Msg.code(2082) + msg);
+        }
+        return myLastChunkId.get();
+    }
 }

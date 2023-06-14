@@ -19,28 +19,22 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import java.util.Date;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
 
-import java.util.Date;
-
 public class TestUtil {
 
-	/**
-	 * non instantiable
-	 */
-	private TestUtil() {
-		super();
-	}
+    /** non instantiable */
+    private TestUtil() {
+        super();
+    }
 
+    public static InstantType getTimestamp(IBaseResource resource) {
+        return new InstantType(new Date(resource.getMeta().getLastUpdated().getTime()));
+    }
 
-	public static InstantType getTimestamp(IBaseResource resource) {
-		return new InstantType(new Date(resource.getMeta().getLastUpdated().getTime()));
-	}
-
-	public static void sleepOneClick() {
-		ca.uhn.fhir.util.TestUtil.sleepAtLeast(1, false);
-	}
-
-
+    public static void sleepOneClick() {
+        ca.uhn.fhir.util.TestUtil.sleepAtLeast(1, false);
+    }
 }

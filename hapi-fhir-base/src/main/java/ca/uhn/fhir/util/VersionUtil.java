@@ -19,78 +19,79 @@
  */
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.system.HapiSystemProperties;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.InputStream;
-import java.util.Properties;
-
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
+import ca.uhn.fhir.system.HapiSystemProperties;
+import java.io.InputStream;
+import java.util.Properties;
+import org.apache.commons.lang3.StringUtils;
+
 /**
- * Used internally by HAPI to log the version of the HAPI FHIR framework
- * once, when the framework is first loaded by the classloader.
+ * Used internally by HAPI to log the version of the HAPI FHIR framework once, when the framework is
+ * first loaded by the classloader.
  */
 public class VersionUtil {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(VersionUtil.class);
-	private static String ourVersion;
-	private static String ourBuildNumber;
-	private static String ourBuildTime;
-	private static boolean ourSnapshot;
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(VersionUtil.class);
+    private static String ourVersion;
+    private static String ourBuildNumber;
+    private static String ourBuildTime;
+    private static boolean ourSnapshot;
 
-	static {
-		initialize();
-	}
+    static {
+        initialize();
+    }
 
-	public static boolean isSnapshot() {
-		return ourSnapshot;
-	}
+    public static boolean isSnapshot() {
+        return ourSnapshot;
+    }
 
-	public static String getBuildNumber() {
-		return ourBuildNumber;
-	}
+    public static String getBuildNumber() {
+        return ourBuildNumber;
+    }
 
-	public static String getBuildTime() {
-		return ourBuildTime;
-	}
+    public static String getBuildTime() {
+        return ourBuildTime;
+    }
 
-	public static String getVersion() {
-		return ourVersion;
-	}
+    public static String getVersion() {
+        return ourVersion;
+    }
 
-	private static void initialize() {
-		try (InputStream is = VersionUtil.class.getResourceAsStream("/ca/uhn/fhir/hapi-fhir-base-build.properties")) {
+    private static void initialize() {
+        try (InputStream is =
+                VersionUtil.class.getResourceAsStream(
+                        "/ca/uhn/fhir/hapi-fhir-base-build.properties")) {
 
-			Properties p = new Properties();
-			if (is != null) {
-				p.load(is);
-			}
+            Properties p = new Properties();
+            if (is != null) {
+                p.load(is);
+            }
 
-			ourVersion = p.getProperty("hapifhir.version");
-			ourVersion = defaultIfBlank(ourVersion, "(unknown)");
+            ourVersion = p.getProperty("hapifhir.version");
+            ourVersion = defaultIfBlank(ourVersion, "(unknown)");
 
-			ourSnapshot = ourVersion.contains("SNAPSHOT");
+            ourSnapshot = ourVersion.contains("SNAPSHOT");
 
-			ourBuildNumber = StringUtils.left(p.getProperty("hapifhir.buildnumber"), 10);
-			ourBuildTime = p.getProperty("hapifhir.timestamp");
+            ourBuildNumber = StringUtils.left(p.getProperty("hapifhir.buildnumber"), 10);
+            ourBuildTime = p.getProperty("hapifhir.timestamp");
 
-			if (!HapiSystemProperties.isSuppressHapiFhirVersionLogEnabled()) {
-				String buildNumber = ourBuildNumber;
-				if (isSnapshot()) {
-					buildNumber = buildNumber + "/" + getBuildDate();
-				}
+            if (!HapiSystemProperties.isSuppressHapiFhirVersionLogEnabled()) {
+                String buildNumber = ourBuildNumber;
+                if (isSnapshot()) {
+                    buildNumber = buildNumber + "/" + getBuildDate();
+                }
 
-				ourLog.info("HAPI FHIR version {} - Rev {}", ourVersion, buildNumber);
-			}
+                ourLog.info("HAPI FHIR version {} - Rev {}", ourVersion, buildNumber);
+            }
 
-		} catch (Exception e) {
-			ourLog.warn("Unable to determine HAPI version information", e);
-		}
-	}
+        } catch (Exception e) {
+            ourLog.warn("Unable to determine HAPI version information", e);
+        }
+    }
 
-	public static String getBuildDate() {
-		return ourBuildTime.substring(0, 10);
-	}
-
+    public static String getBuildDate() {
+        return ourBuildTime.substring(0, 10);
+    }
 }

@@ -22,5 +22,5 @@ package ca.uhn.fhir.mdm.dao;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 
 public interface IMdmLinkImplFactory<M extends IMdmLink> {
-	public M newMdmLinkImpl();
+    public M newMdmLinkImpl();
 }

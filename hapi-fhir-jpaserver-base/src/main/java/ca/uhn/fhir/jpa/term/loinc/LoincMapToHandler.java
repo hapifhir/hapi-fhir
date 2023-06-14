@@ -19,60 +19,65 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
+
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import java.util.Map;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
-
-/**
- * Handles addition of MAP_TO properties to TermConcepts
- */
+/** Handles addition of MAP_TO properties to TermConcepts */
 public class LoincMapToHandler implements IZipContentsHandlerCsv {
-	private static final Logger ourLog = LoggerFactory.getLogger(LoincMapToHandler.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(LoincMapToHandler.class);
 
-	public static final String CONCEPT_CODE_PROP_NAME = "LOINC";
-	public static final String MAP_TO_PROP_NAME = "MAP_TO";
-	public static final String DISPLAY_PROP_NAME = "COMMENT";
+    public static final String CONCEPT_CODE_PROP_NAME = "LOINC";
+    public static final String MAP_TO_PROP_NAME = "MAP_TO";
+    public static final String DISPLAY_PROP_NAME = "COMMENT";
 
-	private final Map<String, TermConcept> myCode2Concept;
+    private final Map<String, TermConcept> myCode2Concept;
 
-	public LoincMapToHandler(Map<String, TermConcept> theCode2concept) {
-		myCode2Concept = theCode2concept;
-	}
+    public LoincMapToHandler(Map<String, TermConcept> theCode2concept) {
+        myCode2Concept = theCode2concept;
+    }
 
-	@Override
-	public void accept(CSVRecord theRecord) {
-		String code = trim(theRecord.get(CONCEPT_CODE_PROP_NAME));
-		String mapTo = trim(theRecord.get(MAP_TO_PROP_NAME));
-		String display = trim(theRecord.get(DISPLAY_PROP_NAME));
+    @Override
+    public void accept(CSVRecord theRecord) {
+        String code = trim(theRecord.get(CONCEPT_CODE_PROP_NAME));
+        String mapTo = trim(theRecord.get(MAP_TO_PROP_NAME));
+        String display = trim(theRecord.get(DISPLAY_PROP_NAME));
 
-		if (isBlank(code)) {
-			ourLog.warn("MapTo record was found with a blank '" + CONCEPT_CODE_PROP_NAME + "' property");
-			return;
-		}
+        if (isBlank(code)) {
+            ourLog.warn(
+                    "MapTo record was found with a blank '"
+                            + CONCEPT_CODE_PROP_NAME
+                            + "' property");
+            return;
+        }
 
-		if (isBlank(mapTo)) {
-			ourLog.warn("MapTo record was found with a blank '" + MAP_TO_PROP_NAME + "' property");
-			return;
-		}
+        if (isBlank(mapTo)) {
+            ourLog.warn("MapTo record was found with a blank '" + MAP_TO_PROP_NAME + "' property");
+            return;
+        }
 
-		TermConcept concept = myCode2Concept.get(code);
-		if (concept == null) {
-			ourLog.warn("A TermConcept was not found for MapTo '" + CONCEPT_CODE_PROP_NAME +
-				"' property: '" + code + "' MapTo record ignored.");
-			return;
-		}
+        TermConcept concept = myCode2Concept.get(code);
+        if (concept == null) {
+            ourLog.warn(
+                    "A TermConcept was not found for MapTo '"
+                            + CONCEPT_CODE_PROP_NAME
+                            + "' property: '"
+                            + code
+                            + "' MapTo record ignored.");
+            return;
+        }
 
-		concept.addPropertyCoding(MAP_TO_PROP_NAME, ITermLoaderSvc.LOINC_URI, mapTo, display);
-		ourLog.trace("Adding " + MAP_TO_PROP_NAME + " coding property: {} to concept.code {}", mapTo, concept.getCode());
-	}
-
-
+        concept.addPropertyCoding(MAP_TO_PROP_NAME, ITermLoaderSvc.LOINC_URI, mapTo, display);
+        ourLog.trace(
+                "Adding " + MAP_TO_PROP_NAME + " coding property: {} to concept.code {}",
+                mapTo,
+                concept.getCode());
+    }
 }

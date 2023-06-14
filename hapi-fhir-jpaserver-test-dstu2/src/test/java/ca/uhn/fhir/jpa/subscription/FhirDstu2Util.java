@@ -20,9 +20,11 @@ public class FhirDstu2Util {
     public static final String LPI_CODESYSTEM = "http://cognitivemedicine.com/lpi";
     public static final String LPI_CODE = "LPI-FHIR";
 
-    public static Subscription createSubscription(String criteria, String payload, String endpoint, IGenericClient client) {
+    public static Subscription createSubscription(
+            String criteria, String payload, String endpoint, IGenericClient client) {
         Subscription subscription = new Subscription();
-        subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
+        subscription.setReason(
+                "Monitor new neonatal function (note, age will be determined by the monitor)");
         subscription.setStatus(SubscriptionStatusEnum.REQUESTED);
         subscription.setCriteria(criteria);
 

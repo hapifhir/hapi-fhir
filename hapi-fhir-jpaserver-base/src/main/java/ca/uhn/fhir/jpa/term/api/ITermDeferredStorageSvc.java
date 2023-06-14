@@ -23,63 +23,58 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import java.util.List;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.List;
-
 /**
- * This service handles processing "deferred" concept writes, meaning concepts that have neen
- * queued for storage because there are too many of them to handle in a single transaction.
+ * This service handles processing "deferred" concept writes, meaning concepts that have neen queued
+ * for storage because there are too many of them to handle in a single transaction.
  */
 public interface ITermDeferredStorageSvc {
 
-	void saveDeferred();
+    void saveDeferred();
 
-	/**
-	 * @deprecated Use {@link #isStorageQueueEmpty(boolean)} instead
-	 */
-	@Deprecated
-	default boolean isStorageQueueEmpty() {
-		return isStorageQueueEmpty(true);
-	}
+    /**
+     * @deprecated Use {@link #isStorageQueueEmpty(boolean)} instead
+     */
+    @Deprecated
+    default boolean isStorageQueueEmpty() {
+        return isStorageQueueEmpty(true);
+    }
 
-	/**
-	 * If you are calling this in a loop or something similar, consider the impact of
-	 * setting {@literal theIncludeExecutingJobs} to true. When that parameter is set
-	 * to true, each call to this method results in a database lookup!
-	 */
-	boolean isStorageQueueEmpty(boolean theIncludeExecutingJobs);
+    /**
+     * If you are calling this in a loop or something similar, consider the impact of setting
+     * {@literal theIncludeExecutingJobs} to true. When that parameter is set to true, each call to
+     * this method results in a database lookup!
+     */
+    boolean isStorageQueueEmpty(boolean theIncludeExecutingJobs);
 
-	/**
-	 * This is mostly for unit tests - we can disable processing of deferred concepts
-	 * by changing this flag
-	 */
-	void setProcessDeferred(boolean theProcessDeferred);
+    /**
+     * This is mostly for unit tests - we can disable processing of deferred concepts by changing
+     * this flag
+     */
+    void setProcessDeferred(boolean theProcessDeferred);
 
-	void addConceptToStorageQueue(TermConcept theConcept);
+    void addConceptToStorageQueue(TermConcept theConcept);
 
-	void addConceptLinkToStorageQueue(TermConceptParentChildLink theConceptLink);
+    void addConceptLinkToStorageQueue(TermConceptParentChildLink theConceptLink);
 
-	void addConceptMapsToStorageQueue(List<ConceptMap> theConceptMaps);
+    void addConceptMapsToStorageQueue(List<ConceptMap> theConceptMaps);
 
-	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
+    void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
 
-	void deleteCodeSystemForResource(ResourceTable theCodeSystemResourceToDelete);
+    void deleteCodeSystemForResource(ResourceTable theCodeSystemResourceToDelete);
 
-	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
+    void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
 
-	void notifyJobEnded(String theId);
+    void notifyJobEnded(String theId);
 
-	/**
-	 * This is mostly here for unit tests - Saves any and all deferred concepts and links
-	 */
-	void saveAllDeferred();
+    /** This is mostly here for unit tests - Saves any and all deferred concepts and links */
+    void saveAllDeferred();
 
-	void logQueueForUnitTest();
+    void logQueueForUnitTest();
 
-	/**
-	 * Only to be used from tests - Disallow test timeouts on deferred tasks
-	 */
-	void disallowDeferredTaskTimeout();
+    /** Only to be used from tests - Disallow test timeouts on deferred tasks */
+    void disallowDeferredTaskTimeout();
 }

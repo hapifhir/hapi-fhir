@@ -12,17 +12,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 public class CqlProviderLoaderR4Test extends BaseCrR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderLoaderR4Test.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderLoaderR4Test.class);
 
-	@Autowired
-	CrProviderLoader myCqlProviderLoader;
+    @Autowired CrProviderLoader myCqlProviderLoader;
 
-	@Autowired
-	private ResourceProviderFactory myResourceProviderFactory;
+    @Autowired private ResourceProviderFactory myResourceProviderFactory;
 
-	@Test
-	public void contextLoads() {
-		myResourceProviderFactory.createProviders();
-		ourLog.info("The CqlProviderLoader loaded and was able to create Providers.");
-	}
+    @Test
+    public void contextLoads() {
+        myResourceProviderFactory.createProviders();
+        ourLog.info("The CqlProviderLoader loaded and was able to create Providers.");
+    }
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -8,6 +10,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -21,97 +24,92 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-/**
- * Created by dsotnikov on 2/25/2014.
- */
+/** Created by dsotnikov on 2/25/2014. */
 public class PreferHl7OrgDstu2Test {
-	private static CloseableHttpClient ourClient;
-	
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PreferHl7OrgDstu2Test.class);
-	private static int ourPort;
-	private static Server ourServer;
-	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-	
-	
-	@Test
-	public void testCreateWithNoPrefer() throws Exception {
+    private static CloseableHttpClient ourClient;
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(PreferHl7OrgDstu2Test.class);
+    private static int ourPort;
+    private static Server ourServer;
+    private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+    @Test
+    public void testCreateWithNoPrefer() throws Exception {
 
-		HttpResponse status = ourClient.execute(httpPost);
+        Patient patient = new Patient();
+        patient.addIdentifier().setValue("002");
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+        HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+        httpPost.setEntity(
+                new StringEntity(
+                        ourCtx.newXmlParser().encodeResourceToString(patient),
+                        ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		ourLog.info("Response was:\n{}", responseContent);
+        HttpResponse status = ourClient.execute(httpPost);
 
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
-	}
+        String responseContent = IOUtils.toString(status.getEntity().getContent());
+        IOUtils.closeQuietly(status.getEntity().getContent());
 
-	
+        ourLog.info("Response was:\n{}", responseContent);
 
-	
-	@AfterAll
-	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
-	}
-		
-	
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+        assertEquals(201, status.getStatusLine().getStatusCode());
+        assertEquals(
+                "http://localhost:" + ourPort + "/Patient/001/_history/002",
+                status.getFirstHeader("location").getValue());
+        assertEquals(
+                "http://localhost:" + ourPort + "/Patient/001/_history/002",
+                status.getFirstHeader("content-location").getValue());
+    }
 
-		PatientProvider patientProvider = new PatientProvider();
+    @AfterAll
+    public static void afterClass() throws Exception {
+        JettyUtil.closeServer(ourServer);
+    }
 
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
+    @BeforeAll
+    public static void beforeClass() throws Exception {
+        ourServer = new Server(0);
+
+        PatientProvider patientProvider = new PatientProvider();
+
+        ServletHandler proxyHandler = new ServletHandler();
+        RestfulServer servlet = new RestfulServer(ourCtx);
+        servlet.setResourceProviders(patientProvider);
+        ServletHolder servletHolder = new ServletHolder(servlet);
+        proxyHandler.addServletWithMapping(servletHolder, "/*");
+        ourServer.setHandler(proxyHandler);
+        JettyUtil.startServer(ourServer);
         ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
+        PoolingHttpClientConnectionManager connectionManager =
+                new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setConnectionManager(connectionManager);
+        ourClient = builder.build();
+    }
 
-	}
-	
-	public static class PatientProvider implements IResourceProvider {
+    public static class PatientProvider implements IResourceProvider {
 
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
-		}
+        @Override
+        public Class<Patient> getResourceType() {
+            return Patient.class;
+        }
 
-		@Create()
-		public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
-			MethodOutcome retVal = new MethodOutcome(new IdType("Patient/001/_history/002"));
-			return retVal;
-		}
+        @Create()
+        public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
+            MethodOutcome retVal = new MethodOutcome(new IdType("Patient/001/_history/002"));
+            return retVal;
+        }
 
-		@Update()
-		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @IdParam IdType theIdParam) {
-			return new MethodOutcome(new IdType("Patient/001/_history/002"));
-		}
-
-	}
-
+        @Update()
+        public MethodOutcome updatePatient(
+                @ResourceParam Patient thePatient, @IdParam IdType theIdParam) {
+            return new MethodOutcome(new IdType("Patient/001/_history/002"));
+        }
+    }
 }

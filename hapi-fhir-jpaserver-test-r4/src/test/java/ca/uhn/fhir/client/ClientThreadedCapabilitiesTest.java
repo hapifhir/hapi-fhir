@@ -1,5 +1,9 @@
 package ca.uhn.fhir.client;
 
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -17,6 +21,13 @@ import ca.uhn.fhir.rest.server.interceptor.SearchPreferHandlingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.HumanName;
@@ -27,122 +38,136 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
 /**
- * Test supporting https://github.com/hapifhir/hapi-fhir/issues/3299
- * Validates that capabilityStatement request is always sent first and is executed only once per client-endpoint,
+ * Test supporting https://github.com/hapifhir/hapi-fhir/issues/3299 Validates that
+ * capabilityStatement request is always sent first and is executed only once per client-endpoint,
  * even when executed from multiple threads
  */
 public class ClientThreadedCapabilitiesTest {
-	private static final Logger ourLog = LoggerFactory.getLogger("ClientThreadedCapabilitiesTest");
+    private static final Logger ourLog = LoggerFactory.getLogger("ClientThreadedCapabilitiesTest");
 
-	private static final FhirContext fhirContext = FhirContext.forR4();
-	private static final IClientInterceptor myCountingMetaClientInterceptor = new CountingMetaClientInterceptor();
-	private static final Collection<String> lastNames = Lists.newArrayList("Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis",
-		"Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee");
-	@RegisterExtension
-	public static RestfulServerExtension ourServer = new RestfulServerExtension(fhirContext)
-		.registerProvider(new TestPatientResourceProvider())
-		.withValidationMode(ServerValidationModeEnum.ONCE)
-		.registerInterceptor(new SearchPreferHandlingInterceptor());
-	private IGenericClient myClient;
+    private static final FhirContext fhirContext = FhirContext.forR4();
+    private static final IClientInterceptor myCountingMetaClientInterceptor =
+            new CountingMetaClientInterceptor();
+    private static final Collection<String> lastNames =
+            Lists.newArrayList(
+                    "Johnson",
+                    "Williams",
+                    "Brown",
+                    "Jones",
+                    "Garcia",
+                    "Miller",
+                    "Davis",
+                    "Rodriguez",
+                    "Martinez",
+                    "Hernandez",
+                    "Lopez",
+                    "Gonzalez",
+                    "Wilson",
+                    "Anderson",
+                    "Thomas",
+                    "Taylor",
+                    "Moore",
+                    "Jackson",
+                    "Martin",
+                    "Lee");
 
-	@BeforeEach
-	public void beforeEach() throws Exception {
-		myClient = ourServer.getFhirClient();
-		myClient.registerInterceptor(myCountingMetaClientInterceptor);
-	}
+    @RegisterExtension
+    public static RestfulServerExtension ourServer =
+            new RestfulServerExtension(fhirContext)
+                    .registerProvider(new TestPatientResourceProvider())
+                    .withValidationMode(ServerValidationModeEnum.ONCE)
+                    .registerInterceptor(new SearchPreferHandlingInterceptor());
 
+    private IGenericClient myClient;
 
-	@Test
-	public void capabilityRequestSentOnlyOncePerClient() {
-		IRestfulClientFactory factory = fhirContext.getRestfulClientFactory();
-		factory.setSocketTimeout(300 * 1000);
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        myClient = ourServer.getFhirClient();
+        myClient.registerInterceptor(myCountingMetaClientInterceptor);
+    }
 
-		Executor executor = Executors.newFixedThreadPool(lastNames.size(), r -> {
-			Thread t = new Thread(r);
-			t.setDaemon(true);
-			return t;
-		});
+    @Test
+    public void capabilityRequestSentOnlyOncePerClient() {
+        IRestfulClientFactory factory = fhirContext.getRestfulClientFactory();
+        factory.setSocketTimeout(300 * 1000);
 
-		Collection<CompletableFuture<Object>> futures = lastNames.stream()
-			.map(last -> CompletableFuture.supplyAsync(() -> searchPatient(last), executor)).collect(toList());
+        Executor executor =
+                Executors.newFixedThreadPool(
+                        lastNames.size(),
+                        r -> {
+                            Thread t = new Thread(r);
+                            t.setDaemon(true);
+                            return t;
+                        });
 
+        Collection<CompletableFuture<Object>> futures =
+                lastNames.stream()
+                        .map(
+                                last ->
+                                        CompletableFuture.supplyAsync(
+                                                () -> searchPatient(last), executor))
+                        .collect(toList());
 
-		final StopWatch sw = new StopWatch();
-		futures.forEach(CompletableFuture::join);
-		ourLog.info("Total elapsed time: {}", sw);
+        final StopWatch sw = new StopWatch();
+        futures.forEach(CompletableFuture::join);
+        ourLog.info("Total elapsed time: {}", sw);
 
-		int metaClientRequestCount = ((CountingMetaClientInterceptor) myCountingMetaClientInterceptor).getCount();
-		assertEquals(1, metaClientRequestCount);
-	}
+        int metaClientRequestCount =
+                ((CountingMetaClientInterceptor) myCountingMetaClientInterceptor).getCount();
+        assertEquals(1, metaClientRequestCount);
+    }
 
+    private Object searchPatient(String last) {
+        return myClient.search()
+                .forResource("Patient")
+                .returnBundle(Bundle.class)
+                .where(Patient.FAMILY.matches().value(last))
+                .execute();
+    }
 
-	private Object searchPatient(String last) {
-		return myClient.search()
-			.forResource("Patient")
-			.returnBundle(Bundle.class)
-			.where(Patient.FAMILY.matches().value(last))
-			.execute();
-	}
+    private static class CountingMetaClientInterceptor implements IClientInterceptor {
+        AtomicInteger counter = new AtomicInteger();
 
+        public int getCount() {
+            return counter.get();
+        }
 
-	private static class CountingMetaClientInterceptor implements IClientInterceptor {
-		AtomicInteger counter = new AtomicInteger();
+        @Override
+        public void interceptRequest(IHttpRequest theRequest) {
+            //			ourLog.info("Request: {}", theRequest.getUri());
+            if (theRequest.getUri().endsWith("/metadata")) {
+                counter.getAndIncrement();
+            } else {
+                // metadata request must always be first
+                if (counter.get() == 0) {
+                    fail("A non-metadata request was executed before metadata request");
+                }
+            }
+        }
 
-		public int getCount() {
-			return counter.get();
-		}
+        @Override
+        public void interceptResponse(IHttpResponse theResponse) {}
+    }
 
-		@Override
-		public void interceptRequest(IHttpRequest theRequest) {
-//			ourLog.info("Request: {}", theRequest.getUri());
-			if (theRequest.getUri().endsWith("/metadata")) {
-				counter.getAndIncrement();
-			} else {
-				// metadata request must always be first
-				if (counter.get() == 0) {
-					fail("A non-metadata request was executed before metadata request");
-				}
-			}
-		}
+    public static class TestPatientResourceProvider implements IResourceProvider {
 
-		@Override
-		public void interceptResponse(IHttpResponse theResponse) {
-		}
-	}
+        Random rand = new Random(new Date().getTime());
 
-	public static class TestPatientResourceProvider implements IResourceProvider {
+        @Override
+        public Class<? extends IBaseResource> getResourceType() {
+            return Patient.class;
+        }
 
-		Random rand = new Random(new Date().getTime());
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Patient.class;
-		}
-
-		@Search()
-		public Patient search(@OptionalParam(name = Patient.SP_FAMILY) StringParam theFamilyName) {
-			Patient patient = new Patient();
-			patient.getIdElement().setValue("Patient/" + rand.nextInt() + "/_history/222");
-			ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE);
-			patient.addName(new HumanName().setFamily(theFamilyName.getValue()));
-			patient.setActive(true);
-			return patient;
-		}
-
-	}
-
-
+        @Search()
+        public Patient search(@OptionalParam(name = Patient.SP_FAMILY) StringParam theFamilyName) {
+            Patient patient = new Patient();
+            patient.getIdElement().setValue("Patient/" + rand.nextInt() + "/_history/222");
+            ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(
+                    patient, BundleEntrySearchModeEnum.INCLUDE);
+            patient.addName(new HumanName().setFamily(theFamilyName.getValue()));
+            patient.setActive(true);
+            return patient;
+        }
+    }
 }

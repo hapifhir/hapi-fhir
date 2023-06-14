@@ -19,51 +19,48 @@
  */
 package ca.uhn.fhir.model.api;
 
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import java.io.InputStream;
 import java.util.Date;
-
-import ca.uhn.fhir.fhirpath.IFhirPath;
 import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
-
 /**
- * Each structure version JAR will have an implementation of this interface.
- * This is used internally by HAPI and subject to change. Do not use this interface
- * directly in user code.
- * 
- * See also IFhirVersionServer for the hapi-fhir-server equivalent.
+ * Each structure version JAR will have an implementation of this interface. This is used internally
+ * by HAPI and subject to change. Do not use this interface directly in user code.
+ *
+ * <p>See also IFhirVersionServer for the hapi-fhir-server equivalent.
  */
 public interface IFhirVersion {
 
-	IFhirPath createFhirPathExecutor(FhirContext theFhirContext);
+    IFhirPath createFhirPathExecutor(FhirContext theFhirContext);
 
-	IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
+    IBaseResource generateProfile(
+            RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 
-	Class<?> getContainedType();
+    Class<?> getContainedType();
 
-	InputStream getFhirVersionPropertiesFile();
+    InputStream getFhirVersionPropertiesFile();
 
-	IPrimitiveType<Date> getLastUpdated(IBaseResource theResource);
+    IPrimitiveType<Date> getLastUpdated(IBaseResource theResource);
 
-	String getPathToSchemaDefinitions();
+    String getPathToSchemaDefinitions();
 
-	Class<? extends IBase> getResourceReferenceType();
+    Class<? extends IBase> getResourceReferenceType();
 
-	FhirVersionEnum getVersion();
+    FhirVersionEnum getVersion();
 
-	IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext);
+    IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext);
 
-	IBase newCodingDt();
+    IBase newCodingDt();
 
-	IIdType newIdType();
+    IIdType newIdType();
 
-	/**
-	 * Returns an instance of <code>IFhirVersionServer<code> for this version.
-	 * Note that this method may only be called if the <code>hapi-fhir-server</code>
-	 * JAR is on the classpath. Otherwise it will result in a {@link ClassNotFoundException}
-	 */
-	Object getServerVersion();
-
+    /**
+     * Returns an instance of <code>IFhirVersionServer<code> for this version.
+     * Note that this method may only be called if the <code>hapi-fhir-server</code>
+     * JAR is on the classpath. Otherwise it will result in a {@link ClassNotFoundException}
+     */
+    Object getServerVersion();
 }

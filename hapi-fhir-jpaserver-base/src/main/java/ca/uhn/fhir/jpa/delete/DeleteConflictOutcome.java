@@ -23,16 +23,15 @@ import org.apache.commons.lang3.Validate;
 
 public class DeleteConflictOutcome {
 
-	private int myShouldRetryCount;
+    private int myShouldRetryCount;
 
-	public int getShouldRetryCount() {
-		return myShouldRetryCount;
-	}
+    public int getShouldRetryCount() {
+        return myShouldRetryCount;
+    }
 
-	public DeleteConflictOutcome setShouldRetryCount(int theShouldRetryCount) {
-		Validate.isTrue(theShouldRetryCount >= 0, "theShouldRetryCount must not be negative");
-		myShouldRetryCount = theShouldRetryCount;
-		return this;
-	}
-
+    public DeleteConflictOutcome setShouldRetryCount(int theShouldRetryCount) {
+        Validate.isTrue(theShouldRetryCount >= 0, "theShouldRetryCount must not be negative");
+        myShouldRetryCount = theShouldRetryCount;
+        return this;
+    }
 }

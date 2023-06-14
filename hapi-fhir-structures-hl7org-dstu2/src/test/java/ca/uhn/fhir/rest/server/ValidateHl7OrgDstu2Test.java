@@ -1,5 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -9,6 +13,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -26,200 +31,209 @@ import org.hl7.fhir.dstu2.model.Organization;
 import org.hl7.fhir.dstu2.model.Parameters;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.dstu2.model.StringType;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.TimeUnit;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-/**
- * Created by dsotnikov on 2/25/2014.
- */
+/** Created by dsotnikov on 2/25/2014. */
 public class ValidateHl7OrgDstu2Test {
-	private static CloseableHttpClient ourClient;
-	private static EncodingEnum ourLastEncoding;
-	private static String ourLastResourceBody;
-	private static int ourPort;
-	private static Server ourServer;
-	private static OperationOutcome ourOutcomeToReturn;
-	private static ValidationModeEnum ourLastMode;
-	private static String ourLastProfile;
-	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-	
-	@BeforeEach()
-	public void before() {
-		ourLastResourceBody = null;
-		ourLastEncoding = null;
-		ourOutcomeToReturn = null;
-		ourLastMode = null;
-		ourLastProfile = null;
-	}
+    private static CloseableHttpClient ourClient;
+    private static EncodingEnum ourLastEncoding;
+    private static String ourLastResourceBody;
+    private static int ourPort;
+    private static Server ourServer;
+    private static OperationOutcome ourOutcomeToReturn;
+    private static ValidationModeEnum ourLastMode;
+    private static String ourLastProfile;
+    private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 
-	@Test
-	public void testValidateWithOptions() throws Exception {
+    @BeforeEach()
+    public void before() {
+        ourLastResourceBody = null;
+        ourLastEncoding = null;
+        ourOutcomeToReturn = null;
+        ourLastMode = null;
+        ourLastProfile = null;
+    }
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("001");
-		patient.addIdentifier().setValue("002");
+    @Test
+    public void testValidateWithOptions() throws Exception {
 
-		Parameters params = new Parameters();
-		params.addParameter().setName("resource").setResource(patient);
-		params.addParameter().setName("profile").setValue(new StringType("http://foo"));
-		params.addParameter().setName("mode").setValue(new StringType(ValidationModeEnum.CREATE.getCode()));
+        Patient patient = new Patient();
+        patient.addIdentifier().setValue("001");
+        patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+        Parameters params = new Parameters();
+        params.addParameter().setName("resource").setResource(patient);
+        params.addParameter().setName("profile").setValue(new StringType("http://foo"));
+        params.addParameter()
+                .setName("mode")
+                .setValue(new StringType(ValidationModeEnum.CREATE.getCode()));
 
-		HttpResponse status = ourClient.execute(httpPost);
-		String resp = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+        HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+        httpPost.setEntity(
+                new StringEntity(
+                        ourCtx.newXmlParser().encodeResourceToString(params),
+                        ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+        HttpResponse status = ourClient.execute(httpPost);
+        String resp = IOUtils.toString(status.getEntity().getContent());
+        IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
-		assertEquals("http://foo", ourLastProfile);
-		assertEquals(ValidationModeEnum.CREATE, ourLastMode);
-	}
+        assertEquals(200, status.getStatusLine().getStatusCode());
 
-	@Test
-	public void testValidate() throws Exception {
+        assertThat(resp, stringContainsInOrder("<OperationOutcome"));
+        assertEquals("http://foo", ourLastProfile);
+        assertEquals(ValidationModeEnum.CREATE, ourLastMode);
+    }
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("001");
-		patient.addIdentifier().setValue("002");
+    @Test
+    public void testValidate() throws Exception {
 
-		Parameters params = new Parameters();
-		params.addParameter().setName("resource").setResource(patient);
+        Patient patient = new Patient();
+        patient.addIdentifier().setValue("001");
+        patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+        Parameters params = new Parameters();
+        params.addParameter().setName("resource").setResource(patient);
 
-		HttpResponse status = ourClient.execute(httpPost);
-		String resp = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+        HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+        httpPost.setEntity(
+                new StringEntity(
+                        ourCtx.newXmlParser().encodeResourceToString(params),
+                        ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+        HttpResponse status = ourClient.execute(httpPost);
+        String resp = IOUtils.toString(status.getEntity().getContent());
+        IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
-	}
+        assertEquals(200, status.getStatusLine().getStatusCode());
 
-	@Test
-	public void testValidateWithResults() throws Exception {
+        assertThat(resp, stringContainsInOrder("<OperationOutcome"));
+    }
 
-		ourOutcomeToReturn = new OperationOutcome();
-		ourOutcomeToReturn.addIssue().setDiagnostics("FOOBAR");
+    @Test
+    public void testValidateWithResults() throws Exception {
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("001");
-		patient.addIdentifier().setValue("002");
+        ourOutcomeToReturn = new OperationOutcome();
+        ourOutcomeToReturn.addIssue().setDiagnostics("FOOBAR");
 
-		Parameters params = new Parameters();
-		params.addParameter().setName("resource").setResource(patient);
+        Patient patient = new Patient();
+        patient.addIdentifier().setValue("001");
+        patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+        Parameters params = new Parameters();
+        params.addParameter().setName("resource").setResource(patient);
 
-		HttpResponse status = ourClient.execute(httpPost);
-		String resp = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+        HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+        httpPost.setEntity(
+                new StringEntity(
+                        ourCtx.newXmlParser().encodeResourceToString(params),
+                        ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+        HttpResponse status = ourClient.execute(httpPost);
+        String resp = IOUtils.toString(status.getEntity().getContent());
+        IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
-	}
+        assertEquals(200, status.getStatusLine().getStatusCode());
 
-	@Test
-	public void testValidateWithNoParsed() throws Exception {
+        assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
+    }
 
-		Organization org = new Organization();
-		org.addIdentifier().setValue("001");
-		org.addIdentifier().setValue("002");
+    @Test
+    public void testValidateWithNoParsed() throws Exception {
 
-		Parameters params = new Parameters();
-		params.addParameter().setName("resource").setResource(org);
+        Organization org = new Organization();
+        org.addIdentifier().setValue("001");
+        org.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+        Parameters params = new Parameters();
+        params.addParameter().setName("resource").setResource(org);
 
-		HttpResponse status = ourClient.execute(httpPost);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+        HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization/$validate");
+        httpPost.setEntity(
+                new StringEntity(
+                        ourCtx.newJsonParser().encodeResourceToString(params),
+                        ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
-		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
-		assertEquals(EncodingEnum.JSON, ourLastEncoding);
+        HttpResponse status = ourClient.execute(httpPost);
+        assertEquals(200, status.getStatusLine().getStatusCode());
 
-	}
+        assertThat(
+                ourLastResourceBody,
+                stringContainsInOrder(
+                        "\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
+        assertEquals(EncodingEnum.JSON, ourLastEncoding);
+    }
 
-	@AfterAll
-	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
-	}
+    @AfterAll
+    public static void afterClass() throws Exception {
+        JettyUtil.closeServer(ourServer);
+    }
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+    @BeforeAll
+    public static void beforeClass() throws Exception {
+        ourServer = new Server(0);
 
-		PatientProvider patientProvider = new PatientProvider();
+        PatientProvider patientProvider = new PatientProvider();
 
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider, new OrganizationProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
+        ServletHandler proxyHandler = new ServletHandler();
+        RestfulServer servlet = new RestfulServer(ourCtx);
+        servlet.setResourceProviders(patientProvider, new OrganizationProvider());
+        ServletHolder servletHolder = new ServletHolder(servlet);
+        proxyHandler.addServletWithMapping(servletHolder, "/*");
+        ourServer.setHandler(proxyHandler);
+        JettyUtil.startServer(ourServer);
         ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
+        PoolingHttpClientConnectionManager connectionManager =
+                new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setConnectionManager(connectionManager);
+        ourClient = builder.build();
+    }
 
-	}
+    public static class PatientProvider implements IResourceProvider {
 
-	public static class PatientProvider implements IResourceProvider {
+        @Validate()
+        public MethodOutcome validatePatient(
+                @ResourceParam Patient thePatient,
+                @Validate.Mode ValidationModeEnum theMode,
+                @Validate.Profile String theProfile) {
+            IdType id = new IdType(thePatient.getIdentifier().get(0).getValue());
+            if (thePatient.getIdElement().isEmpty() == false) {
+                id = thePatient.getIdElement();
+            }
 
-		@Validate()
-		public MethodOutcome validatePatient(@ResourceParam Patient thePatient, @Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile) {
-			IdType id = new IdType(thePatient.getIdentifier().get(0).getValue());
-			if (thePatient.getIdElement().isEmpty() == false) {
-				id = thePatient.getIdElement();
-			}
+            ourLastMode = theMode;
+            ourLastProfile = theProfile;
 
-			ourLastMode = theMode;
-			ourLastProfile = theProfile;
+            MethodOutcome outcome = new MethodOutcome(id.withVersion("002"));
+            outcome.setOperationOutcome(ourOutcomeToReturn);
+            return outcome;
+        }
 
-			MethodOutcome outcome = new MethodOutcome(id.withVersion("002"));
-			outcome.setOperationOutcome(ourOutcomeToReturn);
-			return outcome;
-		}
+        @Override
+        public Class<Patient> getResourceType() {
+            return Patient.class;
+        }
+    }
 
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
-		}
+    public static class OrganizationProvider implements IResourceProvider {
 
-	}
+        @Validate()
+        public MethodOutcome validate(
+                @ResourceParam String theResourceBody, @ResourceParam EncodingEnum theEncoding) {
+            ourLastResourceBody = theResourceBody;
+            ourLastEncoding = theEncoding;
 
-	public static class OrganizationProvider implements IResourceProvider {
+            return new MethodOutcome(new IdDt("001"));
+        }
 
-		@Validate()
-		public MethodOutcome validate(@ResourceParam String theResourceBody, @ResourceParam EncodingEnum theEncoding) {
-			ourLastResourceBody = theResourceBody;
-			ourLastEncoding = theEncoding;
-
-			return new MethodOutcome(new IdDt("001"));
-		}
-
-		@Override
-		public Class<Organization> getResourceType() {
-			return Organization.class;
-		}
-
-	}
-
+        @Override
+        public Class<Organization> getResourceType() {
+            return Organization.class;
+        }
+    }
 }

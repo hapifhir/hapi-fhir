@@ -25,21 +25,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Class annotation used to indicate a class which is a "block"/"component" type. A block
- * is a nested group of fields within a resource definition and can contain other blocks as
- * well as data types.
- * <p>
- * An example of a block would be Patient.contact
- * </p>
+ * Class annotation used to indicate a class which is a "block"/"component" type. A block is a
+ * nested group of fields within a resource definition and can contain other blocks as well as data
+ * types.
+ *
+ * <p>An example of a block would be Patient.contact
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value= {ElementType.TYPE})
+@Target(value = {ElementType.TYPE})
 public @interface Block {
 
-	/**
-	 * @deprecated Do not use, will be removed
-	 */
-	@Deprecated
-	String name() default "";
-	
+    /**
+     * @deprecated Do not use, will be removed
+     */
+    @Deprecated
+    String name() default "";
 }

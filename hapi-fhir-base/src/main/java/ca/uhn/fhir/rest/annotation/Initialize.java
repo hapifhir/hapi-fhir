@@ -25,10 +25,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * ResourceProvider methods tagged with {@link Initialize} will be invoked when the RestfulServer is starting up.
- * This is your chance to do any initialization prior to the server taking any requests.
+ * ResourceProvider methods tagged with {@link Initialize} will be invoked when the RestfulServer is
+ * starting up. This is your chance to do any initialization prior to the server taking any
+ * requests.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Initialize {
-}
+public @interface Initialize {}

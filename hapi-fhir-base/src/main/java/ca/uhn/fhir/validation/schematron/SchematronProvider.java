@@ -24,44 +24,48 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidatorModule;
-
 import java.lang.reflect.Constructor;
 
 public class SchematronProvider {
 
+    private static final String I18N_KEY_NO_PH_WARNING =
+            FhirValidator.class.getName() + ".noPhWarningOnStartup";
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(FhirValidator.class);
 
-	private static final String I18N_KEY_NO_PH_WARNING = FhirValidator.class.getName() + ".noPhWarningOnStartup";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirValidator.class);
-	
-	@CoverageIgnore
-	public static boolean isSchematronAvailable(FhirContext theFhirContext) {
-		try {
-			Class.forName("com.helger.schematron.ISchematronResource");
-			return true;
-		} catch (ClassNotFoundException e) {
-			ourLog.info(theFhirContext.getLocalizer().getMessage(I18N_KEY_NO_PH_WARNING));
-			return false;
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	@CoverageIgnore
-	public static Class<? extends IValidatorModule> getSchematronValidatorClass() {
-		try {
-			return (Class<? extends IValidatorModule>) Class.forName("ca.uhn.fhir.validation.schematron.SchematronBaseValidator");
-		} catch (ClassNotFoundException e) {
-			throw new IllegalStateException(Msg.code(1973) + "Cannot resolve schematron validator ", e);
-		}
-	}
-	
-	@CoverageIgnore
-	public static IValidatorModule getSchematronValidatorInstance(FhirContext myContext) {
-		try {
-			Class<? extends IValidatorModule> cls = getSchematronValidatorClass();
-			Constructor<? extends IValidatorModule> constructor = cls.getConstructor(FhirContext.class);
-			return constructor.newInstance(myContext);
-		} catch (Exception e) {
-			throw new IllegalStateException(Msg.code(1974) + "Cannot construct schematron validator ", e);
-		}
-	}
+    @CoverageIgnore
+    public static boolean isSchematronAvailable(FhirContext theFhirContext) {
+        try {
+            Class.forName("com.helger.schematron.ISchematronResource");
+            return true;
+        } catch (ClassNotFoundException e) {
+            ourLog.info(theFhirContext.getLocalizer().getMessage(I18N_KEY_NO_PH_WARNING));
+            return false;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @CoverageIgnore
+    public static Class<? extends IValidatorModule> getSchematronValidatorClass() {
+        try {
+            return (Class<? extends IValidatorModule>)
+                    Class.forName("ca.uhn.fhir.validation.schematron.SchematronBaseValidator");
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(
+                    Msg.code(1973) + "Cannot resolve schematron validator ", e);
+        }
+    }
+
+    @CoverageIgnore
+    public static IValidatorModule getSchematronValidatorInstance(FhirContext myContext) {
+        try {
+            Class<? extends IValidatorModule> cls = getSchematronValidatorClass();
+            Constructor<? extends IValidatorModule> constructor =
+                    cls.getConstructor(FhirContext.class);
+            return constructor.newInstance(myContext);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    Msg.code(1974) + "Cannot construct schematron validator ", e);
+        }
+    }
 }

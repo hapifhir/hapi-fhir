@@ -19,19 +19,13 @@
  */
 package ca.uhn.fhir.interceptor.model;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,293 +33,319 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @since 5.0.0
  */
 public class RequestPartitionId implements IModelJson {
-	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
-	private static final ObjectMapper ourObjectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-	@JsonProperty("partitionDate")
-	private final LocalDate myPartitionDate;
-	@JsonProperty("allPartitions")
-	private final boolean myAllPartitions;
-	@JsonProperty("partitionIds")
-	private final List<Integer> myPartitionIds;
-	@JsonProperty("partitionNames")
-	private final List<String> myPartitionNames;
+    private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
+    private static final ObjectMapper ourObjectMapper =
+            new ObjectMapper()
+                    .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
-	/**
-	 * Constructor for a single partition
-	 */
-	private RequestPartitionId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
-		myPartitionIds = toListOrNull(thePartitionId);
-		myPartitionNames = toListOrNull(thePartitionName);
-		myPartitionDate = thePartitionDate;
-		myAllPartitions = false;
-	}
+    @JsonProperty("partitionDate")
+    private final LocalDate myPartitionDate;
 
-	/**
-	 * Constructor for a multiple partition
-	 */
-	private RequestPartitionId(@Nullable List<String> thePartitionName, @Nullable List<Integer> thePartitionId, @Nullable LocalDate thePartitionDate) {
-		myPartitionIds = toListOrNull(thePartitionId);
-		myPartitionNames = toListOrNull(thePartitionName);
-		myPartitionDate = thePartitionDate;
-		myAllPartitions = false;
-	}
+    @JsonProperty("allPartitions")
+    private final boolean myAllPartitions;
 
-	/**
-	 * Constructor for all partitions
-	 */
-	private RequestPartitionId() {
-		super();
-		myPartitionDate = null;
-		myPartitionNames = null;
-		myPartitionIds = null;
-		myAllPartitions = true;
-	}
+    @JsonProperty("partitionIds")
+    private final List<Integer> myPartitionIds;
 
-	public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
-		return ourObjectMapper.readValue(theJson, RequestPartitionId.class);
-	}
+    @JsonProperty("partitionNames")
+    private final List<String> myPartitionNames;
 
-	public boolean isAllPartitions() {
-		return myAllPartitions;
-	}
+    /** Constructor for a single partition */
+    private RequestPartitionId(
+            @Nullable String thePartitionName,
+            @Nullable Integer thePartitionId,
+            @Nullable LocalDate thePartitionDate) {
+        myPartitionIds = toListOrNull(thePartitionId);
+        myPartitionNames = toListOrNull(thePartitionName);
+        myPartitionDate = thePartitionDate;
+        myAllPartitions = false;
+    }
 
-	@Nullable
-	public LocalDate getPartitionDate() {
-		return myPartitionDate;
-	}
+    /** Constructor for a multiple partition */
+    private RequestPartitionId(
+            @Nullable List<String> thePartitionName,
+            @Nullable List<Integer> thePartitionId,
+            @Nullable LocalDate thePartitionDate) {
+        myPartitionIds = toListOrNull(thePartitionId);
+        myPartitionNames = toListOrNull(thePartitionName);
+        myPartitionDate = thePartitionDate;
+        myAllPartitions = false;
+    }
 
-	@Nullable
-	public List<String> getPartitionNames() {
-		return myPartitionNames;
-	}
+    /** Constructor for all partitions */
+    private RequestPartitionId() {
+        super();
+        myPartitionDate = null;
+        myPartitionNames = null;
+        myPartitionIds = null;
+        myAllPartitions = true;
+    }
 
-	@Nonnull
-	public List<Integer> getPartitionIds() {
-		Validate.notNull(myPartitionIds, "Partition IDs have not been set");
-		return myPartitionIds;
-	}
+    public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
+        return ourObjectMapper.readValue(theJson, RequestPartitionId.class);
+    }
 
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		if (hasPartitionIds()) {
-			b.append("ids", getPartitionIds());
-		}
-		if (hasPartitionNames()) {
-			b.append("names", getPartitionNames());
-		}
-		return b.build();
-	}
+    public boolean isAllPartitions() {
+        return myAllPartitions;
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) {
-			return true;
-		}
+    @Nullable
+    public LocalDate getPartitionDate() {
+        return myPartitionDate;
+    }
 
-		if (theO == null || getClass() != theO.getClass()) {
-			return false;
-		}
+    @Nullable
+    public List<String> getPartitionNames() {
+        return myPartitionNames;
+    }
 
-		RequestPartitionId that = (RequestPartitionId) theO;
+    @Nonnull
+    public List<Integer> getPartitionIds() {
+        Validate.notNull(myPartitionIds, "Partition IDs have not been set");
+        return myPartitionIds;
+    }
 
-		EqualsBuilder b = new EqualsBuilder();
-		b.append(myAllPartitions, that.myAllPartitions);
-		b.append(myPartitionDate, that.myPartitionDate);
-		b.append(myPartitionIds, that.myPartitionIds);
-		b.append(myPartitionNames, that.myPartitionNames);
-		return b.isEquals();
-	}
+    @Override
+    public String toString() {
+        ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        if (hasPartitionIds()) {
+            b.append("ids", getPartitionIds());
+        }
+        if (hasPartitionNames()) {
+            b.append("names", getPartitionNames());
+        }
+        return b.build();
+    }
 
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myPartitionDate)
-			.append(myAllPartitions)
-			.append(myPartitionIds)
-			.append(myPartitionNames)
-			.toHashCode();
-	}
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) {
+            return true;
+        }
 
-	public String toJson() {
-		return JsonUtil.serializeOrInvalidRequest(this);
-	}
+        if (theO == null || getClass() != theO.getClass()) {
+            return false;
+        }
 
-	@Nullable
-	public Integer getFirstPartitionIdOrNull() {
-		if (myPartitionIds != null) {
-			return myPartitionIds.get(0);
-		}
-		return null;
-	}
+        RequestPartitionId that = (RequestPartitionId) theO;
 
-	public String getFirstPartitionNameOrNull() {
-		if (myPartitionNames != null) {
-			return myPartitionNames.get(0);
-		}
-		return null;
-	}
+        EqualsBuilder b = new EqualsBuilder();
+        b.append(myAllPartitions, that.myAllPartitions);
+        b.append(myPartitionDate, that.myPartitionDate);
+        b.append(myPartitionIds, that.myPartitionIds);
+        b.append(myPartitionNames, that.myPartitionNames);
+        return b.isEquals();
+    }
 
-	/**
-	 * Returns true if this request partition contains only one partition ID and it is the DEFAULT partition ID (null)
-	 */
-	public boolean isDefaultPartition() {
-		if (isAllPartitions()) {
-			return false;
-		}
-		return hasPartitionIds() && getPartitionIds().size() == 1 && getPartitionIds().get(0) == null;
-	}
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(myPartitionDate)
+                .append(myAllPartitions)
+                .append(myPartitionIds)
+                .append(myPartitionNames)
+                .toHashCode();
+    }
 
-	public boolean hasPartitionId(Integer thePartitionId) {
-		Validate.notNull(myPartitionIds, "Partition IDs not set");
-		return myPartitionIds.contains(thePartitionId);
-	}
+    public String toJson() {
+        return JsonUtil.serializeOrInvalidRequest(this);
+    }
 
-	public boolean hasPartitionIds() {
-		return myPartitionIds != null;
-	}
+    @Nullable
+    public Integer getFirstPartitionIdOrNull() {
+        if (myPartitionIds != null) {
+            return myPartitionIds.get(0);
+        }
+        return null;
+    }
 
-	public boolean hasPartitionNames() {
-		return myPartitionNames != null;
-	}
+    public String getFirstPartitionNameOrNull() {
+        if (myPartitionNames != null) {
+            return myPartitionNames.get(0);
+        }
+        return null;
+    }
 
-	public boolean hasDefaultPartitionId() {
-		return getPartitionIds().contains(null);
-	}
+    /**
+     * Returns true if this request partition contains only one partition ID and it is the DEFAULT
+     * partition ID (null)
+     */
+    public boolean isDefaultPartition() {
+        if (isAllPartitions()) {
+            return false;
+        }
+        return hasPartitionIds()
+                && getPartitionIds().size() == 1
+                && getPartitionIds().get(0) == null;
+    }
 
-	public List<Integer> getPartitionIdsWithoutDefault() {
-		return getPartitionIds().stream().filter(t -> t != null).collect(Collectors.toList());
-	}
+    public boolean hasPartitionId(Integer thePartitionId) {
+        Validate.notNull(myPartitionIds, "Partition IDs not set");
+        return myPartitionIds.contains(thePartitionId);
+    }
 
-	@Nullable
-	private static <T> List<T> toListOrNull(@Nullable Collection<T> theList) {
-		if (theList != null) {
-			if (theList.size() == 1) {
-				return Collections.singletonList(theList.iterator().next());
-			}
-			return Collections.unmodifiableList(new ArrayList<>(theList));
-		}
-		return null;
-	}
+    public boolean hasPartitionIds() {
+        return myPartitionIds != null;
+    }
 
-	@Nullable
-	private static <T> List<T> toListOrNull(@Nullable T theObject) {
-		if (theObject != null) {
-			return Collections.singletonList(theObject);
-		}
-		return null;
-	}
+    public boolean hasPartitionNames() {
+        return myPartitionNames != null;
+    }
 
-	@SafeVarargs
-	@Nullable
-	private static <T> List<T> toListOrNull(@Nullable T... theObject) {
-		if (theObject != null) {
-			return Arrays.asList(theObject);
-		}
-		return null;
-	}
+    public boolean hasDefaultPartitionId() {
+        return getPartitionIds().contains(null);
+    }
 
-	@Nonnull
-	public static RequestPartitionId allPartitions() {
-		return ALL_PARTITIONS;
-	}
+    public List<Integer> getPartitionIdsWithoutDefault() {
+        return getPartitionIds().stream().filter(t -> t != null).collect(Collectors.toList());
+    }
 
-	@Nonnull
-	public static RequestPartitionId defaultPartition() {
-		return fromPartitionIds(Collections.singletonList(null));
-	}
+    @Nullable
+    private static <T> List<T> toListOrNull(@Nullable Collection<T> theList) {
+        if (theList != null) {
+            if (theList.size() == 1) {
+                return Collections.singletonList(theList.iterator().next());
+            }
+            return Collections.unmodifiableList(new ArrayList<>(theList));
+        }
+        return null;
+    }
 
-	@Nonnull
-	public static RequestPartitionId defaultPartition(@Nullable LocalDate thePartitionDate) {
-		return fromPartitionIds(Collections.singletonList(null), thePartitionDate);
-	}
+    @Nullable
+    private static <T> List<T> toListOrNull(@Nullable T theObject) {
+        if (theObject != null) {
+            return Collections.singletonList(theObject);
+        }
+        return null;
+    }
 
-	@Nonnull
-	public static RequestPartitionId fromPartitionId(@Nullable Integer thePartitionId) {
-		return fromPartitionIds(Collections.singletonList(thePartitionId));
-	}
+    @SafeVarargs
+    @Nullable
+    private static <T> List<T> toListOrNull(@Nullable T... theObject) {
+        if (theObject != null) {
+            return Arrays.asList(theObject);
+        }
+        return null;
+    }
 
-	@Nonnull
-	public static RequestPartitionId fromPartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
-		return new RequestPartitionId(null, Collections.singletonList(thePartitionId), thePartitionDate);
-	}
+    @Nonnull
+    public static RequestPartitionId allPartitions() {
+        return ALL_PARTITIONS;
+    }
 
-	@Nonnull
-	public static RequestPartitionId fromPartitionIds(@Nonnull Collection<Integer> thePartitionIds) {
-		return fromPartitionIds(thePartitionIds, null);
-	}
+    @Nonnull
+    public static RequestPartitionId defaultPartition() {
+        return fromPartitionIds(Collections.singletonList(null));
+    }
 
-	@Nonnull
-	public static RequestPartitionId fromPartitionIds(@Nonnull Collection<Integer> thePartitionIds, @Nullable LocalDate thePartitionDate) {
-		return new RequestPartitionId(null, toListOrNull(thePartitionIds), thePartitionDate);
-	}
+    @Nonnull
+    public static RequestPartitionId defaultPartition(@Nullable LocalDate thePartitionDate) {
+        return fromPartitionIds(Collections.singletonList(null), thePartitionDate);
+    }
 
-	@Nonnull
-	public static RequestPartitionId fromPartitionIds(Integer... thePartitionIds) {
-		return new RequestPartitionId(null, toListOrNull(thePartitionIds), null);
-	}
+    @Nonnull
+    public static RequestPartitionId fromPartitionId(@Nullable Integer thePartitionId) {
+        return fromPartitionIds(Collections.singletonList(thePartitionId));
+    }
 
-	@Nonnull
-	public static RequestPartitionId fromPartitionName(@Nullable String thePartitionName) {
-		return fromPartitionName(thePartitionName, null);
-	}
+    @Nonnull
+    public static RequestPartitionId fromPartitionId(
+            @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+        return new RequestPartitionId(
+                null, Collections.singletonList(thePartitionId), thePartitionDate);
+    }
 
-	@Nonnull
-	public static RequestPartitionId fromPartitionName(@Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
-		return new RequestPartitionId(thePartitionName, null, thePartitionDate);
-	}
+    @Nonnull
+    public static RequestPartitionId fromPartitionIds(
+            @Nonnull Collection<Integer> thePartitionIds) {
+        return fromPartitionIds(thePartitionIds, null);
+    }
 
-	@Nonnull
-	public static RequestPartitionId fromPartitionNames(@Nullable List<String> thePartitionNames) {
-		return new RequestPartitionId(toListOrNull(thePartitionNames), null, null);
-	}
+    @Nonnull
+    public static RequestPartitionId fromPartitionIds(
+            @Nonnull Collection<Integer> thePartitionIds, @Nullable LocalDate thePartitionDate) {
+        return new RequestPartitionId(null, toListOrNull(thePartitionIds), thePartitionDate);
+    }
 
-	@Nonnull
-	public static RequestPartitionId fromPartitionNames(String... thePartitionNames) {
-		return new RequestPartitionId(toListOrNull(thePartitionNames), null, null);
-	}
+    @Nonnull
+    public static RequestPartitionId fromPartitionIds(Integer... thePartitionIds) {
+        return new RequestPartitionId(null, toListOrNull(thePartitionIds), null);
+    }
 
-	@Nonnull
-	public static RequestPartitionId fromPartitionIdAndName(@Nullable Integer thePartitionId, @Nullable String thePartitionName) {
-		return new RequestPartitionId(thePartitionName, thePartitionId, null);
-	}
+    @Nonnull
+    public static RequestPartitionId fromPartitionName(@Nullable String thePartitionName) {
+        return fromPartitionName(thePartitionName, null);
+    }
 
-	@Nonnull
-	public static RequestPartitionId forPartitionIdAndName(@Nullable Integer thePartitionId, @Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
-		return new RequestPartitionId(thePartitionName, thePartitionId, thePartitionDate);
-	}
+    @Nonnull
+    public static RequestPartitionId fromPartitionName(
+            @Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
+        return new RequestPartitionId(thePartitionName, null, thePartitionDate);
+    }
 
-	@Nonnull
-	public static RequestPartitionId forPartitionIdsAndNames(List<String> thePartitionNames, List<Integer> thePartitionIds, LocalDate thePartitionDate) {
-		return new RequestPartitionId(thePartitionNames, thePartitionIds, thePartitionDate);
-	}
+    @Nonnull
+    public static RequestPartitionId fromPartitionNames(@Nullable List<String> thePartitionNames) {
+        return new RequestPartitionId(toListOrNull(thePartitionNames), null, null);
+    }
 
-	/**
-	 * Create a string representation suitable for use as a cache key. Null aware.
-	 * <p>
-	 * Returns the partition IDs (numeric) as a joined string with a space between, using the string "null" for any null values
-	 */
-	public static String stringifyForKey(@Nonnull RequestPartitionId theRequestPartitionId) {
-		String retVal = "(all)";
-		if (!theRequestPartitionId.isAllPartitions()) {
-			assert theRequestPartitionId.hasPartitionIds();
-			retVal = theRequestPartitionId
-				.getPartitionIds()
-				.stream()
-				.map(t -> defaultIfNull(t, "null").toString())
-				.collect(Collectors.joining(" "));
-		}
-		return retVal;
-	}
+    @Nonnull
+    public static RequestPartitionId fromPartitionNames(String... thePartitionNames) {
+        return new RequestPartitionId(toListOrNull(thePartitionNames), null, null);
+    }
 
-	public String asJson() throws JsonProcessingException {
-		return ourObjectMapper.writeValueAsString(this);
-	}
+    @Nonnull
+    public static RequestPartitionId fromPartitionIdAndName(
+            @Nullable Integer thePartitionId, @Nullable String thePartitionName) {
+        return new RequestPartitionId(thePartitionName, thePartitionId, null);
+    }
+
+    @Nonnull
+    public static RequestPartitionId forPartitionIdAndName(
+            @Nullable Integer thePartitionId,
+            @Nullable String thePartitionName,
+            @Nullable LocalDate thePartitionDate) {
+        return new RequestPartitionId(thePartitionName, thePartitionId, thePartitionDate);
+    }
+
+    @Nonnull
+    public static RequestPartitionId forPartitionIdsAndNames(
+            List<String> thePartitionNames,
+            List<Integer> thePartitionIds,
+            LocalDate thePartitionDate) {
+        return new RequestPartitionId(thePartitionNames, thePartitionIds, thePartitionDate);
+    }
+
+    /**
+     * Create a string representation suitable for use as a cache key. Null aware.
+     *
+     * <p>Returns the partition IDs (numeric) as a joined string with a space between, using the
+     * string "null" for any null values
+     */
+    public static String stringifyForKey(@Nonnull RequestPartitionId theRequestPartitionId) {
+        String retVal = "(all)";
+        if (!theRequestPartitionId.isAllPartitions()) {
+            assert theRequestPartitionId.hasPartitionIds();
+            retVal =
+                    theRequestPartitionId.getPartitionIds().stream()
+                            .map(t -> defaultIfNull(t, "null").toString())
+                            .collect(Collectors.joining(" "));
+        }
+        return retVal;
+    }
+
+    public String asJson() throws JsonProcessingException {
+        return ourObjectMapper.writeValueAsString(this);
+    }
 }

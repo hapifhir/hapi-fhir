@@ -29,6 +29,5 @@ import java.util.function.Supplier;
 @Target({ElementType.TYPE})
 public @interface ExampleSupplier {
 
-	Class<? extends Supplier<?>>[] value();
-
+    Class<? extends Supplier<?>>[] value();
 }

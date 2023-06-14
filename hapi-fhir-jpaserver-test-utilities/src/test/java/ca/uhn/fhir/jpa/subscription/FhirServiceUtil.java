@@ -38,6 +38,4 @@ public class FhirServiceUtil {
     public static void deleteResource(String id, Class clazz, IGenericClient client) {
         client.delete().resourceById(clazz.getSimpleName(), id).execute();
     }
-
-
 }

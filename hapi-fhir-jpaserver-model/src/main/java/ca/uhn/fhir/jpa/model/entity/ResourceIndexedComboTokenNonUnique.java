@@ -19,14 +19,10 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
@@ -39,188 +35,201 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 @Entity
-@Table(name = "HFJ_IDX_CMB_TOK_NU", indexes = {
-	@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
-	@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
-})
-public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
+@Table(
+        name = "HFJ_IDX_CMB_TOK_NU",
+        indexes = {
+            @Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
+            @Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
+        })
+public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
+        implements Comparable<ResourceIndexedComboTokenNonUnique>,
+                IResourceIndexComboSearchParameter {
 
-	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMBTOKNU_ID")
-	@Id
-	@Column(name = "PID")
-	private Long myId;
+    @SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMBTOKNU_ID")
+    @Id
+    @Column(name = "PID")
+    private Long myId;
 
-	@ManyToOne
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_IDXCMBTOKNU_RES_ID"))
-	private ResourceTable myResource;
+    @ManyToOne
+    @JoinColumn(
+            name = "RES_ID",
+            referencedColumnName = "RES_ID",
+            foreignKey = @ForeignKey(name = "FK_IDXCMBTOKNU_RES_ID"))
+    private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
-	private Long myResourceId;
+    @Column(name = "RES_ID", insertable = false, updatable = false)
+    private Long myResourceId;
 
-	@Column(name = "HASH_COMPLETE", nullable = false)
-	private Long myHashComplete;
+    @Column(name = "HASH_COMPLETE", nullable = false)
+    private Long myHashComplete;
 
-	@Column(name = "IDX_STRING", nullable = false, length = ResourceIndexedComboStringUnique.MAX_STRING_LENGTH)
-	private String myIndexString;
+    @Column(
+            name = "IDX_STRING",
+            nullable = false,
+            length = ResourceIndexedComboStringUnique.MAX_STRING_LENGTH)
+    private String myIndexString;
 
-	@Transient
-	private transient PartitionSettings myPartitionSettings;
+    @Transient private transient PartitionSettings myPartitionSettings;
 
-	@Transient
-	private IIdType mySearchParameterId;
+    @Transient private IIdType mySearchParameterId;
 
-	/**
-	 * Constructor
-	 */
-	public ResourceIndexedComboTokenNonUnique() {
-		super();
-	}
+    /** Constructor */
+    public ResourceIndexedComboTokenNonUnique() {
+        super();
+    }
 
-	public ResourceIndexedComboTokenNonUnique(PartitionSettings thePartitionSettings, ResourceTable theEntity, String theQueryString) {
-		myPartitionSettings = thePartitionSettings;
-		myResource = theEntity;
-		myIndexString = theQueryString;
-		calculateHashes();
-	}
+    public ResourceIndexedComboTokenNonUnique(
+            PartitionSettings thePartitionSettings,
+            ResourceTable theEntity,
+            String theQueryString) {
+        myPartitionSettings = thePartitionSettings;
+        myResource = theEntity;
+        myIndexString = theQueryString;
+        calculateHashes();
+    }
 
-	@Override
-	public String getIndexString() {
-		return myIndexString;
-	}
+    @Override
+    public String getIndexString() {
+        return myIndexString;
+    }
 
-	public void setIndexString(String theIndexString) {
-		myIndexString = theIndexString;
-	}
+    public void setIndexString(String theIndexString) {
+        myIndexString = theIndexString;
+    }
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) {
-			return true;
-		}
+    @Override
+    public boolean equals(Object theO) {
+        if (this == theO) {
+            return true;
+        }
 
-		if (theO == null || getClass() != theO.getClass()) {
-			return false;
-		}
+        if (theO == null || getClass() != theO.getClass()) {
+            return false;
+        }
 
-		ResourceIndexedComboTokenNonUnique that = (ResourceIndexedComboTokenNonUnique) theO;
+        ResourceIndexedComboTokenNonUnique that = (ResourceIndexedComboTokenNonUnique) theO;
 
-		EqualsBuilder b = new EqualsBuilder();
-		b.append(myIndexString, that.myIndexString);
-		return b.isEquals();
-	}
+        EqualsBuilder b = new EqualsBuilder();
+        b.append(myIndexString, that.myIndexString);
+        return b.isEquals();
+    }
 
-	@Override
-	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
-		ResourceIndexedComboTokenNonUnique source = (ResourceIndexedComboTokenNonUnique) theSource;
-		myPartitionSettings = source.myPartitionSettings;
-		myHashComplete = source.myHashComplete;
-		myIndexString = source.myIndexString;
-	}
+    @Override
+    public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+        ResourceIndexedComboTokenNonUnique source = (ResourceIndexedComboTokenNonUnique) theSource;
+        myPartitionSettings = source.myPartitionSettings;
+        myHashComplete = source.myHashComplete;
+        myIndexString = source.myIndexString;
+    }
 
-	@Override
-	public Long getId() {
-		return myId;
-	}
+    @Override
+    public Long getId() {
+        return myId;
+    }
 
-	@Override
-	public void setId(Long theId) {
-		myId = theId;
-	}
+    @Override
+    public void setId(Long theId) {
+        myId = theId;
+    }
 
-	@Override
-	public void clearHashes() {
-		myHashComplete = null;
-	}
+    @Override
+    public void clearHashes() {
+        myHashComplete = null;
+    }
 
-	@Override
-	public void calculateHashes() {
-		if (myHashComplete != null) {
-			return;
-		}
+    @Override
+    public void calculateHashes() {
+        if (myHashComplete != null) {
+            return;
+        }
 
-		PartitionSettings partitionSettings = getPartitionSettings();
-		PartitionablePartitionId partitionId = getPartitionId();
-		String queryString = myIndexString;
-		setHashComplete(calculateHashComplete(partitionSettings, partitionId, queryString));
-	}
+        PartitionSettings partitionSettings = getPartitionSettings();
+        PartitionablePartitionId partitionId = getPartitionId();
+        String queryString = myIndexString;
+        setHashComplete(calculateHashComplete(partitionSettings, partitionId, queryString));
+    }
 
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myIndexString)
-			.toHashCode();
-	}
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(myIndexString).toHashCode();
+    }
 
-	public PartitionSettings getPartitionSettings() {
-		return myPartitionSettings;
-	}
+    public PartitionSettings getPartitionSettings() {
+        return myPartitionSettings;
+    }
 
-	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
-	}
+    public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+        myPartitionSettings = thePartitionSettings;
+    }
 
-	@Override
-	public ResourceTable getResource() {
-		return myResource;
-	}
+    @Override
+    public ResourceTable getResource() {
+        return myResource;
+    }
 
-	@Override
-	public void setResource(ResourceTable theResource) {
-		myResource = theResource;
-	}
+    @Override
+    public void setResource(ResourceTable theResource) {
+        myResource = theResource;
+    }
 
-	public Long getHashComplete() {
-		return myHashComplete;
-	}
+    public Long getHashComplete() {
+        return myHashComplete;
+    }
 
-	public void setHashComplete(Long theHashComplete) {
-		myHashComplete = theHashComplete;
-	}
+    public void setHashComplete(Long theHashComplete) {
+        myHashComplete = theHashComplete;
+    }
 
-	@Override
-	public int compareTo(ResourceIndexedComboTokenNonUnique theO) {
-		CompareToBuilder b = new CompareToBuilder();
-		b.append(myHashComplete, theO.getHashComplete());
-		return b.toComparison();
-	}
+    @Override
+    public int compareTo(ResourceIndexedComboTokenNonUnique theO) {
+        CompareToBuilder b = new CompareToBuilder();
+        b.append(myHashComplete, theO.getHashComplete());
+        return b.toComparison();
+    }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("id", myId)
-			.append("resourceId", myResourceId)
-			.append("hashComplete", myHashComplete)
-			.append("indexString", myIndexString)
-			.toString();
-	}
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", myId)
+                .append("resourceId", myResourceId)
+                .append("hashComplete", myHashComplete)
+                .append("indexString", myIndexString)
+                .toString();
+    }
 
-	public static long calculateHashComplete(PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
-		return hash(partitionSettings, requestPartitionId, queryString);
-	}
+    public static long calculateHashComplete(
+            PartitionSettings partitionSettings,
+            PartitionablePartitionId thePartitionId,
+            String queryString) {
+        RequestPartitionId requestPartitionId =
+                PartitionablePartitionId.toRequestPartitionId(thePartitionId);
+        return hash(partitionSettings, requestPartitionId, queryString);
+    }
 
-	public static long calculateHashComplete(PartitionSettings partitionSettings, RequestPartitionId partitionId, String queryString) {
-		return hash(partitionSettings, partitionId, queryString);
-	}
+    public static long calculateHashComplete(
+            PartitionSettings partitionSettings,
+            RequestPartitionId partitionId,
+            String queryString) {
+        return hash(partitionSettings, partitionId, queryString);
+    }
 
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public void setSearchParameterId(IIdType theSearchParameterId) {
-		mySearchParameterId = theSearchParameterId;
-	}
+    /** Note: This field is not persisted, so it will only be populated for new indexes */
+    @Override
+    public void setSearchParameterId(IIdType theSearchParameterId) {
+        mySearchParameterId = theSearchParameterId;
+    }
 
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public IIdType getSearchParameterId() {
-		return mySearchParameterId;
-	}
+    /** Note: This field is not persisted, so it will only be populated for new indexes */
+    @Override
+    public IIdType getSearchParameterId() {
+        return mySearchParameterId;
+    }
 }

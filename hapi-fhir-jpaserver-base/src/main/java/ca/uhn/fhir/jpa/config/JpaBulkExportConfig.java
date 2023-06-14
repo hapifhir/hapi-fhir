@@ -27,13 +27,13 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JpaBulkExportConfig {
-	@Bean
-	public IBulkExportProcessor jpaBulkExportProcessor() {
-		return new JpaBulkExportProcessor();
-	}
+    @Bean
+    public IBulkExportProcessor jpaBulkExportProcessor() {
+        return new JpaBulkExportProcessor();
+    }
 
-	@Bean
-	public BulkExportHelperService bulkExportHelperService() {
-		return new BulkExportHelperService();
-	}
+    @Bean
+    public BulkExportHelperService bulkExportHelperService() {
+        return new BulkExportHelperService();
+    }
 }

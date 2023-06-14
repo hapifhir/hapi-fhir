@@ -19,18 +19,18 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
-import javax.annotation.Nonnull;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 public interface IPointcut {
-	@Nonnull
-	Class<?> getReturnType();
+    @Nonnull
+    Class<?> getReturnType();
 
-	@Nonnull
-	List<String> getParameterTypes();
+    @Nonnull
+    List<String> getParameterTypes();
 
-	@Nonnull
-	String name();
+    @Nonnull
+    String name();
 
-	boolean isShouldLogAndSwallowException(Throwable theException);
+    boolean isShouldLogAndSwallowException(Throwable theException);
 }

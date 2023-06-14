@@ -19,45 +19,45 @@
  */
 package ca.uhn.fhir.validation;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 public class ValidationFailureException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
-	private IBaseOperationOutcome myOperationOutcome;
+    private static final long serialVersionUID = 1L;
+    private IBaseOperationOutcome myOperationOutcome;
 
-//	public ValidationFailureException(String theProblem) {
-//		this(theProblem, IssueSeverityEnum.FATAL, null);
-//	}
+    //	public ValidationFailureException(String theProblem) {
+    //		this(theProblem, IssueSeverityEnum.FATAL, null);
+    //	}
 
-	private static String toDescription(FhirContext theCtx, IBaseOperationOutcome theOo) {
-		StringBuilder b = new StringBuilder();
-		b.append(OperationOutcomeUtil.getFirstIssueDetails(theCtx, theOo));
-//		b.append(" - ");
-//		b.append(theOo.getIssueFirstRep().getLocationFirstRep().getValue());
-		return b.toString();
-	}
+    private static String toDescription(FhirContext theCtx, IBaseOperationOutcome theOo) {
+        StringBuilder b = new StringBuilder();
+        b.append(OperationOutcomeUtil.getFirstIssueDetails(theCtx, theOo));
+        //		b.append(" - ");
+        //		b.append(theOo.getIssueFirstRep().getLocationFirstRep().getValue());
+        return b.toString();
+    }
 
-//	public ValidationFailureException(String theProblem, Exception theCause) {
-//		this(theProblem, IssueSeverityEnum.FATAL, theCause);
-//	}
+    //	public ValidationFailureException(String theProblem, Exception theCause) {
+    //		this(theProblem, IssueSeverityEnum.FATAL, theCause);
+    //	}
 
-//	public ValidationFailureException(String theProblem, IssueSeverityEnum theSeverity, Exception theCause) {
-//		super(theProblem, theCause);
-//		myOperationOutcome = new OperationOutcome();
-//		myOperationOutcome.addIssue().setSeverity(theSeverity).setDetails(theProblem);
-//	}
+    //	public ValidationFailureException(String theProblem, IssueSeverityEnum theSeverity, Exception
+    // theCause) {
+    //		super(theProblem, theCause);
+    //		myOperationOutcome = new OperationOutcome();
+    //		myOperationOutcome.addIssue().setSeverity(theSeverity).setDetails(theProblem);
+    //	}
 
-	public ValidationFailureException(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome) {
-		super(toDescription(theCtx, theOperationOutcome));
-		myOperationOutcome = theOperationOutcome;
-	}
+    public ValidationFailureException(
+            FhirContext theCtx, IBaseOperationOutcome theOperationOutcome) {
+        super(toDescription(theCtx, theOperationOutcome));
+        myOperationOutcome = theOperationOutcome;
+    }
 
-	public IBaseOperationOutcome getOperationOutcome() {
-		return myOperationOutcome;
-	}
-
+    public IBaseOperationOutcome getOperationOutcome() {
+        return myOperationOutcome;
+    }
 }

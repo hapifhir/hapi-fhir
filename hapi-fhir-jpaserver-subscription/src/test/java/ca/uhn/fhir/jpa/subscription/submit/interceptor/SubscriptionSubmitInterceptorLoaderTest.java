@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -22,67 +26,54 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {
-	SubscriptionSubmitterConfig.class,
-	SearchParamConfig.class,
-	SubscriptionSubmitInterceptorLoaderTest.MyConfig.class
-})
+@ContextConfiguration(
+        classes = {
+            SubscriptionSubmitterConfig.class,
+            SearchParamConfig.class,
+            SubscriptionSubmitInterceptorLoaderTest.MyConfig.class
+        })
 public class SubscriptionSubmitInterceptorLoaderTest {
 
-	@MockBean
-	private ISearchParamProvider mySearchParamProvider;
-	@MockBean
-	private IInterceptorService myInterceptorService;
-	@MockBean
-	private IValidationSupport myValidationSupport;
-	@MockBean
-	private SubscriptionChannelFactory mySubscriptionChannelFactory;
-	@MockBean
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
-	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
-	@MockBean
-	private IResourceVersionSvc myResourceVersionSvc;
-	@MockBean
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+    @MockBean private ISearchParamProvider mySearchParamProvider;
+    @MockBean private IInterceptorService myInterceptorService;
+    @MockBean private IValidationSupport myValidationSupport;
+    @MockBean private SubscriptionChannelFactory mySubscriptionChannelFactory;
+    @MockBean private DaoRegistry myDaoRegistry;
+    @Autowired private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
+    @Autowired private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+    @MockBean private IResourceVersionSvc myResourceVersionSvc;
+    @MockBean private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
-	/**
-	 * It should be possible to run only the {@link SubscriptionSubmitterConfig} without the
-	 * {@link ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig}
-	 */
-	@Test
-	public void testLoaderCanRunWithoutProcessorConfigLoaded() {
-		verify(myInterceptorService, times(1)).registerInterceptor(eq(mySubscriptionMatcherInterceptor));
-	}
+    /**
+     * It should be possible to run only the {@link SubscriptionSubmitterConfig} without the {@link
+     * ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig}
+     */
+    @Test
+    public void testLoaderCanRunWithoutProcessorConfigLoaded() {
+        verify(myInterceptorService, times(1))
+                .registerInterceptor(eq(mySubscriptionMatcherInterceptor));
+    }
 
-	@Configuration
-	public static class MyConfig {
+    @Configuration
+    public static class MyConfig {
 
-		@Bean
-		public FhirContext fhirContext() {
-			return FhirContext.forR4();
-		}
+        @Bean
+        public FhirContext fhirContext() {
+            return FhirContext.forR4();
+        }
 
-		@Bean
-		public PartitionSettings partitionSettings() {
-			return new PartitionSettings();
-		}
+        @Bean
+        public PartitionSettings partitionSettings() {
+            return new PartitionSettings();
+        }
 
-		@Bean
-		public JpaStorageSettings storageSettings() {
-			JpaStorageSettings storageSettings = new JpaStorageSettings();
-			storageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-			return storageSettings;
-		}
-
-	}
-
-
+        @Bean
+        public JpaStorageSettings storageSettings() {
+            JpaStorageSettings storageSettings = new JpaStorageSettings();
+            storageSettings.addSupportedSubscriptionType(
+                    Subscription.SubscriptionChannelType.RESTHOOK);
+            return storageSettings;
+        }
+    }
 }

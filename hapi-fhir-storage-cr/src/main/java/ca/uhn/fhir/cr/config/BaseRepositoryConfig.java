@@ -23,15 +23,13 @@ import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 @Configuration
 public abstract class BaseRepositoryConfig {
-	@Bean
-	IRepositoryFactory repositoryFactory(DaoRegistry theDaoRegistry) {
-		return rd -> new HapiFhirRepository(theDaoRegistry, rd, (RestfulServer) rd.getServer());
-	}
+    @Bean
+    IRepositoryFactory repositoryFactory(DaoRegistry theDaoRegistry) {
+        return rd -> new HapiFhirRepository(theDaoRegistry, rd, (RestfulServer) rd.getServer());
+    }
 }

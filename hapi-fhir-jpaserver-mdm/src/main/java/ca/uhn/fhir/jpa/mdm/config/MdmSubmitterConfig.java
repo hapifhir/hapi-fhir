@@ -36,24 +36,25 @@ import org.springframework.context.annotation.Lazy;
 @Import(MdmCommonConfig.class)
 public class MdmSubmitterConfig {
 
-	@Bean
-	MdmSubmitterInterceptorLoader mdmSubmitterInterceptorLoader() {
-		return new MdmSubmitterInterceptorLoader();
-	}
+    @Bean
+    MdmSubmitterInterceptorLoader mdmSubmitterInterceptorLoader() {
+        return new MdmSubmitterInterceptorLoader();
+    }
 
-	@Bean
-	MdmSearchParamSvc mdmSearchParamSvc() {
-		return new MdmSearchParamSvc();
-	}
+    @Bean
+    MdmSearchParamSvc mdmSearchParamSvc() {
+        return new MdmSearchParamSvc();
+    }
 
-	@Bean
-	@Lazy
-	IMdmChannelSubmitterSvc mdmChannelSubmitterSvc(FhirContext theFhirContext, IChannelFactory theChannelFactory) {
-		return new MdmChannelSubmitterSvcImpl(theFhirContext, theChannelFactory);
-	}
+    @Bean
+    @Lazy
+    IMdmChannelSubmitterSvc mdmChannelSubmitterSvc(
+            FhirContext theFhirContext, IChannelFactory theChannelFactory) {
+        return new MdmChannelSubmitterSvcImpl(theFhirContext, theChannelFactory);
+    }
 
-	@Bean
-	IMdmSubmitSvc mdmSubmitService() {
-		return new MdmSubmitSvcImpl();
-	}
+    @Bean
+    IMdmSubmitSvc mdmSubmitService() {
+        return new MdmSubmitSvcImpl();
+    }
 }

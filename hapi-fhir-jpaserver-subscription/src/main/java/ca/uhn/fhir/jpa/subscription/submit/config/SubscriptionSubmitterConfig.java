@@ -34,38 +34,38 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
 /**
- * This Spring config should be imported by a system that submits resources to the
- * matching queue for processing
+ * This Spring config should be imported by a system that submits resources to the matching queue
+ * for processing
  */
 @Configuration
 @Import(SubscriptionModelConfig.class)
 public class SubscriptionSubmitterConfig {
 
-	@Bean
-	public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor() {
-		return new SubscriptionMatcherInterceptor();
-	}
+    @Bean
+    public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor() {
+        return new SubscriptionMatcherInterceptor();
+    }
 
-	@Bean
-	public SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
-		return new SubscriptionValidatingInterceptor();
-	}
+    @Bean
+    public SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
+        return new SubscriptionValidatingInterceptor();
+    }
 
-	@Bean
-	public SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
-		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
-	}
+    @Bean
+    public SubscriptionQueryValidator subscriptionQueryValidator(
+            DaoRegistry theDaoRegistry,
+            SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+        return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
+    }
 
-	@Bean
-	public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader() {
-		return new SubscriptionSubmitInterceptorLoader();
-	}
+    @Bean
+    public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader() {
+        return new SubscriptionSubmitInterceptorLoader();
+    }
 
-	@Bean
-	@Lazy
-	public ISubscriptionTriggeringSvc subscriptionTriggeringSvc() {
-		return new SubscriptionTriggeringSvcImpl();
-	}
-
-
+    @Bean
+    @Lazy
+    public ISubscriptionTriggeringSvc subscriptionTriggeringSvc() {
+        return new SubscriptionTriggeringSvcImpl();
+    }
 }

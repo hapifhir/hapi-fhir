@@ -23,24 +23,23 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
- * Represents a failure by the HAPI FHIR Client to successfully communicate
- * with a FHIR server, because of IO failures, incomprehensible response, etc.
+ * Represents a failure by the HAPI FHIR Client to successfully communicate with a FHIR server,
+ * because of IO failures, incomprehensible response, etc.
  */
 @CoverageIgnore
 public class FhirClientConnectionException extends BaseServerResponseException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public FhirClientConnectionException(Throwable theCause) {
-		super(500, theCause);
-	}
+    public FhirClientConnectionException(Throwable theCause) {
+        super(500, theCause);
+    }
 
-	public FhirClientConnectionException(String theMessage, Throwable theCause) {
-		super(500, theMessage, theCause);
-	}
+    public FhirClientConnectionException(String theMessage, Throwable theCause) {
+        super(500, theMessage, theCause);
+    }
 
-	public FhirClientConnectionException(String theMessage) {
-		super(500, theMessage);
-	}
-
+    public FhirClientConnectionException(String theMessage) {
+        super(500, theMessage);
+    }
 }

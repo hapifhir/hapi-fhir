@@ -30,85 +30,96 @@ import ca.uhn.fhir.subscription.SubscriptionConstants;
 import org.apache.commons.lang3.Validate;
 
 public class SubscriptionChannelFactory {
-	private final IChannelFactory myChannelFactory;
+    private final IChannelFactory myChannelFactory;
 
-	/**
-	 * Constructor
-	 */
-	public SubscriptionChannelFactory(IChannelFactory theChannelFactory) {
-		Validate.notNull(theChannelFactory);
-		myChannelFactory = theChannelFactory;
-	}
+    /** Constructor */
+    public SubscriptionChannelFactory(IChannelFactory theChannelFactory) {
+        Validate.notNull(theChannelFactory);
+        myChannelFactory = theChannelFactory;
+    }
 
-	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
-		ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
-		config.setRetryConfiguration(theChannelSettings.getRetryConfigurationParameters());
-		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
-	}
+    public IChannelProducer newDeliverySendingChannel(
+            String theChannelName, ChannelProducerSettings theChannelSettings) {
+        ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
+        config.setRetryConfiguration(theChannelSettings.getRetryConfigurationParameters());
+        return myChannelFactory.getOrCreateProducer(
+                theChannelName, ResourceDeliveryJsonMessage.class, config);
+    }
 
-	public IChannelReceiver newDeliveryReceivingChannel(String theChannelName, ChannelConsumerSettings theChannelSettings) {
-		ChannelConsumerSettings config = newConsumerConfigForDeliveryChannel(theChannelSettings);
-		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
-		return new BroadcastingSubscribableChannelWrapper(channel);
-	}
+    public IChannelReceiver newDeliveryReceivingChannel(
+            String theChannelName, ChannelConsumerSettings theChannelSettings) {
+        ChannelConsumerSettings config = newConsumerConfigForDeliveryChannel(theChannelSettings);
+        IChannelReceiver channel =
+                myChannelFactory.getOrCreateReceiver(
+                        theChannelName, ResourceDeliveryJsonMessage.class, config);
+        return new BroadcastingSubscribableChannelWrapper(channel);
+    }
 
-	public IChannelProducer newMatchingSendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
-		ChannelProducerSettings config = newProducerConfigForMatchingChannel(theChannelSettings);
-		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
-	}
+    public IChannelProducer newMatchingSendingChannel(
+            String theChannelName, ChannelProducerSettings theChannelSettings) {
+        ChannelProducerSettings config = newProducerConfigForMatchingChannel(theChannelSettings);
+        return myChannelFactory.getOrCreateProducer(
+                theChannelName, ResourceModifiedJsonMessage.class, config);
+    }
 
-	public IChannelReceiver newMatchingReceivingChannel(String theChannelName, ChannelConsumerSettings theChannelSettings) {
-		ChannelConsumerSettings config = newConsumerConfigForMatchingChannel(theChannelSettings);
-		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
-		return new BroadcastingSubscribableChannelWrapper(channel);
-	}
+    public IChannelReceiver newMatchingReceivingChannel(
+            String theChannelName, ChannelConsumerSettings theChannelSettings) {
+        ChannelConsumerSettings config = newConsumerConfigForMatchingChannel(theChannelSettings);
+        IChannelReceiver channel =
+                myChannelFactory.getOrCreateReceiver(
+                        theChannelName, ResourceModifiedJsonMessage.class, config);
+        return new BroadcastingSubscribableChannelWrapper(channel);
+    }
 
-	protected ChannelProducerSettings newProducerConfigForDeliveryChannel(ChannelProducerSettings theOptions) {
-		ChannelProducerSettings config = new ChannelProducerSettings();
-		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
-		config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-		return config;
-	}
+    protected ChannelProducerSettings newProducerConfigForDeliveryChannel(
+            ChannelProducerSettings theOptions) {
+        ChannelProducerSettings config = new ChannelProducerSettings();
+        config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
+        config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+        return config;
+    }
 
-	protected ChannelConsumerSettings newConsumerConfigForDeliveryChannel(ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = new ChannelConsumerSettings();
-		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
-		if (theOptions != null) {
-			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-		}
-		return config;
-	}
+    protected ChannelConsumerSettings newConsumerConfigForDeliveryChannel(
+            ChannelConsumerSettings theOptions) {
+        ChannelConsumerSettings config = new ChannelConsumerSettings();
+        config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
+        if (theOptions != null) {
+            config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+        }
+        return config;
+    }
 
-	protected ChannelProducerSettings newProducerConfigForMatchingChannel(ChannelProducerSettings theOptions) {
-		ChannelProducerSettings config = new ChannelProducerSettings();
-		if (theOptions != null) {
-			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-			config.setQualifyChannelName(theOptions.isQualifyChannelName());
-		}
-		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
-		return config;
-	}
+    protected ChannelProducerSettings newProducerConfigForMatchingChannel(
+            ChannelProducerSettings theOptions) {
+        ChannelProducerSettings config = new ChannelProducerSettings();
+        if (theOptions != null) {
+            config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+            config.setQualifyChannelName(theOptions.isQualifyChannelName());
+        }
+        config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
+        return config;
+    }
 
-	protected ChannelConsumerSettings newConsumerConfigForMatchingChannel(ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = new ChannelConsumerSettings();
-		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
-		if (theOptions != null) {
-			config.setQualifyChannelName(theOptions.isQualifyChannelName());
-			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-		}
-		return config;
-	}
+    protected ChannelConsumerSettings newConsumerConfigForMatchingChannel(
+            ChannelConsumerSettings theOptions) {
+        ChannelConsumerSettings config = new ChannelConsumerSettings();
+        config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
+        if (theOptions != null) {
+            config.setQualifyChannelName(theOptions.isQualifyChannelName());
+            config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+        }
+        return config;
+    }
 
-	public int getDeliveryChannelConcurrentConsumers() {
-		return SubscriptionConstants.DELIVERY_CHANNEL_CONCURRENT_CONSUMERS;
-	}
+    public int getDeliveryChannelConcurrentConsumers() {
+        return SubscriptionConstants.DELIVERY_CHANNEL_CONCURRENT_CONSUMERS;
+    }
 
-	public int getMatchingChannelConcurrentConsumers() {
-		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
-	}
+    public int getMatchingChannelConcurrentConsumers() {
+        return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
+    }
 
-	public IChannelFactory getChannelFactory() {
-		return myChannelFactory;
-	}
-
+    public IChannelFactory getChannelFactory() {
+        return myChannelFactory;
+    }
 }

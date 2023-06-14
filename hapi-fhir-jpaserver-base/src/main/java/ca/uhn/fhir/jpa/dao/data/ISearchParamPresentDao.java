@@ -21,20 +21,19 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+public interface ISearchParamPresentDao
+        extends JpaRepository<SearchParamPresentEntity, Long>, IHapiFhirJpaRepository {
 
-public interface ISearchParamPresentDao extends JpaRepository<SearchParamPresentEntity, Long>, IHapiFhirJpaRepository {
+    @Query("SELECT s FROM SearchParamPresentEntity s WHERE s.myResource = :res")
+    List<SearchParamPresentEntity> findAllForResource(@Param("res") ResourceTable theResource);
 
-	@Query("SELECT s FROM SearchParamPresentEntity s WHERE s.myResource = :res")
-	List<SearchParamPresentEntity> findAllForResource(@Param("res") ResourceTable theResource);
-
-	@Modifying
-	@Query("delete from SearchParamPresentEntity t WHERE t.myResourcePid = :resid")
-	void deleteByResourceId(@Param("resid") Long theResourcePid);
-
+    @Modifying
+    @Query("delete from SearchParamPresentEntity t WHERE t.myResourcePid = :resid")
+    void deleteByResourceId(@Param("resid") Long theResourcePid);
 }

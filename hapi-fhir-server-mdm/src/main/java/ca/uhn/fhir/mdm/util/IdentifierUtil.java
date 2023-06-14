@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.mdm.util;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
@@ -28,45 +28,52 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 public final class IdentifierUtil {
 
-	private IdentifierUtil() {
-	}
+    private IdentifierUtil() {}
 
-	public static CanonicalIdentifier identifierDtFromIdentifier(IBase theIdentifier) {
-		CanonicalIdentifier retval = new CanonicalIdentifier();
+    public static CanonicalIdentifier identifierDtFromIdentifier(IBase theIdentifier) {
+        CanonicalIdentifier retval = new CanonicalIdentifier();
 
-		// TODO add other fields like "use" etc
-		if (theIdentifier instanceof org.hl7.fhir.dstu3.model.Identifier) {
-			org.hl7.fhir.dstu3.model.Identifier ident = (org.hl7.fhir.dstu3.model.Identifier) theIdentifier;
-			retval.setSystem(ident.getSystem()).setValue(ident.getValue());
-		} else if (theIdentifier instanceof org.hl7.fhir.r4.model.Identifier) {
-			org.hl7.fhir.r4.model.Identifier ident = (org.hl7.fhir.r4.model.Identifier) theIdentifier;
-			retval.setSystem(ident.getSystem()).setValue(ident.getValue());
-		} else if (theIdentifier instanceof org.hl7.fhir.r5.model.Identifier) {
-			org.hl7.fhir.r5.model.Identifier ident = (org.hl7.fhir.r5.model.Identifier) theIdentifier;
-			retval.setSystem(ident.getSystem()).setValue(ident.getValue());
-		} else {
-			throw new InternalErrorException(Msg.code(1486) + "Expected 'Identifier' type but was '" + theIdentifier.getClass().getName() + "'");
-		}
-		return retval;
-	}
+        // TODO add other fields like "use" etc
+        if (theIdentifier instanceof org.hl7.fhir.dstu3.model.Identifier) {
+            org.hl7.fhir.dstu3.model.Identifier ident =
+                    (org.hl7.fhir.dstu3.model.Identifier) theIdentifier;
+            retval.setSystem(ident.getSystem()).setValue(ident.getValue());
+        } else if (theIdentifier instanceof org.hl7.fhir.r4.model.Identifier) {
+            org.hl7.fhir.r4.model.Identifier ident =
+                    (org.hl7.fhir.r4.model.Identifier) theIdentifier;
+            retval.setSystem(ident.getSystem()).setValue(ident.getValue());
+        } else if (theIdentifier instanceof org.hl7.fhir.r5.model.Identifier) {
+            org.hl7.fhir.r5.model.Identifier ident =
+                    (org.hl7.fhir.r5.model.Identifier) theIdentifier;
+            retval.setSystem(ident.getSystem()).setValue(ident.getValue());
+        } else {
+            throw new InternalErrorException(
+                    Msg.code(1486)
+                            + "Expected 'Identifier' type but was '"
+                            + theIdentifier.getClass().getName()
+                            + "'");
+        }
+        return retval;
+    }
 
-
-
-	/**
-	 * Retrieves appropriate FHIR Identifier model instance based on the context version
-	 *
-	 * @param theFhirContext FHIR context to use for determining the identifier version
-	 * @param eid EID to get equivalent FHIR Identifier from
-	 * @param <T> Generic Identifier base interface
-	 * @return Returns appropriate R4 or DSTU3 Identifier instance
-	 */
-	public static <T extends IBase> T toId(FhirContext theFhirContext, CanonicalEID eid) {
-		switch (theFhirContext.getVersion().getVersion()) {
-			case R4:
-				return (T) eid.toR4();
-			case DSTU3:
-				return (T) eid.toDSTU3();
-		}
-		throw new IllegalStateException(Msg.code(1487) + "Unsupported FHIR version " + theFhirContext.getVersion().getVersion());
-	}
+    /**
+     * Retrieves appropriate FHIR Identifier model instance based on the context version
+     *
+     * @param theFhirContext FHIR context to use for determining the identifier version
+     * @param eid EID to get equivalent FHIR Identifier from
+     * @param <T> Generic Identifier base interface
+     * @return Returns appropriate R4 or DSTU3 Identifier instance
+     */
+    public static <T extends IBase> T toId(FhirContext theFhirContext, CanonicalEID eid) {
+        switch (theFhirContext.getVersion().getVersion()) {
+            case R4:
+                return (T) eid.toR4();
+            case DSTU3:
+                return (T) eid.toDSTU3();
+        }
+        throw new IllegalStateException(
+                Msg.code(1487)
+                        + "Unsupported FHIR version "
+                        + theFhirContext.getVersion().getVersion());
+    }
 }

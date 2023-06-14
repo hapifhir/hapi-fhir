@@ -19,127 +19,124 @@
  */
 package ca.uhn.fhir.rest.api.server.bulk;
 
+import java.util.Date;
+import java.util.Set;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 // TODO: JA in next ticket - We have 3 more or less identical classes representing
-// bulk data job parameters: BulkDataExportOptions, BulkExportJobParameters, and BulkExportParameters
+// bulk data job parameters: BulkDataExportOptions, BulkExportJobParameters, and
+// BulkExportParameters
 // They don't seem to serve any distinct purpose so they should be collapsed into 1
 public class BulkDataExportOptions {
 
+    public enum ExportStyle {
+        PATIENT,
+        GROUP,
+        SYSTEM
+    }
 
-	public enum ExportStyle {
-		PATIENT,
-		GROUP,
-		SYSTEM
-	}
+    private String myOutputFormat;
+    private Set<String> myResourceTypes;
+    private Date mySince;
+    private Set<String> myFilters;
+    private Set<String> myPostFetchFilterUrls;
+    private ExportStyle myExportStyle;
+    private boolean myExpandMdm;
+    private IIdType myGroupId;
+    private Set<IIdType> myPatientIds;
 
-	private String myOutputFormat;
-	private Set<String> myResourceTypes;
-	private Date mySince;
-	private Set<String> myFilters;
-	private Set<String> myPostFetchFilterUrls;
-	private ExportStyle myExportStyle;
-	private boolean myExpandMdm;
-	private IIdType myGroupId;
-	private Set<IIdType> myPatientIds;
+    private String myExportIdentifier;
 
-	private String myExportIdentifier;
+    public void setOutputFormat(String theOutputFormat) {
+        myOutputFormat = theOutputFormat;
+    }
 
-	public void setOutputFormat(String theOutputFormat) {
-		myOutputFormat = theOutputFormat;
-	}
+    public void setResourceTypes(Set<String> theResourceTypes) {
+        myResourceTypes = theResourceTypes;
+    }
 
-	public void setResourceTypes(Set<String> theResourceTypes) {
-		myResourceTypes = theResourceTypes;
-	}
+    public void setSince(Date theSince) {
+        mySince = theSince;
+    }
 
-	public void setSince(Date theSince) {
-		mySince = theSince;
-	}
+    public void setFilters(Set<String> theFilters) {
+        myFilters = theFilters;
+    }
 
-	public void setFilters(Set<String> theFilters) {
-		myFilters = theFilters;
-	}
+    public ExportStyle getExportStyle() {
+        return myExportStyle;
+    }
 
-	public ExportStyle getExportStyle() {
-		return myExportStyle;
-	}
+    public void setExportStyle(ExportStyle theExportStyle) {
+        myExportStyle = theExportStyle;
+    }
 
-	public void setExportStyle(ExportStyle theExportStyle) {
-		myExportStyle = theExportStyle;
-	}
+    public String getOutputFormat() {
+        return myOutputFormat;
+    }
 
-	public String getOutputFormat() {
-		return myOutputFormat;
-	}
+    @Nonnull
+    public Set<String> getResourceTypes() {
+        if (myResourceTypes == null) {
+            myResourceTypes = Set.of();
+        }
+        return myResourceTypes;
+    }
 
-	@Nonnull
-	public Set<String> getResourceTypes() {
-		if (myResourceTypes == null) {
-			myResourceTypes = Set.of();
-		}
-		return myResourceTypes;
-	}
+    public Date getSince() {
+        return mySince;
+    }
 
-	public Date getSince() {
-		return mySince;
-	}
+    @Nonnull
+    public Set<String> getFilters() {
+        if (myFilters == null) {
+            myFilters = Set.of();
+        }
+        return myFilters;
+    }
 
-	@Nonnull
-	public Set<String> getFilters() {
-		if (myFilters == null) {
-			myFilters = Set.of();
-		}
-		return myFilters;
-	}
+    @Nonnull
+    public Set<String> getPostFetchFilterUrls() {
+        if (myPostFetchFilterUrls == null) {
+            myPostFetchFilterUrls = Set.of();
+        }
+        return myPostFetchFilterUrls;
+    }
 
-	@Nonnull
-	public Set<String> getPostFetchFilterUrls() {
-		if (myPostFetchFilterUrls == null) {
-			myPostFetchFilterUrls = Set.of();
-		}
-		return myPostFetchFilterUrls;
-	}
+    public void setPostFetchFilterUrls(Set<String> thePostFetchFilterUrls) {
+        myPostFetchFilterUrls = thePostFetchFilterUrls;
+    }
 
-	public void setPostFetchFilterUrls(Set<String> thePostFetchFilterUrls) {
-		myPostFetchFilterUrls = thePostFetchFilterUrls;
-	}
+    public boolean isExpandMdm() {
+        return myExpandMdm;
+    }
 
-	public boolean isExpandMdm() {
-		return myExpandMdm;
-	}
+    public void setExpandMdm(boolean theExpandMdm) {
+        myExpandMdm = theExpandMdm;
+    }
 
-	public void setExpandMdm(boolean theExpandMdm) {
-		myExpandMdm = theExpandMdm;
-	}
+    public IIdType getGroupId() {
+        return myGroupId;
+    }
 
-	public IIdType getGroupId() {
-		return myGroupId;
-	}
+    public void setGroupId(IIdType theGroupId) {
+        myGroupId = theGroupId;
+    }
 
-	public void setGroupId(IIdType theGroupId) {
-		myGroupId = theGroupId;
-	}
+    public Set<IIdType> getPatientIds() {
+        return myPatientIds;
+    }
 
-	public Set<IIdType> getPatientIds() {
-		return myPatientIds;
-	}
+    public void setPatientIds(Set<IIdType> thePatientIds) {
+        myPatientIds = thePatientIds;
+    }
 
-	public void setPatientIds(Set<IIdType> thePatientIds) {
-		myPatientIds = thePatientIds;
-	}
+    public String getExportIdentifier() {
+        return myExportIdentifier;
+    }
 
-	public String getExportIdentifier() {
-		return myExportIdentifier;
-	}
-
-	public void setExportIdentifier(String theExportIdentifier) {
-		myExportIdentifier = theExportIdentifier;
-	}
+    public void setExportIdentifier(String theExportIdentifier) {
+        myExportIdentifier = theExportIdentifier;
+    }
 }

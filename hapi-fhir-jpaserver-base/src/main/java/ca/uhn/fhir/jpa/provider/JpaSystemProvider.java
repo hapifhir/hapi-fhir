@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -31,109 +33,112 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT> {
 
+    @Description(
+            "Marks all currently existing resources of a given type, or all resources of all types,"
+                    + " for reindexing.")
+    @Operation(
+            name = MARK_ALL_RESOURCES_FOR_REINDEXING,
+            idempotent = false,
+            returnParameters = {@OperationParam(name = "status")})
+    /**
+     * @deprecated
+     * @see ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
+     */
+    @Deprecated
+    public IBaseResource markAllResourcesForReindexing(
+            @OperationParam(name = "type", min = 0, max = 1, typeName = "code")
+                    IPrimitiveType<String> theType) {
 
-	@Description("Marks all currently existing resources of a given type, or all resources of all types, for reindexing.")
-	@Operation(name = MARK_ALL_RESOURCES_FOR_REINDEXING, idempotent = false, returnParameters = {
-		@OperationParam(name = "status")
-	})
-	/**
-	 * @deprecated
-	 * @see ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
-	 */
-	@Deprecated
-	public IBaseResource markAllResourcesForReindexing(
-		@OperationParam(name = "type", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theType
-	) {
+        if (theType != null && isNotBlank(theType.getValueAsString())) {
+            getResourceReindexingSvc().markAllResourcesForReindexing(theType.getValueAsString());
+        } else {
+            getResourceReindexingSvc().markAllResourcesForReindexing();
+        }
 
-		if (theType != null && isNotBlank(theType.getValueAsString())) {
-			getResourceReindexingSvc().markAllResourcesForReindexing(theType.getValueAsString());
-		} else {
-			getResourceReindexingSvc().markAllResourcesForReindexing();
-		}
+        IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 
-		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
+        IPrimitiveType<?> string = ParametersUtil.createString(getContext(), "Marked resources");
+        ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
 
-		IPrimitiveType<?> string = ParametersUtil.createString(getContext(), "Marked resources");
-		ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
+        return retVal;
+    }
 
-		return retVal;
-	}
+    @Description("Forces a single pass of the resource reindexing processor")
+    @Operation(
+            name = PERFORM_REINDEXING_PASS,
+            idempotent = false,
+            returnParameters = {@OperationParam(name = "status")})
+    /**
+     * @deprecated
+     * @see ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
+     */
+    @Deprecated
+    public IBaseResource performReindexingPass() {
+        Integer count = getResourceReindexingSvc().runReindexingPass();
 
-	@Description("Forces a single pass of the resource reindexing processor")
-	@Operation(name = PERFORM_REINDEXING_PASS, idempotent = false, returnParameters = {
-		@OperationParam(name = "status")
-	})
-	/**
-	 * @deprecated
-	 * @see ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
-	 */
-	@Deprecated
-	public IBaseResource performReindexingPass() {
-		Integer count = getResourceReindexingSvc().runReindexingPass();
+        IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 
-		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
+        IPrimitiveType<?> string;
+        if (count == null) {
+            string = ParametersUtil.createString(getContext(), "Index pass already proceeding");
+        } else {
+            string = ParametersUtil.createString(getContext(), "Indexed " + count + " resources");
+        }
+        ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
 
-		IPrimitiveType<?> string;
-		if (count == null) {
-			string = ParametersUtil.createString(getContext(), "Index pass already proceeding");
-		} else {
-			string = ParametersUtil.createString(getContext(), "Indexed " + count + " resources");
-		}
-		ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
+        return retVal;
+    }
 
-		return retVal;
-	}
+    @Operation(name = JpaConstants.OPERATION_GET_RESOURCE_COUNTS, idempotent = true)
+    @Description(
+            shortDefinition =
+                    "Provides the number of resources currently stored on the server, broken down"
+                            + " by resource type")
+    public IBaseParameters getResourceCounts() {
+        IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 
-	@Operation(name = JpaConstants.OPERATION_GET_RESOURCE_COUNTS, idempotent = true)
-	@Description(shortDefinition = "Provides the number of resources currently stored on the server, broken down by resource type")
-	public IBaseParameters getResourceCounts() {
-		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
+        Map<String, Long> counts = getDao().getResourceCountsFromCache();
+        counts = defaultIfNull(counts, Collections.emptyMap());
+        counts = new TreeMap<>(counts);
+        for (Map.Entry<String, Long> nextEntry : counts.entrySet()) {
+            ParametersUtil.addParameterToParametersInteger(
+                    getContext(), retVal, nextEntry.getKey(), nextEntry.getValue().intValue());
+        }
 
-		Map<String, Long> counts = getDao().getResourceCountsFromCache();
-		counts = defaultIfNull(counts, Collections.emptyMap());
-		counts = new TreeMap<>(counts);
-		for (Map.Entry<String, Long> nextEntry : counts.entrySet()) {
-			ParametersUtil.addParameterToParametersInteger(getContext(), retVal, nextEntry.getKey(), nextEntry.getValue().intValue());
-		}
+        return retVal;
+    }
 
-		return retVal;
-	}
+    @Operation(
+            name = ProviderConstants.OPERATION_META,
+            idempotent = true,
+            returnParameters = {@OperationParam(name = "return", typeName = "Meta")})
+    public IBaseParameters meta(RequestDetails theRequestDetails) {
+        IBaseParameters retVal = ParametersUtil.newInstance(getContext());
+        ParametersUtil.addParameterToParameters(
+                getContext(), retVal, "return", getDao().metaGetOperation(theRequestDetails));
+        return retVal;
+    }
 
-	@Operation(name = ProviderConstants.OPERATION_META, idempotent = true, returnParameters = {
-		@OperationParam(name = "return", typeName = "Meta")
-	})
-	public IBaseParameters meta(RequestDetails theRequestDetails) {
-		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-		ParametersUtil.addParameterToParameters(getContext(), retVal, "return", getDao().metaGetOperation(theRequestDetails));
-		return retVal;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Transaction
-	public IBaseBundle transaction(RequestDetails theRequestDetails, @TransactionParam IBaseBundle theResources) {
-		startRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
-		try {
-			IFhirSystemDao<T, MT> dao = getDao();
-			return (IBaseBundle) dao.transaction(theRequestDetails, (T) theResources);
-		} finally {
-			endRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
-		}
-	}
-
-
+    @SuppressWarnings("unchecked")
+    @Transaction
+    public IBaseBundle transaction(
+            RequestDetails theRequestDetails, @TransactionParam IBaseBundle theResources) {
+        startRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
+        try {
+            IFhirSystemDao<T, MT> dao = getDao();
+            return (IBaseBundle) dao.transaction(theRequestDetails, (T) theResources);
+        } finally {
+            endRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
+        }
+    }
 }

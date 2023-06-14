@@ -21,31 +21,28 @@ package ca.uhn.fhir.jpa.batch.models;
 
 public class Batch2JobStartResponse {
 
-	/**
-	 * The job instance id
-	 */
-	private String myInstanceId;
+    /** The job instance id */
+    private String myInstanceId;
 
-	/**
-	 * True if an existing job is being used instead
-	 * (to prevent multiples of the exact same job being
-	 * requested).
-	 */
-	private boolean myUsesCachedResult;
+    /**
+     * True if an existing job is being used instead (to prevent multiples of the exact same job
+     * being requested).
+     */
+    private boolean myUsesCachedResult;
 
-	public String getInstanceId() {
-		return myInstanceId;
-	}
+    public String getInstanceId() {
+        return myInstanceId;
+    }
 
-	public void setInstanceId(String theInstanceId) {
-		myInstanceId = theInstanceId;
-	}
+    public void setInstanceId(String theInstanceId) {
+        myInstanceId = theInstanceId;
+    }
 
-	public boolean isUsesCachedResult() {
-		return myUsesCachedResult;
-	}
+    public boolean isUsesCachedResult() {
+        return myUsesCachedResult;
+    }
 
-	public void setUsesCachedResult(boolean theUseCachedResult) {
-		myUsesCachedResult = theUseCachedResult;
-	}
+    public void setUsesCachedResult(boolean theUseCachedResult) {
+        myUsesCachedResult = theUseCachedResult;
+    }
 }

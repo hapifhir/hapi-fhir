@@ -22,68 +22,69 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
+import java.util.ArrayList;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 
-import java.util.ArrayList;
-import java.util.List;
+public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor
+        implements ISearchParamExtractor {
 
-public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISearchParamExtractor {
+    public SearchParamExtractorDstu2() {}
 
-	public SearchParamExtractorDstu2() {
-	}
+    /** Constructor for unit tests */
+    SearchParamExtractorDstu2(
+            StorageSettings theStorageSettings,
+            PartitionSettings thePartitionSettings,
+            FhirContext theCtx,
+            ISearchParamRegistry theSearchParamRegistry) {
+        super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
+        start();
+    }
 
-	/**
-	 * Constructor for unit tests
-	 */
-	SearchParamExtractorDstu2(StorageSettings theStorageSettings, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
-		super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
-		start();
-	}
+    @Override
+    public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
+        return () -> {
+            String path = theSinglePath;
 
-	@Override
-	public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
-		return () -> {
-			String path = theSinglePath;
+            String needContactPointSystem = null;
+            if (path.endsWith("(system=phone)")) {
+                path = path.substring(0, path.length() - "(system=phone)".length());
+                needContactPointSystem = "phone";
+            }
+            if (path.endsWith("(system=email)")) {
+                path = path.substring(0, path.length() - "(system=email)".length());
+                needContactPointSystem = "email";
+            }
 
-			String needContactPointSystem = null;
-			if (path.endsWith("(system=phone)")) {
-				path = path.substring(0, path.length() - "(system=phone)".length());
-				needContactPointSystem = "phone";
-			}
-			if (path.endsWith("(system=email)")) {
-				path = path.substring(0, path.length() - "(system=email)".length());
-				needContactPointSystem = "email";
-			}
+            List<IBase> values = new ArrayList<>();
+            FhirTerser t = getContext().newTerser();
+            List<IBase> allValues = t.getValues(theResource, path);
+            for (IBase next : allValues) {
+                if (next instanceof IBaseExtension) {
+                    IBaseDatatype value = ((IBaseExtension) next).getValue();
+                    if (value != null) {
+                        values.add(value);
+                    }
+                } else {
 
-			List<IBase> values = new ArrayList<>();
-			FhirTerser t = getContext().newTerser();
-			List<IBase> allValues = t.getValues(theResource, path);
-			for (IBase next : allValues) {
-				if (next instanceof IBaseExtension) {
-					IBaseDatatype value = ((IBaseExtension) next).getValue();
-					if (value != null) {
-						values.add(value);
-					}
-				} else {
+                    if (needContactPointSystem != null) {
+                        if (next instanceof ContactPointDt) {
+                            if (!needContactPointSystem.equals(
+                                    ((ContactPointDt) next).getSystem())) {
+                                continue;
+                            }
+                        }
+                    }
 
-					if (needContactPointSystem != null) {
-						if (next instanceof ContactPointDt) {
-							if (!needContactPointSystem.equals(((ContactPointDt) next).getSystem())) {
-								continue;
-							}
-						}
-					}
-
-					values.add(next);
-				}
-			}
-			return values;
-		};
-	}
-
+                    values.add(next);
+                }
+            }
+            return values;
+        };
+    }
 }

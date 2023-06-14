@@ -30,30 +30,32 @@ import org.springframework.core.annotation.Order;
 
 public class SearchParamSubmitInterceptorLoader {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamSubmitInterceptorLoader.class);
+    private static final Logger ourLog =
+            LoggerFactory.getLogger(SearchParamSubmitInterceptorLoader.class);
 
-	private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
+    private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 
-	private IInterceptorService myInterceptorRegistry;
+    private IInterceptorService myInterceptorRegistry;
 
-	@EventListener(classes = {ContextRefreshedEvent.class})
-	@Order(IHapiBootOrder.REGISTER_INTERCEPTORS)
-	public void start() {
-		ourLog.info("Registering SearchParamValidatingInterceptor interceptor");
-		myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
-	}
+    @EventListener(classes = {ContextRefreshedEvent.class})
+    @Order(IHapiBootOrder.REGISTER_INTERCEPTORS)
+    public void start() {
+        ourLog.info("Registering SearchParamValidatingInterceptor interceptor");
+        myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
+    }
 
-	@Autowired
-	public void setSearchParamValidatingInterceptor(SearchParamValidatingInterceptor theSearchParamValidatingInterceptor) {
-		mySearchParamValidatingInterceptor = theSearchParamValidatingInterceptor;
-	}
+    @Autowired
+    public void setSearchParamValidatingInterceptor(
+            SearchParamValidatingInterceptor theSearchParamValidatingInterceptor) {
+        mySearchParamValidatingInterceptor = theSearchParamValidatingInterceptor;
+    }
 
-	@Autowired
-	public void setInterceptorRegistry(IInterceptorService theInterceptorRegistry) {
-		myInterceptorRegistry = theInterceptorRegistry;
-	}
+    @Autowired
+    public void setInterceptorRegistry(IInterceptorService theInterceptorRegistry) {
+        myInterceptorRegistry = theInterceptorRegistry;
+    }
 
-	protected SearchParamValidatingInterceptor getSearchParamValidatingInterceptor() {
-		return mySearchParamValidatingInterceptor;
-	}
+    protected SearchParamValidatingInterceptor getSearchParamValidatingInterceptor() {
+        return mySearchParamValidatingInterceptor;
+    }
 }

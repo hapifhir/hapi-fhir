@@ -19,23 +19,21 @@
  */
 package ca.uhn.fhir.narrative2;
 
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import java.io.IOException;
-import java.util.Set;
-
 public interface INarrativeTemplate {
-	String getContextPath();
+    String getContextPath();
 
-	Set<String> getAppliesToProfiles();
+    Set<String> getAppliesToProfiles();
 
-	Set<String> getAppliesToResourceTypes();
+    Set<String> getAppliesToResourceTypes();
 
-	Set<Class<? extends IBase>> getAppliesToClasses();
+    Set<Class<? extends IBase>> getAppliesToClasses();
 
-	TemplateTypeEnum getTemplateType();
+    TemplateTypeEnum getTemplateType();
 
-	String getTemplateName();
+    String getTemplateName();
 
-	String getTemplateText();
+    String getTemplateText();
 }

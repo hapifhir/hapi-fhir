@@ -19,142 +19,142 @@
  */
 package ca.uhn.fhir.parser.path;
 
-import org.apache.commons.lang3.Validate;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import org.apache.commons.lang3.Validate;
 
 public class EncodeContextPath {
-	private final List<EncodeContextPathElement> myPath;
-	private final ArrayList<EncodeContextPathElement> myResourcePath = new ArrayList<>(10);
+    private final List<EncodeContextPathElement> myPath;
+    private final ArrayList<EncodeContextPathElement> myResourcePath = new ArrayList<>(10);
 
-	public EncodeContextPath() {
-		this(new ArrayList<>(10));
-	}
+    public EncodeContextPath() {
+        this(new ArrayList<>(10));
+    }
 
-	public EncodeContextPath(String thePath) {
-		this();
+    public EncodeContextPath(String thePath) {
+        this();
 
-		StringTokenizer tok = new StringTokenizer(thePath, ".");
-		boolean first = true;
-		while (tok.hasMoreTokens()) {
-			String next = tok.nextToken();
-			if (first && next.equals("*")) {
-				getPath().add(new EncodeContextPathElement("*", true));
-			} else if (isNotBlank(next)) {
-				getPath().add(new EncodeContextPathElement(next, Character.isUpperCase(next.charAt(0))));
-			}
-			first = false;
-		}
-	}
+        StringTokenizer tok = new StringTokenizer(thePath, ".");
+        boolean first = true;
+        while (tok.hasMoreTokens()) {
+            String next = tok.nextToken();
+            if (first && next.equals("*")) {
+                getPath().add(new EncodeContextPathElement("*", true));
+            } else if (isNotBlank(next)) {
+                getPath()
+                        .add(
+                                new EncodeContextPathElement(
+                                        next, Character.isUpperCase(next.charAt(0))));
+            }
+            first = false;
+        }
+    }
 
-	public EncodeContextPath(List<EncodeContextPathElement> thePath) {
-		myPath = thePath;
-	}
+    public EncodeContextPath(List<EncodeContextPathElement> thePath) {
+        myPath = thePath;
+    }
 
-	@Override
-	public String toString() {
-		return myPath.stream().map(t -> t.toString()).collect(Collectors.joining("."));
-	}
+    @Override
+    public String toString() {
+        return myPath.stream().map(t -> t.toString()).collect(Collectors.joining("."));
+    }
 
-	public List<EncodeContextPathElement> getPath() {
-		return myPath;
-	}
+    public List<EncodeContextPathElement> getPath() {
+        return myPath;
+    }
 
-	public EncodeContextPath getCurrentResourcePath() {
-		EncodeContextPath retVal = null;
-		for (int i = myPath.size() - 1; i >= 0; i--) {
-			if (myPath.get(i).isResource()) {
-				retVal = new EncodeContextPath(myPath.subList(i, myPath.size()));
-				break;
-			}
-		}
-		Validate.isTrue(retVal != null);
-		return retVal;
-	}
+    public EncodeContextPath getCurrentResourcePath() {
+        EncodeContextPath retVal = null;
+        for (int i = myPath.size() - 1; i >= 0; i--) {
+            if (myPath.get(i).isResource()) {
+                retVal = new EncodeContextPath(myPath.subList(i, myPath.size()));
+                break;
+            }
+        }
+        Validate.isTrue(retVal != null);
+        return retVal;
+    }
 
-	/**
-	 * Add an element at the end of the path
-	 */
-	public void pushPath(String thePathElement, boolean theResource) {
-		assert isNotBlank(thePathElement);
-		assert !thePathElement.contains(".");
-		assert theResource ^ Character.isLowerCase(thePathElement.charAt(0));
+    /** Add an element at the end of the path */
+    public void pushPath(String thePathElement, boolean theResource) {
+        assert isNotBlank(thePathElement);
+        assert !thePathElement.contains(".");
+        assert theResource ^ Character.isLowerCase(thePathElement.charAt(0));
 
-		EncodeContextPathElement element = new EncodeContextPathElement(thePathElement, theResource);
-		getPath().add(element);
-		if (theResource) {
-			myResourcePath.add(element);
-		}
-	}
+        EncodeContextPathElement element =
+                new EncodeContextPathElement(thePathElement, theResource);
+        getPath().add(element);
+        if (theResource) {
+            myResourcePath.add(element);
+        }
+    }
 
-	/**
-	 * Remove the element at the end of the path
-	 */
-	public void popPath() {
-		EncodeContextPathElement removed = getPath().remove(getPath().size() - 1);
-		if (removed.isResource()) {
-			myResourcePath.remove(myResourcePath.size() - 1);
-		}
-	}
+    /** Remove the element at the end of the path */
+    public void popPath() {
+        EncodeContextPathElement removed = getPath().remove(getPath().size() - 1);
+        if (removed.isResource()) {
+            myResourcePath.remove(myResourcePath.size() - 1);
+        }
+    }
 
-	public ArrayList<EncodeContextPathElement> getResourcePath() {
-		return myResourcePath;
-	}
+    public ArrayList<EncodeContextPathElement> getResourcePath() {
+        return myResourcePath;
+    }
 
-	public String getLeafElementName() {
-		return getPath().get(getPath().size() - 1).getName();
-	}
+    public String getLeafElementName() {
+        return getPath().get(getPath().size() - 1).getName();
+    }
 
-	public String getLeafResourceName() {
-		return myResourcePath.get(myResourcePath.size() - 1).getName();
-	}
+    public String getLeafResourceName() {
+        return myResourcePath.get(myResourcePath.size() - 1).getName();
+    }
 
-	public String getLeafResourcePathFirstField() {
-		String retVal = null;
-		for (int i = getPath().size() - 1; i >= 0; i--) {
-			if (getPath().get(i).isResource()) {
-				break;
-			} else {
-				retVal = getPath().get(i).getName();
-			}
-		}
-		return retVal;
-	}
+    public String getLeafResourcePathFirstField() {
+        String retVal = null;
+        for (int i = getPath().size() - 1; i >= 0; i--) {
+            if (getPath().get(i).isResource()) {
+                break;
+            } else {
+                retVal = getPath().get(i).getName();
+            }
+        }
+        return retVal;
+    }
 
-	/**
-	 * Tests and returns whether this path starts with {@literal theCurrentResourcePath}
-	 *
-	 * @param theCurrentResourcePath The path to test
-	 * @param theAllowSymmmetrical   If <code>true</code>, this method will return true if {@literal theCurrentResourcePath} starts with this path as well as testing whether this path starts with {@literal theCurrentResourcePath}
-	 */
-	public boolean startsWith(EncodeContextPath theCurrentResourcePath, boolean theAllowSymmmetrical) {
-		for (int i = 0; i < getPath().size(); i++) {
-			if (theCurrentResourcePath.getPath().size() == i) {
-				return true;
-			}
-			EncodeContextPathElement expected = getPath().get(i);
-			EncodeContextPathElement actual = theCurrentResourcePath.getPath().get(i);
-			if (!expected.matches(actual)) {
-				return false;
-			}
-		}
+    /**
+     * Tests and returns whether this path starts with {@literal theCurrentResourcePath}
+     *
+     * @param theCurrentResourcePath The path to test
+     * @param theAllowSymmmetrical If <code>true</code>, this method will return true if {@literal
+     *     theCurrentResourcePath} starts with this path as well as testing whether this path starts
+     *     with {@literal theCurrentResourcePath}
+     */
+    public boolean startsWith(
+            EncodeContextPath theCurrentResourcePath, boolean theAllowSymmmetrical) {
+        for (int i = 0; i < getPath().size(); i++) {
+            if (theCurrentResourcePath.getPath().size() == i) {
+                return true;
+            }
+            EncodeContextPathElement expected = getPath().get(i);
+            EncodeContextPathElement actual = theCurrentResourcePath.getPath().get(i);
+            if (!expected.matches(actual)) {
+                return false;
+            }
+        }
 
-		if (theAllowSymmmetrical) {
-			return true;
-		}
+        if (theAllowSymmmetrical) {
+            return true;
+        }
 
-		return getPath().size() == theCurrentResourcePath.getPath().size();
-	}
+        return getPath().size() == theCurrentResourcePath.getPath().size();
+    }
 
-	public boolean equalsPath(String thePath) {
-		EncodeContextPath parsedPath = new EncodeContextPath(thePath);
-		return getPath().equals(parsedPath.getPath());
-	}
-
-
+    public boolean equalsPath(String thePath) {
+        EncodeContextPath parsedPath = new EncodeContextPath(thePath);
+        return getPath().equals(parsedPath.getPath());
+    }
 }

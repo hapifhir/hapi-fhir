@@ -31,21 +31,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
-	private static final Logger ourLog = LoggerFactory.getLogger(InMemorySubscriptionMatcher.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(InMemorySubscriptionMatcher.class);
 
-	@Autowired
-	private FhirContext myContext;
-	@Autowired
-	private SearchParamMatcher mySearchParamMatcher;
+    @Autowired private FhirContext myContext;
+    @Autowired private SearchParamMatcher mySearchParamMatcher;
 
-	@Override
-	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
-		try {
-			return mySearchParamMatcher.match(theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext), null);
-		} catch (Exception e) {
-			ourLog.error("Failure in in-memory matcher", e);
-			throw new InternalErrorException(Msg.code(1) + "Failure performing memory-match for resource ID[" + theMsg.getPayloadId(myContext) + "] for subscription ID[" + theSubscription.getIdElementString() + "]: " + e.getMessage(), e);
-		}
-	}
-
+    @Override
+    public InMemoryMatchResult match(
+            CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
+        try {
+            return mySearchParamMatcher.match(
+                    theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext), null);
+        } catch (Exception e) {
+            ourLog.error("Failure in in-memory matcher", e);
+            throw new InternalErrorException(
+                    Msg.code(1)
+                            + "Failure performing memory-match for resource ID["
+                            + theMsg.getPayloadId(myContext)
+                            + "] for subscription ID["
+                            + theSubscription.getIdElementString()
+                            + "]: "
+                            + e.getMessage(),
+                    e);
+        }
+    }
 }

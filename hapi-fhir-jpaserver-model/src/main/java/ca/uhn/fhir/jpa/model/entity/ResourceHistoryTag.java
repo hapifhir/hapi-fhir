@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
@@ -32,75 +33,82 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.io.Serializable;
 
 @Embeddable
 @Entity
-@Table(name = "HFJ_HISTORY_TAG", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_RESHISTTAG_TAGID", columnNames = {"RES_VER_PID", "TAG_ID"}),
-}, indexes =  {
-	@Index(name = "IDX_RESHISTTAG_RESID", columnList="RES_ID")
-})
+@Table(
+        name = "HFJ_HISTORY_TAG",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "IDX_RESHISTTAG_TAGID",
+                    columnNames = {"RES_VER_PID", "TAG_ID"}),
+        },
+        indexes = {@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID")})
 public class ResourceHistoryTag extends BaseTag implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@SequenceGenerator(name = "SEQ_HISTORYTAG_ID", sequenceName = "SEQ_HISTORYTAG_ID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_HISTORYTAG_ID")
-	@Id
-	@Column(name = "PID")
-	private Long myId;
+    @SequenceGenerator(name = "SEQ_HISTORYTAG_ID", sequenceName = "SEQ_HISTORYTAG_ID")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_HISTORYTAG_ID")
+    @Id
+    @Column(name = "PID")
+    private Long myId;
 
-	@ManyToOne()
-	@JoinColumn(name = "RES_VER_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_HISTORYTAG_HISTORY"))
-	private ResourceHistoryTable myResourceHistory;
+    @ManyToOne()
+    @JoinColumn(
+            name = "RES_VER_PID",
+            referencedColumnName = "PID",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "FK_HISTORYTAG_HISTORY"))
+    private ResourceHistoryTable myResourceHistory;
 
-	@Column(name = "RES_VER_PID", insertable = false, updatable = false, nullable = false)
-	private Long myResourceHistoryPid;
+    @Column(name = "RES_VER_PID", insertable = false, updatable = false, nullable = false)
+    private Long myResourceHistoryPid;
 
-	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
-	private String myResourceType;
+    @Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
+    private String myResourceType;
 
-	@Column(name = "RES_ID", nullable = false)
-	private Long myResourceId;
+    @Column(name = "RES_ID", nullable = false)
+    private Long myResourceId;
 
-	public ResourceHistoryTag() {
-	}
+    public ResourceHistoryTag() {}
 
+    public ResourceHistoryTag(
+            ResourceHistoryTable theResourceHistoryTable,
+            TagDefinition theTag,
+            PartitionablePartitionId theRequestPartitionId) {
+        setTag(theTag);
+        setResource(theResourceHistoryTable);
+        setResourceId(theResourceHistoryTable.getResourceId());
+        setResourceType(theResourceHistoryTable.getResourceType());
+        setPartitionId(theRequestPartitionId);
+    }
 
-	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
-		setTag(theTag);
-		setResource(theResourceHistoryTable);
-		setResourceId(theResourceHistoryTable.getResourceId());
-		setResourceType(theResourceHistoryTable.getResourceType());
-		setPartitionId(theRequestPartitionId);
-	}
+    public String getResourceType() {
+        return myResourceType;
+    }
 
-	public String getResourceType() {
-		return myResourceType;
-	}
+    public void setResourceType(String theResourceType) {
+        myResourceType = theResourceType;
+    }
 
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
-	}
+    public Long getResourceId() {
+        return myResourceId;
+    }
 
-	public Long getResourceId() {
-		return myResourceId;
-	}
+    public void setResourceId(Long theResourceId) {
+        myResourceId = theResourceId;
+    }
 
-	public void setResourceId(Long theResourceId) {
-		myResourceId = theResourceId;
-	}
+    public ResourceHistoryTable getResourceHistory() {
+        return myResourceHistory;
+    }
 
-	public ResourceHistoryTable getResourceHistory() {
-		return myResourceHistory;
-	}
+    public void setResource(ResourceHistoryTable theResourceHistory) {
+        myResourceHistory = theResourceHistory;
+    }
 
-	public void setResource(ResourceHistoryTable theResourceHistory) {
-		myResourceHistory = theResourceHistory;
-	}
-
-	public Long getId() {
-		return myId;
-	}
+    public Long getId() {
+        return myId;
+    }
 }

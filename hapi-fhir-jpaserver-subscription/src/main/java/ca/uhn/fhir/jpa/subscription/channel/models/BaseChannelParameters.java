@@ -23,26 +23,24 @@ import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 
 public abstract class BaseChannelParameters {
 
-	private final String myChannelName;
+    private final String myChannelName;
 
-	private ChannelRetryConfiguration myRetryConfiguration;
+    private ChannelRetryConfiguration myRetryConfiguration;
 
-	/**
-	 * Constructor
-	 */
-	public BaseChannelParameters(String theChannelName) {
-		myChannelName = theChannelName;
-	}
+    /** Constructor */
+    public BaseChannelParameters(String theChannelName) {
+        myChannelName = theChannelName;
+    }
 
-	public String getChannelName() {
-		return myChannelName;
-	}
+    public String getChannelName() {
+        return myChannelName;
+    }
 
-	public void setRetryConfiguration(ChannelRetryConfiguration theConfiguration) {
-		myRetryConfiguration = theConfiguration;
-	}
+    public void setRetryConfiguration(ChannelRetryConfiguration theConfiguration) {
+        myRetryConfiguration = theConfiguration;
+    }
 
-	public ChannelRetryConfiguration getRetryConfiguration() {
-		return myRetryConfiguration;
-	}
+    public ChannelRetryConfiguration getRetryConfiguration() {
+        return myRetryConfiguration;
+    }
 }

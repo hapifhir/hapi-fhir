@@ -20,15 +20,14 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
+public interface IPartitionDao
+        extends JpaRepository<PartitionEntity, Integer>, IHapiFhirJpaRepository {
 
-public interface IPartitionDao extends JpaRepository<PartitionEntity, Integer>, IHapiFhirJpaRepository {
-
-	@Query("SELECT p FROM PartitionEntity p WHERE p.myName = :name")
-	Optional<PartitionEntity> findForName(@Param("name") String theName);
-
+    @Query("SELECT p FROM PartitionEntity p WHERE p.myName = :name")
+    Optional<PartitionEntity> findForName(@Param("name") String theName);
 }

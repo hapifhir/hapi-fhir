@@ -19,47 +19,48 @@
  */
 package ca.uhn.fhir.batch2.model;
 
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 public class FetchJobInstancesRequest {
-	
-	private final String myJobDefinition;
-	
-	private final String myParameters;
 
-	private final Set<StatusEnum> myStatuses = new HashSet<>();
+    private final String myJobDefinition;
 
-	public FetchJobInstancesRequest(@Nonnull String theJobDefinition,
-											  @Nonnull String theParameters) {
-		myJobDefinition = theJobDefinition;
-		myParameters = theParameters;
-	}
+    private final String myParameters;
 
-	public FetchJobInstancesRequest(@Nonnull String theJobDefinition,
-											  @Nonnull String theParameters,
-											  StatusEnum... theStatuses) {
-		myJobDefinition = theJobDefinition;
-		myParameters = theParameters;
-		for (StatusEnum status : theStatuses) {
-			addStatus(status);
-		}
-	}
+    private final Set<StatusEnum> myStatuses = new HashSet<>();
 
-	public String getJobDefinition() {
-		return myJobDefinition;
-	}
+    public FetchJobInstancesRequest(
+            @Nonnull String theJobDefinition, @Nonnull String theParameters) {
+        myJobDefinition = theJobDefinition;
+        myParameters = theParameters;
+    }
 
-	public String getParameters() {
-		return myParameters;
-	}
+    public FetchJobInstancesRequest(
+            @Nonnull String theJobDefinition,
+            @Nonnull String theParameters,
+            StatusEnum... theStatuses) {
+        myJobDefinition = theJobDefinition;
+        myParameters = theParameters;
+        for (StatusEnum status : theStatuses) {
+            addStatus(status);
+        }
+    }
 
-	private void addStatus(StatusEnum theStatusEnum) {
-		myStatuses.add(theStatusEnum);
-	}
+    public String getJobDefinition() {
+        return myJobDefinition;
+    }
 
-	public Set<StatusEnum> getStatuses() {
-		return myStatuses;
-	}
+    public String getParameters() {
+        return myParameters;
+    }
+
+    private void addStatus(StatusEnum theStatusEnum) {
+        myStatuses.add(theStatusEnum);
+    }
+
+    public Set<StatusEnum> getStatuses() {
+        return myStatuses;
+    }
 }

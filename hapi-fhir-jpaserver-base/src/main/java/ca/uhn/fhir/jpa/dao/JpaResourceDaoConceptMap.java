@@ -29,42 +29,59 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import java.util.Date;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
+public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResourceDao<T>
+        implements IFhirResourceDaoConceptMap<T> {
+    @Autowired private ITermConceptMappingSvc myTermConceptMappingSvc;
+    @Autowired private IValidationSupport myValidationSupport;
+    @Autowired private VersionCanonicalizer myVersionCanonicalizer;
 
-public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResourceDao<T> implements IFhirResourceDaoConceptMap<T> {
-	@Autowired
-	private ITermConceptMappingSvc myTermConceptMappingSvc;
-	@Autowired
-	private IValidationSupport myValidationSupport;
-	@Autowired
-	private VersionCanonicalizer myVersionCanonicalizer;
+    @Override
+    public TranslateConceptResults translate(
+            TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
+        IValidationSupport.TranslateCodeRequest translateCodeRequest =
+                theTranslationRequest.asTranslateCodeRequest();
+        return myValidationSupport.translateConcept(translateCodeRequest);
+    }
 
-	@Override
-	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
-		IValidationSupport.TranslateCodeRequest translateCodeRequest = theTranslationRequest.asTranslateCodeRequest();
-		return myValidationSupport.translateConcept(translateCodeRequest);
-	}
+    @Override
+    public ResourceTable updateEntity(
+            RequestDetails theRequestDetails,
+            IBaseResource theResource,
+            IBasePersistedResource theEntity,
+            Date theDeletedTimestampOrNull,
+            boolean thePerformIndexing,
+            boolean theUpdateVersion,
+            TransactionDetails theTransactionDetails,
+            boolean theForceUpdate,
+            boolean theCreateNewHistoryEntry) {
+        ResourceTable retVal =
+                super.updateEntity(
+                        theRequestDetails,
+                        theResource,
+                        theEntity,
+                        theDeletedTimestampOrNull,
+                        thePerformIndexing,
+                        theUpdateVersion,
+                        theTransactionDetails,
+                        theForceUpdate,
+                        theCreateNewHistoryEntry);
 
-	@Override
-	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+        boolean entityWasSaved = !retVal.isUnchangedInCurrentOperation();
+        boolean shouldProcessUpdate = entityWasSaved && thePerformIndexing;
+        if (shouldProcessUpdate) {
+            if (retVal.getDeleted() == null) {
+                ConceptMap conceptMap = myVersionCanonicalizer.conceptMapToCanonical(theResource);
+                myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal, conceptMap);
+            } else {
+                myTermConceptMappingSvc.deleteConceptMapAndChildren(retVal);
+            }
+        }
 
-		boolean entityWasSaved = !retVal.isUnchangedInCurrentOperation();
-		boolean shouldProcessUpdate = entityWasSaved && thePerformIndexing;
-		if (shouldProcessUpdate) {
-			if (retVal.getDeleted() == null) {
-				ConceptMap conceptMap = myVersionCanonicalizer.conceptMapToCanonical(theResource);
-				myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal, conceptMap);
-			} else {
-				myTermConceptMappingSvc.deleteConceptMapAndChildren(retVal);
-			}
-		}
-
-		return retVal;
-	}
+        return retVal;
+    }
 }

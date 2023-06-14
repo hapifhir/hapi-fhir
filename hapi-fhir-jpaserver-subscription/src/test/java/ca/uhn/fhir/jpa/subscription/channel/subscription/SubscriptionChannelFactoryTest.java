@@ -1,5 +1,13 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,63 +24,50 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.GenericMessage;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionChannelFactoryTest {
 
-	private SubscriptionChannelFactory mySvc;
+    private SubscriptionChannelFactory mySvc;
 
-	@Mock
-	private ChannelInterceptor myInterceptor;
-	@Mock
-	private IChannelNamer myChannelNamer;
-	@Captor
-	private ArgumentCaptor<Exception> myExceptionCaptor;
+    @Mock private ChannelInterceptor myInterceptor;
+    @Mock private IChannelNamer myChannelNamer;
+    @Captor private ArgumentCaptor<Exception> myExceptionCaptor;
 
-	@BeforeEach
-	public void before() {
-		when(myChannelNamer.getChannelName(any(), any())).thenReturn("CHANNEL_NAME");
-		mySvc = new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(myChannelNamer));
-	}
+    @BeforeEach
+    public void before() {
+        when(myChannelNamer.getChannelName(any(), any())).thenReturn("CHANNEL_NAME");
+        mySvc = new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(myChannelNamer));
+    }
 
-	/**
-	 * Make sure the channel doesn't silently swallow exceptions
-	 */
-	@Test
-	public void testInterceptorsOnChannelWrapperArePropagated() {
+    /** Make sure the channel doesn't silently swallow exceptions */
+    @Test
+    public void testInterceptorsOnChannelWrapperArePropagated() {
 
-		IChannelReceiver channel = mySvc.newDeliveryReceivingChannel("CHANNEL_NAME", null);
-		channel.subscribe(new NpeThrowingHandler());
-		channel.addInterceptor(myInterceptor);
+        IChannelReceiver channel = mySvc.newDeliveryReceivingChannel("CHANNEL_NAME", null);
+        channel.subscribe(new NpeThrowingHandler());
+        channel.addInterceptor(myInterceptor);
 
-		Message<?> input = new GenericMessage<>("TEST");
+        Message<?> input = new GenericMessage<>("TEST");
 
-		when(myInterceptor.preSend(any(),any())).thenAnswer(t->t.getArgument(0, Message.class));
+        when(myInterceptor.preSend(any(), any())).thenAnswer(t -> t.getArgument(0, Message.class));
 
-		try {
-			channel.send(input);
-			fail();
-		} catch (MessageDeliveryException e) {
-			assertTrue(e.getCause() instanceof NullPointerException);
-		}
+        try {
+            channel.send(input);
+            fail();
+        } catch (MessageDeliveryException e) {
+            assertTrue(e.getCause() instanceof NullPointerException);
+        }
 
-		verify(myInterceptor, times(1)).afterSendCompletion(any(), any(), anyBoolean(), myExceptionCaptor.capture());
+        verify(myInterceptor, times(1))
+                .afterSendCompletion(any(), any(), anyBoolean(), myExceptionCaptor.capture());
 
-		assertTrue(myExceptionCaptor.getValue() instanceof NullPointerException);
-	}
+        assertTrue(myExceptionCaptor.getValue() instanceof NullPointerException);
+    }
 
-
-	private class NpeThrowingHandler implements MessageHandler {
-		@Override
-		public void handleMessage(Message<?> message) throws MessagingException {
-			throw new NullPointerException("THIS IS THE MESSAGE");
-		}
-	}
+    private class NpeThrowingHandler implements MessageHandler {
+        @Override
+        public void handleMessage(Message<?> message) throws MessagingException {
+            throw new NullPointerException("THIS IS THE MESSAGE");
+        }
+    }
 }

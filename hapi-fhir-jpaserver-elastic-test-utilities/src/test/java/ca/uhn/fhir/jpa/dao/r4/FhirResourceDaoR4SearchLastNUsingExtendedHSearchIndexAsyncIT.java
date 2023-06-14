@@ -7,21 +7,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * Run entire @see {@link FhirResourceDaoR4SearchLastNAsyncIT} test suite this time
- * using Extended HSearch index as search target
+ * Run entire @see {@link FhirResourceDaoR4SearchLastNAsyncIT} test suite this time using Extended
+ * HSearch index as search target
  */
 @ExtendWith(SpringExtension.class)
-public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexAsyncIT extends FhirResourceDaoR4SearchLastNAsyncIT {
+public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexAsyncIT
+        extends FhirResourceDaoR4SearchLastNAsyncIT {
 
-	@BeforeEach
-	public void enableAdvancedHSearchIndexing() {
-		myStorageSettings.setLastNEnabled(true);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
-	}
+    @BeforeEach
+    public void enableAdvancedHSearchIndexing() {
+        myStorageSettings.setLastNEnabled(true);
+        myStorageSettings.setAdvancedHSearchIndexing(true);
+    }
 
-	@AfterEach
-	public void disableAdvancedHSearchIndex() {
-		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
-	}
-
+    @AfterEach
+    public void disableAdvancedHSearchIndex() {
+        myStorageSettings.setAdvancedHSearchIndexing(
+                new JpaStorageSettings().isAdvancedHSearchIndexing());
+    }
 }

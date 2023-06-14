@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
@@ -15,6 +17,8 @@ import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInter
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import java.util.List;
+import java.util.function.Supplier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeType;
@@ -24,122 +28,122 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-import java.util.function.Supplier;
+public abstract class BaseMultitenantResourceProviderR4Test extends BaseResourceProviderR4Test
+        implements ITestDataBuilder {
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
+    public static final int TENANT_A_ID = 1;
+    public static final int TENANT_B_ID = 2;
+    public static final String TENANT_B = "TENANT-B";
+    public static final String TENANT_A = "TENANT-A";
+    @Autowired private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
+    @Autowired private PartitionManagementProvider myPartitionManagementProvider;
 
-public abstract class BaseMultitenantResourceProviderR4Test extends BaseResourceProviderR4Test implements ITestDataBuilder {
+    protected CapturingInterceptor myCapturingInterceptor;
+    protected UrlTenantSelectionInterceptor myTenantClientInterceptor;
+    protected AuthorizationInterceptor myAuthorizationInterceptor;
 
-	public static final int TENANT_A_ID = 1;
-	public static final int TENANT_B_ID = 2;
-	public static final String TENANT_B = "TENANT-B";
-	public static final String TENANT_A = "TENANT-A";
-	@Autowired
-	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
-	@Autowired
-	private PartitionManagementProvider myPartitionManagementProvider;
+    @Override
+    @BeforeEach
+    public void before() throws Exception {
+        super.before();
 
-	protected CapturingInterceptor myCapturingInterceptor;
-	protected UrlTenantSelectionInterceptor myTenantClientInterceptor;
-	protected AuthorizationInterceptor myAuthorizationInterceptor;
+        myInterceptorRegistry.registerInterceptor(myRequestTenantPartitionInterceptor);
+        myPartitionSettings.setPartitioningEnabled(true);
 
-	@Override
-	@BeforeEach
-	public void before() throws Exception {
-		super.before();
+        myServer.getRestfulServer().registerProvider(myPartitionManagementProvider);
+        myServer.getRestfulServer()
+                .setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 
-		myInterceptorRegistry.registerInterceptor(myRequestTenantPartitionInterceptor);
-		myPartitionSettings.setPartitioningEnabled(true);
+        myCapturingInterceptor = new CapturingInterceptor();
+        myClient.getInterceptorService().registerInterceptor(myCapturingInterceptor);
 
-		myServer.getRestfulServer().registerProvider(myPartitionManagementProvider);
-		myServer.getRestfulServer().setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
+        myTenantClientInterceptor = new UrlTenantSelectionInterceptor();
+        myClient.getInterceptorService().registerInterceptor(myTenantClientInterceptor);
 
-		myCapturingInterceptor = new CapturingInterceptor();
-		myClient.getInterceptorService().registerInterceptor(myCapturingInterceptor);
+        myClient.getInterceptorService().registerInterceptor(new LoggingInterceptor());
 
-		myTenantClientInterceptor = new UrlTenantSelectionInterceptor();
-		myClient.getInterceptorService().registerInterceptor(myTenantClientInterceptor);
+        createTenants();
+    }
 
-		myClient.getInterceptorService().registerInterceptor(new LoggingInterceptor());
+    @Override
+    @AfterEach
+    public void after() throws Exception {
+        super.after();
 
-		createTenants();
-	}
+        myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
+        myInterceptorRegistry.unregisterInterceptor(myRequestTenantPartitionInterceptor);
+        if (myAuthorizationInterceptor != null) {
+            myServer.getRestfulServer().unregisterInterceptor(myAuthorizationInterceptor);
+        }
+        myServer.getRestfulServer().unregisterProvider(myPartitionManagementProvider);
+        myServer.getRestfulServer().setTenantIdentificationStrategy(null);
 
-	@Override
-	@AfterEach
-	public void after() throws Exception {
-		super.after();
+        myClient.getInterceptorService().unregisterAllInterceptors();
+    }
 
-		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
-		myInterceptorRegistry.unregisterInterceptor(myRequestTenantPartitionInterceptor);
-		if (myAuthorizationInterceptor != null) {
-			myServer.getRestfulServer().unregisterInterceptor(myAuthorizationInterceptor);
-		}
-		myServer.getRestfulServer().unregisterProvider(myPartitionManagementProvider);
-		myServer.getRestfulServer().setTenantIdentificationStrategy(null);
+    @Override
+    protected boolean shouldLogClient() {
+        return true;
+    }
 
-		myClient.getInterceptorService().unregisterAllInterceptors();
-	}
+    private void createTenants() {
+        myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
 
-	@Override
-	protected boolean shouldLogClient() {
-		return true;
-	}
+        myClient.operation()
+                .onServer()
+                .named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+                .withParameter(
+                        Parameters.class,
+                        ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID,
+                        new IntegerType(TENANT_A_ID))
+                .andParameter(
+                        ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME,
+                        new CodeType(TENANT_A))
+                .execute();
 
+        myClient.operation()
+                .onServer()
+                .named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+                .withParameter(
+                        Parameters.class,
+                        ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID,
+                        new IntegerType(TENANT_B_ID))
+                .andParameter(
+                        ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME,
+                        new CodeType(TENANT_B))
+                .execute();
+    }
 
-	private void createTenants() {
-		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
+    public void setupAuthorizationInterceptorWithRules(Supplier<List<IAuthRule>> theRuleSupplier) {
+        if (myAuthorizationInterceptor != null) {
+            myServer.getRestfulServer().unregisterInterceptor(myAuthorizationInterceptor);
+        }
+        myAuthorizationInterceptor =
+                new AuthorizationInterceptor() {
+                    @Override
+                    public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+                        return theRuleSupplier.get();
+                    }
+                }.setDefaultPolicy(PolicyEnum.DENY);
+        myServer.getRestfulServer().registerInterceptor(myAuthorizationInterceptor);
+    }
 
-		myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
-			.withParameter(Parameters.class, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(TENANT_A_ID))
-			.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType(TENANT_A))
-			.execute();
+    protected ICreationArgument withTenant(String theTenantId) {
+        return t -> myTenantClientInterceptor.setTenantId(theTenantId);
+    }
 
-		myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
-			.withParameter(Parameters.class, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(TENANT_B_ID))
-			.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType(TENANT_B))
-			.execute();
-	}
+    @Override
+    public IIdType doCreateResource(IBaseResource theResource) {
+        return myClient.create().resource(theResource).execute().getId();
+    }
 
-	public void setupAuthorizationInterceptorWithRules(Supplier<List<IAuthRule>> theRuleSupplier) {
-		if(myAuthorizationInterceptor != null) {
-			myServer.getRestfulServer().unregisterInterceptor(myAuthorizationInterceptor);
-		}
-		myAuthorizationInterceptor = new AuthorizationInterceptor() {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return theRuleSupplier.get();
-			}
-		}.setDefaultPolicy(PolicyEnum.DENY);
-		myServer.getRestfulServer().registerInterceptor(myAuthorizationInterceptor);
-	}
+    @Override
+    public IIdType doUpdateResource(IBaseResource theResource) {
+        return myClient.update().resource(theResource).execute().getId();
+    }
 
-
-
-	protected ICreationArgument withTenant(String theTenantId) {
-		return t -> myTenantClientInterceptor.setTenantId(theTenantId);
-	}
-
-	@Override
-	public IIdType doCreateResource(IBaseResource theResource) {
-		return myClient.create().resource(theResource).execute().getId();
-	}
-
-	@Override
-	public IIdType doUpdateResource(IBaseResource theResource) {
-		return myClient.update().resource(theResource).execute().getId();
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
+    @Override
+    public FhirContext getFhirContext() {
+        return myFhirContext;
+    }
 }

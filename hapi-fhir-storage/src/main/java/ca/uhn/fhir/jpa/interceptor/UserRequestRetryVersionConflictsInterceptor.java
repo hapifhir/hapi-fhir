@@ -28,49 +28,47 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.apache.commons.lang3.Validate;
 
 /**
- * This interceptor looks for a header on incoming requests called <code>X-Retry-On-Version-Conflict</code> and
- * if present, it will instruct the server to automatically retry JPA server operations that would have
- * otherwise failed with a {@link ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException} (HTTP 409).
- * <p>
- * The format of the header is:<br/>
+ * This interceptor looks for a header on incoming requests called <code>X-Retry-On-Version-Conflict
+ * </code> and if present, it will instruct the server to automatically retry JPA server operations
+ * that would have otherwise failed with a {@link
+ * ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException} (HTTP 409).
+ *
+ * <p>The format of the header is:<br>
  * <code>X-Retry-On-Version-Conflict: retry; max-retries=100</code>
- * </p>
  */
 @Interceptor
 public class UserRequestRetryVersionConflictsInterceptor {
 
-	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_RETRY_ON_VERSION_CONFLICT} */
-	@Deprecated
-	public static final String HEADER_NAME = "X-Retry-On-Version-Conflict";
+    /**
+     * Deprecated and moved to {@link
+     * ca.uhn.fhir.rest.api.Constants#HEADER_RETRY_ON_VERSION_CONFLICT}
+     */
+    @Deprecated public static final String HEADER_NAME = "X-Retry-On-Version-Conflict";
 
-	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_MAX_RETRIES} */
-	@Deprecated
-	public static final String MAX_RETRIES = "max-retries";
+    /** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_MAX_RETRIES} */
+    @Deprecated public static final String MAX_RETRIES = "max-retries";
 
-	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_RETRY} */
-	@Deprecated
-	public static final String RETRY = "retry";
+    /** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_RETRY} */
+    @Deprecated public static final String RETRY = "retry";
 
-	@Hook(value = Pointcut.STORAGE_VERSION_CONFLICT, order = 100)
-	public ResourceVersionConflictResolutionStrategy check(RequestDetails theRequestDetails) {
-		ResourceVersionConflictResolutionStrategy retVal = new ResourceVersionConflictResolutionStrategy();
-		boolean shouldSetRetries = theRequestDetails != null && theRequestDetails.isRetry();
-		if (shouldSetRetries) {
-			retVal.setRetry(true);
-			int maxRetries = Math.min(100, theRequestDetails.getMaxRetries());
-			retVal.setMaxRetries(maxRetries);
-		}
+    @Hook(value = Pointcut.STORAGE_VERSION_CONFLICT, order = 100)
+    public ResourceVersionConflictResolutionStrategy check(RequestDetails theRequestDetails) {
+        ResourceVersionConflictResolutionStrategy retVal =
+                new ResourceVersionConflictResolutionStrategy();
+        boolean shouldSetRetries = theRequestDetails != null && theRequestDetails.isRetry();
+        if (shouldSetRetries) {
+            retVal.setRetry(true);
+            int maxRetries = Math.min(100, theRequestDetails.getMaxRetries());
+            retVal.setMaxRetries(maxRetries);
+        }
 
-		return retVal;
-	}
+        return retVal;
+    }
 
-
-	/**
-	 * Convenience method to add a retry header to a system request
-	 */
-	public static void addRetryHeader(SystemRequestDetails theRequestDetails, int theMaxRetries) {
-		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaxRetries, "Max retries must be > 0");
-		theRequestDetails.setRetry(true);
-		theRequestDetails.setMaxRetries(theMaxRetries);
-	}
+    /** Convenience method to add a retry header to a system request */
+    public static void addRetryHeader(SystemRequestDetails theRequestDetails, int theMaxRetries) {
+        Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaxRetries, "Max retries must be > 0");
+        theRequestDetails.setRetry(true);
+        theRequestDetails.setMaxRetries(theMaxRetries);
+    }
 }

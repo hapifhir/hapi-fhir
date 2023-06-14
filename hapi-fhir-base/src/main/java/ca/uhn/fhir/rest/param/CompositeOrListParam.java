@@ -22,38 +22,36 @@ package ca.uhn.fhir.rest.param;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.util.CoverageIgnore;
 
+public class CompositeOrListParam<A extends IQueryParameterType, B extends IQueryParameterType>
+        extends BaseOrListParam<CompositeOrListParam<?, ?>, CompositeParam<A, B>> {
 
-public class CompositeOrListParam<A extends IQueryParameterType, B extends IQueryParameterType>  extends BaseOrListParam<CompositeOrListParam<?,?>, CompositeParam<A,B>> {
+    private Class<A> myLeftType;
+    private Class<B> myRightType;
 
-	private Class<A> myLeftType;
-	private Class<B> myRightType;
+    public CompositeOrListParam(Class<A> theLeftType, Class<B> theRightType) {
+        super();
+        myLeftType = theLeftType;
+        myRightType = theRightType;
+    }
 
-	public CompositeOrListParam(Class<A> theLeftType, Class<B> theRightType) {
-		super();
-		myLeftType = theLeftType;
-		myRightType = theRightType;
-	}
+    public Class<A> getLeftType() {
+        return myLeftType;
+    }
 
-	public Class<A> getLeftType() {
-		return myLeftType;
-	}
+    public Class<B> getRightType() {
+        return myRightType;
+    }
 
-	public Class<B> getRightType() {
-		return myRightType;
-	}
+    @CoverageIgnore
+    @Override
+    CompositeParam<A, B> newInstance() {
+        return new CompositeParam<A, B>(myLeftType, myRightType);
+    }
 
-	@CoverageIgnore
-	@Override
-	CompositeParam<A,B> newInstance() {
-		return new CompositeParam<A,B>(myLeftType, myRightType);
-	}
-
-	@CoverageIgnore
-	@Override
-	public CompositeOrListParam<A, B> addOr(CompositeParam<A, B> theParameter) {
-		add(theParameter);
-		return this;
-	}
-	
-
+    @CoverageIgnore
+    @Override
+    public CompositeOrListParam<A, B> addOr(CompositeParam<A, B> theParameter) {
+        add(theParameter);
+        return this;
+    }
 }

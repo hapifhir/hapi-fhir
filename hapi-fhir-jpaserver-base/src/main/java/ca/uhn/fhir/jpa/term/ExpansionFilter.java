@@ -19,96 +19,99 @@
  */
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.util.FhirVersionIndependentConcept;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.r4.model.ValueSet;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.r4.model.ValueSet;
+
 class ExpansionFilter {
 
-	public static final ExpansionFilter NO_FILTER = new ExpansionFilter(null, null);
-	private final String myCode;
-	private final String mySystem;
-	private final List<ValueSet.ConceptSetFilterComponent> myFilters;
-	private final Integer myMaxCount;
-	/**
-	 * Constructor
-	 */
-	ExpansionFilter(String theSystem, String theCode) {
-		this(theSystem, theCode, Collections.emptyList(), null);
-	}
+    public static final ExpansionFilter NO_FILTER = new ExpansionFilter(null, null);
+    private final String myCode;
+    private final String mySystem;
+    private final List<ValueSet.ConceptSetFilterComponent> myFilters;
+    private final Integer myMaxCount;
 
-	/**
-	 * Constructor
-	 */
-	ExpansionFilter(ExpansionFilter theExpansionFilter, List<ValueSet.ConceptSetFilterComponent> theFilters, Integer theMaxCount) {
-		this(theExpansionFilter.getSystem(), theExpansionFilter.getCode(), theFilters, theMaxCount);
-	}
+    /** Constructor */
+    ExpansionFilter(String theSystem, String theCode) {
+        this(theSystem, theCode, Collections.emptyList(), null);
+    }
 
-	/**
-	 * Constructor
-	 */
-	ExpansionFilter(@Nullable String theSystem, @Nullable String theCode, @Nonnull List<ValueSet.ConceptSetFilterComponent> theFilters, Integer theMaxCount) {
-		Validate.isTrue(isNotBlank(theSystem) == isNotBlank(theCode));
-		Validate.notNull(theFilters);
+    /** Constructor */
+    ExpansionFilter(
+            ExpansionFilter theExpansionFilter,
+            List<ValueSet.ConceptSetFilterComponent> theFilters,
+            Integer theMaxCount) {
+        this(theExpansionFilter.getSystem(), theExpansionFilter.getCode(), theFilters, theMaxCount);
+    }
 
-		mySystem = theSystem;
-		myCode = theCode;
-		myFilters = theFilters;
-		myMaxCount = theMaxCount;
-	}
+    /** Constructor */
+    ExpansionFilter(
+            @Nullable String theSystem,
+            @Nullable String theCode,
+            @Nonnull List<ValueSet.ConceptSetFilterComponent> theFilters,
+            Integer theMaxCount) {
+        Validate.isTrue(isNotBlank(theSystem) == isNotBlank(theCode));
+        Validate.notNull(theFilters);
 
-	public List<ValueSet.ConceptSetFilterComponent> getFilters() {
-		return myFilters;
-	}
+        mySystem = theSystem;
+        myCode = theCode;
+        myFilters = theFilters;
+        myMaxCount = theMaxCount;
+    }
 
-	boolean hasCode() {
-		return myCode != null;
-	}
+    public List<ValueSet.ConceptSetFilterComponent> getFilters() {
+        return myFilters;
+    }
 
-	String getCode() {
-		return myCode;
-	}
+    boolean hasCode() {
+        return myCode != null;
+    }
 
-	String getSystem() {
-		return mySystem;
-	}
+    String getCode() {
+        return myCode;
+    }
 
-	/**
-	 * Converts the system/code in this filter to a FhirVersionIndependentConcept. This method
-	 * should not be called if {@link #hasCode()} returns <code>false</code>
-	 */
-	@Nonnull
-	public FhirVersionIndependentConcept toFhirVersionIndependentConcept() {
-		Validate.isTrue(hasCode());
+    String getSystem() {
+        return mySystem;
+    }
 
-		return new FhirVersionIndependentConcept(mySystem, myCode);
-	}
+    /**
+     * Converts the system/code in this filter to a FhirVersionIndependentConcept. This method
+     * should not be called if {@link #hasCode()} returns <code>false</code>
+     */
+    @Nonnull
+    public FhirVersionIndependentConcept toFhirVersionIndependentConcept() {
+        Validate.isTrue(hasCode());
 
-	public Integer getMaxCount() {
-		return myMaxCount;
-	}
+        return new FhirVersionIndependentConcept(mySystem, myCode);
+    }
 
-	@Nonnull
-	public static ExpansionFilter fromFilterString(@Nullable String theFilter) {
-		ExpansionFilter filter;
-		if (isNoneBlank(theFilter)) {
-			List<ValueSet.ConceptSetFilterComponent> filters = Collections.singletonList(new ValueSet.ConceptSetFilterComponent()
-				.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
-				.setOp(ValueSet.FilterOperator.EQUAL)
-				.setValue(theFilter));
-			filter = new ExpansionFilter(null, null, filters, null);
-		} else {
-			filter = ExpansionFilter.NO_FILTER;
-		}
-		return filter;
-	}
+    public Integer getMaxCount() {
+        return myMaxCount;
+    }
+
+    @Nonnull
+    public static ExpansionFilter fromFilterString(@Nullable String theFilter) {
+        ExpansionFilter filter;
+        if (isNoneBlank(theFilter)) {
+            List<ValueSet.ConceptSetFilterComponent> filters =
+                    Collections.singletonList(
+                            new ValueSet.ConceptSetFilterComponent()
+                                    .setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+                                    .setOp(ValueSet.FilterOperator.EQUAL)
+                                    .setValue(theFilter));
+            filter = new ExpansionFilter(null, null, filters, null);
+        } else {
+            filter = ExpansionFilter.NO_FILTER;
+        }
+        return filter;
+    }
 }

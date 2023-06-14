@@ -25,7 +25,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.Separators;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
@@ -33,183 +32,187 @@ import java.math.BigInteger;
 
 public class JacksonWriter extends BaseJsonLikeWriter {
 
-	private JsonGenerator myJsonGenerator;
+    private JsonGenerator myJsonGenerator;
 
-	public JacksonWriter(JsonFactory theJsonFactory, Writer theWriter) throws IOException {
-		myJsonGenerator = theJsonFactory.createGenerator(theWriter);
-		setWriter(theWriter);
-	}
+    public JacksonWriter(JsonFactory theJsonFactory, Writer theWriter) throws IOException {
+        myJsonGenerator = theJsonFactory.createGenerator(theWriter);
+        setWriter(theWriter);
+    }
 
-	public JacksonWriter() {
-	}
+    public JacksonWriter() {}
 
-	@Override
-	public BaseJsonLikeWriter init() {
-		if (isPrettyPrint()) {
-			DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter() {
+    @Override
+    public BaseJsonLikeWriter init() {
+        if (isPrettyPrint()) {
+            DefaultPrettyPrinter prettyPrinter =
+                    new DefaultPrettyPrinter() {
 
-				/**
-				 * Objects should serialize as
-				 * <pre>
-				 * {
-				 *    "key": "value"
-				 * }
-				 * </pre>
-				 * in order to be consistent with Gson behaviour, instead of the jackson default
-				 * <pre>
-				 * {
-				 *    "key" : "value"
-				 * }
-				 * </pre>
-				 */
-				@Override
-				public DefaultPrettyPrinter withSeparators(Separators separators) {
-					_separators = separators;
-					_objectFieldValueSeparatorWithSpaces = separators.getObjectFieldValueSeparator() + " ";
-					return this;
-				}
+                        /**
+                         * Objects should serialize as
+                         *
+                         * <pre>
+                         * {
+                         *    "key": "value"
+                         * }
+                         * </pre>
+                         *
+                         * in order to be consistent with Gson behaviour, instead of the jackson
+                         * default
+                         *
+                         * <pre>
+                         * {
+                         *    "key" : "value"
+                         * }
+                         * </pre>
+                         */
+                        @Override
+                        public DefaultPrettyPrinter withSeparators(Separators separators) {
+                            _separators = separators;
+                            _objectFieldValueSeparatorWithSpaces =
+                                    separators.getObjectFieldValueSeparator() + " ";
+                            return this;
+                        }
+                    };
+            prettyPrinter = prettyPrinter.withObjectIndenter(new DefaultIndenter("  ", "\n"));
 
-			};
-			prettyPrinter = prettyPrinter.withObjectIndenter(new DefaultIndenter("  ", "\n"));
+            myJsonGenerator.setPrettyPrinter(prettyPrinter);
+        }
+        return this;
+    }
 
-			myJsonGenerator.setPrettyPrinter(prettyPrinter);
-		}
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter flush() {
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter flush() {
-		return this;
-	}
+    @Override
+    public void close() throws IOException {
+        myJsonGenerator.close();
+    }
 
-	@Override
-	public void close() throws IOException {
-		myJsonGenerator.close();
-	}
+    @Override
+    public BaseJsonLikeWriter beginObject() throws IOException {
+        myJsonGenerator.writeStartObject();
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter beginObject() throws IOException {
-		myJsonGenerator.writeStartObject();
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter beginObject(String name) throws IOException {
+        myJsonGenerator.writeObjectFieldStart(name);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter beginObject(String name) throws IOException {
-		myJsonGenerator.writeObjectFieldStart(name);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter beginArray(String name) throws IOException {
+        myJsonGenerator.writeArrayFieldStart(name);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter beginArray(String name) throws IOException {
-		myJsonGenerator.writeArrayFieldStart(name);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(String value) throws IOException {
+        myJsonGenerator.writeObject(value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(String value) throws IOException {
-		myJsonGenerator.writeObject(value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(BigInteger value) throws IOException {
+        myJsonGenerator.writeObject(value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(BigInteger value) throws IOException {
-		myJsonGenerator.writeObject(value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(BigDecimal value) throws IOException {
+        myJsonGenerator.writeObject(value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(BigDecimal value) throws IOException {
-		myJsonGenerator.writeObject(value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(long value) throws IOException {
+        myJsonGenerator.writeObject(value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(long value) throws IOException {
-		myJsonGenerator.writeObject(value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(double value) throws IOException {
+        myJsonGenerator.writeObject(value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(double value) throws IOException {
-		myJsonGenerator.writeObject(value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(Boolean value) throws IOException {
+        myJsonGenerator.writeObject(value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(Boolean value) throws IOException {
-		myJsonGenerator.writeObject(value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(boolean value) throws IOException {
+        myJsonGenerator.writeObject(value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(boolean value) throws IOException {
-		myJsonGenerator.writeObject(value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter writeNull() throws IOException {
+        myJsonGenerator.writeNull();
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter writeNull() throws IOException {
-		myJsonGenerator.writeNull();
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(String name, String value) throws IOException {
+        myJsonGenerator.writeObjectField(name, value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(String name, String value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(String name, BigInteger value) throws IOException {
+        myJsonGenerator.writeObjectField(name, value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(String name, BigInteger value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(String name, BigDecimal value) throws IOException {
+        myJsonGenerator.writeObjectField(name, value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(String name, BigDecimal value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(String name, long value) throws IOException {
+        myJsonGenerator.writeObjectField(name, value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(String name, long value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(String name, double value) throws IOException {
+        myJsonGenerator.writeObjectField(name, value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(String name, double value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(String name, Boolean value) throws IOException {
+        myJsonGenerator.writeObjectField(name, value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(String name, Boolean value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter write(String name, boolean value) throws IOException {
+        myJsonGenerator.writeObjectField(name, value);
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter write(String name, boolean value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter endObject() throws IOException {
+        myJsonGenerator.writeEndObject();
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter endObject() throws IOException {
-		myJsonGenerator.writeEndObject();
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter endArray() throws IOException {
+        myJsonGenerator.writeEndArray();
+        return this;
+    }
 
-	@Override
-	public BaseJsonLikeWriter endArray() throws IOException {
-		myJsonGenerator.writeEndArray();
-		return this;
-	}
-
-	@Override
-	public BaseJsonLikeWriter endBlock() throws IOException {
-		myJsonGenerator.writeEndObject();
-		return this;
-	}
+    @Override
+    public BaseJsonLikeWriter endBlock() throws IOException {
+        myJsonGenerator.writeEndObject();
+        return this;
+    }
 }

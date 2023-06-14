@@ -19,91 +19,76 @@
  */
 package ca.uhn.fhir.model.api.annotation;
 
+import ca.uhn.fhir.model.api.IElement;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import ca.uhn.fhir.model.api.IElement;
-
 /**
- * Field annotation for fields within resource and datatype definitions, indicating 
- * a child of that type.
+ * Field annotation for fields within resource and datatype definitions, indicating a child of that
+ * type.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value= {ElementType.FIELD})
+@Target(value = {ElementType.FIELD})
 public @interface Child {
 
-	/**
-	 * Constant value to supply for {@link #order()} when the order is defined
-	 * elsewhere
-	 */
-	int ORDER_UNKNOWN = -1;
-	
-	/**
-	 * Constant value to supply for {@link #max()} to indicate '*' (no maximum)
-	 */
-	int MAX_UNLIMITED = -1;
+    /** Constant value to supply for {@link #order()} when the order is defined elsewhere */
+    int ORDER_UNKNOWN = -1;
 
-	/**
-	 * Constant value to supply for {@link #order()} to indicate that this child should replace the
-	 * entry in the superclass with the same name (and take its {@link Child#order() order} value 
-	 * in the process). This is useful if you wish to redefine an existing field in a resource/type
-	 * definition in order to constrain/extend it.
-	 */
-	int REPLACE_PARENT = -2;
+    /** Constant value to supply for {@link #max()} to indicate '*' (no maximum) */
+    int MAX_UNLIMITED = -1;
 
-	/**
-	 * The name of this field, as it will appear in serialized versions of the message
-	 */
-	String name();
-	
-	/**
-	 * The order in which this field comes within its parent. The first field should have a 
-	 * value of 0, the second a value of 1, etc.
-	 */
-	int order() default ORDER_UNKNOWN;
+    /**
+     * Constant value to supply for {@link #order()} to indicate that this child should replace the
+     * entry in the superclass with the same name (and take its {@link Child#order() order} value in
+     * the process). This is useful if you wish to redefine an existing field in a resource/type
+     * definition in order to constrain/extend it.
+     */
+    int REPLACE_PARENT = -2;
 
-	/**
-	 * The minimum number of repetitions allowed for this child
-	 */
-	int min() default 0;
+    /** The name of this field, as it will appear in serialized versions of the message */
+    String name();
 
-	/**
-	 * The maximum number of repetitions allowed for this child. Should be
-	 * set to {@link #MAX_UNLIMITED} if there is no limit to the number of
-	 * repetitions.
-	 */
-	int max() default 1;
+    /**
+     * The order in which this field comes within its parent. The first field should have a value of
+     * 0, the second a value of 1, etc.
+     */
+    int order() default ORDER_UNKNOWN;
 
-	/**
-	 * Lists the allowable types for this field, if the field supports multiple
-	 * types (otherwise does not need to be populated).
-	 * <p>
-	 * For example, if this field supports either DateTimeDt or BooleanDt types,
-	 * those two classes should be supplied here.
-	 * </p>
-	 */
-	Class<? extends IElement>[] type() default {};
+    /** The minimum number of repetitions allowed for this child */
+    int min() default 0;
 
-	// Not implemented
-//	/**
-//	 * This value is used when extending a built-in model class and defining a
-//	 * field to replace a field within the built-in class. For example, the {@link Patient} 
-//	 * resource has a {@link Patient#getName() name} field, but if you wanted to extend Patient and
-//	 * provide your own implementation of {@link HumanNameDt} (most likely your own subclass of 
-//	 * HumanNameDt which adds extensions of your choosing) you could do that using a replacement field. 
-//	 */
-//	String replaces() default "";
+    /**
+     * The maximum number of repetitions allowed for this child. Should be set to {@link
+     * #MAX_UNLIMITED} if there is no limit to the number of repetitions.
+     */
+    int max() default 1;
 
-	/**
-	 * Is this element a modifier?
-	 */
-	boolean modifier() default false;	
+    /**
+     * Lists the allowable types for this field, if the field supports multiple types (otherwise
+     * does not need to be populated).
+     *
+     * <p>For example, if this field supports either DateTimeDt or BooleanDt types, those two
+     * classes should be supplied here.
+     */
+    Class<? extends IElement>[] type() default {};
 
-	/**
-	 * Should this element be included in the summary view
-	 */
-	boolean summary() default false;
-	
+    // Not implemented
+    //	/**
+    //	 * This value is used when extending a built-in model class and defining a
+    //	 * field to replace a field within the built-in class. For example, the {@link Patient}
+    //	 * resource has a {@link Patient#getName() name} field, but if you wanted to extend Patient
+    // and
+    //	 * provide your own implementation of {@link HumanNameDt} (most likely your own subclass of
+    //	 * HumanNameDt which adds extensions of your choosing) you could do that using a replacement
+    // field.
+    //	 */
+    //	String replaces() default "";
+
+    /** Is this element a modifier? */
+    boolean modifier() default false;
+
+    /** Should this element be included in the summary view */
+    boolean summary() default false;
 }

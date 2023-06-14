@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Import;
 
 @Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class})
 public class TestMdmConfigR4 extends BaseTestMdmConfig {
-	@Bean
-	MdmHelperR4 mdmHelperR4() {
-		return new MdmHelperR4();
-	}
+    @Bean
+    MdmHelperR4 mdmHelperR4() {
+        return new MdmHelperR4();
+    }
 }

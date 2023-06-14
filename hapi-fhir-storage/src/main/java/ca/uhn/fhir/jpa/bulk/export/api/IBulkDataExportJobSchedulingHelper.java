@@ -24,16 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface IBulkDataExportJobSchedulingHelper {
 
-	/**
-	 * invoked via scheduled task, purges any tasks which are past their cutoff point.
-	 */
-	@Transactional(propagation = Propagation.NEVER)
-	void purgeExpiredFiles();
+    /** invoked via scheduled task, purges any tasks which are past their cutoff point. */
+    @Transactional(propagation = Propagation.NEVER)
+    void purgeExpiredFiles();
 
-	/**
-	 * Stops all invoked jobs, and then purges them.
-	 */
-	@Transactional(propagation = Propagation.NEVER)
-	@Deprecated
-	void cancelAndPurgeAllJobs();
+    /** Stops all invoked jobs, and then purges them. */
+    @Transactional(propagation = Propagation.NEVER)
+    @Deprecated
+    void cancelAndPurgeAllJobs();
 }

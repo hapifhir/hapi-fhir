@@ -19,24 +19,30 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import java.lang.reflect.Method;
+import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 class NullParameter implements IParameter {
 
-	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
-		//nothing
-	}
+    @Override
+    public void translateClientArgumentIntoQueryArgument(
+            FhirContext theContext,
+            Object theSourceClientArgument,
+            Map<String, List<String>> theTargetQueryArguments,
+            IBaseResource theTargetResource)
+            throws InternalErrorException {
+        // nothing
+    }
 
-	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		// nothing
-	}
-
+    @Override
+    public void initializeTypes(
+            Method theMethod,
+            Class<? extends Collection<?>> theOuterCollectionType,
+            Class<? extends Collection<?>> theInnerCollectionType,
+            Class<?> theParameterType) {
+        // nothing
+    }
 }

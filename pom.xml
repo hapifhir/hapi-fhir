@@ -2218,7 +2218,7 @@
 					</executions>
 					<configuration>
 						<!-- optional: limit format enforcement to just the files changed by this feature branch -->
-						<ratchetFrom>origin/master</ratchetFrom>
+<!--						<ratchetFrom>origin/master</ratchetFrom>-->
 						<formats>
 							<!-- you can define as many formats as you want, each is independent -->
 							<format>

@@ -19,15 +19,11 @@
  */
 package ca.uhn.fhir.jaxrs.server.util;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
 import ca.uhn.fhir.util.IoUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-
-import javax.annotation.Nonnull;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.OutputStream;
@@ -35,92 +31,101 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map.Entry;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import javax.annotation.Nonnull;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * The JaxRsResponse is a jax-rs specific implementation of the RestfulResponse.
- * 
+ *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 
-	private StringWriter myWriter;
-	private int myStatusCode;
-	private String myContentType;
-	private String myCharset;
-	private ByteArrayOutputStream myOutputStream;
+    private StringWriter myWriter;
+    private int myStatusCode;
+    private String myContentType;
+    private String myCharset;
+    private ByteArrayOutputStream myOutputStream;
 
-	/**
-	 * The constructor
-	 * 
-	 * @param request the JaxRs Request
-	 */
-	public JaxRsResponse(JaxRsRequest request) {
-		super(request);
-	}
+    /**
+     * The constructor
+     *
+     * @param request the JaxRs Request
+     */
+    public JaxRsResponse(JaxRsRequest request) {
+        super(request);
+    }
 
-	/**
-	 * The response writer is a simple String Writer. All output is configured
-	 * by the server.
-	 */
-	@Nonnull
-	@Override
-	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) {
-		Validate.isTrue(myWriter == null, "getResponseWriter() called multiple times");
-		Validate.isTrue(myOutputStream == null, "getResponseWriter() called after getResponseOutputStream()");
-		myWriter = new StringWriter();
-		myStatusCode = theStatusCode;
-		myContentType = theContentType;
-		myCharset = theCharset;
-		return myWriter;
-	}
+    /** The response writer is a simple String Writer. All output is configured by the server. */
+    @Nonnull
+    @Override
+    public Writer getResponseWriter(
+            int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) {
+        Validate.isTrue(myWriter == null, "getResponseWriter() called multiple times");
+        Validate.isTrue(
+                myOutputStream == null,
+                "getResponseWriter() called after getResponseOutputStream()");
+        myWriter = new StringWriter();
+        myStatusCode = theStatusCode;
+        myContentType = theContentType;
+        myCharset = theCharset;
+        return myWriter;
+    }
 
-	@Nonnull
-	@Override
-	public OutputStream getResponseOutputStream(int theStatusCode, String theContentType, Integer theContentLength) {
-		Validate.isTrue(myWriter == null, "getResponseOutputStream() called multiple times");
-		Validate.isTrue(myOutputStream == null, "getResponseOutputStream() called after getResponseWriter()");
+    @Nonnull
+    @Override
+    public OutputStream getResponseOutputStream(
+            int theStatusCode, String theContentType, Integer theContentLength) {
+        Validate.isTrue(myWriter == null, "getResponseOutputStream() called multiple times");
+        Validate.isTrue(
+                myOutputStream == null,
+                "getResponseOutputStream() called after getResponseWriter()");
 
-		myOutputStream = new ByteArrayOutputStream();
-		myStatusCode = theStatusCode;
-		myContentType = theContentType;
+        myOutputStream = new ByteArrayOutputStream();
+        myStatusCode = theStatusCode;
+        myContentType = theContentType;
 
-		return myOutputStream;
-	}
+        return myOutputStream;
+    }
 
-	@Override
-	public Response commitResponse(@Nonnull Closeable theWriterOrOutputStream) {
-		IoUtil.closeQuietly(theWriterOrOutputStream);
+    @Override
+    public Response commitResponse(@Nonnull Closeable theWriterOrOutputStream) {
+        IoUtil.closeQuietly(theWriterOrOutputStream);
 
-		ResponseBuilder builder = buildResponse(myStatusCode);
-		if (isNotBlank(myContentType)) {
-			if (myWriter != null) {
-				String charContentType = myContentType + "; charset=" + StringUtils.defaultIfBlank(myCharset, Constants.CHARSET_NAME_UTF8);
-				builder.header(Constants.HEADER_CONTENT_TYPE, charContentType);
-				builder.entity(myWriter.toString());
-			} else {
-				byte[] byteArray = myOutputStream.toByteArray();
-				if (byteArray.length > 0) {
-					builder.header(Constants.HEADER_CONTENT_TYPE, myContentType);
-					builder.entity(byteArray);
-				}
-			}
-		}
+        ResponseBuilder builder = buildResponse(myStatusCode);
+        if (isNotBlank(myContentType)) {
+            if (myWriter != null) {
+                String charContentType =
+                        myContentType
+                                + "; charset="
+                                + StringUtils.defaultIfBlank(
+                                        myCharset, Constants.CHARSET_NAME_UTF8);
+                builder.header(Constants.HEADER_CONTENT_TYPE, charContentType);
+                builder.entity(myWriter.toString());
+            } else {
+                byte[] byteArray = myOutputStream.toByteArray();
+                if (byteArray.length > 0) {
+                    builder.header(Constants.HEADER_CONTENT_TYPE, myContentType);
+                    builder.entity(byteArray);
+                }
+            }
+        }
 
-		Response retVal = builder.build();
-		return retVal;
-	}
+        Response retVal = builder.build();
+        return retVal;
+    }
 
-	private ResponseBuilder buildResponse(int statusCode) {
-		ResponseBuilder response = Response.status(statusCode);
-		for (Entry<String, List<String>> header : getHeaders().entrySet()) {
-			final String key = header.getKey();
-			for (String value : header.getValue()) {
-				response.header(key, value);
-			}
-		}
-		return response;
-	}
-
+    private ResponseBuilder buildResponse(int statusCode) {
+        ResponseBuilder response = Response.status(statusCode);
+        for (Entry<String, List<String>> header : getHeaders().entrySet()) {
+            final String key = header.getKey();
+            for (String value : header.getValue()) {
+                response.header(key, value);
+            }
+        }
+        return response;
+    }
 }

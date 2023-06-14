@@ -25,6 +25,10 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivat
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
@@ -32,135 +36,139 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-
 public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
+    private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
 
-	@Autowired
-	private SubscriptionRegistry mySubscriptionRegistry;
+    @Autowired private SubscriptionRegistry mySubscriptionRegistry;
 
-	@Autowired
-	private SubscriptionActivatingSubscriber mySubscriptionActivatingInterceptor;
+    @Autowired private SubscriptionActivatingSubscriber mySubscriptionActivatingInterceptor;
 
-	@Autowired
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+    @Autowired private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
-	/**
-	 * Constructor
-	 */
-	public SubscriptionLoader() {
-		super("Subscription");
-	}
+    /** Constructor */
+    public SubscriptionLoader() {
+        super("Subscription");
+    }
 
-	public int doSyncSubscriptionsForUnitTest() {
-		return super.doSyncResourcessForUnitTest();
-	}
+    public int doSyncSubscriptionsForUnitTest() {
+        return super.doSyncResourcessForUnitTest();
+    }
 
-	@Override
-	@Nonnull
-	protected SearchParameterMap getSearchParameterMap() {
-		SearchParameterMap map = new SearchParameterMap();
+    @Override
+    @Nonnull
+    protected SearchParameterMap getSearchParameterMap() {
+        SearchParameterMap map = new SearchParameterMap();
 
-		if (mySearchParamRegistry.getActiveSearchParam("Subscription", "status") != null) {
-			map.add(Subscription.SP_STATUS, new TokenOrListParam()
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
-		}
-		map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
-		return map;
-	}
+        if (mySearchParamRegistry.getActiveSearchParam("Subscription", "status") != null) {
+            map.add(
+                    Subscription.SP_STATUS,
+                    new TokenOrListParam()
+                            .addOr(
+                                    new TokenParam(
+                                            null,
+                                            Subscription.SubscriptionStatus.REQUESTED.toCode()))
+                            .addOr(
+                                    new TokenParam(
+                                            null,
+                                            Subscription.SubscriptionStatus.ACTIVE.toCode())));
+        }
+        map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
+        return map;
+    }
 
-	@Override
-	protected void handleInit(List<IBaseResource> resourceList) {
-		updateSubscriptionRegistry(resourceList);
-	}
+    @Override
+    protected void handleInit(List<IBaseResource> resourceList) {
+        updateSubscriptionRegistry(resourceList);
+    }
 
-	@Override
-	protected int syncResourcesIntoCache(List<IBaseResource> resourceList) {
-		return updateSubscriptionRegistry(resourceList);
-	}
+    @Override
+    protected int syncResourcesIntoCache(List<IBaseResource> resourceList) {
+        return updateSubscriptionRegistry(resourceList);
+    }
 
-	private int updateSubscriptionRegistry(List<IBaseResource> theResourceList) {
-		Set<String> allIds = new HashSet<>();
-		int activatedCount = 0;
-		int registeredCount = 0;
+    private int updateSubscriptionRegistry(List<IBaseResource> theResourceList) {
+        Set<String> allIds = new HashSet<>();
+        int activatedCount = 0;
+        int registeredCount = 0;
 
-		for (IBaseResource resource : theResourceList) {
-			String nextId = resource.getIdElement().getIdPart();
-			allIds.add(nextId);
+        for (IBaseResource resource : theResourceList) {
+            String nextId = resource.getIdElement().getIdPart();
+            allIds.add(nextId);
 
-			boolean activated = activateSubscriptionIfRequested(resource);
-			if (activated) {
-				++activatedCount;
-			}
+            boolean activated = activateSubscriptionIfRequested(resource);
+            if (activated) {
+                ++activatedCount;
+            }
 
-			boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
-			if (registered) {
-				registeredCount++;
-			}
-		}
+            boolean registered =
+                    mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
+            if (registered) {
+                registeredCount++;
+            }
+        }
 
-		mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);
-		ourLog.debug("Finished sync subscriptions - activated {} and registered {}", theResourceList.size(), registeredCount);
-		return activatedCount;
-	}
+        mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);
+        ourLog.debug(
+                "Finished sync subscriptions - activated {} and registered {}",
+                theResourceList.size(),
+                registeredCount);
+        return activatedCount;
+    }
 
-	/**
-	 * @param theSubscription
-	 * @return true if activated
-	 */
-	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
-		boolean successfullyActivated = false;
+    /**
+     * @param theSubscription
+     * @return true if activated
+     */
+    private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
+        boolean successfullyActivated = false;
 
-		if (SubscriptionConstants.REQUESTED_STATUS.equals(mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
-			if (mySubscriptionActivatingInterceptor.isChannelTypeSupported(theSubscription)) {
-				// internally, subscriptions that cannot activate will be set to error
-				if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
-					successfullyActivated = true;
-				} else {
-					logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
-				}
-			} else {
-				ourLog.debug("Could not activate subscription {} because channel type {} is not supported.",
-					theSubscription.getIdElement(),
-					mySubscriptionCanonicalizer.getChannelType(theSubscription));
-			}
-		}
+        if (SubscriptionConstants.REQUESTED_STATUS.equals(
+                mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
+            if (mySubscriptionActivatingInterceptor.isChannelTypeSupported(theSubscription)) {
+                // internally, subscriptions that cannot activate will be set to error
+                if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(
+                        theSubscription)) {
+                    successfullyActivated = true;
+                } else {
+                    logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
+                }
+            } else {
+                ourLog.debug(
+                        "Could not activate subscription {} because channel type {} is not"
+                                + " supported.",
+                        theSubscription.getIdElement(),
+                        mySubscriptionCanonicalizer.getChannelType(theSubscription));
+            }
+        }
 
-		return successfullyActivated;
-	}
+        return successfullyActivated;
+    }
 
-	/**
-	 * Logs
-	 *
-	 * @param theSubscription
-	 */
-	private void logSubscriptionNotActivatedPlusErrorIfPossible(IBaseResource theSubscription) {
-		String error;
-		if (theSubscription instanceof Subscription) {
-			error = ((Subscription) theSubscription).getError();
-		} else if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
-			error = ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getError();
-		} else if (theSubscription instanceof org.hl7.fhir.dstu2.model.Subscription) {
-			error = ((org.hl7.fhir.dstu2.model.Subscription) theSubscription).getError();
-		} else {
-			error = "";
-		}
-		ourLog.error("Subscription "
-			+ theSubscription.getIdElement().getIdPart()
-			+ " could not be activated."
-			+ " This will not prevent startup, but it could lead to undesirable outcomes! "
-			+ (StringUtils.isBlank(error) ? "" : "Error: " + error)
-		);
-	}
+    /**
+     * Logs
+     *
+     * @param theSubscription
+     */
+    private void logSubscriptionNotActivatedPlusErrorIfPossible(IBaseResource theSubscription) {
+        String error;
+        if (theSubscription instanceof Subscription) {
+            error = ((Subscription) theSubscription).getError();
+        } else if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
+            error = ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getError();
+        } else if (theSubscription instanceof org.hl7.fhir.dstu2.model.Subscription) {
+            error = ((org.hl7.fhir.dstu2.model.Subscription) theSubscription).getError();
+        } else {
+            error = "";
+        }
+        ourLog.error(
+                "Subscription "
+                        + theSubscription.getIdElement().getIdPart()
+                        + " could not be activated. This will not prevent startup, but it could"
+                        + " lead to undesirable outcomes! "
+                        + (StringUtils.isBlank(error) ? "" : "Error: " + error));
+    }
 
-	public void syncSubscriptions() {
-		super.syncDatabaseToCache();
-	}
+    public void syncSubscriptions() {
+        super.syncDatabaseToCache();
+    }
 }
-

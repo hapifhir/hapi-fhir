@@ -19,45 +19,41 @@
  */
 package ca.uhn.fhir.model.base.resource;
 
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 public interface BaseOperationOutcome extends IResource, IBaseOperationOutcome {
 
-	public abstract BaseIssue addIssue();
+    public abstract BaseIssue addIssue();
 
-	public abstract List<? extends BaseIssue> getIssue();
+    public abstract List<? extends BaseIssue> getIssue();
 
-	public abstract BaseIssue getIssueFirstRep();
+    public abstract BaseIssue getIssueFirstRep();
 
-	public static abstract class BaseIssue extends BaseIdentifiableElement implements IResourceBlock {
-	
-		private static final long serialVersionUID = 6700020892151450738L;
+    public abstract static class BaseIssue extends BaseIdentifiableElement
+            implements IResourceBlock {
 
-		public abstract CodeDt getSeverityElement();
-		
-		public abstract StringDt getDetailsElement();
+        private static final long serialVersionUID = 6700020892151450738L;
 
-		public abstract BaseIssue addLocation(String theString);
+        public abstract CodeDt getSeverityElement();
 
-		/**
-		 * @deprecated Use {@link #setDiagnostics(String)} instead - Field was renamed in DSTU2
-		 */
-		@Deprecated
-		public abstract BaseIssue setDetails(String theString);
+        public abstract StringDt getDetailsElement();
 
-		public abstract BaseIssue setDiagnostics(String theString);
+        public abstract BaseIssue addLocation(String theString);
 
-		public abstract StringDt getLocationFirstRep();
-	}
+        /**
+         * @deprecated Use {@link #setDiagnostics(String)} instead - Field was renamed in DSTU2
+         */
+        @Deprecated
+        public abstract BaseIssue setDetails(String theString);
 
+        public abstract BaseIssue setDiagnostics(String theString);
 
-	
+        public abstract StringDt getLocationFirstRep();
+    }
 }

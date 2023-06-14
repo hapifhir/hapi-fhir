@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -40,166 +43,191 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import javax.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PageMethodBinding.class);
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(PageMethodBinding.class);
 
-	public PageMethodBinding(FhirContext theContext, Method theMethod) {
-		super(null, theMethod, theContext, null);
-	}
+    public PageMethodBinding(FhirContext theContext, Method theMethod) {
+        super(null, theMethod, theContext, null);
+    }
 
-	public IBaseResource provider() {
-		return null;
-	}
+    public IBaseResource provider() {
+        return null;
+    }
 
-	@Override
-	protected BundleTypeEnum getResponseBundleType() {
-		return null;
-	}
+    @Override
+    protected BundleTypeEnum getResponseBundleType() {
+        return null;
+    }
 
-	@Override
-	public ReturnTypeEnum getReturnType() {
-		return ReturnTypeEnum.BUNDLE;
-	}
+    @Override
+    public ReturnTypeEnum getReturnType() {
+        return ReturnTypeEnum.BUNDLE;
+    }
 
-	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		return handlePagingRequest(theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
-	}
+    @Override
+    public Object invokeServer(
+            IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
+            throws InvalidRequestException, InternalErrorException {
+        return handlePagingRequest(
+                theServer,
+                theRequest,
+                theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
+    }
 
-	@Override
-	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
-		return handlePagingRequest(theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
-	}
+    @Override
+    public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
+        return handlePagingRequest(
+                theServer,
+                theRequest,
+                theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
+    }
 
-	private IBaseResource handlePagingRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction) {
-		IPagingProvider pagingProvider = theServer.getPagingProvider();
-		if (pagingProvider == null) {
-			throw new InvalidRequestException(Msg.code(416) + "This server does not support paging");
-		}
+    private IBaseResource handlePagingRequest(
+            IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction) {
+        IPagingProvider pagingProvider = theServer.getPagingProvider();
+        if (pagingProvider == null) {
+            throw new InvalidRequestException(
+                    Msg.code(416) + "This server does not support paging");
+        }
 
-		// Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
-		populateRequestDetailsForInterceptor(theRequest, ReflectionUtil.EMPTY_OBJECT_ARRAY);
-		HookParams preHandledParams = new HookParams();
-		preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
-		preHandledParams.add(RequestDetails.class, theRequest);
-		preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		if (theRequest.getInterceptorBroadcaster() != null) {
-			theRequest
-				.getInterceptorBroadcaster()
-				.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
-		}
+        // Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
+        populateRequestDetailsForInterceptor(theRequest, ReflectionUtil.EMPTY_OBJECT_ARRAY);
+        HookParams preHandledParams = new HookParams();
+        preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
+        preHandledParams.add(RequestDetails.class, theRequest);
+        preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
+        if (theRequest.getInterceptorBroadcaster() != null) {
+            theRequest
+                    .getInterceptorBroadcaster()
+                    .callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
+        }
 
-		Integer offsetI;
-		int start = 0;
-		IBundleProvider bundleProvider;
+        Integer offsetI;
+        int start = 0;
+        IBundleProvider bundleProvider;
 
-		String pageId = null;
-		String[] pageIdParams = theRequest.getParameters().get(Constants.PARAM_PAGEID);
-		if (pageIdParams != null) {
-			if (pageIdParams.length > 0) {
-				if (isNotBlank(pageIdParams[0])) {
-					pageId = pageIdParams[0];
-				}
-			}
-		}
+        String pageId = null;
+        String[] pageIdParams = theRequest.getParameters().get(Constants.PARAM_PAGEID);
+        if (pageIdParams != null) {
+            if (pageIdParams.length > 0) {
+                if (isNotBlank(pageIdParams[0])) {
+                    pageId = pageIdParams[0];
+                }
+            }
+        }
 
-		if (pageId != null) {
-			// This is a page request by Search ID and Page ID
+        if (pageId != null) {
+            // This is a page request by Search ID and Page ID
 
-			bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction, pageId);
-			validateHaveBundleProvider(thePagingAction, bundleProvider);
+            bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction, pageId);
+            validateHaveBundleProvider(thePagingAction, bundleProvider);
 
-		} else {
-			// This is a page request by Search ID and Offset
+        } else {
+            // This is a page request by Search ID and Offset
 
-			bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction);
-			validateHaveBundleProvider(thePagingAction, bundleProvider);
+            bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction);
+            validateHaveBundleProvider(thePagingAction, bundleProvider);
 
-			offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
-			if (offsetI == null || offsetI < 0) {
-				offsetI = 0;
-			}
+            offsetI =
+                    RestfulServerUtils.tryToExtractNamedParameter(
+                            theRequest, Constants.PARAM_PAGINGOFFSET);
+            if (offsetI == null || offsetI < 0) {
+                offsetI = 0;
+            }
 
-			Integer totalNum = bundleProvider.size();
-			start = offsetI;
-			if (totalNum != null) {
-				start = Math.min(start, totalNum);
-			}
-		}
+            Integer totalNum = bundleProvider.size();
+            start = offsetI;
+            if (totalNum != null) {
+                start = Math.min(start, totalNum);
+            }
+        }
 
-		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
+        ResponseEncoding responseEncoding =
+                RestfulServerUtils.determineResponseEncodingNoDefault(
+                        theRequest, theServer.getDefaultResponseEncoding());
 
-		Set<Include> includes = new HashSet<>();
-		String[] reqIncludes = theRequest.getParameters().get(Constants.PARAM_INCLUDE);
-		if (reqIncludes != null) {
-			for (String nextInclude : reqIncludes) {
-				includes.add(new Include(nextInclude));
-			}
-		}
+        Set<Include> includes = new HashSet<>();
+        String[] reqIncludes = theRequest.getParameters().get(Constants.PARAM_INCLUDE);
+        if (reqIncludes != null) {
+            for (String nextInclude : reqIncludes) {
+                includes.add(new Include(nextInclude));
+            }
+        }
 
-		String linkSelfBase = theRequest.getFhirServerBase();
-		String completeUrl = theRequest.getCompleteUrl();
-		String linkSelf = linkSelfBase + completeUrl.substring(theRequest.getCompleteUrl().indexOf('?'));
+        String linkSelfBase = theRequest.getFhirServerBase();
+        String completeUrl = theRequest.getCompleteUrl();
+        String linkSelf =
+                linkSelfBase + completeUrl.substring(theRequest.getCompleteUrl().indexOf('?'));
 
-		BundleTypeEnum bundleType = null;
-		String[] bundleTypeValues = theRequest.getParameters().get(Constants.PARAM_BUNDLETYPE);
-		if (bundleTypeValues != null) {
-			bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
-		}
+        BundleTypeEnum bundleType = null;
+        String[] bundleTypeValues = theRequest.getParameters().get(Constants.PARAM_BUNDLETYPE);
+        if (bundleTypeValues != null) {
+            bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
+        }
 
-		EncodingEnum encodingEnum = null;
-		if (responseEncoding != null) {
-			encodingEnum = responseEncoding.getEncoding();
-		}
+        EncodingEnum encodingEnum = null;
+        if (responseEncoding != null) {
+            encodingEnum = responseEncoding.getEncoding();
+        }
 
-		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
-		if (count == null) {
-			count = pagingProvider.getDefaultPageSize();
-		} else if (count > pagingProvider.getMaximumPageSize()) {
-			count = pagingProvider.getMaximumPageSize();
-		}
+        Integer count = RestfulServerUtils.extractCountParameter(theRequest);
+        if (count == null) {
+            count = pagingProvider.getDefaultPageSize();
+        } else if (count > pagingProvider.getMaximumPageSize()) {
+            count = pagingProvider.getMaximumPageSize();
+        }
 
-		return createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, bundleProvider, start, bundleType, encodingEnum, thePagingAction);
-	}
+        return createBundleFromBundleProvider(
+                theServer,
+                theRequest,
+                count,
+                linkSelf,
+                includes,
+                bundleProvider,
+                start,
+                bundleType,
+                encodingEnum,
+                thePagingAction);
+    }
 
-	private void validateHaveBundleProvider(String thePagingAction, IBundleProvider theBundleProvider) {
-		// Return an HTTP 410 if the search is not known
-		if (theBundleProvider == null) {
-			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
-			String msg = getContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
-			throw new ResourceGoneException(Msg.code(417) + msg);
-		}
-	}
+    private void validateHaveBundleProvider(
+            String thePagingAction, IBundleProvider theBundleProvider) {
+        // Return an HTTP 410 if the search is not known
+        if (theBundleProvider == null) {
+            ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
+            String msg =
+                    getContext()
+                            .getLocalizer()
+                            .getMessage(
+                                    PageMethodBinding.class, "unknownSearchId", thePagingAction);
+            throw new ResourceGoneException(Msg.code(417) + msg);
+        }
+    }
 
-	@Nonnull
-	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return RestOperationTypeEnum.GET_PAGE;
-	}
+    @Nonnull
+    @Override
+    public RestOperationTypeEnum getRestOperationType() {
+        return RestOperationTypeEnum.GET_PAGE;
+    }
 
-	@Override
-	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		String[] pageId = theRequest.getParameters().get(Constants.PARAM_PAGINGACTION);
-		if (pageId == null || pageId.length == 0 || isBlank(pageId[0])) {
-			return MethodMatchEnum.NONE;
-		}
-		if (theRequest.getRequestType() != RequestTypeEnum.GET) {
-			return MethodMatchEnum.NONE;
-		}
+    @Override
+    public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+        String[] pageId = theRequest.getParameters().get(Constants.PARAM_PAGINGACTION);
+        if (pageId == null || pageId.length == 0 || isBlank(pageId[0])) {
+            return MethodMatchEnum.NONE;
+        }
+        if (theRequest.getRequestType() != RequestTypeEnum.GET) {
+            return MethodMatchEnum.NONE;
+        }
 
-		return MethodMatchEnum.EXACT;
-	}
-
-
+        return MethodMatchEnum.EXACT;
+    }
 }

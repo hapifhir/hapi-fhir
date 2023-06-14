@@ -28,17 +28,15 @@ import ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-//When you define a new batch job, add it here.
+// When you define a new batch job, add it here.
 @Configuration
 @Import({
-	BatchCommonCtx.class,
-	BulkImportAppCtx.class,
-	ReindexAppCtx.class,
-	DeleteExpungeAppCtx.class,
-	BulkExportAppCtx.class,
-	TermCodeSystemJobConfig.class,
-	BulkImportPullConfig.class,
+    BatchCommonCtx.class,
+    BulkImportAppCtx.class,
+    ReindexAppCtx.class,
+    DeleteExpungeAppCtx.class,
+    BulkExportAppCtx.class,
+    TermCodeSystemJobConfig.class,
+    BulkImportPullConfig.class,
 })
-public class Batch2JobsConfig {
-
-}
+public class Batch2JobsConfig {}

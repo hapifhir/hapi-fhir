@@ -34,6 +34,13 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.util.UrlUtil;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -41,105 +48,91 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 @Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
-	private Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
-	@Autowired
-	private FhirContext myCtx;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private MatchUrlService myMatchUrlService;
+    private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
+    @Autowired private JpaStorageSettings myStorageSettings;
+    private Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
+    @Autowired private FhirContext myCtx;
+    @Autowired private DaoRegistry myDaoRegistry;
+    @Autowired private MatchUrlService myMatchUrlService;
 
-	@Override
-	public synchronized void performWarmingPass() {
-		ourLog.trace("Starting cache warming pass for {} tasks", myCacheEntryToNextRefresh.size());
+    @Override
+    public synchronized void performWarmingPass() {
+        ourLog.trace("Starting cache warming pass for {} tasks", myCacheEntryToNextRefresh.size());
 
-		for (WarmCacheEntry nextCacheEntry : new ArrayList<>(myCacheEntryToNextRefresh.keySet())) {
+        for (WarmCacheEntry nextCacheEntry : new ArrayList<>(myCacheEntryToNextRefresh.keySet())) {
 
-			long nextRefresh = myCacheEntryToNextRefresh.get(nextCacheEntry);
-			if (nextRefresh < System.currentTimeMillis()) {
+            long nextRefresh = myCacheEntryToNextRefresh.get(nextCacheEntry);
+            if (nextRefresh < System.currentTimeMillis()) {
 
-				// Perform the search
-				refreshNow(nextCacheEntry);
+                // Perform the search
+                refreshNow(nextCacheEntry);
 
-				// Set the next time to warm this search
-				nextRefresh = nextCacheEntry.getPeriodMillis() + System.currentTimeMillis();
-				myCacheEntryToNextRefresh.put(nextCacheEntry, nextRefresh);
+                // Set the next time to warm this search
+                nextRefresh = nextCacheEntry.getPeriodMillis() + System.currentTimeMillis();
+                myCacheEntryToNextRefresh.put(nextCacheEntry, nextRefresh);
+            }
+        }
+    }
 
-			}
+    private void refreshNow(WarmCacheEntry theCacheEntry) {
+        String nextUrl = theCacheEntry.getUrl();
 
-		}
+        RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myCtx, nextUrl);
+        IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceDef.getName());
+        String queryPart = parseWarmUrlParamPart(nextUrl);
+        SearchParameterMap responseCriteriaUrl =
+                myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
 
-	}
+        callingDao.search(responseCriteriaUrl);
+    }
 
-	private void refreshNow(WarmCacheEntry theCacheEntry) {
-		String nextUrl = theCacheEntry.getUrl();
+    private String parseWarmUrlParamPart(String theNextUrl) {
+        int paramIndex = theNextUrl.indexOf('?');
+        if (paramIndex == -1) {
+            throw new ConfigurationException(
+                    Msg.code(1172) + "Invalid warm cache URL (must have ? character)");
+        }
+        return theNextUrl.substring(paramIndex);
+    }
 
-		RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myCtx, nextUrl);
-		IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceDef.getName());
-		String queryPart = parseWarmUrlParamPart(nextUrl);
-		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
+    @PostConstruct
+    public void start() {
+        initCacheMap();
+    }
 
-		callingDao.search(responseCriteriaUrl);
-	}
+    @Override
+    public void scheduleJobs(ISchedulerService theSchedulerService) {
+        ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+        jobDetail.setId(getClass().getName());
+        jobDetail.setJobClass(Job.class);
+        theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+    }
 
-	private String parseWarmUrlParamPart(String theNextUrl) {
-		int paramIndex = theNextUrl.indexOf('?');
-		if (paramIndex == -1) {
-			throw new ConfigurationException(Msg.code(1172) + "Invalid warm cache URL (must have ? character)");
-		}
-		return theNextUrl.substring(paramIndex);
-	}
+    public static class Job implements HapiJob {
+        @Autowired private ICacheWarmingSvc myTarget;
 
-	@PostConstruct
-	public void start() {
-		initCacheMap();
-	}
+        @Override
+        public void execute(JobExecutionContext theContext) {
+            myTarget.performWarmingPass();
+        }
+    }
 
-	@Override
-	public void scheduleJobs(ISchedulerService theSchedulerService) {
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(getClass().getName());
-		jobDetail.setJobClass(Job.class);
-		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
-	}
+    public synchronized Set<WarmCacheEntry> initCacheMap() {
 
-	public static class Job implements HapiJob {
-		@Autowired
-		private ICacheWarmingSvc myTarget;
+        myCacheEntryToNextRefresh.clear();
+        List<WarmCacheEntry> warmCacheEntries = myStorageSettings.getWarmCacheEntries();
+        for (WarmCacheEntry next : warmCacheEntries) {
 
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.performWarmingPass();
-		}
-	}
+            // Validate
+            parseWarmUrlParamPart(next.getUrl());
+            UrlUtil.parseUrlResourceType(myCtx, next.getUrl());
 
-	public synchronized Set<WarmCacheEntry> initCacheMap() {
+            myCacheEntryToNextRefresh.put(next, 0L);
+        }
 
-		myCacheEntryToNextRefresh.clear();
-		List<WarmCacheEntry> warmCacheEntries = myStorageSettings.getWarmCacheEntries();
-		for (WarmCacheEntry next : warmCacheEntries) {
-
-			// Validate
-			parseWarmUrlParamPart(next.getUrl());
-			UrlUtil.parseUrlResourceType(myCtx, next.getUrl());
-
-			myCacheEntryToNextRefresh.put(next, 0L);
-		}
-
-		return Collections.unmodifiableSet(myCacheEntryToNextRefresh.keySet());
-	}
+        return Collections.unmodifiableSet(myCacheEntryToNextRefresh.keySet());
+    }
 }

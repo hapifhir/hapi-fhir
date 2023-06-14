@@ -24,33 +24,32 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import java.util.Date;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Date;
-
 public interface IJpaDao<T extends IBaseResource> {
-	@SuppressWarnings("unchecked")
-	IBasePersistedResource updateEntity(
-		RequestDetails theRequest,
-		IBaseResource theResource,
-		IBasePersistedResource theEntity,
-		Date theDeletedTimestampOrNull,
-		boolean thePerformIndexing,
-		boolean theUpdateVersion,
-		TransactionDetails theTransactionDetails,
-		boolean theForceUpdate,
-		boolean theCreateNewHistoryEntry);
+    @SuppressWarnings("unchecked")
+    IBasePersistedResource updateEntity(
+            RequestDetails theRequest,
+            IBaseResource theResource,
+            IBasePersistedResource theEntity,
+            Date theDeletedTimestampOrNull,
+            boolean thePerformIndexing,
+            boolean theUpdateVersion,
+            TransactionDetails theTransactionDetails,
+            boolean theForceUpdate,
+            boolean theCreateNewHistoryEntry);
 
-	DaoMethodOutcome updateInternal(
-		RequestDetails theRequestDetails,
-		T theResource,
-		String theMatchUrl,
-		boolean thePerformIndexing,
-		boolean theForceUpdateVersion,
-		IBasePersistedResource theEntity,
-		IIdType theResourceId,
-		IBaseResource theOldResource,
-		RestOperationTypeEnum theOperationType,
-		TransactionDetails theTransactionDetails);
+    DaoMethodOutcome updateInternal(
+            RequestDetails theRequestDetails,
+            T theResource,
+            String theMatchUrl,
+            boolean thePerformIndexing,
+            boolean theForceUpdateVersion,
+            IBasePersistedResource theEntity,
+            IIdType theResourceId,
+            IBaseResource theOldResource,
+            RestOperationTypeEnum theOperationType,
+            TransactionDetails theTransactionDetails);
 }

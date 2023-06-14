@@ -19,85 +19,97 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.lang.reflect.Method;
+import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody {
+public class DeleteMethodBinding
+        extends BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody {
 
-	public DeleteMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, theProvider, Delete.class, theMethod.getAnnotation(Delete.class).type());
-	}
+    public DeleteMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+        super(
+                theMethod,
+                theContext,
+                theProvider,
+                Delete.class,
+                theMethod.getAnnotation(Delete.class).type());
+    }
 
-	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return RestOperationTypeEnum.DELETE;
-	}
+    @Override
+    public RestOperationTypeEnum getRestOperationType() {
+        return RestOperationTypeEnum.DELETE;
+    }
 
-	@Override
-	protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
-		return Collections.singleton(RequestTypeEnum.DELETE);
-	}
+    @Override
+    protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
+        return Collections.singleton(RequestTypeEnum.DELETE);
+    }
 
-	@Override
-	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IBaseResource theResource) {
-		StringBuilder urlExtension = new StringBuilder();
-		urlExtension.append(getContext().getResourceType(theResource));
+    @Override
+    protected BaseHttpClientInvocation createClientInvocation(
+            Object[] theArgs, IBaseResource theResource) {
+        StringBuilder urlExtension = new StringBuilder();
+        urlExtension.append(getContext().getResourceType(theResource));
 
-		return new HttpPostClientInvocation(getContext(), theResource, urlExtension.toString());
-	}
+        return new HttpPostClientInvocation(getContext(), theResource, urlExtension.toString());
+    }
 
-	@Override
-	protected boolean allowVoidReturnType() {
-		return true;
-	}
+    @Override
+    protected boolean allowVoidReturnType() {
+        return true;
+    }
 
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IIdType id = (IIdType) theArgs[getIdParameterIndex()];
-		if (id == null) {
-			throw new NullPointerException(Msg.code(1472) + "ID can not be null");
-		}
+    @Override
+    public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+        IIdType id = (IIdType) theArgs[getIdParameterIndex()];
+        if (id == null) {
+            throw new NullPointerException(Msg.code(1472) + "ID can not be null");
+        }
 
-		if (id.hasResourceType() == false) {
-			id = id.withResourceType(getResourceName());
-		} else if (getResourceName().equals(id.getResourceType()) == false) {
-			throw new InvalidRequestException(Msg.code(1473) + "ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + id.getResourceType());
-		}
+        if (id.hasResourceType() == false) {
+            id = id.withResourceType(getResourceName());
+        } else if (getResourceName().equals(id.getResourceType()) == false) {
+            throw new InvalidRequestException(
+                    Msg.code(1473)
+                            + "ID parameter has the wrong resource type, expected '"
+                            + getResourceName()
+                            + "', found: "
+                            + id.getResourceType());
+        }
 
-		HttpDeleteClientInvocation retVal = createDeleteInvocation(getContext(), id, Collections.emptyMap());
+        HttpDeleteClientInvocation retVal =
+                createDeleteInvocation(getContext(), id, Collections.emptyMap());
 
-		for (int idx = 0; idx < theArgs.length; idx++) {
-			IParameter nextParam = getParameters().get(idx);
-			nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, null);
-		}
+        for (int idx = 0; idx < theArgs.length; idx++) {
+            IParameter nextParam = getParameters().get(idx);
+            nextParam.translateClientArgumentIntoQueryArgument(
+                    getContext(), theArgs[idx], null, null);
+        }
 
-		return retVal;
-	}
+        return retVal;
+    }
 
-	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, IIdType theId, Map<String, List<String>> theAdditionalParams) {
-		return new HttpDeleteClientInvocation(theContext, theId, theAdditionalParams);
-	}
+    public static HttpDeleteClientInvocation createDeleteInvocation(
+            FhirContext theContext, IIdType theId, Map<String, List<String>> theAdditionalParams) {
+        return new HttpDeleteClientInvocation(theContext, theId, theAdditionalParams);
+    }
 
+    @Override
+    protected String getMatchingOperation() {
+        return null;
+    }
 
-	@Override
-	protected String getMatchingOperation() {
-		return null;
-	}
-
-	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
-		return new HttpDeleteClientInvocation(theContext, theSearchUrl, theParams);
-	}
-
+    public static HttpDeleteClientInvocation createDeleteInvocation(
+            FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
+        return new HttpDeleteClientInvocation(theContext, theSearchUrl, theParams);
+    }
 }

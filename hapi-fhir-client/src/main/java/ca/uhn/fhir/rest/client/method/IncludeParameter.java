@@ -19,17 +19,16 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,83 +38,92 @@ import java.util.Set;
 
 class IncludeParameter extends BaseQueryParameter {
 
-	private Set<String> myAllow;
-	private Class<? extends Collection<Include>> myInstantiableCollectionType;
-	private Class<?> mySpecType;
-	private boolean myReverse;
+    private Set<String> myAllow;
+    private Class<? extends Collection<Include>> myInstantiableCollectionType;
+    private Class<?> mySpecType;
+    private boolean myReverse;
 
+    public IncludeParameter(
+            IncludeParam theAnnotation,
+            Class<? extends Collection<Include>> theInstantiableCollectionType,
+            Class<?> theSpecType) {
+        myInstantiableCollectionType = theInstantiableCollectionType;
+        myReverse = theAnnotation.reverse();
+        if (theAnnotation.allow().length > 0) {
+            myAllow = new HashSet<>();
+            for (String next : theAnnotation.allow()) {
+                if (next != null) {
+                    myAllow.add(next);
+                }
+            }
+        } else {
+            myAllow = Collections.emptySet();
+        }
 
-	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
-		myInstantiableCollectionType = theInstantiableCollectionType;
-		myReverse = theAnnotation.reverse();
-		if (theAnnotation.allow().length > 0) {
-			myAllow = new HashSet<>();
-			for (String next : theAnnotation.allow()) {
-				if (next != null) {
-					myAllow.add(next);
-				}
-			}
-		} else {
-			myAllow = Collections.emptySet();
-		}
+        mySpecType = theSpecType;
+        if (mySpecType != Include.class && mySpecType != String.class) {
+            throw new ConfigurationException(
+                    Msg.code(1462)
+                            + "Invalid @"
+                            + IncludeParam.class.getSimpleName()
+                            + " parameter type: "
+                            + mySpecType);
+        }
+    }
 
-		mySpecType = theSpecType;
-		if (mySpecType != Include.class && mySpecType != String.class) {
-			throw new ConfigurationException(Msg.code(1462) + "Invalid @" + IncludeParam.class.getSimpleName() + " parameter type: " + mySpecType);
-		}
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<QualifiedParamList> encode(FhirContext theContext, Object theObject)
+            throws InternalErrorException {
+        ArrayList<QualifiedParamList> retVal = new ArrayList<>();
 
-	}
+        if (myInstantiableCollectionType == null) {
+            if (mySpecType == Include.class) {
+                convertAndAddIncludeToList(retVal, (Include) theObject, theContext);
+            } else {
+                retVal.add(QualifiedParamList.singleton(((String) theObject)));
+            }
+        } else {
+            Collection<Include> val = (Collection<Include>) theObject;
+            for (Include include : val) {
+                convertAndAddIncludeToList(retVal, include, theContext);
+            }
+        }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException {
-		ArrayList<QualifiedParamList> retVal = new ArrayList<>();
+        return retVal;
+    }
 
-		if (myInstantiableCollectionType == null) {
-			if (mySpecType == Include.class) {
-				convertAndAddIncludeToList(retVal, (Include) theObject, theContext);
-			} else {
-				retVal.add(QualifiedParamList.singleton(((String) theObject)));
-			}
-		} else {
-			Collection<Include> val = (Collection<Include>) theObject;
-			for (Include include : val) {
-				convertAndAddIncludeToList(retVal, include, theContext);
-			}
-		}
+    private void convertAndAddIncludeToList(
+            ArrayList<QualifiedParamList> theQualifiedParamLists,
+            Include theInclude,
+            FhirContext theContext) {
+        String qualifier = null;
+        if (theInclude.isRecurse()) {
+            if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+                qualifier = Constants.PARAM_INCLUDE_QUALIFIER_ITERATE;
+            } else {
+                qualifier = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE;
+            }
+        }
+        theQualifiedParamLists.add(QualifiedParamList.singleton(qualifier, theInclude.getValue()));
+    }
 
-		return retVal;
-	}
+    public Set<String> getAllow() {
+        return myAllow;
+    }
 
-	private void convertAndAddIncludeToList(ArrayList<QualifiedParamList> theQualifiedParamLists, Include theInclude, FhirContext theContext) {
-		String qualifier = null;
-		if (theInclude.isRecurse()) {
-			if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-				qualifier = Constants.PARAM_INCLUDE_QUALIFIER_ITERATE;
-			} else {
-				qualifier = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE;
-			}
-		}
-		theQualifiedParamLists.add(QualifiedParamList.singleton(qualifier, theInclude.getValue()));
-	}
+    @Override
+    public String getName() {
+        return myReverse ? "_revinclude" : "_include";
+    }
 
-	public Set<String> getAllow() {
-		return myAllow;
-	}
+    @Override
+    public RestSearchParameterTypeEnum getParamType() {
+        return null;
+    }
 
-	@Override
-	public String getName() {
-		return myReverse ? "_revinclude" : "_include";
-	}
-
-	@Override
-	public RestSearchParameterTypeEnum getParamType() {
-		return null;
-	}
-
-	@Override
-	public boolean isRequired() {
-		return false;
-	}
-
+    @Override
+    public boolean isRequired() {
+        return false;
+    }
 }

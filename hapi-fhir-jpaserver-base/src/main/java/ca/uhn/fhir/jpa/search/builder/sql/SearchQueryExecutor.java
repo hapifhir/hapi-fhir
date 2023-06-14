@@ -25,141 +25,143 @@ import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.Arrays;
+import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.Query;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.Query;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.Arrays;
 
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
-	private static final Long NO_MORE = -1L;
-	private static final SearchQueryExecutor NO_VALUE_EXECUTOR = new SearchQueryExecutor();
-	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
-	private final GeneratedSql myGeneratedSql;
-	private final Integer myMaxResultsToFetch;
+    private static final Long NO_MORE = -1L;
+    private static final SearchQueryExecutor NO_VALUE_EXECUTOR = new SearchQueryExecutor();
+    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+    private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
+    private final GeneratedSql myGeneratedSql;
+    private final Integer myMaxResultsToFetch;
 
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	private EntityManager myEntityManager;
-	private boolean myQueryInitialized;
-	private Connection myConnection;
-	private PreparedStatement myStatement;
-	private ScrollableResultsIterator<Number> myResultSet;
-	private Long myNext;
+    @PersistenceContext(type = PersistenceContextType.TRANSACTION)
+    private EntityManager myEntityManager;
 
-	/**
-	 * Constructor
-	 */
-	public SearchQueryExecutor(GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {
-		Validate.notNull(theGeneratedSql, "theGeneratedSql must not be null");
-		myGeneratedSql = theGeneratedSql;
-		myQueryInitialized = false;
-		myMaxResultsToFetch = theMaxResultsToFetch;
-	}
+    private boolean myQueryInitialized;
+    private Connection myConnection;
+    private PreparedStatement myStatement;
+    private ScrollableResultsIterator<Number> myResultSet;
+    private Long myNext;
 
-	/**
-	 * Internal constructor for empty executor
-	 */
-	private SearchQueryExecutor() {
-		assert NO_MORE != null;
+    /** Constructor */
+    public SearchQueryExecutor(GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {
+        Validate.notNull(theGeneratedSql, "theGeneratedSql must not be null");
+        myGeneratedSql = theGeneratedSql;
+        myQueryInitialized = false;
+        myMaxResultsToFetch = theMaxResultsToFetch;
+    }
 
-		myGeneratedSql = null;
-		myMaxResultsToFetch = null;
-		myNext = NO_MORE;
-	}
+    /** Internal constructor for empty executor */
+    private SearchQueryExecutor() {
+        assert NO_MORE != null;
 
-	@Override
-	public void close() {
-		IoUtil.closeQuietly(myResultSet);
-	}
+        myGeneratedSql = null;
+        myMaxResultsToFetch = null;
+        myNext = NO_MORE;
+    }
 
-	@Override
-	public boolean hasNext() {
-		fetchNext();
-		return !NO_MORE.equals(myNext);
-	}
+    @Override
+    public void close() {
+        IoUtil.closeQuietly(myResultSet);
+    }
 
-	@Override
-	public Long next() {
-		fetchNext();
-		Validate.isTrue(hasNext(), "Can not call next() right now, no data remains");
-		Long next = myNext;
-		myNext = null;
-		return next;
-	}
+    @Override
+    public boolean hasNext() {
+        fetchNext();
+        return !NO_MORE.equals(myNext);
+    }
 
-	private void fetchNext() {
-		if (myNext == null) {
-			String sql = myGeneratedSql.getSql();
-			Object[] args = myGeneratedSql.getBindVariables().toArray(EMPTY_OBJECT_ARRAY);
+    @Override
+    public Long next() {
+        fetchNext();
+        Validate.isTrue(hasNext(), "Can not call next() right now, no data remains");
+        Long next = myNext;
+        myNext = null;
+        return next;
+    }
 
-			try {
-				if (!myQueryInitialized) {
+    private void fetchNext() {
+        if (myNext == null) {
+            String sql = myGeneratedSql.getSql();
+            Object[] args = myGeneratedSql.getBindVariables().toArray(EMPTY_OBJECT_ARRAY);
 
-					/*
-					 * Note that we use the spring managed connection, and the expectation is that a transaction that
-					 * is managed by Spring has been started before this method is called.
-					 */
-					HapiTransactionService.requireTransaction();
+            try {
+                if (!myQueryInitialized) {
 
-					Query nativeQuery = myEntityManager.createNativeQuery(sql);
-					org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
-					for (int i = 1; i <= args.length; i++) {
-						hibernateQuery.setParameter(i, args[i - 1]);
-					}
+                    /*
+                     * Note that we use the spring managed connection, and the expectation is that a transaction that
+                     * is managed by Spring has been started before this method is called.
+                     */
+                    HapiTransactionService.requireTransaction();
 
-					ourLog.trace("About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
+                    Query nativeQuery = myEntityManager.createNativeQuery(sql);
+                    org.hibernate.query.Query<?> hibernateQuery =
+                            (org.hibernate.query.Query<?>) nativeQuery;
+                    for (int i = 1; i <= args.length; i++) {
+                        hibernateQuery.setParameter(i, args[i - 1]);
+                    }
 
-					/*
-					 * These settings help to ensure that we use a search cursor
-					 * as opposed to loading all search results into memory
-					 */
-					hibernateQuery.setFetchSize(500000);
-					hibernateQuery.setCacheable(false);
-					hibernateQuery.setCacheMode(CacheMode.IGNORE);
-					hibernateQuery.setReadOnly(true);
+                    ourLog.trace(
+                            "About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
 
-					// This tells hibernate not to flush when we call scroll(), but rather to wait until the transaction commits and
-					// only flush then.  We need to do this so that any exceptions that happen in the transaction happen when
-					// we try to commit the transaction, and not here.
-					// See the test called testTransaction_multiThreaded (in FhirResourceDaoR4ConcurrentWriteTest) which triggers
-					// the following exception if we don't set this flush mode:
-					// java.util.concurrent.ExecutionException: org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only
-					hibernateQuery.setFlushMode(FlushModeType.COMMIT);
-					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-					myResultSet = new ScrollableResultsIterator<>(scrollableResults);
-					myQueryInitialized = true;
-				}
+                    /*
+                     * These settings help to ensure that we use a search cursor
+                     * as opposed to loading all search results into memory
+                     */
+                    hibernateQuery.setFetchSize(500000);
+                    hibernateQuery.setCacheable(false);
+                    hibernateQuery.setCacheMode(CacheMode.IGNORE);
+                    hibernateQuery.setReadOnly(true);
 
-				if (myResultSet == null || !myResultSet.hasNext()) {
-					myNext = NO_MORE;
-				} else {
-					Number next = myResultSet.next();
-					myNext = next.longValue();
-				}
+                    // This tells hibernate not to flush when we call scroll(), but rather to wait
+                    // until the transaction commits and
+                    // only flush then.  We need to do this so that any exceptions that happen in
+                    // the transaction happen when
+                    // we try to commit the transaction, and not here.
+                    // See the test called testTransaction_multiThreaded (in
+                    // FhirResourceDaoR4ConcurrentWriteTest) which triggers
+                    // the following exception if we don't set this flush mode:
+                    // java.util.concurrent.ExecutionException:
+                    // org.springframework.transaction.UnexpectedRollbackException: Transaction
+                    // silently rolled back because it has been marked as rollback-only
+                    hibernateQuery.setFlushMode(FlushModeType.COMMIT);
+                    ScrollableResults scrollableResults =
+                            hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+                    myResultSet = new ScrollableResultsIterator<>(scrollableResults);
+                    myQueryInitialized = true;
+                }
 
-			} catch (Exception e) {
-				ourLog.error("Failed to create or execute SQL query", e);
-				close();
-				throw new InternalErrorException(Msg.code(1262) + e, e);
-			}
-		}
-	}
+                if (myResultSet == null || !myResultSet.hasNext()) {
+                    myNext = NO_MORE;
+                } else {
+                    Number next = myResultSet.next();
+                    myNext = next.longValue();
+                }
 
-	public static SearchQueryExecutor emptyExecutor() {
-		return NO_VALUE_EXECUTOR;
-	}
+            } catch (Exception e) {
+                ourLog.error("Failed to create or execute SQL query", e);
+                close();
+                throw new InternalErrorException(Msg.code(1262) + e, e);
+            }
+        }
+    }
+
+    public static SearchQueryExecutor emptyExecutor() {
+        return NO_VALUE_EXECUTOR;
+    }
 }
-

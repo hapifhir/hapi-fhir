@@ -19,16 +19,14 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import java.util.List;
 
-import ca.uhn.fhir.context.RuntimeSearchParam;
-
 /**
- * This is still an experimental API - It isn't meant for public consumption yet. Get in touch if you'd like to use it
- * and maybe we can help work out a good design together.
+ * This is still an experimental API - It isn't meant for public consumption yet. Get in touch if
+ * you'd like to use it and maybe we can help work out a good design together.
  */
 public interface IDynamicSearchResourceProvider extends IResourceProvider {
 
-	List<RuntimeSearchParam> getSearchParameters();
-
+    List<RuntimeSearchParam> getSearchParameters();
 }

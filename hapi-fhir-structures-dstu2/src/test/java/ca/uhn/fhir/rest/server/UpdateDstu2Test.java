@@ -1,5 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -17,6 +21,9 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -34,169 +41,165 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class UpdateDstu2Test {
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static String ourLastConditionalUrl;
-	private static IdDt ourLastId;
-	private static IdDt ourLastIdParam;
-	private static boolean ourLastRequestWasSearch;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateDstu2Test.class);
-	private static int ourPort;
-	private static Server ourServer;
-	private static InstantDt ourSetLastUpdated;
-	
+    private static CloseableHttpClient ourClient;
+    private static FhirContext ourCtx = FhirContext.forDstu2();
+    private static String ourLastConditionalUrl;
+    private static IdDt ourLastId;
+    private static IdDt ourLastIdParam;
+    private static boolean ourLastRequestWasSearch;
+    private static final org.slf4j.Logger ourLog =
+            org.slf4j.LoggerFactory.getLogger(UpdateDstu2Test.class);
+    private static int ourPort;
+    private static Server ourServer;
+    private static InstantDt ourSetLastUpdated;
 
-	@BeforeEach
-	public void before() {
-		ourLastId = null;
-		ourLastConditionalUrl = null;
-		ourLastIdParam = null;
-		ourLastRequestWasSearch = false;
-	}
+    @BeforeEach
+    public void before() {
+        ourLastId = null;
+        ourLastConditionalUrl = null;
+        ourLastIdParam = null;
+        ourLastRequestWasSearch = false;
+    }
 
+    @Test
+    public void testSearchStillWorks() throws Exception {
 
-	
-	@Test
-	public void testSearchStillWorks() throws Exception {
+        Patient patient = new Patient();
+        patient.addIdentifier().setValue("002");
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
+        HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_pretty=true");
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_pretty=true");
+        HttpResponse status = ourClient.execute(httpGet);
 
-		HttpResponse status = ourClient.execute(httpGet);
+        String responseContent = IOUtils.toString(status.getEntity().getContent());
+        IOUtils.closeQuietly(status.getEntity().getContent());
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+        ourLog.info("Response was:\n{}", responseContent);
 
-		ourLog.info("Response was:\n{}", responseContent);
+        assertTrue(ourLastRequestWasSearch);
+        assertNull(ourLastId);
+        assertNull(ourLastIdParam);
+        assertNull(ourLastConditionalUrl);
+    }
 
-		assertTrue(ourLastRequestWasSearch);
-		assertNull(ourLastId);
-		assertNull(ourLastIdParam);
-		assertNull(ourLastConditionalUrl);
+    @Test
+    public void testUpdateWithConditionalUrl() throws Exception {
 
-	}
+        Patient patient = new Patient();
+        patient.addIdentifier().setValue("002");
 
-	@Test
-	public void testUpdateWithConditionalUrl() throws Exception {
+        HttpPut httpPost =
+                new HttpPut("http://localhost:" + ourPort + "/Patient?identifier=system%7C001");
+        httpPost.setEntity(
+                new StringEntity(
+                        ourCtx.newXmlParser().encodeResourceToString(patient),
+                        ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
+        HttpResponse status = ourClient.execute(httpPost);
 
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?identifier=system%7C001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+        String responseContent = IOUtils.toString(status.getEntity().getContent());
+        IOUtils.closeQuietly(status.getEntity().getContent());
 
-		HttpResponse status = ourClient.execute(httpPost);
+        ourLog.info("Response was:\n{}", responseContent);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+        assertEquals(200, status.getStatusLine().getStatusCode());
+        assertEquals(null, status.getFirstHeader("location"));
+        assertEquals(
+                "http://localhost:" + ourPort + "/Patient/001/_history/002",
+                status.getFirstHeader("content-location").getValue());
 
-		ourLog.info("Response was:\n{}", responseContent);
+        assertNull(ourLastId.getValue());
+        assertNull(ourLastIdParam);
+        assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
+    }
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, status.getFirstHeader("location"));
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
-		assertNull(ourLastId.getValue());
-		assertNull(ourLastIdParam);
-		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
+    @Test
+    public void testUpdateWithoutConditionalUrl() throws Exception {
 
-	}
+        Patient patient = new Patient();
+        patient.setId("2");
+        patient.addIdentifier().setValue("002");
 
+        HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
+        httpPost.setEntity(
+                new StringEntity(
+                        ourCtx.newXmlParser().encodeResourceToString(patient),
+                        ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-	@Test
-	public void testUpdateWithoutConditionalUrl() throws Exception {
+        HttpResponse status = ourClient.execute(httpPost);
 
-		Patient patient = new Patient();
-		patient.setId("2");
-		patient.addIdentifier().setValue("002");
+        String responseContent = IOUtils.toString(status.getEntity().getContent());
+        IOUtils.closeQuietly(status.getEntity().getContent());
 
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+        ourLog.info("Response was:\n{}", responseContent);
 
-		HttpResponse status = ourClient.execute(httpPost);
+        assertEquals(200, status.getStatusLine().getStatusCode());
+        assertEquals(null, status.getFirstHeader("location"));
+        assertEquals(
+                "http://localhost:" + ourPort + "/Patient/001/_history/002",
+                status.getFirstHeader("content-location").getValue());
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+        assertEquals("Patient/2", ourLastId.toUnqualified().getValue());
+        assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
+        assertNull(ourLastConditionalUrl);
+    }
 
-		ourLog.info("Response was:\n{}", responseContent);
+    @AfterAll
+    public static void afterClassClearContext() throws Exception {
+        JettyUtil.closeServer(ourServer);
+        TestUtil.randomizeLocaleAndTimezone();
+    }
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, status.getFirstHeader("location"));
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
-		assertEquals("Patient/2", ourLastId.toUnqualified().getValue());
-		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
-		assertNull(ourLastConditionalUrl);
+    @BeforeAll
+    public static void beforeClass() throws Exception {
+        ourServer = new Server(0);
 
-	}
+        PatientProvider patientProvider = new PatientProvider();
 
-	
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
-		
-	
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProvider patientProvider = new PatientProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
+        ServletHandler proxyHandler = new ServletHandler();
+        RestfulServer servlet = new RestfulServer(ourCtx);
+        servlet.setResourceProviders(patientProvider);
+        ServletHolder servletHolder = new ServletHolder(servlet);
+        proxyHandler.addServletWithMapping(servletHolder, "/*");
+        ourServer.setHandler(proxyHandler);
+        JettyUtil.startServer(ourServer);
         ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
+        PoolingHttpClientConnectionManager connectionManager =
+                new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setConnectionManager(connectionManager);
+        ourClient = builder.build();
+    }
 
-	}
-	
-	public static class PatientProvider implements IResourceProvider {
+    public static class PatientProvider implements IResourceProvider {
 
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
+        @Override
+        public Class<? extends IResource> getResourceType() {
+            return Patient.class;
+        }
 
-		@Search
-		public List<IResource> search(@OptionalParam(name="foo") StringDt theString) {
-			ourLastRequestWasSearch = true;
-			return new ArrayList<IResource>();
-		}
-		
-		@Update()
-		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
-			ourLastConditionalUrl = theConditional;
-			ourLastId = thePatient.getId();
-			ourLastIdParam = theIdParam;
-			MethodOutcome retVal = new MethodOutcome(new IdDt("Patient/001/_history/002"));
-			
-			ResourceMetadataKeyEnum.UPDATED.put(thePatient, ourSetLastUpdated);
-			
-			retVal.setResource(thePatient);
-			return retVal;
-		}
+        @Search
+        public List<IResource> search(@OptionalParam(name = "foo") StringDt theString) {
+            ourLastRequestWasSearch = true;
+            return new ArrayList<IResource>();
+        }
 
-	}
+        @Update()
+        public MethodOutcome updatePatient(
+                @ResourceParam Patient thePatient,
+                @ConditionalUrlParam String theConditional,
+                @IdParam IdDt theIdParam) {
+            ourLastConditionalUrl = theConditional;
+            ourLastId = thePatient.getId();
+            ourLastIdParam = theIdParam;
+            MethodOutcome retVal = new MethodOutcome(new IdDt("Patient/001/_history/002"));
 
+            ResourceMetadataKeyEnum.UPDATED.put(thePatient, ourSetLastUpdated);
+
+            retVal.setResource(thePatient);
+            return retVal;
+        }
+    }
 }

@@ -19,30 +19,27 @@
  */
 package ca.uhn.fhir.validation;
 
-import java.util.List;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-
+import java.util.List;
 import javax.annotation.Nonnull;
 
 public interface IValidationContext<T> {
 
-	FhirContext getFhirContext();
+    FhirContext getFhirContext();
 
-	T getResource();
+    T getResource();
 
-	String getResourceAsString();
+    String getResourceAsString();
 
-	EncodingEnum getResourceAsStringEncoding();
+    EncodingEnum getResourceAsStringEncoding();
 
-	void addValidationMessage(SingleValidationMessage theMessage);
+    void addValidationMessage(SingleValidationMessage theMessage);
 
-	List<SingleValidationMessage> getMessages();
-	
-	ValidationResult toResult();
+    List<SingleValidationMessage> getMessages();
 
-	@Nonnull
-	ValidationOptions getOptions();
+    ValidationResult toResult();
 
+    @Nonnull
+    ValidationOptions getOptions();
 }

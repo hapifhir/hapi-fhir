@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
-
 import ca.uhn.fhir.model.api.annotation.ExampleSupplier;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -27,177 +26,213 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
 @Schema(
-	name = "PackageInstallationSpec", description = "Defines a set of instructions for package installation"
-	)
+        name = "PackageInstallationSpec",
+        description = "Defines a set of instructions for package installation")
 @JsonPropertyOrder({
-	"name", "version", "packageUrl", "installMode", "installResourceTypes", "validationMode", "reloadExisting"
+    "name",
+    "version",
+    "packageUrl",
+    "installMode",
+    "installResourceTypes",
+    "validationMode",
+    "reloadExisting"
 })
-@ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
+@ExampleSupplier({
+    PackageInstallationSpec.ExampleSupplier.class,
+    PackageInstallationSpec.ExampleSupplier2.class
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+        creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PackageInstallationSpec {
 
-	@Schema(description = "The direct package URL")
-	@JsonProperty("packageUrl")
-	private String myPackageUrl;
-	@Schema(description = "The NPM package Name")
-	@JsonProperty("name")
-	private String myName;
-	@Schema(description = "The direct package version")
-	@JsonProperty("version")
-	private String myVersion;
-	@Schema(description = "Should resources from this package be extracted from the package and installed into the repository individually")
-	@JsonProperty("installMode")
-	private InstallModeEnum myInstallMode;
-	@Schema(description = "If resources are being installed individually, this is list provides the resource types to install. By default, all conformance resources will be installed.")
-	@JsonProperty("installResourceTypes")
-	private List<String> myInstallResourceTypes;
-	@Schema(description = "Should dependencies be automatically resolved, fetched and installed with the same settings")
-	@JsonProperty("fetchDependencies")
-	private boolean myFetchDependencies;
-	@Schema(description = "Should existing resources be reloaded. Defaults to true, but can be set to false to avoid re-index operations for existing search parameters")
-	@JsonProperty("reloadExisting")
-	private boolean myReloadExisting = true;
-	@Schema(description = "Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
-	private List<String> myDependencyExcludes;
-	@JsonIgnore
-	private byte[] myPackageContents;
+    @Schema(description = "The direct package URL")
+    @JsonProperty("packageUrl")
+    private String myPackageUrl;
 
-	public List<String> getDependencyExcludes() {
-		if (myDependencyExcludes == null) {
-			myDependencyExcludes = new ArrayList<>();
-		}
-		return myDependencyExcludes;
-	}
+    @Schema(description = "The NPM package Name")
+    @JsonProperty("name")
+    private String myName;
 
-	public void setDependencyExcludes(List<String> theDependencyExcludes) {
-		myDependencyExcludes = theDependencyExcludes;
-	}
+    @Schema(description = "The direct package version")
+    @JsonProperty("version")
+    private String myVersion;
 
-	public boolean isFetchDependencies() {
-		return myFetchDependencies;
-	}
+    @Schema(
+            description =
+                    "Should resources from this package be extracted from the package and installed"
+                            + " into the repository individually")
+    @JsonProperty("installMode")
+    private InstallModeEnum myInstallMode;
 
-	public PackageInstallationSpec setFetchDependencies(boolean theFetchDependencies) {
-		myFetchDependencies = theFetchDependencies;
-		return this;
-	}
+    @Schema(
+            description =
+                    "If resources are being installed individually, this is list provides the"
+                        + " resource types to install. By default, all conformance resources will"
+                        + " be installed.")
+    @JsonProperty("installResourceTypes")
+    private List<String> myInstallResourceTypes;
 
-	public String getPackageUrl() {
-		return myPackageUrl;
-	}
+    @Schema(
+            description =
+                    "Should dependencies be automatically resolved, fetched and installed with the"
+                            + " same settings")
+    @JsonProperty("fetchDependencies")
+    private boolean myFetchDependencies;
 
-	public PackageInstallationSpec setPackageUrl(String thePackageUrl) {
-		myPackageUrl = thePackageUrl;
-		return this;
-	}
+    @Schema(
+            description =
+                    "Should existing resources be reloaded. Defaults to true, but can be set to"
+                            + " false to avoid re-index operations for existing search parameters")
+    @JsonProperty("reloadExisting")
+    private boolean myReloadExisting = true;
 
-	public InstallModeEnum getInstallMode() {
-		return myInstallMode;
-	}
+    @Schema(
+            description =
+                    "Any values provided here will be interpreted as a regex. Dependencies with an"
+                            + " ID matching any regex will be skipped.")
+    private List<String> myDependencyExcludes;
 
-	public PackageInstallationSpec setInstallMode(InstallModeEnum theInstallMode) {
-		myInstallMode = theInstallMode;
-		return this;
-	}
+    @JsonIgnore private byte[] myPackageContents;
 
-	public List<String> getInstallResourceTypes() {
-		if (myInstallResourceTypes == null) {
-			myInstallResourceTypes = new ArrayList<>();
-		}
-		return myInstallResourceTypes;
-	}
+    public List<String> getDependencyExcludes() {
+        if (myDependencyExcludes == null) {
+            myDependencyExcludes = new ArrayList<>();
+        }
+        return myDependencyExcludes;
+    }
 
-	public void setInstallResourceTypes(List<String> theInstallResourceTypes) {
-		myInstallResourceTypes = theInstallResourceTypes;
-	}
+    public void setDependencyExcludes(List<String> theDependencyExcludes) {
+        myDependencyExcludes = theDependencyExcludes;
+    }
 
-	public String getName() {
-		return myName;
-	}
+    public boolean isFetchDependencies() {
+        return myFetchDependencies;
+    }
 
-	public PackageInstallationSpec setName(String theName) {
-		myName = theName;
-		return this;
-	}
+    public PackageInstallationSpec setFetchDependencies(boolean theFetchDependencies) {
+        myFetchDependencies = theFetchDependencies;
+        return this;
+    }
 
-	public String getVersion() {
-		return myVersion;
-	}
+    public String getPackageUrl() {
+        return myPackageUrl;
+    }
 
-	public PackageInstallationSpec setVersion(String theVersion) {
-		myVersion = theVersion;
-		return this;
-	}
+    public PackageInstallationSpec setPackageUrl(String thePackageUrl) {
+        myPackageUrl = thePackageUrl;
+        return this;
+    }
 
-	public byte[] getPackageContents() {
-		return myPackageContents;
-	}
+    public InstallModeEnum getInstallMode() {
+        return myInstallMode;
+    }
 
-	public PackageInstallationSpec setPackageContents(byte[] thePackageContents) {
-		myPackageContents = thePackageContents;
-		return this;
-	}
+    public PackageInstallationSpec setInstallMode(InstallModeEnum theInstallMode) {
+        myInstallMode = theInstallMode;
+        return this;
+    }
 
-	public boolean isReloadExisting() {
-		return myReloadExisting;
-	}
+    public List<String> getInstallResourceTypes() {
+        if (myInstallResourceTypes == null) {
+            myInstallResourceTypes = new ArrayList<>();
+        }
+        return myInstallResourceTypes;
+    }
 
-	public void setReloadExisting(boolean reloadExisting) {
-		this.myReloadExisting = reloadExisting;
-	}
+    public void setInstallResourceTypes(List<String> theInstallResourceTypes) {
+        myInstallResourceTypes = theInstallResourceTypes;
+    }
 
-	public PackageInstallationSpec addDependencyExclude(String theExclude) {
-		getDependencyExcludes().add(theExclude);
-		return this;
-	}
+    public String getName() {
+        return myName;
+    }
 
-	public PackageInstallationSpec addInstallResourceTypes(String... theResourceTypes) {
-		for (String next : theResourceTypes) {
-			getInstallResourceTypes().add(next);
-		}
-		return this;
-	}
+    public PackageInstallationSpec setName(String theName) {
+        myName = theName;
+        return this;
+    }
 
-	public enum InstallModeEnum {
-		STORE_ONLY,
-		STORE_AND_INSTALL
-	}
+    public String getVersion() {
+        return myVersion;
+    }
 
-	public enum ValidationModeEnum {
-		NOT_AVAILABLE,
-		AVAILABLE
-	}
+    public PackageInstallationSpec setVersion(String theVersion) {
+        myVersion = theVersion;
+        return this;
+    }
 
-	public static class ExampleSupplier implements Supplier<PackageInstallationSpec> {
+    public byte[] getPackageContents() {
+        return myPackageContents;
+    }
 
-		@Override
-		public PackageInstallationSpec get() {
-			return new PackageInstallationSpec()
-				.setName("hl7.fhir.us.core")
-				.setVersion("3.1.0")
-				.setInstallMode(InstallModeEnum.STORE_ONLY)
-				.setFetchDependencies(true);
-		}
-	}
+    public PackageInstallationSpec setPackageContents(byte[] thePackageContents) {
+        myPackageContents = thePackageContents;
+        return this;
+    }
 
-	public static class ExampleSupplier2 implements Supplier<PackageInstallationSpec> {
+    public boolean isReloadExisting() {
+        return myReloadExisting;
+    }
 
-		@Override
-		public PackageInstallationSpec get() {
-			return new PackageInstallationSpec()
-				.setName("com.example.my-resources")
-				.setVersion("1.0")
-				.setPackageUrl("classpath:/my-resources.tgz")
-				.setInstallMode(InstallModeEnum.STORE_AND_INSTALL)
-				.addInstallResourceTypes("Organization", "Medication", "PlanDefinition", "SearchParameter");
-		}
-	}
+    public void setReloadExisting(boolean reloadExisting) {
+        this.myReloadExisting = reloadExisting;
+    }
 
+    public PackageInstallationSpec addDependencyExclude(String theExclude) {
+        getDependencyExcludes().add(theExclude);
+        return this;
+    }
+
+    public PackageInstallationSpec addInstallResourceTypes(String... theResourceTypes) {
+        for (String next : theResourceTypes) {
+            getInstallResourceTypes().add(next);
+        }
+        return this;
+    }
+
+    public enum InstallModeEnum {
+        STORE_ONLY,
+        STORE_AND_INSTALL
+    }
+
+    public enum ValidationModeEnum {
+        NOT_AVAILABLE,
+        AVAILABLE
+    }
+
+    public static class ExampleSupplier implements Supplier<PackageInstallationSpec> {
+
+        @Override
+        public PackageInstallationSpec get() {
+            return new PackageInstallationSpec()
+                    .setName("hl7.fhir.us.core")
+                    .setVersion("3.1.0")
+                    .setInstallMode(InstallModeEnum.STORE_ONLY)
+                    .setFetchDependencies(true);
+        }
+    }
+
+    public static class ExampleSupplier2 implements Supplier<PackageInstallationSpec> {
+
+        @Override
+        public PackageInstallationSpec get() {
+            return new PackageInstallationSpec()
+                    .setName("com.example.my-resources")
+                    .setVersion("1.0")
+                    .setPackageUrl("classpath:/my-resources.tgz")
+                    .setInstallMode(InstallModeEnum.STORE_AND_INSTALL)
+                    .addInstallResourceTypes(
+                            "Organization", "Medication", "PlanDefinition", "SearchParameter");
+        }
+    }
 }

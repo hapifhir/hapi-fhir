@@ -24,11 +24,10 @@ import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParam
 import com.healthmarketscience.sqlbuilder.Condition;
 
 public interface ICanMakeMissingParamPredicate {
-	/**
-	 * Creates the condition for searching for a missing field
-	 * for a given SearchParameter type.
-	 *
-	 * Only use if {@link JpaStorageSettings#getIndexMissingFields()} is disabled
-	 */
-	Condition createPredicateParamMissingValue(MissingQueryParameterPredicateParams theParams);
+    /**
+     * Creates the condition for searching for a missing field for a given SearchParameter type.
+     *
+     * <p>Only use if {@link JpaStorageSettings#getIndexMissingFields()} is disabled
+     */
+    Condition createPredicateParamMissingValue(MissingQueryParameterPredicateParams theParams);
 }

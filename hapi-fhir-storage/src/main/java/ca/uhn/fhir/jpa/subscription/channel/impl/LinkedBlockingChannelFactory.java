@@ -28,59 +28,75 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ThreadPoolUtil;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
-import javax.annotation.Nonnull;
-import javax.annotation.PreDestroy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.PreDestroy;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 public class LinkedBlockingChannelFactory implements IChannelFactory {
 
-	private final IChannelNamer myChannelNamer;
-	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
+    private final IChannelNamer myChannelNamer;
+    private final Map<String, LinkedBlockingChannel> myChannels =
+            Collections.synchronizedMap(new HashMap<>());
 
-	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer) {
-		myChannelNamer = theChannelNamer;
-	}
+    public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer) {
+        myChannelNamer = theChannelNamer;
+    }
 
-	@Override
-	public IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings) {
-		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
-	}
+    @Override
+    public IChannelReceiver getOrCreateReceiver(
+            String theChannelName,
+            Class<?> theMessageType,
+            ChannelConsumerSettings theChannelSettings) {
+        return getOrCreateChannel(
+                theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
+    }
 
-	@Override
-	public IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings) {
-		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
-	}
+    @Override
+    public IChannelProducer getOrCreateProducer(
+            String theChannelName,
+            Class<?> theMessageType,
+            ChannelProducerSettings theChannelSettings) {
+        return getOrCreateChannel(
+                theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
+    }
 
-	@Override
-	public IChannelNamer getChannelNamer() {
-		return myChannelNamer;
-	}
+    @Override
+    public IChannelNamer getChannelNamer() {
+        return myChannelNamer;
+    }
 
-	private LinkedBlockingChannel getOrCreateChannel(String theChannelName,
-																	 int theConcurrentConsumers,
-																	 IChannelSettings theChannelSettings) {
-		// TODO - does this need retry settings?
-		final String channelName = myChannelNamer.getChannelName(theChannelName, theChannelSettings);
+    private LinkedBlockingChannel getOrCreateChannel(
+            String theChannelName,
+            int theConcurrentConsumers,
+            IChannelSettings theChannelSettings) {
+        // TODO - does this need retry settings?
+        final String channelName =
+                myChannelNamer.getChannelName(theChannelName, theChannelSettings);
 
-		return myChannels.computeIfAbsent(channelName, t -> buildLinkedBlockingChannel(theConcurrentConsumers, channelName));
-	}
+        return myChannels.computeIfAbsent(
+                channelName, t -> buildLinkedBlockingChannel(theConcurrentConsumers, channelName));
+    }
 
-	@Nonnull
-	private LinkedBlockingChannel buildLinkedBlockingChannel(int theConcurrentConsumers, String theChannelName) {
-		String threadNamePrefix = theChannelName + "-";
-		ThreadPoolTaskExecutor threadPoolExecutor = ThreadPoolUtil.newThreadPool(theConcurrentConsumers, theConcurrentConsumers, threadNamePrefix, SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
+    @Nonnull
+    private LinkedBlockingChannel buildLinkedBlockingChannel(
+            int theConcurrentConsumers, String theChannelName) {
+        String threadNamePrefix = theChannelName + "-";
+        ThreadPoolTaskExecutor threadPoolExecutor =
+                ThreadPoolUtil.newThreadPool(
+                        theConcurrentConsumers,
+                        theConcurrentConsumers,
+                        threadNamePrefix,
+                        SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
 
-		return new LinkedBlockingChannel(theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize);
-	}
+        return new LinkedBlockingChannel(
+                theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize);
+    }
 
-
-	@PreDestroy
-	public void stop() {
-		myChannels.clear();
-	}
-
+    @PreDestroy
+    public void stop() {
+        myChannels.clear();
+    }
 }

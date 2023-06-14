@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -13,48 +16,47 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
 public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 
-	@Autowired
-	private SubscriptionTestUtil mySubscriptionTestUtil;
+    @Autowired private SubscriptionTestUtil mySubscriptionTestUtil;
 
-	@AfterEach
-	public void afterResetDao() {
-		myStorageSettings.setResourceServerIdStrategy(new JpaStorageSettings().getResourceServerIdStrategy());
-		BaseHapiFhirDao.setValidationDisabledForUnitTest(false);
-	}
+    @AfterEach
+    public void afterResetDao() {
+        myStorageSettings.setResourceServerIdStrategy(
+                new JpaStorageSettings().getResourceServerIdStrategy());
+        BaseHapiFhirDao.setValidationDisabledForUnitTest(false);
+    }
 
-	@AfterEach
-	public void afterUnregisterRestHookListener() {
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-	}
+    @AfterEach
+    public void afterUnregisterRestHookListener() {
+        mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+    }
 
-	@BeforeEach
-	public void beforeRegisterRestHookListener() {
-		mySubscriptionTestUtil.registerRestHookInterceptor();
-	}
+    @BeforeEach
+    public void beforeRegisterRestHookListener() {
+        mySubscriptionTestUtil.registerRestHookInterceptor();
+    }
 
+    @Test
+    public void testCreateInvalidSubscriptionOkButCanNotActivate() {
+        Subscription s = new Subscription();
+        s.setStatus(Subscription.SubscriptionStatus.OFF);
+        s.setCriteria("FOO");
+        IIdType id = mySubscriptionDao.create(s).getId().toUnqualified();
 
-	@Test
-	public void testCreateInvalidSubscriptionOkButCanNotActivate() {
-		Subscription s = new Subscription();
-		s.setStatus(Subscription.SubscriptionStatus.OFF);
-		s.setCriteria("FOO");
-		IIdType id = mySubscriptionDao.create(s).getId().toUnqualified();
+        s = mySubscriptionDao.read(id);
+        assertEquals("FOO", s.getCriteria());
 
-		s = mySubscriptionDao.read(id);
-		assertEquals("FOO", s.getCriteria());
-
-		s.setStatus(Subscription.SubscriptionStatus.REQUESTED);
-		try {
-			mySubscriptionDao.update(s);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(13) + "Subscription.criteria contains invalid/unsupported resource type: FOO", e.getMessage());
-		}
-	}
-
+        s.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+        try {
+            mySubscriptionDao.update(s);
+            fail();
+        } catch (UnprocessableEntityException e) {
+            assertEquals(
+                    Msg.code(13)
+                            + "Subscription.criteria contains invalid/unsupported resource type:"
+                            + " FOO",
+                    e.getMessage());
+        }
+    }
 }

@@ -26,22 +26,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation declares a bean as a subscription interceptor. This interceptor
- * is not mandatory for interceptor classes, but is added as a marker by convention.
+ * This annotation declares a bean as a subscription interceptor. This interceptor is not mandatory
+ * for interceptor classes, but is added as a marker by convention.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 public @interface Interceptor {
 
-	/**
-	 * @see #order() 
-	 */
-	int DEFAULT_ORDER = 0;
+    /**
+     * @see #order()
+     */
+    int DEFAULT_ORDER = 0;
 
-	/**
-	 * The order that interceptors should be called in. Lower numbers happen before higher numbers. Default is 0
-	 * and allowable values can be positive or negative or 0. Ignored when annotation is set on a method.
-	 */
-	int order() default DEFAULT_ORDER;
+    /**
+     * The order that interceptors should be called in. Lower numbers happen before higher numbers.
+     * Default is 0 and allowable values can be positive or negative or 0. Ignored when annotation
+     * is set on a method.
+     */
+    int order() default DEFAULT_ORDER;
 }

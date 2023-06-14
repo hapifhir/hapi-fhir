@@ -35,68 +35,90 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
 public class StepExecutor {
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-	private final IJobPersistence myJobPersistence;
+    private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+    private final IJobPersistence myJobPersistence;
 
-	public StepExecutor(IJobPersistence theJobPersistence) {
-		myJobPersistence = theJobPersistence;
-	}
+    public StepExecutor(IJobPersistence theJobPersistence) {
+        myJobPersistence = theJobPersistence;
+    }
 
-	/**
-	 * Calls the worker execution step, and performs error handling logic for jobs that failed.
-	 */
-	<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeStep(
-		StepExecutionDetails<PT, IT> theStepExecutionDetails,
-		IJobStepWorker<PT, IT, OT> theStepWorker,
-		BaseDataSink<PT, IT, OT> theDataSink
-	) {
-		String jobDefinitionId = theDataSink.getJobDefinitionId();
-		String targetStepId = theDataSink.getTargetStep().getStepId();
-		String chunkId = theStepExecutionDetails.getChunkId();
+    /** Calls the worker execution step, and performs error handling logic for jobs that failed. */
+    <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeStep(
+            StepExecutionDetails<PT, IT> theStepExecutionDetails,
+            IJobStepWorker<PT, IT, OT> theStepWorker,
+            BaseDataSink<PT, IT, OT> theDataSink) {
+        String jobDefinitionId = theDataSink.getJobDefinitionId();
+        String targetStepId = theDataSink.getTargetStep().getStepId();
+        String chunkId = theStepExecutionDetails.getChunkId();
 
-		RunOutcome outcome;
-		try {
-			outcome = theStepWorker.run(theStepExecutionDetails, theDataSink);
-			Validate.notNull(outcome, "Step theWorker returned null: %s", theStepWorker.getClass());
-		} catch (JobExecutionFailedException e) {
-			ourLog.error("Unrecoverable failure executing job {} step {} chunk {}",
-				jobDefinitionId,
-				targetStepId,
-				chunkId,
-				e);
-			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				myJobPersistence.onWorkChunkFailed(chunkId, e.toString());
-			}
-			return false;
-		} catch (Exception e) {
-			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				ourLog.info("Temporary problem executing job {} step {}, marking chunk {} as retriable ERRORED", jobDefinitionId, targetStepId, chunkId);
-				WorkChunkErrorEvent parameters = new WorkChunkErrorEvent(chunkId, e.getMessage());
-				WorkChunkStatusEnum newStatus = myJobPersistence.onWorkChunkError(parameters);
-				if (newStatus == WorkChunkStatusEnum.FAILED) {
-					ourLog.error("Exhausted retries:  Failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId, e);
-					return false;
-				}
-			} else {
-				ourLog.error("Failure executing job {} step {}, no associated work chunk", jobDefinitionId, targetStepId, e);
-			}
-			throw new JobStepFailedException(Msg.code(2041) + e.getMessage(), e);
-		} catch (Throwable t) {
-			ourLog.error("Unexpected failure executing job {} step {}", jobDefinitionId, targetStepId, t);
-			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				myJobPersistence.onWorkChunkFailed(chunkId, t.toString());
-			}
-			return false;
-		}
+        RunOutcome outcome;
+        try {
+            outcome = theStepWorker.run(theStepExecutionDetails, theDataSink);
+            Validate.notNull(outcome, "Step theWorker returned null: %s", theStepWorker.getClass());
+        } catch (JobExecutionFailedException e) {
+            ourLog.error(
+                    "Unrecoverable failure executing job {} step {} chunk {}",
+                    jobDefinitionId,
+                    targetStepId,
+                    chunkId,
+                    e);
+            if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
+                myJobPersistence.onWorkChunkFailed(chunkId, e.toString());
+            }
+            return false;
+        } catch (Exception e) {
+            if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
+                ourLog.info(
+                        "Temporary problem executing job {} step {}, marking chunk {} as retriable"
+                                + " ERRORED",
+                        jobDefinitionId,
+                        targetStepId,
+                        chunkId);
+                WorkChunkErrorEvent parameters = new WorkChunkErrorEvent(chunkId, e.getMessage());
+                WorkChunkStatusEnum newStatus = myJobPersistence.onWorkChunkError(parameters);
+                if (newStatus == WorkChunkStatusEnum.FAILED) {
+                    ourLog.error(
+                            "Exhausted retries:  Failure executing job {} step {}, marking chunk {}"
+                                    + " as ERRORED",
+                            jobDefinitionId,
+                            targetStepId,
+                            chunkId,
+                            e);
+                    return false;
+                }
+            } else {
+                ourLog.error(
+                        "Failure executing job {} step {}, no associated work chunk",
+                        jobDefinitionId,
+                        targetStepId,
+                        e);
+            }
+            throw new JobStepFailedException(Msg.code(2041) + e.getMessage(), e);
+        } catch (Throwable t) {
+            ourLog.error(
+                    "Unexpected failure executing job {} step {}",
+                    jobDefinitionId,
+                    targetStepId,
+                    t);
+            if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
+                myJobPersistence.onWorkChunkFailed(chunkId, t.toString());
+            }
+            return false;
+        }
 
-		if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-			int recordsProcessed = outcome.getRecordsProcessed();
-			int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
-			WorkChunkCompletionEvent event = new WorkChunkCompletionEvent(chunkId, recordsProcessed, recoveredErrorCount, theDataSink.getRecoveredWarning());
+        if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
+            int recordsProcessed = outcome.getRecordsProcessed();
+            int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
+            WorkChunkCompletionEvent event =
+                    new WorkChunkCompletionEvent(
+                            chunkId,
+                            recordsProcessed,
+                            recoveredErrorCount,
+                            theDataSink.getRecoveredWarning());
 
-			myJobPersistence.onWorkChunkCompletion(event);
-		}
+            myJobPersistence.onWorkChunkCompletion(event);
+        }
 
-		return true;
-	}
+        return true;
+    }
 }

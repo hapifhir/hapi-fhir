@@ -24,12 +24,11 @@ import com.google.common.annotations.VisibleForTesting;
 /**
  * This is currently only here for unit tests!
  *
- * DO NOT USE IN NON-TEST CODE. Maybe this will change in the future?
+ * <p>DO NOT USE IN NON-TEST CODE. Maybe this will change in the future?
  */
 @FunctionalInterface
 @VisibleForTesting
 public interface IAnonymousInterceptor {
 
-	void invoke(IPointcut thePointcut, HookParams theArgs);
-
+    void invoke(IPointcut thePointcut, HookParams theArgs);
 }

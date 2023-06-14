@@ -24,55 +24,62 @@ import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.util.NameUtil;
 import ca.uhn.fhir.util.StringUtil;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-/**
- * Similarity measure for two IBase name fields
- */
+/** Similarity measure for two IBase name fields */
 public class NameMatcher implements IMdmFieldMatcher {
 
-	private final MdmNameMatchModeEnum myMatchMode;
+    private final MdmNameMatchModeEnum myMatchMode;
 
-	private final FhirContext myFhirContext;
+    private final FhirContext myFhirContext;
 
-	public NameMatcher(FhirContext theFhirContext, MdmNameMatchModeEnum theMatchMode) {
-		myMatchMode = theMatchMode;
-		myFhirContext = theFhirContext;
-	}
+    public NameMatcher(FhirContext theFhirContext, MdmNameMatchModeEnum theMatchMode) {
+        myMatchMode = theMatchMode;
+        myFhirContext = theFhirContext;
+    }
 
-	@Override
-	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-		String leftFamilyName = NameUtil.extractFamilyName(myFhirContext, theLeftBase);
-		String rightFamilyName = NameUtil.extractFamilyName(myFhirContext, theRightBase);
-		if (StringUtils.isEmpty(leftFamilyName) || StringUtils.isEmpty(rightFamilyName)) {
-			return false;
-		}
+    @Override
+    public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+        String leftFamilyName = NameUtil.extractFamilyName(myFhirContext, theLeftBase);
+        String rightFamilyName = NameUtil.extractFamilyName(myFhirContext, theRightBase);
+        if (StringUtils.isEmpty(leftFamilyName) || StringUtils.isEmpty(rightFamilyName)) {
+            return false;
+        }
 
-		boolean match = false;
+        boolean match = false;
 
-		List<String> leftGivenNames = NameUtil.extractGivenNames(myFhirContext, theLeftBase);
-		List<String> rightGivenNames = NameUtil.extractGivenNames(myFhirContext, theRightBase);
+        List<String> leftGivenNames = NameUtil.extractGivenNames(myFhirContext, theLeftBase);
+        List<String> rightGivenNames = NameUtil.extractGivenNames(myFhirContext, theRightBase);
 
-		if (!theParams.getExact()) {
-			leftFamilyName = StringUtil.normalizeStringForSearchIndexing(leftFamilyName);
-			rightFamilyName = StringUtil.normalizeStringForSearchIndexing(rightFamilyName);
-			leftGivenNames = leftGivenNames.stream().map(StringUtil::normalizeStringForSearchIndexing).collect(Collectors.toList());
-			rightGivenNames = rightGivenNames.stream().map(StringUtil::normalizeStringForSearchIndexing).collect(Collectors.toList());
-		}
+        if (!theParams.getExact()) {
+            leftFamilyName = StringUtil.normalizeStringForSearchIndexing(leftFamilyName);
+            rightFamilyName = StringUtil.normalizeStringForSearchIndexing(rightFamilyName);
+            leftGivenNames =
+                    leftGivenNames.stream()
+                            .map(StringUtil::normalizeStringForSearchIndexing)
+                            .collect(Collectors.toList());
+            rightGivenNames =
+                    rightGivenNames.stream()
+                            .map(StringUtil::normalizeStringForSearchIndexing)
+                            .collect(Collectors.toList());
+        }
 
-		for (String leftGivenName : leftGivenNames) {
-			for (String rightGivenName : rightGivenNames) {
-				match |= leftGivenName.equals(rightGivenName) && leftFamilyName.equals(rightFamilyName);
-				if (myMatchMode == MdmNameMatchModeEnum.ANY_ORDER) {
-					match |= leftGivenName.equals(rightFamilyName) && leftFamilyName.equals(rightGivenName);
-				}
-			}
-		}
+        for (String leftGivenName : leftGivenNames) {
+            for (String rightGivenName : rightGivenNames) {
+                match |=
+                        leftGivenName.equals(rightGivenName)
+                                && leftFamilyName.equals(rightFamilyName);
+                if (myMatchMode == MdmNameMatchModeEnum.ANY_ORDER) {
+                    match |=
+                            leftGivenName.equals(rightFamilyName)
+                                    && leftFamilyName.equals(rightGivenName);
+                }
+            }
+        }
 
-		return match;
-	}
+        return match;
+    }
 }

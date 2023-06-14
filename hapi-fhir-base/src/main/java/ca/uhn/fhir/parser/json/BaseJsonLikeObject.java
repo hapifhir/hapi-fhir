@@ -23,33 +23,32 @@ import java.util.Iterator;
 
 public abstract class BaseJsonLikeObject extends BaseJsonLikeValue {
 
-	@Override
-	public ValueType getJsonType() {
-		return ValueType.OBJECT;
-	}
+    @Override
+    public ValueType getJsonType() {
+        return ValueType.OBJECT;
+    }
 
-	@Override
-	public ScalarType getDataType() {
-		return null;
-	}
+    @Override
+    public ScalarType getDataType() {
+        return null;
+    }
 
-	@Override
-	public boolean isObject() {
-		return true;
-	}
+    @Override
+    public boolean isObject() {
+        return true;
+    }
 
-	@Override
-	public BaseJsonLikeObject getAsObject() {
-		return this;
-	}
+    @Override
+    public BaseJsonLikeObject getAsObject() {
+        return this;
+    }
 
-	@Override
-	public String getAsString() {
-		return null;
-	}
+    @Override
+    public String getAsString() {
+        return null;
+    }
 
-	public abstract Iterator<String> keyIterator();
+    public abstract Iterator<String> keyIterator();
 
-	public abstract BaseJsonLikeValue get(String key);
-
+    public abstract BaseJsonLikeValue get(String key);
 }

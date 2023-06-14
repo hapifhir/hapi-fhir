@@ -27,31 +27,37 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import java.util.Collections;
+import javax.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
+public class JpaResourceDaoComposition<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
+        implements IFhirResourceDaoComposition<T> {
 
-public class JpaResourceDaoComposition<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoComposition<T> {
-
-	@Override
-	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
-		SearchParameterMap paramMap = new SearchParameterMap();
-		if (theCount != null) {
-			paramMap.setCount(theCount.getValue());
-		}
-		if (theOffset != null) {
-			paramMap.setOffset(theOffset.getValue());
-		}
-		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
-		paramMap.setSort(theSort);
-		paramMap.setLastUpdated(theLastUpdate);
-		if (theId != null) {
-			paramMap.add("_id", new StringParam(theId.getIdPart()));
-		}
-		return search(paramMap, theRequestDetails);
-	}
+    @Override
+    public IBundleProvider getDocumentForComposition(
+            HttpServletRequest theServletRequest,
+            IIdType theId,
+            IPrimitiveType<Integer> theCount,
+            IPrimitiveType<Integer> theOffset,
+            DateRangeParam theLastUpdate,
+            SortSpec theSort,
+            RequestDetails theRequestDetails) {
+        SearchParameterMap paramMap = new SearchParameterMap();
+        if (theCount != null) {
+            paramMap.setCount(theCount.getValue());
+        }
+        if (theOffset != null) {
+            paramMap.setOffset(theOffset.getValue());
+        }
+        paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
+        paramMap.setSort(theSort);
+        paramMap.setLastUpdated(theLastUpdate);
+        if (theId != null) {
+            paramMap.add("_id", new StringParam(theId.getIdPart()));
+        }
+        return search(paramMap, theRequestDetails);
+    }
 }
-

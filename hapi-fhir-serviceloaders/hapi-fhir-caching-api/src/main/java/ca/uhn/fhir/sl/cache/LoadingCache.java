@@ -21,14 +21,13 @@ package ca.uhn.fhir.sl.cache;
  */
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
- * This interface is a blend between
- * <a href="https://github.com/ben-manes/caffeine">Caffeine's LoadingCache</a> and
- * <a href="https://github.com/google/guava/wiki/CachesExplained"></a>Guava's LoadingCache</a>.
+ * This interface is a blend between <a href="https://github.com/ben-manes/caffeine">Caffeine's
+ * LoadingCache</a> and <a href="https://github.com/google/guava/wiki/CachesExplained"></a>Guava's
+ * LoadingCache</a>.
  *
- * Please check their documentation for information in the methods below.
+ * <p>Please check their documentation for information in the methods below.
  */
 public interface LoadingCache<K, V> extends Cache<K, V> {
     V get(K key);

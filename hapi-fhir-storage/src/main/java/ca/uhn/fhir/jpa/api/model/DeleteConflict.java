@@ -25,35 +25,34 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class DeleteConflict {
 
-	private final IdDt mySourceId;
-	private final String mySourcePath;
-	private final IdDt myTargetId;
+    private final IdDt mySourceId;
+    private final String mySourcePath;
+    private final IdDt myTargetId;
 
-	public DeleteConflict(IdDt theSourceId, String theSourcePath, IdDt theTargetId) {
-		mySourceId = theSourceId;
-		mySourcePath = theSourcePath;
-		myTargetId = theTargetId;
-	}
+    public DeleteConflict(IdDt theSourceId, String theSourcePath, IdDt theTargetId) {
+        mySourceId = theSourceId;
+        mySourcePath = theSourcePath;
+        myTargetId = theTargetId;
+    }
 
-	public IdDt getSourceId() {
-		return mySourceId;
-	}
+    public IdDt getSourceId() {
+        return mySourceId;
+    }
 
-	public String getSourcePath() {
-		return mySourcePath;
-	}
+    public String getSourcePath() {
+        return mySourcePath;
+    }
 
-	public IdDt getTargetId() {
-		return myTargetId;
-	}
+    public IdDt getTargetId() {
+        return myTargetId;
+    }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("sourceId", mySourceId)
-			.append("sourcePath", mySourcePath)
-			.append("targetId", myTargetId)
-			.toString();
-	}
-
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("sourceId", mySourceId)
+                .append("sourcePath", mySourcePath)
+                .append("targetId", myTargetId)
+                .toString();
+    }
 }

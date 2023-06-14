@@ -19,29 +19,26 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
+import ca.uhn.fhir.util.ReflectionUtil;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.util.ReflectionUtil;
-
 public final class FhirPrimitiveBinder extends BaseJavaPrimitiveBinder<IPrimitiveType<?>> {
-	
-	private Class<IPrimitiveType<?>> myType;
 
-	public FhirPrimitiveBinder(Class<IPrimitiveType<?>> theType) {
-		myType = theType;
-	}
+    private Class<IPrimitiveType<?>> myType;
 
-	@Override
-	protected String doEncode(IPrimitiveType<?> theString) {
-		return theString.getValueAsString();
-	}
+    public FhirPrimitiveBinder(Class<IPrimitiveType<?>> theType) {
+        myType = theType;
+    }
 
-	@Override
-	protected IPrimitiveType<?> doParse(String theString) {
-		IPrimitiveType<?> instance = ReflectionUtil.newInstance(myType);
-		instance.setValueAsString(theString);
-		return instance;
-	}
+    @Override
+    protected String doEncode(IPrimitiveType<?> theString) {
+        return theString.getValueAsString();
+    }
 
-
+    @Override
+    protected IPrimitiveType<?> doParse(String theString) {
+        IPrimitiveType<?> instance = ReflectionUtil.newInstance(myType);
+        instance.setValueAsString(theString);
+        return instance;
+    }
 }

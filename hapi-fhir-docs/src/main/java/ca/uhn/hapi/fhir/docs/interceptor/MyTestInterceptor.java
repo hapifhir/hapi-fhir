@@ -25,20 +25,18 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 
-/**
- * Interceptor class
- */
+/** Interceptor class */
 @Interceptor
 public class MyTestInterceptor {
 
-	@Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
-	public boolean beforeRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
+    @Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
+    public boolean beforeRestHookDelivery(
+            ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 
-		String header = "Authorization: Bearer 1234567";
+        String header = "Authorization: Bearer 1234567";
 
-		theSubscription.addHeader(header);
+        theSubscription.addHeader(header);
 
-		return true;
-	}
-
+        return true;
+    }
 }

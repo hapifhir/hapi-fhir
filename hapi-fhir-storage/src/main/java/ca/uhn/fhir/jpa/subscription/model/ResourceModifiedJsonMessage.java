@@ -21,60 +21,53 @@ package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import javax.annotation.Nullable;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifiedMessage> {
 
-	@JsonProperty("payload")
-	private ResourceModifiedMessage myPayload;
+    @JsonProperty("payload")
+    private ResourceModifiedMessage myPayload;
 
-	/**
-	 * Constructor
-	 */
-	public ResourceModifiedJsonMessage() {
-		super();
-	}
+    /** Constructor */
+    public ResourceModifiedJsonMessage() {
+        super();
+    }
 
-	/**
-	 * Constructor
-	 */
-	public ResourceModifiedJsonMessage(ResourceModifiedMessage thePayload) {
-		myPayload = thePayload;
-	}
+    /** Constructor */
+    public ResourceModifiedJsonMessage(ResourceModifiedMessage thePayload) {
+        myPayload = thePayload;
+    }
 
-	@Override
-	public ResourceModifiedMessage getPayload() {
-		return myPayload;
-	}
+    @Override
+    public ResourceModifiedMessage getPayload() {
+        return myPayload;
+    }
 
-	public void setPayload(ResourceModifiedMessage thePayload) {
-		myPayload = thePayload;
-	}
+    public void setPayload(ResourceModifiedMessage thePayload) {
+        myPayload = thePayload;
+    }
 
-	@Override
-	@Nullable
-	public String getMessageKey() {
-		if (myPayload == null) {
-			return null;
-		}
-		return myPayload.getMessageKey();
-	}
+    @Override
+    @Nullable
+    public String getMessageKey() {
+        if (myPayload == null) {
+            return null;
+        }
+        return myPayload.getMessageKey();
+    }
 
-	@Override
-	@Nullable
-	public String getMessageKeyOrDefault() {
-		if (myPayload == null) {
-			return null;
-		}
-		return myPayload.getMessageKeyOrDefault();
-	}
+    @Override
+    @Nullable
+    public String getMessageKeyOrDefault() {
+        if (myPayload == null) {
+            return null;
+        }
+        return myPayload.getMessageKeyOrDefault();
+    }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myPayload", myPayload)
-			.toString();
-	}
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).append("myPayload", myPayload).toString();
+    }
 }

@@ -19,9 +19,15 @@
  */
 package ca.uhn.fhir.cli;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -29,101 +35,139 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 /**
- * NB since 2019-12-05: This class is kind of weirdly named now, since it can either use Flyway or not use Flyway
+ * NB since 2019-12-05: This class is kind of weirdly named now, since it can either use Flyway or
+ * not use Flyway
  */
 public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseFlywayMigrateDatabaseCommand.class);
+    private static final Logger ourLog =
+            LoggerFactory.getLogger(BaseFlywayMigrateDatabaseCommand.class);
 
-	public static final String MIGRATE_DATABASE = "migrate-database";
-	public static final String NO_COLUMN_SHRINK = "no-column-shrink";
-	public static final String STRICT_ORDER = "strict-order";
-	public static final String SKIP_VERSIONS = "skip-versions";
-	private Set<String> myFlags;
-	private String myMigrationTableName;
+    public static final String MIGRATE_DATABASE = "migrate-database";
+    public static final String NO_COLUMN_SHRINK = "no-column-shrink";
+    public static final String STRICT_ORDER = "strict-order";
+    public static final String SKIP_VERSIONS = "skip-versions";
+    private Set<String> myFlags;
+    private String myMigrationTableName;
 
-	protected Set<String> getFlags() {
-		return myFlags;
-	}
+    protected Set<String> getFlags() {
+        return myFlags;
+    }
 
-	@Override
-	public String getCommandDescription() {
-		return "This command migrates a HAPI FHIR JPA database to the current version";
-	}
+    @Override
+    public String getCommandDescription() {
+        return "This command migrates a HAPI FHIR JPA database to the current version";
+    }
 
-	protected abstract List<T> provideAllowedVersions();
+    protected abstract List<T> provideAllowedVersions();
 
-	protected abstract Class<T> provideVersionEnumType();
+    protected abstract Class<T> provideVersionEnumType();
 
-	@Override
-	public String getCommandName() {
-		return MIGRATE_DATABASE;
-	}
+    @Override
+    public String getCommandName() {
+        return MIGRATE_DATABASE;
+    }
 
-	@Override
-	public Options getOptions() {
-		Options retVal = new Options();
+    @Override
+    public Options getOptions() {
+        Options retVal = new Options();
 
-		addOptionalOption(retVal, "r", "dry-run", false, "Log the SQL statements that would be executed but to not actually make any changes");
-		addRequiredOption(retVal, "u", "url", "URL", "The JDBC database URL");
-		addRequiredOption(retVal, "n", "username", "Username", "The JDBC database username");
-		addRequiredOption(retVal, "p", "password", "Password", "The JDBC database password");
-		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
-		addOptionalOption(retVal, "x", "flags", "Flags", "A comma-separated list of any specific migration flags (these flags are version specific, see migrator documentation for details)");
-		addOptionalOption(retVal, null, NO_COLUMN_SHRINK, false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
-		addOptionalOption(retVal, null, SKIP_VERSIONS, "Versions", "A comma separated list of schema versions to skip.  E.g. 4_1_0.20191214.2,4_1_0.20191214.4");
+        addOptionalOption(
+                retVal,
+                "r",
+                "dry-run",
+                false,
+                "Log the SQL statements that would be executed but to not actually make any"
+                        + " changes");
+        addRequiredOption(retVal, "u", "url", "URL", "The JDBC database URL");
+        addRequiredOption(retVal, "n", "username", "Username", "The JDBC database username");
+        addRequiredOption(retVal, "p", "password", "Password", "The JDBC database password");
+        addRequiredOption(
+                retVal,
+                "d",
+                "driver",
+                "Driver",
+                "The database driver to use (Options are " + driverOptions() + ")");
+        addOptionalOption(
+                retVal,
+                "x",
+                "flags",
+                "Flags",
+                "A comma-separated list of any specific migration flags (these flags are version"
+                        + " specific, see migrator documentation for details)");
+        addOptionalOption(
+                retVal,
+                null,
+                NO_COLUMN_SHRINK,
+                false,
+                "If this flag is set, the system will not attempt to reduce the length of columns."
+                    + " This is useful in environments with a lot of existing data, where shrinking"
+                    + " a column can take a very long time.");
+        addOptionalOption(
+                retVal,
+                null,
+                SKIP_VERSIONS,
+                "Versions",
+                "A comma separated list of schema versions to skip.  E.g."
+                        + " 4_1_0.20191214.2,4_1_0.20191214.4");
 
-		return retVal;
-	}
+        return retVal;
+    }
 
-	private String driverOptions() {
-		return Arrays.stream(DriverTypeEnum.values()).map(Enum::name).collect(Collectors.joining(", "));
-	}
+    private String driverOptions() {
+        return Arrays.stream(DriverTypeEnum.values())
+                .map(Enum::name)
+                .collect(Collectors.joining(", "));
+    }
 
-	@Override
-	public void run(CommandLine theCommandLine) throws ParseException {
+    @Override
+    public void run(CommandLine theCommandLine) throws ParseException {
 
-		String url = theCommandLine.getOptionValue("u");
-		String username = theCommandLine.getOptionValue("n");
-		String password = theCommandLine.getOptionValue("p");
-		DriverTypeEnum driverType;
-		String driverTypeString = theCommandLine.getOptionValue("d");
-		try {
-			driverType = DriverTypeEnum.valueOf(driverTypeString);
-		} catch (Exception e) {
-			throw new ParseException(Msg.code(1535) + "Invalid driver type \"" + driverTypeString + "\". Valid values are: " + driverOptions());
-		}
+        String url = theCommandLine.getOptionValue("u");
+        String username = theCommandLine.getOptionValue("n");
+        String password = theCommandLine.getOptionValue("p");
+        DriverTypeEnum driverType;
+        String driverTypeString = theCommandLine.getOptionValue("d");
+        try {
+            driverType = DriverTypeEnum.valueOf(driverTypeString);
+        } catch (Exception e) {
+            throw new ParseException(
+                    Msg.code(1535)
+                            + "Invalid driver type \""
+                            + driverTypeString
+                            + "\". Valid values are: "
+                            + driverOptions());
+        }
 
-		boolean dryRun = theCommandLine.hasOption("r");
-		boolean noColumnShrink = theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.NO_COLUMN_SHRINK);
+        boolean dryRun = theCommandLine.hasOption("r");
+        boolean noColumnShrink =
+                theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.NO_COLUMN_SHRINK);
 
-		String flags = theCommandLine.getOptionValue("x");
-		myFlags = Arrays.stream(defaultString(flags).split(","))
-			.map(String::trim)
-			.filter(StringUtils::isNotBlank)
-			.collect(Collectors.toSet());
+        String flags = theCommandLine.getOptionValue("x");
+        myFlags =
+                Arrays.stream(defaultString(flags).split(","))
+                        .map(String::trim)
+                        .filter(StringUtils::isNotBlank)
+                        .collect(Collectors.toSet());
 
-		DriverTypeEnum.ConnectionProperties connectionProperties = driverType.newConnectionProperties(url, username, password);
-		HapiMigrator migrator = new HapiMigrator(myMigrationTableName, connectionProperties.getDataSource(), driverType);
+        DriverTypeEnum.ConnectionProperties connectionProperties =
+                driverType.newConnectionProperties(url, username, password);
+        HapiMigrator migrator =
+                new HapiMigrator(
+                        myMigrationTableName, connectionProperties.getDataSource(), driverType);
 
-		migrator.createMigrationTableIfRequired();
-		migrator.setDryRun(dryRun);
-		migrator.setNoColumnShrink(noColumnShrink);
-		String skipVersions = theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);
-		addTasks(migrator, skipVersions);
-		migrator.migrate();
-	}
+        migrator.createMigrationTableIfRequired();
+        migrator.setDryRun(dryRun);
+        migrator.setNoColumnShrink(noColumnShrink);
+        String skipVersions =
+                theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);
+        addTasks(migrator, skipVersions);
+        migrator.migrate();
+    }
 
-	protected abstract void addTasks(HapiMigrator theMigrator, String theSkippedVersions);
+    protected abstract void addTasks(HapiMigrator theMigrator, String theSkippedVersions);
 
-	public void setMigrationTableName(String theMigrationTableName) {
-		myMigrationTableName = theMigrationTableName;
-	}
+    public void setMigrationTableName(String theMigrationTableName) {
+        myMigrationTableName = theMigrationTableName;
+    }
 }

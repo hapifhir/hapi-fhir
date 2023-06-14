@@ -23,15 +23,19 @@ import ca.uhn.fhir.util.VersionEnum;
 
 public class CalculateOrdinalDatesTask extends BaseColumnCalculatorTask {
 
-	public CalculateOrdinalDatesTask(VersionEnum theRelease, String theVersion) {
-		super(theRelease, theVersion);
-		setDescription("Calculate SP_LOW_VALUE_DATE_ORDINAL and SP_HIGH_VALUE_DATE_ORDINAL based on existing SP_VALUE_LOW and SP_VALUE_HIGH date values in Date Search Params");
-		setWhereClause("(SP_VALUE_LOW_DATE_ORDINAL IS NULL AND SP_VALUE_LOW IS NOT NULL) OR (SP_VALUE_HIGH_DATE_ORDINAL IS NULL AND SP_VALUE_HIGH IS NOT NULL)");
-		setPidColumnName("SP_ID");
-	}
+    public CalculateOrdinalDatesTask(VersionEnum theRelease, String theVersion) {
+        super(theRelease, theVersion);
+        setDescription(
+                "Calculate SP_LOW_VALUE_DATE_ORDINAL and SP_HIGH_VALUE_DATE_ORDINAL based on"
+                    + " existing SP_VALUE_LOW and SP_VALUE_HIGH date values in Date Search Params");
+        setWhereClause(
+                "(SP_VALUE_LOW_DATE_ORDINAL IS NULL AND SP_VALUE_LOW IS NOT NULL) OR"
+                        + " (SP_VALUE_HIGH_DATE_ORDINAL IS NULL AND SP_VALUE_HIGH IS NOT NULL)");
+        setPidColumnName("SP_ID");
+    }
 
-	@Override
-	protected boolean shouldSkipTask() {
-		return false; // TODO Is there a case where we should just not do this?
-	}
+    @Override
+    protected boolean shouldSkipTask() {
+        return false; // TODO Is there a case where we should just not do this?
+    }
 }

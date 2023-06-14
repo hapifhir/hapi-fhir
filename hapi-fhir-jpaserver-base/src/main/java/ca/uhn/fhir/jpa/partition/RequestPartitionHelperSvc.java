@@ -24,100 +24,134 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.apache.commons.lang3.Validate;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.lang3.Validate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 
-	@Autowired
-	IPartitionLookupSvc myPartitionConfigSvc;
+    @Autowired IPartitionLookupSvc myPartitionConfigSvc;
 
-	@Override
-	protected RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
-		List<String> names = null;
-		for (int i = 0; i < theRequestPartitionId.getPartitionIds().size(); i++) {
+    @Override
+    protected RequestPartitionId validateAndNormalizePartitionIds(
+            RequestPartitionId theRequestPartitionId) {
+        List<String> names = null;
+        for (int i = 0; i < theRequestPartitionId.getPartitionIds().size(); i++) {
 
-			PartitionEntity partition;
-			Integer id = theRequestPartitionId.getPartitionIds().get(i);
-			if (id == null) {
-				partition = null;
-			} else {
-				try {
-					partition = myPartitionConfigSvc.getPartitionById(id);
-				} catch (IllegalArgumentException e) {
-					String msg = myFhirContext.getLocalizer().getMessage(BaseRequestPartitionHelperSvc.class, "unknownPartitionId", theRequestPartitionId.getPartitionIds().get(i));
-					throw new ResourceNotFoundException(Msg.code(1316) + msg);
-				}
-			}
+            PartitionEntity partition;
+            Integer id = theRequestPartitionId.getPartitionIds().get(i);
+            if (id == null) {
+                partition = null;
+            } else {
+                try {
+                    partition = myPartitionConfigSvc.getPartitionById(id);
+                } catch (IllegalArgumentException e) {
+                    String msg =
+                            myFhirContext
+                                    .getLocalizer()
+                                    .getMessage(
+                                            BaseRequestPartitionHelperSvc.class,
+                                            "unknownPartitionId",
+                                            theRequestPartitionId.getPartitionIds().get(i));
+                    throw new ResourceNotFoundException(Msg.code(1316) + msg);
+                }
+            }
 
-			if (theRequestPartitionId.getPartitionNames() != null) {
-				if (partition == null) {
-					Validate.isTrue(theRequestPartitionId.getPartitionIds().get(i) == null, "Partition %s must not have an ID", JpaConstants.DEFAULT_PARTITION_NAME);
-				} else {
-					Validate.isTrue(Objects.equals(theRequestPartitionId.getPartitionIds().get(i), partition.getId()), "Partition name %s does not match ID %n", theRequestPartitionId.getPartitionNames().get(i), theRequestPartitionId.getPartitionIds().get(i));
-				}
-			} else {
-				if (names == null) {
-					names = new ArrayList<>();
-				}
-				if (partition != null) {
-					names.add(partition.getName());
-				} else {
-					names.add(null);
-				}
-			}
+            if (theRequestPartitionId.getPartitionNames() != null) {
+                if (partition == null) {
+                    Validate.isTrue(
+                            theRequestPartitionId.getPartitionIds().get(i) == null,
+                            "Partition %s must not have an ID",
+                            JpaConstants.DEFAULT_PARTITION_NAME);
+                } else {
+                    Validate.isTrue(
+                            Objects.equals(
+                                    theRequestPartitionId.getPartitionIds().get(i),
+                                    partition.getId()),
+                            "Partition name %s does not match ID %n",
+                            theRequestPartitionId.getPartitionNames().get(i),
+                            theRequestPartitionId.getPartitionIds().get(i));
+                }
+            } else {
+                if (names == null) {
+                    names = new ArrayList<>();
+                }
+                if (partition != null) {
+                    names.add(partition.getName());
+                } else {
+                    names.add(null);
+                }
+            }
+        }
 
-		}
+        if (names != null) {
+            return RequestPartitionId.forPartitionIdsAndNames(
+                    names,
+                    theRequestPartitionId.getPartitionIds(),
+                    theRequestPartitionId.getPartitionDate());
+        }
 
-		if (names != null) {
-			return RequestPartitionId.forPartitionIdsAndNames(names, theRequestPartitionId.getPartitionIds(), theRequestPartitionId.getPartitionDate());
-		}
+        return theRequestPartitionId;
+    }
 
-		return theRequestPartitionId;
-	}
+    @Override
+    protected RequestPartitionId validateAndNormalizePartitionNames(
+            RequestPartitionId theRequestPartitionId) {
+        List<Integer> ids = null;
+        for (int i = 0; i < theRequestPartitionId.getPartitionNames().size(); i++) {
 
-	@Override
-	protected RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId)  {
-		List<Integer> ids = null;
-		for (int i = 0; i < theRequestPartitionId.getPartitionNames().size(); i++) {
+            PartitionEntity partition;
+            try {
+                partition =
+                        myPartitionConfigSvc.getPartitionByName(
+                                theRequestPartitionId.getPartitionNames().get(i));
+            } catch (IllegalArgumentException e) {
+                String msg =
+                        myFhirContext
+                                .getLocalizer()
+                                .getMessage(
+                                        BaseRequestPartitionHelperSvc.class,
+                                        "unknownPartitionName",
+                                        theRequestPartitionId.getPartitionNames().get(i));
+                throw new ResourceNotFoundException(Msg.code(1317) + msg);
+            }
 
-			PartitionEntity partition;
-			try {
-				partition = myPartitionConfigSvc.getPartitionByName(theRequestPartitionId.getPartitionNames().get(i));
-			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessage(BaseRequestPartitionHelperSvc.class, "unknownPartitionName", theRequestPartitionId.getPartitionNames().get(i));
-				throw new ResourceNotFoundException(Msg.code(1317) + msg);
-			}
+            if (theRequestPartitionId.hasPartitionIds()) {
+                if (partition == null) {
+                    Validate.isTrue(
+                            theRequestPartitionId.getPartitionIds().get(i) == null,
+                            "Partition %s must not have an ID",
+                            JpaConstants.DEFAULT_PARTITION_NAME);
+                } else {
+                    Validate.isTrue(
+                            Objects.equals(
+                                    theRequestPartitionId.getPartitionIds().get(i),
+                                    partition.getId()),
+                            "Partition name %s does not match ID %n",
+                            theRequestPartitionId.getPartitionNames().get(i),
+                            theRequestPartitionId.getPartitionIds().get(i));
+                }
+            } else {
+                if (ids == null) {
+                    ids = new ArrayList<>();
+                }
+                if (partition != null) {
+                    ids.add(partition.getId());
+                } else {
+                    ids.add(null);
+                }
+            }
+        }
 
-			if (theRequestPartitionId.hasPartitionIds()) {
-				if (partition == null) {
-					Validate.isTrue(theRequestPartitionId.getPartitionIds().get(i) == null, "Partition %s must not have an ID", JpaConstants.DEFAULT_PARTITION_NAME);
-				} else {
-					Validate.isTrue(Objects.equals(theRequestPartitionId.getPartitionIds().get(i), partition.getId()), "Partition name %s does not match ID %n", theRequestPartitionId.getPartitionNames().get(i), theRequestPartitionId.getPartitionIds().get(i));
-				}
-			} else {
-				if (ids == null) {
-					ids = new ArrayList<>();
-				}
-				if (partition != null) {
-					ids.add(partition.getId());
-				} else {
-					ids.add(null);
-				}
-			}
+        if (ids != null) {
+            return RequestPartitionId.forPartitionIdsAndNames(
+                    theRequestPartitionId.getPartitionNames(),
+                    ids,
+                    theRequestPartitionId.getPartitionDate());
+        }
 
-		}
-
-		if (ids != null) {
-			return RequestPartitionId.forPartitionIdsAndNames(theRequestPartitionId.getPartitionNames(), ids, theRequestPartitionId.getPartitionDate());
-		}
-
-		return theRequestPartitionId;
-	}
-
-
+        return theRequestPartitionId;
+    }
 }
