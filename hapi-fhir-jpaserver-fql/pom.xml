@@ -29,12 +29,6 @@
 		<!-- Test -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-test-utilities</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
@@ -47,15 +41,8 @@
 			<build>
 				<plugins>
 					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<configuration>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-							<attach>false</attach>
-							<finalName>hapi-fhir-jpaserver-fql-jdbc</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-						</configuration>
 						<executions>
 							<execution>
 								<id>make-assembly</id>
@@ -65,6 +52,14 @@
 								</goals>
 							</execution>
 						</executions>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<attach>false</attach>
+							<finalName>hapi-fhir-jpaserver-fql-jdbc-${project.version}</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>

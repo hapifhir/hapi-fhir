@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.fql.parser;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -40,6 +41,26 @@ public class FqlLexerTest {
 			"name.given", "=", "'Foo ' Chalmers'",
 			"select", "name.given[0]",
 			",", "name.family"
+		));
+
+	}
+
+	@Test
+	public void testSearchParamWithQualifiers() {
+		String input = """
+			from
+			  Patient
+			search
+			  _has:Observation:subject:device.identifier='1234-5'
+			select
+			  name.family
+			  """;
+		FqlLexer fqlLexer = new FqlLexer(input);
+		List<String> allTokens = fqlLexer.allTokens(FqlParser.WHERE_CLAUSE_CHARACTERS);
+		assertThat(allTokens.toString(), allTokens, contains(
+			"from", "Patient", "search",
+			"_has:Observation:subject:device.identifier", "=", "'1234-5'",
+			"select", "name.family"
 		));
 
 	}

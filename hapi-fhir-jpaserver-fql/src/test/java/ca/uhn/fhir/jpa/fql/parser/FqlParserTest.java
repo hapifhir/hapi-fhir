@@ -98,6 +98,28 @@ public class FqlParserTest {
 	}
 
 	@Test
+	public void testFromSearchSelect_RichSearchExpression() {
+		String input = """
+			from
+			  Observation
+			search
+			  _has:Observation:subject:device.identifier='1234-5'
+			select
+			  id
+			""";
+
+		FqlStatement statement = parse(input);
+		assertEquals("Observation", statement.getFromResourceName());
+		assertEquals(1, statement.getSelectClauses().size());
+		assertEquals("id", statement.getSelectClauses().get(0).getClause());
+		assertEquals(1, statement.getSearchClauses().size());
+		assertEquals("_has:Observation:subject:device.identifier", statement.getSearchClauses().get(0).getLeft());
+		assertEquals(FqlStatement.WhereClauseOperator.EQUALS, statement.getSearchClauses().get(0).getOperator());
+		assertThat(statement.getSearchClauses().get(0).getRight(), contains("'1234-5'"));
+
+	}
+
+	@Test
 	public void testFromSearchWhereSelectLimit() {
 		String input = """
 			from
@@ -131,14 +153,15 @@ public class FqlParserTest {
 
 	@Test
 	public void testFromWhereSelect_InClauseAndNamedSelects() {
+		// One select with spaces, one without
 		String input = """
-			from 
+			from
 			    StructureDefinition
-			where 
+			where
 			    url in ('foo' | 'bar')
 			select
-			    Name: name,
-			    URL: url
+			    Name : name,
+			    URL:url
 			""";
 		FqlStatement statement = parse(input);
 		assertEquals("StructureDefinition", statement.getFromResourceName());

@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
+import ca.uhn.fhir.jpa.fql.provider.FqlRestProviderCtxConfig;
 import ca.uhn.fhir.storage.interceptor.balp.AsyncMemoryQueueBackedFhirClientBalpSink;
 import ca.uhn.fhir.storage.interceptor.balp.BalpAuditCaptureInterceptor;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
@@ -34,7 +35,8 @@ import org.springframework.context.annotation.Import;
 	SubscriptionSubmitterConfig.class,
 	JpaBatch2Config.class,
 	Batch2JobsConfig.class,
-	ThreadPoolFactoryConfig.class
+	ThreadPoolFactoryConfig.class,
+	FqlRestProviderCtxConfig.class
 })
 public class CommonConfig {
 

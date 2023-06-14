@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
+import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.storage.interceptor.balp.BalpAuditCaptureInterceptor;
@@ -223,6 +224,7 @@ public class TestRestfulServer extends RestfulServer {
 
 		providers.add(myAppCtx.getBean(JpaSystemProvider.class));
 		providers.add(myAppCtx.getBean(InstanceReindexProvider.class));
+		providers.add(myAppCtx.getBean(FqlRestProvider.class));
 
 		/*
 		 * On the DSTU2 endpoint, we want to enable ETag support

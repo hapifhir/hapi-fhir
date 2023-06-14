@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
+import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
@@ -71,6 +72,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
 			s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
 			s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+			s.registerProvider(myAppCtx.getBean(FqlRestProvider.class));
 
 			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 

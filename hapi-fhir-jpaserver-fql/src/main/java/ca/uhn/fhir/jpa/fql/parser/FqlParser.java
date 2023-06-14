@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Firely Query Language
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.fql.parser;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -8,9 +27,16 @@ import org.apache.commons.lang3.Validate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class FqlParser {
 
+	public static final Set<Character> WHERE_CLAUSE_CHARACTERS = Set.of(
+		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'_', ':', '.'
+	);
 	private final FqlLexer myLexer;
 	private final FhirContext myFhirContext;
 	private BaseState myState;
@@ -30,8 +56,8 @@ public class FqlParser {
 		Validate.isTrue(myStatement == null, "Already completed parsing");
 		myStatement = new FqlStatement();
 
-		while (myLexer.hasNextToken()) {
-			FqlLexerToken nextToken = myLexer.getNextToken();
+		while (myLexer.hasNextToken(myState.getTokenCharacters())) {
+			FqlLexerToken nextToken = myLexer.getNextToken(myState.getTokenCharacters());
 			myState.consume(nextToken);
 		}
 
@@ -181,11 +207,16 @@ public class FqlParser {
 	}
 
 	private class StateInWhereInitial extends BaseState {
-
 		private final WhereModeEnum myWhereMode;
 
 		public StateInWhereInitial(WhereModeEnum theWhereMode) {
 			myWhereMode = theWhereMode;
+		}
+
+		@Nullable
+		@Override
+		public Set<Character> getTokenCharacters() {
+			return WHERE_CLAUSE_CHARACTERS;
 		}
 
 		@Override
@@ -329,6 +360,11 @@ public class FqlParser {
 
 	private abstract static class BaseState {
 		abstract void consume(FqlLexerToken theToken);
+
+		@Nullable
+		public Set<Character> getTokenCharacters() {
+			return null;
+		}
 	}
 
 }

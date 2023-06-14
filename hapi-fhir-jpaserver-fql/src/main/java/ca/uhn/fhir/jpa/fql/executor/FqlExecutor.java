@@ -1,28 +1,61 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Firely Query Language
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.fql.parser.FqlParser;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateOrListParam;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.QualifierDetails;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class FqlExecutor implements IFqlExecutor {
 	private static final int BATCH_SIZE = 1000;
+	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -30,6 +63,8 @@ public class FqlExecutor implements IFqlExecutor {
 	private FhirContext myFhirContext;
 	@Autowired
 	private IPagingProvider myPagingProvider;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	/**
 	 * Constructor
@@ -50,30 +85,52 @@ public class FqlExecutor implements IFqlExecutor {
 		SearchParameterMap map = new SearchParameterMap();
 		IBundleProvider outcome = dao.search(map, theRequestDetails);
 
-		List<FqlStatement.SelectClause> selectClauses = statement.getSelectClauses();
-		List<FqlStatement.WhereClause> whereClauses = statement.getWhereClauses();
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 
-		Integer limit = theLimit;
-		if (limit == null) {
-			limit = 1000;
-		}
-		if (whereClauses.isEmpty() && limit != null) {
-			map.setLoadSynchronousUpTo(limit);
-		}
-
 		List<FqlStatement.WhereClause> searchClauses = statement.getSearchClauses();
-		if (!searchClauses.isEmpty()) {
-			// FIXME: implement
+		for (FqlStatement.WhereClause nextSearchClause : searchClauses) {
+			if (nextSearchClause.getLeft().equals(Constants.PARAM_ID)) {
+				map.add(Constants.PARAM_ID, new TokenOrListParam(null, nextSearchClause.getRightAsStrings().toArray(EMPTY_STRING_ARRAY)));
+			} else if (nextSearchClause.getLeft().equals(Constants.PARAM_LASTUPDATED)) {
+				DateOrListParam param = new DateOrListParam();
+				for (String nextValue : nextSearchClause.getRightAsStrings()) {
+					param.addOr(new DateParam(nextValue));
+				}
+				map.add(Constants.PARAM_LASTUPDATED, param);
+			} else if (nextSearchClause.getLeft().startsWith("_")) {
+				throw newInvalidRequestExceptionUnknownSearchParameter(nextSearchClause);
+			} else {
+
+				String paramName = nextSearchClause.getLeft();
+				QualifierDetails qualifiedParamName = QualifierDetails.extractQualifiersFromParameterName(paramName);
+
+				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(statement.getFromResourceName(), qualifiedParamName.getParamName());
+				if (searchParam == null) {
+					throw newInvalidRequestExceptionUnknownSearchParameter(nextSearchClause);
+				}
+
+				QualifiedParamList values = new QualifiedParamList();
+				values.setQualifier(qualifiedParamName.getWholeQualifier());
+				values.addAll(nextSearchClause.getRightAsStrings());
+				IQueryParameterAnd<?> andParam = JpaParamUtil.parseQueryParams(myFhirContext, searchParam.getParamType(), paramName, List.of(values));
+				map.add(qualifiedParamName.getParamName(), andParam);
+
+			}
 		}
 
-		return new FqlResult(statement, selectClauses, whereClauses, outcome, fhirPath, limit);
+		return new FqlResult(statement, outcome, fhirPath, theLimit, 0);
+	}
+
+	@Nonnull
+	private static InvalidRequestException newInvalidRequestExceptionUnknownSearchParameter(FqlStatement.WhereClause nextSearchClause) {
+		return new InvalidRequestException("Unknown/unsupported search parameter: " + UrlUtil.sanitizeUrlPart(nextSearchClause.getLeft()));
 	}
 
 	@Override
 	public IFqlResult executeContinuation(FqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails) {
-		myPagingProvider.retrieveResultList(theRequestDetails, theSearchId);
-		return null;
+		IBundleProvider resultList = myPagingProvider.retrieveResultList(theRequestDetails, theSearchId);
+		IFhirPath fhirPath = myFhirContext.newFhirPath();
+		return new FqlResult(theStatement, resultList, fhirPath, theLimit, theStartingOffset);
 	}
 
 
@@ -84,18 +141,19 @@ public class FqlExecutor implements IFqlExecutor {
 		private final Integer myLimit;
 		private final FqlStatement myStatement;
 		private int myTotalRowsFetched = 0;
-		private int myNextSearchResultRow = 0;
+		private int myNextSearchResultRow;
 		private int myNextBatchRow = 0;
 		private List<IBaseResource> myNextBatch;
 		private IBaseResource myNextResource;
 		private boolean myExhausted = false;
 		private int myNextResourceSearchRow;
 
-		public FqlResult(FqlStatement theStatement, List<FqlStatement.SelectClause> theSelectClauses, List<FqlStatement.WhereClause> theWhereClauses, IBundleProvider theSearchResult, IFhirPath theFhirPath, Integer theLimit) {
+		public FqlResult(FqlStatement theStatement, IBundleProvider theSearchResult, IFhirPath theFhirPath, Integer theLimit, int theInitialOffset) {
 			myStatement = theStatement;
 			mySearchResult = theSearchResult;
 			myFhirPath = theFhirPath;
 			myLimit = theLimit;
+			myNextSearchResultRow = theInitialOffset;
 		}
 
 

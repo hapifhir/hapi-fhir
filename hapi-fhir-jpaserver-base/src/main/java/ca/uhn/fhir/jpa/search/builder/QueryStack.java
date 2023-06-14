@@ -1841,7 +1841,7 @@ public class QueryStack {
 				if (fullChainParam != null) {
 					List<IQueryParameterType> swappedParamTypes = nextAnd
 						.stream()
-						.map(t -> toParameterType(fullChainParam, null, t.getValueAsQueryToken(myFhirContext)))
+						.map(t -> newParameterInstance(fullChainParam, null, t.getValueAsQueryToken(myFhirContext)))
 						.collect(Collectors.toList());
 					List<List<IQueryParameterType>> params = List.of(swappedParamTypes);
 					Condition predicate = createPredicateSearchParameter(theSourceJoinColumn, theResourceName, fullName, params, theRequest, theRequestPartitionId);
@@ -1936,14 +1936,14 @@ public class QueryStack {
 		mySqlBuilder.addPredicate(predicate);
 	}
 
-	public IQueryParameterType toParameterType(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
-		IQueryParameterType qp = toParameterType(theParam);
+	public IQueryParameterType newParameterInstance(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
+		IQueryParameterType qp = newParameterInstance(theParam);
 
 		qp.setValueAsQueryToken(myFhirContext, theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
 	}
 
-	private IQueryParameterType toParameterType(RuntimeSearchParam theParam) {
+	private IQueryParameterType newParameterInstance(RuntimeSearchParam theParam) {
 
 		IQueryParameterType qp;
 		switch (theParam.getParamType()) {
@@ -1967,8 +1967,8 @@ public class QueryStack {
 				if (compositeOf.size() != 2) {
 					throw new InternalErrorException(Msg.code(1224) + "Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}
-				IQueryParameterType leftParam = toParameterType(compositeOf.get(0));
-				IQueryParameterType rightParam = toParameterType(compositeOf.get(1));
+				IQueryParameterType leftParam = newParameterInstance(compositeOf.get(0));
+				IQueryParameterType rightParam = newParameterInstance(compositeOf.get(1));
 				qp = new CompositeParam<>(leftParam, rightParam);
 				break;
 			case URI:
@@ -2129,7 +2129,7 @@ public class QueryStack {
 						if (RestSearchParameterTypeEnum.REFERENCE.equals(nextSearchParam.getParamType())) {
 							orValues.add(new ReferenceParam(nextQualifier, "", theTargetValue));
 						} else {
-							IQueryParameterType qp = toParameterType(nextSearchParam);
+							IQueryParameterType qp = newParameterInstance(nextSearchParam);
 							qp.setValueAsQueryToken(myFhirContext, nextSearchParam.getName(), null, theTargetValue);
 							orValues.add(qp);
 						}

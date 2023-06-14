@@ -1,13 +1,33 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Firely Query Language
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.fql.parser;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Character.isWhitespace;
 
 class FqlLexer {
@@ -31,7 +51,15 @@ class FqlLexer {
 	 */
 	@Nonnull
 	public FqlLexerToken getNextToken() {
-		lexNextToken();
+		return getNextToken(null);
+	}
+
+	/**
+	 * Returns <code>null</code> when no tokens remain
+	 */
+	@Nonnull
+	public FqlLexerToken getNextToken(Set<Character> theCharacters) {
+		lexNextToken(theCharacters);
 		Validate.notBlank(myNextToken, "No next token is available");
 		FqlLexerToken token = new FqlLexerToken(myNextToken, myNextTokenLine, myNextTokenColumn);
 		myNextToken = null;
@@ -39,6 +67,10 @@ class FqlLexer {
 	}
 
 	private void lexNextToken() {
+		lexNextToken(null);
+	}
+
+	private void lexNextToken(Set<Character> theCharacters) {
 		if (myNextToken != null) {
 			return;
 		}
@@ -55,7 +87,7 @@ class FqlLexer {
 
 			char nextChar = myInput[myPosition];
 
-			handleNextChar(nextChar);
+			handleNextChar(theCharacters, nextChar);
 
 			if (myNextToken != null) {
 				return;
@@ -71,7 +103,7 @@ class FqlLexer {
 		}
 	}
 
-	private void handleNextChar(char nextChar) {
+	private void handleNextChar(Set<Character> theCharacters, char nextChar) {
 		switch (myState) {
 			case INITIAL: {
 				if (isWhitespace(nextChar)) {
@@ -96,7 +128,7 @@ class FqlLexer {
 						return;
 				}
 
-				if (isTokenCharacter(nextChar)) {
+				if (isTokenCharacter(theCharacters, nextChar)) {
 					myNextTokenLine = myLine;
 					myNextTokenColumn = myColumn;
 					myState = LexerState.IN_TOKEN;
@@ -108,7 +140,7 @@ class FqlLexer {
 			}
 
 			case IN_TOKEN: {
-				if (isTokenCharacter(nextChar)) {
+				if (isTokenCharacter(theCharacters, nextChar)) {
 					myBuffer.append(nextChar);
 					return;
 				}
@@ -143,14 +175,18 @@ class FqlLexer {
 
 		}
 
-		throw new DataFormatException("Unexpected character at position " + describePosition() + ": '" + nextChar + "' (" + (int)nextChar + ")");
+		throw new DataFormatException("Unexpected character at position " + describePosition() + ": '" + nextChar + "' (" + (int) nextChar + ")");
 	}
 
 	private String describePosition() {
 		return "[line " + myLine + ", column " + myColumn + "]";
 	}
 
-	private boolean isTokenCharacter(char theChar) {
+	private boolean isTokenCharacter(@Nullable Set<Character> theCharacters, char theChar) {
+		if (theCharacters != null) {
+			return theCharacters.contains(theChar);
+		}
+
 		switch (theChar) {
 			case '.':
 			case '[':
@@ -163,15 +199,23 @@ class FqlLexer {
 	}
 
 	public List<String> allTokens() {
+		return allTokens(null);
+	}
+
+	public List<String> allTokens(Set<Character> theCharacters) {
 		ArrayList<String> retVal = new ArrayList<>();
-		while (hasNextToken()) {
-			retVal.add(getNextToken().toString());
+		while (hasNextToken(theCharacters)) {
+			retVal.add(getNextToken(theCharacters).toString());
 		}
 		return retVal;
 	}
 
 	public boolean hasNextToken() {
-		lexNextToken();
+		return hasNextToken(null);
+	}
+
+	public boolean hasNextToken(Set<Character> theCharacters) {
+		lexNextToken(theCharacters);
 		return myNextToken != null;
 	}
 

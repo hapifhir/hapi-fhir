@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Master Data Management
+ * HAPI FHIR JPA Server - Firely Query Language
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,17 +17,27 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.rules.matcher.util;
+package ca.uhn.fhir.jpa.fql.provider;
 
-import ca.uhn.fhir.util.StringUtil;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import ca.uhn.fhir.jpa.fql.executor.FqlExecutor;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
-public class StringMatcherUtils {
-	public static String extractString(IPrimitiveType<?> thePrimitive, boolean theExact) {
-		String theString = thePrimitive.getValueAsString();
-		if (theExact) {
-			return theString;
-		}
-		return StringUtil.normalizeStringForSearchIndexing(theString);
+@Configuration
+public class FqlRestProviderCtxConfig {
+
+	@Bean
+	@Lazy
+	public IFqlExecutor fqlExecutor() {
+		return new FqlExecutor();
 	}
+
+	@Bean
+	@Lazy
+	public FqlRestProvider fqlRestProvider() {
+		return new FqlRestProvider();
+	}
+
 }
