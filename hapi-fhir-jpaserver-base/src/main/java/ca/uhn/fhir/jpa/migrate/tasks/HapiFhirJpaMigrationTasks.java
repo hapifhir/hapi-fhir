@@ -197,10 +197,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 		version.onTable("MPI_LINK")
-				.addIndex("20230609.7", "FK_EMPI_LINK_TARGET")
-					.unique(false)
-						.withColumns("TARGET_PID")
-							.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+			.addIndex("20230609.7", "FK_EMPI_LINK_TARGET")
+			.unique(false)
+			.withColumns("TARGET_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 		version.onTable("TRM_CODESYSTEM")
 			.addIndex("20230609.8", "FK_TRMCODESYSTEM_RES")
