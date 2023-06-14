@@ -320,8 +320,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Since 6.7.0
 	 */
 	private boolean myIncludePartitionListingCapabilityStatement = false;
-	//has a setter method call on this object
-	//find where getter method is invoked as well
+
 	/**
 	 * Constructor
 	 */
