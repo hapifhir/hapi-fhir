@@ -25,6 +25,8 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.IPartition;
+import ca.uhn.fhir.jpa.api.svc.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -54,6 +56,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -122,14 +125,14 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	@Override
 	@Transactional
-	public PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails) {
+	public IPartition createPartition(IPartition thePartition, RequestDetails theRequestDetails) {
 		validateNotInUnnamedPartitionMode();
-		validateHaveValidPartitionIdAndName(thePartition);
+		validateHaveValidPartitionIdAndName((PartitionEntity) thePartition);
 		validatePartitionNameDoesntAlreadyExist(thePartition.getName());
 
 		ourLog.info("Creating new partition with ID {} and Name {}", thePartition.getId(), thePartition.getName());
 
-		PartitionEntity retVal = myPartitionDao.save(thePartition);
+		PartitionEntity retVal = myPartitionDao.save((PartitionEntity)thePartition);
 
 		// Interceptor call: STORAGE_PARTITION_CREATED
 		if (myInterceptorService.hasHooks(Pointcut.STORAGE_PARTITION_CREATED)) {
@@ -145,9 +148,9 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	@Override
 	@Transactional
-	public PartitionEntity updatePartition(PartitionEntity thePartition) {
+	public IPartition updatePartition(IPartition thePartition) {
 		validateNotInUnnamedPartitionMode();
-		validateHaveValidPartitionIdAndName(thePartition);
+		validateHaveValidPartitionIdAndName((PartitionEntity) thePartition);
 
 		Optional<PartitionEntity> existingPartitionOpt = myPartitionDao.findById(thePartition.getId());
 		if (existingPartitionOpt.isPresent() == false) {
@@ -185,9 +188,14 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	@Override
-	public List<PartitionEntity> listPartitions() {
+	public List<IPartition> listPartitions() {
 		List<PartitionEntity> allPartitions = myPartitionDao.findAll();
-		return allPartitions;
+
+		return allPartitions
+			.stream()
+			.map(IPartition.class::cast)
+			.collect(Collectors.toList());
+
 	}
 
 	private void validatePartitionNameDoesntAlreadyExist(String theName) {

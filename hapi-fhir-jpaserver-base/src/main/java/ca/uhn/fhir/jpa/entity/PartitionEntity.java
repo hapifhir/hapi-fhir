@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.IPartition;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,7 +32,7 @@ import javax.persistence.UniqueConstraint;
 @Table(name = "HFJ_PARTITION", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_PART_NAME", columnNames = {"PART_NAME"})
 })
-public class PartitionEntity {
+public class PartitionEntity implements IPartition {
 
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_DESC_LENGTH = 200;
@@ -48,32 +49,39 @@ public class PartitionEntity {
 	@Column(name = "PART_DESC", length = MAX_DESC_LENGTH, nullable = true)
 	private String myDescription;
 
+	@Override
 	public Integer getId() {
 		return myId;
 	}
 
+	@Override
 	public PartitionEntity setId(Integer theId) {
 		myId = theId;
 		return this;
 	}
 
+	@Override
 	public String getName() {
 		return myName;
 	}
 
+	@Override
 	public PartitionEntity setName(String theName) {
 		myName = theName;
 		return this;
 	}
 
+	@Override
 	public String getDescription() {
 		return myDescription;
 	}
 
+	@Override
 	public void setDescription(String theDescription) {
 		myDescription = theDescription;
 	}
 
+	@Override
 	public RequestPartitionId toRequestPartitionId() {
 		return RequestPartitionId.fromPartitionIdAndName(getId(), getName());
 	}

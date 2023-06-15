@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.model.IPartition;
+import ca.uhn.fhir.jpa.api.svc.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -33,7 +35,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl.validatePartitionIdSupplied;
@@ -76,7 +77,7 @@ public class PartitionManagementProvider {
 		PartitionEntity input = parseInput(thePartitionId, thePartitionName, thePartitionDescription);
 
 		// Note: Input validation happens inside IPartitionLookupSvc
-		PartitionEntity output = myPartitionLookupSvc.createPartition(input, theRequestDetails);
+		PartitionEntity output = (PartitionEntity) myPartitionLookupSvc.createPartition(input, theRequestDetails);
 
 		IBaseParameters retVal = prepareOutput(output);
 
@@ -97,7 +98,7 @@ public class PartitionManagementProvider {
 		validatePartitionIdSupplied(myCtx, toValueOrNull(thePartitionId));
 
 		// Note: Input validation happens inside IPartitionLookupSvc
-		PartitionEntity output = myPartitionLookupSvc.getPartitionById(thePartitionId.getValue());
+		PartitionEntity output = (PartitionEntity) myPartitionLookupSvc.getPartitionById(thePartitionId.getValue());
 
 		return prepareOutput(output);
 	}
@@ -120,7 +121,7 @@ public class PartitionManagementProvider {
 		PartitionEntity input = parseInput(thePartitionId, thePartitionName, thePartitionDescription);
 
 		// Note: Input validation happens inside IPartitionLookupSvc
-		PartitionEntity output = myPartitionLookupSvc.updatePartition(input);
+		PartitionEntity output = (PartitionEntity) myPartitionLookupSvc.updatePartition(input);
 
 		IBaseParameters retVal = prepareOutput(output);
 
@@ -158,7 +159,7 @@ public class PartitionManagementProvider {
 	public IBaseParameters addPartitions(
 		@ResourceParam IBaseParameters theRequest
 	) {
-		List<PartitionEntity> output = myPartitionLookupSvc.listPartitions();
+		List<IPartition> output = myPartitionLookupSvc.listPartitions();
 		return prepareOutputList(output);
 	}
 
@@ -172,14 +173,14 @@ public class PartitionManagementProvider {
 		return retVal;
 	}
 
-	private IBaseParameters prepareOutputList(List<PartitionEntity> theOutput) {
+	private IBaseParameters prepareOutputList(List<IPartition> theOutput) {
 		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
-		for (PartitionEntity partitionEntity : theOutput) {
+		for (IPartition iPartition : theOutput) {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myCtx, retVal, "partition");
-			ParametersUtil.addPartInteger(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, partitionEntity.getId());
-			ParametersUtil.addPartCode(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, partitionEntity.getName());
-			if (isNotBlank(partitionEntity.getDescription())) {
-				ParametersUtil.addPartString(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, partitionEntity.getDescription());
+			ParametersUtil.addPartInteger(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, iPartition.getId());
+			ParametersUtil.addPartCode(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, iPartition.getName());
+			if (isNotBlank(iPartition.getDescription())) {
+				ParametersUtil.addPartString(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, iPartition.getDescription());
 			}
 		}
 		return retVal;

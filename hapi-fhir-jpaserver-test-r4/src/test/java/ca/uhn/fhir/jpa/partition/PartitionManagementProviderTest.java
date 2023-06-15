@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.model.IPartition;
+import ca.uhn.fhir.jpa.api.svc.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -252,7 +254,7 @@ public class PartitionManagementProviderTest {
 		partition2.setName("PARTITION-2");
 		partition2.setDescription("a description2");
 
-		List<PartitionEntity> partitionList = new ArrayList<PartitionEntity>();
+		List<IPartition> partitionList = new ArrayList<>();
 		partitionList.add(partition1);
 		partitionList.add(partition2);
 		when(myPartitionConfigSvc.listPartitions()).thenReturn(partitionList);
