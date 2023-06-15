@@ -67,16 +67,19 @@ import static org.apache.commons.lang3.StringUtils.trim;
 })
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
-	public static final int MAX_LENGTH = 200;
+	public static final int MAX_LENGTH_200 = 200;
+	public static final int MAX_LENGTH_400 = 200;
+	public static final int MAX_LENGTH_SYSTEM = MAX_LENGTH_200;
+	public static final int MAX_LENGTH_VALUE = MAX_LENGTH_400;
 
 	private static final long serialVersionUID = 1L;
 
 	@FullTextField
-	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
+	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH_SYSTEM)
 	public String mySystem;
 
 	@FullTextField
-	@Column(name = "SP_VALUE", nullable = true, length = MAX_LENGTH)
+	@Column(name = "SP_VALUE", nullable = true, length = MAX_LENGTH_VALUE)
 	private String myValue;
 
 	@SuppressWarnings("unused")

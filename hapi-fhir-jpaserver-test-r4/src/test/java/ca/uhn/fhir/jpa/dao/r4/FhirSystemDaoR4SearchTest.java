@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -9,7 +10,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,6 +29,9 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 		organization.addIdentifier(identifier);
 
 		myOrganizationDao.create(organization, mySrd);
+
+		final List<ResourceIndexedSearchParamToken> allSearchTokens = myResourceIndexedSearchParamTokenDao.findAll();
+		assertTrue(allSearchTokens.stream().anyMatch(token -> identifierValue.equals(token.getValue())));
 
 		final SearchParameterMap searchParameterMap = SearchParameterMap.newSynchronous(Observation.SP_IDENTIFIER, new TokenParam(identifierValue));
 
@@ -57,6 +60,9 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 		organization.addIdentifier(identifier);
 
 		myOrganizationDao.create(organization, mySrd);
+
+		final List<ResourceIndexedSearchParamToken> allSearchTokens = myResourceIndexedSearchParamTokenDao.findAll();
+		assertTrue(allSearchTokens.stream().anyMatch(token -> identifierValue.equals(token.getValue())));
 
 		final SearchParameterMap searchParameterMap = SearchParameterMap.newSynchronous(Observation.SP_IDENTIFIER, new TokenParam(identifierValue));
 

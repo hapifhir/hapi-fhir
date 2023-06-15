@@ -159,12 +159,12 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				throw new IllegalArgumentException(Msg.code(1236) + "Invalid token type: " + nextParameter.getClass());
 			}
 
-			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException(Msg.code(1237) + "Parameter[" + paramName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH_SYSTEM) {
+				throw new InvalidRequestException(Msg.code(1237) + "Parameter[" + paramName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH_200 + "): " + system);
 			}
 
-			if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException(Msg.code(1238) + "Parameter[" + paramName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+			if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH_VALUE) {
+				throw new InvalidRequestException(Msg.code(1238) + "Parameter[" + paramName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH_VALUE + "): " + code);
 			}
 
 			/*
