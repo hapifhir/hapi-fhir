@@ -905,7 +905,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (metaSnapshotModeTokens == null) {
-			metaSnapshotModeTokens = Collections.singleton(TagTypeEnum.PROFILE);
+//			metaSnapshotModeTokens = Collections.singleton(TagTypeEnum.PROFILE);
+			metaSnapshotModeTokens = Collections.emptySet();
 		}
 
 		return metaSnapshotModeTokens.contains(theTag.getTag().getTagType());
