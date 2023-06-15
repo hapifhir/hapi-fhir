@@ -84,6 +84,9 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient, context);
 		}
+		// + 2 because the before() method in the base class
+		// adds some resources with links; we don't need these, but
+		// we'll account for them
 		assertLinkCount(total + 2);
 
 		// set log appender
@@ -115,6 +118,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 			verify(appender, atLeastOnce())
 				.doAppend(loggingCaptor.capture());
 			Pattern pattern = Pattern.compile(regex);
+			boolean hasMsgs = false;
 			for (ILoggingEvent event : loggingCaptor.getAllValues()) {
 				if (event.getLevel() != Level.TRACE) {
 					continue; // we are only looking at the trace measures
@@ -123,6 +127,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 				ourLog.info(msg);
 
 				if (msg.contains("golden resources")) {
+					hasMsgs = true;
 					// golden resources deleted
 					boolean contains = msg.contains(String.format("Deleted %d of %d golden resources in", batchSize, batchSize));
 					if (!contains) {
@@ -151,6 +156,10 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 					}
 				}
 			}
+
+			// want to make sure we found the trace messages
+			// or what's the point
+			assertTrue(hasMsgs);
 		} finally {
 			clearStepLogger.detachAppender(appender);
 			clearStepLogger.setLevel(initialLevel);
