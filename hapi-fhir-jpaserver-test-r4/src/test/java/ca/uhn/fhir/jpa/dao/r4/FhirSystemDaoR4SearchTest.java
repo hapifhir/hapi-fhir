@@ -1,15 +1,78 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
 import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
 
 public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 
+	@Test
+	public void testSearchParameterIdentifierWithUnder200Chars() {
+		final String identifierValue = "identifierValue";
+
+		final Organization organization = new Organization();
+
+		final Identifier identifier = new Identifier();
+		identifier.setSystem("http://www.acme.org.au/units");
+		identifier.setValue(identifierValue);
+		organization.addIdentifier(identifier);
+
+		myOrganizationDao.create(organization, mySrd);
+
+		final SearchParameterMap searchParameterMap = SearchParameterMap.newSynchronous(Observation.SP_IDENTIFIER, new TokenParam(identifierValue));
+
+		final IBundleProvider bundle = myOrganizationDao.search(searchParameterMap, mySrd);
+		final List<IBaseResource> allResources = bundle.getAllResources();
+
+		assertEquals(1, allResources.size());
+
+		final IBaseResource resource = allResources.get(0);
+		assertTrue(resource instanceof Organization);
+
+		final List<Identifier> identifiersFromResults = ((Organization) resource).getIdentifier();
+		assertEquals(1, identifiersFromResults.size());
+		assertEquals(identifierValue, identifiersFromResults.get(0).getValue());
+	}
 
 	@Test
-	public void testSearchByParans() {
-		// code to come.. just here to prevent a failure 
+	public void testSearchParameterIdentifierWithOver200Chars() {
+		final String identifierValue = "Exclusive_Provider_Organization_(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)NICHOLAS_FITTANTE_ACT_FAMILY_ddddddddddddddddddddddddddddddd";
+
+		final Organization organization = new Organization();
+
+		final Identifier identifier = new Identifier();
+		identifier.setSystem("http://www.acme.org.au/units");
+		identifier.setValue(identifierValue);
+		organization.addIdentifier(identifier);
+
+		myOrganizationDao.create(organization, mySrd);
+
+		final SearchParameterMap searchParameterMap = SearchParameterMap.newSynchronous(Observation.SP_IDENTIFIER, new TokenParam(identifierValue));
+
+		final IBundleProvider bundle = myOrganizationDao.search(searchParameterMap, mySrd);
+		final List<IBaseResource> allResources = bundle.getAllResources();
+
+		assertEquals(1, allResources.size());
+
+		final IBaseResource resource = allResources.get(0);
+		assertTrue(resource instanceof Organization);
+
+		final List<Identifier> identifiersFromResults = ((Organization) resource).getIdentifier();
+		assertEquals(1, identifiersFromResults.size());
+		assertEquals(identifierValue, identifiersFromResults.get(0).getValue());
 	}
-	
+
 	/*//@formatter:off
 	 * [ERROR] Search parameter action has conflicting types token and reference
 	 * [ERROR] Search parameter source has conflicting types token and reference
