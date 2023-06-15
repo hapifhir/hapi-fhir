@@ -106,7 +106,7 @@ public class RuleBulkExportImpl extends BaseRule {
 
 			final Set<String> filters = options.getFilters();
 
-			// TODO:  LD:  This admittedly adds more to the tech debt above, and should really be addressed by 4634
+			// TODO:  LD:  This admittedly adds more to the tech debt above, and should really be addressed by https://github.com/hapifhir/hapi-fhir/issues/4990
 			if (! filters.isEmpty()) {
 				ourLog.debug("filters not empty");
 				final Set<String> patientIdsInFilters = filters.stream()
