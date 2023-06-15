@@ -172,7 +172,7 @@ public class RuleBulkExportImplTest {
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: We make no claims about type-level export on Patient.
+		//Then: The patient IDs match so this is permitted
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
@@ -191,7 +191,7 @@ public class RuleBulkExportImplTest {
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: We make no claims about type-level export on Patient.
+		//Then: The patient IDs match so this is permitted
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
@@ -210,7 +210,7 @@ public class RuleBulkExportImplTest {
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: We make no claims about type-level export on Patient.
+		//Then: The patient IDs match so this is permitted
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
@@ -228,7 +228,7 @@ public class RuleBulkExportImplTest {
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: We make no claims about type-level export on Patient.
+		//Then: The patient IDs match so this is permitted
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
@@ -247,7 +247,7 @@ public class RuleBulkExportImplTest {
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: We make no claims about type-level export on Patient.
+		//Then: The patient IDs do NOT match so this is not permitted.
 		assertEquals(PolicyEnum.DENY, verdict.getDecision());
 	}
 }
