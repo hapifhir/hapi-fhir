@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.fql.executor.IFqlResult;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
 import ca.uhn.fhir.jpa.fql.util.FqlConstants;
@@ -93,11 +93,11 @@ public class FqlRestClient {
 		myFetchSize = theFetchSize;
 	}
 
-	public IFqlResult execute(String theSql, Integer theLimit) throws SQLException {
-		return new FqlResult(theSql, theLimit);
+	public IFqlExecutionResult execute(String theSql, Integer theLimit) throws SQLException {
+		return new FqlExecutionResult(theSql, theLimit);
 	}
 
-	private class FqlResult implements IFqlResult {
+	private class FqlExecutionResult implements IFqlExecutionResult {
 		private final List<String> myColumnNames = new ArrayList<>();
 		private String mySearchId;
 		private int myLimit;
@@ -109,7 +109,7 @@ public class FqlRestClient {
 		private boolean myExhausted;
 		private FqlStatement myStatement;
 
-		public FqlResult(String theSql, Integer theLimit) throws SQLException {
+		public FqlExecutionResult(String theSql, Integer theLimit) throws SQLException {
 			HttpPost post = new HttpPost(myBaseUrl + "/" + FqlConstants.FQL_EXECUTE);
 			Parameters input = new Parameters();
 			input.addParameter(FqlRestProvider.PARAM_QUERY, new StringType(theSql));

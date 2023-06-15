@@ -4,8 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.fql.executor.EmptyFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
-import ca.uhn.fhir.jpa.fql.executor.IFqlResult;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
 import ca.uhn.fhir.rest.api.Constants;
@@ -44,9 +45,9 @@ public class FqlRestClientTest {
 	@Mock
 	private IFqlExecutor myFqlExecutor;
 	@Mock
-	private IFqlResult myMockFqlResult0;
+	private IFqlExecutionResult myMockFqlResult0;
 	@Mock
-	private IFqlResult myMockFqlResult1;
+	private IFqlExecutionResult myMockFqlResult1;
 	@InjectMocks
 	private FqlRestProvider myProvider = new FqlRestProvider();
 	@RegisterExtension
@@ -75,10 +76,10 @@ public class FqlRestClientTest {
 		when(myMockFqlResult0.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
 		when(myMockFqlResult0.hasNext()).thenReturn(true, true, true);
 		when(myMockFqlResult0.getNextRow()).thenReturn(
-			new IFqlResult.Row(0, List.of("Simpson", "Homer")),
-			new IFqlResult.Row(3, List.of("Simpson", "Marge")),
+			new IFqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
+			new IFqlExecutionResult.Row(3, List.of("Simpson", "Marge")),
 			// Fetch size is 2 so this one shouldn't get returned in the first pass
-			new IFqlResult.Row(5, List.of("Simpson", "Maggie"))
+			new IFqlExecutionResult.Row(5, List.of("Simpson", "Maggie"))
 		);
 		when(myMockFqlResult0.getSearchId()).thenReturn(searchId);
 		when(myMockFqlResult0.getLimit()).thenReturn(123);
@@ -87,38 +88,38 @@ public class FqlRestClientTest {
 		when(myMockFqlResult1.getStatement()).thenReturn(statement);
 		when(myMockFqlResult1.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult1.getNextRow()).thenReturn(
-			new IFqlResult.Row(5, List.of("Simpson", "Maggie")),
-			new IFqlResult.Row(7, List.of("Simpson", "Lisa"))
+			new IFqlExecutionResult.Row(5, List.of("Simpson", "Maggie")),
+			new IFqlExecutionResult.Row(7, List.of("Simpson", "Lisa"))
 		);
 		when(myMockFqlResult1.getSearchId()).thenReturn(searchId);
 		when(myMockFqlResult1.getLimit()).thenReturn(123);
 		when(myFqlExecutor.executeContinuation(any(), eq(searchId), eq(4), eq(123), any())).thenReturn(myMockFqlResult1);
-		when(myFqlExecutor.executeContinuation(any(), eq(searchId), eq(8), eq(123), any())).thenReturn(new EmptyFqlResult(searchId));
+		when(myFqlExecutor.executeContinuation(any(), eq(searchId), eq(8), eq(123), any())).thenReturn(new EmptyFqlExecutionResult(searchId));
 
 		String username = "some-username";
 		String password = "some-password";
 
 		FqlRestClient client = new FqlRestClient(myServer.getBaseUrl(), username, password);
 		client.setFetchSize(2);
-		IFqlResult result = client.execute(sql, 123);
-		IFqlResult.Row nextRow;
+		IFqlExecutionResult result = client.execute(sql, 123);
+		IFqlExecutionResult.Row nextRow;
 		assertThat(result.getColumnNames().toString(), result.getColumnNames(), contains("name.family", "name.given"));
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertEquals(0, nextRow.searchRowNumber());
-		assertThat(nextRow.values(), contains("Simpson", "Homer"));
+		assertEquals(0, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("Simpson", "Homer"));
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertEquals(3, nextRow.searchRowNumber());
-		assertThat(nextRow.values(), contains("Simpson", "Marge"));
+		assertEquals(3, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("Simpson", "Marge"));
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertEquals(5, nextRow.searchRowNumber());
-		assertThat(nextRow.values(), contains("Simpson", "Maggie"));
+		assertEquals(5, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("Simpson", "Maggie"));
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertEquals(7, nextRow.searchRowNumber());
-		assertThat(nextRow.values(), contains("Simpson", "Lisa"));
+		assertEquals(7, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("Simpson", "Lisa"));
 		assertFalse(result.hasNext());
 
 		verify(myFqlExecutor, times(1)).executeInitialSearch(myStatementCaptor.capture(), myLimitCaptor.capture(), myRequestDetailsCaptor.capture());

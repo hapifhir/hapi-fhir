@@ -17,17 +17,17 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.fql.jdbc;
+package ca.uhn.fhir.jpa.fql.executor;
 
-import ca.uhn.fhir.jpa.fql.executor.IFqlResult;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 
 import java.util.List;
 
-public class EmptyFqlResult implements IFqlResult {
+public class EmptyFqlExecutionResult implements IFqlExecutionResult {
 	private final String mySearchId;
 
-	public EmptyFqlResult(String theSearchId) {
+	public EmptyFqlExecutionResult(String theSearchId) {
 		mySearchId = theSearchId;
 	}
 

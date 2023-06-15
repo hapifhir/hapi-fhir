@@ -19,9 +19,7 @@
  */
 package ca.uhn.fhir.jpa.fql.jdbc;
 
-import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
-import ca.uhn.fhir.jpa.fql.executor.IFqlResult;
-import org.springframework.beans.factory.annotation.Autowired;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -122,7 +120,7 @@ class FqlStatement implements Statement {
 		if (getMaxRows() > 0) {
 			limit = getMaxRows();
 		}
-		IFqlResult result = myConnection.getClient().execute(sql, limit);
+		IFqlExecutionResult result = myConnection.getClient().execute(sql, limit);
 
 		myResultSet = new FqlResultSet(result, this);
 		return true;

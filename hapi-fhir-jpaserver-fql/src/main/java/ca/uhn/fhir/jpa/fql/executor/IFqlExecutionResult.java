@@ -23,7 +23,7 @@ import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 
 import java.util.List;
 
-public interface IFqlResult {
+public interface IFqlExecutionResult {
 
 	List<String> getColumnNames();
 
@@ -43,20 +43,20 @@ public interface IFqlResult {
 
 	class Row {
 
-		private final List<String> myValues;
-		private final int mySearchRowNumber;
+		private final List<String> myRowValues;
+		private final int myRowOffset;
 
-		public Row(int theSearchRowNumber, List<String> theValues) {
-			mySearchRowNumber = theSearchRowNumber;
-			myValues = theValues;
+		public Row(int theRowOffset, List<String> theRowValues) {
+			myRowOffset = theRowOffset;
+			myRowValues = theRowValues;
 		}
 
-		public int searchRowNumber() {
-			return mySearchRowNumber;
+		public int getRowOffset() {
+			return myRowOffset;
 		}
 
-		public List<String> values() {
-			return myValues;
+		public List<String> getRowValues() {
+			return myRowValues;
 		}
 
 

@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -70,20 +69,20 @@ public class FqlExecutorTest {
 		when(myPagingProvider.retrieveResultList(any(), eq(searchId))).thenReturn(createSomeSimpsonsAndFlanders());
 
 		// Test
-		IFqlResult result = myFqlExecutor.executeContinuation(statement, searchId, 3, 100, mySrd);
+		IFqlExecutionResult result = myFqlExecutor.executeContinuation(statement, searchId, 3, 100, mySrd);
 
 		// Verify
 		assertThat(result.getColumnNames(), contains(
 			"name.given[1]", "name.family"
 		));
 		assertTrue(result.hasNext());
-		IFqlResult.Row nextRow = result.getNextRow();
-		assertEquals(3, nextRow.searchRowNumber());
-		assertThat(nextRow.values(), contains("Marie", "Simpson"));
+		IFqlExecutionResult.Row nextRow = result.getNextRow();
+		assertEquals(3, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("Marie", "Simpson"));
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertEquals(4, nextRow.searchRowNumber());
-		assertThat(nextRow.values(), contains("Evelyn", "Simpson"));
+		assertEquals(4, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("Evelyn", "Simpson"));
 		assertFalse(result.hasNext());
 
 	}
@@ -100,19 +99,19 @@ public class FqlExecutorTest {
 					select name.given[1], name.family
 			""";
 
-		IFqlResult.Row nextRow;
-		IFqlResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+		IFqlExecutionResult.Row nextRow;
+		IFqlExecutionResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getColumnNames(), contains(
 			"name.given[1]", "name.family"
 		));
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertEquals(0, nextRow.searchRowNumber());
-		assertThat(nextRow.values(), contains("Jay", "Simpson"));
+		assertEquals(0, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("Jay", "Simpson"));
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertEquals(2, nextRow.searchRowNumber());
-		assertThat(nextRow.values(), contains("El Barto", "Simpson"));
+		assertEquals(2, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("El Barto", "Simpson"));
 		assertTrue(result.hasNext());
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
@@ -131,8 +130,8 @@ public class FqlExecutorTest {
 					select *
 			""";
 
-		IFqlResult.Row nextRow;
-		IFqlResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+		IFqlExecutionResult.Row nextRow;
+		IFqlExecutionResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
 			"active", "address.city", "address.country"
 		));
@@ -152,14 +151,14 @@ public class FqlExecutorTest {
 					select Given:name.given[1], Family:name.family
 			""";
 
-		IFqlResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+		IFqlExecutionResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getColumnNames(), contains(
 			"Given", "Family"
 		));
 		assertTrue(result.hasNext());
-		IFqlResult.Row nextRow = result.getNextRow();
-		assertEquals(2, nextRow.searchRowNumber());
-		assertThat(nextRow.values(), contains("El Barto", "Simpson"));
+		IFqlExecutionResult.Row nextRow = result.getNextRow();
+		assertEquals(2, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("El Barto", "Simpson"));
 		assertFalse(result.hasNext());
 
 	}
@@ -175,14 +174,14 @@ public class FqlExecutorTest {
 					select Given:name.given[1], Family:name.family
 			""";
 
-		IFqlResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+		IFqlExecutionResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getColumnNames(), contains(
 			"Given", "Family"
 		));
 		assertTrue(result.hasNext());
-		IFqlResult.Row row = result.getNextRow();
-		assertEquals(0, row.searchRowNumber());
-		assertThat(row.values(), contains("Jay", "Simpson"));
+		IFqlExecutionResult.Row row = result.getNextRow();
+		assertEquals(0, row.getRowOffset());
+		assertThat(row.getRowValues(), contains("Jay", "Simpson"));
 		assertFalse(result.hasNext());
 
 	}

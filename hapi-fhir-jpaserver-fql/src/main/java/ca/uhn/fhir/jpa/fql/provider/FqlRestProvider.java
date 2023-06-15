@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.fql.provider;
 
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
-import ca.uhn.fhir.jpa.fql.executor.IFqlResult;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.fql.util.FqlConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -87,7 +87,7 @@ public class FqlRestProvider {
 		ValidateUtil.isTrueOrThrowInvalidRequest(isNotBlank(query) ^ isNotBlank(continuation), "Must have either a query or a continuation");
 
 		if (isNotBlank(query)) {
-			IFqlResult outcome = myFqlExecutor.executeInitialSearch(query, limit, theRequestDetails);
+			IFqlExecutionResult outcome = myFqlExecutor.executeInitialSearch(query, limit, theRequestDetails);
 			streamResponseCsv(theServletResponse, fetchSize, outcome, true, outcome.getStatement());
 		} else {
 			ValidateUtil.isTrueOrThrowInvalidRequest(theOffset != null && theOffset.hasValue(), "No offset supplied");
@@ -97,7 +97,7 @@ public class FqlRestProvider {
 			ValidateUtil.isNotBlankOrThrowIllegalArgument(statement, "No statement provided");
 			FqlStatement statementJson = JsonUtil.deserialize(statement, FqlStatement.class);
 
-			IFqlResult outcome = myFqlExecutor.executeContinuation(statementJson, continuation, startingOffset, limit, theRequestDetails);
+			IFqlExecutionResult outcome = myFqlExecutor.executeContinuation(statementJson, continuation, startingOffset, limit, theRequestDetails);
 			streamResponseCsv(theServletResponse, fetchSize, outcome, false, outcome.getStatement());
 		}
 
@@ -121,7 +121,7 @@ public class FqlRestProvider {
 		return fetchSize;
 	}
 
-	private static void streamResponseCsv(HttpServletResponse theServletResponse, int theFetchSize, IFqlResult theResult, boolean theInitialPage, FqlStatement theStatement) throws IOException {
+	private static void streamResponseCsv(HttpServletResponse theServletResponse, int theFetchSize, IFqlExecutionResult theResult, boolean theInitialPage, FqlStatement theStatement) throws IOException {
 		theServletResponse.setStatus(200);
 		theServletResponse.setContentType(CT_TEXT_CSV + CHARSET_UTF8_CTSUFFIX);
 		try (ServletOutputStream outputStream = theServletResponse.getOutputStream()) {
@@ -153,9 +153,9 @@ public class FqlRestProvider {
 			// Print the rows
 			int recordCount = 0;
 			while (recordCount++ < theFetchSize && theResult.hasNext()) {
-				IFqlResult.Row nextRow = theResult.getNextRow();
-				csvWriter.print(nextRow.searchRowNumber());
-				csvWriter.printRecord(nextRow.values());
+				IFqlExecutionResult.Row nextRow = theResult.getNextRow();
+				csvWriter.print(nextRow.getRowOffset());
+				csvWriter.printRecord(nextRow.getRowValues());
 			}
 			csvWriter.close(true);
 		}

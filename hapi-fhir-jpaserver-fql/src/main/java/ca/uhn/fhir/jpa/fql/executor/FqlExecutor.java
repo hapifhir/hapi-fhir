@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.fql.executor;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -48,10 +47,6 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.thymeleaf.util.StringUtils;
 
@@ -60,10 +55,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 public class FqlExecutor implements IFqlExecutor {
-	private static final int BATCH_SIZE = 1000;
+	public static final int BATCH_SIZE = 1000;
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	@Autowired
@@ -83,7 +77,7 @@ public class FqlExecutor implements IFqlExecutor {
 	}
 
 	@Override
-	public FqlResult executeInitialSearch(String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
+	public LocalFqlExecutionResult executeInitialSearch(String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
 		FqlParser parser = new FqlParser(myFhirContext, theStatement);
 		FqlStatement statement = parser.parse();
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(statement.getFromResourceName());
@@ -128,7 +122,7 @@ public class FqlExecutor implements IFqlExecutor {
 		}
 
 		IBundleProvider outcome = dao.search(map, theRequestDetails);
-		return new FqlResult(statement, outcome, fhirPath, theLimit, 0);
+		return new LocalFqlExecutionResult(statement, outcome, fhirPath, theLimit, 0);
 	}
 
 	private void massageSelectColumnNames(FqlStatement theFqlStatement) {
@@ -186,157 +180,11 @@ public class FqlExecutor implements IFqlExecutor {
 	}
 
 	@Override
-	public IFqlResult executeContinuation(FqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails) {
+	public IFqlExecutionResult executeContinuation(FqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails) {
 		IBundleProvider resultList = myPagingProvider.retrieveResultList(theRequestDetails, theSearchId);
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		return new FqlResult(theStatement, resultList, fhirPath, theLimit, theStartingOffset);
+		return new LocalFqlExecutionResult(theStatement, resultList, fhirPath, theLimit, theStartingOffset);
 	}
 
-
-	private static class FqlResult implements IFqlResult {
-
-		private final IBundleProvider mySearchResult;
-		private final IFhirPath myFhirPath;
-		private final Integer myLimit;
-		private final FqlStatement myStatement;
-		private int myTotalRowsFetched = 0;
-		private int myNextSearchResultRow;
-		private int myNextBatchRow = 0;
-		private List<IBaseResource> myNextBatch;
-		private IBaseResource myNextResource;
-		private boolean myExhausted = false;
-		private int myNextResourceSearchRow;
-
-		public FqlResult(FqlStatement theStatement, IBundleProvider theSearchResult, IFhirPath theFhirPath, Integer theLimit, int theInitialOffset) {
-			myStatement = theStatement;
-			mySearchResult = theSearchResult;
-			myFhirPath = theFhirPath;
-			myLimit = theLimit;
-			myNextSearchResultRow = theInitialOffset;
-		}
-
-
-		@Override
-		public List<String> getColumnNames() {
-			return
-				myStatement
-					.getSelectClauses()
-					.stream()
-					.map(FqlStatement.SelectClause::getAlias)
-					.collect(Collectors.toUnmodifiableList());
-		}
-
-		@Override
-		public boolean hasNext() {
-			fetchNextResource();
-			return myNextResource != null;
-		}
-
-		private void fetchNextResource() {
-			while (myNextResource == null && !myExhausted) {
-				if (myNextBatch == null) {
-					myNextBatch = mySearchResult.getResources(myNextSearchResultRow, myNextSearchResultRow + BATCH_SIZE);
-					myNextBatchRow = 0;
-					myNextSearchResultRow += BATCH_SIZE;
-				}
-				if (myNextBatch.isEmpty()) {
-					myExhausted = true;
-				} else if (myNextBatch.size() > myNextBatchRow) {
-					myNextResource = myNextBatch.get(myNextBatchRow);
-					myNextResourceSearchRow = (myNextSearchResultRow - BATCH_SIZE) + myNextBatchRow;
-					myNextBatchRow++;
-				} else {
-					myNextBatch = null;
-				}
-
-				if (myNextResource != null && !myStatement.getWhereClauses().isEmpty()) {
-					for (FqlStatement.WhereClause nextWhereClause : myStatement.getWhereClauses()) {
-
-						List<IBase> values = myFhirPath.evaluate(myNextResource, nextWhereClause.getLeft(), IBase.class);
-						boolean haveMatch = false;
-						for (IBase nextValue : values) {
-							for (String nextRight : nextWhereClause.getRight()) {
-								String expression = "$this = " + nextRight;
-								IPrimitiveType outcome = myFhirPath
-									.evaluateFirst(nextValue, expression, IPrimitiveType.class)
-									.orElseThrow(IllegalStateException::new);
-								Boolean value = (Boolean) outcome.getValue();
-								haveMatch |= value;
-								if (haveMatch) {
-									break;
-								}
-							}
-							if (haveMatch) {
-								break;
-							}
-						}
-
-						if (!haveMatch) {
-							myNextResource = null;
-							break;
-						}
-
-					}
-
-				}
-			}
-
-			if (myNextResource != null) {
-				myTotalRowsFetched++;
-				if (myLimit != null && myTotalRowsFetched >= myLimit) {
-					myExhausted = true;
-				}
-			}
-		}
-
-		@Override
-		public Row getNextRow() {
-			fetchNextResource();
-			Validate.isTrue(myNextResource != null, "No more results");
-
-			List<String> values = new ArrayList<>();
-			for (FqlStatement.SelectClause nextColumn : myStatement.getSelectClauses()) {
-				List<IPrimitiveType> nextPrimitive = myFhirPath.evaluate(myNextResource, nextColumn.getClause(), IPrimitiveType.class);
-				String value = null;
-				if (!nextPrimitive.isEmpty()) {
-					IPrimitiveType primitive = nextPrimitive.get(0);
-					if (primitive != null) {
-						value = primitive.getValueAsString();
-					}
-				}
-				values.add(value);
-			}
-
-			myNextResource = null;
-			return new Row(myNextResourceSearchRow, values);
-		}
-
-		@Override
-		public boolean isClosed() {
-			return false;
-		}
-
-		@Override
-		public void close() {
-			// ignore
-		}
-
-		@Override
-		public String getSearchId() {
-			return mySearchResult.getUuid();
-		}
-
-		@Override
-		public int getLimit() {
-			return myLimit != null ? myLimit : -1;
-		}
-
-		@Override
-		public FqlStatement getStatement() {
-			return myStatement;
-		}
-
-
-	}
 
 }

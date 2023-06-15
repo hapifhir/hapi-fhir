@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.fql.executor.EmptyFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
-import ca.uhn.fhir.jpa.fql.executor.IFqlResult;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -36,7 +37,7 @@ public class FqlDriverTest {
 	@Mock
 	private IFqlExecutor myFqlExecutor;
 	@Mock
-	private IFqlResult myMockFqlResult;
+	private IFqlExecutionResult myMockFqlResult;
 	@InjectMocks
 	private FqlRestProvider myProvider = new FqlRestProvider();
 	@RegisterExtension
@@ -65,13 +66,13 @@ public class FqlDriverTest {
 	public void testExecuteStatement() {
 		FqlStatement statement = createFakeStatement();
 		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
-		when(myFqlExecutor.executeContinuation(any(), any(), anyInt(), any(), any())).thenReturn(new EmptyFqlResult("123"));
+		when(myFqlExecutor.executeContinuation(any(), any(), anyInt(), any(), any())).thenReturn(new EmptyFqlExecutionResult("123"));
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
-			new IFqlResult.Row(0, List.of("Simpson", "Homer")),
-			new IFqlResult.Row(3, List.of("Simpson", "Marge"))
+			new IFqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
+			new IFqlExecutionResult.Row(3, List.of("Simpson", "Marge"))
 		);
 		when(myMockFqlResult.getSearchId()).thenReturn("my-search-id");
 		when(myMockFqlResult.getLimit()).thenReturn(999);

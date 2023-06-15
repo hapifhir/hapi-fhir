@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.fql.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
-import ca.uhn.fhir.jpa.fql.executor.IFqlResult;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.fql.util.FqlConstants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -45,7 +45,7 @@ public class FqlRestProviderTest {
 	@Mock
 	private IFqlExecutor myFqlExecutor;
 	@Mock
-	private IFqlResult myMockFqlResult;
+	private IFqlExecutionResult myMockFqlResult;
 	@InjectMocks
 	private FqlRestProvider myProvider = new FqlRestProvider();
 	@RegisterExtension
@@ -68,8 +68,8 @@ public class FqlRestProviderTest {
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
-			new IFqlResult.Row(0, List.of("Simpson", "Homer")),
-			new IFqlResult.Row(3, List.of("Simpson", "Marge"))
+			new IFqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
+			new IFqlExecutionResult.Row(3, List.of("Simpson", "Marge"))
 		);
 		when(myMockFqlResult.getSearchId()).thenReturn("my-search-id");
 		when(myMockFqlResult.getLimit()).thenReturn(999);
@@ -110,8 +110,8 @@ public class FqlRestProviderTest {
 		when(myFqlExecutor.executeContinuation(any(), any(), anyInt(), isNull(), any())).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
-			new IFqlResult.Row(4, List.of("Simpson", "Homer")),
-			new IFqlResult.Row(6, List.of("Simpson", "Marge"))
+			new IFqlExecutionResult.Row(4, List.of("Simpson", "Homer")),
+			new IFqlExecutionResult.Row(6, List.of("Simpson", "Marge"))
 		);
 		when(myMockFqlResult.getSearchId()).thenReturn("my-search-id");
 		when(myMockFqlResult.getLimit()).thenReturn(-1);

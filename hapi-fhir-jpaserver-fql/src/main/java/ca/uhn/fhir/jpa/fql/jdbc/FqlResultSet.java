@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.fql.jdbc;
 
-import ca.uhn.fhir.jpa.fql.executor.IFqlResult;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -49,14 +49,14 @@ import java.util.Map;
 
 class FqlResultSet implements ResultSet {
 
-	private final IFqlResult myResult;
+	private final IFqlExecutionResult myResult;
 	private List<String> myNextRow;
 	private FqlResultSetMetadata myMetadata;
 	private Map<String, Integer> myColumnNameToIndex;
 	private final Statement myStatement;
 	private int myRowCount;
 
-	public FqlResultSet(IFqlResult theResult, Statement theStatement) {
+	public FqlResultSet(IFqlExecutionResult theResult, Statement theStatement) {
 		myStatement = theStatement;
 		myResult = theResult;
 		myMetadata = new FqlResultSetMetadata();
@@ -69,7 +69,7 @@ class FqlResultSet implements ResultSet {
 	@Override
 	public boolean next() throws SQLException {
 		if (myResult.hasNext()) {
-			myNextRow = myResult.getNextRow().values();
+			myNextRow = myResult.getNextRow().getRowValues();
 			myRowCount++;
 			return true;
 		}

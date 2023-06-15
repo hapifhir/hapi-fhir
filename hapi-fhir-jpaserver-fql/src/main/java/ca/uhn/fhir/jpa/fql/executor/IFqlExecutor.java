@@ -30,18 +30,18 @@ public interface IFqlExecutor {
 	 * @param theStatement      The FQL statement to execute
 	 * @param theLimit          The maximum number of records to retrieve
 	 * @param theRequestDetails The request details associated with the request
-	 * @return Returns a {@link IFqlResult result object}. Note that the returned object is not thread safe.
+	 * @return Returns a {@link IFqlExecutionResult result object}. Note that the returned object is not thread safe.
 	 */
-	IFqlResult executeInitialSearch(String theStatement, Integer theLimit, RequestDetails theRequestDetails);
+	IFqlExecutionResult executeInitialSearch(String theStatement, Integer theLimit, RequestDetails theRequestDetails);
 
 	/**
-	 * Load a subsequent page of data
+	 * Load a subsequent page of data from a search initiated by a call to {@link #executeInitialSearch(String, Integer, RequestDetails)}.
 	 *
-	 * @param theStatement
-	 * @param theSearchId
-	 * @param theLimit
-	 * @param theRequestDetails
-	 * @return
+	 * @param theStatement      The parsed statement from the initial search. Available through a call to {@link IFqlExecutionResult#getStatement()}.
+	 * @param theSearchId       The search ID from the initial search. Available through a call to {@link IFqlExecutionResult#getSearchId()}.
+	 * @param theLimit          The maximum number of results to return (across all pages)
+	 * @param theRequestDetails The request details associated with the request
+	 * @param theStartingOffset The row offset count for the first result to return. This should be set to one higher than the last value returned by {@link IFqlExecutionResult.Row#getRowOffset()}.
 	 */
-	IFqlResult executeContinuation(FqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails);
+	IFqlExecutionResult executeContinuation(FqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails);
 }
