@@ -204,6 +204,7 @@ public class InMemoryResourceMatcher {
      * @return result.supported() will be true if theSearchParameterMap can be evaluated in-memory
      */
     public InMemoryMatchResult canBeEvaluatedInMemory(
+
             SearchParameterMap theSearchParameterMap,
             RuntimeResourceDefinition theResourceDefinition) {
         return match(theSearchParameterMap, null, theResourceDefinition, null);
