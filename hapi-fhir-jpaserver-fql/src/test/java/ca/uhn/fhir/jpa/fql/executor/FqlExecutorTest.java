@@ -193,8 +193,7 @@ public class FqlExecutorTest {
 	})
 	@ParameterizedTest
 	public void testSearch_Error_UnknownParam(String theParamName) {
-		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
-		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
+		initDao(Patient.class);
 
 		String statement = "from Patient " +
 			"search " + theParamName + " = 'abc' " +

@@ -94,8 +94,6 @@ public class FqlExecutor implements IFqlExecutor {
 		massageSelectColumnNames(statement);
 
 		SearchParameterMap map = new SearchParameterMap();
-		IBundleProvider outcome = dao.search(map, theRequestDetails);
-
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 
 		List<FqlStatement.WhereClause> searchClauses = statement.getSearchClauses();
@@ -129,6 +127,7 @@ public class FqlExecutor implements IFqlExecutor {
 			}
 		}
 
+		IBundleProvider outcome = dao.search(map, theRequestDetails);
 		return new FqlResult(statement, outcome, fhirPath, theLimit, 0);
 	}
 

@@ -88,7 +88,7 @@ public class FqlRestProviderTest {
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			String expected = """
 				1
-				my-search-id,999,"{""selectClauses"":[{""clause"":""name.family"",""alias"":""name.family""}],""whereClauses"":[],""searchClauses"":[],""fromResourceName"":""Patient""}"
+				my-search-id,999,"{""selectClauses"":[{""clause"":""name.family"",""alias"":""name.family""}],""fromResourceName"":""Patient""}"
 				"",name.family,name.given
 				0,Simpson,Homer
 				3,Simpson,Marge
