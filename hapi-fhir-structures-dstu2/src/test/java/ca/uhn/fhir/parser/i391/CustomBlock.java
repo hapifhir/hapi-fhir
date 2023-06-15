@@ -1,12 +1,13 @@
 package ca.uhn.fhir.parser.i391;
 
+import java.util.List;
+
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
-import java.util.List;
 
 @Block
 public class CustomBlock extends Observation.Component {

@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import java.util.List;
+import javax.annotation.Nullable;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import java.util.List;
-import javax.annotation.Nullable;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class NpmJpaValidationSupport implements IValidationSupport {
 

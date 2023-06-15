@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.migrate.tasks;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 public class SchemaInitializationProviderTest {
 

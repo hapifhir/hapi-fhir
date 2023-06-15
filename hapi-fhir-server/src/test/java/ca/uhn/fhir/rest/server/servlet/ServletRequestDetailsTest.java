@@ -1,13 +1,15 @@
 package ca.uhn.fhir.rest.server.servlet;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.rest.api.Constants;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import ca.uhn.fhir.rest.api.Constants;
-import javax.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.Test;
 
 class ServletRequestDetailsTest {
     @Test

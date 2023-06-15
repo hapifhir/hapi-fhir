@@ -19,16 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import static org.apache.commons.lang3.StringUtils.left;
-
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
-import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,11 +49,23 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.OptimisticLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.system.HapiSystemProperties;
+
+import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(

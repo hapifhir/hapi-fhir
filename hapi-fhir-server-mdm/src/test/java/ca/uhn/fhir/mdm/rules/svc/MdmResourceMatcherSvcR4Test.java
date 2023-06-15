@@ -1,14 +1,15 @@
 package ca.uhn.fhir.mdm.rules.svc;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
     private MdmResourceMatcherSvc myMdmResourceMatcherSvc;

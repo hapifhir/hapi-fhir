@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /** Base class for RESTful operation parameter types */
 public abstract class BaseParam implements IQueryParameterType {

@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import java.util.HashMap;
 import java.util.Map;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 
 public final class ColumnTypeToDriverTypeToSqlType {
 

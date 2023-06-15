@@ -1,10 +1,12 @@
 package org.hl7.fhir.r4.hapi.rest.server.helper;
 
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 
 public class BatchHelperR4 {
 

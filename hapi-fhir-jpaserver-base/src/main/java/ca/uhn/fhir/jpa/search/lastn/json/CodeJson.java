@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.search.lastn.json;
 
-import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
-import java.util.List;
+
+import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(

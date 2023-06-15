@@ -1,6 +1,8 @@
 package ca.uhn.fhirtest.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -11,9 +13,8 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class PublicSecurityInterceptor extends AuthorizationInterceptor {
 

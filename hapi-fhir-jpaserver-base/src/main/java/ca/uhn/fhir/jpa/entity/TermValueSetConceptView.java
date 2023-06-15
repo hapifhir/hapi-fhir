@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
@@ -30,9 +28,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+
 import org.apache.commons.io.IOUtils;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 @Entity
 @Immutable

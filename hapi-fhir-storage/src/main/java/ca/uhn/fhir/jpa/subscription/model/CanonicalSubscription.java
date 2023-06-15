@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -39,6 +35,13 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IModelJson;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class CanonicalSubscription implements Serializable, Cloneable, IModelJson {
 

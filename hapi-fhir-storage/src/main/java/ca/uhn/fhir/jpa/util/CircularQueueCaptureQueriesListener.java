@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import ca.uhn.fhir.util.StopWatch;
-import com.google.common.collect.Queues;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,11 +30,16 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
-import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Queues;
+
+import ca.uhn.fhir.util.StopWatch;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 /**
  * This is a query listener designed to be plugged into a {@link ProxyDataSourceBuilder proxy

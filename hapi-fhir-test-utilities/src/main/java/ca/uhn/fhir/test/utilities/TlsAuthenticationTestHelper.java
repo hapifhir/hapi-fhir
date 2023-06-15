@@ -19,23 +19,26 @@
  */
 package ca.uhn.fhir.test.utilities;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.tls.KeyStoreInfo;
-import ca.uhn.fhir.tls.TlsAuthentication;
-import ca.uhn.fhir.tls.TrustStoreInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.tls.KeyStoreInfo;
+import ca.uhn.fhir.tls.TlsAuthentication;
+import ca.uhn.fhir.tls.TrustStoreInfo;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TlsAuthenticationTestHelper implements AfterEachCallback {
 

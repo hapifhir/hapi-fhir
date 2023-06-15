@@ -19,15 +19,18 @@
  */
 package ca.uhn.fhir.jpa.util.xmlpatch;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import com.github.dnault.xmlpatch.Patcher;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.github.dnault.xmlpatch.Patcher;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class XmlPatchUtils {
 

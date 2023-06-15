@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
+import org.hl7.fhir.r4.model.ConceptMap;
+
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import org.hl7.fhir.r4.model.ConceptMap;
 
 public interface ITermConceptMappingSvc extends IValidationSupport {
 

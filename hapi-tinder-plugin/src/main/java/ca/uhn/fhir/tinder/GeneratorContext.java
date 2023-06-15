@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.tinder;
 
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.plugins.annotations.Parameter;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.parser.BaseStructureParser;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * @author Bill.Denton

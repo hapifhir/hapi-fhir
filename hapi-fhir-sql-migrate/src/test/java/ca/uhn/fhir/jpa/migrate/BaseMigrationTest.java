@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.migrate;
 
-import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+
+import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 
 public abstract class BaseMigrationTest {
     static final String TABLE_NAME = "TEST_MIGRATION_TABLE";

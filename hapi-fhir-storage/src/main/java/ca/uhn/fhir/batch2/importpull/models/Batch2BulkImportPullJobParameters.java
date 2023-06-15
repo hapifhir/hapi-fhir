@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.batch2.importpull.models;
 
-import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.model.api.IModelJson;
 
 public class Batch2BulkImportPullJobParameters implements IModelJson {
 

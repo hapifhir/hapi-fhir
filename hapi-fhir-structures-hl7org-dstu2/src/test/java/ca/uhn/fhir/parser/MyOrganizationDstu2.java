@@ -1,7 +1,8 @@
 package ca.uhn.fhir.parser;
 
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import org.hl7.fhir.dstu2.model.Organization;
+
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 @ResourceDef()
 public class MyOrganizationDstu2 extends Organization {

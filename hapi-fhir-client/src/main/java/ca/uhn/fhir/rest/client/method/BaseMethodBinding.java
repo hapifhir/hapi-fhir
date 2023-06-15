@@ -19,6 +19,15 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.*;
+
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.*;
@@ -30,13 +39,6 @@ import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.ReflectionUtil;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.*;
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> {
 

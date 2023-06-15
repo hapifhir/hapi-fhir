@@ -20,10 +20,11 @@
 
 package ca.uhn.fhir.model.valueset;
 
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
-import ca.uhn.fhir.util.CoverageIgnore;
 import java.util.HashMap;
 import java.util.Map;
+
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * This Enum is only used to support using the DSTU1 Bundle structure (<code>

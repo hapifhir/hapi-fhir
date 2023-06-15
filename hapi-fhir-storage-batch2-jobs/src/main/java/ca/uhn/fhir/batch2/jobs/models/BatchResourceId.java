@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.batch2.jobs.models;
 
-import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public class BatchResourceId implements IModelJson {
 

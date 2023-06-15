@@ -19,32 +19,12 @@
  */
 package ca.uhn.fhir.cr.config;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.cr.common.CodeCacheResourceChangeListener;
-import ca.uhn.fhir.cr.common.CqlExceptionHandlingInterceptor;
-import ca.uhn.fhir.cr.common.CqlForkJoinWorkerThreadFactory;
-import ca.uhn.fhir.cr.common.ElmCacheResourceChangeListener;
-import ca.uhn.fhir.cr.common.HapiFhirDal;
-import ca.uhn.fhir.cr.common.HapiFhirRetrieveProvider;
-import ca.uhn.fhir.cr.common.HapiLibrarySourceProvider;
-import ca.uhn.fhir.cr.common.HapiTerminologyProvider;
-import ca.uhn.fhir.cr.common.IDataProviderFactory;
-import ca.uhn.fhir.cr.common.IFhirDalFactory;
-import ca.uhn.fhir.cr.common.ILibraryLoaderFactory;
-import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
-import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -79,6 +59,28 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.cr.common.CodeCacheResourceChangeListener;
+import ca.uhn.fhir.cr.common.CqlExceptionHandlingInterceptor;
+import ca.uhn.fhir.cr.common.CqlForkJoinWorkerThreadFactory;
+import ca.uhn.fhir.cr.common.ElmCacheResourceChangeListener;
+import ca.uhn.fhir.cr.common.HapiFhirDal;
+import ca.uhn.fhir.cr.common.HapiFhirRetrieveProvider;
+import ca.uhn.fhir.cr.common.HapiLibrarySourceProvider;
+import ca.uhn.fhir.cr.common.HapiTerminologyProvider;
+import ca.uhn.fhir.cr.common.IDataProviderFactory;
+import ca.uhn.fhir.cr.common.IFhirDalFactory;
+import ca.uhn.fhir.cr.common.ILibraryLoaderFactory;
+import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
+import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 
 @Configuration
 @Import({AdapterConfiguration.class, BaseRepositoryConfig.class})

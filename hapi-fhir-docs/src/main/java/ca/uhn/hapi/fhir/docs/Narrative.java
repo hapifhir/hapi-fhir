@@ -19,10 +19,11 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import org.hl7.fhir.r4.model.Patient;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
-import org.hl7.fhir.r4.model.Patient;
 
 @SuppressWarnings("unused")
 public class Narrative {

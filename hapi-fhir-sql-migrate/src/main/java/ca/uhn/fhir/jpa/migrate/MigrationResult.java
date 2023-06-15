@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.migrate;
 
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import java.util.ArrayList;
 import java.util.List;
+
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 
 public class MigrationResult {
     public int changes = 0;

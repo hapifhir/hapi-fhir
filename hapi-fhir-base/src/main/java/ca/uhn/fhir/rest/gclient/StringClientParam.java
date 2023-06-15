@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.rest.api.Constants;
 import java.util.Arrays;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.rest.api.Constants;
 
 /**
  * @author james

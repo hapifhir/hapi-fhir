@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.batch2.config;
 
-import ca.uhn.fhir.IHapiBootOrder;
-import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
-import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.util.Logs;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
+
+import ca.uhn.fhir.IHapiBootOrder;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.util.Logs;
 
 public class Batch2JobRegisterer {
     private static final Logger ourLog = Logs.getBatchTroubleshootingLog();

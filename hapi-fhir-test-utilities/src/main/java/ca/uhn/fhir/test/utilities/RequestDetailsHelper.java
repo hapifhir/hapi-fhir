@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import org.springframework.mock.web.MockHttpServletRequest;
+
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.springframework.mock.web.MockHttpServletRequest;
 
 public class RequestDetailsHelper {
     public static RequestDetails newServletRequestDetails() {

@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
-import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
-import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -9,6 +7,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
+import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 
 public class LastNTestDataGenerator {
 

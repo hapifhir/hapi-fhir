@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 
 /**
  * Combined config so we consistently share app contexts.

@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import java.io.IOException;
+
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoDstu3StructureDefinitionTest extends BaseJpaDstu3Test {
 

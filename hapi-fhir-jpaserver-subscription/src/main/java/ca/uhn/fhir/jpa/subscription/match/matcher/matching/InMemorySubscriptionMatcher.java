@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -26,9 +30,6 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
     private static final Logger ourLog = LoggerFactory.getLogger(InMemorySubscriptionMatcher.class);

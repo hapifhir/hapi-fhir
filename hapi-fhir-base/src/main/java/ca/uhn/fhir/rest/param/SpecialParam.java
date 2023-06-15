@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.UriDt;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.UriDt;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 

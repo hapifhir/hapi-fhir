@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.searchparam.nickname;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
-import java.io.IOException;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NicknameInterceptorTest {
 

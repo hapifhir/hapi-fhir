@@ -19,6 +19,13 @@
  */
 package sample.fhir.server.jersey.provider;
 
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.springframework.stereotype.Component;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
@@ -28,11 +35,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import java.util.concurrent.ConcurrentHashMap;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.springframework.stereotype.Component;
 
 @Component
 public class PatientResourceProvider extends AbstractJaxRsResourceProvider<Patient> {

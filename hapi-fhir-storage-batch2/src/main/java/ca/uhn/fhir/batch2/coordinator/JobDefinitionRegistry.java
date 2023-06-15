@@ -19,15 +19,6 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.JobDefinitionStep;
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.util.Logs;
-import com.google.common.collect.ImmutableSortedMap;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -39,8 +30,20 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
+
+import com.google.common.collect.ImmutableSortedMap;
+
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.JobDefinitionStep;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 
 public class JobDefinitionRegistry {
     private static final Logger ourLog = Logs.getBatchTroubleshootingLog();

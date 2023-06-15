@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
-import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import java.util.Iterator;
+
 import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hibernate.search.engine.search.query.SearchScrollResult;
+
+import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 
 /** Adapt Hibernate Search SearchScroll paging result to our ISearchQueryExecutor */
 public class SearchScrollQueryExecutorAdaptor implements ISearchQueryExecutor {

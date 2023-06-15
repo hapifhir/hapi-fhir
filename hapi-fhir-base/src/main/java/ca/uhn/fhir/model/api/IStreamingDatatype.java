@@ -21,6 +21,7 @@ package ca.uhn.fhir.model.api;
 
 import java.io.IOException;
 import java.io.Writer;
+
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public interface IStreamingDatatype<T> extends IPrimitiveType<T> {

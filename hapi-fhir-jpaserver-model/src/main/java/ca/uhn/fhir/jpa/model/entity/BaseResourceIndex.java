@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import java.io.Serializable;
 import javax.persistence.MappedSuperclass;
+
 import org.apache.commons.lang3.ObjectUtils;
 
 @MappedSuperclass

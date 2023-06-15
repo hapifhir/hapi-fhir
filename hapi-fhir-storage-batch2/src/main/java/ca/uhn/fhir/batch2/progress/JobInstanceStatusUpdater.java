@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.batch2.progress;
 
+import org.slf4j.Logger;
+
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
@@ -27,7 +29,6 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
-import org.slf4j.Logger;
 
 public class JobInstanceStatusUpdater {
     private static final Logger ourLog = Logs.getBatchTroubleshootingLog();

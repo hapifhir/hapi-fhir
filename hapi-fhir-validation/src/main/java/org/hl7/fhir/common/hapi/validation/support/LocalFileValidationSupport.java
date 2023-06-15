@@ -19,12 +19,14 @@
  */
 package org.hl7.fhir.common.hapi.validation.support;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class LocalFileValidationSupport extends PrePopulatedValidationSupport {
 

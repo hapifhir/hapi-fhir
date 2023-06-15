@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import org.hl7.fhir.r4.model.CodeSystem;
+
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.util.ValidateUtil;
-import org.hl7.fhir.r4.model.CodeSystem;
 
 public abstract class BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
 

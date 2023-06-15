@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.rest.api.Constants;
 import java.util.Arrays;
+
+import ca.uhn.fhir.rest.api.Constants;
 
 public enum HistorySearchStyleEnum {
     AT(Constants.PARAM_AT),

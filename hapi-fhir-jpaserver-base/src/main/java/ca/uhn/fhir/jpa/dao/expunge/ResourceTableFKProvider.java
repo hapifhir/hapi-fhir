@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 
 @Service
 public class ResourceTableFKProvider {

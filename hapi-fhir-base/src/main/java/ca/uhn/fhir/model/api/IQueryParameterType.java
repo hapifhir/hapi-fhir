@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.model.api;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.io.Serializable;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public interface IQueryParameterType extends Serializable {
 

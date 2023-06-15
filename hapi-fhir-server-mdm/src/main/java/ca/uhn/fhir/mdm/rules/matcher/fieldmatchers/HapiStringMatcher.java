@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
  * Similarity measure for two IBase fields whose similarity can be measured by their String

@@ -1,5 +1,9 @@
 package ca.uhn.fhir.parser;
 
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
@@ -10,8 +14,6 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.util.ElementUtil;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /** See #364 */
 @ResourceDef(

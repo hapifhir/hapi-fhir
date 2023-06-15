@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
-import ca.uhn.fhir.model.primitive.InstantDt;
 import java.util.Calendar;
+
+import ca.uhn.fhir.model.primitive.InstantDt;
 
 public final class CalendarBinder extends BaseJavaPrimitiveBinder<Calendar> {
     public CalendarBinder() {}

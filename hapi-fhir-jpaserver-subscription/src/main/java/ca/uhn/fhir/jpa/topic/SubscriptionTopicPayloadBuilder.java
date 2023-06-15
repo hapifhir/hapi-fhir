@@ -19,6 +19,14 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -29,12 +37,6 @@ import ca.uhn.fhir.jpa.topic.status.R4NotificationStatusBuilder;
 import ca.uhn.fhir.jpa.topic.status.R5NotificationStatusBuilder;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SubscriptionTopicPayloadBuilder {
     private static final Logger ourLog =

@@ -19,21 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toPredicateArray;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Multimaps;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -52,9 +37,27 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.Multimaps;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toPredicateArray;
 
 /** The HistoryBuilder is responsible for building history queries */
 public class HistoryBuilder {

@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.tls;
 
-import ca.uhn.fhir.i18n.Msg;
 import java.util.Arrays;
 import java.util.List;
+
+import ca.uhn.fhir.i18n.Msg;
 
 public enum KeyStoreType {
     PKCS12("p12", "pfx"),

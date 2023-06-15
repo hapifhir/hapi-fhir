@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.model.api.IModelJson;
 
 public class MdmLinkJson implements IModelJson {
 

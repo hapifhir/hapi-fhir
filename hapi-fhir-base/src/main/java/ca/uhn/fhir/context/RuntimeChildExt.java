@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.context;
 
-import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+
+import com.google.common.collect.Sets;
 
 public class RuntimeChildExt extends BaseRuntimeChildDefinition {
 

@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.batch2.jobs.services;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -38,8 +40,8 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class Batch2JobRunnerImpl implements IBatch2JobRunner {
     private static final Logger ourLog = getLogger(IBatch2JobRunner.class);

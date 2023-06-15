@@ -19,10 +19,13 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
-import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 
 public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifiedMessage> {
 

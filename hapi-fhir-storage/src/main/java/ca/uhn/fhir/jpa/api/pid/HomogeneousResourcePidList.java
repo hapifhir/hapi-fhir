@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import java.util.Collection;
 import java.util.Date;
 import javax.annotation.Nonnull;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 /** A resource pid list where all pids have the same resource type */
 public class HomogeneousResourcePidList extends BaseResourcePidList {

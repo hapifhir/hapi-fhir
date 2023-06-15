@@ -1,13 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
-
-import ca.uhn.fhir.jpa.config.ElasticsearchWithPrefixConfig;
-import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
-import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import java.io.IOException;
+
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
@@ -20,6 +14,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
+
+import ca.uhn.fhir.jpa.config.ElasticsearchWithPrefixConfig;
+import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
+import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 @RequiresDocker
 @ExtendWith(SpringExtension.class)

@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.mdm.provider;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 public class MdmControllerUtil {
     public static MdmMatchResultEnum extractMatchResultOrNull(String theMatchResult) {

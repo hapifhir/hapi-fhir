@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.validation;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 public class ValidationFailureException extends RuntimeException {
 

@@ -19,8 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
+import javax.annotation.Nonnull;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -43,11 +47,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
-import javax.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 

@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Intermediate holder for indexing composite search parameters. There will be one instance for each

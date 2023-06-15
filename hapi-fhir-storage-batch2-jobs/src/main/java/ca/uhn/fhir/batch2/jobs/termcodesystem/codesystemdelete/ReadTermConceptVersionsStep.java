@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 
+import java.util.Iterator;
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -28,8 +31,6 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
-import java.util.Iterator;
-import javax.annotation.Nonnull;
 
 public class ReadTermConceptVersionsStep
         implements IFirstJobStepWorker<

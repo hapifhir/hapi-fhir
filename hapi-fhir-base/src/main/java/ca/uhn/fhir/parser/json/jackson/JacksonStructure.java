@@ -19,23 +19,6 @@
  */
 package ca.uhn.fhir.parser.json.jackson;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.json.BaseJsonLikeArray;
-import ca.uhn.fhir.parser.json.BaseJsonLikeObject;
-import ca.uhn.fhir.parser.json.BaseJsonLikeValue;
-import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
-import ca.uhn.fhir.parser.json.JsonLikeStructure;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.DecimalNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
@@ -46,6 +29,25 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.DecimalNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.json.BaseJsonLikeArray;
+import ca.uhn.fhir.parser.json.BaseJsonLikeObject;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue;
+import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
 
 public class JacksonStructure implements JsonLikeStructure {
 

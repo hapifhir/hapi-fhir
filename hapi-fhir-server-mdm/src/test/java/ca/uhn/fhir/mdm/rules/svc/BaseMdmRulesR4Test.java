@@ -1,5 +1,11 @@
 package ca.uhn.fhir.mdm.rules.svc;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
+
 import ca.uhn.fhir.mdm.BaseR4Test;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
@@ -8,10 +14,6 @@ import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
 import ca.uhn.fhir.mdm.rules.similarity.MdmSimilarityEnum;
-import java.util.ArrayList;
-import java.util.Arrays;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.BeforeEach;
 
 public abstract class BaseMdmRulesR4Test extends BaseR4Test {
     public static final String PATIENT_GIVEN = "patient-given";

@@ -1,11 +1,13 @@
 package ca.uhn.fhir.parser.json;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.io.StringReader;
+
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
-import java.io.StringReader;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JsonLikeStructureTest {
     //	private static FhirContext ourCtx;

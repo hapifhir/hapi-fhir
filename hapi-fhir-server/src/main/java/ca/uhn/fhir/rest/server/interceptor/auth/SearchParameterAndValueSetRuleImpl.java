@@ -19,7 +19,16 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -33,15 +42,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
-import java.util.List;
-import java.util.Set;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 

@@ -19,15 +19,9 @@
  */
 package ca.uhn.fhir.jpa.search.autocomplete;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import com.google.gson.JsonObject;
 import java.util.List;
 import javax.annotation.Nonnull;
+
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.aggregation.SearchAggregation;
@@ -37,6 +31,15 @@ import org.hibernate.search.mapper.orm.search.loading.dsl.SearchLoadingOptionsSt
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonObject;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /** Use aggregations to implement a search of most-frequent token search params values. */
 class TokenAutocompleteSearch {

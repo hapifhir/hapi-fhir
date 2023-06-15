@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.searchparam.matcher;
 
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher;
 
 /** Adapter from {@link SearchParamMatcher} to our authorization version. */
 public class AuthorizationSearchParamMatcher implements IAuthorizationSearchParamMatcher {

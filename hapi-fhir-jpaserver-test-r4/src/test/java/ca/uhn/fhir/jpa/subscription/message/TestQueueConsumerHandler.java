@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.subscription.message;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 import java.util.ArrayList;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class TestQueueConsumerHandler<T> implements MessageHandler {
     private static final Logger ourLog = getLogger(TestQueueConsumerHandler.class);

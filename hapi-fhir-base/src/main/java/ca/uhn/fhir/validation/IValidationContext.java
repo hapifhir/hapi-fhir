@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.validation;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.util.List;
 import javax.annotation.Nonnull;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public interface IValidationContext<T> {
 

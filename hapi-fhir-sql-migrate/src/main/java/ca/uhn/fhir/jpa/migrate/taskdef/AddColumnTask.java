@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import java.sql.SQLException;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 
 public class AddColumnTask extends BaseTableColumnTypeTask {
 

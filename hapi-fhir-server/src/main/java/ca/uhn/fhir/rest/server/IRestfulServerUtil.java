@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ResourceParameter.Mode;
 import ca.uhn.fhir.rest.server.method.TransactionParameter.ParamStyle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IRestfulServerUtil {
 

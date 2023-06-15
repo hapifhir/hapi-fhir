@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.batch2.api;
 
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.model.api.IModelJson;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.model.api.IModelJson;
 
 public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> {
 

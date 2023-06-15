@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.util;
 
 import java.io.Closeable;
 import java.util.Iterator;
+
 import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollableResults;
 

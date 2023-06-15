@@ -1,19 +1,21 @@
 package ca.uhn.fhir.jpa.batch2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
-import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
+import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
 

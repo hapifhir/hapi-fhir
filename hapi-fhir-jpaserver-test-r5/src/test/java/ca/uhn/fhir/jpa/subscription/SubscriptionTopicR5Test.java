@@ -1,12 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.Logs;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
@@ -17,6 +12,13 @@ import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.Logs;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
     private static final Logger ourLog = Logs.getSubscriptionTopicLog();

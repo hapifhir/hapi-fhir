@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.parser.json.jackson;
 
-import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.Separators;
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
+import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 
 public class JacksonWriter extends BaseJsonLikeWriter {
 

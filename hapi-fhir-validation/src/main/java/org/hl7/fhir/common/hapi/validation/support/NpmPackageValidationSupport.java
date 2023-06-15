@@ -1,19 +1,21 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.ClasspathUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.ClasspathUtil;
 
 /**
  * This interceptor loads and parses FHIR NPM Conformance Packages, and makes the artifacts foudn

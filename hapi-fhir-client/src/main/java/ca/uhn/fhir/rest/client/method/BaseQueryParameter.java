@@ -19,19 +19,21 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseQueryParameter implements IParameter {
 

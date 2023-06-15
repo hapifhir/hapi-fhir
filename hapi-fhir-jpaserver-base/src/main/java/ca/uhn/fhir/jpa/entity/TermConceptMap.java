@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import static org.apache.commons.lang3.StringUtils.length;
-
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.util.ValidateUtil;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.util.ValidateUtil;
+
+import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Table(

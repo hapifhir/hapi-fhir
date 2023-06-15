@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ParameterUtil;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionInternal {
 

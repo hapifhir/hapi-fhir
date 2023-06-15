@@ -1,14 +1,15 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.config.CrProviderLoader;
-import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.config.CrProviderLoader;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 
 @ExtendWith(SpringExtension.class)
 public class CqlProviderLoaderR4Test extends BaseCrR4Test {

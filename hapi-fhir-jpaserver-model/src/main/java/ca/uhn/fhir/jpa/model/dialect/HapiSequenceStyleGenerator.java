@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.util.ReflectionUtil;
 import java.io.Serializable;
 import java.util.Properties;
+
 import org.apache.commons.lang3.Validate;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
@@ -37,6 +36,9 @@ import org.hibernate.id.enhanced.StandardOptimizerDescriptor;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.Type;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 /**
  * This is a sequence generator that wraps the Hibernate default sequence generator {@link

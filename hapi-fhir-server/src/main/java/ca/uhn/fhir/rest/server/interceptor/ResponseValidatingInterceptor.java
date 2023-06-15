@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -27,10 +33,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
-import java.util.HashSet;
-import java.util.Set;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * This interceptor intercepts each outgoing response and if it contains a FHIR resource, validates

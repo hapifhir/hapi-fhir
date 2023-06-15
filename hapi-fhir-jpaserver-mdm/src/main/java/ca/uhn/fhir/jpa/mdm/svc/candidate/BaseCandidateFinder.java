@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 
 public abstract class BaseCandidateFinder {
     @Autowired IIdHelperService myIdHelperService;

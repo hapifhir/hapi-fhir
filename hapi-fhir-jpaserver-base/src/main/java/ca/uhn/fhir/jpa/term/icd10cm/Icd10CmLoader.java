@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.term.icd10cm;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.io.IOException;
+import java.io.Reader;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.util.XmlUtil;
-import java.io.IOException;
-import java.io.Reader;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class Icd10CmLoader {
 

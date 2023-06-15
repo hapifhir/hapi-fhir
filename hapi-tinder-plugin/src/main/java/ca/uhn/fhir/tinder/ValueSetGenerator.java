@@ -1,5 +1,16 @@
 package ca.uhn.fhir.tinder;
 
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.*;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -12,15 +23,6 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.model.ValueSetTm;
 import ca.uhn.fhir.tinder.parser.TargetType;
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.*;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 
 public class ValueSetGenerator {
 

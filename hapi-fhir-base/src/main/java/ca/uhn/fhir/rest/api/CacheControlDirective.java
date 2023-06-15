@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import static org.apache.commons.lang3.StringUtils.trim;
-
 import java.util.List;
 import java.util.StringTokenizer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /** Parses and stores the value(s) within HTTP Cache-Control headers */
 public class CacheControlDirective {

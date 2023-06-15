@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class GeneratedSqlTest {
 

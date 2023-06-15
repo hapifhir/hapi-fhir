@@ -19,9 +19,13 @@
  */
 package ca.uhn.fhir.jpa.partition;
 
-import static ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl.validatePartitionIdSupplied;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hl7.fhir.instance.model.api.IPrimitiveType.toValueOrNull;
+import java.util.List;
+import javax.annotation.Nonnull;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -31,12 +35,10 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
-import java.util.List;
-import javax.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl.validatePartitionIdSupplied;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.instance.model.api.IPrimitiveType.toValueOrNull;
 
 /**
  * This HAPI FHIR Server Plain Provider class provides the following operations:

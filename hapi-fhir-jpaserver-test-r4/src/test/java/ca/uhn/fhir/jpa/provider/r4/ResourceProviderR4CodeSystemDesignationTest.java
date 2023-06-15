@@ -1,12 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
-import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -17,6 +14,11 @@ import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
+
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourceProviderR4Test {
 

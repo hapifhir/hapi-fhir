@@ -1,11 +1,12 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ParameterUtilTest {
 

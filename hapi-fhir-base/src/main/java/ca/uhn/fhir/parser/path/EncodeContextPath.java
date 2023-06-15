@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.parser.path;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.Validate;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class EncodeContextPath {
     private final List<EncodeContextPathElement> myPath;

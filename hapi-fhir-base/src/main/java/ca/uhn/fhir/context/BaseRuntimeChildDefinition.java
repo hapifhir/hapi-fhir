@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.i18n.Msg;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
+
+import ca.uhn.fhir.i18n.Msg;
 
 public abstract class BaseRuntimeChildDefinition {
 

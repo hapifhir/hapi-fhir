@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.client.api;
 
-import ca.uhn.fhir.rest.annotation.Metadata;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
+
+import ca.uhn.fhir.rest.annotation.Metadata;
 
 /**
  * Base interface for a client supporting the mandatory operations as defined by the FHIR

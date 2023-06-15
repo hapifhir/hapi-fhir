@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.batch2.maintenance;
 
+import java.util.List;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
@@ -34,9 +39,6 @@ import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
-import java.util.List;
-import org.apache.commons.lang3.time.DateUtils;
-import org.slf4j.Logger;
 
 public class JobInstanceProcessor {
     private static final Logger ourLog = Logs.getBatchTroubleshootingLog();

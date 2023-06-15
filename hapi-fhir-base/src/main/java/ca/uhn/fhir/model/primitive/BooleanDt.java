@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.model.primitive;
 
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
-import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 
 @DatatypeDef(name = "boolean")
 public class BooleanDt extends BasePrimitive<Boolean> implements IBaseBooleanDatatype {

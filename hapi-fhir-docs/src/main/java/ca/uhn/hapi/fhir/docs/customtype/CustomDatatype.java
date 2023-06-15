@@ -21,13 +21,14 @@ package ca.uhn.hapi.fhir.docs.customtype;
 
 // START SNIPPET: datatype
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.util.ElementUtil;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.util.ElementUtil;
 
 /**
  * This is an example of a custom datatype.

@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 
 public interface INpmPackageVersionDao
         extends JpaRepository<NpmPackageVersionEntity, Long>, IHapiFhirJpaRepository {

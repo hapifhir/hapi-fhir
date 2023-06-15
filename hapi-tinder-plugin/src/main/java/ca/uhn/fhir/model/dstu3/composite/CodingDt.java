@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.dstu3.composite;
 
+import java.util.List;
+
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -10,7 +12,6 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import java.util.List;
 
 /**
  * HAPI/FHIR <b>CodingDt</b> Datatype ()

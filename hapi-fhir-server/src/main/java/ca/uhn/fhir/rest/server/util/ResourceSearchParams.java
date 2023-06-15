@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.util;
 
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +26,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 
 public class ResourceSearchParams {
     private final String myResourceName;

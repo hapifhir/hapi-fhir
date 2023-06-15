@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.searchparam;
 
-import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.compare;
-import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.sql.Date;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -19,12 +19,14 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import java.sql.Date;
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+
+import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.compare;
+import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SearchParameterMapTest {
     static FhirContext ourFhirContext = FhirContext.forR4Cached();

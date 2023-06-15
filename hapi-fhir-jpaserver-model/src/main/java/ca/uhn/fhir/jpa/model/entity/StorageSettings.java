@@ -19,15 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
-import ca.uhn.fhir.context.ParserOptions;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.dialect.ISequenceValueMassager;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
-import ca.uhn.fhir.util.HapiExtensions;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -35,10 +26,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.dialect.ISequenceValueMassager;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import ca.uhn.fhir.util.HapiExtensions;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 /**
  * This class contains configuration options common to all hapi-fhir-storage implementations.

@@ -19,15 +19,8 @@
  */
 package ca.uhn.fhir.jpa.term;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
 import java.security.InvalidParameterException;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -36,6 +29,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.util.UrlUtil;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public class TermVersionAdapterSvcR4 extends BaseTermVersionAdapterSvcImpl
         implements ITermVersionAdapterSvc {

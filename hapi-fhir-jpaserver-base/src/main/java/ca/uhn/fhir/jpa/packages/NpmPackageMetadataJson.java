@@ -19,18 +19,20 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import javax.annotation.Nonnull;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
+import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import javax.annotation.Nonnull;
 
 @Schema(description = "Represents an NPM package metadata response")
 @JsonInclude(JsonInclude.Include.NON_NULL)

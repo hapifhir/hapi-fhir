@@ -19,6 +19,15 @@
  */
 package ca.uhn.fhir.batch2.jobs.importpull;
 
+import java.io.IOException;
+import java.io.StringReader;
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.io.LineReader;
+
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -32,12 +41,6 @@ import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.util.IoUtil;
-import com.google.common.io.LineReader;
-import java.io.IOException;
-import java.io.StringReader;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ReadInResourcesFromFileStep
         implements IJobStepWorker<

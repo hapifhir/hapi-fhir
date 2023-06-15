@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.model.dstu2.composite;
 
+import java.util.List;
+
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -27,7 +29,6 @@ import ca.uhn.fhir.model.dstu2.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
-import java.util.List;
 
 /**
  * HAPI/FHIR <b>Narrative</b> Datatype (A human-readable formatted text, including images)

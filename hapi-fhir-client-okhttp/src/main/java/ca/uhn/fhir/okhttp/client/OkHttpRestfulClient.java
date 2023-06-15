@@ -19,11 +19,10 @@
  */
 package ca.uhn.fhir.okhttp.client;
 
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.deleteLastCharacter;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.endsWith;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.everythingAfterFirstQuestionMark;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.hasQuestionMark;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.withTrailingQuestionMarkRemoved;
+import java.util.List;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
@@ -35,14 +34,17 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
-import java.util.List;
-import java.util.Map;
 import okhttp3.Call;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
+
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.deleteLastCharacter;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.endsWith;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.everythingAfterFirstQuestionMark;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.hasQuestionMark;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.withTrailingQuestionMarkRemoved;
 
 /**
  * A Http Request based on OkHttp. This is an adapter around the class {@link OkHttpClient}

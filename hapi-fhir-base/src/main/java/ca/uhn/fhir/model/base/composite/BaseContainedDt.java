@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.model.base.composite;
 
+import java.util.List;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.util.CoverageIgnore;
-import java.util.List;
 
 public abstract class BaseContainedDt implements IDatatype {
 

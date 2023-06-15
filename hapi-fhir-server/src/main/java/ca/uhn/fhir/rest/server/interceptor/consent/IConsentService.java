@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.consent;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * This interface is intended to be implemented as the user-defined contract for the {@link

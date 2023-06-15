@@ -1,24 +1,26 @@
 package ca.uhn.fhir.rest.client.tls;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.tls.KeyStoreInfo;
-import ca.uhn.fhir.tls.TlsAuthentication;
-import ca.uhn.fhir.tls.TrustStoreInfo;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.util.Optional;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
+
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.tls.KeyStoreInfo;
+import ca.uhn.fhir.tls.TlsAuthentication;
+import ca.uhn.fhir.tls.TrustStoreInfo;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TlsAuthenticationSvcTest {
 

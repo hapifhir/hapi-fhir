@@ -19,11 +19,13 @@
  */
 package ca.uhn.hapi.fhir.docs.customtype;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.util.Date;
+
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.StringType;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class CustomUsage {
 

@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static ca.uhn.fhir.rest.server.interceptor.InterceptorOrders.RESPONSE_TERMINOLOGY_TRANSLATION_INTERCEPTOR;
+import java.util.List;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import java.util.List;
-import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import static ca.uhn.fhir.rest.server.interceptor.InterceptorOrders.RESPONSE_TERMINOLOGY_TRANSLATION_INTERCEPTOR;
 
 /**
  * This interceptor leverages ConceptMap resources stored in the repository to automatically map

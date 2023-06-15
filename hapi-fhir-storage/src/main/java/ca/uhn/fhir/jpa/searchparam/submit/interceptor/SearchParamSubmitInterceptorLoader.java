@@ -19,14 +19,15 @@
  */
 package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
 
-import ca.uhn.fhir.IHapiBootOrder;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
+
+import ca.uhn.fhir.IHapiBootOrder;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 
 public class SearchParamSubmitInterceptorLoader {
 

@@ -19,7 +19,11 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
@@ -32,10 +36,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This interceptor looks for a URL parameter on requests called <code>_fhirpath</code> and replaces

@@ -1,18 +1,19 @@
 package ca.uhn.fhir.util;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 
 public class StopWatchTest {
 

@@ -19,19 +19,20 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.StringTokenizer;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.StringTokenizer;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SortParameter implements IParameter {
 

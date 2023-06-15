@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import java.math.BigDecimal;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResourceIndexedSearchParamNumberTest {
     private static final String GRITTSCORE = "grittscore";

@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ReindexOutcome {
 

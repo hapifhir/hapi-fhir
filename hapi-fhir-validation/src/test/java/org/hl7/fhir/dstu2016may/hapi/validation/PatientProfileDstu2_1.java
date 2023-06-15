@@ -1,13 +1,14 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
+import org.hl7.fhir.dstu2016may.model.CodeableConcept;
+import org.hl7.fhir.dstu2016may.model.Patient;
+import org.hl7.fhir.dstu2016may.model.Reference;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.ElementUtil;
-import org.hl7.fhir.dstu2016may.model.CodeableConcept;
-import org.hl7.fhir.dstu2016may.model.Patient;
-import org.hl7.fhir.dstu2016may.model.Reference;
 
 @ResourceDef(name = "Patient", profile = "http://hl7.org/fhir/StructureDefinition/Patient")
 public class PatientProfileDstu2_1 extends Patient {

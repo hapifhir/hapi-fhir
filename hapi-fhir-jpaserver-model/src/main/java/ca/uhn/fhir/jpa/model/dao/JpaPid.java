@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.jpa.model.dao;
 
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 /**
  * JPA implementation of IResourcePersistentId. JPA uses a Long as the primary key. This class

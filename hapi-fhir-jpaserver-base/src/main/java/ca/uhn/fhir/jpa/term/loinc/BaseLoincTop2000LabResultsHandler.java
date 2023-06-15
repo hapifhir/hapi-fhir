@@ -19,18 +19,20 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
-import static org.apache.commons.lang3.StringUtils.trim;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import org.apache.commons.csv.CSVRecord;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ValueSet;
+
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class BaseLoincTop2000LabResultsHandler extends BaseLoincHandler
         implements IZipContentsHandlerCsv {

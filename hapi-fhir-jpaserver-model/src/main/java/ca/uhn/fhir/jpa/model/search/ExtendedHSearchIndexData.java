@@ -19,21 +19,24 @@
  */
 package ca.uhn.fhir.jpa.model.search;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.SetMultimap;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 
 /** Collects our HSearch extended indexing data. */
 public class ExtendedHSearchIndexData {

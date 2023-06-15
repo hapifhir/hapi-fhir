@@ -20,6 +20,7 @@
 package ca.uhn.fhir.test.utilities.server;
 
 import javax.servlet.http.HttpServlet;
+
 import org.apache.commons.lang3.Validate;
 
 public class HttpServletExtension extends BaseJettyServerExtension<HttpServletExtension> {

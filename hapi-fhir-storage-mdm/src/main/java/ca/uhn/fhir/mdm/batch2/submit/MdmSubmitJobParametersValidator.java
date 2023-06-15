@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.mdm.batch2.submit;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.context.FhirContext;
@@ -27,9 +31,6 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nonnull;
 
 public class MdmSubmitJobParametersValidator
         implements IJobParametersValidator<MdmSubmitJobParameters> {

@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.config.r4;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 
 public class FhirContextR4Config {
 

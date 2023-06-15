@@ -19,6 +19,13 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.Collections;
+import javax.servlet.http.HttpServletRequest;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -27,11 +34,6 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import java.util.Collections;
-import javax.servlet.http.HttpServletRequest;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
         implements IFhirResourceDaoEncounter<T> {

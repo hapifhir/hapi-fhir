@@ -1,17 +1,19 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import java.sql.SQLException;
+import java.util.function.Supplier;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.MigrationResult;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import ca.uhn.fhir.jpa.migrate.MigrationResult;
-import java.sql.SQLException;
-import java.util.function.Supplier;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 public class DropTableTest extends BaseTest {
 

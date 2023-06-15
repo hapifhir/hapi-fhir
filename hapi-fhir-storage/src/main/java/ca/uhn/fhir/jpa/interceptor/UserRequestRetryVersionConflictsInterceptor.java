@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.jpa.interceptor;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import org.apache.commons.lang3.Validate;
 
 /**
  * This interceptor looks for a header on incoming requests called <code>X-Retry-On-Version-Conflict

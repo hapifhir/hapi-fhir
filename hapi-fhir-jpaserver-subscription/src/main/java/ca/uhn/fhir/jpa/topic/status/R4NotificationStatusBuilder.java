@@ -1,11 +1,9 @@
 package ca.uhn.fhir.jpa.topic.status;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import ca.uhn.fhir.subscription.SubscriptionConstants;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
@@ -15,6 +13,10 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
 
 public class R4NotificationStatusBuilder implements INotificationStatusBuilder<Parameters> {
     private final FhirContext myFhirContext;

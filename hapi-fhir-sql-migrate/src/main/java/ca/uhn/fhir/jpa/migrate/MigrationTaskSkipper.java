@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.jpa.migrate;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class MigrationTaskSkipper {
     private static final Logger ourLog = LoggerFactory.getLogger(MigrationTaskSkipper.class);

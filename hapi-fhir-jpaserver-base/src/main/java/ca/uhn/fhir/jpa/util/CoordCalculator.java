@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import static ca.uhn.fhir.jpa.searchparam.extractor.GeopointNormalizer.normalizeLatitude;
-import static ca.uhn.fhir.jpa.searchparam.extractor.GeopointNormalizer.normalizeLongitude;
-import static org.slf4j.LoggerFactory.getLogger;
-
 import org.hibernate.search.engine.spatial.GeoBoundingBox;
 import org.hibernate.search.engine.spatial.GeoPoint;
 import org.slf4j.Logger;
+
+import static ca.uhn.fhir.jpa.searchparam.extractor.GeopointNormalizer.normalizeLatitude;
+import static ca.uhn.fhir.jpa.searchparam.extractor.GeopointNormalizer.normalizeLongitude;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class CoordCalculator {
     private static final Logger ourLog = getLogger(CoordCalculator.class);

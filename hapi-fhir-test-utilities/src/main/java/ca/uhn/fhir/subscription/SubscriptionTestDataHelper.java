@@ -1,12 +1,12 @@
 package ca.uhn.fhir.subscription;
 
-import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
-
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+
+import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 
 public class SubscriptionTestDataHelper {
     public static final String TEST_TOPIC = "http://test.topic";

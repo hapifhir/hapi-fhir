@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.parser.IParser;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import ca.uhn.fhir.parser.IParser;
 
 /**
  * This object supplies default configuration to all {@link IParser parser} instances created by a

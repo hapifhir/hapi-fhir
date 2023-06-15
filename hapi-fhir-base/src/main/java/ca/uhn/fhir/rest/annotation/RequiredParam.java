@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.CompositeParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 
 /** Parameter annotation which specifies a search parameter for a {@link Search} method. */
 @Retention(RetentionPolicy.RUNTIME)

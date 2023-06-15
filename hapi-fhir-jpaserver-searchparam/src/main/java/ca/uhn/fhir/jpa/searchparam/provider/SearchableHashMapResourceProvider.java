@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.jpa.searchparam.provider;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -27,10 +33,6 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class SearchableHashMapResourceProvider<T extends IBaseResource>
         extends HashMapResourceProvider<T> {

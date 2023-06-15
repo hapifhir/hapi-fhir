@@ -1,17 +1,19 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
-import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
-import ca.uhn.fhir.util.VersionEnum;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
+import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.util.VersionEnum;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ArbitrarySqlTaskTest extends BaseTest {
 

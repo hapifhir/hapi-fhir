@@ -19,10 +19,21 @@
  */
 package ca.uhn.fhir.jpa.search.builder.tasks;
 
-import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
-import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
-import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -59,20 +70,11 @@ import ca.uhn.fhir.util.StopWatch;
 import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
+
+import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
+import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 /**
  * A search task is a Callable task that runs in a thread pool to handle an individual search. One

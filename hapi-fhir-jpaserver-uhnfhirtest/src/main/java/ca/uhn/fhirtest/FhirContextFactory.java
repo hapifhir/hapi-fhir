@@ -1,8 +1,9 @@
 package ca.uhn.fhirtest;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class FhirContextFactory implements FactoryBean<FhirContext>, InitializingBean {
 

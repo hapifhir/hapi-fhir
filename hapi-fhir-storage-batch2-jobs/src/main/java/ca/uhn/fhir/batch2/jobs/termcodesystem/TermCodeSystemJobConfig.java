@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.batch2.jobs.termcodesystem;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete.DeleteCodeSystemCompletionHandler;
 import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete.DeleteCodeSystemConceptsByVersionStep;
@@ -35,9 +39,6 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class TermCodeSystemJobConfig {

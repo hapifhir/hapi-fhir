@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.dao.search;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Collections;
 import java.util.Set;
+
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class TermHelperTest {
 

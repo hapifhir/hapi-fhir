@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.batch2.model;
 
+import java.util.List;
+
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
-import java.util.List;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
 
 /**
  * This immutable object is produced by reconciling a work notification message to its corresponding

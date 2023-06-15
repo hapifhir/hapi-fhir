@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
+
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 

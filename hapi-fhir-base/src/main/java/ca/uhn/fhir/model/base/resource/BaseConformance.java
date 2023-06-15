@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.model.base.resource;
 
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 // @ResourceDef(name="Conformance")
 public interface BaseConformance extends IResource, IBaseConformance {

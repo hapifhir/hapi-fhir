@@ -19,31 +19,6 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_BUNDLE_PROFILE;
-import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
-import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_DETECTED_ISSUE_PROFILE;
-import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_GAP_STATUS_EXTENSION;
-import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
-import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_REPORT_PROFILE;
-import static ca.uhn.fhir.cr.constant.HtmlConstants.HTML_DIV_PARAGRAPH_CONTENT;
-import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
-import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_POPULATION_SYSTEM;
-import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Map.ofEntries;
-import static org.hl7.fhir.r4.model.Factory.newId;
-import static org.opencds.cqf.cql.evaluator.fhir.util.Resources.newResource;
-
-import ca.uhn.fhir.cr.common.IDaoRegistryUser;
-import ca.uhn.fhir.cr.common.Searches;
-import ca.uhn.fhir.cr.config.CrProperties;
-import ca.uhn.fhir.cr.enumeration.CareGapsStatusCode;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import com.google.common.base.Strings;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,6 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -86,6 +62,33 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
 import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
+
+import ca.uhn.fhir.cr.common.IDaoRegistryUser;
+import ca.uhn.fhir.cr.common.Searches;
+import ca.uhn.fhir.cr.config.CrProperties;
+import ca.uhn.fhir.cr.enumeration.CareGapsStatusCode;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_BUNDLE_PROFILE;
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_DETECTED_ISSUE_PROFILE;
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_GAP_STATUS_EXTENSION;
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_REPORT_PROFILE;
+import static ca.uhn.fhir.cr.constant.HtmlConstants.HTML_DIV_PARAGRAPH_CONTENT;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_POPULATION_SYSTEM;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Map.ofEntries;
+import static org.hl7.fhir.r4.model.Factory.newId;
+import static org.opencds.cqf.cql.evaluator.fhir.util.Resources.newResource;
 
 public class CareGapsService implements IDaoRegistryUser {
 

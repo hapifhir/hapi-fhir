@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import static org.apache.commons.lang3.StringUtils.left;
-import static org.apache.commons.lang3.StringUtils.length;
-
-import ca.uhn.fhir.util.ValidateUtil;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import javax.annotation.Nonnull;
@@ -39,6 +35,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -49,6 +46,11 @@ import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.validator.constraints.NotBlank;
+
+import ca.uhn.fhir.util.ValidateUtil;
+
+import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Table(

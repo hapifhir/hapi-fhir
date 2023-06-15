@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.batch2.jobs.export.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ExpandedResourcesList extends BulkExportJobBase {
 

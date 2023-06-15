@@ -19,13 +19,16 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
-import static java.util.Objects.isNull;
-
-import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.messaging.MessageHeaders;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.model.api.IModelJson;
+
+import static java.util.Objects.isNull;
 
 /**
  * This class is for holding headers for BaseJsonMessages. Any serializable data can be thrown into

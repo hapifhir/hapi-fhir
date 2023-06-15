@@ -19,6 +19,13 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
+import java.util.Optional;
+
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -27,11 +34,6 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import java.util.Optional;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class CandidateSearcher {
     private static final Logger ourLog = LoggerFactory.getLogger(CandidateSearcher.class);

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.reindex;
 
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

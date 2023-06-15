@@ -20,16 +20,18 @@ package ca.uhn.fhir.mdm.api;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 
 public class MdmHistorySearchParameters {
     private List<IIdType> myGoldenResourceIds = new ArrayList<>();

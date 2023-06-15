@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.embedded;
 
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.testcontainers.containers.OracleContainer;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 
 /**
  * For testing purposes. <br>

@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.migrate;
 
+import java.util.Optional;
+import java.util.Set;
+
+import org.flywaydb.core.api.MigrationVersion;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import java.util.Optional;
-import java.util.Set;
-import org.flywaydb.core.api.MigrationVersion;
 
 public class HapiMigrationStorageSvc {
     public static final String UNKNOWN_VERSION = "unknown";

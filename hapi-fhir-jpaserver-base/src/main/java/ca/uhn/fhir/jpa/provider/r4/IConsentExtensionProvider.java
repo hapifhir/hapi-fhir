@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.util.ExtensionUtil;
 import java.util.Collection;
+
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.util.ExtensionUtil;
 
 /**
  * Hook for Consent pre-save additions.

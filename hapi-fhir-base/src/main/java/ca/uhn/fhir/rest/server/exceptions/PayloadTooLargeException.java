@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * This Represents an <b>HTTP 413 Payload Too Large</b> response, which means the request body was

@@ -19,15 +19,16 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
-import ca.uhn.fhir.jaxrs.server.AbstractJaxRsConformanceProvider;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import ca.uhn.fhir.jaxrs.server.AbstractJaxRsConformanceProvider;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 
 /**
  * Conformance Rest Service

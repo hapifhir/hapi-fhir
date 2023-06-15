@@ -19,8 +19,15 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import javax.persistence.PersistenceException;
+
+import org.hibernate.HibernateException;
+import org.hibernate.PessimisticLockException;
+import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
@@ -29,14 +36,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import javax.persistence.PersistenceException;
-import org.hibernate.HibernateException;
-import org.hibernate.PessimisticLockException;
-import org.hibernate.exception.ConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 

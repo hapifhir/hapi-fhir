@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.Collection;
+import javax.annotation.Nullable;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
-import java.util.Collection;
-import javax.annotation.Nullable;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IJpaStorageResourceParser extends IStorageResourceParser {
 

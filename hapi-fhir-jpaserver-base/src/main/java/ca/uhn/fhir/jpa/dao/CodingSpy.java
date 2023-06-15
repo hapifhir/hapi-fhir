@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 
 /**
  * We are trying to preserve null behaviour despite IBaseCoding using primitive boolean for

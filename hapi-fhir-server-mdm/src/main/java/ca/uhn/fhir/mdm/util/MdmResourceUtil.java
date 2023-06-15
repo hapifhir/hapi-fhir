@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.mdm.util;
 
-import ca.uhn.fhir.mdm.api.MdmConstants;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.mdm.api.MdmConstants;
 
 public final class MdmResourceUtil {
 

@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
-import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -12,6 +8,11 @@ import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
+import ca.uhn.fhir.rest.api.Constants;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** Tests copied from jpa.subscription.resthook.RestHookTestDstu3Test */
 public class SubscriptionCheckingSubscriberTest

@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.cli;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
+
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
-import java.util.Arrays;
-import java.util.List;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
 
 public class HapiFlywayMigrateDatabaseCommand
         extends BaseFlywayMigrateDatabaseCommand<VersionEnum> {

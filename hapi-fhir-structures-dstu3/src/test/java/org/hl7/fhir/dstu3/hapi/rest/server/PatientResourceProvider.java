@@ -1,5 +1,9 @@
 package org.hl7.fhir.dstu3.hapi.rest.server;
 
+import java.util.Set;
+
+import org.hl7.fhir.dstu3.model.*;
+
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.*;
@@ -7,12 +11,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
-// import ca.uhn.fhir.model.dstu.resource.Binary;
-// import ca.uhn.fhir.model.dstu2.resource.Bundle;
-// import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import java.util.Set;
-import org.hl7.fhir.dstu3.model.*;
 
 public class PatientResourceProvider implements IResourceProvider {
 

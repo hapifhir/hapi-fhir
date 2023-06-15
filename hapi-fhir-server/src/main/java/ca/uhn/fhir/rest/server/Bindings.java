@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
-import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
+
+import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
+import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 
 public class Bindings {
     private final IdentityHashMap<SearchMethodBinding, String> myNamedSearchMethodBindingToName;

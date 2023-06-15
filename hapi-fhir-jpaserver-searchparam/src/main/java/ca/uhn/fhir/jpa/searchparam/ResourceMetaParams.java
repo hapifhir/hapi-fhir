@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.jpa.searchparam;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IAnyResource;
+
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -30,10 +36,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriAndListParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public class ResourceMetaParams {
     /** These are parameters which are supported by searches */

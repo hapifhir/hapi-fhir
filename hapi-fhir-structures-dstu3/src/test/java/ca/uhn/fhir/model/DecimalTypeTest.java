@@ -1,9 +1,9 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DecimalTypeTest {
 

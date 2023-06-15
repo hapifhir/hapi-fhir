@@ -19,7 +19,17 @@
  */
 package ca.uhn.fhir.jpa.util.jsonpatch;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import java.io.IOException;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.intellij.lang.annotations.Language;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -27,15 +37,8 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
-import java.io.IOException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.intellij.lang.annotations.Language;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class JsonPatchUtils {
 

@@ -1,6 +1,14 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.util.AopTestUtils;
+
+import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -9,14 +17,8 @@ import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
-import com.google.common.collect.Lists;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Narrative;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.test.util.AopTestUtils;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Test {

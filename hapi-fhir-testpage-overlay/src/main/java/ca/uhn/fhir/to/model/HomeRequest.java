@@ -1,6 +1,8 @@
 package ca.uhn.fhir.to.model;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -13,8 +15,8 @@ import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
 import ca.uhn.fhir.to.Controller;
 import ca.uhn.fhir.to.TesterConfig;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.ModelAttribute;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class HomeRequest {
 

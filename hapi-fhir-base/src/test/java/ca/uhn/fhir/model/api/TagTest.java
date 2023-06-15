@@ -1,10 +1,11 @@
 package ca.uhn.fhir.model.api;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TagTest {
 

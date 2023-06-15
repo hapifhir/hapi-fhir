@@ -19,14 +19,10 @@
  */
 package ca.uhn.fhir.rest.client.apache;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.api.*;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
 import java.util.Map.Entry;
+import java.util.*;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -34,6 +30,12 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicNameValuePair;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
  * A Http Client based on Apache. This is an adapter around the class {@link

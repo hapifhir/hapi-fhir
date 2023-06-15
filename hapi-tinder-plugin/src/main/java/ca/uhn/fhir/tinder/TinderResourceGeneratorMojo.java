@@ -1,13 +1,11 @@
 package ca.uhn.fhir.tinder;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -18,6 +16,10 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
 @Mojo(name = "generate-resource", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class TinderResourceGeneratorMojo extends AbstractGeneratorMojo {

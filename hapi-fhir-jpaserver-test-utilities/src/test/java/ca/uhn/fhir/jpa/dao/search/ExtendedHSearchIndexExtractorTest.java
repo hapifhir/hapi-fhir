@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.dao.search;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import java.util.Set;
+
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -22,10 +25,9 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import java.util.Set;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 
 class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport {
     FhirContext myFhirContext = FhirContext.forR4Cached();

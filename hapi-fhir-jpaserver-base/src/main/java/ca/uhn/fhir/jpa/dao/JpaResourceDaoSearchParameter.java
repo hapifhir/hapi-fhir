@@ -19,20 +19,23 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
-import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumeration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
+import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 
 public class JpaResourceDaoSearchParameter<T extends IBaseResource>
         extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoSearchParameter<T> {

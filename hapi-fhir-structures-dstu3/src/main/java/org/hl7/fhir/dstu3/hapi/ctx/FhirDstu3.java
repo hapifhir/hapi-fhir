@@ -19,6 +19,16 @@
  */
 package org.hl7.fhir.dstu3.hapi.ctx;
 
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.hapi.fluentpath.FhirPathDstu3;
+import org.hl7.fhir.dstu3.hapi.rest.server.Dstu3BundleFactory;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.*;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -29,14 +39,6 @@ import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.hapi.fluentpath.FhirPathDstu3;
-import org.hl7.fhir.dstu3.hapi.rest.server.Dstu3BundleFactory;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.*;
 
 public class FhirDstu3 implements IFhirVersion {
 

@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.cli;
 
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import java.util.concurrent.ExecutionException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 
 public class ToggleSearchParametersCommand extends BaseCommand {
 

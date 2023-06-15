@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.narrative;
 
-import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 import java.util.ArrayList;
 import java.util.List;
+
+import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 
 public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator
         implements INarrativeGenerator {

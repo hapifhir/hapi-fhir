@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IResourceLinkResolver {
 

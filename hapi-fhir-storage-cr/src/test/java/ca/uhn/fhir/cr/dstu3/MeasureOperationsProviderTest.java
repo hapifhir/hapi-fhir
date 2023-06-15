@@ -1,19 +1,21 @@
 package ca.uhn.fhir.cr.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import ca.uhn.fhir.cr.BaseCrDstu3Test;
-import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import io.specto.hoverfly.junit5.HoverflyExtension;
 import java.io.IOException;
+
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import ca.uhn.fhir.cr.BaseCrDstu3Test;
+import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import io.specto.hoverfly.junit5.HoverflyExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(HoverflyExtension.class)

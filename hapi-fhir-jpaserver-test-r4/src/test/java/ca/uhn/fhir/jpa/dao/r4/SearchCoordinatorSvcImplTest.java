@@ -1,7 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.Date;
+import java.util.UUID;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -14,12 +19,9 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import java.util.Date;
-import java.util.UUID;
-import org.apache.commons.lang3.time.DateUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 

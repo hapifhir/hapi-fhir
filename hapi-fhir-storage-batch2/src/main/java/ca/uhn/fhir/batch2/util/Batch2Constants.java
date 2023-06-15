@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.util;
 
 import java.util.Date;
+
 import org.hl7.fhir.r4.model.InstantType;
 
 public class Batch2Constants {

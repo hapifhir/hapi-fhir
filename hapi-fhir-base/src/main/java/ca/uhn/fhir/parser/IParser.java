@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.parser;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.ParserOptions;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -31,9 +26,16 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 /**
  * A parser, which can be used to convert between HAPI FHIR model/structure objects, and their

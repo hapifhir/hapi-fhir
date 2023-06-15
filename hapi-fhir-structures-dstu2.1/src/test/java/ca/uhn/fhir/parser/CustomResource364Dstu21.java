@@ -1,16 +1,17 @@
 package ca.uhn.fhir.parser;
 
+import org.hl7.fhir.dstu2016may.model.DateTimeType;
+import org.hl7.fhir.dstu2016may.model.DomainResource;
+import org.hl7.fhir.dstu2016may.model.ResourceType;
+import org.hl7.fhir.dstu2016may.model.Type;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.util.ElementUtil;
-import org.hl7.fhir.dstu2016may.model.DateTimeType;
-import org.hl7.fhir.dstu2016may.model.DomainResource;
-import org.hl7.fhir.dstu2016may.model.ResourceType;
-import org.hl7.fhir.dstu2016may.model.Type;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 
 /**
  * This is an example of a custom resource that also uses a custom datatype.

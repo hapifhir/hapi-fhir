@@ -19,15 +19,16 @@
  */
 package ca.uhn.fhir.mdm.batch2.clear;
 
-import ca.uhn.fhir.batch2.api.IJobParametersValidator;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public class MdmClearJobParametersValidator
         implements IJobParametersValidator<MdmClearJobParameters> {

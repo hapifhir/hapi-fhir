@@ -19,14 +19,16 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import java.util.List;
+
+import org.springframework.context.ApplicationContext;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.interceptor.validation.IRepositoryValidatingRule;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import java.util.List;
-import org.springframework.context.ApplicationContext;
 
 @SuppressWarnings("unused")
 public class RepositoryValidatingInterceptorExamples {

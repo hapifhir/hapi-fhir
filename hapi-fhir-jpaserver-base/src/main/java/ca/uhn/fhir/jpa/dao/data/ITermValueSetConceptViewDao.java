@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptView;
 import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import ca.uhn.fhir.jpa.entity.TermValueSetConceptView;
 
 public interface ITermValueSetConceptViewDao
         extends JpaRepository<TermValueSetConceptView, Long>, IHapiFhirJpaRepository {

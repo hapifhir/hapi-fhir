@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.model.primitive.XhtmlDt;
 import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 public class RuntimePrimitiveDatatypeNarrativeDefinition
         extends BaseRuntimeElementDefinition<XhtmlDt> {

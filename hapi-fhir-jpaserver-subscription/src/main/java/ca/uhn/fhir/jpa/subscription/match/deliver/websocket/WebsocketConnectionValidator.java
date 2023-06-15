@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
 
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 
 public class WebsocketConnectionValidator {
     private static Logger ourLog = LoggerFactory.getLogger(WebsocketConnectionValidator.class);

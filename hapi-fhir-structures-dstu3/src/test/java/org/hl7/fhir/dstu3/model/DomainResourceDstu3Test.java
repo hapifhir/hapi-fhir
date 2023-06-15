@@ -1,9 +1,9 @@
 package org.hl7.fhir.dstu3.model;
 
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Test;
 
 public class DomainResourceDstu3Test {
     /**

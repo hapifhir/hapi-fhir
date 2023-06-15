@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /** Quantity parameter type for use in fluent client interfaces */
 @SuppressWarnings("deprecation")

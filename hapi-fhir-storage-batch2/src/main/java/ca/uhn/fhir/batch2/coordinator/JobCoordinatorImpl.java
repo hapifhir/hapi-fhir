@@ -19,7 +19,19 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.springframework.data.domain.Page;
+import org.springframework.messaging.MessageHandler;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
@@ -41,18 +53,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Logs;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.springframework.data.domain.Page;
-import org.springframework.messaging.MessageHandler;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JobCoordinatorImpl implements IJobCoordinator {
     private static final Logger ourLog = Logs.getBatchTroubleshootingLog();

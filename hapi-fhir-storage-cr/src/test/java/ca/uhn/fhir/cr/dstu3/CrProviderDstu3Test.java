@@ -1,17 +1,8 @@
 package ca.uhn.fhir.cr.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.cr.BaseCrDstu3Test;
-import ca.uhn.fhir.cr.PartitionHelper;
-import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
-import ca.uhn.fhir.util.StopWatch;
 import java.io.IOException;
 import java.util.List;
+
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
@@ -23,6 +14,17 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ca.uhn.fhir.cr.BaseCrDstu3Test;
+import ca.uhn.fhir.cr.PartitionHelper;
+import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
+import ca.uhn.fhir.util.StopWatch;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CrProviderDstu3Test extends BaseCrDstu3Test {
     private static final Logger ourLog = LoggerFactory.getLogger(CrProviderDstu3Test.class);

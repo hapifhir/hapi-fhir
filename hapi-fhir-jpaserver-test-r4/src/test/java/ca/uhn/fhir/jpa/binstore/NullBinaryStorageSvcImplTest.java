@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.binstore;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NullBinaryStorageSvcImplTest {
 

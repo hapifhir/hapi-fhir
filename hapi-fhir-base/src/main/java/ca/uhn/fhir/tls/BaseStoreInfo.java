@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.tls;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import org.apache.commons.io.FilenameUtils;
 
 import ca.uhn.fhir.i18n.Msg;
-import org.apache.commons.io.FilenameUtils;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseStoreInfo {
 

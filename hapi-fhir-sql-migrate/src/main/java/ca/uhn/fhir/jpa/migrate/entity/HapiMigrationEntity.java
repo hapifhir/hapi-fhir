@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.migrate.entity;
 
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import ca.uhn.fhir.util.VersionEnum;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
+
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.util.VersionEnum;
 
 // Note even though we are using javax.persistence annotations here, we are managing these records
 // outside of jpa

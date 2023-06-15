@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.List;
 
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -27,7 +27,8 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.XmlDetectionUtil;
 import ca.uhn.fhir.util.XmlUtil;
-import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Note that as of HAPI FHIR 3.1.0, this method no longer uses the StAX XMLEvent type as the XML

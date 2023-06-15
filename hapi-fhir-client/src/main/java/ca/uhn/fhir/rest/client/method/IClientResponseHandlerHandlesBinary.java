@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.List;
 import java.util.Map;
+
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 public interface IClientResponseHandlerHandlesBinary<T> extends IClientResponseHandler<T> {
 

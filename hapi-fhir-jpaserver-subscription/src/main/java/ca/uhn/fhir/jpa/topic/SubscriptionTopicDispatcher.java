@@ -19,6 +19,13 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionDeliveryRequest;
@@ -31,11 +38,6 @@ import ca.uhn.fhir.jpa.topic.filter.ISubscriptionTopicFilterMatcher;
 import ca.uhn.fhir.jpa.topic.filter.SubscriptionTopicFilterUtil;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.util.Logs;
-import java.util.List;
-import java.util.UUID;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
 
 /**
  * Subscription topic notifications are natively supported in R5, R4B. They are also partially

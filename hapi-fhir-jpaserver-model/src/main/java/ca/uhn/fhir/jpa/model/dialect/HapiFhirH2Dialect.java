@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import java.sql.Types;
+
 import org.hibernate.dialect.H2Dialect;
 
 /** HAPI FHIR dialect for H2 database */

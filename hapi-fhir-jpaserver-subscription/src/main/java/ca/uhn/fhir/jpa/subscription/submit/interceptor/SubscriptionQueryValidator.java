@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SubscriptionQueryValidator {
     private final DaoRegistry myDaoRegistry;

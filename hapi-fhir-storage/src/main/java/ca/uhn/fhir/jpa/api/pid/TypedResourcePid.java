@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
+import java.util.Objects;
+
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import java.util.Objects;
 
 public class TypedResourcePid {
     public final String resourceType;

@@ -1,13 +1,13 @@
 package ca.uhn.fhir.jpa.packages;
 
+import org.junit.jupiter.api.Test;
+
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.thymeleaf.util.ListUtils.sort;
-
-import org.junit.jupiter.api.Test;
 
 public class PackageVersionComparatorTest {
 

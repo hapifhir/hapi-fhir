@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.jpa.model.sched;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.util.Set;
+
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+
+import com.google.common.annotations.VisibleForTesting;
 
 public interface ISchedulerService {
 

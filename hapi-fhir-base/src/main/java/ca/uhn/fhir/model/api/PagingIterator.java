@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.model.api;
 
-import ca.uhn.fhir.i18n.Msg;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
+
+import ca.uhn.fhir.i18n.Msg;
 
 public class PagingIterator<T> implements Iterator<T> {
 

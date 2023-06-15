@@ -1,9 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.dao.IHSearchEventListener;
-import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.IHSearchEventListener;
+import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
 
 /**
  * Run entire @see {@link FhirResourceDaoR4SearchLastNIT} test suite this time using Extended

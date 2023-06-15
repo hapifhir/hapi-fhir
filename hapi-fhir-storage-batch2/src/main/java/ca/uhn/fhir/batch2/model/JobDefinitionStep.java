@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.batch2.model;
 
-import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.model.api.IModelJson;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang3.Validate;
+
+import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 
 public class JobDefinitionStep<
         PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {

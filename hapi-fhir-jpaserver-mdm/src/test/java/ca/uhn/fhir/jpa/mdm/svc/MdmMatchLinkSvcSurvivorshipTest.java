@@ -1,13 +1,5 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import static org.mockito.Mockito.times;
-import static org.slf4j.LoggerFactory.getLogger;
-
-import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
-import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -16,6 +8,15 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+
+import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
+
+import static org.mockito.Mockito.times;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 

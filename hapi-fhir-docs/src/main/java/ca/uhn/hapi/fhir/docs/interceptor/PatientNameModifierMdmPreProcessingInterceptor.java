@@ -19,15 +19,17 @@
  */
 package ca.uhn.hapi.fhir.docs.interceptor;
 
-import static java.util.Arrays.asList;
-
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
+
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+
+import static java.util.Arrays.asList;
 
 // START SNIPPET: patientInterceptor
 /**

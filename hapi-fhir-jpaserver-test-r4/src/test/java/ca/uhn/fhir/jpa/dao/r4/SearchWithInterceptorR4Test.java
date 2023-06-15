@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -13,10 +14,11 @@ import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
-import java.util.List;
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings({"Duplicates"})
 public class SearchWithInterceptorR4Test extends BaseJpaR4Test {

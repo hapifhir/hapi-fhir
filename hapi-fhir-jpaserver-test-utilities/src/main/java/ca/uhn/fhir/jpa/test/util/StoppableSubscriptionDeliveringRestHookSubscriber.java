@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.test.util;
 
-import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import java.util.concurrent.CountDownLatch;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
+
+import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 
 public class StoppableSubscriptionDeliveringRestHookSubscriber
         extends SubscriptionDeliveringRestHookSubscriber {

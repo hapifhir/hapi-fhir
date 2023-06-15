@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jaxrs.server.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import javax.ejb.ApplicationException;
+
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import javax.ejb.ApplicationException;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JaxRsResponseExceptionTest {
 

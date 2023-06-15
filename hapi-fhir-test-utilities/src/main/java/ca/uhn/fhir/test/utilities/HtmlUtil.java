@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import java.io.IOException;
+import java.net.URL;
+
+import org.awaitility.Awaitility;
+
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.StringWebResponse;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -26,9 +31,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.parser.neko.HtmlUnitNekoHtmlParser;
-import java.io.IOException;
-import java.net.URL;
-import org.awaitility.Awaitility;
 
 public class HtmlUtil {
 

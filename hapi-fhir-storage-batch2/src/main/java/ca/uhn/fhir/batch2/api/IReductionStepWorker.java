@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.model.api.IModelJson;
-import javax.annotation.Nonnull;
 
 /**
  * Reduction step worker.

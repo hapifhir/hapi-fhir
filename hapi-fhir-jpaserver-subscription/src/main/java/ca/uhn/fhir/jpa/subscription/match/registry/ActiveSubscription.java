@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class ActiveSubscription {
 

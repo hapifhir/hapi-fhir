@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.mdm.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Creates a new {@link IMdmLink} either with the current {@link IMdmSettings#getRuleVersion()} or

@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import java.util.List;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import java.util.List;
 
 public interface IRestfulServerDefaults {
     /**

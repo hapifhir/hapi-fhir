@@ -1,16 +1,18 @@
 package ca.uhn.fhir.rest.client;
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.annotation.Count;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.param.*;
 import java.util.Date;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
+
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.annotation.Count;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.param.*;
 
 public interface ITestClient extends IBasicClient {
 

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.util;
 
 import java.sql.SQLException;
+
 import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.exception.spi.TemplatedViolatedConstraintNameExtracter;
 import org.hibernate.exception.spi.ViolatedConstraintNameExtracter;

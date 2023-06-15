@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.migrate.dao;
 
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
-import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
-import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeToDriverTypeToSqlType;
+import java.sql.Types;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.CreateIndexQuery;
 import com.healthmarketscience.sqlbuilder.CreateTableQuery;
@@ -34,9 +35,11 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import java.sql.Types;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
+import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
+import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeToDriverTypeToSqlType;
 
 public class MigrationQueryBuilder {
     private static final Logger ourLog = LoggerFactory.getLogger(MigrationQueryBuilder.class);

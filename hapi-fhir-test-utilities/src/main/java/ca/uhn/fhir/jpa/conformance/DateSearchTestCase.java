@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.conformance;
 
-import ca.uhn.fhir.util.CollectionUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,7 +31,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+
 import org.junit.jupiter.params.provider.Arguments;
+
+import ca.uhn.fhir.util.CollectionUtil;
 
 /**
  * Collection of test cases for date type search.

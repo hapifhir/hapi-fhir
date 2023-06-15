@@ -19,12 +19,13 @@
  */
 package ca.uhn.test.concurrency;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.util.concurrent.Phaser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test helper to force a particular sequence on multiple threads. Wraps Phaser with an Enum for

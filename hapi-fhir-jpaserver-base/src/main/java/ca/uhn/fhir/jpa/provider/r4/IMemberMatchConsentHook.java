@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import java.util.function.Consumer;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /** Pre-save hook for Consent saved during $member-match. */

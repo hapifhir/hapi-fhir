@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.search.cache;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.entity.Search;
 import java.time.Instant;
 import java.util.Optional;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.entity.Search;
 
 public interface ISearchCacheSvc {
 

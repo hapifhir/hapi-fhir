@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.rest.client.api;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import java.util.List;
 import java.util.Map;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 
 public interface IRestfulClientFactory {
 

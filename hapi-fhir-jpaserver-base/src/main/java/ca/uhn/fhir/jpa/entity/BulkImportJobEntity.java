@@ -19,12 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
-import static org.apache.commons.lang3.StringUtils.left;
-
-import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
-import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
-import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
@@ -40,6 +34,13 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
+
+import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
+import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(

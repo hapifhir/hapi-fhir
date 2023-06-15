@@ -1,9 +1,9 @@
 package ca.uhn.fhir.cli;
 
+import org.junit.jupiter.api.Test;
+
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-
-import org.junit.jupiter.api.Test;
 
 public class HelpOptionTest extends ConsoleOutputCapturingBaseTest {
     @Test

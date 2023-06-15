@@ -1,17 +1,19 @@
 package ca.uhn.fhir.storage.interceptor.balp;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
-import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import java.util.List;
+
 import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 public class FhirClientBalpSinkTest {
 

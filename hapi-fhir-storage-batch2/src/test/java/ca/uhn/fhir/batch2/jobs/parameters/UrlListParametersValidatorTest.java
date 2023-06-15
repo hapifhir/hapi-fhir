@@ -1,18 +1,20 @@
 package ca.uhn.fhir.batch2.jobs.parameters;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.mockito.Mockito.when;
-
-import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import java.util.Collections;
 import java.util.List;
+
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UrlListParametersValidatorTest {

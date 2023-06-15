@@ -19,12 +19,14 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.*;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import java.io.IOException;
-import java.util.List;
-import org.hl7.fhir.r4.model.*;
 
 public class ExtensionsDstu3 {
 

@@ -19,18 +19,20 @@
  */
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.util.ParametersUtil;
-import ca.uhn.fhir.util.ValidateUtil;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.ValidateUtil;
 
 public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChildDefinition {
     private final IAccessor myAccessor;

@@ -20,12 +20,14 @@ package ca.uhn.fhir.sl.cache.guava;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
-import com.google.common.cache.CacheLoader;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+
+import com.google.common.cache.CacheLoader;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+
+import ca.uhn.fhir.i18n.Msg;
 
 public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 

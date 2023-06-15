@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 
 public interface IBatch2JobInstanceRepository
         extends JpaRepository<Batch2JobInstanceEntity, String>, IHapiFhirJpaRepository {

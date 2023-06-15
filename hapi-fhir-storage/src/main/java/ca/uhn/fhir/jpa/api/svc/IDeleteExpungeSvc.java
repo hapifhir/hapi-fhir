@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.jpa.api.svc;
 
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import java.util.List;
+
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public interface IDeleteExpungeSvc<T extends IResourcePersistentId<?>> {
 

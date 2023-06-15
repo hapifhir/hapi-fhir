@@ -22,6 +22,7 @@ package ca.uhn.fhir.util;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+
 import org.apache.commons.lang3.Validate;
 
 public class ProxyUtil {

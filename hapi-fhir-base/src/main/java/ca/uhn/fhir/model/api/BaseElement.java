@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.model.api;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import java.util.*;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
 
 public abstract class BaseElement implements /*IElement, */ ISupportsUndeclaredExtensions {
 

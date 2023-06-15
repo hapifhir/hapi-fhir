@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.packages.util;
 
-import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 public class PackageUtils {
 

@@ -19,21 +19,22 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import static org.apache.commons.lang3.StringUtils.trim;
-
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.listener.MethodExecutionContext;
 import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseCaptureQueriesListener
         implements ProxyDataSourceBuilder.SingleQueryExecution,

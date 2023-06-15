@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.jpa.searchparam.util;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import java.util.Collection;
-import java.util.List;
-import org.hl7.fhir.dstu3.model.Location;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * In DSTU3, the near-distance search parameter is separate from near. In this utility method, we

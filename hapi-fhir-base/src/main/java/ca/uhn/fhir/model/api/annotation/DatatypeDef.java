@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.model.api.annotation;
 
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
 
 /** Class annotation to note a class which defines a datatype */
 @Retention(RetentionPolicy.RUNTIME)

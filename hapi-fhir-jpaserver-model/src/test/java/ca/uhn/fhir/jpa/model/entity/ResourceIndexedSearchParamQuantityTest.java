@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import java.math.BigDecimal;
+
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import java.math.BigDecimal;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class ResourceIndexedSearchParamQuantityTest {
 

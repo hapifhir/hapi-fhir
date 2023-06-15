@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.model.api;
 
-import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.parser.DataFormatException;
 
 public interface IPrimitiveDatatype<T> extends IDatatype, IPrimitiveType<T> {
 

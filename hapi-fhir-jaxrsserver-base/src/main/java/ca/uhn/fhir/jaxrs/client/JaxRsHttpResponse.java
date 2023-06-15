@@ -19,9 +19,6 @@
  */
 package ca.uhn.fhir.jaxrs.client;
 
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
-import ca.uhn.fhir.util.StopWatch;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +26,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
 
 /**
  * A Http Response based on JaxRs. This is an adapter around the class {@link

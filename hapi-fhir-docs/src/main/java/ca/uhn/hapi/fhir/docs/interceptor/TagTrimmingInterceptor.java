@@ -19,10 +19,11 @@
  */
 package ca.uhn.hapi.fhir.docs.interceptor;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 // START SNIPPET: TagTrimmingInterceptor
 /**

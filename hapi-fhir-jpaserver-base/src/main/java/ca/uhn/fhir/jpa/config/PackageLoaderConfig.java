@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
-import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
+import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 
 @Configuration
 public class PackageLoaderConfig {

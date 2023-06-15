@@ -19,13 +19,16 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 
 class SubscriptionChannelCache {
     private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);

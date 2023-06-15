@@ -19,14 +19,15 @@
  */
 package ca.uhn.fhir.rest.client.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
-import org.apache.commons.lang3.Validate;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This interceptor adds a path element representing the tenant ID to each client request. It is

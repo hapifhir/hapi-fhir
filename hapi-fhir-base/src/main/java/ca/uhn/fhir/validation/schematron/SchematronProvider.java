@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.validation.schematron;
 
+import java.lang.reflect.Constructor;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidatorModule;
-import java.lang.reflect.Constructor;
 
 public class SchematronProvider {
 

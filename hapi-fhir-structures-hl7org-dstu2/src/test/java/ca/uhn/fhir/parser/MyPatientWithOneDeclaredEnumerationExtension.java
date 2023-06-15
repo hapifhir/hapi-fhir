@@ -1,10 +1,11 @@
 package ca.uhn.fhir.parser;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import org.hl7.fhir.dstu2.model.Address.AddressUse;
 import org.hl7.fhir.dstu2.model.Enumeration;
 import org.hl7.fhir.dstu2.model.Patient;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 @ResourceDef(name = "Patient")
 public class MyPatientWithOneDeclaredEnumerationExtension extends Patient {

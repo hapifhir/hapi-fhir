@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.mail;
 
 import java.util.List;
 import javax.annotation.Nonnull;
+
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.mailer.AsyncResponse;
 

@@ -1,23 +1,11 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.dao.r4.ElasticsearchPrefixTest;
-import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
-import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
-import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
-import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
-import ca.uhn.fhir.jpa.test.config.BlockLargeNumbersOfParamsListener;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
-import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
-import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -38,6 +26,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.r4.ElasticsearchPrefixTest;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
+import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
+import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
+import ca.uhn.fhir.jpa.test.config.BlockLargeNumbersOfParamsListener;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 /**
  * The only reason this is its own class is so that we can set a dao config setting before the whole

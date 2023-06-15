@@ -1,13 +1,14 @@
 package ca.uhn.fhir.rest.server;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
+
+import ca.uhn.fhir.rest.api.Constants;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.rest.api.Constants;
-import org.junit.jupiter.api.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
 
 public class ServletRequestTracingTest {
 

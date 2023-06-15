@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 public class BulkExportUtils {
     private BulkExportUtils() {}

@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
-import static org.apache.commons.lang3.StringUtils.isNumeric;
-
 import java.math.BigDecimal;
 import java.util.Comparator;
+
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 public class PackageVersionComparator implements Comparator<String> {
     public static final PackageVersionComparator INSTANCE = new PackageVersionComparator();

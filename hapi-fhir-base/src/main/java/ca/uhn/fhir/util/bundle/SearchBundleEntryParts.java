@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.util.bundle;
 
-import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 
 public class SearchBundleEntryParts {
     private final IBaseResource myResource;

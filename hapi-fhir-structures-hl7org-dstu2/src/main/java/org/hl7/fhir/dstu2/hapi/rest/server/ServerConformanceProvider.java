@@ -19,7 +19,23 @@
  */
 package org.hl7.fhir.dstu2.hapi.rest.server;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.Map.Entry;
+import java.util.*;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu2.model.Conformance;
+import org.hl7.fhir.dstu2.model.Conformance.*;
+import org.hl7.fhir.dstu2.model.DateTimeType;
+import org.hl7.fhir.dstu2.model.Enumerations.ConformanceResourceStatus;
+import org.hl7.fhir.dstu2.model.Enumerations.ResourceType;
+import org.hl7.fhir.dstu2.model.IdType;
+import org.hl7.fhir.dstu2.model.OperationDefinition;
+import org.hl7.fhir.dstu2.model.OperationDefinition.OperationDefinitionParameterComponent;
+import org.hl7.fhir.dstu2.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -45,22 +61,8 @@ import ca.uhn.fhir.rest.server.method.OperationParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.util.BaseServerCapabilityStatementProvider;
-import java.util.*;
-import java.util.Map.Entry;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu2.model.Conformance;
-import org.hl7.fhir.dstu2.model.Conformance.*;
-import org.hl7.fhir.dstu2.model.DateTimeType;
-import org.hl7.fhir.dstu2.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu2.model.Enumerations.ResourceType;
-import org.hl7.fhir.dstu2.model.IdType;
-import org.hl7.fhir.dstu2.model.OperationDefinition;
-import org.hl7.fhir.dstu2.model.OperationDefinition.OperationDefinitionParameterComponent;
-import org.hl7.fhir.dstu2.model.OperationDefinition.OperationParameterUse;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation

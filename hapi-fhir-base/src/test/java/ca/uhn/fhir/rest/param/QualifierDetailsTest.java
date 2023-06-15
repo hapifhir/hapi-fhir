@@ -1,9 +1,10 @@
 package ca.uhn.fhir.rest.param;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Sets;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class QualifierDetailsTest {
 

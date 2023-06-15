@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.api.server.storage;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.List;
+
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 // Tag interface for Spring auto-wiring
 public interface IDeleteExpungeJobSubmitter {

@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.mdm.util;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.PrimitiveType;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 
 public final class NameUtil {
 

@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
@@ -27,9 +32,6 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.util.Collections;
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 
 public final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType>
         implements IParamBinder<IQueryParameterType> {

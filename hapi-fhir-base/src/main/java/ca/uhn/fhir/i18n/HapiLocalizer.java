@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.i18n;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
-
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.util.VersionUtil;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -37,6 +30,14 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.VersionUtil;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * This feature is not yet in its final state and should be considered an internal part of HAPI for

@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.jaxrs.server.util;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.BaseRestfulResponse;
-import ca.uhn.fhir.util.IoUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.OutputStream;
@@ -34,8 +29,15 @@ import java.util.Map.Entry;
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.BaseRestfulResponse;
+import ca.uhn.fhir.util.IoUtil;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * The JaxRsResponse is a jax-rs specific implementation of the RestfulResponse.

@@ -1,12 +1,13 @@
 package ca.uhn.fhir.jpa.nickname;
 
+import java.io.IOException;
+import java.io.StringReader;
+
+import org.junit.jupiter.api.Test;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.IOException;
-import java.io.StringReader;
-import org.junit.jupiter.api.Test;
 
 class NicknameMapTest {
     @Test

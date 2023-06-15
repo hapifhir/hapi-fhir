@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.api.model;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import ca.uhn.fhir.model.primitive.IdDt;
 
 public class DeleteConflict {
 

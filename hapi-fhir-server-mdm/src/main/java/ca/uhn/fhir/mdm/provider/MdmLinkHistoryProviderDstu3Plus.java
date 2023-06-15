@@ -20,7 +20,11 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
-import static org.slf4j.LoggerFactory.getLogger;
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
@@ -31,10 +35,8 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
     private static final Logger ourLog = getLogger(MdmLinkHistoryProviderDstu3Plus.class);

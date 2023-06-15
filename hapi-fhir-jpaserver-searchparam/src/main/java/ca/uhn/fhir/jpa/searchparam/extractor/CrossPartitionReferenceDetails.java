@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import javax.annotation.Nonnull;
 
 public class CrossPartitionReferenceDetails {
 

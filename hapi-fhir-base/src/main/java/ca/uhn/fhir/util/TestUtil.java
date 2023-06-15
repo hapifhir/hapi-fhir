@@ -19,14 +19,15 @@
  */
 package ca.uhn.fhir.util;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.i18n.Msg;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.i18n.Msg;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class TestUtil {
     private static final org.slf4j.Logger ourLog =

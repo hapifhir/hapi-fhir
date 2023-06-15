@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.module.cache;
 
-import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
+
+import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 
 public abstract class BaseSubscriptionRegistryTest extends BaseSubscriptionDstu3Test {
     public static final String SUBSCRIPTION_ID = "1";

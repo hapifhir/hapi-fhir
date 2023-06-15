@@ -19,10 +19,11 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import org.hl7.fhir.r4.model.*;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import org.hl7.fhir.r4.model.*;
 
 public class FhirContextIntro {
 

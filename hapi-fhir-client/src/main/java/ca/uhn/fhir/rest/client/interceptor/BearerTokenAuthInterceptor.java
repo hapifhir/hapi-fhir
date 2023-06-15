@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.rest.client.interceptor;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.CoverageIgnore;
-import org.apache.commons.lang3.Validate;
 
 /**
  * HTTP interceptor to be used for adding HTTP Authorization using "bearer tokens" to requests.

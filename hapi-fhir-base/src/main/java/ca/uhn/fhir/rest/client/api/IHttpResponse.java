@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.rest.client.api;
 
-import ca.uhn.fhir.util.StopWatch;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.List;
 import java.util.Map;
+
+import ca.uhn.fhir.util.StopWatch;
 
 /** An interface around the HTTP Response. */
 public interface IHttpResponse {

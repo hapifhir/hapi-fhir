@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import com.google.common.base.Charsets;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,10 +28,15 @@ import java.util.List;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Charsets;
+
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 
 public class ZipCollectionBuilder {
 

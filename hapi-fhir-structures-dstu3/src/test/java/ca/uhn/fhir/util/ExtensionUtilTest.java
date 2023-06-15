@@ -1,12 +1,12 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class ExtensionUtilTest {
 

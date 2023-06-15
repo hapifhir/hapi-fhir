@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.api.model;
 
+import java.util.Date;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
-import java.util.Date;
 
 public class Batch2JobInfo {
 

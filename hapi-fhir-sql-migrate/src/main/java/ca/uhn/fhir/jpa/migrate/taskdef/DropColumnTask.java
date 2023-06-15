@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
+
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 
 public class DropColumnTask extends BaseTableColumnTask {
 

@@ -19,22 +19,12 @@
  */
 package ca.uhn.fhir.narrative;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.narrative2.BaseNarrativeGenerator;
-import ca.uhn.fhir.narrative2.INarrativeTemplate;
-import ca.uhn.fhir.narrative2.TemplateTypeEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.google.common.collect.Sets;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.TemplateEngine;
@@ -62,6 +52,19 @@ import org.thymeleaf.templateresolver.DefaultTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
 import org.thymeleaf.templateresource.StringTemplateResource;
+
+import com.google.common.collect.Sets;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.narrative2.BaseNarrativeGenerator;
+import ca.uhn.fhir.narrative2.INarrativeTemplate;
+import ca.uhn.fhir.narrative2.TemplateTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 

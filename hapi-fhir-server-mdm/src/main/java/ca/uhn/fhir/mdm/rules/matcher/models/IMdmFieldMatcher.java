@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.models;
 
-import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 
 /**
  * Measure how similar two IBase (resource fields) are to one another. 1.0 means identical. 0.0

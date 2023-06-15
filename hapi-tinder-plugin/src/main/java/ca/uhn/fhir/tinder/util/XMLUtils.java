@@ -1,9 +1,9 @@
 package ca.uhn.fhir.tinder.util;
 
-import ca.uhn.fhir.i18n.Msg;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.DOMErrorHandler;
 import org.w3c.dom.DOMImplementation;
@@ -15,6 +15,8 @@ import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSParser;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.w3c.dom.ls.LSSerializer;
+
+import ca.uhn.fhir.i18n.Msg;
 
 public class XMLUtils {
 

@@ -19,16 +19,19 @@
  */
 package ca.uhn.fhir.rest.server.util;
 
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.collect.ArrayListMultimap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.http.NameValuePair;
+
+import com.google.common.collect.ArrayListMultimap;
+
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class ServletRequestUtil {
     public static ServletSubRequestDetails getServletSubRequestDetails(

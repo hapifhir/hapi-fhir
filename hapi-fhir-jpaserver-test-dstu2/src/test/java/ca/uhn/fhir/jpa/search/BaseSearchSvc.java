@@ -1,8 +1,15 @@
 package ca.uhn.fhir.jpa.search;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atMost;
-import static org.mockito.Mockito.verify;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.BeanFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -16,15 +23,10 @@ import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.BeanFactory;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.verify;
 
 public class BaseSearchSvc {
     protected int myExpectedNumberOfSearchBuildersCreated = 2;

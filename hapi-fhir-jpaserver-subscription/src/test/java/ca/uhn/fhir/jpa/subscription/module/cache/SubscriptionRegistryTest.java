@@ -1,12 +1,13 @@
 package ca.uhn.fhir.jpa.subscription.module.cache;
 
+import org.hl7.fhir.dstu3.model.Subscription;
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.jupiter.api.Test;
 
 public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 

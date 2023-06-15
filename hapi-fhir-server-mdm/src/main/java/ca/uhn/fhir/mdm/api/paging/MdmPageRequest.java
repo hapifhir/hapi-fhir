@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.mdm.api.paging;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.data.domain.PageRequest;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 
 /**
  * This class is essentially just a data clump of offset + count, as well as the ability to convert

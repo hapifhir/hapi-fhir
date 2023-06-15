@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
+
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
+
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class LinkedBlockingChannel extends ExecutorSubscribableChannel
         implements IChannelProducer, IChannelReceiver {

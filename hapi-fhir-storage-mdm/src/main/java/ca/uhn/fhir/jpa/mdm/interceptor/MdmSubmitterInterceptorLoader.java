@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import javax.annotation.PostConstruct;
+
+import org.hl7.fhir.dstu2.model.Subscription;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
@@ -26,10 +32,6 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
-import javax.annotation.PostConstruct;
-import org.hl7.fhir.dstu2.model.Subscription;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class MdmSubmitterInterceptorLoader {
     private static final Logger ourLog = Logs.getMdmTroubleshootingLog();

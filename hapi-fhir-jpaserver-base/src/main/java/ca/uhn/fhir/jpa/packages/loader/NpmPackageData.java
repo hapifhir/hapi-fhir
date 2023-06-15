@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
 import java.io.InputStream;
+
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
 public class NpmPackageData {

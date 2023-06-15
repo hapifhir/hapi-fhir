@@ -20,9 +20,10 @@ package ca.uhn.fhir.sl.cache;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import java.util.Iterator;
 import java.util.ServiceLoader;
+
+import ca.uhn.fhir.i18n.Msg;
 
 @SuppressWarnings("unchecked")
 public class CacheFactory {

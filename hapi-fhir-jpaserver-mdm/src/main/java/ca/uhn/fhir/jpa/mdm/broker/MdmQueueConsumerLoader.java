@@ -19,16 +19,19 @@
  */
 package ca.uhn.fhir.jpa.mdm.broker;
 
+import javax.annotation.PreDestroy;
+
+import org.slf4j.Logger;
+import org.springframework.stereotype.Service;
+
+import com.google.common.annotations.VisibleForTesting;
+
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
-import com.google.common.annotations.VisibleForTesting;
-import javax.annotation.PreDestroy;
-import org.slf4j.Logger;
-import org.springframework.stereotype.Service;
 
 @Service
 public class MdmQueueConsumerLoader {

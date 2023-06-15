@@ -20,13 +20,15 @@
 
 package ca.uhn.fhir.cr.repo;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import java.util.HashMap;
-import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * This class produces partial clones of RequestDetails, the intent being to reuse the context of a

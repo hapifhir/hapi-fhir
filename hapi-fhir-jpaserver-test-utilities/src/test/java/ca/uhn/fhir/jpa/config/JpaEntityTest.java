@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.test.utilities.jpa.JpaModelScannerAndVerifier;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.test.utilities.jpa.JpaModelScannerAndVerifier;
 
 public class JpaEntityTest {
 

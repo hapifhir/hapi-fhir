@@ -19,14 +19,17 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
-import static java.util.Objects.isNull;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.annotation.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.model.api.IModelJson;
+
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 

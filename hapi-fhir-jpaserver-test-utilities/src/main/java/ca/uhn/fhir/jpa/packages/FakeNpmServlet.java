@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
-import ca.uhn.fhir.rest.api.Constants;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.rest.api.Constants;
 
 public class FakeNpmServlet extends HttpServlet {
     private static final Logger ourLog = LoggerFactory.getLogger(FakeNpmServlet.class);

@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.mdm.model;
 
-import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import java.util.ArrayList;
 import java.util.List;
+
+import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 
 public class MdmTransactionContext {
 

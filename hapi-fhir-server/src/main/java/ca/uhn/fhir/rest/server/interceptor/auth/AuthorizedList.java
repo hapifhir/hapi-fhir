@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /** Return type for {@link SearchNarrowingInterceptor#buildAuthorizedList(RequestDetails)} */
 public class AuthorizedList {

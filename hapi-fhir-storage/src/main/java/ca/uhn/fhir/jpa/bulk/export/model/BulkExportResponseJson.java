@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.model;
 
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
-import ca.uhn.fhir.model.api.IModelJson;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+
+import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
+import ca.uhn.fhir.jpa.util.JsonDateSerializer;
+import ca.uhn.fhir.model.api.IModelJson;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @JsonAutoDetect(

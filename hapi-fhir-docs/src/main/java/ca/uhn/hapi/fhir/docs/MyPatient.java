@@ -21,16 +21,18 @@ package ca.uhn.hapi.fhir.docs;
 
 // START SNIPPET: patientDef
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.ElementUtil;
-import java.util.ArrayList;
-import java.util.List;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.StringType;
 
 /**
  * Definition class for adding extensions to the built-in Patient resource type.

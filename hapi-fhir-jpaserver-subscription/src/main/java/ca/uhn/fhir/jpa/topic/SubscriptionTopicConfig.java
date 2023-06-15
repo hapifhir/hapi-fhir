@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import org.springframework.context.annotation.Bean;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
-import org.springframework.context.annotation.Bean;
 
 public class SubscriptionTopicConfig {
     @Bean

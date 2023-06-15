@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import java.util.Date;
+
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.rest.param.DateRangeParam;
 
 public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T> {
 

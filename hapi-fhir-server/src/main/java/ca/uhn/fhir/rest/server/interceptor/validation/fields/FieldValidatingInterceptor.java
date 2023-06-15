@@ -19,7 +19,14 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.validation.fields;
 
-import static ca.uhn.fhir.rest.server.interceptor.validation.fields.IValidator.VALIDATION_EXTENSION_URL;
+import java.util.List;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -30,13 +37,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
 import ca.uhn.fhir.util.ExtensionUtil;
-import java.util.List;
-import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static ca.uhn.fhir.rest.server.interceptor.validation.fields.IValidator.VALIDATION_EXTENSION_URL;
 
 @Interceptor
 public class FieldValidatingInterceptor {

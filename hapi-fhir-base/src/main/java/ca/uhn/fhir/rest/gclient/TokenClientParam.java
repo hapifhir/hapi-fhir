@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import java.util.*;
+
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /** Token parameter type for use in fluent client interfaces */
 public class TokenClientParam extends BaseClientParam implements IParam {

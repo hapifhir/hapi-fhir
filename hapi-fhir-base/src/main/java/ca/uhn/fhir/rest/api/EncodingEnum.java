@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.lang3.ObjectUtils;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public enum EncodingEnum {
     JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_JSON) {

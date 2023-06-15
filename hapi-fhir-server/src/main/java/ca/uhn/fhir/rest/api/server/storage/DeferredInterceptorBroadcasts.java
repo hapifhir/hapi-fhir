@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.api.server.storage;
 
+import com.google.common.collect.ListMultimap;
+
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import com.google.common.collect.ListMultimap;
 
 public class DeferredInterceptorBroadcasts {
 

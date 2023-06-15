@@ -19,7 +19,13 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.List;
+
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
+
+import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -41,11 +47,8 @@ import ca.uhn.fhir.rest.server.interceptor.auth.*;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.RuleFilteringConsentService;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import com.google.common.collect.Lists;
-import java.util.List;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("unused")
 /** Examples integrated into our documentation. */

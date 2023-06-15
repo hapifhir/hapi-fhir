@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import java.util.Collection;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IAuthRuleBuilderRuleOp

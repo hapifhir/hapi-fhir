@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.test.config;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
-
 import java.time.Duration;
+
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
+
+import static java.time.temporal.ChronoUnit.SECONDS;
 
 public class TestElasticsearchContainerHelper {
 

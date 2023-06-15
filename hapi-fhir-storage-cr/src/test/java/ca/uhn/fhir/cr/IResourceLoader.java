@@ -1,17 +1,10 @@
 package ca.uhn.fhir.cr;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import ca.uhn.fhir.cr.common.IDaoRegistryUser;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.util.ClasspathUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,6 +13,15 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
 import org.springframework.core.io.DefaultResourceLoader;
+
+import ca.uhn.fhir.cr.common.IDaoRegistryUser;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.util.ClasspathUtil;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * This is a utility interface that allows a class that has a DaoRegistry to load Bundles and read

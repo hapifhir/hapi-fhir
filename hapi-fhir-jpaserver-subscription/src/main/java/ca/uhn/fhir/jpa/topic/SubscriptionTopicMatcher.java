@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
-import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
+
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
 public class SubscriptionTopicMatcher {
     private final SubscriptionTopicSupport mySubscriptionTopicSupport;

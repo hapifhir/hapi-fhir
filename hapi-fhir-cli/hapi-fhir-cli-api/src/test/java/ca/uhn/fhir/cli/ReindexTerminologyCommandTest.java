@@ -1,24 +1,7 @@
 package ca.uhn.fhir.cli;
 
-import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
-import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithMessageContains;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
-import ca.uhn.fhir.system.HapiSystemProperties;
-import ca.uhn.fhir.test.utilities.RestServerR4Helper;
-import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
-import ca.uhn.fhir.util.ParametersUtil;
-import ca.uhn.test.util.LogbackCaptureTestExtension;
-import ch.qos.logback.classic.Logger;
 import java.util.function.Consumer;
+
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +11,25 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
+import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.test.utilities.RestServerR4Helper;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
+import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ch.qos.logback.classic.Logger;
+
+import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
+import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithMessageContains;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 @ExtendWith(MockitoExtension.class)
 class ReindexTerminologyCommandTest {

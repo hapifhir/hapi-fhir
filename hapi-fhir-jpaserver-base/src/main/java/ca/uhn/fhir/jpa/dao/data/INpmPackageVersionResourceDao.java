@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 
 public interface INpmPackageVersionResourceDao
         extends JpaRepository<NpmPackageVersionResourceEntity, Long>, IHapiFhirJpaRepository {

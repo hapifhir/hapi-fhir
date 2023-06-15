@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.BaseTest;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TerminologyUploaderProviderTest extends BaseTest {
     @Test

@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import java.sql.SQLException;
 import java.util.function.Supplier;
+
 import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 
 public class AddForeignKeyTaskTest extends BaseTest {
 

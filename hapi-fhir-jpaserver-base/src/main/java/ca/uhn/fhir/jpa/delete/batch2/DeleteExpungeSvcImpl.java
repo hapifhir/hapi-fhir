@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.jpa.delete.batch2;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
     private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSvcImpl.class);

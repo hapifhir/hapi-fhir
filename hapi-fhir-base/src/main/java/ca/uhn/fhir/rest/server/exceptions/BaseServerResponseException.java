@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import ca.uhn.fhir.i18n.Msg;
 
 /**
  * Base class for RESTful client and server exceptions. RESTful client methods will only throw

@@ -19,7 +19,15 @@
  */
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Optional;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -50,13 +58,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
-import com.google.common.annotations.VisibleForTesting;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Optional;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Interceptor
 public class SubscriptionValidatingInterceptor {

@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.jpa.api.model;
 
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * This class is a replacement for {@link DaoMethodOutcome} for delete operations, as they can

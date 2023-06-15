@@ -1,16 +1,18 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.jpa.dao.predicate.SearchFuzzUtil;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import java.math.BigDecimal;
 import java.math.MathContext;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.dao.predicate.SearchFuzzUtil;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchFuzzUtilTest {
     private static final Logger ourLog = LoggerFactory.getLogger(SearchFuzzUtilTest.class);

@@ -19,15 +19,18 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
-import ca.uhn.fhir.util.Logs;
-import ca.uhn.fhir.util.UrlUtil;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Subscription;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class CanonicalTopicSubscriptionFilter {
     private static final Logger ourLog = Logs.getSubscriptionTopicLog();

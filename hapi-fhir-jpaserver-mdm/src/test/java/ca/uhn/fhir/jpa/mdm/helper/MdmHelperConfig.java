@@ -1,16 +1,19 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
-import com.google.common.base.Charsets;
 import java.io.IOException;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+
+import com.google.common.base.Charsets;
+
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 
 public class MdmHelperConfig {
     @Bean

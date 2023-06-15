@@ -19,13 +19,16 @@
  */
 package ca.uhn.fhir.mdm.batch2.clear;
 
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.validation.constraints.Pattern;
+
 import org.apache.commons.lang3.Validate;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 
 public class MdmClearJobParameters extends PartitionedJobParameters {
     @JsonProperty("resourceType")

@@ -19,6 +19,16 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.ListIterator;
+import java.util.Set;
+import javax.annotation.Nonnull;
+
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -28,14 +38,6 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.ListIterator;
-import java.util.Set;
-import javax.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * Base class for an operation that has a resource type but not a resource body in the request body

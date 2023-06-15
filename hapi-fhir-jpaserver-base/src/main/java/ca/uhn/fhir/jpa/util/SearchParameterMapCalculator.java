@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.INTEGER_0;
-
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+
+import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.INTEGER_0;
 
 public class SearchParameterMapCalculator {
 

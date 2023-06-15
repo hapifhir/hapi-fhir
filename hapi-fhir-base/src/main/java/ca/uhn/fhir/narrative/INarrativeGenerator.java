@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.narrative;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public interface INarrativeGenerator {
 

@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResourceTableTest {
 

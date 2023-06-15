@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.batch2;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
-import javax.annotation.Nonnull;
 
 class JobInstanceUtil {
 

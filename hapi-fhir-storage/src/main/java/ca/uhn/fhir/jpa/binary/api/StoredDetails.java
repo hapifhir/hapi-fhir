@@ -19,16 +19,19 @@
  */
 package ca.uhn.fhir.jpa.binary.api;
 
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
-import ca.uhn.fhir.model.api.IModelJson;
+import java.util.Date;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.hash.HashingInputStream;
-import java.util.Date;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
+import ca.uhn.fhir.jpa.util.JsonDateSerializer;
+import ca.uhn.fhir.model.api.IModelJson;
 
 public class StoredDetails implements IModelJson {
 

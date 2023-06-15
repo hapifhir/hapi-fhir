@@ -19,24 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
-import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL;
-import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
-import ca.uhn.fhir.rest.server.interceptor.validation.helpers.AddressHelper;
-import ca.uhn.fhir.util.ExtensionUtil;
-import ca.uhn.fhir.util.TerserUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.math.BigDecimal;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.entity.ContentType;
@@ -47,6 +35,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
+import ca.uhn.fhir.rest.server.interceptor.validation.helpers.AddressHelper;
+import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.TerserUtil;
+
+import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL;
+import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL;
 
 /**
  * For more details regarind the API refer to <a

@@ -19,6 +19,16 @@
  */
 package ca.uhn.fhir.mdm.dao;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.history.Revisions;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
@@ -30,14 +40,6 @@ import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.history.Revisions;
 
 public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink<P>> {
     int deleteWithAnyReferenceToPid(P thePid);

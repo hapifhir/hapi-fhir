@@ -1,13 +1,15 @@
 package ca.uhn.fhir.context;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hl7.fhir.dstu3.model.*;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.ElementUtil;
-import java.util.ArrayList;
-import java.util.List;
-import org.hl7.fhir.dstu3.model.*;
 
 @ResourceDef(
         name = MyEpisodeOfCareFHIR.FHIR_RESOURCE_NAME,

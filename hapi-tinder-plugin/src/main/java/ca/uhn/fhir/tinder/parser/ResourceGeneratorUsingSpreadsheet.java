@@ -1,14 +1,16 @@
 package ca.uhn.fhir.tinder.parser;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.tinder.model.BaseElement;
-import ca.uhn.fhir.tinder.model.BaseRootType;
-import ca.uhn.fhir.tinder.model.Resource;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.maven.plugin.MojoFailureException;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.tinder.model.BaseElement;
+import ca.uhn.fhir.tinder.model.BaseRootType;
+import ca.uhn.fhir.tinder.model.Resource;
 
 public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetParser {
     private List<String> myInputStreamNames;

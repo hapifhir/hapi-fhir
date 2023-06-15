@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.mdm.rules.similarity;
 
+import javax.annotation.Nullable;
+
+import org.hl7.fhir.instance.model.api.IBase;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import info.debatty.java.stringsimilarity.Cosine;
@@ -26,8 +30,6 @@ import info.debatty.java.stringsimilarity.Jaccard;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import info.debatty.java.stringsimilarity.SorensenDice;
-import javax.annotation.Nullable;
-import org.hl7.fhir.instance.model.api.IBase;
 
 public enum MdmSimilarityEnum {
     JARO_WINKLER(new HapiStringSimilarity(new JaroWinkler())),

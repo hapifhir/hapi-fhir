@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.batch2.progress;
 
+import java.util.Iterator;
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
-import java.util.Iterator;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
 
 public class JobInstanceProgressCalculator {
     private static final Logger ourLog = Logs.getBatchTroubleshootingLog();

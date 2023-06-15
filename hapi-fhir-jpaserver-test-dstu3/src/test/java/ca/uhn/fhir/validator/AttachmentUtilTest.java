@@ -1,11 +1,12 @@
 package ca.uhn.fhir.validator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.AttachmentUtil;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AttachmentUtilTest {
 

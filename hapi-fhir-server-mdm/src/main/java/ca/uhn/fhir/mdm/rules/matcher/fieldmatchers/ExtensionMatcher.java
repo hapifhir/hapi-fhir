@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
-import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
-import ca.uhn.fhir.util.ExtensionUtil;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
+import ca.uhn.fhir.util.ExtensionUtil;
 
 public class ExtensionMatcher implements IMdmFieldMatcher {
 

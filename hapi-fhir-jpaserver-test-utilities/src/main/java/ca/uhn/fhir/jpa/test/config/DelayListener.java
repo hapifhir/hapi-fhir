@@ -21,11 +21,13 @@ package ca.uhn.fhir.jpa.test.config;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DelayListener implements ProxyDataSourceBuilder.SingleQueryExecution {
     private static final Logger ourLog = LoggerFactory.getLogger(DelayListener.class);

@@ -1,13 +1,15 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.support.BaseValidationSupportWrapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.IValidationSupport;
 
 public class HapiToHl7OrgDstu2ValidatingSupportWrapper extends BaseValidationSupportWrapper
         implements IValidationSupport {

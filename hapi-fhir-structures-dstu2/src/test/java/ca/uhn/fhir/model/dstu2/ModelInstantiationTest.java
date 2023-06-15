@@ -1,16 +1,18 @@
 package ca.uhn.fhir.model.dstu2;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Properties;
+
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.util.TestUtil;
-import java.util.Properties;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ModelInstantiationTest {
 

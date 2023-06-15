@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.batch2.jobs.step;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -30,8 +32,8 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class LoadIdsStep
         implements IJobStepWorker<

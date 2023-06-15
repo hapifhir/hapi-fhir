@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import ca.uhn.fhir.jpa.entity.TermConcept;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
+
+import ca.uhn.fhir.jpa.entity.TermConcept;
 
 public class LoincTop2000LabResultsUsHandler extends BaseLoincTop2000LabResultsHandler {
 

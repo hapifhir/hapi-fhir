@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 

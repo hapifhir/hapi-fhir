@@ -1,10 +1,11 @@
 package ca.uhn.fhirtest;
 
-import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.WebRequestInterceptor;
+
+import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 
 public class RequestInterceptor implements WebRequestInterceptor {
 

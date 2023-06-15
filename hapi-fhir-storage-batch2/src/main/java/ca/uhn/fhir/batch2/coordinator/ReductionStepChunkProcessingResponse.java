@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
+
+import ca.uhn.fhir.batch2.model.WorkChunk;
 
 public class ReductionStepChunkProcessingResponse {
 

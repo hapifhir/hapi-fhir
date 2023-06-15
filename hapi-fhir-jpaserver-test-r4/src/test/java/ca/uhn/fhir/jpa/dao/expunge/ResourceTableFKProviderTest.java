@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -15,10 +11,16 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.sql.DataSource;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 
 class ResourceTableFKProviderTest extends BaseJpaR4Test {
     private static final Logger ourLog = LoggerFactory.getLogger(ResourceTableFKProviderTest.class);

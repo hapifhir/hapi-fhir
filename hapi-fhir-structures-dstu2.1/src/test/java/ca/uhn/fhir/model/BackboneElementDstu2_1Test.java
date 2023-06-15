@@ -1,11 +1,11 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.hl7.fhir.dstu2016may.model.BackboneElement;
 import org.hl7.fhir.dstu2016may.model.Patient.PatientCommunicationComponent;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BackboneElementDstu2_1Test {
     /**

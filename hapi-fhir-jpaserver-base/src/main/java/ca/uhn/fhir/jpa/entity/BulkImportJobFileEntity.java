@@ -19,9 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import static org.apache.commons.lang3.StringUtils.left;
-
-import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import javax.persistence.Column;
@@ -36,6 +33,10 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
+
+import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(

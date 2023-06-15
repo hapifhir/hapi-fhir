@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
+import org.hibernate.search.engine.backend.document.DocumentElement;
+
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -31,7 +33,6 @@ import ca.uhn.fhir.jpa.model.search.HSearchIndexWriter;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParamComposite;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.util.ObjectUtil;
-import org.hibernate.search.engine.backend.document.DocumentElement;
 
 /**
  * binding of HSearch apis into

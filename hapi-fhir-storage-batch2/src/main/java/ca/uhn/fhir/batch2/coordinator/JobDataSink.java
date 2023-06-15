@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -31,10 +37,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
 
 class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
         extends BaseDataSink<PT, IT, OT> {

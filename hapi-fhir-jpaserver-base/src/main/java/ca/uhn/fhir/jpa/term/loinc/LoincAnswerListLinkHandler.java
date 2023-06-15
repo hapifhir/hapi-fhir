@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import java.util.Map;
+
+import org.apache.commons.csv.CSVRecord;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
-import java.util.Map;
-import org.apache.commons.csv.CSVRecord;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincAnswerListLinkHandler implements IZipContentsHandlerCsv {
 

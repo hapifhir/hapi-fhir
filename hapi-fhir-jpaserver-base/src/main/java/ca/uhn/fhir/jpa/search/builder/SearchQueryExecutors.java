@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.search.builder;
 
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 
 public class SearchQueryExecutors {
 

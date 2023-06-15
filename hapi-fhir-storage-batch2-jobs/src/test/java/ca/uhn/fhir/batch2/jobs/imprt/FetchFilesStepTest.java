@@ -1,5 +1,24 @@
 package ca.uhn.fhir.batch2.jobs.imprt;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.Base64Utils;
+
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
+
 import static ca.uhn.fhir.rest.api.Constants.CT_APP_NDJSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
@@ -13,23 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.Base64Utils;
 
 @ExtendWith(MockitoExtension.class)
 public class FetchFilesStepTest {

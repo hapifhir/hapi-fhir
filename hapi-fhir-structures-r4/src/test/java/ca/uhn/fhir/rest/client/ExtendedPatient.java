@@ -1,8 +1,9 @@
 package ca.uhn.fhir.rest.client;
 
-import ca.uhn.fhir.model.api.annotation.*;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
+
+import ca.uhn.fhir.model.api.annotation.*;
 
 @ResourceDef(name = "Patient", profile = ExtendedPatient.HTTP_FOO_PROFILES_PROFILE)
 public class ExtendedPatient extends Patient {

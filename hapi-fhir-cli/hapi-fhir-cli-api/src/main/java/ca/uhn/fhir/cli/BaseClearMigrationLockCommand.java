@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.cli;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 
 /** */
 public abstract class BaseClearMigrationLockCommand extends BaseCommand {

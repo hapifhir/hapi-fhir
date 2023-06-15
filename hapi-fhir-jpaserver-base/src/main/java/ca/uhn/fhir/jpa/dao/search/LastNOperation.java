@@ -19,19 +19,22 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
+import java.util.List;
+import java.util.Objects;
+
+import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
+import org.hibernate.search.engine.search.aggregation.AggregationKey;
+import org.hibernate.search.engine.search.query.SearchResult;
+import org.hibernate.search.mapper.orm.session.SearchSession;
+
+import com.google.gson.JsonObject;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import com.google.gson.JsonObject;
-import java.util.List;
-import java.util.Objects;
-import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
-import org.hibernate.search.engine.search.aggregation.AggregationKey;
-import org.hibernate.search.engine.search.query.SearchResult;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 
 public class LastNOperation {
     public static final String OBSERVATION_RES_TYPE = "Observation";

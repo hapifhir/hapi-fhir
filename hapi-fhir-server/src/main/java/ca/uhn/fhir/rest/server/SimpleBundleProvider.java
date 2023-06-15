@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 
 public class SimpleBundleProvider implements IBundleProvider {
 

@@ -21,6 +21,7 @@ package ca.uhn.fhir.test.utilities;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;

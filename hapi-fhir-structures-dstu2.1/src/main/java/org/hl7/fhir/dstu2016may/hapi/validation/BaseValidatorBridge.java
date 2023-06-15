@@ -1,9 +1,11 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
-import ca.uhn.fhir.validation.*;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+
+import ca.uhn.fhir.validation.*;
 
 /** Base class for a bridge between the RI validation tools and HAPI */
 abstract class BaseValidatorBridge implements IValidatorModule {

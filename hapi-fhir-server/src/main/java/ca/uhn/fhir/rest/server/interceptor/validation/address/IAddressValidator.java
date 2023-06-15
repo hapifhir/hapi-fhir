@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.validation.address;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.context.FhirContext;
 
 /** Contract for validating addresses. */
 public interface IAddressValidator {

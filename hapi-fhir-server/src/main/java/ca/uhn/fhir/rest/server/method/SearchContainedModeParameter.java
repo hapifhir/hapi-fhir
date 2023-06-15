@@ -19,15 +19,16 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.lang.reflect.Method;
-import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class SearchContainedModeParameter implements IParameter {
 

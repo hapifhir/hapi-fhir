@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.rest.param;
 
+import java.util.List;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -32,7 +34,6 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.util.CoverageIgnore;
-import java.util.List;
 
 @CoverageIgnore
 public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype {

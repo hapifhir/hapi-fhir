@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.jpa.term.custom;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import java.util.Map;
+
+import org.apache.commons.csv.CSVRecord;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.util.ValidateUtil;
-import java.util.Map;
-import org.apache.commons.csv.CSVRecord;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class HierarchyHandler implements IZipContentsHandlerCsv {
 

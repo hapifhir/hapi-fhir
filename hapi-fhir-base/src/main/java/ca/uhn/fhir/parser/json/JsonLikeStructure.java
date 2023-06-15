@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.parser.json;
 
-import ca.uhn.fhir.parser.DataFormatException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+
+import ca.uhn.fhir.parser.DataFormatException;
 
 /**
  * This interface is the generic representation of any sort of data

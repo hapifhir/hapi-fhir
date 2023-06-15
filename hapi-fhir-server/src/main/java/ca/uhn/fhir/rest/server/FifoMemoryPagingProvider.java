@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.LinkedHashMap;
 import java.util.UUID;
+
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public class FifoMemoryPagingProvider extends BasePagingProvider {
 

@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.model.api;
 
+import java.io.Serializable;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import ca.uhn.fhir.i18n.Msg;
+
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.i18n.Msg;
-import java.io.Serializable;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Represents a FHIR resource path specification, e.g. <code>Patient:name</code>

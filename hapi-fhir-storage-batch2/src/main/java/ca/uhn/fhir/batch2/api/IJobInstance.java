@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.batch2.api;
 
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import java.util.Date;
+
+import ca.uhn.fhir.batch2.model.StatusEnum;
 
 public interface IJobInstance {
     String getCurrentGatedStepId();

@@ -1,11 +1,13 @@
 package ca.uhn.fhir.rest.client;
 
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.util.ElementUtil;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.hl7.fhir.r4.model.*;
+
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.util.ElementUtil;
 
 @ResourceDef(
         name = "Patient",

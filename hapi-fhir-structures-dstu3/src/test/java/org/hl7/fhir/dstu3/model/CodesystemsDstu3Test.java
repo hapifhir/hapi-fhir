@@ -1,8 +1,8 @@
 package org.hl7.fhir.dstu3.model;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CodesystemsDstu3Test {
 

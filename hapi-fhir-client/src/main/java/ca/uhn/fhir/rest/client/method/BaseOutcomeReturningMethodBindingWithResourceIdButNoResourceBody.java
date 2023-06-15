@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
+import java.lang.reflect.Method;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.context.*;
-// TODO Use of a deprecated method should be resolved
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.ParameterUtil;
-import java.lang.reflect.Method;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody
         extends BaseOutcomeReturningMethodBinding {

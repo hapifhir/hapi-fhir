@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import java.util.Date;
 import java.util.Objects;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.envers.RevisionType;
 

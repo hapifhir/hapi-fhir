@@ -19,7 +19,11 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -29,10 +33,8 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam
         extends BaseOutcomeReturningMethodBinding {

@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.util.ReflectionUtil;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -33,7 +26,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.util.ReflectionUtil;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceDefinition {
 

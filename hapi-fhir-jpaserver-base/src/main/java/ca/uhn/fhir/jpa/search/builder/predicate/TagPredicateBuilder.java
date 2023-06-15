@@ -19,23 +19,26 @@
  */
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
-import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftMatchLikeExpression;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.List;
+import java.util.Objects;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
+import org.apache.commons.lang3.tuple.Triple;
+
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import java.util.List;
-import java.util.Objects;
-import org.apache.commons.lang3.tuple.Triple;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
+
+import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftMatchLikeExpression;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 

@@ -21,6 +21,7 @@ package ca.uhn.fhir.mdm.util;
 
 import java.lang.reflect.Field;
 import java.util.function.BiPredicate;
+
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class PrimitiveTypeEqualsPredicate implements BiPredicate {

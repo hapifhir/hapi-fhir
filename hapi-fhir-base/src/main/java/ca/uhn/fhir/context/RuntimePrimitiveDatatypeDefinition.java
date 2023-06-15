@@ -19,20 +19,22 @@
  */
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class RuntimePrimitiveDatatypeDefinition
         extends BaseRuntimeElementDefinition<IPrimitiveType<?>>

@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.r5.model.Subscription;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CanonicalTopicSubscription {
     @JsonProperty("topic")

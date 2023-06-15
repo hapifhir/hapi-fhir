@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.rest.server.provider;
 
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 /**
  * This class implements the Observation <a

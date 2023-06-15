@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import javax.persistence.*;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;

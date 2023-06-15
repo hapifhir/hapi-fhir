@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.UrlUtil;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,9 +27,13 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.util.UrlUtil;
 
 public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 

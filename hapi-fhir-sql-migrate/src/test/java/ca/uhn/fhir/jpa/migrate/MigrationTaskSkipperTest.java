@@ -1,18 +1,20 @@
 package ca.uhn.fhir.jpa.migrate;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 public class MigrationTaskSkipperTest {
     public static final String RELEASE = "4.1.0";

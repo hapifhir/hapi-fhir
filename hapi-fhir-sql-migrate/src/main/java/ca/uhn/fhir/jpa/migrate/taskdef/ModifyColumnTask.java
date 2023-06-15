@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class ModifyColumnTask extends BaseTableColumnTypeTask {
 

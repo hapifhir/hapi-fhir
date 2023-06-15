@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IResourceModifiedConsumer {
 

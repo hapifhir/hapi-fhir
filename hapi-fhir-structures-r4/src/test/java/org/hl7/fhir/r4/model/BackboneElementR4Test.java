@@ -1,10 +1,10 @@
 package org.hl7.fhir.r4.model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BackboneElementR4Test {
     /**

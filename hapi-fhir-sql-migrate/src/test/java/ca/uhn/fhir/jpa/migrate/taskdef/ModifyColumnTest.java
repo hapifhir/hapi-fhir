@@ -1,20 +1,22 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import java.sql.SQLException;
+import java.util.function.Supplier;
+import javax.annotation.Nonnull;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import java.sql.SQLException;
-import java.util.function.Supplier;
-import javax.annotation.Nonnull;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 public class ModifyColumnTest extends BaseTest {
 

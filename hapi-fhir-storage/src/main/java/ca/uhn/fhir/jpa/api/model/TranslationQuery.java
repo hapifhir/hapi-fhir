@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.jpa.api.model;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TranslationQuery {
     private Coding myCoding;

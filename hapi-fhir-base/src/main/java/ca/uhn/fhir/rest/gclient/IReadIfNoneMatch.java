@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 
 public interface IReadIfNoneMatch<T extends IBaseResource> {
 

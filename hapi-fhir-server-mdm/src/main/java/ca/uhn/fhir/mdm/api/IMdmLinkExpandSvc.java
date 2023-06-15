@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import java.util.Set;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public interface IMdmLinkExpandSvc {
     Set<String> expandMdmBySourceResource(IBaseResource theResource);

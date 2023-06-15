@@ -1,12 +1,14 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.util.TestUtil;
 import java.util.Calendar;
 import java.util.TimeZone;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.util.TestUtil;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateDtTest {
     private static final org.slf4j.Logger ourLog =

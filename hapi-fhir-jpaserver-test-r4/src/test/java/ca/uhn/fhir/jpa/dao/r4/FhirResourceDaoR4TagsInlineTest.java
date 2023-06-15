@@ -1,18 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsTest.toProfiles;
-import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsTest.toSecurityLabels;
-import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsTest.toTags;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -20,6 +9,19 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
+
+import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsTest.toProfiles;
+import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsTest.toSecurityLabels;
+import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsTest.toTags;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test {

@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.model.search;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hibernate.search.mapper.pojo.bridge.RoutingBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.RoutingBindingContext;
 import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.RoutingBinder;
 import org.hibernate.search.mapper.pojo.bridge.runtime.RoutingBridgeRouteContext;
 import org.hibernate.search.mapper.pojo.route.DocumentRoutes;
+
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
 public class ResourceTableRoutingBinder implements RoutingBinder {
     @Override

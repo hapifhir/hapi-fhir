@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import java.util.Objects;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

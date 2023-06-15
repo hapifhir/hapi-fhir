@@ -21,6 +21,7 @@ package ca.uhn.fhir.model.api;
 
 import java.net.URI;
 import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;

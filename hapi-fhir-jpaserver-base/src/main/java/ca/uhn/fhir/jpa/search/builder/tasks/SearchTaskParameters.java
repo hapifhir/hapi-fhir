@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.search.builder.tasks;
 
+import java.util.function.Consumer;
+
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import java.util.function.Consumer;
 
 public class SearchTaskParameters {
     // parameters

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.topic;
 
 import java.util.Collection;
 import java.util.Set;
+
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 
 public class SubscriptionTopicRegistry {

@@ -1,15 +1,17 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import java.io.IOException;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.StopWatch;
-import java.io.IOException;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DefaultProfileValidationSupportNpmStrategy extends NpmPackageValidationSupport {
     private static final Logger ourLog =

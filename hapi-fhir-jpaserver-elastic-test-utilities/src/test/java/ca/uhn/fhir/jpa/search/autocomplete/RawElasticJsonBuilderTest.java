@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RawElasticJsonBuilderTest {
 

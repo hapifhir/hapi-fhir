@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.jpa.search.builder.models;
 
+import java.security.InvalidParameterException;
+import java.util.List;
+
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import java.security.InvalidParameterException;
-import java.util.List;
 
 public class MissingParameterQueryParams {
     /** The sql builder */

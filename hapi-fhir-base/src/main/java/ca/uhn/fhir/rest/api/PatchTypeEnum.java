@@ -19,16 +19,17 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.Nonnull;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /** Parameter type for methods annotated with {@link Patch} */
 public enum PatchTypeEnum {

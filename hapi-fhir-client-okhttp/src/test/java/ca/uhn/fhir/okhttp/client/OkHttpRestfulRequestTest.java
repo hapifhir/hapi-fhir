@@ -1,9 +1,10 @@
 package ca.uhn.fhir.okhttp.client;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OkHttpRestfulRequestTest {
 

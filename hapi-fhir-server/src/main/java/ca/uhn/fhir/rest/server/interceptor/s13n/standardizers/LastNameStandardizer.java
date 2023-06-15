@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.commons.text.WordUtils;
 
 /**

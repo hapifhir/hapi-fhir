@@ -19,14 +19,15 @@
  */
 package ca.uhn.fhir.jpa.interceptor.ex;
 
+import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
 
 // This class is replicated in PartitionExamples.java -- Keep it up to date there too!!
 @Interceptor

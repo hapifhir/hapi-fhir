@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.Date;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import java.util.Date;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /** Date parameter type for use in fluent client interfaces */
 public class DateClientParam extends BaseClientParam implements IParam {

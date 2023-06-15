@@ -1,18 +1,20 @@
 package ca.uhn.fhir.tinder.parser;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.maven.plugin.MojoFailureException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.SearchParameter;
 import ca.uhn.fhir.tinder.util.XMLUtils;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.maven.plugin.MojoFailureException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class CompartmentParser {
 

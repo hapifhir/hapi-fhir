@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import ca.uhn.fhir.util.CoverageIgnore;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.util.CoverageIgnore;
 
 @CoverageIgnore
 public enum RestOperationTypeEnum {

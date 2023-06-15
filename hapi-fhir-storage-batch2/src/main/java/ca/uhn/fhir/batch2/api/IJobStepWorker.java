@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.batch2.api;
 
-import ca.uhn.fhir.model.api.IModelJson;
 import javax.annotation.Nonnull;
+
+import ca.uhn.fhir.model.api.IModelJson;
 
 /**
  * This interface is implemented by step workers within the Batch2 framework. It will be called 0..*

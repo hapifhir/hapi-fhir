@@ -1,9 +1,9 @@
 package org.hl7.fhir.r4.model;
 
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Test;
 
 public class MetadataResourceR4Test {
     /**

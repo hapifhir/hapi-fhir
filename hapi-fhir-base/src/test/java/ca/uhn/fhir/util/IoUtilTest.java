@@ -1,11 +1,11 @@
 package ca.uhn.fhir.util;
 
-import static org.mockito.Mockito.doThrow;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 public class IoUtilTest {

@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.Date;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
@@ -29,10 +35,6 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import java.util.Date;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResourceDao<T>
         implements IFhirResourceDaoConceptMap<T> {

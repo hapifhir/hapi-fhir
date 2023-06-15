@@ -19,6 +19,18 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
+import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.databind.util.ArrayIterator;
+
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -28,15 +40,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.term.models.CodeSystemConceptsDeleteResult;
-import com.fasterxml.jackson.databind.util.ArrayIterator;
-import java.text.DecimalFormat;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {

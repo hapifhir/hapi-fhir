@@ -1,16 +1,17 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
+import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 
 class ValueSetAutocompleteSearchTest {
     FhirContext myFhirContext = FhirContext.forR4();

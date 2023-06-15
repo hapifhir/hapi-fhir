@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.search;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class TermHelper {

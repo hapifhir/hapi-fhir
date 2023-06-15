@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.jpa.interceptor.validation;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.Collection;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 class RuleRequireProfileDeclaration extends BaseTypedRule {
     private final Collection<String> myProfileOptions;

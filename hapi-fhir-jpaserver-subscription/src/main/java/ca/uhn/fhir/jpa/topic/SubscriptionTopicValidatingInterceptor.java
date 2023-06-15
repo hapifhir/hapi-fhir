@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
+import org.slf4j.Logger;
+
+import com.google.common.annotations.VisibleForTesting;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -31,10 +37,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.Logs;
-import com.google.common.annotations.VisibleForTesting;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
-import org.slf4j.Logger;
 
 public class SubscriptionTopicValidatingInterceptor {
     private static final Logger ourLog = Logs.getSubscriptionTopicLog();

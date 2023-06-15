@@ -1,17 +1,19 @@
 package ca.uhn.fhir.jpa.topic.filter;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SubscriptionTopicFilterUtilTest {
 

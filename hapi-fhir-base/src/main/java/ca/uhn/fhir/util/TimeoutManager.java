@@ -19,12 +19,15 @@
  */
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.system.HapiSystemProperties;
-import com.google.common.annotations.VisibleForTesting;
 import java.time.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.system.HapiSystemProperties;
 
 public class TimeoutManager {
     private static final Logger ourLog = LoggerFactory.getLogger(TimeoutManager.class);

@@ -19,15 +19,16 @@
  */
 package ca.uhn.fhir.okhttp.client;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.StopWatch;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import okhttp3.Call;
 import okhttp3.Call.Factory;
 import okhttp3.Request;

@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import java.util.Collection;
 import javax.annotation.Nullable;
+
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 
 public interface IValueSetConceptAccumulator {
 

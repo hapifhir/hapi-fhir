@@ -19,17 +19,20 @@
  */
 package ca.uhn.fhir.rest.server.messaging;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.Validate;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseResourceMessage implements IResourceMessage, IModelJson {

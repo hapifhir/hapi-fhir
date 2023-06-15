@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.subscription.model;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CanonicalTopicSubscriptionFilterTest {
 

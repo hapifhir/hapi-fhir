@@ -1,13 +1,15 @@
 package ca.uhn.fhir.util;
 
-import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
-import static org.awaitility.Awaitility.await;
-
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
+import static org.awaitility.Awaitility.await;
 
 public class AsyncUtilTest {
 

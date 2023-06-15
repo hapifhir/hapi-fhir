@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.param.StringParam;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.param.StringParam;
 
 /** */
 @Retention(RetentionPolicy.RUNTIME)

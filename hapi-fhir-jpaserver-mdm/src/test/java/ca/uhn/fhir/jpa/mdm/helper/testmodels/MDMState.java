@@ -1,13 +1,15 @@
 package ca.uhn.fhir.jpa.mdm.helper.testmodels;
 
-import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.testcontainers.shaded.com.google.common.collect.HashMultimap;
 import org.testcontainers.shaded.com.google.common.collect.Multimap;
+
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public class MDMState<T, P extends IResourcePersistentId> {
     /**

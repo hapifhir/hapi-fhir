@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.model.api.IModelJson;
 import java.util.ArrayList;
 import java.util.List;
+
+import ca.uhn.fhir.model.api.IModelJson;
 
 public class MdmLinkEvent implements IModelJson {
 

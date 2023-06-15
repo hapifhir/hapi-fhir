@@ -19,9 +19,11 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.util.List;
+
 import org.hl7.fhir.r4.model.*;
+
+import ca.uhn.fhir.context.FhirContext;
 
 @SuppressWarnings("unused")
 public class ExampleRestfulClient {

@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * Represents an <b>HTTP 409 Conflict</b> response. This exception should be thrown in methods which

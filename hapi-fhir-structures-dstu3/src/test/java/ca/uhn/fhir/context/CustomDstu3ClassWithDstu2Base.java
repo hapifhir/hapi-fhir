@@ -1,12 +1,14 @@
 package ca.uhn.fhir.context;
 
+import java.util.List;
+
+import org.hl7.fhir.dstu3.model.*;
+
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
-import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.api.annotation.Extension;
-import java.util.List;
-import org.hl7.fhir.dstu3.model.*;
+import ca.uhn.fhir.model.api.annotation.*;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id = "0001")
 public class CustomDstu3ClassWithDstu2Base extends DomainResource {

@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.search.builder.models;
 
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 public class PredicateBuilderCacheKey {
     private final DbColumn myDbColumn;

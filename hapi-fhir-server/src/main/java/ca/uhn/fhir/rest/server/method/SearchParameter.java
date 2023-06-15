@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import java.util.*;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.*;
@@ -33,10 +39,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
-import java.util.*;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class SearchParameter extends BaseQueryParameter {
 

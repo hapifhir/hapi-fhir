@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 

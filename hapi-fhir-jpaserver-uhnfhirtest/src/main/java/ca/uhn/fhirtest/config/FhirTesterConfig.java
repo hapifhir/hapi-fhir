@@ -1,15 +1,16 @@
 package ca.uhn.fhirtest.config;
 
-import static ca.uhn.fhir.rest.api.Constants.EXTOP_VALIDATE;
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.to.FhirTesterMvcConfig;
 import ca.uhn.fhir.to.TesterConfig;
 import ca.uhn.fhirtest.mvc.SubscriptionPlaygroundController;
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+
+import static ca.uhn.fhir.rest.api.Constants.EXTOP_VALIDATE;
 
 /**
  * This spring config file configures the web testing module. It serves two purposes: 1. It imports

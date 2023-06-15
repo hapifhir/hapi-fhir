@@ -19,6 +19,18 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Set;
+import java.util.TreeSet;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jboss.logging.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -29,16 +41,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Set;
-import java.util.TreeSet;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jboss.logging.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class BaseJpaProvider {
     public static final String REMOTE_ADDR = "req.remoteAddr";

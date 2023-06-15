@@ -19,16 +19,6 @@
  */
 package ca.uhn.fhir.util;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.util.jar.DependencyLogFactory;
-import ca.uhn.fhir.util.jar.IDependencyLog;
-import com.ctc.wstx.api.WstxInputProperties;
-import com.ctc.wstx.stax.WstxOutputFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -60,6 +50,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.text.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
@@ -68,6 +59,18 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.ctc.wstx.api.WstxInputProperties;
+import com.ctc.wstx.stax.WstxOutputFactory;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.jar.DependencyLogFactory;
+import ca.uhn.fhir.util.jar.IDependencyLog;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Utility methods for working with the StAX API.

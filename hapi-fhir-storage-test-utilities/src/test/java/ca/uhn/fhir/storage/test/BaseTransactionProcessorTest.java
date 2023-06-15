@@ -20,14 +20,15 @@ package ca.uhn.fhir.storage.test;
  * #L%
  */
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.hl7.fhir.r4.model.IdType;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
 import ca.uhn.fhir.jpa.dao.IdSubstitutionMap;
 import ca.uhn.fhir.util.UrlUtil;
-import org.hl7.fhir.r4.model.IdType;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BaseTransactionProcessorTest {
 

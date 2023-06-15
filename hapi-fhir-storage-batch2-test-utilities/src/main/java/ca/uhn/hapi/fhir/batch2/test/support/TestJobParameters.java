@@ -19,11 +19,14 @@
  */
 package ca.uhn.hapi.fhir.batch2.test.support;
 
+import javax.validation.constraints.NotBlank;
+
+import org.hibernate.validator.constraints.Length;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.PasswordField;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.validation.constraints.NotBlank;
-import org.hibernate.validator.constraints.Length;
 
 public class TestJobParameters implements IModelJson {
 

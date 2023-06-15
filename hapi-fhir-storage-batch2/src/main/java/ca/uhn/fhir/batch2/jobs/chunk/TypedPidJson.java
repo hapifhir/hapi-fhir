@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.batch2.jobs.chunk;
 
-import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
-import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
+import ca.uhn.fhir.model.api.IModelJson;
 
 public class TypedPidJson implements IModelJson {
 

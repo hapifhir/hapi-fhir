@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 
 public class InitializeSchemaTask extends BaseTask {
     private static final String DESCRIPTION_PREFIX = "Initialize schema for ";

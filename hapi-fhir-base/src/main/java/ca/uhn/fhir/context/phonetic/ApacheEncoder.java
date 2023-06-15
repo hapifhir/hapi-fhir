@@ -20,6 +20,7 @@
 package ca.uhn.fhir.context.phonetic;
 
 import java.util.StringJoiner;
+
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.StringEncoder;
 import org.apache.commons.lang3.StringUtils;

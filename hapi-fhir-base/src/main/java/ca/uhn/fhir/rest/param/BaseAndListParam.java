@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.rest.param;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class BaseAndListParam<T extends IQueryParameterOr<?>>
         implements IQueryParameterAnd<T> {

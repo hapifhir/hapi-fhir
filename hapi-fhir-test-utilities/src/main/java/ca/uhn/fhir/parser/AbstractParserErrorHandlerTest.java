@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.parser;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Defines FHIR version independent tests for testing parser error handling. In version dependent

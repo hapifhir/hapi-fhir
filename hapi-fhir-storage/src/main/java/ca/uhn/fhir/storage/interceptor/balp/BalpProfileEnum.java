@@ -20,6 +20,7 @@
 package ca.uhn.fhir.storage.interceptor.balp;
 
 import java.util.function.Supplier;
+
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Coding;
 

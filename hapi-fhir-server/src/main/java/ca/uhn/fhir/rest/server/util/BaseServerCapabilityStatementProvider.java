@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.rest.server.util;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
-import javax.annotation.Nullable;
-import org.apache.commons.lang3.Validate;
 
 public abstract class BaseServerCapabilityStatementProvider {
 

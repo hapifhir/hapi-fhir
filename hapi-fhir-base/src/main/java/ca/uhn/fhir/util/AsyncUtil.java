@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class AsyncUtil {
     private static final Logger ourLog = LoggerFactory.getLogger(AsyncUtil.class);

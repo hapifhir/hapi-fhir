@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.model.primitive.IdDt;
 
 /** An immutable list of resource ids that have been changed, updated, or deleted. */
 public class ResourceChangeEvent implements IResourceChangeEvent {

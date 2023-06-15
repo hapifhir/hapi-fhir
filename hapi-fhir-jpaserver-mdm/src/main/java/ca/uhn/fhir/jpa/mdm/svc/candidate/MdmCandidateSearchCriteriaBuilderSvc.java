@@ -19,18 +19,20 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
-import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
-import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
-import ca.uhn.fhir.util.UrlUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
+import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.util.UrlUtil;
 
 @Service
 public class MdmCandidateSearchCriteriaBuilderSvc {

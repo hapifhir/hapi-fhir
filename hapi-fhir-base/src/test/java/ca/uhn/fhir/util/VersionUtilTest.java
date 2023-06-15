@@ -1,10 +1,10 @@
 package ca.uhn.fhir.util;
 
+import org.junit.jupiter.api.Test;
+
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
-
-import org.junit.jupiter.api.Test;
 
 public class VersionUtilTest {
 

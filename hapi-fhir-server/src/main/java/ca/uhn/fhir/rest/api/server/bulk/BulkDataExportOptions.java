@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.api.server.bulk;
 import java.util.Date;
 import java.util.Set;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 
 // TODO: JA in next ticket - We have 3 more or less identical classes representing

@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.google.common.annotations.VisibleForTesting;
+
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.api.TermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.google.common.annotations.VisibleForTesting;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TermCodeSystemDeleteJobSvcWithUniTestFailures extends TermCodeSystemDeleteJobSvc
         implements ITermCodeSystemDeleteJobSvc {

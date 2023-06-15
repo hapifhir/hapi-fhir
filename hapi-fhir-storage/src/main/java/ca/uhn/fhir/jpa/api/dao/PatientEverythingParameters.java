@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public final class PatientEverythingParameters {
     @Description(

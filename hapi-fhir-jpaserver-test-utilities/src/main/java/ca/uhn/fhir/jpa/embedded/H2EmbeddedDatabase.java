@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.embedded;
 
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 
 /**
  * For testing purposes. <br>

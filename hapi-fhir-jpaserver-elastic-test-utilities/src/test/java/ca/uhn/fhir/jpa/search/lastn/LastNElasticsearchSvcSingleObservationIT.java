@@ -1,5 +1,36 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
+import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
+import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.config.TestElasticsearchContainerHelper;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CATEGORYFIRSTCODINGSYSTEM;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CATEGORYSECONDCODINGSYSTEM;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CATEGORYTHIRDCODINGSYSTEM;
@@ -34,35 +65,6 @@ import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYT
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYTHIRDCODINGDISPLAY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
-import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
-import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.test.config.TestElasticsearchContainerHelper;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker

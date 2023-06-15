@@ -19,12 +19,15 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
-import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.annotation.Nullable;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 
 public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> {
     private static final ObjectMapper ourObjectMapper =

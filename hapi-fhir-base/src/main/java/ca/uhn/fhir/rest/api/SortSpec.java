@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import ca.uhn.fhir.i18n.Msg;
 import java.io.Serializable;
+
+import ca.uhn.fhir.i18n.Msg;
 
 /**
  * Represents values for <a

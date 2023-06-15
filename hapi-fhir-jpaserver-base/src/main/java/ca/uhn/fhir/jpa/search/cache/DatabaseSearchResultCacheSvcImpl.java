@@ -19,7 +19,15 @@
  */
 package ca.uhn.fhir.jpa.search.cache;
 
-import static ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl.toPage;
+import java.util.Collections;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+
+import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
@@ -28,13 +36,8 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import com.google.common.collect.Lists;
-import java.util.Collections;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
+
+import static ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl.toPage;
 
 public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
     private static final Logger ourLog =

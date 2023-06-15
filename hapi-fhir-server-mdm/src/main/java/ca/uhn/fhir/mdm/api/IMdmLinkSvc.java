@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.mdm.api;
 
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IAnyResource;
+
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IMdmLinkSvc {
 

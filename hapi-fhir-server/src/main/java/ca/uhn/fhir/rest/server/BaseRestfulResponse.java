@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.rest.api.server.IRestfulResponse;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public abstract class BaseRestfulResponse<T extends RequestDetails> implements IRestfulResponse {
     private final Map<String, List<String>> myHeaders = new HashMap<>();

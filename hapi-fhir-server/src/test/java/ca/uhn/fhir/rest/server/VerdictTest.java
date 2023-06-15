@@ -1,5 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
+import java.util.Set;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.Test;
+
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -8,10 +14,6 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
-import java.util.Set;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link Verdict}

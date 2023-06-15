@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 
 public class FhirResourceDaoDocumentDstu3Test extends BaseJpaDstu3Test {
 

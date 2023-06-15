@@ -1,12 +1,13 @@
 package ca.uhn.fhir.parser.i423;
 
+import java.util.List;
+
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.resource.ProcedureRequest;
 import ca.uhn.fhir.util.ElementUtil;
-import java.util.List;
 
 @ResourceDef(name = "ProcedureRequest", id = "custom-procedure-request", profile = "http://test/")
 public class CustomProcedureRequest extends ProcedureRequest {

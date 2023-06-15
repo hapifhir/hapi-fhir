@@ -1,11 +1,12 @@
 package ca.uhn.fhir.parser;
 
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.util.ElementUtil;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 
 /**
  * This is an example of a custom resource that also uses a custom datatype.

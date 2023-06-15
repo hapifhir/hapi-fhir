@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.util;
 
+import javax.annotation.Nullable;
+
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import javax.annotation.Nullable;
 
 public class CompositeInterceptorBroadcaster {
 

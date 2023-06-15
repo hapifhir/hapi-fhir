@@ -19,19 +19,22 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Properties;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
 
 public abstract class BaseRestfulValidator implements IAddressValidator {
 

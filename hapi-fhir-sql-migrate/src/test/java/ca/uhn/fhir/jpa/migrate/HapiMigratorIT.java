@@ -1,17 +1,5 @@
 package ca.uhn.fhir.jpa.migrate;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
-import ca.uhn.test.concurrency.IPointcutLatch;
-import ca.uhn.test.concurrency.PointcutLatch;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -19,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -28,6 +17,19 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
+import ca.uhn.test.concurrency.IPointcutLatch;
+import ca.uhn.test.concurrency.PointcutLatch;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class HapiMigratorIT {
     private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorIT.class);

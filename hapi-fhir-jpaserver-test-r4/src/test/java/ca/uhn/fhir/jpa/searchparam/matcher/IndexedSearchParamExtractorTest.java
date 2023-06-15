@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.searchparam.matcher;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IndexedSearchParamExtractorTest extends BaseJpaR4Test {
     @Autowired PlatformTransactionManager myPlatformTransactionManager;

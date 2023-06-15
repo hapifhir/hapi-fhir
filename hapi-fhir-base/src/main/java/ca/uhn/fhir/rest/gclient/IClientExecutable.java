@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IClientExecutable<T extends IClientExecutable<?, Y>, Y> {
 

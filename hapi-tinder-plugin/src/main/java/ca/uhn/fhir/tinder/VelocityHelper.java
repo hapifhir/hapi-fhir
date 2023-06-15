@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.tinder;
 
-import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,8 +26,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.Properties;
+
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+
+import ca.uhn.fhir.i18n.Msg;
 
 public class VelocityHelper {
 

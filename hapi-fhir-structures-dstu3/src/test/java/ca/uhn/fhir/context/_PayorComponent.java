@@ -1,11 +1,12 @@
 package ca.uhn.fhir.context;
 
+import org.hl7.fhir.dstu3.model.*;
+
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.util.ElementUtil;
-import org.hl7.fhir.dstu3.model.*;
 
 @Block
 public class _PayorComponent extends BackboneElement

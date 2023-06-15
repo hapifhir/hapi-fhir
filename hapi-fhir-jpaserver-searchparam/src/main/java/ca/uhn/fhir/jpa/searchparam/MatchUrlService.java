@@ -19,8 +19,12 @@
  */
 package ca.uhn.fhir.jpa.searchparam;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.collect.ArrayListMultimap;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -42,10 +46,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.collect.ArrayListMultimap;
-import java.util.List;
-import org.apache.http.NameValuePair;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class MatchUrlService {
 

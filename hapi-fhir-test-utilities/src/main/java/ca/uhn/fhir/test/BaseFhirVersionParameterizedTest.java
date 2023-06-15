@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.test;
 
+import java.util.stream.Stream;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.provider.Arguments;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -27,10 +33,6 @@ import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.tls.TlsAuthentication;
-import java.util.stream.Stream;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.provider.Arguments;
 
 public abstract class BaseFhirVersionParameterizedTest {
 

@@ -1,12 +1,14 @@
 package ca.uhn.fhir.tinder;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import ca.uhn.fhir.i18n.Msg;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.i18n.Msg;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ExamineTestTrace {
 

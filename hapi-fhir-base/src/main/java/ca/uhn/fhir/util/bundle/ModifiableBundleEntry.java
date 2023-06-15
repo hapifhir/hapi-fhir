@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.util.bundle;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class ModifiableBundleEntry {
     private final BundleEntryParts myBundleEntryParts;

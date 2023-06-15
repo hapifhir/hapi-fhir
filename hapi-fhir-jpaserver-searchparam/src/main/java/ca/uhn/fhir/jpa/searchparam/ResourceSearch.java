@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.searchparam;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * A resource type along with a search parameter map and partition id. Everything you need to

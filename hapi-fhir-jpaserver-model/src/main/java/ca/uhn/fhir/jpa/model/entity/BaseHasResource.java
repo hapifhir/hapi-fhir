@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Column;
@@ -32,7 +28,13 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+
 import org.hibernate.annotations.OptimisticLock;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.model.primitive.InstantDt;
 
 @MappedSuperclass
 public abstract class BaseHasResource extends BasePartitionable

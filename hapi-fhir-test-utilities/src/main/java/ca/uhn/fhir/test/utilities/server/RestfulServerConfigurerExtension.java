@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.test.utilities.server;
 
-import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.util.Assert;
+
+import ca.uhn.fhir.rest.server.RestfulServer;
 
 /**
  * This JUnit extension can be used to perform configuration of the {@link RestfulServerExtension},

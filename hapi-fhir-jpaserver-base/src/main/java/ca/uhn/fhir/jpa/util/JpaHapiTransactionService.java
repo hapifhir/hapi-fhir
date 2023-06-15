@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
+
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 
 public class JpaHapiTransactionService extends HapiTransactionService {
 

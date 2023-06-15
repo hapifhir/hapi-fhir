@@ -1,13 +1,15 @@
 package ca.uhn.fhir.jpa.topic;
 
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.topic.filter.ISubscriptionTopicFilterMatcher;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class SubscriptionTopicDispatchRequest {
     @Nonnull private final String myTopicUrl;

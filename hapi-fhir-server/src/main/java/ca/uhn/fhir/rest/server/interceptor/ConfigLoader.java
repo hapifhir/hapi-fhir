@@ -19,14 +19,17 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.ClasspathUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.util.ClasspathUtil;
 
 public class ConfigLoader {
 

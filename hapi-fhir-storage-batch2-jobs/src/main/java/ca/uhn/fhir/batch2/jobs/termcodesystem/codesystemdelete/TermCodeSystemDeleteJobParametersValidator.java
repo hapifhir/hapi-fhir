@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 
-import ca.uhn.fhir.batch2.api.IJobParametersValidator;
-import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public class TermCodeSystemDeleteJobParametersValidator
         implements IJobParametersValidator<TermCodeSystemDeleteJobParameters> {

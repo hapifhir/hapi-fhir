@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.validation;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.util.List;
+
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.StructureDefinition;
@@ -34,6 +34,8 @@ import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 

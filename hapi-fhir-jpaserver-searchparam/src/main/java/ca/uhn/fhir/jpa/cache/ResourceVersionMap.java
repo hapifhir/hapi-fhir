@@ -19,18 +19,20 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.model.primitive.IdDt;
 
 /** This immutable map holds a copy of current resource versions read from the repository. */
 public class ResourceVersionMap {

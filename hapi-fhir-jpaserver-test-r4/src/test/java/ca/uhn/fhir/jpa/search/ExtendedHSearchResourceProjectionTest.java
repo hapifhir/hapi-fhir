@@ -1,19 +1,20 @@
 package ca.uhn.fhir.jpa.search;
 
-import static ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection.RESOURCE_NOT_STORED_ERROR;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Observation;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.parser.IParser;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Observation;
-import org.junit.jupiter.api.Test;
+
+import static ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection.RESOURCE_NOT_STORED_ERROR;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ExtendedHSearchResourceProjectionTest {
     final FhirContext myFhirContext = FhirContext.forR4();

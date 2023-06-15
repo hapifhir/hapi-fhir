@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.hibernate.search.engine.spatial.GeoBoundingBox;
 import org.hibernate.search.engine.spatial.GeoPoint;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CoordCalculatorTest {
 

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

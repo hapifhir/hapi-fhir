@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.api.model;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.context.support.IValidationSupport;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+
+import ca.uhn.fhir.context.support.IValidationSupport;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TranslationRequest {
     private CodeableConcept myCodeableConcept;

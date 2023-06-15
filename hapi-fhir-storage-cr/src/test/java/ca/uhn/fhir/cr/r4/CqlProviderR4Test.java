@@ -1,15 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.PartitionHelper;
-import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
 import java.io.IOException;
+
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -21,6 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.PartitionHelper;
+import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 public class CqlProviderR4Test extends BaseCrR4Test {

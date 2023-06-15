@@ -1,11 +1,13 @@
 package ca.uhn.fhir.mdm.api;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import java.util.Collections;
 import java.util.List;
+
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MdmQuerySearchParametersTest {
 

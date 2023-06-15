@@ -36,6 +36,7 @@
 package ca.uhn.fhir.test.utilities;
 
 import java.text.MessageFormat;
+
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;

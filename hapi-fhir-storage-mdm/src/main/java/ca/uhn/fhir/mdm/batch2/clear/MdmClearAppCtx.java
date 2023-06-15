@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.mdm.batch2.clear;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -27,8 +30,6 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.batch2.LoadGoldenIdsStep;
 import ca.uhn.fhir.mdm.batch2.MdmChunkRangeJson;
 import ca.uhn.fhir.mdm.batch2.MdmGenerateRangeChunksStep;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MdmClearAppCtx {

@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.model.dstu2.composite;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import org.apache.commons.lang3.Validate;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @DatatypeDef(name = "CodeableConcept", isSpecialization = true)
 public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt

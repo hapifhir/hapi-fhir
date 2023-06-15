@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 
 /**
  * Run entire @see {@link FhirResourceDaoR4SearchLastNAsyncIT} test suite this time using Extended

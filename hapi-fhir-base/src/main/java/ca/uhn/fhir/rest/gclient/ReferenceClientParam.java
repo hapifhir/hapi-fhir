@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.context.FhirContext;
 import java.util.Arrays;
 import java.util.Collection;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.context.FhirContext;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ReferenceClientParam extends BaseClientParam implements IParam {
 

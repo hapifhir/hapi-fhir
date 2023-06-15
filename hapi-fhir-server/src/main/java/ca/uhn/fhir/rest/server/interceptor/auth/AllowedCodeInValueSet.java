@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import javax.annotation.Nonnull;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class AllowedCodeInValueSet {
     private final String myResourceName;

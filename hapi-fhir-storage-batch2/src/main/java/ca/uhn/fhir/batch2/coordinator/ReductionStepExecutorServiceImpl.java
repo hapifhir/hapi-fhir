@@ -19,9 +19,32 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
-import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
-import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;
-import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.quartz.JobExecutionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+import org.springframework.transaction.annotation.Propagation;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -41,30 +64,10 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.google.common.annotations.VisibleForTesting;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang3.time.DateUtils;
-import org.quartz.JobExecutionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
-import org.springframework.transaction.annotation.Propagation;
+
+import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
+import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;
+import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
 
 public class ReductionStepExecutorServiceImpl
         implements IReductionStepExecutorService, IHasScheduledJobs {

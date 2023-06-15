@@ -1,12 +1,13 @@
 package ca.uhn.fhir.util;
 
-import static com.helger.commons.mock.CommonsAssert.assertEquals;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.context.FhirContext;
+
+import static com.helger.commons.mock.CommonsAssert.assertEquals;
 
 public class CompositionBuilderTest {
 

@@ -20,11 +20,12 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.StringType;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.StringType;
 
 @ResourceDef(name = "Observation", profile = CustomObservationR4.PROFILE)
 public class CustomObservationR4 extends Observation {

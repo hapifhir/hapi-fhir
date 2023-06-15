@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.Iterator;
+
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public interface IResultIterator<T extends IResourcePersistentId> extends Iterator<T>, Closeable {
 

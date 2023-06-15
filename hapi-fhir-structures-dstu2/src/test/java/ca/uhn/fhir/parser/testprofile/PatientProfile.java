@@ -1,12 +1,13 @@
 package ca.uhn.fhir.parser.testprofile;
 
+import java.util.List;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import java.util.List;
 
 @ResourceDef(
         name = "Patient",

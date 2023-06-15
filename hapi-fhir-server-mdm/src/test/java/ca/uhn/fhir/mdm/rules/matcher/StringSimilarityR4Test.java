@@ -1,5 +1,10 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.uhn.fhir.mdm.rules.similarity.HapiStringSimilarity;
 import ca.uhn.fhir.mdm.rules.similarity.IMdmFieldSimilarity;
 import info.debatty.java.stringsimilarity.Cosine;
@@ -7,10 +12,6 @@ import info.debatty.java.stringsimilarity.Jaccard;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import info.debatty.java.stringsimilarity.SorensenDice;
-import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class StringSimilarityR4Test extends BaseMatcherR4Test {
     private static final Logger ourLog = LoggerFactory.getLogger(StringSimilarityR4Test.class);

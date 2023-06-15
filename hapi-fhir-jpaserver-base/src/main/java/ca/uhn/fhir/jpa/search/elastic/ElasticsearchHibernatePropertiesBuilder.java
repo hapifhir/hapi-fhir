@@ -19,13 +19,8 @@
  */
 package ca.uhn.fhir.jpa.search.elastic;
 
-import static org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings.Defaults.SCROLL_TIMEOUT;
-import static org.slf4j.LoggerFactory.getLogger;
-
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import java.util.Properties;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.backend.elasticsearch.aws.cfg.ElasticsearchAwsBackendSettings;
 import org.hibernate.search.backend.elasticsearch.aws.cfg.ElasticsearchAwsCredentialsTypeNames;
@@ -37,6 +32,13 @@ import org.hibernate.search.mapper.orm.automaticindexing.session.AutomaticIndexi
 import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
+
+import static org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings.Defaults.SCROLL_TIMEOUT;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * This class is used to inject appropriate properties into a hibernate Properties object being used

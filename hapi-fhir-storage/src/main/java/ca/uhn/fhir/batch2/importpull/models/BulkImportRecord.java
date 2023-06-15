@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.batch2.importpull.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BulkImportRecord implements IModelJson {
     /** Stringified version of the resource */

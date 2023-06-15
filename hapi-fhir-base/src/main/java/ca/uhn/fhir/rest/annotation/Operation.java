@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
 /** RESTful method annotation used for a method which provides FHIR "operations". */
 @Retention(RetentionPolicy.RUNTIME)

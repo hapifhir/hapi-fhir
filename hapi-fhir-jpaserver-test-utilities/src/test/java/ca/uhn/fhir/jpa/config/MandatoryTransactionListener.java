@@ -2,10 +2,12 @@ package ca.uhn.fhir.jpa.config;
 
 import java.util.List;
 import java.util.Locale;
+
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 public class MandatoryTransactionListener implements ProxyDataSourceBuilder.SingleQueryExecution {
     @Override

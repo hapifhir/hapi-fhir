@@ -1,11 +1,12 @@
 package ca.uhn.fhir.parser;
 
+import org.hl7.fhir.r4.model.Basic;
+import org.hl7.fhir.r4.model.UuidType;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import org.hl7.fhir.r4.model.Basic;
-import org.hl7.fhir.r4.model.UuidType;
 
 @ResourceDef(name = "Basic", profile = "http://mycustom.url")
 public class MyCustom extends Basic {

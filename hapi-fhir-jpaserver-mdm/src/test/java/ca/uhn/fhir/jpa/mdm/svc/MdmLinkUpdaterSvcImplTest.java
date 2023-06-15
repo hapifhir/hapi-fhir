@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
-import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.NO_MATCH;
-import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import java.io.IOException;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -13,12 +14,13 @@ import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import java.io.IOException;
-import java.util.List;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
+import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.NO_MATCH;
+import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
     @Autowired private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;

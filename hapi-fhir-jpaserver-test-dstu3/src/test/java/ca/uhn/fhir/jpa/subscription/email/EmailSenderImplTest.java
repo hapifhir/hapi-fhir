@@ -1,25 +1,28 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailDetails;
-import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
-import ca.uhn.fhir.rest.server.mail.IMailSvc;
-import ca.uhn.fhir.rest.server.mail.MailConfig;
-import ca.uhn.fhir.rest.server.mail.MailSvc;
-import com.icegreen.greenmail.junit5.GreenMailExtension;
-import com.icegreen.greenmail.util.GreenMailUtil;
-import com.icegreen.greenmail.util.ServerSetupTest;
 import java.util.Arrays;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+
 import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.icegreen.greenmail.junit5.GreenMailExtension;
+import com.icegreen.greenmail.util.GreenMailUtil;
+import com.icegreen.greenmail.util.ServerSetupTest;
+
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailDetails;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
+import ca.uhn.fhir.rest.server.mail.IMailSvc;
+import ca.uhn.fhir.rest.server.mail.MailConfig;
+import ca.uhn.fhir.rest.server.mail.MailSvc;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmailSenderImplTest {
 

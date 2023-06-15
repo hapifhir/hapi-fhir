@@ -20,6 +20,7 @@
 package ca.uhn.fhir.context;
 
 import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IBase;
 
 public class RuntimeResourceBlockDefinition extends BaseRuntimeElementCompositeDefinition<IBase> {

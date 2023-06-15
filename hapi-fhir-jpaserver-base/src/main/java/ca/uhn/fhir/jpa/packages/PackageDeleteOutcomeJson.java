@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.ArrayList;
-import java.util.List;
 
 @Schema(description = "Represents an NPM package deletion response")
 @JsonInclude(JsonInclude.Include.NON_NULL)

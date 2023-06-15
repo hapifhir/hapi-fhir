@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 
 /**
  * This interface is used by any storage implementations to convert from persisted database format

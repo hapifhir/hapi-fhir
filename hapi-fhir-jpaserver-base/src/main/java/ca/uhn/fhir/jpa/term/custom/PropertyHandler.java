@@ -19,18 +19,20 @@
  */
 package ca.uhn.fhir.jpa.term.custom;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.csv.CSVRecord;
 
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.util.ValidateUtil;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.csv.CSVRecord;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class PropertyHandler implements IZipContentsHandlerCsv {
 

@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.left;
-
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,9 +39,16 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r5.model.InstantType;
+
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+
+import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.left;
 
 /*
  * These classes are no longer needed.

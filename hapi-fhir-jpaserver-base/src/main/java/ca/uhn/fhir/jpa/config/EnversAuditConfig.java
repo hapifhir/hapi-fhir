@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.config;
  */
 
 import javax.persistence.EntityManagerFactory;
+
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.springframework.context.annotation.Bean;

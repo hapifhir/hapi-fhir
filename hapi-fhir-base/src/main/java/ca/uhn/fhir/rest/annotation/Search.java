@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
 /**
  * RESTful method annotation used for a method which provides the FHIR "search" method.

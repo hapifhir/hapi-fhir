@@ -1,7 +1,8 @@
 package ca.uhn.fhir.tinder.model;
 
-import ca.uhn.fhir.model.api.ExtensionDt;
 import java.util.ArrayList;
+
+import ca.uhn.fhir.model.api.ExtensionDt;
 
 public class UndeclaredExtensionChild extends Child {
 

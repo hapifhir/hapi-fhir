@@ -19,14 +19,6 @@
  */
 package ca.uhn.fhir.cli;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.fusesource.jansi.Ansi.ansi;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.system.HapiSystemProperties;
-import ca.uhn.fhir.util.VersionUtil;
-import com.google.common.annotations.VisibleForTesting;
-import com.helger.commons.io.file.FileHelper;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
@@ -36,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -46,6 +39,16 @@ import org.apache.commons.text.WordUtils;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.helger.commons.io.file.FileHelper;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.VersionUtil;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.fusesource.jansi.Ansi.ansi;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseApp {

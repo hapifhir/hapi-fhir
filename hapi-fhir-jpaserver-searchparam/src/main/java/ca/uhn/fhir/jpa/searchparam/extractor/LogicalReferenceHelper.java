@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import static org.apache.commons.lang3.StringUtils.trim;
+import java.util.Set;
+
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import java.util.Set;
-import org.hl7.fhir.instance.model.api.IIdType;
+
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LogicalReferenceHelper {
 

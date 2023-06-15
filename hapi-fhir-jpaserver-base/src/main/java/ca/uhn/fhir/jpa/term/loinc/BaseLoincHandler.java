@@ -19,15 +19,11 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
-import static org.apache.commons.lang3.StringUtils.*;
-
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -35,6 +31,12 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
     private static final Logger ourLog = LoggerFactory.getLogger(BaseLoincHandler.class);

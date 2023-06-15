@@ -1,17 +1,19 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamFinder {
     private static final Logger ourLog = LoggerFactory.getLogger(SearchParamFinder.class);

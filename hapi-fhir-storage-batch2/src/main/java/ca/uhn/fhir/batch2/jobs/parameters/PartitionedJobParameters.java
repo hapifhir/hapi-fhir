@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.batch2.jobs.parameters;
 
+import javax.annotation.Nullable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.annotation.Nullable;
 
 public class PartitionedJobParameters implements IModelJson {
     @JsonProperty(value = "partitionId")

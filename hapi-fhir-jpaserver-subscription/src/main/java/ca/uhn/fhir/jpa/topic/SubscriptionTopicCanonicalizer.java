@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 
 public final class SubscriptionTopicCanonicalizer {
     private static final FhirContext ourFhirContextR5 = FhirContext.forR5();

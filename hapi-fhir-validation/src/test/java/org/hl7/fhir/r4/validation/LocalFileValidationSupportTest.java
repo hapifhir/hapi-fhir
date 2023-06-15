@@ -1,14 +1,16 @@
 package org.hl7.fhir.r4.validation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.context.FhirContext;
 import java.io.IOException;
+
 import org.hl7.fhir.common.hapi.validation.support.LocalFileValidationSupport;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LocalFileValidationSupportTest {
 

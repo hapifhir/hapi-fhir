@@ -1,14 +1,15 @@
 package ca.uhn.fhir.rest.server;
 
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.withSettings;
-
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
 
 /** Unit tests of {@link BaseRestfulResponse}. */
 public class RestfulResponseTest {

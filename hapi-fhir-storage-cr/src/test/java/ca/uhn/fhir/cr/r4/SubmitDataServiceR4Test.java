@@ -1,16 +1,8 @@
 package ca.uhn.fhir.cr.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.common.Searches;
-import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.function.Function;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -20,6 +12,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import com.google.common.collect.Lists;
+
+import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.common.Searches;
+import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
 public class SubmitDataServiceR4Test extends BaseCrR4Test {

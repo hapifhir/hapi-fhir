@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.jpa.config.util;
 
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 
 public final class ValidationSupportConfigUtil {
     private ValidationSupportConfigUtil() {}

@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import java.util.Collection;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IAuthRuleBuilderRuleOpClassifier {

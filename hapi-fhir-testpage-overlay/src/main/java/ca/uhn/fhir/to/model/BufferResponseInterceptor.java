@@ -1,7 +1,8 @@
 package ca.uhn.fhir.to.model;
 
-import ca.uhn.fhir.rest.client.api.*;
 import java.io.IOException;
+
+import ca.uhn.fhir.rest.client.api.*;
 
 public class BufferResponseInterceptor implements IClientInterceptor {
 

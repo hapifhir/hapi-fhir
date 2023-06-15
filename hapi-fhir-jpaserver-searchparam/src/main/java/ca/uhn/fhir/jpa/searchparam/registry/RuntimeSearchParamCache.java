@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.jpa.searchparam.registry;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
-import java.util.Map;
-import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
     private static final Logger ourLog = LoggerFactory.getLogger(RuntimeSearchParamCache.class);

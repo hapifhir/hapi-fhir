@@ -1,16 +1,18 @@
 package ca.uhn.fhir.tinder;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
+
 import org.apache.commons.lang.WordUtils;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
 
 public class Configuration {
 

@@ -20,11 +20,12 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.StringType;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.StringType;
 
 @ResourceDef(name = "Observation", profile = CustomObservationDstu3.PROFILE)
 public class CustomObservationDstu3 extends Observation {

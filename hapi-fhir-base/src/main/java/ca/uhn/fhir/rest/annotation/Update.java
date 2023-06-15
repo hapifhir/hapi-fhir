@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.model.api.IResource;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import ca.uhn.fhir.model.api.IResource;
 
 /**
  * RESTful method annotation to be used for the FHIR <a

@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBase;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.util.NameUtil;
 import ca.uhn.fhir.util.StringUtil;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBase;
 
 /** Similarity measure for two IBase name fields */
 public class NameMatcher implements IMdmFieldMatcher {

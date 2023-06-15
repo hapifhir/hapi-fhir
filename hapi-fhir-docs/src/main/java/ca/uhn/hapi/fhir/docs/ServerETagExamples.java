@@ -19,10 +19,11 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
-import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.RestfulServer;
 
 @SuppressWarnings("serial")
 public class ServerETagExamples {

@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.storage;
 
+import java.util.Optional;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import java.util.Optional;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 public class PreviousVersionReader<T extends IBaseResource> {
     private final IFhirResourceDao<T> myDao;

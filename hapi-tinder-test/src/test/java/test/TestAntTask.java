@@ -1,9 +1,11 @@
 package test;
 
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
 import ca.uhn.test.ant.multi.*;
 import ca.uhn.test.ant.single.TestConfigDstu2;
-import java.util.List;
-import org.junit.jupiter.api.Test;
 
 public class TestAntTask {
 

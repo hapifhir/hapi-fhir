@@ -19,20 +19,23 @@
  */
 package ca.uhn.fhir.jpa.binstore;
 
-import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
-import ca.uhn.fhir.jpa.binary.api.StoredDetails;
-import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import com.google.common.hash.HashingInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import com.google.common.hash.HashingInputStream;
+
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
+import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /**
  * Purely in-memory implementation of binary storage service. This is really only appropriate for

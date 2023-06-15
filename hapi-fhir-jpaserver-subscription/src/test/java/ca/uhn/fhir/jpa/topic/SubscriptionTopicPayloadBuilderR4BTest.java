@@ -1,17 +1,19 @@
 package ca.uhn.fhir.jpa.topic;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.List;
+
+import org.hl7.fhir.r4b.model.Bundle;
+import org.hl7.fhir.r4b.model.Encounter;
+import org.hl7.fhir.r4b.model.Resource;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.util.BundleUtil;
-import java.util.List;
-import org.hl7.fhir.r4b.model.Bundle;
-import org.hl7.fhir.r4b.model.Encounter;
-import org.hl7.fhir.r4b.model.Resource;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SubscriptionTopicPayloadBuilderR4BTest {
     private static final String TEST_TOPIC_URL = "test-builder-topic-url";

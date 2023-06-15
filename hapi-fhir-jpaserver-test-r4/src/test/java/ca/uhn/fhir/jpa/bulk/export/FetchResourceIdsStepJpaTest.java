@@ -1,8 +1,14 @@
 package ca.uhn.fhir.jpa.bulk.export;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -14,14 +20,10 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsTest;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import java.util.List;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.OrganizationAffiliation;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class FetchResourceIdsStepJpaTest extends BaseJpaR4Test {
 

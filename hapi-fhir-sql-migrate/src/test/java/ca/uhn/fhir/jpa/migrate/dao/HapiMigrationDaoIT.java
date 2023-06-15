@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.migrate.dao;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Set;
+
+import org.flywaydb.core.api.MigrationVersion;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.jpa.migrate.BaseMigrationTest;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
-import java.util.Set;
-import org.flywaydb.core.api.MigrationVersion;
-import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HapiMigrationDaoIT extends BaseMigrationTest {
 

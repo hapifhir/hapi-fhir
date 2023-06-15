@@ -19,16 +19,19 @@
  */
 package ca.uhn.fhir.rest.client.exceptions;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.util.CoverageIgnore;
-import com.google.common.base.Charsets;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+
 import org.apache.commons.io.IOUtils;
+
+import com.google.common.base.Charsets;
+
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.util.CoverageIgnore;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @CoverageIgnore
 public class NonFhirResponseException extends BaseServerResponseException {

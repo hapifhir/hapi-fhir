@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.topic.status;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import java.util.List;
+
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4b.model.SubscriptionStatus;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 
 public class R4BNotificationStatusBuilder
         implements INotificationStatusBuilder<SubscriptionStatus> {

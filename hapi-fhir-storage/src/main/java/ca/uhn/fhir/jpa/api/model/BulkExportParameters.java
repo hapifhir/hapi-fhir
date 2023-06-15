@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.jpa.api.model;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Nonnull;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 
 public class BulkExportParameters extends Batch2BaseJobParameters {
 

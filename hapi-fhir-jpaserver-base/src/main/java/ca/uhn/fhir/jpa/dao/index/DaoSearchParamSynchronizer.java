@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao.index;
 
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.util.AddRemoveCount;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -31,7 +26,15 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+
 import org.springframework.stereotype.Service;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.util.AddRemoveCount;
 
 @Service
 public class DaoSearchParamSynchronizer {

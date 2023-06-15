@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.batch2.jobs.config;
 
+import org.springframework.context.annotation.Bean;
+
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.jobs.services.Batch2JobRunnerImpl;
@@ -26,7 +28,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import org.springframework.context.annotation.Bean;
 
 public class BatchCommonCtx {
     @Bean

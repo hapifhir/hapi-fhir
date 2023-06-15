@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jaxrs.server.test;
 
+import java.util.List;
+
+import org.hl7.fhir.r4.model.Patient;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
-import java.util.List;
-import org.hl7.fhir.r4.model.Patient;
 
 /** A dummy patient provider exposing no methods */
 public abstract class AbstractDummyPatientProvider extends AbstractJaxRsResourceProvider<Patient> {

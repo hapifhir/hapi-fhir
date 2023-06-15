@@ -1,16 +1,18 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.Date;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 public class ResourceIndexedSearchParamDateTest {
 

@@ -19,6 +19,14 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.Enumeration;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
+import org.slf4j.Logger;
+
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -26,12 +34,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.storage.PreviousVersionReader;
 import ca.uhn.fhir.util.Logs;
-import java.util.List;
-import java.util.Optional;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Enumeration;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
-import org.slf4j.Logger;
 
 public class SubscriptionTriggerMatcher {
     private static final Logger ourLog = Logs.getSubscriptionTopicLog();

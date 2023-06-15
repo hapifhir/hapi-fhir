@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.rest.client.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.io.IOException;
+
+import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import java.io.IOException;
-import org.apache.commons.lang3.Validate;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This interceptor adds an arbitrary header to requests made by this client. Both the header name

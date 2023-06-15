@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.batch2.jobs.parameters;
 
-import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 
 public class UrlListValidator implements IUrlListValidator {
     private final String myOperationName;

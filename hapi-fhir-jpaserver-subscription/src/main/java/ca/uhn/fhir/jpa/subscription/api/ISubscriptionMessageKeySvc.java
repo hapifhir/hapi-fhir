@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.api;
 
 import javax.annotation.Nullable;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**

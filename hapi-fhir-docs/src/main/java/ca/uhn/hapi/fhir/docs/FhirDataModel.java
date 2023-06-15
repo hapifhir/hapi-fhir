@@ -19,12 +19,14 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import java.util.Date;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.*;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import java.util.Date;
-import java.util.List;
-import org.hl7.fhir.r4.model.*;
 
 public class FhirDataModel {
 

@@ -19,7 +19,10 @@
  */
 package ca.uhn.fhir.jpa.searchparam.util;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.List;
+import java.util.Optional;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -27,9 +30,8 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import java.util.List;
-import java.util.Optional;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParameterHelper {
     private final SearchParameterCanonicalizer mySearchParameterCanonicalizer;

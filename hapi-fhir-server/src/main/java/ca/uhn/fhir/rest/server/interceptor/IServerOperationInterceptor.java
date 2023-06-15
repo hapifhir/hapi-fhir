@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * Server interceptor with added methods which can be called within the lifecycle of write

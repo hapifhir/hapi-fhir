@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MdmMatcherJson implements IModelJson {
     @JsonProperty(value = "algorithm", required = true)

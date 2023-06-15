@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
+import java.util.List;
+import java.util.Objects;
+import javax.annotation.CheckReturnValue;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -27,10 +33,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import java.util.List;
-import java.util.Objects;
-import javax.annotation.CheckReturnValue;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ServerInterceptorUtil {
 

@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.model.search;
 
+import javax.annotation.Nullable;
+
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.StopWatch;
-import javax.annotation.Nullable;
 
 /**
  * This class contains a runtime in-memory description of a search operation, including details on

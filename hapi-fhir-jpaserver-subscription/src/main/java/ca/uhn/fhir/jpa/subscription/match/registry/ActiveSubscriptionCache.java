@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,9 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 class ActiveSubscriptionCache {
     private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscriptionCache.class);

@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.esr;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.Validate;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class ExternallyStoredResourceServiceRegistry {
 

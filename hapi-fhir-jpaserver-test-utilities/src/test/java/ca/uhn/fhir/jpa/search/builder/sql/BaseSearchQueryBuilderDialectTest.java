@@ -1,7 +1,16 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import javax.annotation.Nonnull;
+
+import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.OrderObject;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -11,15 +20,9 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
-import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.OrderObject;
-import javax.annotation.Nonnull;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
-import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public abstract class BaseSearchQueryBuilderDialectTest {
 

@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
-import ca.uhn.fhir.parser.IParser;
 import java.io.IOException;
 import java.io.Writer;
+
+import ca.uhn.fhir.parser.IParser;
 
 /**
  * @author Peter Van Houte

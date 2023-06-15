@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-
-import java.util.List;
 
 public class CustomMatchersUtil {
 

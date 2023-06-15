@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.searchparam.util;
 
-import static org.apache.commons.lang3.StringUtils.startsWith;
-
 import ca.uhn.fhir.context.RuntimeSearchParam;
+
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 public class RuntimeSearchParamHelper {
 

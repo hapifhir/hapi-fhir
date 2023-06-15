@@ -19,9 +19,10 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class ResourceRefs {
 

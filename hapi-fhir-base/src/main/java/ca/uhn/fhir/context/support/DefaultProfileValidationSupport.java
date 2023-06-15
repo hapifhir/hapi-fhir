@@ -19,19 +19,21 @@
  */
 package ca.uhn.fhir.context.support;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.util.ILockable;
-import ca.uhn.fhir.util.ReflectionUtil;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.util.ILockable;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 /**
  * This class returns the vocabulary that is shipped with the base FHIR specification.

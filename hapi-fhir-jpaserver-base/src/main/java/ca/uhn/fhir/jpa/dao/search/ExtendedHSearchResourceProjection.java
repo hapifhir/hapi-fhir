@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /** Query result when fetching full resources from HSearch. */
 public class ExtendedHSearchResourceProjection {

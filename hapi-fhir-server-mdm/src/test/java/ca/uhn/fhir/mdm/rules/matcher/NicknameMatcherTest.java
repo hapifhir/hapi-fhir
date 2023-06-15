@@ -1,13 +1,14 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
-import ca.uhn.fhir.jpa.nickname.NicknameSvc;
-import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
-import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NicknameMatcher;
-import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.nickname.NicknameSvc;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NicknameMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 
 class NicknameMatcherTest {
     IMdmFieldMatcher matcher;

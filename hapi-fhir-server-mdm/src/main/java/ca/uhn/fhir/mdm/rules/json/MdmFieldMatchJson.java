@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
+import javax.annotation.Nonnull;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.annotation.Nonnull;
 
 /**
  * Contains all business data for determining if a match exists on a particular field, given:

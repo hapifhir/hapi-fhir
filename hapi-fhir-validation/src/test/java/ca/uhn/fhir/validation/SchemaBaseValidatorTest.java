@@ -1,14 +1,16 @@
 package ca.uhn.fhir.validation;
 
+import javax.xml.transform.Source;
+
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import javax.xml.transform.Source;
-import org.junit.jupiter.api.Test;
 
 public class SchemaBaseValidatorTest {
 

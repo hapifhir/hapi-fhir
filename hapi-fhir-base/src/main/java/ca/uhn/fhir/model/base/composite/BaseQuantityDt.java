@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.model.base.composite;
 
+import java.math.BigDecimal;
+
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
@@ -31,8 +35,6 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
-import java.math.BigDecimal;
-import org.apache.commons.lang3.StringUtils;
 
 public abstract class BaseQuantityDt extends BaseIdentifiableElement
         implements ICompositeDatatype, IQueryParameterType {

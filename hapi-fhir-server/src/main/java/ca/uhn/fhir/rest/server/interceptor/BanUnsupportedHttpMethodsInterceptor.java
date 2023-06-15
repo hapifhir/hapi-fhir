@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
 /**
  * This interceptor causes the server to reject invocations for HTTP methods other than those

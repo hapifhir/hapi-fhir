@@ -19,16 +19,19 @@
  */
 package ca.uhn.fhir.batch2.model;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
-import com.google.common.collect.Maps;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
+
+import com.google.common.collect.Maps;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.util.Logs;
 
 /**
  * Status of a Batch2 Job Instance. The initial state is QUEUED. The terminal states are COMPLETED,

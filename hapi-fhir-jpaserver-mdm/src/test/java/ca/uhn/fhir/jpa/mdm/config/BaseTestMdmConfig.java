@@ -1,17 +1,20 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
-import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
-import com.google.common.base.Charsets;
 import java.io.IOException;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+
+import com.google.common.base.Charsets;
+
+import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 
 @Configuration
 public abstract class BaseTestMdmConfig {

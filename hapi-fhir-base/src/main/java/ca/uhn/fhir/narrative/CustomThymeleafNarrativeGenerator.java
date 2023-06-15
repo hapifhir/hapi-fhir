@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.narrative;
 
-import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 
 public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator {
 

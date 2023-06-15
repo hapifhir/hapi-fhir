@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class RuntimeCompositeDatatypeDefinition
         extends BaseRuntimeElementCompositeDefinition<ICompositeType>

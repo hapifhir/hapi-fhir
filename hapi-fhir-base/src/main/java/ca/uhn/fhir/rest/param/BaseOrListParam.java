@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.rest.param;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class BaseOrListParam<
                 MT extends BaseOrListParam<?, ?>, PT extends IQueryParameterType>

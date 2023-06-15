@@ -19,25 +19,27 @@
  */
 package ca.uhn.fhir.jpa.test.config;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
-import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
-import ca.uhn.fhir.jpa.config.HapiJpaConfig;
-import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
-import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import java.sql.Connection;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
-import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
-import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
+import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
+import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
+import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({

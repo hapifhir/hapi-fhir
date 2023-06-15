@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.jpa.dao.predicate;
 
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import java.math.BigDecimal;
+
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
 public interface SearchFuzzUtil {
     /**

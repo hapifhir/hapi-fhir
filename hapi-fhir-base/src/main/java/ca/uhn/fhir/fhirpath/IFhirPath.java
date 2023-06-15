@@ -22,6 +22,7 @@ package ca.uhn.fhir.fhirpath;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.instance.model.api.IBase;
 
 public interface IFhirPath {

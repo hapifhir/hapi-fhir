@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.term.snomedct;
 
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.csv.CSVRecord;
+
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 
 public final class SctHandlerConcept implements IZipContentsHandlerCsv {
 

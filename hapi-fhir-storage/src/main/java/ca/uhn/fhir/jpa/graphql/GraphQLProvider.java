@@ -19,6 +19,22 @@
  */
 package ca.uhn.fhir.jpa.graphql;
 
+import java.util.function.Supplier;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.utilities.graphql.IGraphQLEngine;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.hl7.fhir.utilities.graphql.ObjectValue;
+import org.hl7.fhir.utilities.graphql.Package;
+import org.hl7.fhir.utilities.graphql.Parser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -38,20 +54,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import java.util.function.Supplier;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.utilities.graphql.IGraphQLEngine;
-import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.hl7.fhir.utilities.graphql.ObjectValue;
-import org.hl7.fhir.utilities.graphql.Package;
-import org.hl7.fhir.utilities.graphql.Parser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GraphQLProvider {
     private static final Logger ourLog = LoggerFactory.getLogger(GraphQLProvider.class);

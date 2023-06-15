@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.concurrent.NotThreadSafe;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /**
  * This class leverages IBundleProvider Iterable to provide an iterator for processing bundle search

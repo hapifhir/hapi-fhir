@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This class, unlike {@link MdmResourceSearchParamJson}, is responsible for doing inclusions during

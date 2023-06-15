@@ -1,13 +1,14 @@
 package ca.uhn.fhir.tinder.model;
 
-import static org.apache.commons.lang.StringUtils.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
+
+import static org.apache.commons.lang.StringUtils.*;
 
 public abstract class BaseElement {
 

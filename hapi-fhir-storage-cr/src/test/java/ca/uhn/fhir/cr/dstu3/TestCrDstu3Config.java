@@ -1,16 +1,18 @@
 package ca.uhn.fhir.cr.dstu3;
 
-import ca.uhn.fhir.cr.TestCrConfig;
-import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.function.Function;
+
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+
+import ca.uhn.fhir.cr.TestCrConfig;
+import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
+import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 @Configuration
 @Import(TestCrConfig.class)

@@ -20,7 +20,17 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.hl7.fhir.r4.model.ConceptMap;
+
+import com.google.common.base.Charsets;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -33,15 +43,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
-import com.google.common.base.Charsets;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.hl7.fhir.r4.model.ConceptMap;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This is a subclass to implement FHIR operations specific to R4 ConceptMap resources. Its

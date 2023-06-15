@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.gclient;
 
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

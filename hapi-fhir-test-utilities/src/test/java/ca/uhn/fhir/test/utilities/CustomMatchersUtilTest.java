@@ -1,10 +1,11 @@
 package ca.uhn.fhir.test.utilities;
 
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
 import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.util.List;
-import org.junit.jupiter.api.Test;
 
 class CustomMatchersUtilTest {
     private List<String> data = List.of("A", "B", "C");

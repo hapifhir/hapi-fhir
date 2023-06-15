@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.module.cache;
 
-import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+
+import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ContextConfiguration(classes = {SubscriptionRegistrySharedTest.SpringConfig.class})

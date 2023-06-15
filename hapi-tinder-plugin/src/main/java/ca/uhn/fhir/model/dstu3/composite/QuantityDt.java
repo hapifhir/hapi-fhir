@@ -1,5 +1,8 @@
 package ca.uhn.fhir.model.dstu3.composite;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -13,8 +16,6 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * HAPI/FHIR <b>QuantityDt</b> Datatype ()

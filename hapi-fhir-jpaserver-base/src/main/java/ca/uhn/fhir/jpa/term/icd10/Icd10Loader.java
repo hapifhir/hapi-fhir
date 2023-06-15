@@ -19,21 +19,23 @@
  */
 package ca.uhn.fhir.jpa.term.icd10;
 
-import static ca.uhn.fhir.util.XmlUtil.getChildrenByTagName;
-import static ca.uhn.fhir.util.XmlUtil.parseDocument;
-
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+
+import static ca.uhn.fhir.util.XmlUtil.getChildrenByTagName;
+import static ca.uhn.fhir.util.XmlUtil.parseDocument;
 
 public class Icd10Loader {
 

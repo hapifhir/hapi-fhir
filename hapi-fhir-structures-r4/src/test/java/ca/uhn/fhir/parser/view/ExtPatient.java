@@ -1,10 +1,11 @@
 package ca.uhn.fhir.parser.view;
 
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Patient;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Patient;
 
 @ResourceDef(name = "Patient")
 public class ExtPatient extends Patient {

@@ -1,15 +1,17 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import java.util.Enumeration;
+import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpServletRequest;
+
+import org.junit.jupiter.api.BeforeEach;
 
 import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import java.util.Enumeration;
-import javax.servlet.ServletConfig;
-import javax.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
     private RestfulServer myServer;

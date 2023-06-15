@@ -19,10 +19,13 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.Set;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
 /**
  * This component holds an in-memory list of all registered {@link IResourceChangeListener}

@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
+import java.lang.reflect.Method;
+
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import java.lang.reflect.Method;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 

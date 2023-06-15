@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 @DatatypeDef(name = "code", isSpecialization = true)
 public class BoundCodeDt<T extends Enum<?>> extends CodeDt {

@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.interceptor;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.apache.commons.lang3.Validate;
 
 /**
  * This interceptor for the HAPI FHIR JPA server forces all queries to be performed as offset

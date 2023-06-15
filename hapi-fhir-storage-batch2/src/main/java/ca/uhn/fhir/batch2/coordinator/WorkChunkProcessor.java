@@ -19,7 +19,11 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.Optional;
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -33,10 +37,8 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
-import java.util.Optional;
-import javax.annotation.Nullable;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class WorkChunkProcessor {
     /**

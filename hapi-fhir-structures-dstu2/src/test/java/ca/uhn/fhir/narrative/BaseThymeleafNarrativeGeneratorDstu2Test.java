@@ -1,8 +1,8 @@
 package ca.uhn.fhir.narrative;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BaseThymeleafNarrativeGeneratorDstu2Test {
     private static final org.slf4j.Logger ourLog =

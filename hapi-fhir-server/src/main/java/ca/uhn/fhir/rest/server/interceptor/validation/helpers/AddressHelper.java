@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.validation.helpers;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.PropertyModifyingHelper;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.PropertyModifyingHelper;
 
 /** Helper class for working with FHIR Address element */
 public class AddressHelper extends PropertyModifyingHelper {

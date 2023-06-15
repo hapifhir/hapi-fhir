@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.batch2.jobs.export;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
-import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class BulkExportUtil {
     private static final Logger ourLog = getLogger(BulkExportUtil.class);

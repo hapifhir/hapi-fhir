@@ -1,13 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
-import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
-import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -16,13 +15,15 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.Enumerations;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Test;
+
+import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
+import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SubscriptionCanonicalizerTest {
 

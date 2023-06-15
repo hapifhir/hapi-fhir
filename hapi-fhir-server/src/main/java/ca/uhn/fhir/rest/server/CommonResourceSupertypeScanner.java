@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 /**
  *

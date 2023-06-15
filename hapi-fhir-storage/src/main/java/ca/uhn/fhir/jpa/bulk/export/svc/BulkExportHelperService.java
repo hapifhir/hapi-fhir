@@ -19,7 +19,14 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.svc;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -27,13 +34,8 @@ import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class BulkExportHelperService {
     private static final Logger ourLog = getLogger(BulkExportHelperService.class);

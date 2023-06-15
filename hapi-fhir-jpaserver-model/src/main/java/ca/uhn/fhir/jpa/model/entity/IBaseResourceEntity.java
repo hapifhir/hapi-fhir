@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import java.util.Date;
+import javax.annotation.Nullable;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import java.util.Date;
-import javax.annotation.Nullable;
 
 public interface IBaseResourceEntity {
 

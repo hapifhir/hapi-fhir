@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.delete;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
@@ -26,7 +28,6 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 public final class DeleteConflictUtil {
     private DeleteConflictUtil() {}

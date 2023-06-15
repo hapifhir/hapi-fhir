@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import ca.uhn.fhir.util.CoverageIgnore;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.util.CoverageIgnore;
 
 public class MethodOutcome {
 

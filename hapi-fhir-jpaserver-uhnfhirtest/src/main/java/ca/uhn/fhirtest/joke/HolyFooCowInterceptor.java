@@ -1,12 +1,13 @@
 package ca.uhn.fhirtest.joke;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HolyFooCowInterceptor extends InterceptorAdapter {
 

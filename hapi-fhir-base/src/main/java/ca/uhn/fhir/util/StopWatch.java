@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.util;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
+
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * A multipurpose stopwatch which can be used to time tasks and produce human readable output about

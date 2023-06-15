@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+
 import org.apache.commons.io.output.TeeOutputStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

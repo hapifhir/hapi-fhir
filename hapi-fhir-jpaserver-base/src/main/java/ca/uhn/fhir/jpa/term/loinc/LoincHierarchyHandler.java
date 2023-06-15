@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import java.util.Map;
+
+import org.apache.commons.csv.CSVRecord;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import java.util.Map;
-import org.apache.commons.csv.CSVRecord;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincHierarchyHandler implements IZipContentsHandlerCsv {
 

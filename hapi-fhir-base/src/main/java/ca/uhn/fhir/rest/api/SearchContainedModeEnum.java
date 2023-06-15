@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.api;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
-import java.util.HashMap;
-import java.util.Map;
 
 public enum SearchContainedModeEnum {
 

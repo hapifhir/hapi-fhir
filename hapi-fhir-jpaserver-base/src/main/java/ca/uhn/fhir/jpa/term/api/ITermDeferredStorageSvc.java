@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
+import java.util.List;
+
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ValueSet;
+
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import java.util.List;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ValueSet;
 
 /**
  * This service handles processing "deferred" concept writes, meaning concepts that have neen queued

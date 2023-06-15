@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
 public class BundleLinks {
     public final String serverBase;

@@ -19,7 +19,16 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.Map;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
+import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
+import org.hl7.fhir.r4.model.Meta;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -33,15 +42,8 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
-import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
-import org.hl7.fhir.r4.model.Meta;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /** R4+ Only */
 public class JpaCapabilityStatementProvider extends ServerCapabilityStatementProvider {

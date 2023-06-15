@@ -19,6 +19,12 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.servlet.ServletException;
+
+import org.hl7.fhir.r4.model.Reference;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
@@ -26,10 +32,6 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.storage.interceptor.balp.AsyncMemoryQueueBackedFhirClientBalpSink;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditEventSink;
-import java.util.List;
-import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
-import org.hl7.fhir.r4.model.Reference;
 
 public class BalpExample {
 

@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.util.CoverageIgnore;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /** Utility methods for working with {@link IBundleProvider} */
 public class BundleProviders {

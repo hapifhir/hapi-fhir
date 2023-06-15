@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.jpa.search.lastn;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IElasticsearchSvc {
 

@@ -19,14 +19,6 @@
  */
 package ca.uhn.fhir.rest.client.tls;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.tls.BaseStoreInfo;
-import ca.uhn.fhir.tls.KeyStoreInfo;
-import ca.uhn.fhir.tls.PathType;
-import ca.uhn.fhir.tls.TlsAuthentication;
-import ca.uhn.fhir.tls.TrustStoreInfo;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -37,6 +29,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -44,6 +37,15 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.ssl.PrivateKeyStrategy;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.tls.BaseStoreInfo;
+import ca.uhn.fhir.tls.KeyStoreInfo;
+import ca.uhn.fhir.tls.PathType;
+import ca.uhn.fhir.tls.TlsAuthentication;
+import ca.uhn.fhir.tls.TrustStoreInfo;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TlsAuthenticationSvc {
 

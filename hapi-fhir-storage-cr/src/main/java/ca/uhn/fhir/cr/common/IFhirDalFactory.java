@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public interface IFhirDalFactory {
     FhirDal create(RequestDetails theRequestDetails);

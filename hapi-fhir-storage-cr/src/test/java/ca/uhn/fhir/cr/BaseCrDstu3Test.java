@@ -1,19 +1,8 @@
 package ca.uhn.fhir.cr;
 
-import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
-import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
-import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.config.CrDstu3Config;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
-import ca.uhn.fhir.parser.IParser;
-import io.specto.hoverfly.junit.dsl.HoverflyDsl;
-import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
-import io.specto.hoverfly.junit.rule.HoverflyRule;
 import java.util.Arrays;
 import java.util.List;
+
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -23,6 +12,19 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.junit.ClassRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.cr.config.CrDstu3Config;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
+import ca.uhn.fhir.parser.IParser;
+import io.specto.hoverfly.junit.dsl.HoverflyDsl;
+import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
+import io.specto.hoverfly.junit.rule.HoverflyRule;
+
+import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
+import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
+import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 
 @ContextConfiguration(classes = {TestCrConfig.class, CrDstu3Config.class})
 public abstract class BaseCrDstu3Test extends BaseJpaDstu3Test implements IResourceLoader {

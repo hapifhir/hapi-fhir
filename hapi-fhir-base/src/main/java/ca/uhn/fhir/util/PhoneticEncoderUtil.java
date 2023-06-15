@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.context.phonetic.ApacheEncoder;
-import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
-import ca.uhn.fhir.context.phonetic.NumericEncoder;
-import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import org.apache.commons.codec.language.Caverphone1;
 import org.apache.commons.codec.language.Caverphone2;
 import org.apache.commons.codec.language.ColognePhonetic;
@@ -35,6 +31,11 @@ import org.apache.commons.codec.language.Soundex;
 import org.apache.commons.lang3.EnumUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.phonetic.ApacheEncoder;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.context.phonetic.NumericEncoder;
+import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 
 public final class PhoneticEncoderUtil {
 

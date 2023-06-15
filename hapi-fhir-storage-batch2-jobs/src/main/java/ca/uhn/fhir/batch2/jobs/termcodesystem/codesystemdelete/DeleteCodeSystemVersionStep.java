@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -27,7 +29,6 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
-import javax.annotation.Nonnull;
 
 public class DeleteCodeSystemVersionStep
         implements IJobStepWorker<

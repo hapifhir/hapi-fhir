@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.embedded;
 
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.util.VersionEnum;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -30,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -38,6 +37,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.util.VersionEnum;
 
 public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 

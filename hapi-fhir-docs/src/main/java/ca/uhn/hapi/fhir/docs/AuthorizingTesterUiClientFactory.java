@@ -19,11 +19,12 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import javax.servlet.http.HttpServletRequest;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
-import javax.servlet.http.HttpServletRequest;
 
 public class AuthorizingTesterUiClientFactory implements ITestingUiClientFactory {
 

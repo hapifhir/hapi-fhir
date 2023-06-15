@@ -20,11 +20,13 @@ package ca.uhn.fhir.sl.cache.caffeine;
  * #L%
  */
 
+import java.util.concurrent.TimeUnit;
+
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheLoader;
 import ca.uhn.fhir.sl.cache.LoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import java.util.concurrent.TimeUnit;
 
 public class CacheProvider<K, V> implements ca.uhn.fhir.sl.cache.CacheProvider<K, V> {
 

@@ -1,14 +1,15 @@
 package ca.uhn.fhir.batch2.model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.batch2.coordinator.BaseBatch2Test;
 import ca.uhn.fhir.batch2.coordinator.TestJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class JobWorkCursorTest extends BaseBatch2Test {
 

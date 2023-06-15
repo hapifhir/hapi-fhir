@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import static org.apache.commons.lang3.StringUtils.left;
-import static org.apache.commons.lang3.StringUtils.length;
-
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.util.ValidateUtil;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,10 +42,17 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
+
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.util.ValidateUtil;
+
+import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.length;
 
 @Table(
         name = "TRM_VALUESET",

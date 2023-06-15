@@ -9,12 +9,14 @@
  */
 package ca.uhn.fhir.jpa.dao.validation;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 /**
  * This class is a custom resource class structure representing a Meal that was prepared by a chef

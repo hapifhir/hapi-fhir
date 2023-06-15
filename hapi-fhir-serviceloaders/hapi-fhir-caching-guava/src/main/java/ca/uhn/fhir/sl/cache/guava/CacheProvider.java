@@ -20,11 +20,13 @@ package ca.uhn.fhir.sl.cache.guava;
  * #L%
  */
 
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.cache.CacheBuilder;
+
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheLoader;
 import ca.uhn.fhir.sl.cache.LoadingCache;
-import com.google.common.cache.CacheBuilder;
-import java.util.concurrent.TimeUnit;
 
 public class CacheProvider<K, V> implements ca.uhn.fhir.sl.cache.CacheProvider<K, V> {
 

@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.topic.status;
 
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 
 public interface INotificationStatusBuilder<T extends IBaseResource> {
     /**

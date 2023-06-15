@@ -1,9 +1,5 @@
 package ca.uhn.fhir.tinder;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import com.google.common.reflect.ClassPath;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,6 +7,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
@@ -18,6 +15,12 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.util.Assert;
+
+import com.google.common.reflect.ClassPath;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 // @Mojo(name = "generate-version-propertyfile", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class VersionPropertyFileGeneratorMojo extends AbstractMojo {

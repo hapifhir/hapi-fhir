@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import java.util.List;
 import java.util.Map;
+
+import ca.uhn.fhir.model.api.IQueryParameterType;
 
 public interface IBaseQuery<T extends IBaseQuery<?>> {
 

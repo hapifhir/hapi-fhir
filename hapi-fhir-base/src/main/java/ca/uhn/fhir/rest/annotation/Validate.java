@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import java.lang.annotation.*;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 
 /**
  * RESTful method annotation to be used for the FHIR <a

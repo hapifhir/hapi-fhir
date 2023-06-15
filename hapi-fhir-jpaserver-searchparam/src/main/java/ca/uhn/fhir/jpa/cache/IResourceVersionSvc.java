@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import java.util.List;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
 /**
  * This interface is used by the {@literal IResourceChangeListenerCacheRefresher} to read resources

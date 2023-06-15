@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.rest.api.SortSpec;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import ca.uhn.fhir.rest.api.SortSpec;
 
 /**
  * For searches, a parameter may be annotated with the {@link Sort} annotation. The parameter should

@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IBase;
 
 public class AddressValidationResult {

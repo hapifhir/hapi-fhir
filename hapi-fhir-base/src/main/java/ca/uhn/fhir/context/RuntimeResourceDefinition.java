@@ -19,9 +19,6 @@
  */
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.util.UrlUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,10 +26,15 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class RuntimeResourceDefinition
         extends BaseRuntimeElementCompositeDefinition<IBaseResource> {

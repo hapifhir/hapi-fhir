@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jaxrs.server.test;
 
-import ca.uhn.fhir.jaxrs.server.AbstractJaxRsConformanceProvider;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import ca.uhn.fhir.jaxrs.server.AbstractJaxRsConformanceProvider;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 
 /** A conformance provider exposes the mock patient and this provider */
 @Path("")

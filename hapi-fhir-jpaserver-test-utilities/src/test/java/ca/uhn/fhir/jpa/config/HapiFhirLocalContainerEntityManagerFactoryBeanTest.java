@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.config;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class HapiFhirLocalContainerEntityManagerFactoryBeanTest {
     HapiFhirLocalContainerEntityManagerFactoryBean myBean =

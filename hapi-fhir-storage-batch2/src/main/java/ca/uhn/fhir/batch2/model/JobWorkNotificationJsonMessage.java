@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.batch2.model;
 
-import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.annotation.Nonnull;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 
 public class JobWorkNotificationJsonMessage extends BaseJsonMessage<JobWorkNotification> {
 

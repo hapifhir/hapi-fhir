@@ -1,16 +1,18 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 
 /**
  * Matcher with tells us if there is an MdmLink with between these two resources that are considered

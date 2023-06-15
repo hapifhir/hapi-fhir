@@ -19,14 +19,15 @@
  */
 package ca.uhn.fhir.rest.client.interceptor;
 
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
 
 /**
  * This interceptor adds arbitrary header values to requests made by the client.

@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.jpa.migrate;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
-import java.util.Optional;
-import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * The approach used in this class is borrowed from

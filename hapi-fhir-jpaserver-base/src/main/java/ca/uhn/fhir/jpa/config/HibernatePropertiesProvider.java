@@ -19,16 +19,19 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.util.ReflectionUtil;
-import com.google.common.annotations.VisibleForTesting;
 import javax.sql.DataSource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 public class HibernatePropertiesProvider {
 

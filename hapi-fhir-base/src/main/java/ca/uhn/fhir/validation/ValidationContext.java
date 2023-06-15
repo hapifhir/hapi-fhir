@@ -19,7 +19,11 @@
  */
 package ca.uhn.fhir.validation;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -28,10 +32,8 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ObjectUtil;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ValidationContext<T> extends BaseValidationContext<T>
         implements IValidationContext<T> {

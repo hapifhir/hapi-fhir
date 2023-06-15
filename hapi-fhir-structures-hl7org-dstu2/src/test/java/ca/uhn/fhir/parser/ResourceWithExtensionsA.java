@@ -1,11 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import java.util.List;
+
 import org.hl7.fhir.dstu2.model.BackboneElement;
 import org.hl7.fhir.dstu2.model.CodeableConcept;
 import org.hl7.fhir.dstu2.model.DateType;
@@ -13,6 +9,12 @@ import org.hl7.fhir.dstu2.model.DomainResource;
 import org.hl7.fhir.dstu2.model.Identifier;
 import org.hl7.fhir.dstu2.model.ResourceType;
 import org.hl7.fhir.dstu2.model.StringType;
+
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id = "0001")
 public class ResourceWithExtensionsA extends DomainResource {

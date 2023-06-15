@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.rest.client.interceptor;
 
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.api.*;
 import java.io.IOException;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.*;
 
 /**
  * HTTP interceptor to be used for adding HTTP basic auth username/password tokens to requests

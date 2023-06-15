@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+
+import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ValueSetTestUtil {
 

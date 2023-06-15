@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.binary.api;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.util.HapiExtensions;
 import java.util.Optional;
+
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.util.HapiExtensions;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Wraps an Attachment datatype or Binary resource, since they both hold binary content but don't

@@ -19,6 +19,9 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import java.io.IOException;
+import java.util.List;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
@@ -29,8 +32,6 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import java.io.IOException;
-import java.util.List;
 
 public class ExtensionsDstu2 {
 

@@ -1,5 +1,13 @@
 package ca.uhn.fhir.jpa.api.pid;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
@@ -8,12 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import org.junit.jupiter.api.Test;
 
 class ResourcePidListBuilderTest {
 

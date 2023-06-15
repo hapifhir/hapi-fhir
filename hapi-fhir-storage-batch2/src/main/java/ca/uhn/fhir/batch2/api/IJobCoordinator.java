@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nullable;
+
+import org.springframework.data.domain.Page;
+
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -27,10 +33,6 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import java.util.List;
-import java.util.Set;
-import javax.annotation.Nullable;
-import org.springframework.data.domain.Page;
 
 public interface IJobCoordinator {
 

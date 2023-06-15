@@ -19,7 +19,33 @@
  */
 package ca.uhn.fhir.jpa.graphql;
 
-import static ca.uhn.fhir.util.MessageSupplier.msg;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.apache.commons.io.output.StringBuilderWriter;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.SearchParameter;
+import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.utils.GraphQLSchemaGenerator;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -33,8 +59,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.VersionUtil;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.language.InterfaceTypeDefinition;
@@ -48,29 +72,8 @@ import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.TypeRuntimeWiring;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import org.apache.commons.io.output.StringBuilderWriter;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.SearchParameter;
-import org.hl7.fhir.r5.model.StructureDefinition;
-import org.hl7.fhir.r5.utils.GraphQLSchemaGenerator;
-import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static ca.uhn.fhir.util.MessageSupplier.msg;
 
 public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 

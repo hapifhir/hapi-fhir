@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import ca.uhn.fhir.rest.param.DateRangeParam;
 
 public class DateRangeUtil {
 

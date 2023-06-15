@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.rest.api.Constants;
 import java.util.HashMap;
 import java.util.Map;
+
+import ca.uhn.fhir.rest.api.Constants;
 
 /** Modifiers for {@link TokenParam} */
 public enum TokenParamModifier {

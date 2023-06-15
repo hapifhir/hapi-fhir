@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 
 /** Service that applies survivorship rules on target and golden resources. */
 public interface IMdmSurvivorshipService {

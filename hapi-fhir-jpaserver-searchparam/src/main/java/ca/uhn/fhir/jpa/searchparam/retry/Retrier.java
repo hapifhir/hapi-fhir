@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.searchparam.retry;
 
-import ca.uhn.fhir.system.HapiSystemProperties;
 import java.util.function.Supplier;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -33,6 +33,8 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+
+import ca.uhn.fhir.system.HapiSystemProperties;
 
 public class Retrier<T> {
     private static final Logger ourLog = LoggerFactory.getLogger(Retrier.class);

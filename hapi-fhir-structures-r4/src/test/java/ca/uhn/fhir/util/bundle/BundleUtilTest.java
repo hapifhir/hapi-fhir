@@ -1,5 +1,28 @@
 package ca.uhn.fhir.util.bundle;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.UriType;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.TestUtil;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -13,27 +36,6 @@ import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
-import ca.uhn.fhir.util.BundleBuilder;
-import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.TestUtil;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.UriType;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
 
 public class BundleUtilTest {
 

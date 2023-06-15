@@ -19,16 +19,6 @@
  */
 package ca.uhn.fhir.jpa.test.config;
 
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.IHSearchEventListener;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
-import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
-import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
-import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.annotation.PreDestroy;
+
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
@@ -50,6 +41,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
+
+import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.IHSearchEventListener;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
+import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
+import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
+import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 
 /**
  * Configurations for Hibernate Search: off, lucene in-memory, lucene on file system or elastic.

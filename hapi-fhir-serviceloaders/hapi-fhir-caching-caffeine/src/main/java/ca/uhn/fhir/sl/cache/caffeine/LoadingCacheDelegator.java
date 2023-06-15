@@ -20,8 +20,9 @@ package ca.uhn.fhir.sl.cache.caffeine;
  * #L%
  */
 
-import ca.uhn.fhir.sl.cache.LoadingCache;
 import java.util.Map;
+
+import ca.uhn.fhir.sl.cache.LoadingCache;
 
 public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V>
         implements LoadingCache<K, V> {

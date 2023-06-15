@@ -1,15 +1,17 @@
 package ca.uhn.fhir.parser;
 
+import java.util.List;
+
+import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
+import org.hl7.fhir.dstu2016may.model.Enumeration;
+import org.hl7.fhir.dstu2016may.model.Identifier;
+import org.hl7.fhir.dstu2016may.model.Patient;
+
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import java.util.List;
-import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
-import org.hl7.fhir.dstu2016may.model.Enumeration;
-import org.hl7.fhir.dstu2016may.model.Identifier;
-import org.hl7.fhir.dstu2016may.model.Patient;
 
 @ResourceDef(name = "Patient")
 public class MyPatientWithOneDeclaredEnumerationExtensionDstu3 extends Patient {

@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
-import java.util.LinkedList;
-import java.util.List;
 
 /** Holds all method bindings for an individual resource type */
 public class ResourceBinding {

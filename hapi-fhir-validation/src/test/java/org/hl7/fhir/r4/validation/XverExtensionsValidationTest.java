@@ -1,7 +1,16 @@
 package org.hl7.fhir.r4.validation;
 
-import static ca.uhn.fhir.util.ClasspathUtil.loadResource;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.io.IOException;
+import java.util.function.Predicate;
+import javax.annotation.Nonnull;
+
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -10,16 +19,9 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import java.io.IOException;
-import java.util.function.Predicate;
-import javax.annotation.Nonnull;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.junit.jupiter.api.Test;
+
+import static ca.uhn.fhir.util.ClasspathUtil.loadResource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class XverExtensionsValidationTest {
     private static final FhirContext ourCtx = FhirContext.forR4();

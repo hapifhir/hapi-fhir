@@ -1,10 +1,10 @@
 package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Test;
 
 class NoiseCharactersTest {
 

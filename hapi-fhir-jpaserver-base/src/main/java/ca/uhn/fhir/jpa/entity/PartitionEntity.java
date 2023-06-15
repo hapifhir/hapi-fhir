@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 
 @Entity
 @Table(

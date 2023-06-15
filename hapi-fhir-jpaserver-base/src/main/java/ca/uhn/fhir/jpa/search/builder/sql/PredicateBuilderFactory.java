@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
@@ -30,8 +33,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PredicateBuilderFactory {
 

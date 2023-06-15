@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import java.time.Instant;
+
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
 /**
  * This is a handle to the cache created by {@link IResourceChangeListenerRegistry} when a listener

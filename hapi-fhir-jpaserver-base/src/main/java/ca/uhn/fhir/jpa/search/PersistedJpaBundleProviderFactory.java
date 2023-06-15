@@ -19,7 +19,11 @@
  */
 package ca.uhn.fhir.jpa.search;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import java.util.Date;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.JpaConfig;
@@ -31,10 +35,8 @@ import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
-import java.util.Date;
-import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class PersistedJpaBundleProviderFactory {
 

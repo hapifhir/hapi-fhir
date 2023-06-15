@@ -19,6 +19,14 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.PreDestroy;
+
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -28,12 +36,6 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ThreadPoolUtil;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.PreDestroy;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 public class LinkedBlockingChannelFactory implements IChannelFactory {
 

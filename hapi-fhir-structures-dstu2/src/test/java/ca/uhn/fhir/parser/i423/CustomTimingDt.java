@@ -1,5 +1,8 @@
 package ca.uhn.fhir.parser.i423;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -16,8 +19,6 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.util.ElementUtil;
-import java.math.BigDecimal;
-import java.util.List;
 
 @DatatypeDef(name = "Timing")
 public class CustomTimingDt extends TimingDt {

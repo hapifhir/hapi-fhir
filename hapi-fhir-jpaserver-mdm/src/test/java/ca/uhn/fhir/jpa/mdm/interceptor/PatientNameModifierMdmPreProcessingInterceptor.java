@@ -1,13 +1,15 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
-import static java.util.Arrays.asList;
-
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
+
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+
+import static java.util.Arrays.asList;
 
 public class PatientNameModifierMdmPreProcessingInterceptor {
 

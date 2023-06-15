@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.search.cache;
 
+import java.util.List;
+import javax.annotation.Nullable;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import java.util.List;
-import javax.annotation.Nullable;
 
 public interface ISearchResultCacheSvc {
     /**

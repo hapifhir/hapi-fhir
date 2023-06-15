@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.context;
 
+import java.lang.reflect.Field;
+
+import org.hl7.fhir.instance.model.api.IBase;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import java.lang.reflect.Field;
-import org.hl7.fhir.instance.model.api.IBase;
 
 public class RuntimeChildPrimitiveEnumerationDatatypeDefinition
         extends RuntimeChildPrimitiveDatatypeDefinition {

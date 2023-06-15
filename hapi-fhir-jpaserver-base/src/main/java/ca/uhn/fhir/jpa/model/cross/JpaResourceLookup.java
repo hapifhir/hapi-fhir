@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.jpa.model.cross;
 
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import java.util.Date;
+
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 
 public class JpaResourceLookup implements IResourceLookup {
     private final String myResourceType;

@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.jpa.interceptor.validation;
 
-import ca.uhn.fhir.context.FhirContext;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.context.FhirContext;
 
 abstract class BaseTypedRule implements IRepositoryValidatingRule {
 

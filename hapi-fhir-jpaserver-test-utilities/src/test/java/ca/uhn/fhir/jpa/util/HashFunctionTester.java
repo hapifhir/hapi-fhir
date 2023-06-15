@@ -1,15 +1,18 @@
 package ca.uhn.fhir.jpa.util;
 
-import ca.uhn.fhir.util.StopWatch;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.helger.commons.base64.Base64;
-import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.util.StopWatch;
 
 public class HashFunctionTester {
     byte[] bytes1 = "ABCDiohseoiey oisegoyi  loegsiyosg l".getBytes(Charsets.UTF_8);

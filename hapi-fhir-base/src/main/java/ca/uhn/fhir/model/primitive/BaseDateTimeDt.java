@@ -19,22 +19,24 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.BasePrimitive;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.parser.DataFormatException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.BasePrimitive;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.parser.DataFormatException;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
     static final long NANOS_PER_MILLIS = 1000000L;

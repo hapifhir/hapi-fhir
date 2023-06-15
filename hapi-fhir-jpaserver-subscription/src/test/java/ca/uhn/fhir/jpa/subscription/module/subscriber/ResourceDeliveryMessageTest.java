@@ -1,11 +1,14 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceDeliveryMessageTest {
 

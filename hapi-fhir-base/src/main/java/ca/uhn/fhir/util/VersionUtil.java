@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.util;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-
-import ca.uhn.fhir.system.HapiSystemProperties;
 import java.io.InputStream;
 import java.util.Properties;
+
 import org.apache.commons.lang3.StringUtils;
+
+import ca.uhn.fhir.system.HapiSystemProperties;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 /**
  * Used internally by HAPI to log the version of the HAPI FHIR framework once, when the framework is

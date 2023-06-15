@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
-import ca.uhn.fhir.jpa.term.UploadStatistics;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
+
+import ca.uhn.fhir.jpa.term.UploadStatistics;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /**
  * This service handles bulk loading concepts into the terminology service concept tables using any

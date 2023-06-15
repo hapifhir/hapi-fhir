@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class PathAndRefTest {
 

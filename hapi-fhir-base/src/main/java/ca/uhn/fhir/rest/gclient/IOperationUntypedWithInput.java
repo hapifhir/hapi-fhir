@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.rest.api.MethodOutcome;
 
 public interface IOperationUntypedWithInput<T>
         extends IClientExecutable<IOperationUntypedWithInput<T>, T> {

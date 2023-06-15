@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.util.bundle;
 
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 
 public class BundleEntryParts {
     private final RequestTypeEnum myRequestType;

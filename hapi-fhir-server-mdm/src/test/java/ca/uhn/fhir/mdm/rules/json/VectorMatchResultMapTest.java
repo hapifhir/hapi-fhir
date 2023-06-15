@@ -1,10 +1,11 @@
 package ca.uhn.fhir.mdm.rules.json;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VectorMatchResultMapTest {
     @Test

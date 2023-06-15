@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.util.StopWatch;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -13,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.collections4.comparators.ReverseComparator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -27,6 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.comparator.ComparableComparator;
+
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.util.StopWatch;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 

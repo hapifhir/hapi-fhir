@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.rest.client.impl;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -27,10 +33,6 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ClientInvocationHandlerFactory {
 

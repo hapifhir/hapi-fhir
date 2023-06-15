@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.dstu2.composite;
 
+import java.util.List;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
@@ -24,7 +26,6 @@ import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.MarkdownDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import java.util.List;
 
 /**
  * HAPI/FHIR <b>ElementDefinitionDt</b> Datatype ()

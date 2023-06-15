@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.model.api;
 
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
 
 /**
  * This interface is the parent interface for all FHIR Resource definition classes. Classes

@@ -19,14 +19,15 @@
  */
 package ca.uhn.fhir.jpa.dao.validation;
 
-import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
-import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.NUMBER;
-import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.QUANTITY;
-import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
-import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.STRING;
-import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.TOKEN;
-import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.URI;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.SearchParameter;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -38,14 +39,15 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.HapiExtensions;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.SearchParameter;
+
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.NUMBER;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.QUANTITY;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.STRING;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.TOKEN;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.URI;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParameterDaoValidator {
 

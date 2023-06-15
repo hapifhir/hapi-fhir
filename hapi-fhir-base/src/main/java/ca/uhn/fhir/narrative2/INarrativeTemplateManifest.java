@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.narrative2;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public interface INarrativeTemplateManifest {
     List<INarrativeTemplate> getTemplateByResourceName(

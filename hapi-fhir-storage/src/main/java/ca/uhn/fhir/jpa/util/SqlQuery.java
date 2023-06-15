@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import static org.apache.commons.lang3.StringUtils.trim;
-
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.util.UrlUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.commons.lang3.Validate;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.util.UrlUtil;
+
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class SqlQuery {
     private final String myThreadName = Thread.currentThread().getName();

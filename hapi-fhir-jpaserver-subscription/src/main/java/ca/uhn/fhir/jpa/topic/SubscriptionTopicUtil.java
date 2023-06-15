@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
-import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import java.util.List;
+
 import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
+
+import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 
 public class SubscriptionTopicUtil {
     public static boolean matches(

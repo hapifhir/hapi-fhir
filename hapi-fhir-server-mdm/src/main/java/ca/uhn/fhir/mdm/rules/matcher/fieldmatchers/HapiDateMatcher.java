@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
+import org.hl7.fhir.instance.model.api.IBase;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
-import org.hl7.fhir.instance.model.api.IBase;
 
 public class HapiDateMatcher implements IMdmFieldMatcher {
 

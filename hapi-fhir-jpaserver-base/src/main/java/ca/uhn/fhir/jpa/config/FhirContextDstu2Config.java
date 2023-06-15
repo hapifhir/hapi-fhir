@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class FhirContextDstu2Config {
     @Primary

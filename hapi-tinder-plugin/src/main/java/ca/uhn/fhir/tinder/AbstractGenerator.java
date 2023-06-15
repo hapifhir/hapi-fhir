@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.tinder;
 
+import java.io.IOException;
+import java.util.*;
+
+import org.apache.maven.plugin.MojoFailureException;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -26,9 +31,6 @@ import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
-import java.io.IOException;
-import java.util.*;
-import org.apache.maven.plugin.MojoFailureException;
 
 public abstract class AbstractGenerator {
 

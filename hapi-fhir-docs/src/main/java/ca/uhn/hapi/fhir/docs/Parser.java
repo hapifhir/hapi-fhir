@@ -19,12 +19,15 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import java.io.IOException;
+
+import org.hl7.fhir.r4.model.Patient;
+
+import com.google.common.collect.Sets;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import com.google.common.collect.Sets;
-import java.io.IOException;
-import org.hl7.fhir.r4.model.Patient;
 
 public class Parser {
 

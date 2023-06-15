@@ -1,12 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.websocket;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-
-import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
-import ca.uhn.fhir.jpa.subscription.FhirDstu3Util;
-import ca.uhn.fhir.jpa.util.WebsocketSubscriptionClient;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -19,6 +12,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
+
+import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
+import ca.uhn.fhir.jpa.subscription.FhirDstu3Util;
+import ca.uhn.fhir.jpa.util.WebsocketSubscriptionClient;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 // This is currently disabled as the criteria mechanism was a non-standard experiment
 @Disabled

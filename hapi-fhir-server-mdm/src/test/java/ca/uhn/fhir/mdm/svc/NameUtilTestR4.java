@@ -1,19 +1,21 @@
 package ca.uhn.fhir.mdm.svc;
 
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.mdm.util.NameUtil;
+import ca.uhn.fhir.util.FhirTerser;
+
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.util.NameUtil;
-import ca.uhn.fhir.util.FhirTerser;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.Test;
 
 public class NameUtilTestR4 {
 

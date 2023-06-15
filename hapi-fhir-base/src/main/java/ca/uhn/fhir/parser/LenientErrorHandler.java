@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * The default error handler, which logs issues but does not abort parsing, with only two

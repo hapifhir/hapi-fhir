@@ -9,13 +9,15 @@
  */
 package ca.uhn.fhir.to.util;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.i18n.Msg;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 
 public class WebUtil {
     public static final String BOOTSTRAP_ID = "bootstrap";

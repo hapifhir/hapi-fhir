@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.mdm.api.paging;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
+import java.util.Arrays;
+
+import org.springframework.data.domain.Page;
 
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import java.util.Arrays;
-import org.springframework.data.domain.Page;
+
+import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 
 /**
  * Builder to generate {@link MdmPageLinkTuple} objects, based on a given page of data and the

@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import ca.uhn.fhir.jpa.term.IZipContentsHandler;
 import java.io.IOException;
 import java.io.Reader;
+
 import org.apache.commons.io.IOUtils;
+
+import ca.uhn.fhir.jpa.term.IZipContentsHandler;
 
 public class LoincXmlFileZipContentsHandler implements IZipContentsHandler {
 

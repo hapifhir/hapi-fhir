@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.model.search;
 
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.fhir.ucum.Pair;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 
 public class HSearchIndexWriter {
     private static final Logger ourLog = LoggerFactory.getLogger(HSearchIndexWriter.class);

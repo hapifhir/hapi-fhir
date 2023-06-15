@@ -1,12 +1,13 @@
 package ca.uhn.fhir.parser;
 
+import org.hl7.fhir.dstu3.model.Person;
+import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hl7.fhir.dstu3.model.Person;
-import org.hl7.fhir.dstu3.model.Type;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 
 /** See #720 */
 @DatatypeDef(name = "ConsentTemplate")

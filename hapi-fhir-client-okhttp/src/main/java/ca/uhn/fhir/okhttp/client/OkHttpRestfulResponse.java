@@ -19,18 +19,20 @@
  */
 package ca.uhn.fhir.okhttp.client;
 
+import java.io.*;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
-import java.io.*;
-import java.util.List;
-import java.util.Map;
 import okhttp3.MediaType;
 import okhttp3.Response;
-import org.apache.commons.io.IOUtils;
 
 /**
  * Wraps an OkHttp {@link Response}

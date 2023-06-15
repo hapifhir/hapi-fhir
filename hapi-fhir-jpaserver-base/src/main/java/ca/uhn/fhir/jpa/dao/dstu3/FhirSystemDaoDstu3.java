@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import java.util.Collection;
+import java.util.List;
+import javax.persistence.TypedQuery;
+
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import java.util.Collection;
-import java.util.List;
-import javax.persistence.TypedQuery;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 

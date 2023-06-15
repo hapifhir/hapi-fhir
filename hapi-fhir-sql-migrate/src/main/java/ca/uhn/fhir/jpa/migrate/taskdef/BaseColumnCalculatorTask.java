@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.VersionEnum;
-import com.google.common.collect.ForwardingMap;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -37,12 +33,19 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
+
+import com.google.common.collect.ForwardingMap;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.VersionEnum;
 
 public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 

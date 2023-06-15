@@ -1,8 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PhoneStandardizerTest {
 

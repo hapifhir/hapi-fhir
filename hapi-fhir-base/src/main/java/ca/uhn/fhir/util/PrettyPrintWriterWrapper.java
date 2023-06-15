@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class PrettyPrintWriterWrapper implements XMLStreamWriter {

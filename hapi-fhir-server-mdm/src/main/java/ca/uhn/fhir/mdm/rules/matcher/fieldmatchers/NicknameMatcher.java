@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
+import java.util.Collection;
+import java.util.Locale;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
-import java.util.Collection;
-import java.util.Locale;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class NicknameMatcher implements IMdmFieldMatcher {
     private final NicknameSvc myNicknameSvc;

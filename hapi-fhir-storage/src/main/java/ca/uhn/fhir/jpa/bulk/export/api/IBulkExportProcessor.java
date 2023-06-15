@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.api;
 
-import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import java.util.Iterator;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public interface IBulkExportProcessor<T extends IResourcePersistentId> {
 

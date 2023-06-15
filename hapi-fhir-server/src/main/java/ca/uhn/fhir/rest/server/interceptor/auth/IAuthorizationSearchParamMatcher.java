@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**

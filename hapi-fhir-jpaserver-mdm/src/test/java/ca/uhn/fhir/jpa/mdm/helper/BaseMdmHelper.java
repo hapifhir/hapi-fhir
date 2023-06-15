@@ -1,7 +1,14 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
-import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.when;
+import java.util.function.Supplier;
+import javax.servlet.http.HttpServletRequest;
+
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -15,14 +22,9 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
-import java.util.function.Supplier;
-import javax.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.when;
 
 /**
  * How to use this Rule:

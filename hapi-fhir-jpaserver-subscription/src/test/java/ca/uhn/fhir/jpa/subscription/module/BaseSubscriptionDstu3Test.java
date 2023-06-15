@@ -1,19 +1,21 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.hl7.fhir.dstu3.model.Subscription;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.config.TestSubscriptionDstu3Config;
 import ca.uhn.fhir.util.StopWatch;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.Subscription;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
+
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = {TestSubscriptionDstu3Config.class})
 public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {

@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.jpa.bulk.imprt.api;
 
+import java.util.Date;
+import java.util.List;
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
-import java.util.Date;
-import java.util.List;
-import javax.annotation.Nonnull;
 
 public interface IBulkDataImportSvc {
 

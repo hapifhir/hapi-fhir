@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.term;
 
-import static org.apache.commons.lang3.StringUtils.isNoneBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.ValueSet;
+
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class ExpansionFilter {
 

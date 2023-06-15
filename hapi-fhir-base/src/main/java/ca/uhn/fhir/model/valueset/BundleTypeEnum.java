@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.model.valueset;
 
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
-import ca.uhn.fhir.util.CoverageIgnore;
 import java.util.HashMap;
 import java.util.Map;
+
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 @CoverageIgnore
 public enum BundleTypeEnum {

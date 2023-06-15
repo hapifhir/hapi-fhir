@@ -19,17 +19,20 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import com.google.common.annotations.VisibleForTesting;
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.HashSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 
 public class SubscriptionChannelWithHandlers implements Closeable {
     private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);

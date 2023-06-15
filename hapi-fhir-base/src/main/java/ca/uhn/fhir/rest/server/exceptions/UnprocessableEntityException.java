@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * Represents an <b>HTTP 422 Unprocessable Entity</b> response, which means that a resource was

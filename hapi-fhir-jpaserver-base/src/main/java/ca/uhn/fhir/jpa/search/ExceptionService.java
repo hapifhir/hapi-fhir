@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.search;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
-import javax.annotation.Nonnull;
 
 public class ExceptionService {
     private static final org.slf4j.Logger ourLog =

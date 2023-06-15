@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This class is used for Reduction Step for Batch2 Jobs.

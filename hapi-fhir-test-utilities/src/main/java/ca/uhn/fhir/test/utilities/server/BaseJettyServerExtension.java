@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.test.utilities.server;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -41,6 +36,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -66,6 +62,12 @@ import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.utilities.JettyUtil;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtension<?>>
         implements BeforeEachCallback, AfterEachCallback, AfterAllCallback {

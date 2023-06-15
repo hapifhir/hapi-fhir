@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.model.dstu2;
 
+import java.io.InputStream;
+import java.util.Date;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.*;
+
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
@@ -30,10 +36,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.provider.dstu2.Dstu2BundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
-import java.io.InputStream;
-import java.util.Date;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
 
 public class FhirDstu2 implements IFhirVersion {
 

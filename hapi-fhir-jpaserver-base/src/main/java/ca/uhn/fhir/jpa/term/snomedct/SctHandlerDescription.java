@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.term.snomedct;
 
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.csv.CSVRecord;
+
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import java.util.Map;
-import java.util.Set;
-import org.apache.commons.csv.CSVRecord;
 
 public final class SctHandlerDescription implements IZipContentsHandlerCsv {
     private final Map<String, TermConcept> myCode2concept;

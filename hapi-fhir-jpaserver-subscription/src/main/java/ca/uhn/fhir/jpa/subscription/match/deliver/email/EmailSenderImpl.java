@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.deliver.email;
 
-import ca.uhn.fhir.rest.server.mail.IMailSvc;
-import ca.uhn.fhir.util.StopWatch;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.Validate;
 import org.simplejavamail.api.email.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.rest.server.mail.IMailSvc;
+import ca.uhn.fhir.util.StopWatch;
 
 public class EmailSenderImpl implements IEmailSender {
 

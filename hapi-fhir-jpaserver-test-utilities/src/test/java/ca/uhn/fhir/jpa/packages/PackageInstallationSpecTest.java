@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.packages;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.util.JsonUtil;
-import java.io.IOException;
-import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class PackageInstallationSpecTest {
 

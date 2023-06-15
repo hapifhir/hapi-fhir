@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.search.reindex;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.Set;
 import javax.annotation.Nullable;
+
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public interface IInstanceReindexService {
 

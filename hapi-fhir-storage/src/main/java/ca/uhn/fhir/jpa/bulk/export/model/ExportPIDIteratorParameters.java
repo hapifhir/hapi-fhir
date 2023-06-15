@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.model;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ExportPIDIteratorParameters {
     /** The primary resource type of interest */

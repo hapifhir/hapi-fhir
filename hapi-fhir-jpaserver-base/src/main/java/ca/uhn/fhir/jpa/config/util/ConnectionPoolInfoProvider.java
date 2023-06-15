@@ -22,10 +22,12 @@ package ca.uhn.fhir.jpa.config.util;
 import java.sql.SQLException;
 import java.util.Optional;
 import javax.sql.DataSource;
-import net.ttddyy.dsproxy.support.ProxyDataSource;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.ttddyy.dsproxy.support.ProxyDataSource;
 
 /** Utility to hide complexity involved in obtaining connection pool information */
 public class ConnectionPoolInfoProvider implements IConnectionPoolInfoProvider {

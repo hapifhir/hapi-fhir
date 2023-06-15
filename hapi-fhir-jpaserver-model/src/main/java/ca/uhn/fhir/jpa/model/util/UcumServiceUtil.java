@@ -19,20 +19,22 @@
  */
 package ca.uhn.fhir.jpa.model.util;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ClasspathUtil;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import javax.annotation.Nullable;
+
 import org.fhir.ucum.Decimal;
 import org.fhir.ucum.Pair;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ClasspathUtil;
 
 /** It's a wrapper of UcumEssenceService */
 public class UcumServiceUtil {

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import java.sql.Types;
+
 import org.hibernate.dialect.PostgreSQL94Dialect;
 
 /** This dialect is recommended when using HAPI FHIR JPA on Postgresql database. */

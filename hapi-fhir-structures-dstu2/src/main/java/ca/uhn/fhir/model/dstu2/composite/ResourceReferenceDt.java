@@ -20,6 +20,10 @@
 
 package ca.uhn.fhir.model.dstu2.composite;
 
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -30,8 +34,6 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * HAPI/FHIR <b>ResourceReferenceDt</b> Datatype (A reference from one resource to another)

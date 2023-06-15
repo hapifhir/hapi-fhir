@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
-import ca.uhn.fhir.util.BaseUnrecoverableRuntimeException;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -36,6 +36,8 @@ import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.policy.TimeoutRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.CannotCreateTransactionException;
+
+import ca.uhn.fhir.util.BaseUnrecoverableRuntimeException;
 
 class RetryingMessageHandlerWrapper implements MessageHandler {
     private static final Logger ourLog =

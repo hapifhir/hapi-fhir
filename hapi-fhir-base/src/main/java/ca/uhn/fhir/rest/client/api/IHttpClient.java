@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.rest.client.api;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.util.List;
 import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 /** A HTTP Client interface. */
 public interface IHttpClient {

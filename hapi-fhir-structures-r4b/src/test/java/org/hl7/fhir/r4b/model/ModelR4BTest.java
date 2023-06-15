@@ -1,13 +1,15 @@
 package org.hl7.fhir.r4b.model;
 
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.context.FhirContext;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.context.FhirContext;
-import java.util.Set;
-import org.junit.jupiter.api.Test;
 
 public class ModelR4BTest {
 

@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.ClasspathUtil;
 import java.io.IOException;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.ClasspathUtil;
 
 public abstract class BaseTest {
 

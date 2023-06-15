@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
@@ -26,9 +31,6 @@ import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import java.util.Collection;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IFulltextSearchSvc {
 

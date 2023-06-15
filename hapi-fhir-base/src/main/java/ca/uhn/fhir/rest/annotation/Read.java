@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
+import java.lang.annotation.*;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import java.lang.annotation.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * RESTful method annotation to be used for the FHIR <a

@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 
 public interface IMdmLinkUpdaterSvc {
     IAnyResource updateLink(

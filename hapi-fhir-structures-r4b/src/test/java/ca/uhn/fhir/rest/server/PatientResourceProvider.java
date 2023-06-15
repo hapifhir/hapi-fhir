@@ -1,5 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
+import java.util.Set;
+
+import org.hl7.fhir.r4b.model.Organization;
+import org.hl7.fhir.r4b.model.Patient;
+import org.hl7.fhir.r4b.model.Practitioner;
+
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.*;
@@ -7,10 +13,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
-import java.util.Set;
-import org.hl7.fhir.r4b.model.Organization;
-import org.hl7.fhir.r4b.model.Patient;
-import org.hl7.fhir.r4b.model.Practitioner;
 
 // import ca.uhn.fhir.model.dstu.resource.Binary;
 // import ca.uhn.fhir.model.dstu2.resource.Bundle;

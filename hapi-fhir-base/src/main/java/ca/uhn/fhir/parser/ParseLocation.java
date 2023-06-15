@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 class ParseLocation implements IParseLocation {
 

@@ -1,10 +1,11 @@
 package ca.uhn.fhir.narrative;
 
+import org.hl7.fhir.r4.model.Patient;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.ElementUtil;
-import org.hl7.fhir.r4.model.Patient;
 
 @ResourceDef(profile = "http://custom_patient")
 public class CustomPatient extends Patient {

@@ -19,8 +19,10 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import static ca.uhn.fhir.jpa.provider.BaseJpaProvider.endRequest;
-import static ca.uhn.fhir.jpa.provider.BaseJpaProvider.startRequest;
+import javax.servlet.http.HttpServletRequest;
+
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -28,9 +30,9 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import javax.servlet.http.HttpServletRequest;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static ca.uhn.fhir.jpa.provider.BaseJpaProvider.endRequest;
+import static ca.uhn.fhir.jpa.provider.BaseJpaProvider.startRequest;
 
 public class ProcessMessageProvider {
 

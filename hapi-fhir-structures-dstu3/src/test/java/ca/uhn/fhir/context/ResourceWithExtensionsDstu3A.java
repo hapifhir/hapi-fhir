@@ -1,9 +1,11 @@
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.api.annotation.Extension;
 import java.util.List;
+
 import org.hl7.fhir.dstu3.model.*;
+
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.*;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id = "0001")
 public class ResourceWithExtensionsDstu3A extends DomainResource {

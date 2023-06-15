@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.client.api;
 
+import java.io.IOException;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import java.io.IOException;
 
 /**
  * This interface represents an interceptor which can be used to access (and optionally change or

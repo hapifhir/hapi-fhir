@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.rest.client.apache;
 
+import java.util.List;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.Header;
@@ -27,9 +32,6 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
-import java.util.List;
-import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 public abstract class BaseHttpClient implements IHttpClient {
 

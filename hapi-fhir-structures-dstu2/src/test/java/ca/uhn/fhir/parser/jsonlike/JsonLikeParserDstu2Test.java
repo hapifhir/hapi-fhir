@@ -1,14 +1,16 @@
 package ca.uhn.fhir.parser.jsonlike;
 
+import java.io.StringReader;
+
+import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.util.TestUtil;
-import java.io.StringReader;
-import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
 
 public class JsonLikeParserDstu2Test {
     private static FhirContext ourCtx = FhirContext.forDstu2();

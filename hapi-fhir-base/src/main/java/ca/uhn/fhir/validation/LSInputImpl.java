@@ -21,6 +21,7 @@ package ca.uhn.fhir.validation;
 
 import java.io.InputStream;
 import java.io.Reader;
+
 import org.w3c.dom.ls.LSInput;
 
 class LSInputImpl implements LSInput {

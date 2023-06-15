@@ -19,12 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
-import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
-import static org.apache.commons.lang3.StringUtils.left;
-
-import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -40,8 +34,16 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+
+import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
+import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
+import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(

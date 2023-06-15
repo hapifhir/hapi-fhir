@@ -19,7 +19,22 @@
  */
 package ca.uhn.fhir.jpa.test.config;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import java.sql.Connection;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
+
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
@@ -39,22 +54,9 @@ import ca.uhn.fhir.rest.server.mail.MailConfig;
 import ca.uhn.fhir.rest.server.mail.MailSvc;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import java.sql.Connection;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({

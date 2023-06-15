@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.i18n.Msg;
-import com.google.common.io.CountingInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import com.google.common.io.CountingInputStream;
+
+import ca.uhn.fhir.i18n.Msg;
 
 public class CountingAndLimitingInputStream extends InputStream {
     private final int myMaxBytes;

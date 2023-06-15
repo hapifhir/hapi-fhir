@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 
 /**
  * A Matcher which allows us to check that a target resource at a given link level is linked to a

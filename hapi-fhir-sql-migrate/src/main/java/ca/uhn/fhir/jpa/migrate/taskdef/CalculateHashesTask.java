@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import ca.uhn.fhir.util.VersionEnum;
 import java.sql.SQLException;
 import java.util.Set;
+
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.VersionEnum;
 
 public class CalculateHashesTask extends BaseColumnCalculatorTask {
 

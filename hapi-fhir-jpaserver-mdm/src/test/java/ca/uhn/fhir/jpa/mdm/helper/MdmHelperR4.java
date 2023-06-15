@@ -1,7 +1,11 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
-import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
-import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
+import java.util.List;
+import javax.annotation.Nonnull;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -12,11 +16,9 @@ import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import ca.uhn.test.concurrency.PointcutLatch;
-import java.util.List;
-import javax.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
+import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
 
 public class MdmHelperR4 extends BaseMdmHelper {
     @Autowired private FhirContext myFhirContext;

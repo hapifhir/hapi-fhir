@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.mail;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.Validate;
 import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;

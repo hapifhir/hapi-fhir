@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public class ResourcePidListBuilder {
     private static final IResourcePidList EMPTY_CHUNK = new EmptyResourcePidList();

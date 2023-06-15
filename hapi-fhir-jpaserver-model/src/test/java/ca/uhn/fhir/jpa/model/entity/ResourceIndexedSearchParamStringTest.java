@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class ResourceIndexedSearchParamStringTest {

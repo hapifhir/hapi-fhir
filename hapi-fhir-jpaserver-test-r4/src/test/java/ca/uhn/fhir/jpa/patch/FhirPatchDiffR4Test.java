@@ -1,10 +1,5 @@
 package ca.uhn.fhir.jpa.patch;
 
-import static ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test.extractPartValue;
-import static ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test.extractPartValuePrimitive;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -17,6 +12,12 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
+
+import static ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test.extractPartValue;
+import static ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test.extractPartValuePrimitive;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirPatchDiffR4Test {
 

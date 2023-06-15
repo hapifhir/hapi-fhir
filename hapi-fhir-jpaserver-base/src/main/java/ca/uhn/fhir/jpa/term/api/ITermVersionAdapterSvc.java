@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
+
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /**
  * This interface is used to handle differences in versions of FHIR for the terminology server. It

@@ -1,10 +1,11 @@
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.DateTimeType;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r4.model.DateTimeType;
 
 /** A wrapper class for datetimes of ambiguous fhir version */
 public class DateTimeWrapper {

@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.test.utilities.server;
 
+import javax.servlet.ServletConfig;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import javax.servlet.ServletConfig;
 
 public class MockServletUtil {
 

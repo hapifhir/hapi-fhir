@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
+
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import java.lang.reflect.Method;
-import java.util.Collection;
 
 class ServletRequestParameter implements IParameter {
     private static final org.slf4j.Logger ourLog =

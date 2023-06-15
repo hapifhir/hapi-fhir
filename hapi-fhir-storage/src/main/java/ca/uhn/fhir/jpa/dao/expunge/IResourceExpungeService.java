@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public interface IResourceExpungeService<T extends IResourcePersistentId> {
     List<T> findHistoricalVersionsOfDeletedResources(

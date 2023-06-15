@@ -1,30 +1,7 @@
 package ca.uhn.fhir.jpa.dao.validation;
 
-import static org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE;
-import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE;
-import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.DATE;
-import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.NUMBER;
-import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.QUANTITY;
-import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.REFERENCE;
-import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.STRING;
-import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
-import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.URI;
-import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
-import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PATIENT;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import java.util.stream.Stream;
+
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
@@ -41,6 +18,31 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+
+import static org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.DATE;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.NUMBER;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.QUANTITY;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.REFERENCE;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.STRING;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
+import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.URI;
+import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
+import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PATIENT;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 public class SearchParameterDaoValidatorTest {

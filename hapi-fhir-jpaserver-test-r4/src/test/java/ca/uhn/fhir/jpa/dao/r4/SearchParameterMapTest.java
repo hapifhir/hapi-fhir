@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.slf4j.LoggerFactory.getLogger;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -15,8 +15,9 @@ import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.test.BaseTest;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class SearchParameterMapTest extends BaseTest {
     private static final Logger ourLog = getLogger(SearchParameterMapTest.class);

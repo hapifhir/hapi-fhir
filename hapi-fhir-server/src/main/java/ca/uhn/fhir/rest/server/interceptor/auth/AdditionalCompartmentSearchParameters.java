@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import ca.uhn.fhir.i18n.Msg;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
+
+import ca.uhn.fhir.i18n.Msg;
 
 /**
  * This class is used in RuleBuilder, as a way to provide a compartment permission additional

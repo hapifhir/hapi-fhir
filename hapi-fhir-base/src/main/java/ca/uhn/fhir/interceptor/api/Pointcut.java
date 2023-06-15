@@ -19,12 +19,6 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.validation.ValidationResult;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +26,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.instance.model.api.IBaseConformance;
+
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.validation.ValidationResult;
 
 /**
  * Value for {@link Hook#value()}

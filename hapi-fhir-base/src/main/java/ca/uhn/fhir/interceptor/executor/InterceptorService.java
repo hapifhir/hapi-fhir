@@ -19,6 +19,13 @@
  */
 package ca.uhn.fhir.interceptor.executor;
 
+import java.lang.reflect.Method;
+import java.util.Optional;
+
+import org.apache.commons.lang3.Validate;
+
+import com.google.common.annotations.VisibleForTesting;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -26,10 +33,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import com.google.common.annotations.VisibleForTesting;
-import java.lang.reflect.Method;
-import java.util.Optional;
-import org.apache.commons.lang3.Validate;
 
 public class InterceptorService extends BaseInterceptorService<Pointcut>
         implements IInterceptorService, IInterceptorBroadcaster {

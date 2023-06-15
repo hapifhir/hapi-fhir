@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.hl7.fhir.r4.model.OperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.r4.model.OperationOutcome;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class R4ValidationTestUtil {
     private static final FhirContext ourFhirContext = FhirContext.forR4Cached();

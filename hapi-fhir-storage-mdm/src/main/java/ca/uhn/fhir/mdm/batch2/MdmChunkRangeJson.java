@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.mdm.batch2;
 
-import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 
 public class MdmChunkRangeJson extends ChunkRangeJson {
     @Nonnull

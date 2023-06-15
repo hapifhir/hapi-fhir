@@ -1,10 +1,10 @@
 package org.hl7.fhir.dstu3.model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BackboneElementDstu3Test {
     /**

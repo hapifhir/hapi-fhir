@@ -1,5 +1,26 @@
 package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
+import java.util.HashMap;
+import java.util.Properties;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.r4.model.Address;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
+import ca.uhn.fhir.util.ExtensionUtil;
+
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator.PROPERTY_GEOCODE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,24 +33,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
-import ca.uhn.fhir.util.ExtensionUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import java.util.HashMap;
-import java.util.Properties;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.r4.model.Address;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpEntity;
-import org.springframework.web.client.RestTemplate;
 
 class LoquateAddressValidatorTest {
 

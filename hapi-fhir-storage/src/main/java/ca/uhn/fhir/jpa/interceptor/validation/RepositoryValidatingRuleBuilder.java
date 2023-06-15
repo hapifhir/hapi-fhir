@@ -19,8 +19,16 @@
  */
 package ca.uhn.fhir.jpa.interceptor.validation;
 
-import static com.google.common.base.Ascii.toLowerCase;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.text.WordUtils;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -29,15 +37,9 @@ import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.rest.server.interceptor.ValidationResultEnrichingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.text.WordUtils;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static com.google.common.base.Ascii.toLowerCase;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class is used to construct rules to populate the {@link RepositoryValidatingInterceptor}.

@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
+import org.hl7.fhir.instance.model.api.IBase;
+
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.util.IdentifierUtil;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.CanonicalIdentifier;
-import org.hl7.fhir.instance.model.api.IBase;
 
 public class IdentifierMatcher implements IMdmFieldMatcher {
 

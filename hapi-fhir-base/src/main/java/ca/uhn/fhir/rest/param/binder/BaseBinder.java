@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
+import java.lang.reflect.Constructor;
+import java.util.List;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import java.lang.reflect.Constructor;
-import java.util.List;
 
 abstract class BaseBinder<T> {
     private List<Class<? extends IQueryParameterType>> myCompositeTypes;

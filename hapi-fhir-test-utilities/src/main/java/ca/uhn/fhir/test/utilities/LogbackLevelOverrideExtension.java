@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.test.utilities;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 
 /** Extension to allow temporary log elevation for a single test. */
 public class LogbackLevelOverrideExtension implements AfterEachCallback {

@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public class RuleTarget {
     IBaseResource resource;

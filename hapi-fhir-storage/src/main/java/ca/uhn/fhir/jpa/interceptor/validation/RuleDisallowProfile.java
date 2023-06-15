@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.interceptor.validation;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.util.UrlUtil;
 
 class RuleDisallowProfile extends BaseTypedRule {
     private final Set<String> myProfileUrls;

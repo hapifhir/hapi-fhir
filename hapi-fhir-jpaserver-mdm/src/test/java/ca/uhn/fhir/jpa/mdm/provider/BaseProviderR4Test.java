@@ -1,19 +1,10 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.jpa.test.Batch2JobHelper;
-import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
-import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
-import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
-import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
-import ca.uhn.fhir.mdm.util.MessageHelper;
-import com.google.common.base.Charsets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
@@ -24,6 +15,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+
+import com.google.common.base.Charsets;
+
+import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
+import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
+import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
+import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
+import ca.uhn.fhir.mdm.util.MessageHelper;
 
 public abstract class BaseProviderR4Test extends BaseMdmR4Test {
     protected MdmProviderDstu3Plus myMdmProvider;

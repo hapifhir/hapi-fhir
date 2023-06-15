@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.time.LocalDate;
+
+import org.hl7.fhir.r4.model.Organization;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import java.time.LocalDate;
-import org.hl7.fhir.r4.model.Organization;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ResourceModifiedTest {
     private FhirContext myFhirContext = FhirContext.forR4();

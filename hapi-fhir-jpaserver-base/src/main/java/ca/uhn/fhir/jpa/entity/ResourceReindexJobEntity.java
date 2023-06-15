@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.rest.api.Constants;
-import com.google.common.annotations.VisibleForTesting;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
@@ -32,9 +30,14 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r4.model.InstantType;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import ca.uhn.fhir.rest.api.Constants;
 
 /**
  * @deprecated use new batch2 reindex job

@@ -1,15 +1,17 @@
 package ca.uhn.fhir.test.utilities;
 
+import java.util.Date;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import java.util.Date;
-import java.util.UUID;
-import org.junit.jupiter.api.Test;
 
 class RandomDataHelperTest {
 

@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /** NOP implementation of {@link IServerOperationInterceptor} */
 public class ServerOperationInterceptorAdapter extends InterceptorAdapter

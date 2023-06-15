@@ -1,12 +1,13 @@
 package ca.uhn.fhir.jpa.topic;
 
+import java.util.Set;
+
+import org.hl7.fhir.r5.model.SubscriptionTopic;
+import org.junit.jupiter.api.Test;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.Set;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
-import org.junit.jupiter.api.Test;
 
 public class ActiveSubscriptionTopicCacheTest {
     @Test

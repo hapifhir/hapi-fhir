@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import java.sql.SQLException;
+import java.util.function.Supplier;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
-
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import java.sql.SQLException;
-import java.util.function.Supplier;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 public class DropColumnTest extends BaseTest {
 

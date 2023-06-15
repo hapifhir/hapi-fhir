@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.batch2.api;
 
-import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /**
  * This interface can be used to validate the parameters object supplied to start a job instance.

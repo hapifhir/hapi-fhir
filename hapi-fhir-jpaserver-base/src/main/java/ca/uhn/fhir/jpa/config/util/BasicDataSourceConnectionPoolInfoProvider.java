@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.config.util;
 
 import java.util.Optional;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 
 /** Utility class to hide the complexities of obtaining ConnectionPool information */

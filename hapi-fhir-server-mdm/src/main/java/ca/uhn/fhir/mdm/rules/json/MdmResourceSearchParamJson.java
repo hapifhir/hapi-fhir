@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
-import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.model.api.IModelJson;
 
 /** */
 public class MdmResourceSearchParamJson implements IModelJson, Iterable<String> {

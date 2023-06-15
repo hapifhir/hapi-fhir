@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.util.CoverageIgnore;
 import java.util.Arrays;
 import java.util.List;
+
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /** */
 public class UriClientParam extends BaseClientParam implements IParam {

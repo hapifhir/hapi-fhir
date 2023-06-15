@@ -1,14 +1,9 @@
 package org.hl7.fhir.dstu3.hapi.fluentpath;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
-import ca.uhn.fhir.i18n.Msg;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -17,6 +12,13 @@ import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
+import ca.uhn.fhir.i18n.Msg;
 
 public class FhirPathDstu3 implements IFhirPath {
 

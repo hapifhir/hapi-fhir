@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
+import java.util.Date;
+
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
@@ -31,9 +36,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
-import java.util.Date;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
 
 public class ReductionStepDataSink<
                 PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>

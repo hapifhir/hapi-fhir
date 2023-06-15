@@ -19,6 +19,9 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import java.io.IOException;
+import java.util.List;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -30,8 +33,6 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import java.io.IOException;
-import java.util.List;
 
 public class QuickUsage {
 

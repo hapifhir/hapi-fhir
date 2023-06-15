@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.tenant;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
@@ -27,9 +29,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlPathTokenizer;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 /**
  * This class is a tenant identification strategy which assumes that a single path element will be

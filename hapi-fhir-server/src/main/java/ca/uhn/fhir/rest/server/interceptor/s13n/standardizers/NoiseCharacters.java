@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
 
 public class NoiseCharacters {
 

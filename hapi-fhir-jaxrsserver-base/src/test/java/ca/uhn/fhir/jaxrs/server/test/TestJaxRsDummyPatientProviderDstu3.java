@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jaxrs.server.test;
 
+import org.hl7.fhir.dstu3.model.Patient;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
-import org.hl7.fhir.dstu3.model.Patient;
 
 /** A dummy patient provider exposing no methods */
 public class TestJaxRsDummyPatientProviderDstu3 extends AbstractJaxRsResourceProvider<Patient> {

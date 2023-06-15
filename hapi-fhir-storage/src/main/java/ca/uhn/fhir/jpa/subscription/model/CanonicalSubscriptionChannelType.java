@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import ca.uhn.fhir.i18n.Msg;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.exceptions.FHIRException;
+
+import ca.uhn.fhir.i18n.Msg;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public enum CanonicalSubscriptionChannelType {
     /**

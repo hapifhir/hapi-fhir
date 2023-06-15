@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.cr.config;
 
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.common.PreExpandedValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 
 /** This class loads the validation of terminology services. */
 public class PreExpandedValidationSupportLoader {

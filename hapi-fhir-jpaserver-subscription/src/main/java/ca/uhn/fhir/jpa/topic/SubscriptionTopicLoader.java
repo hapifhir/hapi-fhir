@@ -19,6 +19,17 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nonnull;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -27,15 +38,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.Logs;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
     private static final Logger ourLog = Logs.getSubscriptionTopicLog();

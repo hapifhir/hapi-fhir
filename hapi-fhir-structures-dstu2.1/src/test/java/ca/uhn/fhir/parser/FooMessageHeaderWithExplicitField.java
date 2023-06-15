@@ -1,13 +1,14 @@
 package ca.uhn.fhir.parser;
 
+import org.hl7.fhir.dstu2016may.model.Identifier;
+import org.hl7.fhir.dstu2016may.model.MessageHeader;
+import org.hl7.fhir.exceptions.FHIRException;
+
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import org.hl7.fhir.dstu2016may.model.Identifier;
-import org.hl7.fhir.dstu2016may.model.MessageHeader;
-import org.hl7.fhir.exceptions.FHIRException;
 
 @ResourceDef(name = "FooMessageHeader")
 public class FooMessageHeaderWithExplicitField extends MessageHeader {

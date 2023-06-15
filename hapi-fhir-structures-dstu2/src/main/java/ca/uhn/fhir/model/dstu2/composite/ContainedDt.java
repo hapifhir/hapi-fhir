@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.model.dstu2.composite;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
-import java.util.ArrayList;
-import java.util.List;
 
 @DatatypeDef(name = "contained")
 public class ContainedDt extends BaseContainedDt {

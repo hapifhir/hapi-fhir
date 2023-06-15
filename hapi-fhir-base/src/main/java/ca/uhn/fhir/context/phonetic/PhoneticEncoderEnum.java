@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.context.phonetic;
 
-import ca.uhn.fhir.util.PhoneticEncoderUtil;
 import org.apache.commons.codec.language.Caverphone1;
 import org.apache.commons.codec.language.Caverphone2;
 import org.apache.commons.codec.language.ColognePhonetic;
@@ -29,6 +28,8 @@ import org.apache.commons.codec.language.Metaphone;
 import org.apache.commons.codec.language.Nysiis;
 import org.apache.commons.codec.language.RefinedSoundex;
 import org.apache.commons.codec.language.Soundex;
+
+import ca.uhn.fhir.util.PhoneticEncoderUtil;
 
 public enum PhoneticEncoderEnum {
     CAVERPHONE1(new ApacheEncoder("CAVERPHONE1", new Caverphone1())),

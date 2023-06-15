@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.rest.client.apache;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
 import java.nio.charset.UnsupportedCharsetException;
+
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 
 /**
  * Apache HttpClient request content entity where the body is a FHIR resource, that will be encoded

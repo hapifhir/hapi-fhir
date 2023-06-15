@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.topic.filter;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class InMemoryTopicFilterMatcher implements ISubscriptionTopicFilterMatcher {
     private final SearchParamMatcher mySearchParamMatcher;

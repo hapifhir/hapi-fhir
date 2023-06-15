@@ -19,14 +19,16 @@
  */
 package ca.uhn.fhir.mdm.batch2;
 
+import java.util.Date;
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
-import java.util.Date;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
     private static final Logger ourLog = LoggerFactory.getLogger(MdmIdChunkProducer.class);

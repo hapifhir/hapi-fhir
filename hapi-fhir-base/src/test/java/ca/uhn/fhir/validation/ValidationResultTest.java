@@ -1,14 +1,16 @@
 package ca.uhn.fhir.validation;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+
+import ca.uhn.fhir.context.FhirContext;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-
-import ca.uhn.fhir.context.FhirContext;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 class ValidationResultTest {
 

@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import javax.servlet.http.HttpServletResponse;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IFhirResourceDaoObservation<T extends IBaseResource> extends IFhirResourceDao<T> {
 

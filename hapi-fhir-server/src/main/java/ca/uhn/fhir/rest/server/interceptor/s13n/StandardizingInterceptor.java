@@ -19,6 +19,16 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.s13n;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -35,14 +45,6 @@ import ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.LastNameStandardiz
 import ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.PhoneStandardizer;
 import ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.TextStandardizer;
 import ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.TitleStandardizer;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Interceptor
 public class StandardizingInterceptor {

@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
 
 import java.io.Reader;
 import java.io.StringReader;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

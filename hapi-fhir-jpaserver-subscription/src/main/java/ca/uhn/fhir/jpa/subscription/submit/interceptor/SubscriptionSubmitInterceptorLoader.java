@@ -19,16 +19,19 @@
  */
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.Set;
 import javax.annotation.PostConstruct;
+
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
 
 public class SubscriptionSubmitInterceptorLoader {
     private static final Logger ourLog =

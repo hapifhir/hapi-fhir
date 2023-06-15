@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.model.util;
 
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
+
+import ca.uhn.fhir.util.UrlUtil;
 
 public class CodeSystemHash {
     private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);

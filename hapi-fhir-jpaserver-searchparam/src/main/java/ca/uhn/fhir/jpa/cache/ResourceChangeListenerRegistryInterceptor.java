@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.IHapiBootOrder;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import javax.annotation.PreDestroy;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
+
+import ca.uhn.fhir.IHapiBootOrder;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 
 /**
  * This interceptor watches all resource changes on the server and compares them to the {@link

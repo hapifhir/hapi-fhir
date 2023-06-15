@@ -19,7 +19,14 @@
  */
 package ca.uhn.fhir.storage.interceptor.balp;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.AuditEvent;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -31,13 +38,8 @@ import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.AuditEvent;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * The IHE Basic Audit Logging Pattern (BALP) interceptor can be used to autopmatically generate

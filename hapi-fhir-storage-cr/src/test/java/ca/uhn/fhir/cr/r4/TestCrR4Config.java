@@ -1,10 +1,5 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.TestCrConfig;
-import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionOperationsProvider;
-import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider;
-import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
-import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseOperationsProvider;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor;
@@ -13,6 +8,12 @@ import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireRespo
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import ca.uhn.fhir.cr.TestCrConfig;
+import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionOperationsProvider;
+import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider;
+import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
+import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseOperationsProvider;
 
 @Configuration
 @Import(TestCrConfig.class)

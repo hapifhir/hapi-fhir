@@ -1,5 +1,23 @@
 package ca.uhn.fhir.rest.server.interceptor.validation.address;
 
+import java.util.Arrays;
+import java.util.Properties;
+import javax.annotation.Nonnull;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator;
+
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.ADDRESS_VALIDATION_DISABLED_HEADER;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.PROPERTY_EXTENSION_URL;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.PROPERTY_VALIDATOR_CLASS;
@@ -16,22 +34,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator;
-import java.util.Arrays;
-import java.util.Properties;
-import javax.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r4.model.Address;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 class AddressValidatingInterceptorTest {
 

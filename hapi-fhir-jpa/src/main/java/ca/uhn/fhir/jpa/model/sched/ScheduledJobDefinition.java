@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.sched;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.quartz.Job;

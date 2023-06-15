@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
-import ca.uhn.fhir.jpa.term.models.CodeSystemConceptsDeleteResult;
 import java.util.Iterator;
+
+import ca.uhn.fhir.jpa.term.models.CodeSystemConceptsDeleteResult;
 
 public interface ITermCodeSystemDeleteJobSvc {
 

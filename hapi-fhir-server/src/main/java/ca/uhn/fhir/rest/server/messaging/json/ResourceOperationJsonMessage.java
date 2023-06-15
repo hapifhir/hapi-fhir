@@ -19,10 +19,13 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
-import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 
 public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperationMessage> {
 

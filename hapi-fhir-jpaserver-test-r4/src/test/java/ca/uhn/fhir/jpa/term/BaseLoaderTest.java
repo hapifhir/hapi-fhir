@@ -1,12 +1,9 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.test.BaseTest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -15,6 +12,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.test.BaseTest;
 
 @ExtendWith(MockitoExtension.class)
 abstract class BaseLoaderTest extends BaseTest {

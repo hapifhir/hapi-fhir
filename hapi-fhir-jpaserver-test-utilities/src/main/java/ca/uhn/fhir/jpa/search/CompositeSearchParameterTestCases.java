@@ -19,14 +19,9 @@
  */
 package ca.uhn.fhir.jpa.search;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-
-import ca.uhn.fhir.jpa.dao.TestDaoSearch;
-import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import ca.uhn.fhir.util.HapiExtensions;
 import java.util.List;
 import java.util.stream.Stream;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -43,6 +38,13 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.HapiExtensions;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 
 /**
  * Test cases for composite search parameters. https://www.hl7.org/fhir/search.html#composite

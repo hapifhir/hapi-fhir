@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import java.util.HashSet;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 
 public final class OperationRuleTestUtil {
     private OperationRuleTestUtil() {}

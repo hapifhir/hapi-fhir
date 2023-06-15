@@ -1,12 +1,14 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
+
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 /** Base class for a bridge between the RI validation tools and HAPI */
 abstract class BaseValidatorBridge implements IValidatorModule {

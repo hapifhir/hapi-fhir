@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.model.api;
 
+import java.io.Serializable;
+import java.util.List;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.io.Serializable;
-import java.util.List;
 
 public interface IQueryParameterAnd<T extends IQueryParameterOr<?>> extends Serializable {
 

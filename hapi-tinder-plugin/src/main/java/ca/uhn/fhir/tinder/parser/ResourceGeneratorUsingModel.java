@@ -1,16 +1,18 @@
 package ca.uhn.fhir.tinder.parser;
 
+import java.io.File;
+import java.util.stream.Collectors;
+import java.util.*;
+
+import org.apache.commons.lang.WordUtils;
+import org.apache.maven.plugin.MojoFailureException;
+
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.SearchParameter;
-import java.io.File;
-import java.util.*;
-import java.util.stream.Collectors;
-import org.apache.commons.lang.WordUtils;
-import org.apache.maven.plugin.MojoFailureException;
 
 public class ResourceGeneratorUsingModel extends BaseStructureParser {
 

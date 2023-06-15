@@ -19,21 +19,23 @@
  */
 package ca.uhn.fhir.cli;
 
-import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
+import java.util.List;
+import java.util.Optional;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.r4.model.Parameters;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.ParametersUtil;
-import java.util.List;
-import java.util.Optional;
-import javax.annotation.Nonnull;
 import joptsimple.internal.Strings;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.r4.model.Parameters;
+
+import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
 
 public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
     public static final org.slf4j.Logger ourLog =

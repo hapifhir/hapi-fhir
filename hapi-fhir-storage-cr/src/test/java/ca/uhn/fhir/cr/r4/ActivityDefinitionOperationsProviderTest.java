@@ -1,13 +1,14 @@
 package ca.uhn.fhir.cr.r4;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionOperationsProvider;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionOperationsProvider;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ActivityDefinitionOperationsProviderTest extends BaseCrR4Test {
     @Autowired ActivityDefinitionOperationsProvider activityDefinitionOperationsProvider;

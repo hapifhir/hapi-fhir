@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.batch2.jobs.expunge;
 
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.IUrlListValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
@@ -26,9 +30,6 @@ import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ValidateUtil;
-import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class DeleteExpungeJobParametersValidator
         implements IJobParametersValidator<DeleteExpungeJobParameters> {

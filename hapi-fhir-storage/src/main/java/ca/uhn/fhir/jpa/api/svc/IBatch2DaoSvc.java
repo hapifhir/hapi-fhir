@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.api.svc;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 
 public interface IBatch2DaoSvc {
 

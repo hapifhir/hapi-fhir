@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.validation;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.commons.lang3.Validate;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValidationOptions {
 

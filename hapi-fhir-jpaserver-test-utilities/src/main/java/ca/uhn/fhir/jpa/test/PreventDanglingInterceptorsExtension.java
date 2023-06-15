@@ -19,19 +19,21 @@
  */
 package ca.uhn.fhir.jpa.test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * This test extension makes sure that tests don't leave any interceptors registered that weren't

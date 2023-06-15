@@ -1,10 +1,11 @@
 package ca.uhn.fhir.parser;
 
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.Patient;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.Patient;
 
 @ResourceDef(name = "Patient", profile = "http://acme.org//StructureDefinition/patient-with-eyes")
 public class ExtendedPatient extends Patient {

@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.batch2.jobs.importpull;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -31,8 +33,8 @@ import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.importpull.models.BulkImportFilePartitionResult;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class FetchPartitionedFilesStep
         implements IFirstJobStepWorker<

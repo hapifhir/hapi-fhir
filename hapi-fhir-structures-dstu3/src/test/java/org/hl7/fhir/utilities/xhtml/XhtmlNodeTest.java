@@ -1,8 +1,8 @@
 package org.hl7.fhir.utilities.xhtml;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class XhtmlNodeTest {
     private static final org.slf4j.Logger ourLog =

@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public class ResourcePersistentIdMap {
     private final Map<IIdType, IResourcePersistentId> myMap = new HashMap<>();

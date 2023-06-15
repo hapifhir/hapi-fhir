@@ -19,16 +19,17 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
 import ca.uhn.fhir.util.PhoneticEncoderUtil;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PhoneticEncoderMatcher implements IMdmFieldMatcher {
     private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderMatcher.class);

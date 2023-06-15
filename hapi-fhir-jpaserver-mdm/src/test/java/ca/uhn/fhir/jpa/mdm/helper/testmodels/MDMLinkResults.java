@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.mdm.helper.testmodels;
 
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import java.util.ArrayList;
 import java.util.List;
+
+import ca.uhn.fhir.jpa.entity.MdmLink;
 
 public class MDMLinkResults {
 

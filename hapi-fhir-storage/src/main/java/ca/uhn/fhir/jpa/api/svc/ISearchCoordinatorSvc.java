@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.api.svc;
 
+import java.util.List;
+import java.util.Optional;
+import javax.annotation.Nullable;
+
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -26,9 +30,6 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import java.util.List;
-import java.util.Optional;
-import javax.annotation.Nullable;
 
 public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 

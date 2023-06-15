@@ -19,6 +19,11 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.IdType;
+
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
@@ -29,9 +34,6 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import java.util.Collections;
-import java.util.List;
-import org.hl7.fhir.r4.model.IdType;
 
 // START SNIPPET: provider
 

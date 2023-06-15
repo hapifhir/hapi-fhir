@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
-import ca.uhn.fhir.model.api.annotation.ExampleSupplier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import ca.uhn.fhir.model.api.annotation.ExampleSupplier;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
 
 @Schema(
         name = "PackageInstallationSpec",

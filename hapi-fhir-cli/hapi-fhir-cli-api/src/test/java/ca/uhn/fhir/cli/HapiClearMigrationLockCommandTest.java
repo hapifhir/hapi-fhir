@@ -1,18 +1,5 @@
 package ca.uhn.fhir.cli;
 
-import static ca.uhn.fhir.jpa.migrate.HapiMigrationLock.LOCK_PID;
-import static ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc.LOCK_TYPE;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.slf4j.LoggerFactory.getLogger;
-
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
-import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
-import ca.uhn.fhir.system.HapiSystemProperties;
-import com.google.common.base.Charsets;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -21,6 +8,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.*;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
@@ -29,6 +17,21 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
+
+import com.google.common.base.Charsets;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
+import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
+import ca.uhn.fhir.system.HapiSystemProperties;
+
+import static ca.uhn.fhir.jpa.migrate.HapiMigrationLock.LOCK_PID;
+import static ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc.LOCK_TYPE;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBaseTest {
 

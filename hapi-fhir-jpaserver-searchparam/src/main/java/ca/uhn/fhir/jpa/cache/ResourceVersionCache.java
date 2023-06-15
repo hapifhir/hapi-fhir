@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.model.primitive.IdDt;
 
 /**
  * This maintains a mapping of resource id to resource version. We cache these in order to detect

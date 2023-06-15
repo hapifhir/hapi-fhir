@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.search;
 
-import static ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder.LOWERCASE_ASCIIFOLDING_NORMALIZER;
-
 import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.core.StopFilterFactory;
@@ -38,6 +36,8 @@ import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysis
 import org.hibernate.search.backend.lucene.analysis.LuceneAnalysisConfigurationContext;
 import org.hibernate.search.backend.lucene.analysis.LuceneAnalysisConfigurer;
 import org.springframework.stereotype.Component;
+
+import static ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder.LOWERCASE_ASCIIFOLDING_NORMALIZER;
 
 /**
  * Class includes configuration classes for both Lucene and Elasticsearch as they usually need to be

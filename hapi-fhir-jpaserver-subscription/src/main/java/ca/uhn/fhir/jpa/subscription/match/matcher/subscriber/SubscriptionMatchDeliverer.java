@@ -19,7 +19,13 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.messaging.MessageChannel;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -34,12 +40,8 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.messaging.MessageChannel;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SubscriptionMatchDeliverer {
     private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchDeliverer.class);

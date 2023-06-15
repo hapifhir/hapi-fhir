@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RenameColumnTaskDbSpecificTest {
 

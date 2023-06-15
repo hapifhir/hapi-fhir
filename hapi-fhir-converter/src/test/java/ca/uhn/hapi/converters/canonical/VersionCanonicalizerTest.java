@@ -1,21 +1,23 @@
 package ca.uhn.hapi.converters.canonical;
 
-import static ca.uhn.fhir.util.ExtensionUtil.getExtensionPrimitiveValues;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.util.HapiExtensions;
 import java.util.stream.Collectors;
+
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.util.HapiExtensions;
+
+import static ca.uhn.fhir.util.ExtensionUtil.getExtensionPrimitiveValues;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class VersionCanonicalizerTest {
 

@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.partition;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -30,7 +30,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
-import javax.annotation.Nonnull;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This interceptor uses the request tenant ID (as supplied to the server using {@link

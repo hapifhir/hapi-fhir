@@ -1,10 +1,11 @@
 package ca.uhn.fhir.rest.param;
 
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-
-import java.util.Map;
-import org.junit.jupiter.api.Test;
 
 class HistorySearchDateRangeParamTest {
     private final int theOffset = 100;

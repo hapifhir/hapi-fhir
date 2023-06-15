@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam {
 

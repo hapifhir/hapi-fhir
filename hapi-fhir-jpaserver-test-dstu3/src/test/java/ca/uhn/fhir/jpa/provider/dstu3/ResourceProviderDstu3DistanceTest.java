@@ -1,15 +1,17 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
 import java.net.URLEncoder;
+
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.PractitionerRole;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3Test {
 

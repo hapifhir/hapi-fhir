@@ -19,9 +19,15 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
+import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
+
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -58,14 +64,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ParametersUtil;
-import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.springframework.beans.factory.annotation.Required;
+
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 
 public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider
         implements IResourceProvider {

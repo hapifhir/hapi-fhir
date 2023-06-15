@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.triggering;
 
 import java.util.List;
 import javax.annotation.Nullable;
+
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;

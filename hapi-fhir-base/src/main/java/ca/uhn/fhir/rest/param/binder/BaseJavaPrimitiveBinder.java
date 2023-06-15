@@ -19,7 +19,8 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.Collections;
+import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -29,8 +30,8 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.util.Collections;
-import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 abstract class BaseJavaPrimitiveBinder<T> implements IParamBinder<T> {
 

@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.batch2.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JobInstanceStartRequest implements IModelJson {
 

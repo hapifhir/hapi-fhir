@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.mdm.batch2;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -29,7 +31,6 @@ import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
-import javax.annotation.Nonnull;
 
 public class LoadGoldenIdsStep
         implements IJobStepWorker<

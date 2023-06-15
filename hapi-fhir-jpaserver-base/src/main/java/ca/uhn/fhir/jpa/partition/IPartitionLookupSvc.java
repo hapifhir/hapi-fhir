@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.partition;
 
+import java.util.List;
+import javax.annotation.Nullable;
+
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import java.util.List;
-import javax.annotation.Nullable;
 
 public interface IPartitionLookupSvc {
 

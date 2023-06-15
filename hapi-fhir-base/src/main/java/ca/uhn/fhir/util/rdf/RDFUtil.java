@@ -20,6 +20,7 @@
 package ca.uhn.fhir.util.rdf;
 
 import java.io.*;
+
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;

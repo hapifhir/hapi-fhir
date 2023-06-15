@@ -1,9 +1,10 @@
 package ca.uhn.fhir.tinder.model;
 
-import ca.uhn.fhir.tinder.model.SearchParameter.Include;
-import edu.emory.mathcs.backport.java.util.Collections;
 import java.util.ArrayList;
 import java.util.List;
+
+import ca.uhn.fhir.tinder.model.SearchParameter.Include;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public abstract class BaseRootType extends BaseElement {
 

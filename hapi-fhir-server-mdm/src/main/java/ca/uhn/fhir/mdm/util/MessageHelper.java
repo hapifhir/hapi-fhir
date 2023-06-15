@@ -19,14 +19,15 @@
  */
 package ca.uhn.fhir.mdm.util;
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class MessageHelper {

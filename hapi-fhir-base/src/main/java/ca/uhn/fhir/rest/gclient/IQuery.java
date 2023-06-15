@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
+import java.util.Collection;
+
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import java.util.Collection;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 public interface IQuery<Y> extends IBaseQuery<IQuery<Y>>, IClientExecutable<IQuery<Y>, Y> {
 

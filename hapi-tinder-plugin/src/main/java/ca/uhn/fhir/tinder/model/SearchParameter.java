@@ -1,12 +1,13 @@
 package ca.uhn.fhir.tinder.model;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParameter {
 

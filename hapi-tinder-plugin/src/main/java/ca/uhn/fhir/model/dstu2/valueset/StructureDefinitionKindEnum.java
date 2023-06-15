@@ -1,8 +1,9 @@
 package ca.uhn.fhir.model.dstu2.valueset;
 
-import ca.uhn.fhir.model.api.*;
 import java.util.HashMap;
 import java.util.Map;
+
+import ca.uhn.fhir.model.api.*;
 
 public enum StructureDefinitionKindEnum {
 

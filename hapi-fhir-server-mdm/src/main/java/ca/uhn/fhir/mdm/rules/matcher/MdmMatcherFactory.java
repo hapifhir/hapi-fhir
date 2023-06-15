@@ -1,5 +1,7 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
+import org.slf4j.Logger;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
@@ -18,7 +20,6 @@ import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.PhoneticEncoderMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.SubstringStringMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
-import org.slf4j.Logger;
 
 public class MdmMatcherFactory implements IMatcherFactory {
     private static final Logger ourLog = Logs.getMdmTroubleshootingLog();

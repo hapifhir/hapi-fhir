@@ -1,9 +1,13 @@
 package ca.uhn.fhir.jaxrs.server.interceptor;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
+import java.net.URI;
+import java.util.HashMap;
+import javax.interceptor.InvocationContext;
+import javax.servlet.ServletException;
+import javax.ws.rs.core.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
@@ -11,13 +15,11 @@ import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
-import java.net.URI;
-import java.util.HashMap;
-import javax.interceptor.InvocationContext;
-import javax.servlet.ServletException;
-import javax.ws.rs.core.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.*;
 
 public class JaxRsExceptionInterceptorTest {
 

@@ -1,17 +1,19 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiDateMatcher;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.HapiDateMatcher;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DateMatcherR4Test extends BaseMatcherR4Test {
 

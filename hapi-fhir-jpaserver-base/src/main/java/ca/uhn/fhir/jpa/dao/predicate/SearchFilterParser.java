@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.dao.predicate;
 
-import ca.uhn.fhir.i18n.Msg;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
+
+import ca.uhn.fhir.i18n.Msg;
 
 public class SearchFilterParser {
 
