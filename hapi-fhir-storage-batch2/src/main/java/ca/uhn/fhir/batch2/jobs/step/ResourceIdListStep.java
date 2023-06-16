@@ -63,9 +63,10 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		Date start = data.getStart();
 		Date end = data.getEnd();
-		Integer pageSize = theStepExecutionDetails.getParameters().getBatchSize();
-		if (pageSize == null) {
-			pageSize = DEFAULT_PAGE_SIZE;
+		Integer batchSize = theStepExecutionDetails.getParameters().getBatchSize();
+		int pageSize = DEFAULT_PAGE_SIZE;
+		if (batchSize != null) {
+			pageSize = batchSize.intValue();
 		}
 
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
@@ -76,6 +77,12 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		long previousLastTime = 0L;
 		int totalIdsFound = 0;
 		int chunkCount = 0;
+
+		int maxBatchId = MAX_BATCH_OF_IDS;
+		if (batchSize != null) {
+			// we won't go over MAX_BATCH_OF_IDS
+			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
+		}
 		while (true) {
 			IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(nextStart, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
@@ -105,12 +112,12 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			previousLastTime = nextChunk.getLastDate().getTime();
 			nextStart = nextChunk.getLastDate();
 
-			while (idBuffer.size() > MAX_BATCH_OF_IDS) {
+			while (idBuffer.size() > maxBatchId) {
 				List<TypedPidJson> submissionIds = new ArrayList<>();
 				for (Iterator<TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
 					submissionIds.add(iter.next());
 					iter.remove();
-					if (submissionIds.size() == MAX_BATCH_OF_IDS) {
+					if (submissionIds.size() == maxBatchId) {
 						break;
 					}
 				}

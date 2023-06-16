@@ -156,4 +156,98 @@ public class RuleBulkExportImplTest {
 		//Then: We make no claims about type-level export on Patient.
 		assertEquals(null, verdict);
 	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterResourceTypePatient() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=123"));
+		options.setResourceTypes(Set.of("Patient"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: The patient IDs match so this is permitted
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterResourceTypePatientAndFilterHasResources() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=123"));
+		options.setResourceTypes(Set.of("Patient", "Condition", "Immunization"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: The patient IDs match so this is permitted
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterResourceTypeObservation() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=123"));
+		options.setResourceTypes(Set.of("Observation"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: The patient IDs match so this is permitted
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterNoResourceType() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=123"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: The patient IDs match so this is permitted
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterMismatch() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=456"));
+		options.setResourceTypes(Set.of("Patient"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: The patient IDs do NOT match so this is not permitted.
+		assertEquals(PolicyEnum.DENY, verdict.getDecision());
+	}
 }

@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.7.6-SNAPSHOT</version>
+	<version>6.7.8-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -893,7 +893,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.0.10</fhir_core_version>
+		<fhir_core_version>6.0.15</fhir_core_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -1950,6 +1950,11 @@
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>42.5.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.oracle.database.jdbc</groupId>
+				<artifactId>ojdbc11</artifactId>
+				<version>21.5.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
