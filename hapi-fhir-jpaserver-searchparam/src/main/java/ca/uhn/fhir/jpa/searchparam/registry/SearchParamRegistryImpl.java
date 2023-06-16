@@ -374,4 +374,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	public void setSearchParameterCanonicalizerForUnitTest(SearchParameterCanonicalizer theSearchParameterCanonicalizerForUnitTest) {
 		mySearchParameterCanonicalizer = theSearchParameterCanonicalizerForUnitTest;
 	}
+
+	@VisibleForTesting
+	public int getMaxManagedParamCountForUnitTests() {
+		return MAX_MANAGED_PARAM_COUNT;
+	}
 }
