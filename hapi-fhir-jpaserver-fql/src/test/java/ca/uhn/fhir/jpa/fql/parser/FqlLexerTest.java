@@ -3,10 +3,10 @@ package ca.uhn.fhir.jpa.fql.parser;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FqlLexerTest {
 
@@ -69,12 +69,15 @@ public class FqlLexerTest {
 			  name.family
 			  """;
 		FqlLexer fqlLexer = new FqlLexer(input);
-		List<String> allTokens = fqlLexer.allTokens(FqlParser.WHERE_CLAUSE_CHARACTERS);
-		assertThat(allTokens.toString(), allTokens, contains(
-			"from", "Patient", "search",
-			"_has:Observation:subject:device.identifier", "=", "'1234-5'",
-			"select", "name.family"
-		));
+
+		assertEquals("from", fqlLexer.getNextToken(FqlLexerOptions.DEFAULT).getToken());
+		assertEquals("Patient", fqlLexer.getNextToken(FqlLexerOptions.DEFAULT).getToken());
+		assertEquals("search", fqlLexer.getNextToken(FqlLexerOptions.DEFAULT).getToken());
+		assertEquals("_has:Observation:subject:device.identifier", fqlLexer.getNextToken(FqlLexerOptions.SEARCH_PARAMETER_NAME).getToken());
+		assertEquals("=", fqlLexer.getNextToken(FqlLexerOptions.DEFAULT).getToken());
+		assertEquals("'1234-5'", fqlLexer.getNextToken(FqlLexerOptions.DEFAULT).getToken());
+		assertEquals("select", fqlLexer.getNextToken(FqlLexerOptions.DEFAULT).getToken());
+		assertEquals("name.family", fqlLexer.getNextToken(FqlLexerOptions.DEFAULT).getToken());
 
 	}
 
@@ -97,5 +100,43 @@ public class FqlLexerTest {
 		));
 	}
 
+	@Test
+	public void testFhirPathSelector() {
+		String input = """
+					from Patient
+					select 
+						( Observation.value.ofType ( Quantity ) ).unit,
+						name.family.length()
+			""";
+		FqlLexer lexer = new FqlLexer(input);
+		assertEquals("from", lexer.getNextToken().getToken());
+		assertEquals("Patient", lexer.getNextToken().getToken());
+		assertEquals("select", lexer.getNextToken().getToken());
+		assertEquals("( Observation.value.ofType ( Quantity ) ).unit", lexer.getNextToken(FqlLexerOptions.FHIRPATH_EXPRESSION).getToken());
+		assertEquals(",", lexer.getNextToken().getToken());
+		assertEquals("name.family.length()", lexer.getNextToken(FqlLexerOptions.FHIRPATH_EXPRESSION).getToken());
+	}
+
+
+	@Test
+	public void testOptionChangeIsRespected() {
+		// Setup
+		String input = """
+					from Patient
+					select 
+						( Observation.value.ofType ( Quantity ) ).unit,
+						name.family.length()
+			""";
+		FqlLexer lexer = new FqlLexer(input);
+		assertEquals("from", lexer.getNextToken().getToken());
+		assertEquals("Patient", lexer.getNextToken().getToken());
+		assertEquals("select", lexer.getNextToken().getToken());
+
+		// Test + Verify
+		assertEquals("(", lexer.peekNextToken(FqlLexerOptions.DEFAULT).getToken());
+		assertEquals("( Observation.value.ofType ( Quantity ) ).unit", lexer.peekNextToken(FqlLexerOptions.FHIRPATH_EXPRESSION).getToken());
+		assertEquals("(", lexer.peekNextToken(FqlLexerOptions.DEFAULT).getToken());
+		assertEquals("( Observation.value.ofType ( Quantity ) ).unit", lexer.getNextToken(FqlLexerOptions.FHIRPATH_EXPRESSION).getToken());
+	}
 
 }

@@ -37,10 +37,13 @@ class FqlLexer {
 	private int myPosition = 0;
 	private int myLine = 0;
 	private int myColumn = 0;
+	private int myParenDepth = 0;
 	private LexerState myState = LexerState.INITIAL;
 	private String myNextToken;
 	private int myNextTokenLine;
 	private int myNextTokenColumn;
+	private int myNextTokenStartPosition;
+	private FqlLexerOptions myNextTokenOptions;
 
 	public FqlLexer(String theInput) {
 		myInput = theInput.toCharArray();
@@ -51,43 +54,45 @@ class FqlLexer {
 	 */
 	@Nonnull
 	public FqlLexerToken getNextToken() {
-		return getNextToken(null);
+		return getNextToken(FqlLexerOptions.DEFAULT);
 	}
 
 	/**
 	 * Returns <code>null</code> when no tokens remain
 	 */
 	@Nonnull
-	public FqlLexerToken getNextToken(Set<Character> theCharacters) {
-		lexNextToken(theCharacters);
+	public FqlLexerToken getNextToken(@Nonnull FqlLexerOptions theOptions) {
+		lexNextToken(theOptions);
 		Validate.notBlank(myNextToken, "No next token is available");
 		FqlLexerToken token = new FqlLexerToken(myNextToken, myNextTokenLine, myNextTokenColumn);
 		myNextToken = null;
 		return token;
 	}
 
-	private void lexNextToken() {
-		lexNextToken(null);
-	}
-
-	private void lexNextToken(Set<Character> theCharacters) {
+	private void lexNextToken(@Nonnull FqlLexerOptions theOptions) {
 		if (myNextToken != null) {
-			return;
+			if (theOptions == myNextTokenOptions) {
+				// Already have a token, no action needed
+				return;
+			} else {
+				// Rewind because the options have changed
+				myNextToken = null;
+				myPosition = myNextTokenStartPosition;
+			}
 		}
 
 		while (true) {
 			if (myPosition == myInput.length) {
 				if (myBuffer.length() > 0) {
 					// FIXME: make sure we're in an appropriate state
-					myNextToken = myBuffer.toString();
-					myBuffer.setLength(0);
+					setNextToken(myBuffer.toString());
 				}
 				return;
 			}
 
 			char nextChar = myInput[myPosition];
 
-			handleNextChar(theCharacters, nextChar);
+			handleNextChar(theOptions, nextChar);
 
 			if (myNextToken != null) {
 				return;
@@ -103,37 +108,51 @@ class FqlLexer {
 		}
 	}
 
-	private void handleNextChar(Set<Character> theCharacters, char nextChar) {
+	private void setNextToken(String theNextToken) {
+		myNextToken = theNextToken;
+		myBuffer.setLength(0);
+		myState = LexerState.INITIAL;
+	}
+
+	private void handleNextChar(@Nonnull FqlLexerOptions theOptions, final char theNextChar) {
+
+		if (theOptions.isSlurpParens()) {
+			if (theNextChar == '(') {
+				myParenDepth++;
+			} else if (theNextChar == ')') {
+				myParenDepth--;
+			}
+		}
+
 		switch (myState) {
 			case INITIAL: {
-				if (isWhitespace(nextChar)) {
+				if (isWhitespace(theNextChar)) {
 					return;
 				}
 
-				switch (nextChar) {
-					case ',':
-					case '=':
-					case '(':
-					case ')':
-					case '|':
-					case ':':
-					case '*':
-						myNextToken = Character.toString(nextChar);
-						myPosition++;
-						return;
-					case '\'':
-						myNextTokenLine = myLine;
-						myNextTokenColumn = myColumn;
-						myState = LexerState.IN_QUOTED_STRING;
-						myBuffer.append(nextChar);
-						return;
+				if (theNextChar == '\'') {
+					myNextTokenLine = myLine;
+					myNextTokenColumn = myColumn;
+					myState = LexerState.IN_QUOTED_STRING;
+					myBuffer.append(theNextChar);
+					return;
 				}
 
-				if (isTokenCharacter(theCharacters, nextChar)) {
+				if (theOptions.getSingleCharTokenCharacters().contains(theNextChar)) {
+					myNextTokenStartPosition = myPosition;
+					myNextTokenOptions = theOptions;
+					setNextToken(Character.toString(theNextChar));
+					myPosition++;
+					return;
+				}
+
+				if (theOptions.getMultiCharTokenCharacters().contains(theNextChar)) {
+					myNextTokenStartPosition = myPosition;
+					myNextTokenOptions = theOptions;
 					myNextTokenLine = myLine;
 					myNextTokenColumn = myColumn;
 					myState = LexerState.IN_TOKEN;
-					myBuffer.append(nextChar);
+					myBuffer.append(theNextChar);
 					return;
 				}
 
@@ -141,27 +160,28 @@ class FqlLexer {
 			}
 
 			case IN_TOKEN: {
-				if (isTokenCharacter(theCharacters, nextChar)) {
-					myBuffer.append(nextChar);
+				if (theOptions.getMultiCharTokenCharacters().contains(theNextChar)) {
+					myBuffer.append(theNextChar);
 					return;
 				}
 
-				myNextToken = myBuffer.toString();
-				myBuffer.setLength(0);
-				myState = LexerState.INITIAL;
+				if (myParenDepth > 0) {
+					myBuffer.append(theNextChar);
+					return;
+				}
+
+				setNextToken(myBuffer.toString());
 				return;
 			}
 
 			case IN_QUOTED_STRING: {
-				if (nextChar == '\'') {
-					myBuffer.append(nextChar);
+				if (theNextChar == '\'') {
+					myBuffer.append(theNextChar);
 					myPosition++;
-					myNextToken = myBuffer.toString();
-					myBuffer.setLength(0);
-					myState = LexerState.INITIAL;
+					setNextToken(myBuffer.toString());
 					return;
 				}
-				if (nextChar == '\\') {
+				if (theNextChar == '\\') {
 					if (myPosition < myInput.length - 1) {
 						char followingChar = myInput[myPosition + 1];
 						myBuffer.append(followingChar);
@@ -170,63 +190,48 @@ class FqlLexer {
 					}
 					break;
 				}
-				myBuffer.append(nextChar);
+				myBuffer.append(theNextChar);
 				return;
 			}
 
 		}
 
-		throw new DataFormatException("Unexpected character at position " + describePosition() + ": '" + nextChar + "' (" + (int) nextChar + ")");
+		throw new DataFormatException("Unexpected character at position " + describePosition() + ": '" + theNextChar + "' (" + (int) theNextChar + ")");
 	}
 
 	private String describePosition() {
 		return "[line " + myLine + ", column " + myColumn + "]";
 	}
 
-	private boolean isTokenCharacter(@Nullable Set<Character> theCharacters, char theChar) {
-		if (theCharacters != null) {
-			return theCharacters.contains(theChar);
-		}
-
-		switch (theChar) {
-			case '.':
-			case '[':
-			case ']':
-			case '_':
-				return true;
-			default:
-				return Character.isLetterOrDigit(theChar);
-		}
-	}
-
 	public List<String> allTokens() {
-		return allTokens(null);
+		return allTokens(FqlLexerOptions.DEFAULT);
 	}
 
-	public List<String> allTokens(Set<Character> theCharacters) {
+	public List<String> allTokens(@Nonnull FqlLexerOptions theOptions) {
 		ArrayList<String> retVal = new ArrayList<>();
-		while (hasNextToken(theCharacters)) {
-			retVal.add(getNextToken(theCharacters).toString());
+		while (hasNextToken(theOptions)) {
+			retVal.add(getNextToken(theOptions).toString());
 		}
 		return retVal;
 	}
 
-	public boolean hasNextToken() {
-		return hasNextToken(null);
-	}
-
-	public boolean hasNextToken(Set<Character> theCharacters) {
-		lexNextToken(theCharacters);
+	public boolean hasNextToken(@Nonnull FqlLexerOptions theOptions) {
+		lexNextToken(theOptions);
 		return myNextToken != null;
 	}
 
+	/**
+	 * This method should only be called if there is a token already available
+	 * (meaning that {@link #hasNextToken(FqlLexerOptions)
+	 * has been called).
+	 */
 	public void consumeNextToken() {
 		Validate.isTrue(myNextToken != null);
 		myNextToken = null;
 	}
 
-	public FqlLexerToken peekNextToken() {
-		lexNextToken();
+	public FqlLexerToken peekNextToken(FqlLexerOptions theOptions) {
+		lexNextToken(theOptions);
 		if (myNextToken == null) {
 			return null;
 		}

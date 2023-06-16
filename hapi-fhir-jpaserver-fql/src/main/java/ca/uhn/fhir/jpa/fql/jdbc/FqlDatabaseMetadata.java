@@ -19,18 +19,28 @@
  */
 package ca.uhn.fhir.jpa.fql.jdbc;
 
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.executor.StaticFqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.collect.Lists;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Parameters;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
+import java.sql.SQLException;
+import java.util.List;
 
 public class FqlDatabaseMetadata implements DatabaseMetaData {
 	private final Connection myConnection;
+	private final FqlRestClient myRestClient;
 
-	public FqlDatabaseMetadata(Connection theConnection) {
+	public FqlDatabaseMetadata(Connection theConnection, FqlRestClient theRestClient) {
 		myConnection = theConnection;
+		myRestClient = theRestClient;
 	}
 
 	@Override
@@ -634,19 +644,23 @@ public class FqlDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws UnsupportedOperationException {
-		// FIXME: implement
-		throw new UnsupportedOperationException();
+	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
+		Parameters input = new Parameters();
+		input.addParameter(FqlRestProvider.PARAM_ACTION, new CodeType(FqlRestProvider.PARAM_ACTION_INTROSPECT_TABLES));
+		IFqlExecutionResult outcome = myRestClient.execute(input, false);
+		return new FqlResultSet(outcome);
 	}
 
 	@Override
 	public ResultSet getSchemas() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+		// Empty result set
+		return new FqlResultSet();
 	}
 
 	@Override
 	public ResultSet getCatalogs() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+		// Empty result set
+		return new FqlResultSet();
 	}
 
 	@Override
@@ -655,8 +669,11 @@ public class FqlDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws UnsupportedOperationException, SQLException {
+		Parameters input = new Parameters();
+		input.addParameter(FqlRestProvider.PARAM_ACTION, new CodeType(FqlRestProvider.PARAM_ACTION_INTROSPECT_COLUMNS));
+		IFqlExecutionResult outcome = myRestClient.execute(input, false);
+		return new FqlResultSet(outcome);
 	}
 
 	@Override

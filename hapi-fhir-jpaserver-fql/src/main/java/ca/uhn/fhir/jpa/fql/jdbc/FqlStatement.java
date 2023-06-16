@@ -20,6 +20,11 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -120,7 +125,16 @@ class FqlStatement implements Statement {
 		if (getMaxRows() > 0) {
 			limit = getMaxRows();
 		}
-		IFqlExecutionResult result = myConnection.getClient().execute(sql, limit);
+
+		Parameters input = new Parameters();
+		input.addParameter(FqlRestProvider.PARAM_ACTION, new CodeType(FqlRestProvider.PARAM_ACTION_SEARCH));
+		input.addParameter(FqlRestProvider.PARAM_QUERY, new StringType(sql));
+		if (limit != null) {
+			input.addParameter(FqlRestProvider.PARAM_LIMIT, new IntegerType(limit));
+		}
+		input.addParameter(FqlRestProvider.PARAM_FETCH_SIZE, new IntegerType(myFetchSize));
+
+		IFqlExecutionResult result = myConnection.getClient().execute(input, true);
 
 		myResultSet = new FqlResultSet(result, this);
 		return true;

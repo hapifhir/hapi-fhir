@@ -101,8 +101,8 @@ class FqlConnection implements Connection {
 	}
 
 	@Override
-	public DatabaseMetaData getMetaData() throws SQLException {
-		return new FqlDatabaseMetadata(this);
+	public DatabaseMetaData getMetaData() {
+		return new FqlDatabaseMetadata(this, myClient);
 	}
 
 	@Override

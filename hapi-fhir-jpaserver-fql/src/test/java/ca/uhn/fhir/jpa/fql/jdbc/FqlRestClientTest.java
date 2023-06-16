@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.fql.executor.EmptyFqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.executor.StaticFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
@@ -13,6 +13,11 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +38,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,6 +47,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class FqlRestClientTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final String USERNAME = "some-username";
+	private static final String PASSWORD = "some-password";
 	private final HeaderCaptureInterceptor myHeaderCaptureInterceptor = new HeaderCaptureInterceptor();
 	@Mock
 	private IFqlExecutor myFqlExecutor;
@@ -60,20 +68,28 @@ public class FqlRestClientTest {
 	private ArgumentCaptor<RequestDetails> myRequestDetailsCaptor;
 	@Captor
 	private ArgumentCaptor<Integer> myLimitCaptor;
+	private FqlRestClient myClient;
 
 	@BeforeEach
 	public void beforeEach() {
 		myHeaderCaptureInterceptor.clear();
+		myClient = new FqlRestClient(myServer.getBaseUrl(), USERNAME, PASSWORD);
+	}
+
+	@AfterEach
+	public void afterEach() {
+		myClient.close();
 	}
 
 
 	@Test
-	public void testClient() throws SQLException {
+	public void testExecuteSearchAndContinuation() throws SQLException {
 		String sql = "from Patient select name.family, name.given where name.family = 'Simpson'";
 		String searchId = "my-search-id";
 		FqlStatement statement = createFakeStatement();
 		when(myMockFqlResult0.getStatement()).thenReturn(statement);
 		when(myMockFqlResult0.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
+		when(myMockFqlResult0.getColumnTypes()).thenReturn(List.of(IFqlExecutionResult.DataTypeEnum.STRING, IFqlExecutionResult.DataTypeEnum.STRING));
 		when(myMockFqlResult0.hasNext()).thenReturn(true, true, true);
 		when(myMockFqlResult0.getNextRow()).thenReturn(
 			new IFqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
@@ -94,14 +110,16 @@ public class FqlRestClientTest {
 		when(myMockFqlResult1.getSearchId()).thenReturn(searchId);
 		when(myMockFqlResult1.getLimit()).thenReturn(123);
 		when(myFqlExecutor.executeContinuation(any(), eq(searchId), eq(4), eq(123), any())).thenReturn(myMockFqlResult1);
-		when(myFqlExecutor.executeContinuation(any(), eq(searchId), eq(8), eq(123), any())).thenReturn(new EmptyFqlExecutionResult(searchId));
+		when(myFqlExecutor.executeContinuation(any(), eq(searchId), eq(8), eq(123), any())).thenReturn(new StaticFqlExecutionResult(searchId));
 
-		String username = "some-username";
-		String password = "some-password";
+		myClient.setFetchSize(2);
+		Parameters input = new Parameters();
+		input.addParameter(FqlRestProvider.PARAM_ACTION, new CodeType(FqlRestProvider.PARAM_ACTION_SEARCH));
+		input.addParameter(FqlRestProvider.PARAM_QUERY, new StringType(sql));
+		input.addParameter(FqlRestProvider.PARAM_LIMIT, new IntegerType(123));
+		input.addParameter(FqlRestProvider.PARAM_FETCH_SIZE, new IntegerType(2));
 
-		FqlRestClient client = new FqlRestClient(myServer.getBaseUrl(), username, password);
-		client.setFetchSize(2);
-		IFqlExecutionResult result = client.execute(sql, 123);
+		IFqlExecutionResult result = myClient.execute(input, true);
 		IFqlExecutionResult.Row nextRow;
 		assertThat(result.getColumnNames().toString(), result.getColumnNames(), contains("name.family", "name.given"));
 		assertTrue(result.hasNext());
@@ -124,7 +142,7 @@ public class FqlRestClientTest {
 
 		verify(myFqlExecutor, times(1)).executeInitialSearch(myStatementCaptor.capture(), myLimitCaptor.capture(), myRequestDetailsCaptor.capture());
 		assertEquals(sql, myStatementCaptor.getValue());
-		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
+		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((USERNAME + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8));
 
 
 		String actual = myHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);

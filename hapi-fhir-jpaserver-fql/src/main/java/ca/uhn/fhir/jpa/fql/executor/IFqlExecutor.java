@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.fql.executor;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
+
 public interface IFqlExecutor {
 
 	/**
@@ -44,4 +47,20 @@ public interface IFqlExecutor {
 	 * @param theStartingOffset The row offset count for the first result to return. This should be set to one higher than the last value returned by {@link IFqlExecutionResult.Row#getRowOffset()}.
 	 */
 	IFqlExecutionResult executeContinuation(FqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails);
+
+	/**
+	 * Provides a list of "tables", which are actually resource types, in order to
+	 * support the JCBC {@link java.sql.DatabaseMetaData#getTables(String, String, String, String[])}
+	 * query.
+	 */
+	IFqlExecutionResult introspectTables();
+
+	/**
+	 * Provides a list of "columns", which are actually selected valid FHIRPath expressions
+	 * that can be selected on a resource
+	 *
+	 * @param theTableName The table name or null
+	 * @param theColumnName The column name or null
+	 */
+	IFqlExecutionResult introspectColumns(@Nullable String theTableName, @Nullable String theColumnName);
 }

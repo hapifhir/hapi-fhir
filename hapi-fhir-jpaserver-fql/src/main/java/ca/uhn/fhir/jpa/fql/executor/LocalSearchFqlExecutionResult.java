@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Firely Query Language
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -12,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class LocalFqlExecutionResult implements IFqlExecutionResult {
+public class LocalSearchFqlExecutionResult implements IFqlExecutionResult {
 
 	private final IBundleProvider mySearchResult;
 	private final IFhirPath myFhirPath;
@@ -26,7 +45,7 @@ public class LocalFqlExecutionResult implements IFqlExecutionResult {
 	private boolean myExhausted = false;
 	private int myNextResourceSearchRow;
 
-	public LocalFqlExecutionResult(FqlStatement theStatement, IBundleProvider theSearchResult, IFhirPath theFhirPath, Integer theLimit, int theInitialOffset) {
+	public LocalSearchFqlExecutionResult(FqlStatement theStatement, IBundleProvider theSearchResult, IFhirPath theFhirPath, Integer theLimit, int theInitialOffset) {
 		myStatement = theStatement;
 		mySearchResult = theSearchResult;
 		myFhirPath = theFhirPath;
@@ -43,6 +62,20 @@ public class LocalFqlExecutionResult implements IFqlExecutionResult {
 				.stream()
 				.map(FqlStatement.SelectClause::getAlias)
 				.collect(Collectors.toUnmodifiableList());
+	}
+
+	@Override
+	public List<DataTypeEnum> getColumnTypes() {
+		/*
+		 * For now we assume that all datatypes returned by select clauses are all
+		 * strings. It'd be nice to do something more nuanced here, but it's hard to
+		 * determine datatypes from a fhirpath expression
+		 */
+		ArrayList<DataTypeEnum> retVal = new ArrayList<>();
+		for (int i = 0; i < myStatement.getSelectClauses().size(); i++) {
+			retVal.add(DataTypeEnum.STRING);
+		}
+		return retVal;
 	}
 
 	@Override
@@ -113,7 +146,7 @@ public class LocalFqlExecutionResult implements IFqlExecutionResult {
 		fetchNextResource();
 		Validate.isTrue(myNextResource != null, "No more results");
 
-		List<String> values = new ArrayList<>();
+		List<Object> values = new ArrayList<>();
 		for (FqlStatement.SelectClause nextColumn : myStatement.getSelectClauses()) {
 			List<IPrimitiveType> nextPrimitive = myFhirPath.evaluate(myNextResource, nextColumn.getClause(), IPrimitiveType.class);
 			String value = null;

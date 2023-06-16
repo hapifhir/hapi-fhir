@@ -39,7 +39,6 @@ public class FqlDriver implements Driver {
 	public Connection connect(String theUrl, Properties theProperties) throws SQLException {
 		String serverUrl = theUrl.substring(URL_PREFIX.length());
 
-//		URLConnection connection = new URLConnection(new URL(serverUrl + "/$"));
 		FqlConnection connection = new FqlConnection(serverUrl);
 		connection.setUsername(theProperties.getProperty("user", null));
 		connection.setPassword(theProperties.getProperty("password", null));

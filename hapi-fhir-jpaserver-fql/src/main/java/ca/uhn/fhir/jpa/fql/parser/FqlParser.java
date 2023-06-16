@@ -27,16 +27,9 @@ import org.apache.commons.lang3.Validate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Set;
 
 public class FqlParser {
 
-	public static final Set<Character> WHERE_CLAUSE_CHARACTERS = Set.of(
-		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-		'_', ':', '.'
-	);
 	private final FqlLexer myLexer;
 	private final FhirContext myFhirContext;
 	private BaseState myState;
@@ -56,8 +49,8 @@ public class FqlParser {
 		Validate.isTrue(myStatement == null, "Already completed parsing");
 		myStatement = new FqlStatement();
 
-		while (myLexer.hasNextToken(myState.getTokenCharacters())) {
-			FqlLexerToken nextToken = myLexer.getNextToken(myState.getTokenCharacters());
+		while (myLexer.hasNextToken(myState.getLexerOptions())) {
+			FqlLexerToken nextToken = myLexer.getNextToken(myState.getLexerOptions());
 			myState.consume(nextToken);
 		}
 
@@ -74,8 +67,8 @@ public class FqlParser {
 	}
 
 	@Nonnull
-	private FqlLexerToken getNextTokenRequired() {
-		if (!myLexer.hasNextToken()) {
+	private FqlLexerToken getNextTokenRequired(@Nonnull FqlLexerOptions theOptions) {
+		if (!myLexer.hasNextToken(theOptions)) {
 			throw newExceptionUnexpectedToken(null);
 		}
 		return myLexer.getNextToken();
@@ -126,6 +119,12 @@ public class FqlParser {
 		}
 	}
 
+	private static void validateNotPresent(Object theValue, FqlLexerToken theKeyword) {
+		if (theValue != null) {
+			throw newExceptionUnexpectedToken(theKeyword);
+		}
+	}
+
 	private enum WhereModeEnum {
 		WHERE,
 		SEARCH
@@ -134,16 +133,8 @@ public class FqlParser {
 	/**
 	 * No tokens consumed yet
 	 */
-	public class InitialState extends BaseState {
-
-		@Override
-		void consume(FqlLexerToken theToken) {
-			if (theToken.asKeyword().equals("FROM")) {
-				myState = new StateFromStart();
-			} else {
-				throw newExceptionUnexpectedToken(theToken);
-			}
-		}
+	public class InitialState extends BaseRootState {
+		// nothing
 	}
 
 	/**
@@ -172,6 +163,11 @@ public class FqlParser {
 	 * We're in the select statement
 	 */
 	public class StateInSelect extends BaseState {
+		@Nonnull
+		@Override
+		public FqlLexerOptions getLexerOptions() {
+			return FqlLexerOptions.FHIRPATH_EXPRESSION;
+		}
 
 		@Override
 		void consume(FqlLexerToken theToken) {
@@ -181,7 +177,7 @@ public class FqlParser {
 		}
 	}
 
-	private class StateInSelectAfterClause extends BaseState {
+	private class StateInSelectAfterClause extends BaseRootState {
 		private final FqlStatement.SelectClause mySelectClause;
 
 		public StateInSelectAfterClause(FqlStatement.SelectClause theSelectClause) {
@@ -191,17 +187,15 @@ public class FqlParser {
 		@Override
 		void consume(FqlLexerToken theToken) {
 			if (theToken.getToken().equals(":")) {
-				FqlLexerToken nextToken = getNextTokenRequired();
+				FqlLexerToken nextToken = getNextTokenRequired(getLexerOptions());
 				String clause = nextToken.asString();
 				String alias = mySelectClause.getClause();
 				mySelectClause.setAlias(alias);
 				mySelectClause.setClause(clause);
 			} else if (theToken.getToken().equals(",")) {
 				myState = new StateInSelect();
-			} else if (theToken.asKeyword().equals("LIMIT")) {
-				myState = new LimitState();
 			} else {
-				throw newExceptionUnexpectedToken(theToken);
+				super.consume(theToken);
 			}
 		}
 	}
@@ -213,10 +207,14 @@ public class FqlParser {
 			myWhereMode = theWhereMode;
 		}
 
-		@Nullable
+		@Nonnull
 		@Override
-		public Set<Character> getTokenCharacters() {
-			return WHERE_CLAUSE_CHARACTERS;
+		public FqlLexerOptions getLexerOptions() {
+			if (myWhereMode == WhereModeEnum.WHERE) {
+				return FqlLexerOptions.FHIRPATH_EXPRESSION;
+			} else {
+				return FqlLexerOptions.SEARCH_PARAMETER_NAME;
+			}
 		}
 
 		@Override
@@ -247,7 +245,7 @@ public class FqlParser {
 				myWhereClause.setOperator(FqlStatement.WhereClauseOperator.EQUALS);
 				myState = new StateInWhereAfterOperatorEquals(myWhereMode, myWhereClause);
 			} else if ("IN".equals(theToken.asKeyword())) {
-				FqlLexerToken nextToken = getNextTokenRequired();
+				FqlLexerToken nextToken = getNextTokenRequired(getLexerOptions());
 				if (!nextToken.getToken().equals("(")) {
 					throw newExceptionUnexpectedTokenExpectToken(theToken, "(");
 				}
@@ -293,18 +291,18 @@ public class FqlParser {
 		void consume(FqlLexerToken theToken) {
 			myWhereClause.addRight(theToken.getToken());
 
-			if (myLexer.peekNextToken() != null) {
-				if (myLexer.peekNextToken().getToken().equals("|")) {
+			if (myLexer.peekNextToken(getLexerOptions()) != null) {
+				if (myLexer.peekNextToken(getLexerOptions()).getToken().equals("|")) {
 					myLexer.consumeNextToken();
 					return;
-				} else if (myLexer.peekNextToken().getToken().equals(")")) {
+				} else if (myLexer.peekNextToken(getLexerOptions()).getToken().equals(")")) {
 					myLexer.consumeNextToken();
 					myState = new StateAfterWhere(myWhereMode);
 					return;
 				}
 			}
 
-			throw newExceptionUnexpectedToken(myLexer.peekNextToken());
+			throw newExceptionUnexpectedToken(myLexer.peekNextToken(getLexerOptions()));
 		}
 	}
 
@@ -351,6 +349,12 @@ public class FqlParser {
 			} else if (keyword.equals("SELECT")) {
 				validateNotPresent(myStatement.getSelectClauses(), theToken);
 				myState = new StateInSelect();
+			} else if (keyword.equals("FROM")) {
+				validateNotPresent(myStatement.getFromResourceName(), theToken);
+				myState = new StateFromStart();
+			} else if (theToken.asKeyword().equals("LIMIT")) {
+				validateNotPresent(myStatement.getLimit(), theToken);
+				myState = new LimitState();
 			} else {
 				throw newExceptionUnexpectedTokenExpectToken(theToken, "SELECT");
 			}
@@ -361,9 +365,9 @@ public class FqlParser {
 	private abstract static class BaseState {
 		abstract void consume(FqlLexerToken theToken);
 
-		@Nullable
-		public Set<Character> getTokenCharacters() {
-			return null;
+		@Nonnull
+		public FqlLexerOptions getLexerOptions() {
+			return FqlLexerOptions.DEFAULT;
 		}
 	}
 

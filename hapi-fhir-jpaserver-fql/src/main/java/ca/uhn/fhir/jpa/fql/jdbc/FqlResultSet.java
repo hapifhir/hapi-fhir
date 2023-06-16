@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.executor.StaticFqlExecutionResult;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -41,21 +42,40 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 class FqlResultSet implements ResultSet {
 
 	private final IFqlExecutionResult myResult;
-	private List<String> myNextRow;
+	private final Statement myStatement;
+	private List<Object> myNextRow;
 	private FqlResultSetMetadata myMetadata;
 	private Map<String, Integer> myColumnNameToIndex;
-	private final Statement myStatement;
 	private int myRowCount;
+	private Object myLastValue;
 
+	/**
+	 * Empty Constructor
+	 */
+	public FqlResultSet() {
+		this(new StaticFqlExecutionResult(null));
+	}
+
+	/**
+	 * Constructor
+	 */
+	public FqlResultSet(IFqlExecutionResult theResult) {
+		this(theResult, null);
+	}
+
+	/**
+	 * Constructor
+	 */
 	public FqlResultSet(IFqlExecutionResult theResult, Statement theStatement) {
 		myStatement = theStatement;
 		myResult = theResult;
@@ -82,13 +102,34 @@ class FqlResultSet implements ResultSet {
 	}
 
 	@Override
-	public boolean wasNull() throws SQLException {
-		return false;
+	public boolean wasNull() {
+		return myLastValue == null;
+	}
+
+	private void validateColumnIndex(int columnIndex) throws SQLException {
+		if (columnIndex <= 0) {
+			throw new SQLException("Invalid column index: " + columnIndex);
+		}
+		if (columnIndex > myResult.getColumnTypes().size()) {
+			throw new SQLException("Invalid column index: " + columnIndex);
+		}
 	}
 
 	@Override
 	public String getString(int columnIndex) throws SQLException {
-		return myNextRow.get(columnIndex - 1);
+		validateColumnIndex(columnIndex);
+		String retVal = (String) myNextRow.get(columnIndex - 1);
+		myLastValue = retVal;
+		return retVal;
+	}
+
+	@Override
+	public int getInt(int columnIndex) throws SQLException {
+		validateColumnIndex(columnIndex);
+		Integer retVal = (Integer) myNextRow.get(columnIndex - 1);
+		myLastValue = retVal;
+		retVal = defaultIfNull(retVal, 0);
+		return retVal;
 	}
 
 	@Override
@@ -103,11 +144,6 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public short getShort(int columnIndex) throws SQLException {
-		throw new SQLException();
-	}
-
-	@Override
-	public int getInt(int columnIndex) throws SQLException {
 		throw new SQLException();
 	}
 
@@ -168,7 +204,12 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public String getString(String columnLabel) throws SQLException {
-		return getString(findColumn(columnLabel) - 1);
+		return getString(findColumn(columnLabel));
+	}
+
+	@Override
+	public int getInt(String columnLabel) throws SQLException {
+		return getInt(findColumn(columnLabel));
 	}
 
 	@Override
@@ -183,11 +224,6 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public short getShort(String columnLabel) throws SQLException {
-		throw new SQLException();
-	}
-
-	@Override
-	public int getInt(String columnLabel) throws SQLException {
 		throw new SQLException();
 	}
 
@@ -268,12 +304,18 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public Object getObject(int columnIndex) throws SQLException {
-		return getString(columnIndex);
+		switch (myResult.getColumnTypes().get(columnIndex - 1)) {
+			case INTEGER:
+				return getInt(columnIndex);
+			case STRING:
+			default:
+				return getString(columnIndex);
+		}
 	}
 
 	@Override
 	public Object getObject(String columnLabel) throws SQLException {
-		return getString(columnLabel);
+		return getObject(findColumn(columnLabel));
 	}
 
 	@Override
@@ -392,7 +434,7 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public int getConcurrency() throws SQLException {
-		return  ResultSet.CONCUR_READ_ONLY;
+		return ResultSet.CONCUR_READ_ONLY;
 	}
 
 	@Override
@@ -1108,12 +1150,12 @@ class FqlResultSet implements ResultSet {
 
 		@Override
 		public int getColumnType(int column) throws SQLException {
-			return Types.VARCHAR;
+			return myResult.getColumnTypes().get(column - 1).getSqlType();
 		}
 
 		@Override
 		public String getColumnTypeName(int column) throws SQLException {
-			return "varchar";
+			return myResult.getColumnTypes().get(column - 1).name();
 		}
 
 		@Override

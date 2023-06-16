@@ -27,6 +27,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.annotation.Nonnull;
+import java.sql.Types;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -141,6 +142,51 @@ public class FqlExecutorTest {
 	}
 
 	@Test
+	public void testFromSelectComplexFhirPath() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
+
+		String statement = """
+					from Patient
+					where name.family = 'Simpson'
+					select name.given, identifier.where(system = 'http://system' ).value
+			""";
+
+		IFqlExecutionResult.Row nextRow;
+		IFqlExecutionResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+			"name.given", "identifier.where(system = 'http://system' ).value"
+		));
+		nextRow = result.getNextRow();
+
+		assertEquals("Homer", nextRow.getRowValues().get(0));
+		assertEquals("value0", nextRow.getRowValues().get(1));
+	}
+
+	@Test
+	public void testFromWhereComplexFhirPath() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
+
+		String statement = """
+					from Patient
+					where identifier.where(system = 'http://system' ).value = 'value0'
+					select name.given, identifier.value
+			""";
+
+		IFqlExecutionResult.Row nextRow;
+		IFqlExecutionResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+			"name.given", "identifier.value"
+		));
+		nextRow = result.getNextRow();
+
+		assertEquals("Homer", nextRow.getRowValues().get(0));
+		assertEquals("value0", nextRow.getRowValues().get(1));
+		assertFalse(result.hasNext());
+	}
+
+	@Test
 	public void testFromWhereSelectIn() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
@@ -186,6 +232,37 @@ public class FqlExecutorTest {
 
 	}
 
+	@Test
+	public void testIntrospectTables() {
+		IFqlExecutionResult tables = myFqlExecutor.introspectTables();
+		assertEquals("TABLE_NAME", tables.getColumnNames().get(2));
+		assertTrue(tables.hasNext());
+		assertEquals("Account", tables.getNextRow().getRowValues().get(2));
+	}
+
+	@Test
+	public void testIntrospectColumns_NoSelector() {
+		IFqlExecutionResult tables = myFqlExecutor.introspectColumns(null, null);
+		assertEquals("TABLE_NAME", tables.getColumnNames().get(2), tables.getColumnNames().toString());
+		assertEquals("COLUMN_NAME", tables.getColumnNames().get(3), tables.getColumnNames().toString());
+		assertEquals("DATA_TYPE", tables.getColumnNames().get(4), tables.getColumnNames().toString());
+		assertTrue(tables.hasNext());
+		assertEquals("Account", tables.getNextRow().getRowValues().get(2));
+		assertEquals("description", tables.getNextRow().getRowValues().get(3));
+		assertEquals(Types.VARCHAR, tables.getNextRow().getRowValues().get(4));
+	}
+
+	@Test
+	public void testIntrospectColumns_TableSelector() {
+		IFqlExecutionResult tables = myFqlExecutor.introspectColumns("Patient", null);
+		assertEquals("TABLE_NAME", tables.getColumnNames().get(2), tables.getColumnNames().toString());
+		assertEquals("COLUMN_NAME", tables.getColumnNames().get(3), tables.getColumnNames().toString());
+		assertEquals("DATA_TYPE", tables.getColumnNames().get(4), tables.getColumnNames().toString());
+		assertTrue(tables.hasNext());
+		assertEquals("Patient", tables.getNextRow().getRowValues().get(2));
+		assertEquals("address.city", tables.getNextRow().getRowValues().get(3));
+		assertEquals(Types.VARCHAR, tables.getNextRow().getRowValues().get(4));
+	}
 
 	@ValueSource(strings = {
 		"_blah", "foo"
@@ -340,23 +417,27 @@ public class FqlExecutorTest {
 	private static SimpleBundleProvider createSomeSimpsonsAndFlanders() {
 		Patient homer = new Patient();
 		homer.addName().setFamily("Simpson").addGiven("Homer").addGiven("Jay");
+		homer.addIdentifier().setSystem("http://system").setValue("value0");
 
 		Patient nedFlanders = new Patient();
 		nedFlanders.addName().setFamily("Flanders").addGiven("Ned");
+		homer.addIdentifier().setSystem("http://system").setValue("value1");
 
 		Patient bart = new Patient();
 		bart.addName().setFamily("Simpson").addGiven("Bart").addGiven("El Barto");
+		homer.addIdentifier().setSystem("http://system").setValue("value2");
 
 		Patient lisa = new Patient();
 		lisa.addName().setFamily("Simpson").addGiven("Lisa").addGiven("Marie");
+		homer.addIdentifier().setSystem("http://system").setValue("value3");
 
 		Patient maggie = new Patient();
 		maggie.addName().setFamily("Simpson").addGiven("Maggie").addGiven("Evelyn");
+		homer.addIdentifier().setSystem("http://system").setValue("value4");
 
-		SimpleBundleProvider provider = new SimpleBundleProvider(List.of(
+		return new SimpleBundleProvider(List.of(
 			homer, nedFlanders, bart, lisa, maggie
 		));
-		return provider;
 	}
 
 }

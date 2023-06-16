@@ -35,6 +35,24 @@ public class FqlParserTest {
 		assertEquals("name.family", statement.getSelectClauses().get(1).getAlias());
 	}
 
+	@Test
+	public void testSelectFrom() {
+		String input = """
+					select
+					   name.given[0],
+					   name.family
+					from Patient
+			""";
+
+		FqlStatement statement = parse(input);
+		assertEquals("Patient", statement.getFromResourceName());
+		assertEquals(2, statement.getSelectClauses().size());
+		assertEquals("name.given[0]", statement.getSelectClauses().get(0).getClause());
+		assertEquals("name.given[0]", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("name.family", statement.getSelectClauses().get(1).getClause());
+		assertEquals("name.family", statement.getSelectClauses().get(1).getAlias());
+	}
+
 	private FqlStatement parse(String theInput) {
 		return new FqlParser(ourCtx, theInput).parse();
 	}
@@ -184,7 +202,7 @@ public class FqlParserTest {
 		String input = """
 			blah""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertEquals("Unexpected token at position [line=0, column=0]: blah", ex.getMessage());
+		assertEquals("Unexpected token (expected \"SELECT\") at position [line=0, column=0]: blah", ex.getMessage());
 	}
 
 	@Test
@@ -268,19 +286,6 @@ public class FqlParserTest {
 
 	@Test
 	public void testError_MultipleWhere() {
-//		String input = """
-//				from
-//				  Patient
-//				where
-//				  name.family = 'a'
-//				search
-//				  _id = '123
-//				where
-//				  name.given = 'a'
-//				select
-//				  name.given
-//			""";
-//
 		String input = """
 			from
 			  Patient
@@ -297,6 +302,22 @@ public class FqlParserTest {
 
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
 		assertEquals("Unexpected token at position [line=6, column=0]: where", ex.getMessage());
+	}
+
+	@Test
+	public void testError_MultipleFrom() {
+		String input = """
+			from
+			  Patient
+			select
+			  name.given[0],
+			  name.family
+			from
+			  Patient
+			""";
+
+		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
+		assertEquals("Unexpected token at position [line=5, column=0]: from", ex.getMessage());
 	}
 
 	@Test
