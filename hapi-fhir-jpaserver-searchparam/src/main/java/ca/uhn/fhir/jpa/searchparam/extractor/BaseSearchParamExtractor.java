@@ -1471,21 +1471,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private ResourceIndexedSearchParamToken createTokenIndexIfNotBlank(String theResourceType, String theSystem, String theValue, String searchParamName) {
-		String system = theSystem;
-		String value = theValue;
-		ResourceIndexedSearchParamToken nextEntity = null;
-		if (isNotBlank(system) || isNotBlank(value)) {
-			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				system = system.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
-			}
-			if (value != null && value.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				value = value.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
-			}
-
-			nextEntity = new ResourceIndexedSearchParamToken(myPartitionSettings, theResourceType, searchParamName, system, value);
-		}
-
-		return nextEntity;
+		return new ResourceIndexedSearchParamToken(myPartitionSettings, theResourceType, searchParamName, theSystem, theValue);
 	}
 
 	@Override

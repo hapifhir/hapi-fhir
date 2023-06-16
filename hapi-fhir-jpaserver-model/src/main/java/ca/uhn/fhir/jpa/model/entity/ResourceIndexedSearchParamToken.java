@@ -42,6 +42,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -369,5 +370,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
+	}
+
+	@PrePersist
+	public void truncateValueTo200Chars() {
+		mySystem = StringUtils.truncate(mySystem, 200);
+		myValue = StringUtils.truncate(myValue, 200);
 	}
 }
