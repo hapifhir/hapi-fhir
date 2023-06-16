@@ -860,7 +860,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(ValueSet.ConceptSetComponent theIncludeOrExclude) {
 		if (isEmpty(theIncludeOrExclude.getVersion())) {
-			return Optional.ofNullable(myCodeSystemVersionDao.findCurrentVersionByCodeSystemUri(theIncludeOrExclude.getSystem()));
+			return Optional.ofNullable(myCodeSystemDao.findByCodeSystemUri(theIncludeOrExclude.getSystem())).map(TermCodeSystem::getCurrentVersion);
 		} else {
 			return Optional.ofNullable(myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theIncludeOrExclude.getSystem(), theIncludeOrExclude.getVersion()));
 		}

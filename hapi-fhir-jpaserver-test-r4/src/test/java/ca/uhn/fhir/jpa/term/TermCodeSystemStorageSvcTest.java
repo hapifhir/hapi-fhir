@@ -21,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
-	private static final String MY_CODE_SYSTEM_VERSION = "4.0.1";
-	private static final String MY_CODE_SYSTEM_VERSION_LATEST = "4.3.0";
 
 	@Autowired
 	private Batch2JobHelper myBatchJobHelper;
@@ -86,49 +84,6 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 			assertEquals(myTermCodeSystem.getResource().getId(), mySecondTermCodeSystemVersion.getResource().getId());
 		});
 
-	}
-
-	@Test
-	public void testFindCurrentVersionByCodeSystemUri_whenTwoCodeSystems_returnsCorrectVersion() {
-		createCodeSystem(URL_MY_CODE_SYSTEM_2, MY_CODE_SYSTEM_VERSION);
-		createCodeSystem(URL_MY_CODE_SYSTEM, MY_CODE_SYSTEM_VERSION);
-
-		runInTransaction(() -> {
-			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao.findCurrentVersionByCodeSystemUri(URL_MY_CODE_SYSTEM);
-			assertEquals(MY_CODE_SYSTEM_VERSION, termCodeSystemVersion.getCodeSystemVersionId());
-			assertEquals(URL_MY_CODE_SYSTEM, termCodeSystemVersion.getCodeSystem().getCodeSystemUri());
-		});
-	}
-
-	@Test
-	public void testFindCurrentVersionByCodeSystemUri_whenTwoVersions_returnsLatestVersion() {
-		createCodeSystem(URL_MY_CODE_SYSTEM, MY_CODE_SYSTEM_VERSION);
-		createCodeSystem(URL_MY_CODE_SYSTEM, MY_CODE_SYSTEM_VERSION_LATEST);
-
-		runInTransaction(() -> {
-			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao.findCurrentVersionByCodeSystemUri(URL_MY_CODE_SYSTEM);
-			assertEquals(MY_CODE_SYSTEM_VERSION_LATEST, termCodeSystemVersion.getCodeSystemVersionId());
-			assertEquals(URL_MY_CODE_SYSTEM, termCodeSystemVersion.getCodeSystem().getCodeSystemUri());
-		});
-	}
-
-	@Test
-	public void testFindByCodeSystemUriAndVersion_whenTwoVersions_returnsCorrectVersion() {
-		createCodeSystem(URL_MY_CODE_SYSTEM, MY_CODE_SYSTEM_VERSION);
-		createCodeSystem(URL_MY_CODE_SYSTEM, MY_CODE_SYSTEM_VERSION_LATEST);
-
-		runInTransaction(() -> {
-			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemUriAndVersion(URL_MY_CODE_SYSTEM, MY_CODE_SYSTEM_VERSION);
-			assertEquals(MY_CODE_SYSTEM_VERSION, termCodeSystemVersion.getCodeSystemVersionId());
-			assertEquals(URL_MY_CODE_SYSTEM, termCodeSystemVersion.getCodeSystem().getCodeSystemUri());
-		});
-	}
-
-	private void createCodeSystem(String url, String version) {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(url).setVersion(version);
-
-		myCodeSystemDao.create(codeSystem, mySrd);
 	}
 
 	private CodeSystem createCodeSystemWithMoreThan100Concepts() {

@@ -36,8 +36,6 @@ import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1022,31 +1020,34 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		MatcherAssert.assertThat(myValueSetTestUtil.toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(1, 23))));
 	}
 
-	@ParameterizedTest
-	@CsvSource({
-		"/org/hl7/fhir/r4/model/valueset/valuesets.xml, 4.0.1",
-		"/org/hl7/fhir/r4b/model/valueset/valuesets.xml, 4.3.0",
-	})
-	public void testExpandTaskCodeValueSet_loadedFromValidationFile_hasCorrectCodeSystemVersion(String valueSetsPath, String codeSystemVersion) throws IOException {
+	/**
+	 * This test intended to check that version of included CodeSystem in task-code ValueSet is correct
+	 * There is a typo in the FHIR Specification: <a href="http://hl7.org/fhir/R4/valueset-task-code.xml.html"/>
+	 * As agreed in FHIR-30377 included CodeSystem version for task-code ValueSet changed from 3.6.0 to 4.0.1
+	 * <a href="https://jira.hl7.org/browse/FHIR-30377">Source resources for task-code ValueSet reference old version of CodeSystem</a>
+	 */
+	@Test
+	public void testExpandTaskCodeValueSet_withCorrectedCodeSystemVersion_willExpandCorrectly() throws IOException {
 		// load validation file
-		Bundle r4ValueSets = loadResourceFromClasspath(Bundle.class, valueSetsPath);
+		Bundle r4ValueSets = loadResourceFromClasspath(Bundle.class, "/org/hl7/fhir/r4/model/valueset/valuesets.xml");
 		ValueSet taskCodeVs = (ValueSet) findResourceByFullUrlInBundle(r4ValueSets, "http://hl7.org/fhir/ValueSet/task-code");
 		CodeSystem taskCodeCs = (CodeSystem) findResourceByFullUrlInBundle(r4ValueSets, "http://hl7.org/fhir/CodeSystem/task-code");
 
 		// check valueSet and codeSystem versions
-		assertEquals(taskCodeCs.getVersion(), codeSystemVersion);
-		assertEquals(taskCodeVs.getVersion(), codeSystemVersion);
-		assertEquals(taskCodeVs.getCompose().getInclude().get(0).getVersion(), codeSystemVersion);
+		String expectedCodeSystemVersion = "4.0.1";
+		assertEquals(expectedCodeSystemVersion, taskCodeCs.getVersion());
+		assertEquals(expectedCodeSystemVersion, taskCodeVs.getVersion());
+		assertEquals(expectedCodeSystemVersion, taskCodeVs.getCompose().getInclude().get(0).getVersion());
 
-		myCodeSystemDao.update(taskCodeCs);
-		IIdType id = myValueSetDao.create(taskCodeVs).getId().toUnqualifiedVersionless();
+		myCodeSystemDao.create(taskCodeCs);
+		IIdType id = myValueSetDao.create(taskCodeVs).getId();
 
-		ValueSet expansion = myValueSetDao.expand(id, new ValueSetExpansionOptions(), mySrd);
+		ValueSet expandedValueSet = myValueSetDao.expand(id, new ValueSetExpansionOptions(), mySrd);
 
-		// check expansionComponent versions
-		assertEquals(7, expansion.getExpansion().getContains().size());
-		expansion.getExpansion().getContains().stream()
-			.map(ValueSet.ValueSetExpansionContainsComponent::getVersion).forEach(version -> assertEquals(codeSystemVersion, version));
+		// check expansion size and include CodeSystem version
+		assertEquals(7, expandedValueSet.getExpansion().getContains().size());
+		assertEquals(1, expandedValueSet.getCompose().getInclude().size());
+		assertEquals(expectedCodeSystemVersion, expandedValueSet.getCompose().getInclude().get(0).getVersion());
 	}
 
 	private IBaseResource findResourceByFullUrlInBundle(Bundle thebundle, String theFullUrl) {
