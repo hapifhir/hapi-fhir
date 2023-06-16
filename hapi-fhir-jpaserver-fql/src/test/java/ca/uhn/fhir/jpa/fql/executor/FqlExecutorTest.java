@@ -121,6 +121,37 @@ public class FqlExecutorTest {
 	}
 
 	@Test
+	public void testFromSelectSearchParam() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
+
+		String statement = """
+					from Patient
+					where __family in ('Simpson' | 'Flanders')
+					select name.given, name.family
+			""";
+
+		IFqlExecutionResult.Row nextRow;
+		IFqlExecutionResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertThat(result.getColumnNames(), contains(
+			"name.given", "name.family"
+		));
+		assertTrue(result.hasNext());
+		nextRow = result.getNextRow();
+		assertEquals(0, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("Homer", "Simpson"));
+		assertTrue(result.hasNext());
+		nextRow = result.getNextRow();
+		assertEquals(1, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains("Ned", "Flanders"));
+		assertTrue(result.hasNext());
+
+		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
+		assertEquals("Simpson", mySearchParameterMapCaptor.getValue().get("family").get(0).get(0).getValueAsQueryToken(myCtx));
+		assertEquals("Flanders", mySearchParameterMapCaptor.getValue().get("family").get(0).get(1).getValueAsQueryToken(myCtx));
+	}
+
+	@Test
 	public void testFromSelectStar() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());

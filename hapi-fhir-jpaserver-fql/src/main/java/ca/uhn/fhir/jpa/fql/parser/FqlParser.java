@@ -220,12 +220,16 @@ public class FqlParser {
 		@Override
 		void consume(FqlLexerToken theToken) {
 			FqlStatement.WhereClause whereClause;
-			if (myWhereMode == WhereModeEnum.WHERE) {
-				whereClause = myStatement.addWhereClause();
-			} else {
+			String token = theToken.getToken();
+			if (token.startsWith("__") && myWhereMode == WhereModeEnum.WHERE) {
 				whereClause = myStatement.addSearchClause();
+				token = token.substring(2);
+			} else if (myWhereMode == WhereModeEnum.SEARCH) {
+				whereClause = myStatement.addSearchClause();
+			} else {
+				whereClause = myStatement.addWhereClause();
 			}
-			whereClause.setLeft(theToken.getToken());
+			whereClause.setLeft(token);
 			myState = new StateInWhereAfterLeft(myWhereMode, whereClause);
 		}
 	}

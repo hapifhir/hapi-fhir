@@ -53,6 +53,31 @@ public class FqlParserTest {
 		assertEquals("name.family", statement.getSelectClauses().get(1).getAlias());
 	}
 
+	@Test
+	public void testSelectFromWhere_SearchParam() {
+		String input = """
+					select
+					   __family, __given
+					from
+						Patient
+					where
+						__family = 'Simpson'
+			""";
+
+		FqlStatement statement = parse(input);
+		assertEquals("Patient", statement.getFromResourceName());
+		assertEquals(2, statement.getSelectClauses().size());
+		assertEquals("__family", statement.getSelectClauses().get(0).getClause());
+		assertEquals("__family", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("__given", statement.getSelectClauses().get(1).getClause());
+		assertEquals("__given", statement.getSelectClauses().get(1).getAlias());
+		assertEquals(0, statement.getWhereClauses().size());
+		assertEquals(1, statement.getSearchClauses().size());
+		assertEquals("family", statement.getSearchClauses().get(0).getLeft());
+		assertEquals(FqlStatement.WhereClauseOperator.EQUALS, statement.getSearchClauses().get(0).getOperator());
+		assertEquals(1, statement.getSearchClauses().get(0).getRight().size());
+		assertEquals("'Simpson'", statement.getSearchClauses().get(0).getRight().get(0));
+	}
 	private FqlStatement parse(String theInput) {
 		return new FqlParser(ourCtx, theInput).parse();
 	}
