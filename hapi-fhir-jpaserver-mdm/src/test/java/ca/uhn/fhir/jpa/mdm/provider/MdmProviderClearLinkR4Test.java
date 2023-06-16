@@ -1,25 +1,38 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.batch2.clear.MdmClearStep;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.mdm.api.MdmMatchOutcome.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,9 +41,16 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
+	private static final org.slf4j.Logger ourLog = getLogger(MdmProviderClearLinkR4Test.class);
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
 	protected IAnyResource myPractitionerGoldenResource;
@@ -46,6 +66,104 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		myPractitionerGoldenResourceId = new StringType(myPractitionerGoldenResource.getIdElement().getValue());
 
 		setMdmRuleJson("mdm/nickname-mdm-rules.json");
+	}
+
+	@Test
+	public void test_MDMClear_usesBatchSize() {
+		int batchSize = 5;
+		int total = 100;
+		String idTemplate = "RED_%d";
+		String name = "Yui";
+		MdmTransactionContext context = createContextForCreate("Patient");
+		for (int i = 0; i < total; i++) {
+			if (i % 20 == 0) {
+				name += i;
+			}
+			Patient patient = buildPatientWithNameAndId(name, String.format(idTemplate, i));
+			DaoMethodOutcome result = myPatientDao.create(patient, myRequestDetails);
+
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient, context);
+		}
+		// + 2 because the before() method in the base class
+		// adds some resources with links; we don't need these, but
+		// we'll account for them
+		assertLinkCount(total + 2);
+
+		// set log appender
+		Logger clearStepLogger = (Logger) LoggerFactory.getLogger(MdmClearStep.class);
+		Level initialLevel = clearStepLogger.getLevel();
+		clearStepLogger.setLevel(Level.TRACE);
+
+		// mocks
+		@SuppressWarnings("unchecked")
+		ListAppender<ILoggingEvent> appender = mock(ListAppender.class);
+		clearStepLogger.addAppender(appender);
+
+		// test
+		try {
+			Parameters result = (Parameters) myMdmProvider.clearMdmLinks(
+				null, // resource names (everything if null)
+				new DecimalType(batchSize), // batch size
+				myRequestDetails // request details
+			);
+			myBatch2JobHelper.awaitJobCompletion(BatchHelperR4.jobIdFromBatch2Parameters(result));
+
+			// verify
+			assertNoLinksExist();
+
+			// the trace log we're inspecting is in MdmClearStep
+			// "Deleted {} of {} golden resources in {}"
+			String regex = ".(\\d)+";
+			ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
+			verify(appender, atLeastOnce())
+				.doAppend(loggingCaptor.capture());
+			Pattern pattern = Pattern.compile(regex);
+			boolean hasMsgs = false;
+			for (ILoggingEvent event : loggingCaptor.getAllValues()) {
+				if (event.getLevel() != Level.TRACE) {
+					continue; // we are only looking at the trace measures
+				}
+				String msg = event.getFormattedMessage();
+				ourLog.info(msg);
+
+				if (msg.contains("golden resources")) {
+					hasMsgs = true;
+					// golden resources deleted
+					boolean contains = msg.contains(String.format("Deleted %d of %d golden resources in", batchSize, batchSize));
+					if (!contains) {
+						// if we didn't delete exactly <batchsize>, we should've deleted < batchsize
+						Matcher matcher = pattern.matcher(msg);
+						int count = 0;
+						int deletedCount = -1;
+						int deletedTotal = -1;
+						while (matcher.find()) {
+							String group = matcher.group().trim();
+							int i = Integer.parseInt(group);
+							if (count == 0) {
+								deletedCount = i;
+							} else if (count == 1) {
+								deletedTotal = i;
+							}
+							count++;
+						}
+
+						// we have < batch size, but it should be the total deleted still
+						assertTrue( deletedTotal < batchSize, msg);
+						assertEquals(deletedTotal, deletedCount, msg);
+					} else {
+						// pointless, but...
+						assertTrue(contains);
+					}
+				}
+			}
+
+			// want to make sure we found the trace messages
+			// or what's the point
+			assertTrue(hasMsgs);
+		} finally {
+			clearStepLogger.detachAppender(appender);
+			clearStepLogger.setLevel(initialLevel);
+		}
 	}
 
 	@Test
