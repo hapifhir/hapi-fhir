@@ -21,14 +21,13 @@ package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 
-import java.sql.Types;
 import java.util.List;
 
 public interface IFqlExecutionResult {
 
 	List<String> getColumnNames();
 
-	List<DataTypeEnum> getColumnTypes();
+	List<FqlDataTypeEnum> getColumnTypes();
 
 	boolean hasNext();
 
@@ -63,21 +62,6 @@ public interface IFqlExecutionResult {
 		}
 
 
-	}
-
-	enum DataTypeEnum {
-		STRING(Types.VARCHAR),
-		INTEGER(Types.INTEGER);
-
-		private final int mySqlType;
-
-		DataTypeEnum(int theSqlType) {
-			mySqlType = theSqlType;
-		}
-
-		public int getSqlType() {
-			return mySqlType;
-		}
 	}
 
 

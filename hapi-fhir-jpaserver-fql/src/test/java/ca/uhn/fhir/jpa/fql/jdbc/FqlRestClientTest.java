@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.fql.executor.FqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.StaticFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
@@ -89,7 +90,7 @@ public class FqlRestClientTest {
 		FqlStatement statement = createFakeStatement();
 		when(myMockFqlResult0.getStatement()).thenReturn(statement);
 		when(myMockFqlResult0.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
-		when(myMockFqlResult0.getColumnTypes()).thenReturn(List.of(IFqlExecutionResult.DataTypeEnum.STRING, IFqlExecutionResult.DataTypeEnum.STRING));
+		when(myMockFqlResult0.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING, FqlDataTypeEnum.STRING));
 		when(myMockFqlResult0.hasNext()).thenReturn(true, true, true);
 		when(myMockFqlResult0.getNextRow()).thenReturn(
 			new IFqlExecutionResult.Row(0, List.of("Simpson", "Homer")),

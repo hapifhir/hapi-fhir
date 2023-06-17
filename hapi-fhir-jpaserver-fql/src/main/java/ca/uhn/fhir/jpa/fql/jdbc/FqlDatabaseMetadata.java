@@ -703,12 +703,12 @@ public class FqlDatabaseMetadata implements DatabaseMetaData {
 
 	@Override
 	public ResultSet getImportedKeys(String catalog, String schema, String table) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+		return new FqlResultSet();
 	}
 
 	@Override
 	public ResultSet getExportedKeys(String catalog, String schema, String table) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+		return new FqlResultSet();
 	}
 
 	@Override

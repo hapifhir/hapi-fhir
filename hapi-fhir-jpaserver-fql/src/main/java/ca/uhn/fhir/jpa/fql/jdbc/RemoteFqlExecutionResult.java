@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.fql.executor.FqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
@@ -53,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class RemoteFqlExecutionResult implements IFqlExecutionResult {
 	private final List<String> myColumnNames = new ArrayList<>();
-	private final List<DataTypeEnum> myColumnTypes = new ArrayList<>();
+	private final List<FqlDataTypeEnum> myColumnTypes = new ArrayList<>();
 	private final boolean mySupportsContinuations;
 	private final String myBaseUrl;
 	private final CloseableHttpClient myClient;
@@ -134,7 +135,7 @@ public class RemoteFqlExecutionResult implements IFqlExecutionResult {
 					first = false;
 					continue;
 				}
-				myColumnTypes.add(DataTypeEnum.valueOf(next));
+				myColumnTypes.add(FqlDataTypeEnum.valueOf(next));
 			}
 		}
 
@@ -146,7 +147,7 @@ public class RemoteFqlExecutionResult implements IFqlExecutionResult {
 	}
 
 	@Override
-	public List<DataTypeEnum> getColumnTypes() {
+	public List<FqlDataTypeEnum> getColumnTypes() {
 		return myColumnTypes;
 	}
 

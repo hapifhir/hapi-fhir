@@ -29,7 +29,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.fql.parser.FqlParser;
+import ca.uhn.fhir.jpa.fql.parser.FqlStatementParser;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
@@ -55,7 +55,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -83,7 +82,7 @@ public class FqlExecutor implements IFqlExecutor {
 
 	@Override
 	public LocalSearchFqlExecutionResult executeInitialSearch(String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
-		FqlParser parser = new FqlParser(myFhirContext, theStatement);
+		FqlStatementParser parser = new FqlStatementParser(myFhirContext, theStatement);
 		FqlStatement statement = parser.parse();
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(statement.getFromResourceName());
 		if (dao == null) {
@@ -128,6 +127,13 @@ public class FqlExecutor implements IFqlExecutor {
 
 		IBundleProvider outcome = dao.search(map, theRequestDetails);
 		return new LocalSearchFqlExecutionResult(statement, outcome, fhirPath, theLimit, 0);
+	}
+
+	@Override
+	public IFqlExecutionResult executeContinuation(FqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails) {
+		IBundleProvider resultList = myPagingProvider.retrieveResultList(theRequestDetails, theSearchId);
+		IFhirPath fhirPath = myFhirContext.newFhirPath();
+		return new LocalSearchFqlExecutionResult(theStatement, resultList, fhirPath, theLimit, theStartingOffset);
 	}
 
 	private void massageSelectColumnNames(FqlStatement theFqlStatement) {
@@ -188,13 +194,6 @@ public class FqlExecutor implements IFqlExecutor {
 		}
 	}
 
-	@Override
-	public IFqlExecutionResult executeContinuation(FqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails) {
-		IBundleProvider resultList = myPagingProvider.retrieveResultList(theRequestDetails, theSearchId);
-		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		return new LocalSearchFqlExecutionResult(theStatement, resultList, fhirPath, theLimit, theStartingOffset);
-	}
-
 	/**
 	 * Columns to return, per {@link java.sql.DatabaseMetaData#getTables(String, String, String, String[])}
 	 * <OL>
@@ -229,17 +228,17 @@ public class FqlExecutor implements IFqlExecutor {
 			"SELF_REFERENCING_COL_NAME",
 			"REF_GENERATION"
 		);
-		List<IFqlExecutionResult.DataTypeEnum> dataTypes = List.of(
-			IFqlExecutionResult.DataTypeEnum.STRING,
-			IFqlExecutionResult.DataTypeEnum.STRING,
-			IFqlExecutionResult.DataTypeEnum.STRING,
-			IFqlExecutionResult.DataTypeEnum.STRING,
-			IFqlExecutionResult.DataTypeEnum.STRING,
-			IFqlExecutionResult.DataTypeEnum.STRING,
-			IFqlExecutionResult.DataTypeEnum.STRING,
-			IFqlExecutionResult.DataTypeEnum.STRING,
-			IFqlExecutionResult.DataTypeEnum.STRING,
-			IFqlExecutionResult.DataTypeEnum.STRING
+		List<FqlDataTypeEnum> dataTypes = List.of(
+			FqlDataTypeEnum.STRING,
+			FqlDataTypeEnum.STRING,
+			FqlDataTypeEnum.STRING,
+			FqlDataTypeEnum.STRING,
+			FqlDataTypeEnum.STRING,
+			FqlDataTypeEnum.STRING,
+			FqlDataTypeEnum.STRING,
+			FqlDataTypeEnum.STRING,
+			FqlDataTypeEnum.STRING,
+			FqlDataTypeEnum.STRING
 		);
 		List<List<Object>> rows = new ArrayList<>();
 
@@ -264,67 +263,66 @@ public class FqlExecutor implements IFqlExecutor {
 
 	/**
 	 * Columns from {@link java.sql.DatabaseMetaData#getColumns(String, String, String, String)}
-	 * 
-	 *  <OL>
-	 *  <LI><B>TABLE_CAT</B> String {@code =>} table catalog (may be {@code null})
-	 *  <LI><B>TABLE_SCHEM</B> String {@code =>} table schema (may be {@code null})
-	 *  <LI><B>TABLE_NAME</B> String {@code =>} table name
-	 *  <LI><B>COLUMN_NAME</B> String {@code =>} column name
-	 *  <LI><B>DATA_TYPE</B> int {@code =>} SQL type from java.sql.Types
-	 *  <LI><B>TYPE_NAME</B> String {@code =>} Data source dependent type name,
-	 *  for a UDT the type name is fully qualified
-	 *  <LI><B>COLUMN_SIZE</B> int {@code =>} column size.
-	 *  <LI><B>BUFFER_LENGTH</B> is not used.
-	 *  <LI><B>DECIMAL_DIGITS</B> int {@code =>} the number of fractional digits. Null is returned for data types where
-	 * DECIMAL_DIGITS is not applicable.
-	 *  <LI><B>NUM_PREC_RADIX</B> int {@code =>} Radix (typically either 10 or 2)
-	 *  <LI><B>NULLABLE</B> int {@code =>} is NULL allowed.
-	 *      <UL>
-	 *      <LI> columnNoNulls - might not allow {@code NULL} values
-	 *      <LI> columnNullable - definitely allows {@code NULL} values
-	 *      <LI> columnNullableUnknown - nullability unknown
-	 *      </UL>
-	 *  <LI><B>REMARKS</B> String {@code =>} comment describing column (may be {@code null})
-	 *  <LI><B>COLUMN_DEF</B> String {@code =>} default value for the column, which should be interpreted as a string when the value is enclosed in single quotes (may be {@code null})
-	 *  <LI><B>SQL_DATA_TYPE</B> int {@code =>} unused
-	 *  <LI><B>SQL_DATETIME_SUB</B> int {@code =>} unused
-	 *  <LI><B>CHAR_OCTET_LENGTH</B> int {@code =>} for char types the
-	 *       maximum number of bytes in the column
-	 *  <LI><B>ORDINAL_POSITION</B> int {@code =>} index of column in table
-	 *      (starting at 1)
-	 *  <LI><B>IS_NULLABLE</B> String  {@code =>} ISO rules are used to determine the nullability for a column.
-	 *       <UL>
-	 *       <LI> YES           --- if the column can include NULLs
-	 *       <LI> NO            --- if the column cannot include NULLs
-	 *       <LI> empty string  --- if the nullability for the
-	 * column is unknown
-	 *       </UL>
-	 *  <LI><B>SCOPE_CATALOG</B> String {@code =>} catalog of table that is the scope
-	 *      of a reference attribute ({@code null} if DATA_TYPE isn't REF)
-	 *  <LI><B>SCOPE_SCHEMA</B> String {@code =>} schema of table that is the scope
-	 *      of a reference attribute ({@code null} if the DATA_TYPE isn't REF)
-	 *  <LI><B>SCOPE_TABLE</B> String {@code =>} table name that this the scope
-	 *      of a reference attribute ({@code null} if the DATA_TYPE isn't REF)
-	 *  <LI><B>SOURCE_DATA_TYPE</B> short {@code =>} source type of a distinct type or user-generated
-	 *      Ref type, SQL type from java.sql.Types ({@code null} if DATA_TYPE
-	 *      isn't DISTINCT or user-generated REF)
-	 *   <LI><B>IS_AUTOINCREMENT</B> String  {@code =>} Indicates whether this column is auto incremented
-	 *       <UL>
-	 *       <LI> YES           --- if the column is auto incremented
-	 *       <LI> NO            --- if the column is not auto incremented
-	 *       <LI> empty string  --- if it cannot be determined whether the column is auto incremented
-	 *       </UL>
-	 *   <LI><B>IS_GENERATEDCOLUMN</B> String  {@code =>} Indicates whether this is a generated column
-	 *       <UL>
-	 *       <LI> YES           --- if this a generated column
-	 *       <LI> NO            --- if this not a generated column
-	 *       <LI> empty string  --- if it cannot be determined whether this is a generated column
-	 *       </UL>
-	 *  </OL>
 	 *
-	 * @param theTableName The table name or null
+	 * <OL>
+	 * <LI><B>TABLE_CAT</B> String {@code =>} table catalog (may be {@code null})
+	 * <LI><B>TABLE_SCHEM</B> String {@code =>} table schema (may be {@code null})
+	 * <LI><B>TABLE_NAME</B> String {@code =>} table name
+	 * <LI><B>COLUMN_NAME</B> String {@code =>} column name
+	 * <LI><B>DATA_TYPE</B> int {@code =>} SQL type from java.sql.Types
+	 * <LI><B>TYPE_NAME</B> String {@code =>} Data source dependent type name,
+	 * for a UDT the type name is fully qualified
+	 * <LI><B>COLUMN_SIZE</B> int {@code =>} column size.
+	 * <LI><B>BUFFER_LENGTH</B> is not used.
+	 * <LI><B>DECIMAL_DIGITS</B> int {@code =>} the number of fractional digits. Null is returned for data types where
+	 * DECIMAL_DIGITS is not applicable.
+	 * <LI><B>NUM_PREC_RADIX</B> int {@code =>} Radix (typically either 10 or 2)
+	 * <LI><B>NULLABLE</B> int {@code =>} is NULL allowed.
+	 * <UL>
+	 * <LI> columnNoNulls - might not allow {@code NULL} values
+	 * <LI> columnNullable - definitely allows {@code NULL} values
+	 * <LI> columnNullableUnknown - nullability unknown
+	 * </UL>
+	 * <LI><B>REMARKS</B> String {@code =>} comment describing column (may be {@code null})
+	 * <LI><B>COLUMN_DEF</B> String {@code =>} default value for the column, which should be interpreted as a string when the value is enclosed in single quotes (may be {@code null})
+	 * <LI><B>SQL_DATA_TYPE</B> int {@code =>} unused
+	 * <LI><B>SQL_DATETIME_SUB</B> int {@code =>} unused
+	 * <LI><B>CHAR_OCTET_LENGTH</B> int {@code =>} for char types the
+	 * maximum number of bytes in the column
+	 * <LI><B>ORDINAL_POSITION</B> int {@code =>} index of column in table
+	 * (starting at 1)
+	 * <LI><B>IS_NULLABLE</B> String  {@code =>} ISO rules are used to determine the nullability for a column.
+	 * <UL>
+	 * <LI> YES           --- if the column can include NULLs
+	 * <LI> NO            --- if the column cannot include NULLs
+	 * <LI> empty string  --- if the nullability for the
+	 * column is unknown
+	 * </UL>
+	 * <LI><B>SCOPE_CATALOG</B> String {@code =>} catalog of table that is the scope
+	 * of a reference attribute ({@code null} if DATA_TYPE isn't REF)
+	 * <LI><B>SCOPE_SCHEMA</B> String {@code =>} schema of table that is the scope
+	 * of a reference attribute ({@code null} if the DATA_TYPE isn't REF)
+	 * <LI><B>SCOPE_TABLE</B> String {@code =>} table name that this the scope
+	 * of a reference attribute ({@code null} if the DATA_TYPE isn't REF)
+	 * <LI><B>SOURCE_DATA_TYPE</B> short {@code =>} source type of a distinct type or user-generated
+	 * Ref type, SQL type from java.sql.Types ({@code null} if DATA_TYPE
+	 * isn't DISTINCT or user-generated REF)
+	 * <LI><B>IS_AUTOINCREMENT</B> String  {@code =>} Indicates whether this column is auto incremented
+	 * <UL>
+	 * <LI> YES           --- if the column is auto incremented
+	 * <LI> NO            --- if the column is not auto incremented
+	 * <LI> empty string  --- if it cannot be determined whether the column is auto incremented
+	 * </UL>
+	 * <LI><B>IS_GENERATEDCOLUMN</B> String  {@code =>} Indicates whether this is a generated column
+	 * <UL>
+	 * <LI> YES           --- if this a generated column
+	 * <LI> NO            --- if this not a generated column
+	 * <LI> empty string  --- if it cannot be determined whether this is a generated column
+	 * </UL>
+	 * </OL>
+	 *
+	 * @param theTableName  The table name or null
 	 * @param theColumnName The column name or null
-	 * @return
 	 */
 	@Override
 	public IFqlExecutionResult introspectColumns(@Nullable String theTableName, @Nullable String theColumnName) {
@@ -354,31 +352,31 @@ public class FqlExecutor implements IFqlExecutor {
 			"IS_AUTOINCREMENT",
 			"IS_GENERATEDCOLUMN"
 		);
-		List<IFqlExecutionResult.DataTypeEnum> dataTypes = List.of(
-			IFqlExecutionResult.DataTypeEnum.STRING, // TABLE_CAT
-			IFqlExecutionResult.DataTypeEnum.STRING, // TABLE_SCHEM
-			IFqlExecutionResult.DataTypeEnum.STRING, // TABLE_NAME
-			IFqlExecutionResult.DataTypeEnum.STRING, // COLUMN_NAME
-			IFqlExecutionResult.DataTypeEnum.INTEGER, // DATA_TYPE
-			IFqlExecutionResult.DataTypeEnum.STRING,  // TYPE_NAME
-			IFqlExecutionResult.DataTypeEnum.INTEGER, // COLUMN_SIZE
-			IFqlExecutionResult.DataTypeEnum.STRING, // BUFFER_LENGTH
-			IFqlExecutionResult.DataTypeEnum.INTEGER, // DECIMAL_DIGITS
-			IFqlExecutionResult.DataTypeEnum.INTEGER, // NUM_PREC_RADIX
-			IFqlExecutionResult.DataTypeEnum.INTEGER, // NULLABLE
-			IFqlExecutionResult.DataTypeEnum.STRING, // REMARKS
-			IFqlExecutionResult.DataTypeEnum.STRING, // COLUMN_DEF
-			IFqlExecutionResult.DataTypeEnum.INTEGER, // SQL_DATA_TYPE
-			IFqlExecutionResult.DataTypeEnum.INTEGER, // SQL_DATETIME_SUB
-			IFqlExecutionResult.DataTypeEnum.INTEGER, // CHAR_OCTET_LENGTH
-			IFqlExecutionResult.DataTypeEnum.INTEGER, // ORDINAL_POSITION
-			IFqlExecutionResult.DataTypeEnum.STRING, // IS_NULLABLE
-			IFqlExecutionResult.DataTypeEnum.STRING, // SCOPE_CATALOG
-			IFqlExecutionResult.DataTypeEnum.STRING, // SCOPE_SCHEMA
-			IFqlExecutionResult.DataTypeEnum.STRING, // SCOPE_TABLE
-			IFqlExecutionResult.DataTypeEnum.STRING, // SOURCE_DATA_TYPE
-			IFqlExecutionResult.DataTypeEnum.STRING, // IS_AUTOINCREMENT
-			IFqlExecutionResult.DataTypeEnum.STRING  // IS_GENERATEDCOLUMN
+		List<FqlDataTypeEnum> dataTypes = List.of(
+			FqlDataTypeEnum.STRING, // TABLE_CAT
+			FqlDataTypeEnum.STRING, // TABLE_SCHEM
+			FqlDataTypeEnum.STRING, // TABLE_NAME
+			FqlDataTypeEnum.STRING, // COLUMN_NAME
+			FqlDataTypeEnum.INTEGER, // DATA_TYPE
+			FqlDataTypeEnum.STRING,  // TYPE_NAME
+			FqlDataTypeEnum.INTEGER, // COLUMN_SIZE
+			FqlDataTypeEnum.STRING, // BUFFER_LENGTH
+			FqlDataTypeEnum.INTEGER, // DECIMAL_DIGITS
+			FqlDataTypeEnum.INTEGER, // NUM_PREC_RADIX
+			FqlDataTypeEnum.INTEGER, // NULLABLE
+			FqlDataTypeEnum.STRING, // REMARKS
+			FqlDataTypeEnum.STRING, // COLUMN_DEF
+			FqlDataTypeEnum.INTEGER, // SQL_DATA_TYPE
+			FqlDataTypeEnum.INTEGER, // SQL_DATETIME_SUB
+			FqlDataTypeEnum.INTEGER, // CHAR_OCTET_LENGTH
+			FqlDataTypeEnum.INTEGER, // ORDINAL_POSITION
+			FqlDataTypeEnum.STRING, // IS_NULLABLE
+			FqlDataTypeEnum.STRING, // SCOPE_CATALOG
+			FqlDataTypeEnum.STRING, // SCOPE_SCHEMA
+			FqlDataTypeEnum.STRING, // SCOPE_TABLE
+			FqlDataTypeEnum.STRING, // SOURCE_DATA_TYPE
+			FqlDataTypeEnum.STRING, // IS_AUTOINCREMENT
+			FqlDataTypeEnum.STRING  // IS_GENERATEDCOLUMN
 		);
 
 		List<List<Object>> rows = new ArrayList<>();
@@ -423,6 +421,7 @@ public class FqlExecutor implements IFqlExecutor {
 
 		return new StaticFqlExecutionResult(null, columns, dataTypes, rows);
 	}
+
 
 	@Nonnull
 	private static InvalidRequestException newInvalidRequestExceptionUnknownSearchParameter(FqlStatement.WhereClause nextSearchClause) {

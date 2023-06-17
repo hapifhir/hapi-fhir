@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -18,7 +20,11 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -118,37 +124,6 @@ public class FqlExecutorTest {
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		// Default count
 		assertNull(mySearchParameterMapCaptor.getValue().getCount());
-	}
-
-	@Test
-	public void testFromSelectSearchParam() {
-		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
-		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
-
-		String statement = """
-					from Patient
-					where __family in ('Simpson' | 'Flanders')
-					select name.given, name.family
-			""";
-
-		IFqlExecutionResult.Row nextRow;
-		IFqlExecutionResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames(), contains(
-			"name.given", "name.family"
-		));
-		assertTrue(result.hasNext());
-		nextRow = result.getNextRow();
-		assertEquals(0, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("Homer", "Simpson"));
-		assertTrue(result.hasNext());
-		nextRow = result.getNextRow();
-		assertEquals(1, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("Ned", "Flanders"));
-		assertTrue(result.hasNext());
-
-		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
-		assertEquals("Simpson", mySearchParameterMapCaptor.getValue().get("family").get(0).get(0).getValueAsQueryToken(myCtx));
-		assertEquals("Flanders", mySearchParameterMapCaptor.getValue().get("family").get(0).get(1).getValueAsQueryToken(myCtx));
 	}
 
 	@Test
@@ -317,13 +292,17 @@ public class FqlExecutorTest {
 
 	@Test
 	public void testSearch_Id_In() {
-		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
-		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
+		IFhirResourceDao<Observation> patientDao = initDao(Observation.class);
+		Observation resource = new Observation();
+		resource.setId("Observation/123");
+		resource.setValue(new Quantity(null, 500, "http://unitsofmeasure.org", "kg", "kg"));
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resource));
 
 		String statement = """
-					from Patient
-					search _id in ('123' | 'Patient/456')
-					select name.given
+					from Observation
+					select
+						id,
+						valueQuantity.
 			""";
 
 		myFqlExecutor.executeInitialSearch(statement, null, mySrd);
@@ -336,6 +315,22 @@ public class FqlExecutorTest {
 		assertEquals("123", ((TokenParam) map.get("_id").get(0).get(0)).getValue());
 		assertNull(((TokenParam) map.get("_id").get(0).get(1)).getSystem());
 		assertEquals("Patient/456", ((TokenParam) map.get("_id").get(0).get(1)).getValue());
+	}
+
+	@Test
+	public void testSearch_QualifiedSelect() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
+
+		String statement = """
+					from Patient
+					select Patient.name.given
+			""";
+
+		LocalSearchFqlExecutionResult outcome = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertTrue(outcome.hasNext());
+		assertEquals("Homer", outcome.getNextRow().getRowValues().get(0));
+
 	}
 
 	@Test

@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.fql.executor.StaticFqlExecutionResult;
-import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
+import ca.uhn.fhir.jpa.fql.executor.FqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
+import ca.uhn.fhir.jpa.fql.executor.StaticFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -77,7 +78,7 @@ public class FqlDriverTest {
 		when(myFqlExecutor.executeContinuation(any(), any(), anyInt(), any(), any())).thenReturn(new StaticFqlExecutionResult("123"));
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(IFqlExecutionResult.DataTypeEnum.STRING, IFqlExecutionResult.DataTypeEnum.STRING));
+		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING, FqlDataTypeEnum.STRING));
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IFqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
@@ -100,7 +101,7 @@ public class FqlDriverTest {
 	public void testIntrospectTables() throws SQLException {
 		when(myFqlExecutor.introspectTables()).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("TABLE_NAME"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(IFqlExecutionResult.DataTypeEnum.STRING));
+		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING));
 		when(myMockFqlResult.hasNext()).thenReturn(true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(new IFqlExecutionResult.Row(0, List.of("Account")));
 
@@ -119,7 +120,7 @@ public class FqlDriverTest {
 	public void testIntrospectColumns() throws SQLException {
 		when(myFqlExecutor.introspectColumns(any(), any())).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("COLUMN_NAME", "DATA_TYPE"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(IFqlExecutionResult.DataTypeEnum.STRING, IFqlExecutionResult.DataTypeEnum.INTEGER));
+		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING, FqlDataTypeEnum.INTEGER));
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IFqlExecutionResult.Row(0, Lists.newArrayList("foo", Types.VARCHAR)),
@@ -148,10 +149,19 @@ public class FqlDriverTest {
 		// No more rows
 		assertFalse(tables.next());
 		// Invalid columns
-		assertThrows(SQLException.class, ()->tables.getString(0));
-		assertThrows(SQLException.class, ()->tables.getString(999));
-		assertThrows(SQLException.class, ()->tables.getString("foo"));
+		assertThrows(SQLException.class, () -> tables.getString(0));
+		assertThrows(SQLException.class, () -> tables.getString(999));
+		assertThrows(SQLException.class, () -> tables.getString("foo"));
 
+	}
+
+	@Test
+	public void testMetadata_ImportedAndExportedKeys() throws SQLException {
+		Connection connection = myDs.getConnection();
+		DatabaseMetaData metadata = connection.getMetaData();
+
+		assertFalse(metadata.getImportedKeys(null, null, null).next());
+		assertFalse(metadata.getExportedKeys(null, null, null).next());
 	}
 
 

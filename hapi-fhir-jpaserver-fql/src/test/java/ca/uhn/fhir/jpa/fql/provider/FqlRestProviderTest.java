@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.fql.provider;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.fql.executor.FqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
@@ -68,7 +69,7 @@ public class FqlRestProviderTest {
 		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(IFqlExecutionResult.DataTypeEnum.STRING, IFqlExecutionResult.DataTypeEnum.STRING));
+		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING, FqlDataTypeEnum.STRING));
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IFqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
@@ -108,6 +109,52 @@ public class FqlRestProviderTest {
 		}
 	}
 
+	@Test
+	public void testDataTypes() throws IOException {
+		// Setup
+		FqlStatement statement = createFakeStatement();
+		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
+		when(myMockFqlResult.getStatement()).thenReturn(statement);
+		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("col.string", "col.date", "col.boolean", "col.time", "col.decimal", "col.integer", "col.longint", "col.timestamp"));
+		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING, FqlDataTypeEnum.DATE, FqlDataTypeEnum.BOOLEAN, FqlDataTypeEnum.TIME, FqlDataTypeEnum.DECIMAL, FqlDataTypeEnum.INTEGER, FqlDataTypeEnum.LONGINT, FqlDataTypeEnum.TIMESTAMP));
+		when(myMockFqlResult.hasNext()).thenReturn(true, false);
+		when(myMockFqlResult.getNextRow()).thenReturn(
+			new IFqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
+			new IFqlExecutionResult.Row(3, List.of("Simpson", "Marge"))
+		);
+		when(myMockFqlResult.getSearchId()).thenReturn("my-search-id");
+		when(myMockFqlResult.getLimit()).thenReturn(999);
+
+		String select = "from Patient select foo";
+		Parameters request = new Parameters();
+		request.addParameter(FqlRestProvider.PARAM_ACTION, new CodeType(FqlRestProvider.PARAM_ACTION_SEARCH));
+		request.addParameter(FqlRestProvider.PARAM_QUERY, new StringType(select));
+		request.addParameter(FqlRestProvider.PARAM_LIMIT, new IntegerType(100));
+		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + FqlConstants.FQL_EXECUTE);
+		fetch.setEntity(new ResourceEntity(ourCtx, request));
+
+		// Test
+		try (CloseableHttpResponse response = myHttpClient.execute(fetch)) {
+
+			// Verify
+			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			String expected = """
+				1,HAPI FHIR THE-VERSION
+				my-search-id,999,"{""selectClauses"":[{""clause"":""name.family"",""alias"":""name.family""}],""fromResourceName"":""Patient""}"
+				"",name.family,name.given
+				"",STRING,STRING
+				0,Simpson,Homer
+				3,Simpson,Marge
+				""".replace("THE-VERSION", VersionUtil.getVersion());
+			assertEquals(expected.trim(), outcome.trim());
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getEntity().getContentType().getValue(), startsWith("text/csv;"));
+
+			verify(myFqlExecutor, times(1)).executeInitialSearch(myStatementCaptor.capture(), myLimitCaptor.capture(), notNull());
+			assertEquals(select, myStatementCaptor.getValue());
+			assertEquals(100, myLimitCaptor.getValue());
+		}
+	}
 
 	@Test
 	public void testExecuteContinuation() throws IOException {
@@ -161,7 +208,7 @@ public class FqlRestProviderTest {
 		when(myFqlExecutor.introspectTables()).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("TABLE_NAME"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(IFqlExecutionResult.DataTypeEnum.STRING));
+		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING));
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IFqlExecutionResult.Row(0, List.of("Account")),
 			new IFqlExecutionResult.Row(6, List.of("Patient"))
@@ -201,7 +248,7 @@ public class FqlRestProviderTest {
 		when(myFqlExecutor.introspectColumns(eq("FOO"),eq("BAR"))).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("COLUMN_NAME"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(IFqlExecutionResult.DataTypeEnum.STRING));
+		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING));
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IFqlExecutionResult.Row(0, List.of("FOO")),
 			new IFqlExecutionResult.Row(6, List.of("BAR"))

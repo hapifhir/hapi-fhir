@@ -50,6 +50,19 @@ public class FqlLexerOptions {
 		',', '=', '|', ':', '*'
 	), true);
 
+	/**
+	 * Returns individual dot-parts of a FHIRPath expression as individual tokens, and also returns
+	 * dots as separate tokens.
+	 */
+	public static final FqlLexerOptions FHIRPATH_EXPRESSION_PART = new FqlLexerOptions(Set.of(
+		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'[', ']', '_', '(', ')'
+	), Set.of(
+		',', '=', '|', ':', '*', '.'
+	), true);
+
 	private final Set<Character> myMultiCharTokenCharacters;
 	private final boolean mySlurpParens;
 	private final Set<Character> mySingleCharTokenCharacters;

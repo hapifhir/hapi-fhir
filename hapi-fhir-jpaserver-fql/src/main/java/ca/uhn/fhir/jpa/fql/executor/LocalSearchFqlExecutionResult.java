@@ -65,15 +65,15 @@ public class LocalSearchFqlExecutionResult implements IFqlExecutionResult {
 	}
 
 	@Override
-	public List<DataTypeEnum> getColumnTypes() {
+	public List<FqlDataTypeEnum> getColumnTypes() {
 		/*
 		 * For now we assume that all datatypes returned by select clauses are all
 		 * strings. It'd be nice to do something more nuanced here, but it's hard to
 		 * determine datatypes from a fhirpath expression
 		 */
-		ArrayList<DataTypeEnum> retVal = new ArrayList<>();
+		ArrayList<FqlDataTypeEnum> retVal = new ArrayList<>();
 		for (int i = 0; i < myStatement.getSelectClauses().size(); i++) {
-			retVal.add(DataTypeEnum.STRING);
+			retVal.add(FqlDataTypeEnum.STRING);
 		}
 		return retVal;
 	}
@@ -113,7 +113,7 @@ public class LocalSearchFqlExecutionResult implements IFqlExecutionResult {
 								.evaluateFirst(nextValue, expression, IPrimitiveType.class)
 								.orElseThrow(IllegalStateException::new);
 							Boolean value = (Boolean) outcome.getValue();
-							haveMatch |= value;
+							haveMatch = value;
 							if (haveMatch) {
 								break;
 							}

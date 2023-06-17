@@ -28,7 +28,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class FqlParser {
+public class FqlStatementParser {
 
 	private final FqlLexer myLexer;
 	private final FhirContext myFhirContext;
@@ -36,7 +36,7 @@ public class FqlParser {
 
 	private FqlStatement myStatement;
 
-	public FqlParser(FhirContext theFhirContext, String theInput) {
+	public FqlStatementParser(FhirContext theFhirContext, String theInput) {
 		myFhirContext = theFhirContext;
 		myLexer = new FqlLexer(theInput);
 		myState = new InitialState();
@@ -220,15 +220,12 @@ public class FqlParser {
 		@Override
 		void consume(FqlLexerToken theToken) {
 			FqlStatement.WhereClause whereClause;
-			String token = theToken.getToken();
-			if (token.startsWith("__") && myWhereMode == WhereModeEnum.WHERE) {
-				whereClause = myStatement.addSearchClause();
-				token = token.substring(2);
-			} else if (myWhereMode == WhereModeEnum.SEARCH) {
+			if (myWhereMode == WhereModeEnum.SEARCH) {
 				whereClause = myStatement.addSearchClause();
 			} else {
 				whereClause = myStatement.addWhereClause();
 			}
+			String token = theToken.getToken();
 			whereClause.setLeft(token);
 			myState = new StateInWhereAfterLeft(myWhereMode, whereClause);
 		}

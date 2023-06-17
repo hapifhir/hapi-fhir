@@ -29,7 +29,7 @@ import java.util.List;
 public class StaticFqlExecutionResult implements IFqlExecutionResult {
 	private final String mySearchId;
 	private final Iterator<List<Object>> myRowsIterator;
-	private final List<DataTypeEnum> myDataTypes;
+	private final List<FqlDataTypeEnum> myDataTypes;
 	private int myNextRowOffset;
 	private List<String> myColumnNames;
 
@@ -47,7 +47,7 @@ public class StaticFqlExecutionResult implements IFqlExecutionResult {
 	 *
 	 * @param theSearchId The search ID associated with this result
 	 */
-	public StaticFqlExecutionResult(@Nullable String theSearchId, List<String> theColumnNames, List<DataTypeEnum> theDataTypes, List<List<Object>> theRows) {
+	public StaticFqlExecutionResult(@Nullable String theSearchId, List<String> theColumnNames, List<FqlDataTypeEnum> theDataTypes, List<List<Object>> theRows) {
 		mySearchId = theSearchId;
 		myColumnNames = theColumnNames;
 		myDataTypes = theDataTypes;
@@ -79,7 +79,7 @@ public class StaticFqlExecutionResult implements IFqlExecutionResult {
 	}
 
 	@Override
-	public List<DataTypeEnum> getColumnTypes() {
+	public List<FqlDataTypeEnum> getColumnTypes() {
 		return myDataTypes;
 	}
 
