@@ -25,6 +25,7 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 
 
 
+	@Test
 	public void testRawSql_Search() {
 		myStorageSettings.setAdvancedHSearchIndexing(false);
 

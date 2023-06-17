@@ -191,7 +191,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
-
 	/**
 	 * Constructor
 	 */

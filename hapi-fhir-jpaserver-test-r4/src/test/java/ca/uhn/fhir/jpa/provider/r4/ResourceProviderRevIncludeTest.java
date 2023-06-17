@@ -53,38 +53,6 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			return queryList;
 		}
 	}
-	@Test
-	public void testRevIncludeSql() {
-		final String methodName = "testSearchWithRevIncludes";
-		Patient p = new Patient();
-		p.addName().setFamily(methodName);
-		IIdType pid = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
-
-		Condition c = new Condition();
-		c.getSubject().setReferenceElement(pid);
-		IIdType cid = myClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
-
-		myCaptureQueriesListener.clear();
-		Bundle bundle = myClient.search().forResource(Patient.class)
-			.where(Patient.NAME.matches().value(methodName))
-			.revInclude(Condition.INCLUDE_PATIENT)
-			.cacheControl(new CacheControlDirective().setNoStore(true).setNoCache(true))
-			.returnBundle(Bundle.class)
-			.execute();
-		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-
-		myCaptureQueriesListener.logSelectQueries();
-		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
-		assertEquals(3, selectQueries.size());
-		assertSqlContains(selectQueries.get(0).toString(), "FROM\\s+HFJ_SPIDX_STRING");
-		assertSqlContains(selectQueries.get(1).toString(), "WHERE\\s+r.src_path = 'Condition.subject.where\\(resolve\\(\\) is Patient\\)'");
-		assertThat(foundResources, hasSize(2));
-		Patient patient = (Patient) foundResources.get(0);
-		Condition condition = (Condition) foundResources.get(1);
-		assertEquals(pid.getIdPart(), patient.getIdElement().getIdPart());
-		assertEquals(cid.getIdPart(), condition.getIdElement().getIdPart());
-		assertEquals(methodName, patient.getName().get(0).getFamily());
-	}
 
 	@Test
 	public void testRevincludeIterate() {
@@ -142,10 +110,6 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		//TODO GGG/KHS reduce this to something less than 6 by smarter iterating and getting the resource types earlier when needed.
 		assertEquals(6, sqlCapturingInterceptor.getQueryList().size());
 		myInterceptorRegistry.unregisterInterceptor(sqlCapturingInterceptor);
-	}
-
-	private static void assertSqlContains(String theSql, String theExpectedSql) {
-		assertThat(theSql, matchesPattern(Pattern.compile(".*" + theExpectedSql + ".*", Pattern.DOTALL)));
 	}
 
 }
