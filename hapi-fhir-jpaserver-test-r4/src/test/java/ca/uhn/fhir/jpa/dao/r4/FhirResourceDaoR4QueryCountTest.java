@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterc
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -257,6 +258,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
+
 
 	/**
 	 * See the class javadoc before changing the counts in this test!

@@ -2,6 +2,9 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
@@ -19,6 +22,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -92,15 +96,18 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.DetectedIssue;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DocumentManifest;
@@ -206,6 +213,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -269,6 +277,87 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
+
+
+	class SqlCapturingInterceptor {
+		SqlQueryList queryList = null;
+		@Hook(Pointcut.JPA_PERFTRACE_RAW_SQL)
+		public void trackRequest(RequestDetails theRequestDetails, SqlQueryList theQueryList) {
+			if (queryList == null) {
+				queryList = theQueryList;
+			} else {
+				queryList.addAll(theQueryList);
+			}
+		}
+
+		public SqlQueryList getQueryList() {
+			return queryList;
+		}
+	}
+	@Test
+	public void testRawSqlCapturingGetsIncludesAndRevIncludes() {
+
+		SqlCapturingInterceptor interceptor = new SqlCapturingInterceptor();
+		try {
+			Patient p = new Patient();
+			IIdType unqualified = myClient.create().resource(p).execute().getId().toUnqualified();
+			Observation o = new Observation();
+			o.setSubject(new Reference(unqualified));
+			myClient.create().resource(o).execute();
+
+			myInterceptorRegistry.registerInterceptor(interceptor);
+			Bundle execute = myClient.search().byUrl("Patient?_revinclude=Observation:subject").returnBundle(Bundle.class).execute();
+			assertThat(execute.getEntry(), hasSize(2));
+			SqlQueryList queryList = interceptor.getQueryList();
+			//Basic query, then the revinclude
+			assertThat(queryList, hasSize(2));
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+	@Test
+	public void testRawSqlCapturingGetsIteratedRevIncludes() {
+
+		SqlCapturingInterceptor interceptor = new SqlCapturingInterceptor();
+		try {
+			Patient p = new Patient();
+			IIdType patientId = myClient.create().resource(p).execute().getId().toUnqualified();
+
+			Condition condition = new Condition();
+			condition.setSubject(new Reference(patientId));
+			myClient.create().resource(condition).execute();
+
+			Group g = new Group();
+			g.addMember().setEntity(new Reference(patientId));
+			IIdType groupId = myClient.create().resource(g).execute().getId().toUnqualified();
+
+			CareTeam careTeam = new CareTeam();
+			careTeam.setSubject(new Reference(groupId));
+			myClient.create().resource(careTeam).execute();
+
+			DetectedIssue detectedIssue = new DetectedIssue();
+			detectedIssue.setPatient(new Reference(patientId));
+			myClient.create().resource(detectedIssue).execute();
+
+			myInterceptorRegistry.registerInterceptor(interceptor);
+
+			Bundle execute = myClient.search()
+				.byUrl("Patient?_id="+ patientId.getIdPart() +
+					"&_revinclude=Condition:patient" +
+					"&_revinclude:iterate=CareTeam:subject" +
+					"&_revinclude=Group:member:Patient" +
+					"&_revinclude=DetectedIssue:patient"
+				).returnBundle(Bundle.class).execute();
+			assertThat(execute.getEntry(), hasSize(2));
+			SqlQueryList queryList = interceptor.getQueryList();
+			//Basic query, then the revinclude
+			assertThat(queryList, hasSize(5));
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
@@ -279,7 +368,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		myClient.create().resource(searchParameter).execute();
-
 		mySearchParamRegistry.forceRefresh();
 
 		HttpGet get = new HttpGet(myServerBase + "/Procedure?focalAccess.a%20ne%20e");
