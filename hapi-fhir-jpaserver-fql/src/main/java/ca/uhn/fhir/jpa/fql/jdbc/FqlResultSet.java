@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.executor.StaticFqlExecutionResult;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -134,7 +135,11 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public boolean getBoolean(int columnIndex) throws SQLException {
-		throw new SQLException();
+		validateColumnIndex(columnIndex);
+		Boolean retVal = (Boolean) myNextRow.get(columnIndex - 1);
+		myLastValue = retVal;
+		retVal = defaultIfNull(retVal, Boolean.FALSE);
+		return retVal;
 	}
 
 	@Override
@@ -149,22 +154,28 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public long getLong(int columnIndex) throws SQLException {
-		throw new SQLException();
+		validateColumnIndex(columnIndex);
+		Long retVal = (Long) myNextRow.get(columnIndex - 1);
+		myLastValue = retVal;
+		retVal = defaultIfNull(retVal, 0L);
+		return retVal;
 	}
 
 	@Override
 	public float getFloat(int columnIndex) throws SQLException {
-		throw new SQLException();
+		BigDecimal retVal = getBigDecimal(columnIndex);
+		return retVal != null ? retVal.floatValue() : 0f;
 	}
 
 	@Override
 	public double getDouble(int columnIndex) throws SQLException {
-		throw new SQLException();
+		BigDecimal retVal = getBigDecimal(columnIndex);
+		return retVal != null ? retVal.doubleValue() : 0d;
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
-		throw new SQLException();
+		return getBigDecimal(columnIndex);
 	}
 
 	@Override
@@ -174,17 +185,43 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public Date getDate(int columnIndex) throws SQLException {
-		throw new SQLException();
+		validateColumnIndex(columnIndex);
+		Object retVal = myNextRow.get(columnIndex - 1);
+		if (retVal != null) {
+			retVal = new Date(((java.util.Date)retVal).getTime());
+		}
+		myLastValue = retVal;
+		return (Date) retVal;
 	}
 
 	@Override
 	public Time getTime(int columnIndex) throws SQLException {
-		throw new SQLException();
+		validateColumnIndex(columnIndex);
+		Object retVal = myNextRow.get(columnIndex - 1);
+		if (retVal != null) {
+			String time = (String) retVal;
+			if (StringUtils.countMatches(time, ':') == 1) {
+				time = time + ":00";
+			}
+			int pointIdx = time.indexOf('.');
+			if (pointIdx != -1) {
+				time = time.substring(0, pointIdx);
+			}
+			retVal = Time.valueOf(time);
+		}
+		myLastValue = retVal;
+		return (Time) retVal;
 	}
 
 	@Override
 	public Timestamp getTimestamp(int columnIndex) throws SQLException {
-		throw new SQLException();
+		validateColumnIndex(columnIndex);
+		Object retVal = myNextRow.get(columnIndex - 1);
+		if (retVal != null) {
+			retVal = new Timestamp(((java.util.Date)retVal).getTime());
+		}
+		myLastValue = retVal;
+		return (Timestamp) retVal;
 	}
 
 	@Override
@@ -214,7 +251,7 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public boolean getBoolean(String columnLabel) throws SQLException {
-		throw new SQLException();
+		return getBoolean(findColumn(columnLabel));
 	}
 
 	@Override
@@ -229,22 +266,22 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public long getLong(String columnLabel) throws SQLException {
-		throw new SQLException();
+		return getLong(findColumn(columnLabel));
 	}
 
 	@Override
 	public float getFloat(String columnLabel) throws SQLException {
-		throw new SQLException();
+		return getFloat(findColumn(columnLabel));
 	}
 
 	@Override
 	public double getDouble(String columnLabel) throws SQLException {
-		throw new SQLException();
+		return getDouble(findColumn(columnLabel));
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
-		throw new SQLException();
+		return getBigDecimal(findColumn(columnLabel));
 	}
 
 	@Override
@@ -254,17 +291,17 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public Date getDate(String columnLabel) throws SQLException {
-		throw new SQLException();
+		return getDate(findColumn(columnLabel));
 	}
 
 	@Override
 	public Time getTime(String columnLabel) throws SQLException {
-		throw new SQLException();
+		return getTime(findColumn(columnLabel));
 	}
 
 	@Override
 	public Timestamp getTimestamp(String columnLabel) throws SQLException {
-		throw new SQLException();
+		return getTimestamp(findColumn(columnLabel));
 	}
 
 	@Override
@@ -307,6 +344,18 @@ class FqlResultSet implements ResultSet {
 		switch (myResult.getColumnTypes().get(columnIndex - 1)) {
 			case INTEGER:
 				return getInt(columnIndex);
+			case BOOLEAN:
+				return getBoolean(columnIndex);
+			case DATE:
+				return getDate(columnIndex);
+			case TIMESTAMP:
+				return getTimestamp(columnIndex);
+			case LONGINT:
+				return getLong(columnIndex);
+			case TIME:
+				return getTime(columnIndex);
+			case DECIMAL:
+				return getBigDecimal(columnIndex);
 			case STRING:
 			default:
 				return getString(columnIndex);
@@ -339,12 +388,15 @@ class FqlResultSet implements ResultSet {
 
 	@Override
 	public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
-		throw new SQLException();
+		validateColumnIndex(columnIndex);
+		BigDecimal retVal = (BigDecimal) myNextRow.get(columnIndex - 1);
+		myLastValue = retVal;
+		return retVal;
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
-		throw new SQLException();
+		return getBigDecimal(findColumn(columnLabel));
 	}
 
 	@Override

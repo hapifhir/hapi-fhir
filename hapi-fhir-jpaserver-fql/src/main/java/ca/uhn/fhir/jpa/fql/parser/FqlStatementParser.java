@@ -296,6 +296,9 @@ public class FqlStatementParser {
 				if (myLexer.peekNextToken(getLexerOptions()).getToken().equals("|")) {
 					myLexer.consumeNextToken();
 					return;
+				} else if (myLexer.peekNextToken(getLexerOptions()).getToken().equals(",")) {
+					myLexer.consumeNextToken();
+					return;
 				} else if (myLexer.peekNextToken(getLexerOptions()).getToken().equals(")")) {
 					myLexer.consumeNextToken();
 					myState = new StateAfterWhere(myWhereMode);

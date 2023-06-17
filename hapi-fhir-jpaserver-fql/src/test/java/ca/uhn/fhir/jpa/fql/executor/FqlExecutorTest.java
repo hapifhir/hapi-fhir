@@ -291,21 +291,32 @@ public class FqlExecutorTest {
 
 
 	@Test
-	public void testSearch_Id_In() {
+	public void testSearch_Id_In_CommaList() {
 		IFhirResourceDao<Observation> patientDao = initDao(Observation.class);
 		Observation resource = new Observation();
+		resource.getMeta().setVersionId("5");
 		resource.setId("Observation/123");
-		resource.setValue(new Quantity(null, 500, "http://unitsofmeasure.org", "kg", "kg"));
+		resource.setValue(new Quantity(null, 500.1, "http://unitsofmeasure.org", "kg", "kg"));
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resource));
 
 		String statement = """
-					from Observation
 					select
-						id,
-						valueQuantity.
+						id, meta.versionId, value.ofType(Quantity).value
+					from
+						Observation
+					search
+						_id in ('123', 'Patient/456')
 			""";
 
-		myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+		LocalSearchFqlExecutionResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+
+		assertThat(result.getColumnNames(), contains("id", "meta.versionId", "value.ofType(Quantity).value"));
+		assertThat(result.getColumnTypes(), contains(FqlDataTypeEnum.STRING, FqlDataTypeEnum.LONGINT, FqlDataTypeEnum.DECIMAL));
+		assertTrue(result.hasNext());
+		List<Object> nextRow = result.getNextRow().getRowValues();
+		assertEquals("123", nextRow.get(0));
+		assertEquals("5", nextRow.get(1));
+		assertEquals("500.1", nextRow.get(2));
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
@@ -332,6 +343,30 @@ public class FqlExecutorTest {
 		assertEquals("Homer", outcome.getNextRow().getRowValues().get(0));
 
 	}
+
+	@Test
+	public void testSearch_UnknownSelector() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createSomeSimpsonsAndFlanders());
+
+
+		String statement = """
+					select
+						name.given, foo
+					from
+						Patient
+			""";
+
+		LocalSearchFqlExecutionResult result = myFqlExecutor.executeInitialSearch(statement, null, mySrd);
+
+		assertThat(result.getColumnNames(), contains("name.given", "foo"));
+		assertThat(result.getColumnTypes(), contains(FqlDataTypeEnum.STRING, FqlDataTypeEnum.STRING));
+		assertTrue(result.hasNext());
+		List<Object> nextRow = result.getNextRow().getRowValues();
+		assertEquals("Homer", nextRow.get(0));
+		assertNull(nextRow.get(1));
+	}
+
 
 	@Test
 	public void testSearch_LastUpdated_In() {

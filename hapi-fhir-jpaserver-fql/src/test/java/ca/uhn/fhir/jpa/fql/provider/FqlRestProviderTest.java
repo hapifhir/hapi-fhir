@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.fql.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.fql.executor.FqlDataTypeEnum;
-import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
 import ca.uhn.fhir.jpa.fql.executor.IFqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.fql.util.FqlConstants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -26,6 +26,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -37,12 +39,18 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class FqlRestProviderTest {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final Logger ourLog = LoggerFactory.getLogger(FqlRestProviderTest.class);
 	@RegisterExtension
 	public HttpClientExtension myHttpClient = new HttpClientExtension();
 	@Mock
@@ -61,7 +69,6 @@ public class FqlRestProviderTest {
 	@Captor
 	private ArgumentCaptor<Integer> myOffsetCaptor;
 
-
 	@Test
 	public void testExecuteInitialSearch() throws IOException {
 		// Setup
@@ -71,53 +78,6 @@ public class FqlRestProviderTest {
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
 		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING, FqlDataTypeEnum.STRING));
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
-		when(myMockFqlResult.getNextRow()).thenReturn(
-			new IFqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
-			new IFqlExecutionResult.Row(3, List.of("Simpson", "Marge"))
-		);
-		when(myMockFqlResult.getSearchId()).thenReturn("my-search-id");
-		when(myMockFqlResult.getLimit()).thenReturn(999);
-
-		String select = "from Patient select foo";
-		Parameters request = new Parameters();
-		request.addParameter(FqlRestProvider.PARAM_ACTION, new CodeType(FqlRestProvider.PARAM_ACTION_SEARCH));
-		request.addParameter(FqlRestProvider.PARAM_QUERY, new StringType(select));
-		request.addParameter(FqlRestProvider.PARAM_LIMIT, new IntegerType(100));
-		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + FqlConstants.FQL_EXECUTE);
-		fetch.setEntity(new ResourceEntity(ourCtx, request));
-
-		// Test
-		try (CloseableHttpResponse response = myHttpClient.execute(fetch)) {
-
-			// Verify
-			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			String expected = """
-				1,HAPI FHIR THE-VERSION
-				my-search-id,999,"{""selectClauses"":[{""clause"":""name.family"",""alias"":""name.family""}],""fromResourceName"":""Patient""}"
-				"",name.family,name.given
-				"",STRING,STRING
-				0,Simpson,Homer
-				3,Simpson,Marge
-				""".replace("THE-VERSION", VersionUtil.getVersion());
-			assertEquals(expected.trim(), outcome.trim());
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(response.getEntity().getContentType().getValue(), startsWith("text/csv;"));
-
-			verify(myFqlExecutor, times(1)).executeInitialSearch(myStatementCaptor.capture(), myLimitCaptor.capture(), notNull());
-			assertEquals(select, myStatementCaptor.getValue());
-			assertEquals(100, myLimitCaptor.getValue());
-		}
-	}
-
-	@Test
-	public void testDataTypes() throws IOException {
-		// Setup
-		FqlStatement statement = createFakeStatement();
-		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
-		when(myMockFqlResult.getStatement()).thenReturn(statement);
-		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("col.string", "col.date", "col.boolean", "col.time", "col.decimal", "col.integer", "col.longint", "col.timestamp"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING, FqlDataTypeEnum.DATE, FqlDataTypeEnum.BOOLEAN, FqlDataTypeEnum.TIME, FqlDataTypeEnum.DECIMAL, FqlDataTypeEnum.INTEGER, FqlDataTypeEnum.LONGINT, FqlDataTypeEnum.TIMESTAMP));
-		when(myMockFqlResult.hasNext()).thenReturn(true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IFqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
 			new IFqlExecutionResult.Row(3, List.of("Simpson", "Marge"))
@@ -174,6 +134,7 @@ public class FqlRestProviderTest {
 		request.addParameter(FqlRestProvider.PARAM_CONTINUATION, new StringType(continuation));
 		request.addParameter(FqlRestProvider.PARAM_STATEMENT, new StringType(JsonUtil.serialize(createFakeStatement())));
 		request.addParameter(FqlRestProvider.PARAM_OFFSET, new IntegerType(99));
+		ourLog.info("Request: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(request));
 		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + FqlConstants.FQL_EXECUTE);
 		fetch.setEntity(new ResourceEntity(ourCtx, request));
 
@@ -245,7 +206,7 @@ public class FqlRestProviderTest {
 	@Test
 	public void testIntrospectColumns() throws IOException {
 		// Setup
-		when(myFqlExecutor.introspectColumns(eq("FOO"),eq("BAR"))).thenReturn(myMockFqlResult);
+		when(myFqlExecutor.introspectColumns(eq("FOO"), eq("BAR"))).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("COLUMN_NAME"));
 		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING));

@@ -37,6 +37,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -158,17 +161,76 @@ public class RemoteFqlExecutionResult implements IFqlExecutionResult {
 		}
 
 		boolean hasNext = myIterator.hasNext();
-		if (!hasNext) {
+		if (!hasNext && myCurrentFetchCount < myFetchSize) {
+			myExhausted = true;
+			close();
+		} else if (!hasNext) {
 			close();
 			if (mySupportsContinuations) {
 				hasNext = executeContinuationSearch();
 			}
 		}
 
-		if (!hasNext && myCurrentFetchCount < myFetchSize) {
-			myExhausted = true;
-		}
 		return hasNext;
+	}
+
+	@Override
+	public Row getNextRow() {
+		Validate.isTrue(!myExhausted, "Search is exhausted. This is a bug.");
+
+		List<Object> columnValues = new ArrayList<>();
+		boolean first = true;
+		CSVRecord nextRecord = myIterator.next();
+		myCurrentFetchCount++;
+
+		for (String next : nextRecord) {
+			if (first) {
+				first = false;
+				myLastRowNumber = Integer.parseInt(next);
+				continue;
+			}
+			columnValues.add(next);
+		}
+
+		for (int i = 0; i < columnValues.size(); i++) {
+			String existingValue = (String) columnValues.get(i);
+			if (isNotBlank(existingValue)) {
+				Object newValue = null;
+				switch (myColumnTypes.get(i)) {
+					case STRING:
+						// No action
+						break;
+					case TIME:
+						// No action (we represent times as strings internally)
+						break;
+					case INTEGER:
+						newValue = Integer.parseInt(existingValue);
+						break;
+					case BOOLEAN:
+						newValue = Boolean.parseBoolean(existingValue);
+						break;
+					case DATE:
+						newValue = new DateType(existingValue).getValue();
+						break;
+					case TIMESTAMP:
+						newValue = new DateTimeType(existingValue).getValue();
+						break;
+					case LONGINT:
+						newValue = Long.parseLong(existingValue);
+						break;
+					case DECIMAL:
+						newValue = new DecimalType(existingValue).getValue();
+						break;
+				}
+				if (newValue != null) {
+					columnValues.set(i, newValue);
+				}
+			} else {
+				columnValues.set(i, null);
+			}
+		}
+
+		return new Row(myLastRowNumber, columnValues);
 	}
 
 	private boolean executeContinuationSearch() {
@@ -194,43 +256,6 @@ public class RemoteFqlExecutionResult implements IFqlExecutionResult {
 		}
 		hasNext = myIterator.hasNext();
 		return hasNext;
-	}
-
-	@Override
-	public Row getNextRow() {
-		Validate.isTrue(!myExhausted, "Search is exhausted. This is a bug.");
-
-		List<Object> columnValues = new ArrayList<>();
-		boolean first = true;
-		CSVRecord nextRecord = myIterator.next();
-		myCurrentFetchCount++;
-
-		for (String next : nextRecord) {
-			if (first) {
-				first = false;
-				myLastRowNumber = Integer.parseInt(next);
-				continue;
-			}
-			columnValues.add(next);
-		}
-
-		for (int i = 0; i < columnValues.size(); i++) {
-			if (isNotBlank((String)columnValues.get(i))) {
-				switch (myColumnTypes.get(i)) {
-					case STRING:
-						// No action
-						break;
-					case INTEGER:
-						Integer newValue = Integer.parseInt((String) columnValues.get(i));
-						columnValues.set(i, newValue);
-						break;
-				}
-			} else {
-				columnValues.set(i, null);
-			}
-		}
-
-		return new Row(myLastRowNumber, columnValues);
 	}
 
 	@Override

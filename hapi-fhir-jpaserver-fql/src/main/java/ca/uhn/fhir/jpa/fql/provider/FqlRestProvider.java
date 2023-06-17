@@ -191,6 +191,7 @@ public class FqlRestProvider {
 				csvWriter.print(nextRow.getRowOffset());
 				csvWriter.printRecord(nextRow.getRowValues());
 			}
+
 			csvWriter.close(true);
 		}
 	}

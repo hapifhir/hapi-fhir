@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ public class LocalSearchFqlExecutionResult implements IFqlExecutionResult {
 	private final IFhirPath myFhirPath;
 	private final Integer myLimit;
 	private final FqlStatement myStatement;
+	private final List<String> myColumnNames;
+	private final List<FqlDataTypeEnum> myColumnDataTypes;
 	private int myTotalRowsFetched = 0;
 	private int myNextSearchResultRow;
 	private int myNextBatchRow = 0;
@@ -45,37 +48,29 @@ public class LocalSearchFqlExecutionResult implements IFqlExecutionResult {
 	private boolean myExhausted = false;
 	private int myNextResourceSearchRow;
 
-	public LocalSearchFqlExecutionResult(FqlStatement theStatement, IBundleProvider theSearchResult, IFhirPath theFhirPath, Integer theLimit, int theInitialOffset) {
+	public LocalSearchFqlExecutionResult(FqlStatement theStatement, IBundleProvider theSearchResult, IFhirPath theFhirPath, Integer theLimit, int theInitialOffset, List<FqlDataTypeEnum> theColumnDataTypes) {
 		myStatement = theStatement;
 		mySearchResult = theSearchResult;
 		myFhirPath = theFhirPath;
 		myLimit = theLimit;
 		myNextSearchResultRow = theInitialOffset;
+		myColumnDataTypes = theColumnDataTypes;
+		myColumnNames = myStatement
+			.getSelectClauses()
+			.stream()
+			.map(FqlStatement.SelectClause::getAlias)
+			.collect(Collectors.toUnmodifiableList());
 	}
 
 
 	@Override
 	public List<String> getColumnNames() {
-		return
-			myStatement
-				.getSelectClauses()
-				.stream()
-				.map(FqlStatement.SelectClause::getAlias)
-				.collect(Collectors.toUnmodifiableList());
+		return myColumnNames;
 	}
 
 	@Override
 	public List<FqlDataTypeEnum> getColumnTypes() {
-		/*
-		 * For now we assume that all datatypes returned by select clauses are all
-		 * strings. It'd be nice to do something more nuanced here, but it's hard to
-		 * determine datatypes from a fhirpath expression
-		 */
-		ArrayList<FqlDataTypeEnum> retVal = new ArrayList<>();
-		for (int i = 0; i < myStatement.getSelectClauses().size(); i++) {
-			retVal.add(FqlDataTypeEnum.STRING);
-		}
-		return retVal;
+		return myColumnDataTypes;
 	}
 
 	@Override
@@ -151,8 +146,10 @@ public class LocalSearchFqlExecutionResult implements IFqlExecutionResult {
 			List<IPrimitiveType> nextPrimitive = myFhirPath.evaluate(myNextResource, nextColumn.getClause(), IPrimitiveType.class);
 			String value = null;
 			if (!nextPrimitive.isEmpty()) {
-				IPrimitiveType primitive = nextPrimitive.get(0);
-				if (primitive != null) {
+				IPrimitiveType<?> primitive = nextPrimitive.get(0);
+				if (primitive instanceof IIdType) {
+					value = ((IIdType)primitive).getIdPart();
+				} else if (primitive != null) {
 					value = primitive.getValueAsString();
 				}
 			}

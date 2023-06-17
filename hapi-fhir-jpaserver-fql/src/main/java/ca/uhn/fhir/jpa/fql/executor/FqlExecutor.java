@@ -29,8 +29,9 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.fql.parser.FqlStatementParser;
+import ca.uhn.fhir.jpa.fql.parser.FqlFhirPathParser;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
+import ca.uhn.fhir.jpa.fql.parser.FqlStatementParser;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -55,9 +56,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class FqlExecutor implements IFqlExecutor {
@@ -125,15 +128,36 @@ public class FqlExecutor implements IFqlExecutor {
 			}
 		}
 
+		List<FqlDataTypeEnum> columnDataTypes = determineColumnDataTypes(statement);
 		IBundleProvider outcome = dao.search(map, theRequestDetails);
-		return new LocalSearchFqlExecutionResult(statement, outcome, fhirPath, theLimit, 0);
+		return new LocalSearchFqlExecutionResult(statement, outcome, fhirPath, theLimit, 0, columnDataTypes);
 	}
 
 	@Override
 	public IFqlExecutionResult executeContinuation(FqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails) {
 		IBundleProvider resultList = myPagingProvider.retrieveResultList(theRequestDetails, theSearchId);
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		return new LocalSearchFqlExecutionResult(theStatement, resultList, fhirPath, theLimit, theStartingOffset);
+		return new LocalSearchFqlExecutionResult(theStatement, resultList, fhirPath, theLimit, theStartingOffset, Collections.emptyList());
+	}
+
+	@Nonnull
+	private List<FqlDataTypeEnum> determineColumnDataTypes(FqlStatement statement) {
+		FqlFhirPathParser fhirPathParser = new FqlFhirPathParser(myFhirContext);
+		List<FqlDataTypeEnum> columnDataTypes = new ArrayList<>();
+		for (FqlStatement.SelectClause nextSelectClause : statement.getSelectClauses()) {
+			String clause = nextSelectClause.getClause();
+			FqlDataTypeEnum nextType;
+			if (clause.equals("meta.versionId")) {
+				// FHIR's versionId field is a string, but in HAPI FHIR JPA it can only ever be a long so we'll
+				// use that type
+				nextType = FqlDataTypeEnum.LONGINT;
+			} else {
+				nextType = fhirPathParser.determineDatatypeForPath(statement.getFromResourceName(), clause);
+				nextType = defaultIfNull(nextType, FqlDataTypeEnum.STRING);
+			}
+			columnDataTypes.add(nextType);
+		}
+		return columnDataTypes;
 	}
 
 	private void massageSelectColumnNames(FqlStatement theFqlStatement) {

@@ -7,9 +7,21 @@ import ca.uhn.fhir.jpa.fql.executor.IFqlExecutor;
 import ca.uhn.fhir.jpa.fql.executor.StaticFqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.FqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
+import ca.uhn.fhir.jpa.fql.util.FqlConstants;
+import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.VersionUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,24 +33,35 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
 import static ca.uhn.fhir.jpa.fql.jdbc.FqlRestClientTest.createFakeStatement;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("SqlDialectInspection")
+@SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
 @ExtendWith(MockitoExtension.class)
 public class FqlDriverTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
@@ -75,7 +98,6 @@ public class FqlDriverTest {
 	public void testExecuteStatement() {
 		FqlStatement statement = createFakeStatement();
 		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
-		when(myFqlExecutor.executeContinuation(any(), any(), anyInt(), any(), any())).thenReturn(new StaticFqlExecutionResult("123"));
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
 		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING, FqlDataTypeEnum.STRING));
@@ -94,6 +116,104 @@ public class FqlDriverTest {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDs);
 		List<Map<String, Object>> outcome = jdbcTemplate.query(input, new ColumnMapRowMapper());
 		assertEquals(2, outcome.size());
+	}
+
+
+	@Test
+	public void testDataTypes() throws SQLException {
+		// Setup
+		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
+		when(myMockFqlResult.getStatement()).thenReturn(createFakeStatement());
+		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("col.string", "col.date", "col.boolean", "col.time", "col.decimal", "col.integer", "col.longint", "col.timestamp"));
+		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.STRING, FqlDataTypeEnum.DATE, FqlDataTypeEnum.BOOLEAN, FqlDataTypeEnum.TIME, FqlDataTypeEnum.DECIMAL, FqlDataTypeEnum.INTEGER, FqlDataTypeEnum.LONGINT, FqlDataTypeEnum.TIMESTAMP));
+		when(myMockFqlResult.hasNext()).thenReturn(true, false);
+		when(myMockFqlResult.getNextRow()).thenReturn(
+			new IFqlExecutionResult.Row(0, List.of("a-string", "2023-02-02", "true", "12:23:22", "100.123", "123", "987", "2023-02-12T10:01:02.234Z"))
+		);
+		when(myMockFqlResult.getSearchId()).thenReturn("my-search-id");
+		when(myMockFqlResult.getLimit()).thenReturn(999);
+
+		String input = """
+				select col.string, col.date, col.boolean, col.time, col.decimal, col.integer, col.longint, col.timestamp
+				from Patient
+			""";
+
+		// Test
+		Connection connection = myDs.getConnection();
+		Statement statement = connection.createStatement();
+		assertTrue(statement.execute(input));
+		ResultSet resultSet = statement.getResultSet();
+
+		// Verify
+		assertTrue(resultSet.next());
+		assertEquals("a-string", resultSet.getString("col.string"));
+		assertEquals(new DateType("2023-02-02").getValue(), resultSet.getDate("col.date"));
+		assertEquals(true, resultSet.getBoolean("col.boolean"));
+		assertEquals("12:23:22", resultSet.getTime("col.time").toString());
+		assertEquals(new BigDecimal("100.123"), resultSet.getBigDecimal("col.decimal"));
+		assertEquals(new BigDecimal("100.123"), resultSet.getBigDecimal("col.decimal", 100));
+		assertEquals(100.123f, resultSet.getFloat("col.decimal"));
+		assertEquals(100.123d, resultSet.getDouble("col.decimal"));
+		assertEquals(123, resultSet.getInt("col.integer"));
+		assertEquals(987L, resultSet.getLong("col.longint"));
+		assertEquals(new Timestamp(new DateTimeType("2023-02-12T10:01:02.234Z").getValue().getTime()), resultSet.getTimestamp("col.timestamp"));
+
+		// Using getObject
+		assertEquals("a-string", resultSet.getObject("col.string"));
+		assertEquals(new DateType("2023-02-02").getValue(), resultSet.getObject("col.date"));
+		assertEquals(true, resultSet.getObject("col.boolean"));
+		assertEquals("12:23:22", resultSet.getObject("col.time").toString());
+		assertEquals(new BigDecimal("100.123"), resultSet.getObject("col.decimal"));
+		assertEquals(123, resultSet.getObject("col.integer"));
+		assertEquals(987L, resultSet.getObject("col.longint"));
+		assertEquals(new Timestamp(new DateTimeType("2023-02-12T10:01:02.234Z").getValue().getTime()), resultSet.getObject("col.timestamp"));
+
+		assertThrows(SQLException.class, ()->resultSet.getString(0));
+		assertThrows(SQLException.class, ()->resultSet.getString(999));
+		assertThrows(SQLException.class, ()->resultSet.getString("foo"));
+	}
+
+	@Test
+	public void testDatatypes_TimestampPrecision() throws SQLException {
+		// Setup
+		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
+		when(myMockFqlResult.getStatement()).thenReturn(createFakeStatement());
+		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("col.time"));
+		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(FqlDataTypeEnum.TIME));
+		when(myMockFqlResult.hasNext()).thenReturn(true, true, true, true, true, false);
+		when(myMockFqlResult.getNextRow()).thenReturn(
+			new IFqlExecutionResult.Row(0, List.of("12:23")),
+			new IFqlExecutionResult.Row(1, List.of("12:23:10")),
+			new IFqlExecutionResult.Row(2, List.of("12:23:11.0")),
+			new IFqlExecutionResult.Row(3, List.of("12:23:12.12")),
+			new IFqlExecutionResult.Row(4, List.of("12:23:13.123"))
+		);
+		when(myMockFqlResult.getSearchId()).thenReturn("my-search-id");
+		when(myMockFqlResult.getLimit()).thenReturn(999);
+
+		String input = "select col.time from Patient";
+
+		// Test
+		Connection connection = myDs.getConnection();
+		Statement statement = connection.createStatement();
+		assertTrue(statement.execute(input));
+		ResultSet resultSet = statement.getResultSet();
+
+		// Verify
+		assertTrue(resultSet.next());
+		assertEquals("12:23:00", resultSet.getTime("col.time").toString());
+		assertTrue(resultSet.next());
+		assertEquals("12:23:10", resultSet.getTime("col.time").toString());
+		assertTrue(resultSet.next());
+		assertEquals("12:23:11", resultSet.getTime("col.time").toString());
+		assertTrue(resultSet.next());
+		assertEquals("12:23:12", resultSet.getTime("col.time").toString());
+		assertTrue(resultSet.next());
+		assertEquals("12:23:13", resultSet.getTime("col.time").toString());
+		assertFalse(resultSet.next());
+
+		verify(myFqlExecutor, times(1)).executeInitialSearch(any(), any(), any());
+		verify(myFqlExecutor, times(0)).executeContinuation(any(), any(), anyInt(), any(), any());
 	}
 
 
