@@ -67,7 +67,6 @@ import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.QueryChunker;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
@@ -1149,7 +1148,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		String searchIdOrDescription = theParameters.getSearchIdOrDescription();
 		List<String> desiredResourceTypes = theParameters.getDesiredResourceTypes();
 		boolean hasDesiredResourceTypes = desiredResourceTypes != null && !desiredResourceTypes.isEmpty();
-
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, theParameters.getRequestDetails())) {
+			CurrentThreadCaptureQueriesListener.startCapturing();
+		}
 		if (matches.size() == 0) {
 			return new HashSet<>();
 		}
@@ -1395,6 +1396,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), reverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), searchIdOrDescription);
 
+
+
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, request)) {
+			callRawSqlHookWithCurrentThreadQueries(request);
+		}
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
@@ -1421,6 +1427,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		return allAdded;
+	}
+
+	/**
+	 * Given a
+	 * @param request
+	 */
+	private void callRawSqlHookWithCurrentThreadQueries(RequestDetails request) {
+		SqlQueryList capturedQueries = CurrentThreadCaptureQueriesListener.getCurrentQueueAndStopCapturing();
+		HookParams params = new HookParams()
+			.add(RequestDetails.class, request)
+			.addIfMatchesType(ServletRequestDetails.class, request)
+			.add(SqlQueryList.class, capturedQueries);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, request, Pointcut.JPA_PERFTRACE_RAW_SQL, params);
 	}
 
 	@Nullable
@@ -1865,12 +1884,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			} finally {
 				// search finished - fire hooks
 				if (myHaveRawSqlHooks) {
-					SqlQueryList capturedQueries = CurrentThreadCaptureQueriesListener.getCurrentQueueAndStopCapturing();
-					HookParams params = new HookParams()
-						.add(RequestDetails.class, myRequest)
-						.addIfMatchesType(ServletRequestDetails.class, myRequest)
-						.add(SqlQueryList.class, capturedQueries);
-					CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_RAW_SQL, params);
+					callRawSqlHookWithCurrentThreadQueries(myRequest);
 				}
 			}
 
