@@ -52,8 +52,6 @@ public class FqlExecutorTest {
 	private final RequestDetails mySrd = new SystemRequestDetails();
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
-	@Spy
-	private ISearchParamRegistry mySearchParamRegistry = new FhirContextSearchParamRegistry(myCtx);
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock
