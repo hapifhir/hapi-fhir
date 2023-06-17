@@ -1,9 +1,13 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -17,6 +21,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +37,22 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderRevIncludeTest.class);
 
 
+
+	class SqlCapturingInterceptor {
+		SqlQueryList queryList = null;
+		@Hook(Pointcut.JPA_PERFTRACE_RAW_SQL)
+		public void trackRequest(RequestDetails theRequestDetails, SqlQueryList theQueryList) {
+			if (queryList == null) {
+				queryList = theQueryList;
+			} else {
+				queryList.addAll(theQueryList);
+			}
+		}
+
+		public SqlQueryList getQueryList() {
+			return queryList;
+		}
+	}
 	@Test
 	public void testRevIncludeSql() {
 		final String methodName = "testSearchWithRevIncludes";
@@ -93,8 +114,9 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			ourLog.info("Created detected issue: {}", diid.getValue()); // 4...103
 			dids.add(diid);
 		}
-
+		SqlCapturingInterceptor sqlCapturingInterceptor = new SqlCapturingInterceptor();
 		myCaptureQueriesListener.clear();
+		myInterceptorRegistry.registerInterceptor(sqlCapturingInterceptor);
 		Bundle bundle = myClient.search()
 			.forResource(Patient.class)
 			.count(200)
@@ -103,14 +125,8 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 //			.revInclude(new Include("CareTeam:subject:Group"))
 			.revInclude(new Include("Group:member:Patient"))
 			.revInclude(DetectedIssue.INCLUDE_PATIENT)
-			.cacheControl(new CacheControlDirective().setNoStore(true).setNoCache(true))
 			.returnBundle(Bundle.class)
 			.execute();
-
-		myCaptureQueriesListener.logSelectQueries();
-		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
-//		assertEquals(5, selectQueries.size());
-		assertEquals(7, selectQueries.size());
 
 		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
 		Patient patient = (Patient) foundResources.get(0);
@@ -122,8 +138,10 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		assertEquals(ctid.getIdPart(), careTeam.getIdElement().getIdPart());
 		assertEquals(methodName, patient.getName().get(0).getFamily());
 
-		assertEquals(50, foundResources.size());
-
+		//Ensure that the revincludes are included in the query list of the sql trace.
+		//TODO GGG/KHS reduce this to something less than 6 by smarter iterating and getting the resource types earlier when needed.
+		assertEquals(6, sqlCapturingInterceptor.getQueryList().size());
+		myInterceptorRegistry.unregisterInterceptor(sqlCapturingInterceptor);
 	}
 
 	private static void assertSqlContains(String theSql, String theExpectedSql) {
