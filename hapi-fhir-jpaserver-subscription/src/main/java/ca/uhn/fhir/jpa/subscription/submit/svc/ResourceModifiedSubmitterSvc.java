@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
  */
 
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.r5.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -42,6 +44,8 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
+
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
@@ -78,10 +82,10 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		}
 	}
 
-	public ResourceModifiedSubmitterSvc(StorageSettings theStorageSettings, SubscriptionChannelFactory theSubscriptionChannelFactory, IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc, IHapiTransactionService theHapiTransactionService) {
+	public ResourceModifiedSubmitterSvc(StorageSettings theStorageSettings, SubscriptionChannelFactory theSubscriptionChannelFactory, IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc, IHapiTransactionService theHapiTransactionService) {
 		myStorageSettings = theStorageSettings;
 		mySubscriptionChannelFactory = theSubscriptionChannelFactory;
-		myResourceModifiedMessagePersistenceSvc = theResourceModifiedMessagePersistenceSvc;
+		myResourceModifiedMessagePersistenceSvc = resourceModifiedMessagePersistenceSvc;
 		myHapiTransactionService = theHapiTransactionService;
 	}
 
@@ -107,50 +111,42 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	 * Implementation of {@link IResourceModifiedConsumerWithRetries}
 	 */
 	@Override
-	public boolean submitResourceModified(ResourceModifiedMessage theResourceModifiedMessage, IPersistedResourceModifiedMessagePK theResourceModifiedPK) {
-		return processResourceModifiedInTransaction(theResourceModifiedMessage, theResourceModifiedPK);
-	}
-
-	protected boolean processResourceModifiedInTransaction(ResourceModifiedMessage theResourceModifiedMessage, IPersistedResourceModifiedMessagePK theResourceModifiedPK){
-
+	public boolean submitPersisedResourceModifiedMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
 		return (boolean) myHapiTransactionService
 			.withSystemRequest()
 			.withPropagation(Propagation.REQUIRES_NEW)
-			.execute(doProcessResourceModifiedInTransaction(theResourceModifiedMessage, theResourceModifiedPK));
-
+			.execute(doProcessResourceModifiedInTransaction(thePersistedResourceModifiedMessage));
+		
+		
 	}
 
 	/**
 	 * This method is the cornerstone in the submit and retry upon failure mechanism for messages needing submission to the subscription processing pipeline.
-	 * It requires execution in a transaction for rollback of deleting the persistedResourceModifiedMessage pointed to by <code>theResourceModifiedPK<code/>
+	 * It requires execution in a transaction for rollback of deleting the persistedResourceModifiedMessage pointed to by <code>thePersistedResourceModifiedMessage<code/>
 	 * in the event where submission would fail.
 	 *
-	 * @param theResourceModifiedMessage the message for submission to the subscription processing pipeline
-	 * @param theResourceModifiedPK the primary key pointing to the persisted version (IPersistedResourceModifiedMessage) of theResourceModifiedMessage needing submission
+	 * @param thePersistedResourceModifiedMessage the primary key pointing to the persisted version (IPersistedResourceModifiedMessage) of a ResourceModifiedMessage needing submission
 	 * @return true upon successful submission, false otherwise.
 	 */
-	protected TransactionCallback doProcessResourceModifiedInTransaction(ResourceModifiedMessage theResourceModifiedMessage, IPersistedResourceModifiedMessagePK theResourceModifiedPK) {
+	protected TransactionCallback doProcessResourceModifiedInTransaction(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
 		return theStatus -> {
 			boolean processed = true;
-
+			ResourceModifiedMessage resourceModifiedMessage = null;
 			try {
-				// delete the entry to lock the row to ensure unique processing
-				boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteByPK(theResourceModifiedPK);
 
-				if(wasDeleted) {
+				Optional<ResourceModifiedMessage> optionalResourceModifiedMessage = inflatePersistedResourceMessage(thePersistedResourceModifiedMessage);
+				// delete the entry to lock the row to ensure unique processing
+				boolean wasDeleted = deletePersistedResourceModifiedMessage(thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk());
+				
+				if(wasDeleted && optionalResourceModifiedMessage.isPresent()) {
 					// the PK did exist and we were able to deleted it, ie, we are the only one processing the message
-					submitResourceModified(theResourceModifiedMessage);
-				} else {
-					ourLog.warn("theResourceModifiedPK with {} and version {} could not be deleted as it may have already been deleted.", theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion());
-					// we were not able to delete the pk.  this implies that someone else did read/delete the PK and processed the message
-					// successfully before we did.  still, we return true as the message was processed.
+					resourceModifiedMessage = optionalResourceModifiedMessage.get();
+					submitResourceModified(resourceModifiedMessage);
 				}
 
-			} catch(ResourceNotFoundException exception) {
-				ourLog.warn("Resource with primary key {}/{} could not be found", theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion(), exception);
 			} catch (MessageDeliveryException exception) {
 				// we encountered an issue when trying to send the message so mark the transaction for rollback
-				ourLog.error("Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.", theResourceModifiedMessage.getPayloadId(), theResourceModifiedMessage.getSubscriptionId());
+				ourLog.error("Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.", resourceModifiedMessage.getPayloadId(), resourceModifiedMessage.getSubscriptionId());
 				processed = false;
 				theStatus.setRollbackOnly();
 			}
@@ -159,6 +155,51 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		};
 	}
 
+	private Optional<ResourceModifiedMessage> inflatePersistedResourceMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
+
+		ResourceModifiedMessage resourceModifiedMessage = myHapiTransactionService
+			.withSystemRequest()
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(() -> {
+				try {
+
+					return myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(thePersistedResourceModifiedMessage);
+
+				} catch (ResourceNotFoundException e) {
+					IPersistedResourceModifiedMessagePK persistedResourceModifiedMessagePk = thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk();
+
+					IdType idType = new IdType(thePersistedResourceModifiedMessage.getResourceType(),
+						persistedResourceModifiedMessagePk.getResourcePid(),
+						persistedResourceModifiedMessagePk.getResourceVersion());
+
+					ourLog.warn("Scheduled submission will be ignored since resource {} cannot be found", idType.asStringValue());
+				}
+
+				return null;
+
+			});
+
+		return Optional.ofNullable(resourceModifiedMessage);
+	}
+
+
+	private boolean deletePersistedResourceModifiedMessage(IPersistedResourceModifiedMessagePK theResourceModifiedPK) {
+
+		try {
+			// delete the entry to lock the row to ensure unique processing
+			return myResourceModifiedMessagePersistenceSvc.deleteByPK(theResourceModifiedPK);
+		} catch (ResourceNotFoundException exception) {
+			ourLog.warn("thePersistedResourceModifiedMessage with {} and version {} could not be deleted as it may have already been deleted.", theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion());
+			// we were not able to delete the pk.  this implies that someone else did read/delete the PK and processed the message
+			// successfully before we did.
+
+			return false;
+		}
+
+	}
+	
+	
+	
 	private ChannelProducerSettings getChannelProducerSettings() {
 		ChannelProducerSettings channelProducerSettings= new ChannelProducerSettings();
 		channelProducerSettings.setQualifyChannelName(myStorageSettings.isQualifySubscriptionMatchingChannelName());

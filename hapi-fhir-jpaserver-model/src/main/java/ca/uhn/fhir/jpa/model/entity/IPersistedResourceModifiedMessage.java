@@ -4,4 +4,6 @@ public interface IPersistedResourceModifiedMessage {
 
 	IPersistedResourceModifiedMessagePK getPersistedResourceModifiedMessagePk();
 
+	String getResourceType();
+
 }

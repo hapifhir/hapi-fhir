@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.subscription.asynch;
  */
 
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.slf4j.Logger;
@@ -54,13 +53,11 @@ public class AsyncResourceModifiedSubmitterSvc {
 
 		for (IPersistedResourceModifiedMessage persistedResourceModifiedMessage : AllPersistedResourceModifiedMessages){
 
-			ResourceModifiedMessage resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(persistedResourceModifiedMessage);
+				boolean wasProcessed = myResourceModifiedConsumer.submitPersisedResourceModifiedMessage(persistedResourceModifiedMessage);
 
-			boolean wasProcessed = myResourceModifiedConsumer.submitResourceModified(resourceModifiedMessage, persistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk());
-
-			if(!wasProcessed){
-				break;
-			}
+				if(!wasProcessed){
+					break;
+				}
 		}
 
 	}

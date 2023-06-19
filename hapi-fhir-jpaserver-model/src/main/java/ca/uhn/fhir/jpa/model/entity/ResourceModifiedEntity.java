@@ -63,6 +63,7 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 		return this;
 	}
 
+	@Override
 	public String getResourceType() {
 		return myResourceType;
 	}

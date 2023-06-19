@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.svc;
 
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
+import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
@@ -81,13 +81,14 @@ public class ResourceModifiedSubmitterSvcTest {
 	}
 
 	@Test
-	public void testMethodProcessResourceModified_withExistingPersistedResourceModifiedMessage_willSucceed(){
+	public void testSubmitPersisedResourceModifiedMessage_withExistingPersistedResourceModifiedMessage_willSucceed(){
 		// given
 		// a successful deletion implies that the message did exist.
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
+		when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(any())).thenReturn(new ResourceModifiedMessage());
 
 		// when
-		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
+		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.TRUE));
@@ -97,13 +98,14 @@ public class ResourceModifiedSubmitterSvcTest {
 	}
 
 	@Test
-	public void testMethodProcessResourceModified_whenMessageWasAlreadyProcess_willSucceed(){
+	public void testSubmitPersisedResourceModifiedMessage_whenMessageWasAlreadyProcess_willSucceed(){
 		// given
 		// deletion fails, someone else was faster and processed the message
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(false);
+		when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(any())).thenReturn(new ResourceModifiedMessage());
 
 		// when
-		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
+		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.TRUE));
@@ -114,15 +116,16 @@ public class ResourceModifiedSubmitterSvcTest {
 	}
 
 	@Test
-	public void testMethodProcessResourceModified_whitErrorOnSending_willRollbackDeletion(){
+	public void testSubmitPersisedResourceModifiedMessage_whitErrorOnSending_willRollbackDeletion(){
 		// given
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
+		when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(any())).thenReturn(new ResourceModifiedMessage());
 
 		// simulate failure writing to the channel
 		when(myChannelProducer.send(any())).thenThrow(new MessageDeliveryException("sendingError"));
 
 		// when
-		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitResourceModified(new ResourceModifiedMessage(), new PersistedResourceModifiedMessageEntityPK());
+		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
 		assertThat(wasProcessed, is(Boolean.FALSE));

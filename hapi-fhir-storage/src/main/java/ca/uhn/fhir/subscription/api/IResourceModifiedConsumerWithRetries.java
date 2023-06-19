@@ -20,9 +20,8 @@ package ca.uhn.fhir.subscription.api;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
 /**
  * The implementer of this interface participates in the retry upon failure mechanism for messages submitted
@@ -31,17 +30,13 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 public interface IResourceModifiedConsumerWithRetries {
 
 	/**
-	 * The implementer of this method should submit a ResourceModifiedMessage to a broker (see {@link IResourceModifiedConsumer})
-	 * and if submission succeeds, delete the persisted message referred to by the IResourceModifiedPK.
+	 * The implementer of this method should submit the ResourceModifiedMessage pointed to by the IPersistedResourceModifiedMessagePK
+	 * to a broker (see {@link IResourceModifiedConsumer}) and if submission succeeds, delete the IPersistedResourceModifiedMessage
+	 * referred to by the IPersistedResourceModifiedMessagePK.
 	 *
-	 * Clients of this interface are responsible for persisting the {@link ResourceModifiedMessage} through a
-	 * {@link IResourceModifiedMessagePersistenceSvc} before invoking this service.
-	 *
-	 *
-	 * @param theResourceModifiedMessage The message for submission
-	 * @param thePersistedResourceModifiedMessagePK The primary key pointing to the <code>theResourceModifiedMessage</code> in its persisted form
+	 * @param thePersistedResourceModifiedMessagePK A primary key pointing to a IPersistedResourceModifiedMessage requiring submission.
 	 * @return Whether the message was successfully submitted to the broker
 	 */
-	boolean submitResourceModified(ResourceModifiedMessage theResourceModifiedMessage, IPersistedResourceModifiedMessagePK thePersistedResourceModifiedMessagePK);
+	boolean submitPersisedResourceModifiedMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessagePK);
 
 }
