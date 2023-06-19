@@ -45,7 +45,6 @@ public class MdmMatcherFactory implements IMatcherFactory {
 	private final FhirContext myFhirContext;
 	private final IMdmSettings myMdmSettings;
 
-	// TODO - this must come from persistence
 	private final NicknameServiceFactory myNicknameSvcFactory;
 
 	public MdmMatcherFactory(
