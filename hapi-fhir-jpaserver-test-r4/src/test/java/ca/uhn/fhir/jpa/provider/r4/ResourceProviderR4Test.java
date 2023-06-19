@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -279,7 +278,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		myClient.create().resource(searchParameter).execute();
-
 		mySearchParamRegistry.forceRefresh();
 
 		HttpGet get = new HttpGet(myServerBase + "/Procedure?focalAccess.a%20ne%20e");

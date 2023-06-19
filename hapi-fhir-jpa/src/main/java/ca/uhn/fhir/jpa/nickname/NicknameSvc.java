@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * hapi-fhir-jpa
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
