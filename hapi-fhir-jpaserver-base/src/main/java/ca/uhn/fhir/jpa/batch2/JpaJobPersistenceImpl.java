@@ -153,6 +153,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public List<JobInstance> fetchInstancesAfterUpdateTime(Date theUpdateTime, Pageable thePageable) {
+		return toInstanceList(myJobInstanceRepository.findInstancesAfterUpdateTime(theUpdateTime, thePageable));
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, CREATE_TIME);
 		return toInstanceList(myJobInstanceRepository.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theRequestedStatuses, pageRequest));

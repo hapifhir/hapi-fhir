@@ -83,6 +83,13 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 		Pageable thePageable
 	);
 
+	// TODO:  There is no index that covers updateTime columns:  do we need one?
+	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myUpdateTime > :updateTime")
+	List<Batch2JobInstanceEntity> findInstancesAfterUpdateTime(
+		@Param("updateTime") Date theUpdateTime,
+		Pageable thePageable
+	);
+
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId AND e.myStatus IN :statuses")
 	List<Batch2JobInstanceEntity> fetchInstancesByJobDefinitionIdAndStatus(@Param("jobDefinitionId") String theJobDefinitionId, @Param("statuses") Set<StatusEnum> theIncompleteStatuses, Pageable thePageRequest);
 

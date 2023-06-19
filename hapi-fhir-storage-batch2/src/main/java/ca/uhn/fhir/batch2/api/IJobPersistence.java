@@ -95,6 +95,12 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex);
 
+	// TODO:  I don't feel like dealing with Mongo right now
+	default List<JobInstance> fetchInstancesAfterUpdateTime(Date theUpdateTime, Pageable thePageable) {
+		throw new UnsupportedOperationException();
+	}
+
+
 	/**
 	 * Fetch all job instances for a given job definition id
 	 *
