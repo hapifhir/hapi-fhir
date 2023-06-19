@@ -153,7 +153,7 @@ public class XmlParser extends BaseParser {
 
 			eventWriter.flush();
 		} catch (XMLStreamException e) {
-			throw new ConfigurationException(Msg.code(1850) + "Failed to initialize STaX event factory", e);
+			throw new ConfigurationException(Msg.code(2365) + "Failed to initialize STaX event factory", e);
 		}
 	}
 
