@@ -71,7 +71,7 @@ public class RDFParserR4Test {
 		name.setFamily("Simpson").addGiven("Homer").addGiven("Jay");
 		name.addExtension("http://foo", new StringType("bar"));
 
-		assertEquals("RDF Parser does not support encoding non-resource values",
+		assertEquals("HAPI-2363: This parser does not support encoding non-resource values",
 			assertThrows(InternalErrorException.class, ()->ourCtx.newRDFParser().encodeToString(name)).getMessage());
 	}
 
@@ -81,7 +81,7 @@ public class RDFParserR4Test {
 		communication.setPreferred(true);
 		communication.getLanguage().setText("English");
 
-		assertEquals("RDF Parser does not support encoding non-resource values",
+		assertEquals("HAPI-2363: This parser does not support encoding non-resource values",
 			assertThrows(InternalErrorException.class, ()->ourCtx.newRDFParser().encodeToString(communication)).getMessage());
 	}
 

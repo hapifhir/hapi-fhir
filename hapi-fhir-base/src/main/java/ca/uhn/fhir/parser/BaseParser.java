@@ -263,8 +263,7 @@ public abstract class BaseParser implements IParser {
 	protected abstract void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws IOException, DataFormatException;
 
 	protected void doEncodeToWriter(IBase theElement, Writer theWriter, EncodeContext theEncodeContext) throws IOException, DataFormatException {
-		// FIXME: change message and add code
-		throw new InternalErrorException("RDF Parser does not support encoding non-resource values");
+		throw new InternalErrorException(Msg.code(2363) + "This parser does not support encoding non-resource values");
 	}
 
 	protected abstract <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
@@ -293,7 +292,7 @@ public abstract class BaseParser implements IParser {
 		try {
 			encodeToWriter(theElement, stringWriter);
 		} catch (IOException e) {
-			throw new Error(Msg.code(1828) + "Encountered IOException during write to string - This should not happen!", e);
+			throw new Error(Msg.code(2364) + "Encountered IOException during write to string - This should not happen!", e);
 		}
 		return stringWriter.toString();
 	}
