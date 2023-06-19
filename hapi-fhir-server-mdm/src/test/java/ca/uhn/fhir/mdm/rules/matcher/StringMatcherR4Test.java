@@ -1,6 +1,6 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
-import ca.uhn.fhir.jpa.nickname.NicknameSvc;
+import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
@@ -38,7 +38,7 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 		myIMatcherFactory = new MdmMatcherFactory(
 			ourFhirContext,
 			myMdmSettings,
-			new NicknameSvc()
+			new NicknameServiceFactory()
 		);
 	}
 

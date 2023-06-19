@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.nickname;
 
-import ca.uhn.fhir.jpa.nickname.NicknameSvc;
+import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class NicknameInterceptorTest {
 
 	private NicknameInterceptor createNicknameInterceptor() {
-		return new NicknameInterceptor(new NicknameSvc());
+		return new NicknameInterceptor(new NicknameServiceFactory());
 	}
 
 	@Test
