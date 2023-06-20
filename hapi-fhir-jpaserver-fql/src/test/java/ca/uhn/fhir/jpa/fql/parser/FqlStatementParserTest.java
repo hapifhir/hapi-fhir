@@ -31,6 +31,7 @@ public class FqlStatementParserTest {
 		assertEquals(2, statement.getSelectClauses().size());
 		assertEquals("name.given[0]", statement.getSelectClauses().get(0).getClause());
 		assertEquals("name.given[0]", statement.getSelectClauses().get(0).getAlias());
+		assertEquals(FqlStatement.SelectClauseOperator.SELECT, statement.getSelectClauses().get(0).getOperator());
 		assertEquals("name.family", statement.getSelectClauses().get(1).getClause());
 		assertEquals("name.family", statement.getSelectClauses().get(1).getAlias());
 	}
@@ -77,11 +78,11 @@ public class FqlStatementParserTest {
 		assertEquals("name.family", statement.getSelectClauses().get(1).getClause());
 		assertEquals(2, statement.getWhereClauses().size());
 		assertEquals("name.given", statement.getWhereClauses().get(0).getLeft());
-		assertEquals(FqlStatement.WhereClauseOperator.EQUALS, statement.getWhereClauses().get(0).getOperator());
+		assertEquals(FqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight(), contains("'Foo ' Chalmers'"));
 		assertEquals("name.family", statement.getWhereClauses().get(1).getLeft());
 		assertThat(statement.getWhereClauses().get(1).getRight(), contains("'blah'"));
-		assertEquals(FqlStatement.WhereClauseOperator.EQUALS, statement.getWhereClauses().get(1).getOperator());
+		assertEquals(FqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getWhereClauses().get(1).getOperator());
 	}
 
 	@Test
@@ -103,14 +104,14 @@ public class FqlStatementParserTest {
 		assertEquals("id", statement.getSelectClauses().get(0).getClause());
 		assertEquals(2, statement.getSearchClauses().size());
 		assertEquals("subject.name", statement.getSearchClauses().get(0).getLeft());
-		assertEquals(FqlStatement.WhereClauseOperator.IN, statement.getSearchClauses().get(0).getOperator());
+		assertEquals(FqlStatement.WhereClauseOperatorEnum.IN, statement.getSearchClauses().get(0).getOperator());
 		assertThat(statement.getSearchClauses().get(0).getRight(), contains("'foo'", "'bar'"));
 		assertEquals("_id", statement.getSearchClauses().get(1).getLeft());
-		assertEquals(FqlStatement.WhereClauseOperator.EQUALS, statement.getSearchClauses().get(1).getOperator());
+		assertEquals(FqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getSearchClauses().get(1).getOperator());
 		assertThat(statement.getSearchClauses().get(1).getRight(), contains("'123'"));
 		assertEquals(1, statement.getWhereClauses().size());
 		assertEquals("status", statement.getWhereClauses().get(0).getLeft());
-		assertEquals(FqlStatement.WhereClauseOperator.EQUALS, statement.getWhereClauses().get(0).getOperator());
+		assertEquals(FqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight(), contains("'final'"));
 
 	}
@@ -132,7 +133,7 @@ public class FqlStatementParserTest {
 		assertEquals("id", statement.getSelectClauses().get(0).getClause());
 		assertEquals(1, statement.getSearchClauses().size());
 		assertEquals("_has:Observation:subject:device.identifier", statement.getSearchClauses().get(0).getLeft());
-		assertEquals(FqlStatement.WhereClauseOperator.EQUALS, statement.getSearchClauses().get(0).getOperator());
+		assertEquals(FqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getSearchClauses().get(0).getOperator());
 		assertThat(statement.getSearchClauses().get(0).getRight(), contains("'1234-5'"));
 
 	}
@@ -157,14 +158,14 @@ public class FqlStatementParserTest {
 		assertEquals("id", statement.getSelectClauses().get(0).getClause());
 		assertEquals(2, statement.getSearchClauses().size());
 		assertEquals("subject.name", statement.getSearchClauses().get(0).getLeft());
-		assertEquals(FqlStatement.WhereClauseOperator.IN, statement.getSearchClauses().get(0).getOperator());
+		assertEquals(FqlStatement.WhereClauseOperatorEnum.IN, statement.getSearchClauses().get(0).getOperator());
 		assertThat(statement.getSearchClauses().get(0).getRight(), contains("'foo'", "'bar'"));
 		assertEquals("_id", statement.getSearchClauses().get(1).getLeft());
-		assertEquals(FqlStatement.WhereClauseOperator.EQUALS, statement.getSearchClauses().get(1).getOperator());
+		assertEquals(FqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getSearchClauses().get(1).getOperator());
 		assertThat(statement.getSearchClauses().get(1).getRight(), contains("'123'"));
 		assertEquals(1, statement.getWhereClauses().size());
 		assertEquals("status", statement.getWhereClauses().get(0).getLeft());
-		assertEquals(FqlStatement.WhereClauseOperator.EQUALS, statement.getWhereClauses().get(0).getOperator());
+		assertEquals(FqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight(), contains("'final'"));
 		assertEquals(123, statement.getLimit());
 	}
@@ -190,7 +191,7 @@ public class FqlStatementParserTest {
 		assertEquals("URL", statement.getSelectClauses().get(1).getAlias());
 		assertEquals(1, statement.getWhereClauses().size());
 		assertEquals("url", statement.getWhereClauses().get(0).getLeft());
-		assertEquals(FqlStatement.WhereClauseOperator.IN, statement.getWhereClauses().get(0).getOperator());
+		assertEquals(FqlStatement.WhereClauseOperatorEnum.IN, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight(), contains(
 			"'foo'", "'bar'"
 		));

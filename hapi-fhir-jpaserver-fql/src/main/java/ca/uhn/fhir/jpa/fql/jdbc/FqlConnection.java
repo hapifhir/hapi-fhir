@@ -52,7 +52,7 @@ class FqlConnection implements Connection {
 
 	@Override
 	public Statement createStatement() {
-		return new FqlStatement(this);
+		return new FqlJdbcStatement(this);
 	}
 
 	@Override

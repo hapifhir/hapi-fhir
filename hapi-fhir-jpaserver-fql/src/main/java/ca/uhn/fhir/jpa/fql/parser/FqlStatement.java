@@ -60,6 +60,7 @@ public class FqlStatement implements IModelJson {
 		SelectClause clause = new SelectClause();
 		clause.setClause(theClause);
 		clause.setAlias(theClause);
+		clause.setOperator(SelectClauseOperator.SELECT);
 		mySelectClauses.add(clause);
 		return clause;
 	}
@@ -93,16 +94,23 @@ public class FqlStatement implements IModelJson {
 		myLimit = theLimit;
 	}
 
-	public void addWhereClause(String theLeft, WhereClauseOperator theOperator, String theRight) {
+	public void addWhereClause(String theLeft, WhereClauseOperatorEnum theOperator, String theRight) {
 		WhereClause clause = addWhereClause();
 		clause.setLeft(theLeft);
 		clause.setOperator(theOperator);
 		clause.addRight(theRight);
 	}
 
-	public enum WhereClauseOperator {
+	public enum WhereClauseOperatorEnum {
 		EQUALS,
 		IN
+	}
+
+	public enum SelectClauseOperator {
+
+		SELECT,
+		COUNT
+
 	}
 
 	public static class SelectClause implements IModelJson {
@@ -110,6 +118,8 @@ public class FqlStatement implements IModelJson {
 		private String myClause;
 		@JsonProperty("alias")
 		private String myAlias;
+		@JsonProperty("operator")
+		private SelectClauseOperator myOperator;
 
 		/**
 		 * Constructor
@@ -124,8 +134,17 @@ public class FqlStatement implements IModelJson {
 		 * @param theClause The clause (will be used as both the clause and the alias)
 		 */
 		public SelectClause(String theClause) {
+			setOperator(SelectClauseOperator.SELECT);
 			setClause(theClause);
 			setAlias(theClause);
+		}
+
+		public SelectClauseOperator getOperator() {
+			return myOperator;
+		}
+
+		public void setOperator(SelectClauseOperator theOperator) {
+			myOperator = theOperator;
 		}
 
 		public String getAlias() {
@@ -150,15 +169,15 @@ public class FqlStatement implements IModelJson {
 		@JsonProperty("left")
 		private String myLeft;
 		@JsonProperty("operator")
-		private WhereClauseOperator myOperator;
+		private WhereClauseOperatorEnum myOperator;
 		@JsonProperty("right")
 		private List<String> myRight = new ArrayList<>();
 
-		public WhereClauseOperator getOperator() {
+		public WhereClauseOperatorEnum getOperator() {
 			return myOperator;
 		}
 
-		public void setOperator(WhereClauseOperator theOperator) {
+		public void setOperator(WhereClauseOperatorEnum theOperator) {
 			myOperator = theOperator;
 		}
 
@@ -194,4 +213,6 @@ public class FqlStatement implements IModelJson {
 		}
 
 	}
+
+
 }

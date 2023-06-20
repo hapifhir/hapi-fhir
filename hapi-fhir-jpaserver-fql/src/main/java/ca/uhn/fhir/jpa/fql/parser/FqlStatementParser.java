@@ -243,14 +243,14 @@ public class FqlStatementParser {
 		@Override
 		void consume(FqlLexerToken theToken) {
 			if ("=".equals(theToken.getToken())) {
-				myWhereClause.setOperator(FqlStatement.WhereClauseOperator.EQUALS);
+				myWhereClause.setOperator(FqlStatement.WhereClauseOperatorEnum.EQUALS);
 				myState = new StateInWhereAfterOperatorEquals(myWhereMode, myWhereClause);
 			} else if ("IN".equals(theToken.asKeyword())) {
 				FqlLexerToken nextToken = getNextTokenRequired(getLexerOptions());
 				if (!nextToken.getToken().equals("(")) {
 					throw newExceptionUnexpectedTokenExpectToken(theToken, "(");
 				}
-				myWhereClause.setOperator(FqlStatement.WhereClauseOperator.IN);
+				myWhereClause.setOperator(FqlStatement.WhereClauseOperatorEnum.IN);
 				myState = new StateInWhereAfterOperatorIn(myWhereMode, myWhereClause);
 			} else {
 				throw newExceptionUnexpectedTokenExpectToken(theToken, "=");

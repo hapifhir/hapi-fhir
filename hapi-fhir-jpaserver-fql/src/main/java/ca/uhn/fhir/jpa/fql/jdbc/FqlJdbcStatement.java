@@ -32,14 +32,14 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
-class FqlStatement implements Statement {
+class FqlJdbcStatement implements Statement {
 	private int myMaxRows;
 	private final FqlConnection myConnection;
 
 	private int myFetchSize;
 	private FqlResultSet myResultSet;
 
-	public FqlStatement(FqlConnection theConnection) {
+	public FqlJdbcStatement(FqlConnection theConnection) {
 		myConnection = theConnection;
 	}
 
