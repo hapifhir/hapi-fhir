@@ -24,6 +24,6 @@ import ca.uhn.fhir.rest.api.PageStyleEnum;
 
 public interface IGetPageTyped<T> extends IClientExecutable<IGetPageTyped<T>, T> {
 
-	IGetPageTyped<T> usingStyle(PageStyleEnum theStyle);
+	IGetPageTyped<T> usingMethod(PageStyleEnum theStyle);
 
 }

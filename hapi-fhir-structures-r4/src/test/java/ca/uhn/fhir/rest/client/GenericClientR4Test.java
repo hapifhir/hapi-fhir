@@ -2712,7 +2712,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.loadPage()
 			.byUrl("http://example.com/page1")
 			.andReturnBundle(Bundle.class)
-			.usingStyle(PageStyleEnum.POST)
+			.usingMethod(PageStyleEnum.POST)
 			.execute();
 
 		assertEquals("POST", capt.getValue().getMethod());
