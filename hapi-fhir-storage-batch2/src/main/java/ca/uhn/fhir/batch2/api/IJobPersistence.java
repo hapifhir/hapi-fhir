@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	// TODO:  I don't feel like dealing with Mongo right now
 	default List<JobInstance> fetchInstancesAfterUpdateTime(Date theUpdateTime, Pageable thePageable) {
-		throw new UnsupportedOperationException();
+		// TODO: come up with a better HAPI code later
+		throw new UnsupportedOperationException(Msg.code(9999));
 	}
 
 
