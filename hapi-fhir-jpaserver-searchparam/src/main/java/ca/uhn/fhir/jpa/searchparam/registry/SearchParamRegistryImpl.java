@@ -284,12 +284,14 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	/**
 	 * There is a circular reference between this class and the ResourceChangeListenerRegistry:
-	 * SearchParamRegistryImpl -> ResourceChangeListenerRegistry -> InMemoryResourceMatcher -> SearchParamRegistryImpl. Sicne we only need this once on boot-up, we delay
+	 * SearchParamRegistryImpl -> ResourceChangeListenerRegistry -> InMemoryResourceMatcher -> SearchParamRegistryImpl. Since we only need this once on boot-up, we delay
 	 * until ContextRefreshedEvent.
 	 */
 	@PostConstruct
 	public void registerListener() {
- 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
+		SearchParameterMap spMap = SearchParameterMap.newSynchronous();
+		spMap.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
+ 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", spMap, this, REFRESH_INTERVAL);
 	}
 
 	@PreDestroy
@@ -371,5 +373,10 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@VisibleForTesting
 	public void setSearchParameterCanonicalizerForUnitTest(SearchParameterCanonicalizer theSearchParameterCanonicalizerForUnitTest) {
 		mySearchParameterCanonicalizer = theSearchParameterCanonicalizerForUnitTest;
+	}
+
+	@VisibleForTesting
+	public int getMaxManagedParamCountForUnitTests() {
+		return MAX_MANAGED_PARAM_COUNT;
 	}
 }

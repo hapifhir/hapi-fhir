@@ -160,6 +160,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -1740,9 +1741,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.withRequestPartitionId(requestPartitionId)
 			.execute(() -> {
 
-				if (theParams.getLoadSynchronousUpTo() != null) {
-					theParams.setLoadSynchronousUpTo(Math.min(myStorageSettings.getInternalSynchronousSearchSize(), theParams.getLoadSynchronousUpTo()));
-				} else {
+				if(isNull(theParams.getLoadSynchronousUpTo())){
 					theParams.setLoadSynchronousUpTo(myStorageSettings.getInternalSynchronousSearchSize());
 				}
 
