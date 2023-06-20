@@ -51,6 +51,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -213,6 +214,13 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 			throw new InvalidRequestException(Msg.code(1312) + msg);
 		}
 
+		List<PartitionEntity> allPartitions = myPartitionDao.findAll();
+		for(PartitionEntity i : allPartitions){
+			if(i.getId()==thePartition.getId()){
+				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "duplicatePartitionId");
+				throw new InvalidRequestException(Msg.code(2366) + msg);
+			}
+		}
 	}
 
 	private void validateNotInUnnamedPartitionMode() {

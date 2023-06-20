@@ -93,7 +93,6 @@ public class PartitionManagementProviderTest {
 		assertEquals("PARTITION-123", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
 		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
 	}
-
 	@Nonnull
 	private Parameters createInputPartition() {
 		Parameters input = new Parameters();
@@ -101,6 +100,26 @@ public class PartitionManagementProviderTest {
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType("PARTITION-123"));
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, new StringType("a description"));
 		return input;
+	}
+
+	@Test
+	public void testCreatePartition_whenPartitionAlreadyExists_operationNotAllowed() {
+		try {
+			Parameters inputPartition = createInputPartition();
+			for(int i = 0; i<2; i++) {
+				myClient
+					.operation()
+					.onServer()
+					.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+					.withParameters(inputPartition)
+					.encodedXml()
+					.execute();
+			}
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2366) + "Partition ID already exists", e.getMessage());
+		}
+		verify(myPartitionConfigSvc, times(0)).createPartition(any(), any());
 	}
 
 	@Test
