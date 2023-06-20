@@ -54,7 +54,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 @Entity
 @Table(name = "TRM_CONCEPT_PROPERTY", uniqueConstraints = { }, indexes = {
 	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
-	@Index(name = "FK_CONCEPTPROP_CONCEPT",  columnList = "CONCEPT_PID", unique = false)
+	@Index(name = "FK_CONCEPTPROP_CONCEPT",  columnList = "CONCEPT_PID", unique = false),
+	@Index(name = "FK_CONCEPTPROP_CSV", columnList = "CS_VER_PID")
 })
 public class TermConceptProperty implements Serializable {
 	public static final int MAX_PROPTYPE_ENUM_LENGTH = 6;

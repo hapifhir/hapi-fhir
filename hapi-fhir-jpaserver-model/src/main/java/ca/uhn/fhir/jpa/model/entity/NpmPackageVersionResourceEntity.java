@@ -45,7 +45,9 @@ import java.util.Date;
 @Entity()
 @Table(name = "NPM_PACKAGE_VER_RES", uniqueConstraints = {
 }, indexes = {
-	@Index(name = "IDX_PACKVERRES_URL", columnList = "CANONICAL_URL")
+	@Index(name = "IDX_PACKVERRES_URL", columnList = "CANONICAL_URL"),
+	@Index(name = "FK_NPM_PACKVERRES_PACKVER", columnList = "PACKVER_PID"),
+	@Index(name = "FK_NPM_PKVR_RESID", columnList = "BINARY_RES_ID")
 })
 public class NpmPackageVersionResourceEntity {
 

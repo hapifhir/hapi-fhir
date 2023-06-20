@@ -36,6 +36,9 @@ import static org.apache.commons.lang3.StringUtils.length;
 //@formatter:off
 @Table(name = "TRM_CODESYSTEM", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_CS_CODESYSTEM", columnNames = {"CODE_SYSTEM_URI"})
+}, indexes = {
+	@Index(name = "FK_TRMCODESYSTEM_RES", columnList = "RES_ID"),
+	@Index(name = "FK_TRMCODESYSTEM_CURVER", columnList = "CURRENT_VERSION_PID")
 })
 @Entity()
 //@formatter:on

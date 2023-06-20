@@ -205,6 +205,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private static final String IDX_PROP_KEY = IDX_PROPERTIES + ".myKey";
 	private static final String IDX_PROP_VALUE_STRING = IDX_PROPERTIES + ".myValueString";
 	private static final String IDX_PROP_DISPLAY_STRING = IDX_PROPERTIES + ".myDisplayString";
+	private static final String OUR_PIPE_CHARACTER = "|";
 	private static final int SECONDS_IN_MINUTE = 60;
 	private static final int INDEXED_ROOTS_LOGGING_COUNT = 50_000;
 	private static Runnable myInvokeOnNextCallForUnitTest;
@@ -296,7 +297,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
 		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
-			return addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem + "|" + theValueSetIncludeVersion, code, display, sourceConceptPid, directParentPids, codeSystemVersion);
+			return addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion, code, display, sourceConceptPid, directParentPids, codeSystemVersion);
 		} else {
 			return addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem, code, display, sourceConceptPid, directParentPids, codeSystemVersion);
 		}
@@ -305,23 +306,23 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private boolean addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, boolean theAdd, String theCodeSystem, String theCodeSystemVersion, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, Collection<TermConceptDesignation> theDesignations) {
 		if (StringUtils.isNotEmpty(theCodeSystemVersion)) {
 			if (isNoneBlank(theCodeSystem, theCode)) {
-				if (theAdd && theAddedCodes.add(theCodeSystem + "|" + theCode)) {
-					theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem + "|" + theCodeSystemVersion, theCode, theDisplay, theDesignations, theSourceConceptPid, theSourceConceptDirectParentPids, theCodeSystemVersion);
+				if (theAdd && theAddedCodes.add(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
+					theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem + OUR_PIPE_CHARACTER + theCodeSystemVersion, theCode, theDisplay, theDesignations, theSourceConceptPid, theSourceConceptDirectParentPids, theCodeSystemVersion);
 					return true;
 				}
 
-				if (!theAdd && theAddedCodes.remove(theCodeSystem + "|" + theCode)) {
-					theValueSetCodeAccumulator.excludeConcept(theCodeSystem + "|" + theCodeSystemVersion, theCode);
+				if (!theAdd && theAddedCodes.remove(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
+					theValueSetCodeAccumulator.excludeConcept(theCodeSystem + OUR_PIPE_CHARACTER + theCodeSystemVersion, theCode);
 					return true;
 				}
 			}
 		} else {
-			if (theAdd && theAddedCodes.add(theCodeSystem + "|" + theCode)) {
+			if (theAdd && theAddedCodes.add(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
 				theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem, theCode, theDisplay, theDesignations, theSourceConceptPid, theSourceConceptDirectParentPids, theCodeSystemVersion);
 				return true;
 			}
 
-			if (!theAdd && theAddedCodes.remove(theCodeSystem + "|" + theCode)) {
+			if (!theAdd && theAddedCodes.remove(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
 				theValueSetCodeAccumulator.excludeConcept(theCodeSystem, theCode);
 				return true;
 			}
@@ -332,12 +333,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private boolean addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, Collection<TermConceptDesignation> theDesignations, boolean theAdd, String theCodeSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theSystemVersion) {
 		if (isNoneBlank(theCodeSystem, theCode)) {
-			if (theAdd && theAddedCodes.add(theCodeSystem + "|" + theCode)) {
+			if (theAdd && theAddedCodes.add(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
 				theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem, theCode, theDisplay, theDesignations, theSourceConceptPid, theSourceConceptDirectParentPids, theSystemVersion);
 				return true;
 			}
 
-			if (!theAdd && theAddedCodes.remove(theCodeSystem + "|" + theCode)) {
+			if (!theAdd && theAddedCodes.remove(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
 				theValueSetCodeAccumulator.excludeConcept(theCodeSystem, theCode);
 				return true;
 			}
@@ -798,11 +799,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 			ourLog.debug("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
 
-			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
-			if (cs != null) {
+			Optional<TermCodeSystemVersion> termCodeSystemVersion = optionalFindTermCodeSystemVersion(theIncludeOrExclude);
+			if (termCodeSystemVersion.isPresent()) {
 
 				expandValueSetHandleIncludeOrExcludeUsingDatabase(theExpansionOptions, theValueSetCodeAccumulator,
-					theAddedCodes, theIncludeOrExclude, theAdd, theExpansionFilter, system, cs);
+					theAddedCodes, theIncludeOrExclude, theAdd, theExpansionFilter, system, termCodeSystemVersion.get());
 
 			} else {
 
@@ -857,6 +858,14 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	}
 
+	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(ValueSet.ConceptSetComponent theIncludeOrExclude) {
+		if (isEmpty(theIncludeOrExclude.getVersion())) {
+			return Optional.ofNullable(myCodeSystemDao.findByCodeSystemUri(theIncludeOrExclude.getSystem())).map(TermCodeSystem::getCurrentVersion);
+		} else {
+			return Optional.ofNullable(myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theIncludeOrExclude.getSystem(), theIncludeOrExclude.getVersion()));
+		}
+	}
+
 	private boolean isHibernateSearchEnabled() {
 		return myFulltextSearchSvc != null && !ourForceDisableHibernateSearchForUnitTest;
 	}
@@ -869,21 +878,17 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		boolean theAdd,
 		@Nonnull ExpansionFilter theExpansionFilter,
 		String theSystem,
-		TermCodeSystem theCs) {
+		TermCodeSystemVersion theTermCodeSystemVersion) {
 
 		StopWatch fullOperationSw = new StopWatch();
-
 		String includeOrExcludeVersion = theIncludeOrExclude.getVersion();
-		TermCodeSystemVersion termCodeSystemVersion = isEmpty(includeOrExcludeVersion)
-			? theCs.getCurrentVersion()
-			: myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCs.getPid(), includeOrExcludeVersion);
 
 		/*
 		 * If FullText searching is not enabled, we can handle only basic expansions
 		 * since we're going to do it without the database.
 		 */
 		if (!isHibernateSearchEnabled()) {
-			expandWithoutHibernateSearch(theValueSetCodeAccumulator, termCodeSystemVersion, theAddedCodes, theIncludeOrExclude, theSystem, theAdd);
+			expandWithoutHibernateSearch(theValueSetCodeAccumulator, theTermCodeSystemVersion, theAddedCodes, theIncludeOrExclude, theSystem, theAdd);
 			return;
 		}
 
@@ -899,7 +904,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 		int chunkSize = chunkSizeOpt.get();
 
-		SearchProperties searchProps = buildSearchScroll(termCodeSystemVersion, theExpansionFilter, theSystem,
+		SearchProperties searchProps = buildSearchScroll(theTermCodeSystemVersion, theExpansionFilter, theSystem,
 			theIncludeOrExclude, chunkSize, includeOrExcludeVersion);
 
 		int accumulatedBatchesSoFar = 0;
@@ -1087,7 +1092,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private String buildCodeSystemUrlAndVersion(String theSystem, String theIncludeOrExcludeVersion) {
 		String codeSystemUrlAndVersion;
 		if (theIncludeOrExcludeVersion != null) {
-			codeSystemUrlAndVersion = theSystem + "|" + theIncludeOrExcludeVersion;
+			codeSystemUrlAndVersion = theSystem + OUR_PIPE_CHARACTER + theIncludeOrExcludeVersion;
 		} else {
 			codeSystemUrlAndVersion = theSystem;
 		}
@@ -1100,10 +1105,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	private void addOrRemoveCode(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, boolean theAdd, String theSystem, String theCode, String theDisplay, String theSystemVersion) {
-		if (theAdd && theAddedCodes.add(theSystem + "|" + theCode)) {
+		if (theAdd && theAddedCodes.add(theSystem + OUR_PIPE_CHARACTER + theCode)) {
 			theValueSetCodeAccumulator.includeConcept(theSystem, theCode, theDisplay, null, null, theSystemVersion);
 		}
-		if (!theAdd && theAddedCodes.remove(theSystem + "|" + theCode)) {
+		if (!theAdd && theAddedCodes.remove(theSystem + OUR_PIPE_CHARACTER + theCode)) {
 			theValueSetCodeAccumulator.excludeConcept(theSystem, theCode);
 		}
 	}
@@ -1697,7 +1702,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		List<TermValueSetConcept> retVal = new ArrayList<>();
 		Optional<TermValueSetConcept> optionalTermValueSetConcept;
-		int versionIndex = theSystem.indexOf("|");
+		int versionIndex = theSystem.indexOf(OUR_PIPE_CHARACTER);
 		if (versionIndex >= 0) {
 			String systemUrl = theSystem.substring(0, versionIndex);
 			String systemVersion = theSystem.substring(versionIndex + 1);
@@ -2075,7 +2080,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		String codeASystemIdentifier;
 		if (StringUtils.isNotEmpty(conceptA.getSystemVersion())) {
-			codeASystemIdentifier = conceptA.getSystem() + "|" + conceptA.getSystemVersion();
+			codeASystemIdentifier = conceptA.getSystem() + OUR_PIPE_CHARACTER + conceptA.getSystemVersion();
 		} else {
 			codeASystemIdentifier = conceptA.getSystem();
 		}
@@ -2084,7 +2089,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		String codeBSystemIdentifier;
 		if (StringUtils.isNotEmpty(conceptB.getSystemVersion())) {
-			codeBSystemIdentifier = conceptB.getSystem() + "|" + conceptB.getSystemVersion();
+			codeBSystemIdentifier = conceptB.getSystem() + OUR_PIPE_CHARACTER + conceptB.getSystemVersion();
 		} else {
 			codeBSystemIdentifier = conceptB.getSystem();
 		}

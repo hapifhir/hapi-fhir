@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -46,7 +45,7 @@ public class HapiSchemaMigrationTest {
 
 	@ParameterizedTest
 	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
-	public void testMigration(DriverTypeEnum theDriverType) {
+	public void testMigration(DriverTypeEnum theDriverType) throws SQLException {
 		// ensure all migrations are run
 		HapiSystemProperties.disableUnitTestMode();
 
@@ -55,7 +54,8 @@ public class HapiSchemaMigrationTest {
 		myEmbeddedServersExtension.initializePersistenceSchema(theDriverType);
 		myEmbeddedServersExtension.insertPersistenceTestData(theDriverType);
 
-		DataSource dataSource = myEmbeddedServersExtension.getDataSource(theDriverType);
+		JpaEmbeddedDatabase database = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
+		DataSource dataSource = database.getDataSource();
 		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
@@ -72,6 +72,16 @@ public class HapiSchemaMigrationTest {
 		schemaMigrator.setDriverType(theDriverType);
 		schemaMigrator.createMigrationTableIfRequired();
 		schemaMigrator.migrate();
+
+		if (theDriverType == DriverTypeEnum.POSTGRES_9_4) {
+			// we only run this for postgres because:
+			// 1 we only really need to check one db
+			// 2 H2 automatically adds indexes to foreign keys automatically (and so cannot be used)
+			// 3 Oracle doesn't run on everyone's machine (and is difficult to do so)
+			// 4 Postgres is generally the fastest/least terrible relational db supported
+			new HapiForeignKeyIndexHelper()
+				.ensureAllForeignKeysAreIndexed(dataSource);
+		}
 	}
 
 

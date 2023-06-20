@@ -41,7 +41,8 @@ import java.io.Serializable;
 @Table(name = "TRM_CONCEPT_PC_LINK", indexes = {
 	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
 	@Index(name = "FK_TERM_CONCEPTPC_CHILD",  columnList = "CHILD_PID", unique = false),
-	@Index(name = "FK_TERM_CONCEPTPC_PARENT",  columnList = "PARENT_PID", unique = false)
+	@Index(name = "FK_TERM_CONCEPTPC_PARENT",  columnList = "PARENT_PID", unique = false),
+	@Index(name = "FK_TERM_CONCEPTPC_CS", columnList = "CODESYSTEM_PID")
 })
 public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;
