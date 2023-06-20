@@ -46,7 +46,9 @@ public class JobInstance implements IModelJson, IJobInstance {
 	@JsonProperty(value = "jobDefinitionVersion")
 	private int myJobDefinitionVersion;
 
-	@JsonProperty(value = "instanceId", access = JsonProperty.Access.READ_ONLY)
+	// TODO:  try this:
+//	@JsonProperty(value = "instanceId", access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(value = "instanceId")
 	private String myInstanceId;
 
 	@JsonProperty(value = "status")
