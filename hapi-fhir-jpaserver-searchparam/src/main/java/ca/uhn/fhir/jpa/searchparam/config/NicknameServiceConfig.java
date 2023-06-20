@@ -19,7 +19,8 @@
  */
 package ca.uhn.fhir.jpa.searchparam.config;
 
-import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
+import ca.uhn.fhir.jpa.nickname.INicknameSvc;
+import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,13 +30,13 @@ import org.springframework.context.annotation.Lazy;
 public class NicknameServiceConfig {
 
 	@Bean
-	public NicknameServiceFactory nicknameSvc() {
-		return new NicknameServiceFactory();
+	public INicknameSvc nicknameSvc() {
+		return new NicknameSvc();
 	}
 
 	@Lazy
 	@Bean
-	public NicknameInterceptor nicknameInterceptor(NicknameServiceFactory theNicknameSvcFactory) {
-		return new NicknameInterceptor(theNicknameSvcFactory);
+	public NicknameInterceptor nicknameInterceptor(INicknameSvc theNicknameSvc) {
+		return new NicknameInterceptor(theNicknameSvc);
 	}
 }

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.mdm;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -36,7 +35,7 @@ public abstract class BaseR4Test {
 		myIMatcherFactory = new MdmMatcherFactory(
 			ourFhirContext,
 			myMdmSettings,
-			new NicknameServiceFactory()
+			new NicknameSvc()
 		);
 	}
 

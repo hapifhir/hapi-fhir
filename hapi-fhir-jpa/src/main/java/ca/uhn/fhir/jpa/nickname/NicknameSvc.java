@@ -51,7 +51,7 @@ public class NicknameSvc implements INicknameSvc {
 
 	private Resource myNicknameResource;
 
-	NicknameSvc() {
+	public NicknameSvc() {
 	}
 
 	public void setNicknameResource(Resource theNicknameResource) {

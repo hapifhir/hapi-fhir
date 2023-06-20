@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.nickname.NicknameServiceFactory;
+import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
@@ -65,12 +65,12 @@ public class MdmCommonConfig {
 	public IMatcherFactory matcherFactory(
 		FhirContext theFhirContext,
 		IMdmSettings theSettings,
-		NicknameServiceFactory theFactory
+		INicknameSvc theNicknameSvc
 	) {
 		return new MdmMatcherFactory(
 			theFhirContext,
 			theSettings,
-			theFactory
+			theNicknameSvc
 		);
 	}
 }
