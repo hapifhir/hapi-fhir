@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
@@ -34,6 +35,8 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +44,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -70,6 +74,7 @@ public class MdmEidUpdateService {
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 
 		if (updateContext.isRemainsMatchedToSameGoldenResource()) {
+			ourLog.info("4631: isRemainsMatchedToSameGoldenResource");
 			// Copy over any new external EIDs which don't already exist.
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {
 				//update to patient that uses internal EIDs only.
@@ -78,8 +83,13 @@ public class MdmEidUpdateService {
 				handleNoEidsInCommon(theTargetResource, theMatchedGoldenResourceCandidate, theMdmTransactionContext, updateContext);
 			}
 		} else {
+			ourLog.info("4631: else isRemainsMatchedToSameGoldenResource for updateContext: {}", updateContext);
 			//This is a new linking scenario. we have to break the existing link and link to the new Golden Resource. For now, we create duplicate.
 			//updated patient has an EID that matches to a new candidate. Link them, and set the Golden Resources possible duplicates
+		//		myMdmLinkSvc.updateLink(theNewGoldenResource, theOldGoldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+			if (updateContext.getExistingGoldenResource() == null) {
+				throw new InternalErrorException(String.format(Msg.code(9999) + "More than likely $mdm-clear was called without calling $mdm-submit to rebuild MDM"));
+			}
 			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 
 			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
@@ -189,6 +199,17 @@ public class MdmEidUpdateService {
 
 		public boolean isRemainsMatchedToSameGoldenResource() {
 			return myRemainsMatchedToSameGoldenResource;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this)
+				.append("myHasEidsInCommon", myHasEidsInCommon)
+				.append("myIncomingResourceHasAnEid", myIncomingResourceHasAnEid)
+				.append("myExistingGoldenResource is null", Objects.isNull(myExistingGoldenResource))
+				.append("myRemainsMatchedToSameGoldenResource", myRemainsMatchedToSameGoldenResource)
+				.append("myMatchedGoldenResource is null", Objects.isNull(myMatchedGoldenResource))
+				.toString();
 		}
 	}
 }
