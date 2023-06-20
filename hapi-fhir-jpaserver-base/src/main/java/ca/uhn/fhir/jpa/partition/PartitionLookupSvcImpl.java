@@ -127,7 +127,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		validateNotInUnnamedPartitionMode();
 		validateHaveValidPartitionIdAndName(thePartition);
 		validatePartitionNameDoesntAlreadyExist(thePartition.getName());
-
+		validIdUponCreation(thePartition);
 		ourLog.info("Creating new partition with ID {} and Name {}", thePartition.getId(), thePartition.getName());
 
 		PartitionEntity retVal = myPartitionDao.save(thePartition);
@@ -198,6 +198,15 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		}
 	}
 
+	private void validIdUponCreation(PartitionEntity thePartition){
+		List<PartitionEntity> allPartitions = myPartitionDao.findAll();
+		for(PartitionEntity i : allPartitions){
+			if(i.getId().equals(thePartition.getId())){
+				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "duplicatePartitionId");
+				throw new InvalidRequestException(Msg.code(2366) + msg);
+			}
+		}
+	}
 	private void validateHaveValidPartitionIdAndName(PartitionEntity thePartition) {
 		if (thePartition.getId() == null || isBlank(thePartition.getName())) {
 			String msg = myFhirCtx.getLocalizer().getMessage(PartitionLookupSvcImpl.class, "missingPartitionIdOrName");
@@ -212,14 +221,6 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		if (!PARTITION_NAME_VALID_PATTERN.matcher(thePartition.getName()).matches()) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", thePartition.getName());
 			throw new InvalidRequestException(Msg.code(1312) + msg);
-		}
-
-		List<PartitionEntity> allPartitions = myPartitionDao.findAll();
-		for(PartitionEntity i : allPartitions){
-			if(i.getId().equals(thePartition.getId())){
-				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "duplicatePartitionId");
-				throw new InvalidRequestException(Msg.code(2366) + msg);
-			}
 		}
 	}
 
