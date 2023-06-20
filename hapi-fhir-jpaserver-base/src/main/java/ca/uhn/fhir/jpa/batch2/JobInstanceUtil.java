@@ -120,6 +120,7 @@ class JobInstanceUtil {
 		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
 		// note: may be null out if queried NoData
 		retVal.setData(theEntity.getSerializedData());
+		// TODO:  reverse this change when all work is done
 //		retVal.setWarningMessage(theEntity.getWarningMessage());
 		return retVal;
 	}
