@@ -46,9 +46,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 	@JsonProperty(value = "jobDefinitionVersion")
 	private int myJobDefinitionVersion;
 
-	// TODO:  try this:
-//	@JsonProperty(value = "instanceId", access = JsonProperty.Access.READ_ONLY)
-	@JsonProperty(value = "instanceId")
+	@JsonProperty(value = "instanceId", access = JsonProperty.Access.READ_WRITE)
 	private String myInstanceId;
 
 	@JsonProperty(value = "status")
@@ -94,22 +92,22 @@ public class JobInstance implements IModelJson, IJobInstance {
 	@JsonProperty(value = "totalElapsedMillis")
 	private Integer myTotalElapsedMillis;
 
-	@JsonProperty(value = "workChunksPurged", access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(value = "workChunksPurged", access = JsonProperty.Access.READ_WRITE)
 	private boolean myWorkChunksPurged;
 
-	@JsonProperty(value = "progress", access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(value = "progress", access = JsonProperty.Access.READ_WRITE)
 	private double myProgress;
-	@JsonProperty(value = "currentGatedStepId", access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(value = "currentGatedStepId", access = JsonProperty.Access.READ_WRITE)
 	private String myCurrentGatedStepId;
-	@JsonProperty(value = "errorMessage", access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(value = "errorMessage", access = JsonProperty.Access.READ_WRITE)
 	private String myErrorMessage;
-	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_WRITE)
 	private int myErrorCount;
-	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_WRITE)
 	private String myEstimatedTimeRemaining;
 	@JsonProperty(value = "report", access = JsonProperty.Access.READ_WRITE)
 	private String myReport;
-	@JsonProperty(value = "warningMessages", access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(value = "warningMessages", access = JsonProperty.Access.READ_WRITE)
 	private String myWarningMessages;
 
 	/**
