@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5008
+jira: SMILE-6727
+title: "Previously, HAPI-FHIR GenericClient had no support for POST paging requests to be executed. This has been corrected."

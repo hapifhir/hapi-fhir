@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -61,12 +62,12 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 	protected final MyRestfulServer myRestServer;
 
 	public RestServerR4Helper() {
-		this(false, false);
+		this(false, false, false);
 	}
 
-	private RestServerR4Helper(boolean theInitialize, boolean theTransactionLatchEnabled) {
+	private RestServerR4Helper(boolean theInitialize, boolean theTransactionLatchEnabled, boolean theExecutePostPagingRequestsEnabled) {
 		super(FhirContext.forR4Cached());
-		myRestServer = new MyRestfulServer(myFhirContext, theTransactionLatchEnabled);
+		myRestServer = new MyRestfulServer(myFhirContext, theTransactionLatchEnabled, theExecutePostPagingRequestsEnabled);
 		if (theInitialize) {
 			try {
 				myRestServer.initialize();
@@ -77,11 +78,11 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 	}
 
 	public static RestServerR4Helper newWithTransactionLatch() {
-		return new RestServerR4Helper(false, true);
+		return new RestServerR4Helper(false, true, false);
 	}
 
 	public static RestServerR4Helper newInitialized() {
-		return new RestServerR4Helper(true, false);
+		return new RestServerR4Helper(true, false, false);
 	}
 
 	@Override
@@ -268,6 +269,10 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		myRestServer.setTransactionLatchEnabled(theTransactionLatchEnabled);
 	}
 
+	public void enableExecutePostPagingRequests(boolean theExecutePostPagingRequestsEnabled) {
+		myRestServer.setExecutePostPagingRequestsEnabled(theExecutePostPagingRequestsEnabled);
+	}
+
 	private static class MyRestfulServer extends RestfulServer {
 		private final List<String> myRequestUrls = Collections.synchronizedList(new ArrayList<>());
 		private final List<String> myRequestVerbs = Collections.synchronizedList(new ArrayList<>());
@@ -281,9 +286,12 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 		private final boolean myInitialTransactionLatchEnabled;
 
-		public MyRestfulServer(FhirContext theFhirContext, boolean theInitialTransactionLatchEnabled) {
+		private boolean myExecutePostPagingRequestsEnabled;
+
+		public MyRestfulServer(FhirContext theFhirContext, boolean theInitialTransactionLatchEnabled, boolean theExecutePostPagingRequestsEnabled) {
 			super(theFhirContext);
 			myInitialTransactionLatchEnabled = theInitialTransactionLatchEnabled;
+			myExecutePostPagingRequestsEnabled = theExecutePostPagingRequestsEnabled;
 		}
 
 		public RestServerDstu3Helper.MyPlainProvider getPlainProvider() {
@@ -298,7 +306,21 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		public void setTransactionLatchEnabled(boolean theTransactionLatchEnabled) {
 			getPlainProvider().setTransactionLatchEnabled(theTransactionLatchEnabled);
 		}
-		
+
+		public void setExecutePostPagingRequestsEnabled(boolean theExecutePostPagingRequestsEnabled) {
+			myExecutePostPagingRequestsEnabled = theExecutePostPagingRequestsEnabled;
+		}
+
+		@Override
+		protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			// emulate a GET request invocation in the case of a POST paging request, as POST paging is not supported by FHIR RestServer
+			if (myExecutePostPagingRequestsEnabled) {
+				super.handleRequest(RequestTypeEnum.GET, request, response);
+			} else {
+				super.handleRequest(RequestTypeEnum.POST, request, response);
+			}
+		}
+
 		public void executeWithLatch(Runnable theRunnable) throws InterruptedException {
 			myPlainProvider.setExpectedCount(1);
 			theRunnable.run();

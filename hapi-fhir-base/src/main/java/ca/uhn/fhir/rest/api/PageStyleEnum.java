@@ -17,13 +17,22 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.gclient;
+package ca.uhn.fhir.rest.api;
 
+/**
+ * Enumerated type to represent allowable syntax for a paging request.
+ */
+public enum PageStyleEnum {
 
-import ca.uhn.fhir.rest.api.PageStyleEnum;
+	/**
+	 * This is the most common default behaviour. Performs the paging using GET HTTP method.
+	 */
+	GET,
 
-public interface IGetPageTyped<T> extends IClientExecutable<IGetPageTyped<T>, T> {
-
-	IGetPageTyped<T> usingStyle(PageStyleEnum theStyle);
-
+	/**
+	 * Performs the paging using POST HTTP method. Note that this style is less commonly supported
+	 * in servers, so it should not be used unless there is a specific reason for needing to.
+	 */
+	POST
+	
 }
