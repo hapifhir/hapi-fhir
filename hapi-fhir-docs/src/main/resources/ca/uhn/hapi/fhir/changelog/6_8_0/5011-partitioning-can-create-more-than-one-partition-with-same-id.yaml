@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5011
+title: "Fixed bug that allowed creation of two partitions with the same id"
