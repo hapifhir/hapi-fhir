@@ -96,7 +96,7 @@ public class NicknameSvc implements INicknameSvc {
 
 	private void ensureMapInitialized() {
 		if (myNicknameResource == null) {
-			ourLog.info("\n\nLoading defaults");
+			ourLog.debug("Loading defaults");
 			myNicknameResource = new ClassPathResource("/nickname/names.csv");
 		}
 
