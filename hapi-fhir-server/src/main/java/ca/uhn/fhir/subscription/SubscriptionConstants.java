@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%

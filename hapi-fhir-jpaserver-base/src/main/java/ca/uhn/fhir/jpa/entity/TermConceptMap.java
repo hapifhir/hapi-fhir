@@ -35,6 +35,9 @@ import static org.apache.commons.lang3.StringUtils.length;
 @Entity
 @Table(name = "TRM_CONCEPT_MAP", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_CONCEPT_MAP_URL", columnNames = {"URL", "VER"})
+}, indexes = {
+	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+	@Index(name = "FK_TRMCONCEPTMAP_RES", columnList = "RES_ID")
 })
 public class TermConceptMap implements Serializable {
 	private static final long serialVersionUID = 1L;
