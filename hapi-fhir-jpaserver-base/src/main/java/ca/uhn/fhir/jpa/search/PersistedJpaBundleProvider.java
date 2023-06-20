@@ -467,22 +467,16 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	private boolean shouldPerformIncludesBeforeRevincudes() {
-		// Whichever one has recurse = true should be performed last
-		boolean performIncludesBeforeRevincludes = true;
+		// When revincludes contain a :iterate, we should perform them last so they can iterate through the includes found so far
+		boolean retval = false;
 
-		for (Include nextInclude : mySearchEntity.toIncludesList()) {
-			if (nextInclude.isRecurse()) {
-				performIncludesBeforeRevincludes = false;
-				break;
-			}
-		}
 		for (Include nextInclude : mySearchEntity.toRevIncludesList()) {
 			if (nextInclude.isRecurse()) {
-				performIncludesBeforeRevincludes = true;
+				retval = true;
 				break;
 			}
 		}
-		return performIncludesBeforeRevincludes;
+		return retval;
 
 	}
 
