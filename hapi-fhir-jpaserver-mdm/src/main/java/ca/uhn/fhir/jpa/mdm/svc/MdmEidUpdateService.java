@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,10 +82,15 @@ public class MdmEidUpdateService {
 		} else {
 			//This is a new linking scenario. we have to break the existing link and link to the new Golden Resource. For now, we create duplicate.
 			//updated patient has an EID that matches to a new candidate. Link them, and set the Golden Resources possible duplicates
-			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			IAnyResource theOldGoldenResource = updateContext.getExistingGoldenResource();
+			if (theOldGoldenResource == null) {
+				throw new InternalErrorException(Msg.code(2362) + "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.");
+			} else {
+				linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), theOldGoldenResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 
-			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
-			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
+				myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+				myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
+			}
 		}
 	}
 
