@@ -200,10 +200,12 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	private void validIdUponCreation(PartitionEntity thePartition){
 		List<PartitionEntity> allPartitions = myPartitionDao.findAll();
-		for(PartitionEntity i : allPartitions){
-			if(i.getId().equals(thePartition.getId())){
-				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "duplicatePartitionId");
-				throw new InvalidRequestException(Msg.code(2366) + msg);
+		if(!allPartitions.isEmpty()) {
+			for (PartitionEntity i : allPartitions) {
+				if (i.getId().equals(thePartition.getId())) {
+					String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "duplicatePartitionId");
+					throw new InvalidRequestException(Msg.code(2366) + msg);
+				}
 			}
 		}
 	}
