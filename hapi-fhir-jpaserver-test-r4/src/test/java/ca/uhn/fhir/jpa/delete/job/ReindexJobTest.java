@@ -383,6 +383,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
 		assertNotNull(myJob.getWarningMessages());
+		// TODO: retest this once you've reversed the changes for the warnings
 		assertTrue(myJob.getWarningMessages().contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString()));
 	}
 

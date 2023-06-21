@@ -225,6 +225,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 							myBatchJobSender, instanceId, progressAccumulator, myReductionStepExecutorService, myJobDefinitionRegistry);
 						ourLog.debug("Triggering maintenance process for instance {} in status {}", instanceId, instance.getStatus());
 						jobInstanceProcessor.process();
+						// TODO: consider myMaintenanceJobFinishedCallback
+						doExtraStuff();
 					}
 				}
 				else {
@@ -236,7 +238,12 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 				break;
 			}
 		}
+		// TODO:  consider using this:
 		myMaintenanceJobFinishedCallback.run();
+	}
+
+	protected void doExtraStuff() {
+		// do nothing but let subclasses implement
 	}
 
 	public void setMaintenanceJobStartedCallback(Runnable theMaintenanceJobStartedCallback) {

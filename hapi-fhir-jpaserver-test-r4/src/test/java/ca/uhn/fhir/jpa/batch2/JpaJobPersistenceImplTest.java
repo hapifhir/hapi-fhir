@@ -36,6 +36,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -67,6 +69,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public static final int JOB_DEF_VER = 1;
 	public static final int SEQUENCE_NUMBER = 1;
 	public static final String CHUNK_DATA = "{\"key\":\"value\"}";
+	private static final LocalDateTime ANCIENT_HISTORY = LocalDateTime.of(1000, Month.JANUARY, 1, 0, 0, 0);
+	// if this code is still running in the year 3000, I say to all my future colleagues:  Congratulations!
+	private static final LocalDateTime DISTANT_FUTURE = LocalDateTime.of(3000, Month.JANUARY, 1, 0, 0, 0);
 
 	@Autowired
 	private IJobPersistence mySvc;
@@ -291,6 +296,62 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobStatus("COMPLETED");
 		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 		assertThat(foundInstances.getTotalElements(), equalTo(1L));
+	}
+
+	@Test
+	void testFetchInstanceAfterUpdateTimeDifferentUpdateTimes() {
+		final PageRequest pageRequest0to100 = PageRequest.of(0, 100);
+
+		final String instanceIdFromDb = mySvc.storeNewInstance(createInstance());
+
+		final Optional<JobInstance> optJobInstanceFromDb = mySvc.fetchInstance(instanceIdFromDb);
+
+		assertTrue(optJobInstanceFromDb.isPresent());
+
+		final Date updateTime = optJobInstanceFromDb.get().getUpdateTime();
+
+		final LocalDateTime updateTimeLocalDateTime = Instant.ofEpochMilli(updateTime.getTime())
+			.atZone(ZoneId.systemDefault())
+			.toLocalDateTime();
+
+		final LocalDateTime oneSecondAgo = updateTimeLocalDateTime.minusSeconds(1);
+		final LocalDateTime oneSecondSince = updateTimeLocalDateTime.plusSeconds(1);
+
+		final List<JobInstance> jobInstancesOneSecondAgo = fetchInstancesAfterUpdateTime(oneSecondAgo, pageRequest0to100);
+		assertEquals(1, jobInstancesOneSecondAgo.size());
+
+		assertEquals(instanceIdFromDb, jobInstancesOneSecondAgo.get(0).getInstanceId());
+
+		final List<JobInstance> jobInstancesAncientHistory = fetchInstancesAfterUpdateTime(ANCIENT_HISTORY, pageRequest0to100);
+		assertEquals(1, jobInstancesAncientHistory.size());
+
+		assertEquals(instanceIdFromDb, jobInstancesAncientHistory.get(0).getInstanceId());
+
+		final List<JobInstance> jobInstancesDistantFuture = fetchInstancesAfterUpdateTime(DISTANT_FUTURE, pageRequest0to100);
+		assertTrue(jobInstancesDistantFuture.isEmpty());
+
+		final List<JobInstance> jobInstancesOneSecondSince = fetchInstancesAfterUpdateTime(oneSecondSince, pageRequest0to100);
+		assertTrue(jobInstancesOneSecondSince.isEmpty());
+	}
+
+	@Test
+	void testFetchInstanceAfterUpdateTimeDifferentPageSizes() {
+		final List<String> instanceIdsFromDb = createAndStoreNewInstances(20);
+
+		final List<JobInstance> jobInstances2 = fetchInstancesAfterUpdateTime(ANCIENT_HISTORY, PageRequest.of(0, 2));
+		assertEquals(instanceIdsFromDb.subList(0, 2), toInstanceIds(jobInstances2));
+
+		final List<JobInstance> jobInstances15 = fetchInstancesAfterUpdateTime(ANCIENT_HISTORY, PageRequest.of(0, 15));
+		assertEquals(instanceIdsFromDb.subList(0, 15), toInstanceIds(jobInstances15));
+
+		final List<JobInstance> jobInstances25 = fetchInstancesAfterUpdateTime(ANCIENT_HISTORY, PageRequest.of(0, 25));
+		assertEquals(instanceIdsFromDb.subList(0, 20), toInstanceIds(jobInstances25));
+	}
+
+	private static List<String> toInstanceIds(List<JobInstance> theJobInstances) {
+		return theJobInstances.stream()
+			.map(JobInstance::getInstanceId)
+			.toList();
 	}
 
 	private JobInstanceFetchRequest createFetchRequest() {
@@ -684,5 +745,18 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			Arguments.of(WorkChunkStatusEnum.FAILED, false),
 			Arguments.of(WorkChunkStatusEnum.COMPLETED, false)
 		);
+	}
+
+	private List<String> createAndStoreNewInstances(int iterations) {
+		return IntStream.range(0, iterations)
+			.mapToObj(num -> mySvc.storeNewInstance(createInstance()))
+			.toList();
+	}
+
+	private List<JobInstance> fetchInstancesAfterUpdateTime(LocalDateTime theLocalDateTime, PageRequest thePageRequest) {
+		final Date asJavaUtilDate = Date.from(theLocalDateTime
+			.atZone(ZoneId.systemDefault())
+			.toInstant());
+		return mySvc.fetchInstancesAfterUpdateTime(asJavaUtilDate, thePageRequest);
 	}
 }
