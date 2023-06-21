@@ -100,7 +100,7 @@ public abstract class BaseParser implements IParser {
 
 	private FhirTerser.ContainedResources myContainedResources;
 	private boolean myEncodeElementsAppliesToChildResourcesOnly;
-	private FhirContext myContext;
+	private final FhirContext myContext;
 	private List<EncodeContextPath> myDontEncodeElements;
 	private List<EncodeContextPath> myEncodeElements;
 	private Set<String> myEncodeElementsAppliesToResourceTypes;
@@ -262,6 +262,10 @@ public abstract class BaseParser implements IParser {
 
 	protected abstract void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws IOException, DataFormatException;
 
+	protected void doEncodeToWriter(IBase theElement, Writer theWriter, EncodeContext theEncodeContext) throws IOException, DataFormatException {
+		throw new InternalErrorException(Msg.code(2363) + "This parser does not support encoding non-resource values");
+	}
+
 	protected abstract <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
 
 	@Override
@@ -270,7 +274,7 @@ public abstract class BaseParser implements IParser {
 		try {
 			encodeResourceToWriter(theResource, stringWriter);
 		} catch (IOException e) {
-			throw new Error(Msg.code(1828) + "Encountered IOException during write to string - This should not happen!");
+			throw new Error(Msg.code(1828) + "Encountered IOException during write to string - This should not happen!", e);
 		}
 		return stringWriter.toString();
 	}
@@ -278,9 +282,33 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public final void encodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException {
 		EncodeContext encodeContext = new EncodeContext();
-
 		encodeResourceToWriter(theResource, theWriter, encodeContext);
 	}
+
+
+	@Override
+	public String encodeToString(IBase theElement) throws DataFormatException {
+		Writer stringWriter = new StringBuilderWriter();
+		try {
+			encodeToWriter(theElement, stringWriter);
+		} catch (IOException e) {
+			throw new Error(Msg.code(2364) + "Encountered IOException during write to string - This should not happen!", e);
+		}
+		return stringWriter.toString();
+	}
+
+	@Override
+	public void encodeToWriter(IBase theElement, Writer theWriter) throws DataFormatException, IOException {
+		if (theElement instanceof IBaseResource) {
+			encodeResourceToWriter((IBaseResource) theElement, theWriter);
+		} else if (theElement instanceof IPrimitiveType) {
+			theWriter.write(((IPrimitiveType<?>) theElement).getValueAsString());
+		} else {
+			EncodeContext encodeContext = new EncodeContext();
+			encodeToWriter(theElement, theWriter, encodeContext);
+		}
+	}
+
 
 	protected void encodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws IOException {
 		Validate.notNull(theResource, "theResource can not be null");
@@ -289,15 +317,28 @@ public abstract class BaseParser implements IParser {
 
 		if (myContext.getVersion().getVersion() == FhirVersionEnum.R4B && theResource.getStructureFhirVersionEnum() == FhirVersionEnum.R5) {
 			// TODO: remove once we've bumped the core lib version
-		} else
-		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
+		} else if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
 			throw new IllegalArgumentException(Msg.code(1829) + "This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
-		String resourceName = myContext.getResourceType(theResource);
+		String resourceName = myContext.getElementDefinition(theResource.getClass()).getName();
 		theEncodeContext.pushPath(resourceName, true);
 
 		doEncodeResourceToWriter(theResource, theWriter, theEncodeContext);
+
+		theEncodeContext.popPath();
+	}
+
+	protected void encodeToWriter(IBase theElement, Writer theWriter, EncodeContext theEncodeContext) throws IOException {
+		Validate.notNull(theElement, "theElement can not be null");
+		Validate.notNull(theWriter, "theWriter can not be null");
+		Validate.notNull(theEncodeContext, "theEncodeContext can not be null");
+
+		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
+		String elementName = def.getName();
+		theEncodeContext.pushPath(elementName, true);
+
+		doEncodeToWriter(theElement, theWriter, theEncodeContext);
 
 		theEncodeContext.popPath();
 	}
@@ -896,7 +937,7 @@ public abstract class BaseParser implements IParser {
 				RuntimeChildChoiceDefinition choice = (RuntimeChildChoiceDefinition) nextChild;
 				b.append(" - Expected one of: " + choice.getValidChildTypes());
 			}
-			throw new DataFormatException(Msg.code(1831) + b.toString());
+			throw new DataFormatException(Msg.code(1831) + b);
 		}
 		throw new DataFormatException(Msg.code(1832) + nextChild + " has no child of type " + theType);
 	}
@@ -971,7 +1012,7 @@ public abstract class BaseParser implements IParser {
 						if (myDef != null) {
 							path.append(myDef.getElementName());
 						}
-						ourLog.trace(" * Next path: {}", path.toString());
+						ourLog.trace(" * Next path: {}", path);
 					}
 				}
 			}

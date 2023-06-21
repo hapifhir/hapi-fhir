@@ -223,7 +223,7 @@ class ModelScanner {
 	private void scanBlock(Class<? extends IBase> theClass) {
 		ourLog.debug("Scanning resource block class: {}", theClass.getName());
 
-		String resourceName = theClass.getCanonicalName();
+		String blockName = theClass.getSimpleName();
 
 		// Just in case someone messes up when upgrading from DSTU2
 		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
@@ -232,7 +232,7 @@ class ModelScanner {
 			}
 		}
 
-		RuntimeResourceBlockDefinition blockDef = new RuntimeResourceBlockDefinition(resourceName, theClass, isStandardType(theClass), myContext, myClassToElementDefinitions);
+		RuntimeResourceBlockDefinition blockDef = new RuntimeResourceBlockDefinition(blockName, theClass, isStandardType(theClass), myContext, myClassToElementDefinitions);
 		blockDef.populateScanAlso(myScanAlso);
 
 		myClassToElementDefinitions.put(theClass, blockDef);

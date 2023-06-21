@@ -34,7 +34,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 
 @Table(name = "TRM_VALUESET_C_DESIGNATION", indexes = {
 	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
-	@Index(name = "FK_TRM_VALUESET_CONCEPT_PID",  columnList = "VALUESET_CONCEPT_PID", unique = false)
+	@Index(name = "FK_TRM_VALUESET_CONCEPT_PID",  columnList = "VALUESET_CONCEPT_PID", unique = false),
+	@Index(name = "FK_TRM_VSCD_VS_PID", columnList = "VALUESET_PID")
 })
 @Entity()
 public class TermValueSetConceptDesignation implements Serializable {

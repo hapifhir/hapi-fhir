@@ -103,6 +103,10 @@ public class ExtendedHSearchIndexExtractor {
 			.filter(nextParam -> !nextParam.isMissing())
 			.forEach(nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
 
+		theNewParams.myUriParams.stream()
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addUriIndexData(nextParam.getParamName(), nextParam.getUri()));
+
 		theResource.getMeta().getTag().forEach(tag ->
 			retVal.addTokenIndexData("_tag", tag));
 

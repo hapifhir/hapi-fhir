@@ -211,6 +211,15 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	@Override
+	protected void doEncodeToWriter(IBase theElement, Writer theWriter, EncodeContext theEncodeContext) throws IOException, DataFormatException {
+		BaseJsonLikeWriter eventWriter = createJsonWriter(theWriter);
+		eventWriter.beginObject();
+		encodeCompositeElementToStreamWriter(null, null, theElement, eventWriter, false, null, theEncodeContext);
+		eventWriter.endObject();
+		eventWriter.close();
+	}
+
+	@Override
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
 		JsonLikeStructure jsonStructure = new JacksonStructure();
 		jsonStructure.load(theReader);
@@ -1446,9 +1455,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				// Undeclared extensions
 				extractUndeclaredExtensions(theValue, extensions, modifierExtensions, myParent, null, theEncodeContext, theContainedResource);
 				// Declared extensions
-				if (def != null) {
-					extractDeclaredExtensions(theValue, def, extensions, modifierExtensions, myParent);
-				}
+				extractDeclaredExtensions(theValue, def, extensions, modifierExtensions, myParent);
 				boolean haveContent = false;
 				if (!extensions.isEmpty() || !modifierExtensions.isEmpty()) {
 					haveContent = true;

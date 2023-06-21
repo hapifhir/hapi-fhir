@@ -36,6 +36,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -54,8 +55,13 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Table(name = "TRM_VALUESET", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VALUESET_URL", columnNames = {"URL", "VER"})
-})
+		@UniqueConstraint(name = "IDX_VALUESET_URL", columnNames = {"URL", "VER"})
+	},
+	indexes = {
+		// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+		@Index(name = "FK_TRMVALUESET_RES", columnList = "RES_ID" )
+	}
+)
 @Entity()
 public class TermValueSet implements Serializable {
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;

@@ -37,6 +37,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class RuleBulkExportImpl extends BaseRule {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuleBulkExportImpl.class);
 	private String myGroupId;
 	private String myPatientId;
 	private BulkDataExportOptions.ExportStyle myWantExportStyle;
@@ -89,14 +90,37 @@ public class RuleBulkExportImpl extends BaseRule {
 		// TODO This is a _bad bad bad implementation_ but we are out of time.
 		// 1. If a claimed resource ID is present in the parameters, and the permission contains one, check for membership
 		// 2. If not a member, Deny.
-		if (myWantExportStyle == BulkDataExportOptions.ExportStyle.PATIENT && isNotBlank(myPatientId) && options.getPatientIds() != null) {
-			String expectedPatientId = new IdDt(myPatientId).toUnqualifiedVersionless().getValue();
-			String actualPatientIds = options.getPatientIds().stream().map(t -> t.toUnqualifiedVersionless().getValue()).collect(Collectors.joining(","));
-			if (actualPatientIds.contains(expectedPatientId)) {
-				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
-			} else {
+		if (myWantExportStyle == BulkDataExportOptions.ExportStyle.PATIENT && isNotBlank(myPatientId)) {
+			final String expectedPatientId = new IdDt(myPatientId).toUnqualifiedVersionless().getValue();
+			if (options.getPatientIds() != null) {
+				ourLog.debug("options.getPatientIds() != null");
+				final String actualPatientIds = options.getPatientIds().stream()
+					.map(t -> t.toUnqualifiedVersionless().getValue())
+					.collect(Collectors.joining(","));
+				if (actualPatientIds.contains(expectedPatientId)) {
+					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
+				}
+
 				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY,this);
 			}
+
+			final Set<String> filters = options.getFilters();
+
+			// TODO:  LD:  This admittedly adds more to the tech debt above, and should really be addressed by https://github.com/hapifhir/hapi-fhir/issues/4990
+			if (! filters.isEmpty()) {
+				ourLog.debug("filters not empty");
+				final Set<String> patientIdsInFilters = filters.stream()
+					.filter(filter -> filter.startsWith("Patient?_id="))
+					.map(filter -> filter.replace("?_id=", "/"))
+					.collect(Collectors.toUnmodifiableSet());
+
+				if (patientIdsInFilters.contains(expectedPatientId)) {
+					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
+				}
+
+				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY,this);
+			}
+			ourLog.debug("patientIds and filters both empty");
 		}
 		return null;
 	}
