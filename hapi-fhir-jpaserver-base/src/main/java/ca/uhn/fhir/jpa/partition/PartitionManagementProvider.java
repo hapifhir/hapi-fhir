@@ -31,7 +31,6 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +92,7 @@ public class PartitionManagementProvider {
 		return retVal;
 	}
 
-	@NotNull
+	@Nonnull
 	private IPrimitiveType<Integer> requestRandomPartitionId(IPrimitiveType<String> thePartitionName) {
 		int unusedPartitionId = myPartitionLookupSvc.generateRandomUnusedPartitionId();
 		ourLog.info("Request to create partition came in without a partition ID. Auto-assigning an available ID.[partition_id={}, partition_name={}]", unusedPartitionId, thePartitionName);
