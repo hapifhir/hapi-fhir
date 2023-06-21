@@ -199,11 +199,13 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	private void validIdUponCreation(PartitionEntity thePartition){
-		if (myPartitionDao.findById(thePartition.getId())!=null) {
+		List<PartitionEntity> allPartitions = myPartitionDao.findAll();
+		if (myPartitionDao.findById(thePartition.getId())!=null&&!allPartitions.isEmpty()) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "duplicatePartitionId");
 			throw new InvalidRequestException(Msg.code(2366) + msg);
 		}
 	}
+
 	private void validateHaveValidPartitionIdAndName(PartitionEntity thePartition) {
 		if (thePartition.getId() == null || isBlank(thePartition.getName())) {
 			String msg = myFhirCtx.getLocalizer().getMessage(PartitionLookupSvcImpl.class, "missingPartitionIdOrName");
