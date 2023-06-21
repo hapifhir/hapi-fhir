@@ -199,8 +199,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	private void validIdUponCreation(PartitionEntity thePartition){
-		List<PartitionEntity> allPartitions = myPartitionDao.findAll();
-		if (myPartitionDao.findById(thePartition.getId()).isPresent() && !allPartitions.isEmpty()) {
+		if (myPartitionDao.findById(thePartition.getId()).isPresent()) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "duplicatePartitionId");
 			throw new InvalidRequestException(Msg.code(2366) + msg);
 		}
