@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import ca.uhn.fhir.jpa.fql.provider.FqlRestProvider;
-import ca.uhn.fhir.jpa.fql.util.FqlConstants;
+import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -32,10 +31,10 @@ public class ResourceProviderR5FqlTest extends BaseResourceProviderR5Test {
 			select name.family, name.given
 			""";
 		Parameters request = new Parameters();
-		request.addParameter(FqlRestProvider.PARAM_QUERY, new StringType(select));
-		request.addParameter(FqlRestProvider.PARAM_LIMIT, new IntegerType(100));
-		request.addParameter(FqlRestProvider.PARAM_FETCH_SIZE, new IntegerType(5));
-		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + FqlConstants.FQL_EXECUTE);
+		request.addParameter(HfqlConstants.PARAM_QUERY, new StringType(select));
+		request.addParameter(HfqlConstants.PARAM_LIMIT, new IntegerType(100));
+		request.addParameter(HfqlConstants.PARAM_FETCH_SIZE, new IntegerType(5));
+		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.FQL_EXECUTE);
 		fetch.setEntity(new ResourceEntity(myFhirContext, request));
 
 		// Test

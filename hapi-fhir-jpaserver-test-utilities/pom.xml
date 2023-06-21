@@ -60,7 +60,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-fql</artifactId>
+			<artifactId>hapi-fhir-jpaserver-hfql</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
