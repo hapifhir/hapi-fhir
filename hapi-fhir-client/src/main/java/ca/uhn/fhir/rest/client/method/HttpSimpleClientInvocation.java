@@ -21,8 +21,7 @@ package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.PageStyleEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
@@ -35,17 +34,17 @@ public class HttpSimpleClientInvocation extends BaseHttpClientInvocation {
 	private final String myUrl;
 	private UrlSourceEnum myUrlSource = UrlSourceEnum.EXPLICIT;
 
-	private PageStyleEnum myPageStyleEnum;
+	private PagingHttpMethodEnum myPagingHttpMethod;
 
-	public HttpSimpleClientInvocation(FhirContext theContext, String theUrlPath, PageStyleEnum thePageStyleEnum) {
+	public HttpSimpleClientInvocation(FhirContext theContext, String theUrlPath, PagingHttpMethodEnum thePagingHttpMethod) {
 		super(theContext);
 		myUrl = theUrlPath;
-		myPageStyleEnum = thePageStyleEnum;
+		myPagingHttpMethod = thePagingHttpMethod;
 	}
 
 	@Override
 	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
-		IHttpRequest retVal = createHttpRequest(myUrl, theEncoding, myPageStyleEnum == PageStyleEnum.POST ? RequestTypeEnum.POST : RequestTypeEnum.GET);
+		IHttpRequest retVal = createHttpRequest(myUrl, theEncoding, myPagingHttpMethod.getRequestType());
 		retVal.setUrlSource(myUrlSource);
 		return retVal;
 	}

@@ -42,7 +42,7 @@ import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PageStyleEnum;
+import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
@@ -849,7 +849,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Class<? extends IBaseBundle> myBundleType;
 		private String myUrl;
 
-		private PageStyleEnum myPageStyle = PageStyleEnum.GET;
+		private PagingHttpMethodEnum myPagingHttpMethod = PagingHttpMethodEnum.GET;
 
 		public GetPageInternal(String theUrl, Class<? extends IBaseBundle> theBundleType) {
 			myUrl = theUrl;
@@ -859,13 +859,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public Object execute() {
 			IClientResponseHandler binding = new ResourceResponseHandler(myBundleType, getPreferResponseTypes());
-			HttpSimpleClientInvocation invocationGet = new HttpSimpleClientInvocation(myContext, myUrl, myPageStyle);
+			HttpSimpleClientInvocation invocationGet = new HttpSimpleClientInvocation(myContext, myUrl, myPagingHttpMethod);
 			return invoke(null, binding, invocationGet);
 		}
 
 		@Override
-		public IGetPageTyped<Object> usingMethod(PageStyleEnum theStyle) {
-			myPageStyle = theStyle;
+		public IGetPageTyped<Object> usingMethod(PagingHttpMethodEnum thePagingHttpMethod) {
+			myPagingHttpMethod = thePagingHttpMethod;
 			return this;
 		}
 

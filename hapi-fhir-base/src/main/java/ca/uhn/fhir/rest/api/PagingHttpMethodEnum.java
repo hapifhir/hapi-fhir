@@ -20,19 +20,28 @@
 package ca.uhn.fhir.rest.api;
 
 /**
- * Enumerated type to represent allowable syntax for a paging request.
+ * Enumerated type to represent allowable HTTP methods for a paging request.
  */
-public enum PageStyleEnum {
+public enum PagingHttpMethodEnum {
 
 	/**
 	 * This is the most common default behaviour. Performs the paging using GET HTTP method.
 	 */
-	GET,
+	GET(RequestTypeEnum.GET),
 
 	/**
 	 * Performs the paging using POST HTTP method. Note that this style is less commonly supported
 	 * in servers, so it should not be used unless there is a specific reason for needing to.
 	 */
-	POST
-	
+	POST(RequestTypeEnum.POST);
+
+	private final RequestTypeEnum myRequestType;
+
+	PagingHttpMethodEnum(RequestTypeEnum theRequestType) {
+		this.myRequestType = theRequestType;
+	}
+
+	public RequestTypeEnum getRequestType() {
+		return myRequestType;
+	}
 }

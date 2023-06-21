@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PageStyleEnum;
+import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -2712,7 +2712,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.loadPage()
 			.byUrl("http://example.com/page1")
 			.andReturnBundle(Bundle.class)
-			.usingMethod(PageStyleEnum.POST)
+			.usingMethod(PagingHttpMethodEnum.POST)
 			.execute();
 
 		assertEquals("POST", capt.getValue().getMethod());
