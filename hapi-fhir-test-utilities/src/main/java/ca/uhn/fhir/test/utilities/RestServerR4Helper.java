@@ -286,7 +286,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 		private final boolean myInitialTransactionLatchEnabled;
 
-		private PagingHttpMethodEnum myPagingHttpMethod = PagingHttpMethodEnum.GET;
+		private PagingHttpMethodEnum myPagingHttpMethod = PagingHttpMethodEnum.POST;
 
 		public MyRestfulServer(FhirContext theFhirContext, boolean theInitialTransactionLatchEnabled) {
 			super(theFhirContext);
@@ -306,8 +306,8 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			getPlainProvider().setTransactionLatchEnabled(theTransactionLatchEnabled);
 		}
 
-		public void setHttpMethodForPagingRequest(PagingHttpMethodEnum thePageStyle) {
-			myPagingHttpMethod = thePageStyle;
+		public void setHttpMethodForPagingRequest(PagingHttpMethodEnum thePagingHttpMethod) {
+			myPagingHttpMethod = thePagingHttpMethod;
 		}
 
 		@Override
