@@ -23,6 +23,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.IPartition;
+import ca.uhn.fhir.jpa.api.svc.IPartitionLookupSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
@@ -42,6 +44,7 @@ import org.hl7.fhir.r4.model.Meta;
 import javax.annotation.Nonnull;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -54,11 +57,12 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private IFhirSystemDao<?, ?> mySystemDao;
+	private IPartitionLookupSvc myPartitionLookupSvc;
 
 	/**
 	 * Constructor
 	 */
-	public JpaCapabilityStatementProvider(@Nonnull RestfulServer theRestfulServer, @Nonnull IFhirSystemDao<?, ?> theSystemDao, @Nonnull JpaStorageSettings theStorageSettings, @Nonnull ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
+	public JpaCapabilityStatementProvider(@Nonnull RestfulServer theRestfulServer, @Nonnull IFhirSystemDao<?, ?> theSystemDao, @Nonnull JpaStorageSettings theStorageSettings, @Nonnull ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport, IPartitionLookupSvc thePartitionLookupSvc) {
 		super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
 
 		Validate.notNull(theRestfulServer);
@@ -69,6 +73,7 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		myContext = theRestfulServer.getFhirContext();
 		mySystemDao = theSystemDao;
 		myStorageSettings = theStorageSettings;
+		myPartitionLookupSvc = thePartitionLookupSvc;
 		setIncludeResourceCounts(true);
 	}
 
@@ -84,6 +89,17 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_XML_NEW);
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_JSON_PATCH);
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_XML_PATCH);
+
+		if (nonNull(myPartitionLookupSvc) && myStorageSettings.isIncludePartitionListingCapabilityStatement()) {
+			IBase parentPartitionExtension = theTerser.addElement(theCapabilityStatement, "extension");
+			theTerser.addElement(parentPartitionExtension, "url", "http://hapifhir.io/fhir/StructureDefinition/partition-list");
+
+			for (IPartition partition : myPartitionLookupSvc.listPartitions()) {
+				IBase childPartitionExtension = theTerser.addElement(parentPartitionExtension, "extension");
+				theTerser.addElement(childPartitionExtension, "url", "partitionname");
+				theTerser.setElement(childPartitionExtension, "valueString", partition.getName());
+			}
+		}
 	}
 
 	@Override

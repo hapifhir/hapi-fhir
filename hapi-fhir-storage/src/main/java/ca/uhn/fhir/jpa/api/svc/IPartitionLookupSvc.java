@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.partition;
+package ca.uhn.fhir.jpa.api.svc;
 
-import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.api.model.IPartition;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
@@ -37,20 +37,20 @@ public interface IPartitionLookupSvc {
 	 * @throws ResourceNotFoundException If the name is not known
 	 */
 	@Nullable
-	PartitionEntity getPartitionByName(String theName) throws ResourceNotFoundException;
+	IPartition getPartitionByName(String theName) throws ResourceNotFoundException;
 
 	/**
 	 * @throws ResourceNotFoundException If the ID is not known
 	 */
-	PartitionEntity getPartitionById(Integer theId) throws ResourceNotFoundException;
+	IPartition getPartitionById(Integer theId) throws ResourceNotFoundException;
 
 	void clearCaches();
 
-	PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails);
+	IPartition createPartition(IPartition thePartition, RequestDetails theRequestDetails);
 
-	PartitionEntity updatePartition(PartitionEntity thePartition);
+	IPartition updatePartition(IPartition thePartition);
 
 	void deletePartition(Integer thePartitionId);
 
-	List<PartitionEntity> listPartitions();
+	List<IPartition> listPartitions();
 }

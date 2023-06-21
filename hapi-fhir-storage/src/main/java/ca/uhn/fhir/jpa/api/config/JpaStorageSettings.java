@@ -317,6 +317,11 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myNonResourceDbHistoryEnabled = true;
 
 	/**
+	 * Since 6.7.0
+	 */
+	private boolean myIncludePartitionListingCapabilityStatement = false;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -2307,6 +2312,14 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public void setNonResourceDbHistoryEnabled(boolean theNonResourceDbHistoryEnabled) {
 		myNonResourceDbHistoryEnabled = theNonResourceDbHistoryEnabled;
+	}
+
+	public boolean isIncludePartitionListingCapabilityStatement() {
+		return myIncludePartitionListingCapabilityStatement;
+	}
+
+	public void setIncludePartitionListingCapabilityStatement(boolean theIncludePartitionListingCapabilityStatement) {
+		myIncludePartitionListingCapabilityStatement = theIncludePartitionListingCapabilityStatement;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

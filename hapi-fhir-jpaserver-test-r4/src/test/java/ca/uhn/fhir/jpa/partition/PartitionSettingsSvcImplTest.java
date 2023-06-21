@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.model.IPartition;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -25,7 +26,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateAndFetchPartition() {
 
-		PartitionEntity partition = new PartitionEntity();
+		IPartition partition = new PartitionEntity();
 		partition.setId(123);
 		partition.setName("NAME123");
 		partition.setDescription("A description");
@@ -56,7 +57,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 	@Test
 	public void testDeletePartition() {
 
-		PartitionEntity partition = new PartitionEntity();
+		IPartition partition = new PartitionEntity();
 		partition.setId(123);
 		partition.setName("NAME123");
 		partition.setDescription("A description");
@@ -120,7 +121,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 	@Test
 	public void testUpdatePartition() {
 
-		PartitionEntity partition = new PartitionEntity();
+		IPartition partition = new PartitionEntity();
 		partition.setId(123);
 		partition.setName("NAME123");
 		partition.setDescription("A description");
@@ -185,7 +186,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		myPartitionConfigSvc.createPartition(partition1, null);
 		myPartitionConfigSvc.createPartition(partition2, null);
 
-		List<PartitionEntity> actual = myPartitionConfigSvc.listPartitions();
+		List<IPartition> actual = myPartitionConfigSvc.listPartitions();
 
 		assertEquals(2, actual.size());
 		assertTrue(actual.stream().anyMatch(item -> "PARTITION-1".equals(item.getName())));

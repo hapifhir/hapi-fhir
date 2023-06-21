@@ -21,7 +21,8 @@ package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.api.model.IPartition;
+import ca.uhn.fhir.jpa.api.svc.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
@@ -41,7 +42,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 		List<String> names = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionIds().size(); i++) {
 
-			PartitionEntity partition;
+			IPartition partition;
 			Integer id = theRequestPartitionId.getPartitionIds().get(i);
 			if (id == null) {
 				partition = null;
@@ -85,7 +86,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 		List<Integer> ids = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionNames().size(); i++) {
 
-			PartitionEntity partition;
+			IPartition partition;
 			try {
 				partition = myPartitionConfigSvc.getPartitionByName(theRequestPartitionId.getPartitionNames().get(i));
 			} catch (IllegalArgumentException e) {
