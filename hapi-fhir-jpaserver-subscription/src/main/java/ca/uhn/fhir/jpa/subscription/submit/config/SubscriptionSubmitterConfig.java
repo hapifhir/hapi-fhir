@@ -46,7 +46,9 @@ import org.springframework.context.annotation.Lazy;
  * matching queue for processing
  */
 @Configuration
-@Import(SubscriptionModelConfig.class)
+@Import({
+	SubscriptionModelConfig.class,
+	SubscriptionMatcherInterceptorConfig.class})
 public class SubscriptionSubmitterConfig {
 
 	@Bean
@@ -57,11 +59,6 @@ public class SubscriptionSubmitterConfig {
 
 		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theHapiTransactionService);
 
-	}
-
-	@Bean
-	public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor() {
-		return new SubscriptionMatcherInterceptor();
 	}
 
 	@Bean
