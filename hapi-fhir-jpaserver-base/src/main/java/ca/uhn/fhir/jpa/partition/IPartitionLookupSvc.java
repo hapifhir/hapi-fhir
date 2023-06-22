@@ -46,6 +46,13 @@ public interface IPartitionLookupSvc {
 
 	void clearCaches();
 
+	/**
+	 * Will generate a random unused partition ID. Validates that no partition with that ID exists before returning.
+	 *
+	 * @return an integer, representing a random unused partition ID.
+	 */
+	int generateRandomUnusedPartitionId();
+
 	PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails);
 
 	PartitionEntity updatePartition(PartitionEntity thePartition);

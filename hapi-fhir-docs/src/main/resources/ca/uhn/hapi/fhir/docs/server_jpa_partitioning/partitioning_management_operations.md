@@ -21,9 +21,9 @@ The `$partition-management-create-partition` operation can be used to create a n
         <tr>
             <td>id</td>
             <td>Integer</td>
-            <td>1..1</td>
+            <td>0..1</td>
             <td>
-                The numeric ID for the partition. This value can be any integer, positive or negative or zero. It must not be a value that has already been used. 
+                The numeric ID for the partition. This value can be any integer, positive or negative or zero. It must not be a value that has already been used. If omitted, a random unused integer will be selected.
             </td>
         </tr>
         <tr>
