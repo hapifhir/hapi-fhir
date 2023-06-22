@@ -50,18 +50,23 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.thymeleaf.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,6 +74,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -145,12 +151,73 @@ public class HfqlExecutor implements IHfqlExecutor {
 		IBundleProvider outcome = dao.search(map, theRequestDetails);
 		Predicate<IBaseResource> whereClausePredicate = newWhereClausePredicate(fhirPath, statement);
 
+
+		IHfqlExecutionResult executionResult;
 		if (statement.hasCountClauses()) {
-			return executeCountClause(statement, outcome, whereClausePredicate);
+			executionResult = executeCountClause(statement, outcome, whereClausePredicate);
+		} else {
+			executionResult = new LocalSearchHfqlExecutionResult(statement, outcome, fhirPath, theLimit, 0, columnDataTypes, whereClausePredicate);
 		}
 
+		if (!statement.getOrderByClauses().isEmpty()) {
+			executionResult = createOrderedResult(statement, executionResult);
+		}
 
-		return new LocalSearchHfqlExecutionResult(statement, outcome, fhirPath, theLimit, 0, columnDataTypes, whereClausePredicate);
+		return executionResult;
+	}
+
+	private IHfqlExecutionResult createOrderedResult(HfqlStatement theStatement, IHfqlExecutionResult theExecutionResult) {
+		List<IHfqlExecutionResult.Row> rows = new ArrayList<>();
+		while (theExecutionResult.hasNext()) {
+			IHfqlExecutionResult.Row nextRow = theExecutionResult.getNextRow();
+			rows.add(nextRow);
+			Validate.isTrue(rows.size() <= 10000, "Can not ORDER BY result sets over 10000 results");
+		}
+
+		List<Integer> orderColumnIndexes = theStatement
+			.getOrderByClauses()
+			.stream()
+			.map(t->{
+				int index = theStatement.findSelectClauseIndex(t.getClause());
+				if (index == -1) {
+					throw new InvalidRequestException("Invalid/unknown ORDER BY clause: " + t.getClause());
+				}
+				return index;
+			}).collect(Collectors.toList());
+		List<Boolean> orderAscending = theStatement
+			.getOrderByClauses()
+			.stream()
+			.map(HfqlStatement.OrderByClause::isAscending)
+			.collect(Collectors.toList());
+
+		Comparator<IHfqlExecutionResult.Row> comparator = null;
+		for (int i = 0; i < orderColumnIndexes.size(); i++) {
+			int columnIndex = orderColumnIndexes.get(i);
+			HfqlDataTypeEnum dataType = theExecutionResult.getColumnTypes().get(columnIndex);
+			Comparator<IHfqlExecutionResult.Row> nextComparator = newRowComparator(columnIndex, dataType);
+			if (!orderAscending.get(i)) {
+				nextComparator = nextComparator.reversed();
+			}
+			if (comparator == null) {
+				comparator = nextComparator;
+			} else {
+				comparator = comparator.thenComparing(nextComparator);
+			}
+		}
+
+		rows.sort(comparator);
+
+		List<List<Object>> rowData = rows
+			.stream()
+			.map(t->t.getRowValues())
+			.collect(Collectors.toList());
+		return new StaticHfqlExecutionResult(null, theExecutionResult.getColumnNames(), theExecutionResult.getColumnTypes(), rowData);
+	}
+
+	@SuppressWarnings("unchecked")
+	static Comparator<IHfqlExecutionResult.Row> newRowComparator(int columnIndex, HfqlDataTypeEnum dataType) {
+		Comparator<IHfqlExecutionResult.Row> nextComparator = Comparator.comparing(new RowValueExtractor(columnIndex, dataType));
+		return nextComparator;
 	}
 
 	@Override
@@ -294,21 +361,16 @@ public class HfqlExecutor implements IHfqlExecutor {
 		return r -> {
 			for (HfqlStatement.WhereClause nextWhereClause : theStatement.getWhereClauses()) {
 
-				List<IBase> values = theFhirPath.evaluate(r, nextWhereClause.getLeft(), IBase.class);
-				boolean haveMatch = false;
-				for (IBase nextValue : values) {
-					for (String nextRight : nextWhereClause.getRight()) {
-						String expression = "$this = " + nextRight;
-						IPrimitiveType outcome = theFhirPath
-							.evaluateFirst(nextValue, expression, IPrimitiveType.class)
-							.orElseThrow(IllegalStateException::new);
-						Boolean value = (Boolean) outcome.getValue();
-						haveMatch = value;
-						if (haveMatch) {
-							break;
-						}
+				boolean haveMatch;
+				switch (nextWhereClause.getOperator()) {
+					case UNARY_BOOLEAN: {
+						haveMatch = evaluateWhereClauseUnaryBoolean(theFhirPath, r, nextWhereClause);
+						break;
 					}
-					if (haveMatch) {
+					case EQUALS:
+					case IN:
+					default: {
+						haveMatch = evaluateWhereClauseBinaryEqualsOrIn(theFhirPath, r, nextWhereClause);
 						break;
 					}
 				}
@@ -321,6 +383,41 @@ public class HfqlExecutor implements IHfqlExecutor {
 
 			return true;
 		};
+	}
+
+	private static boolean evaluateWhereClauseUnaryBoolean(IFhirPath theFhirPath, IBaseResource r, HfqlStatement.WhereClause nextWhereClause) {
+		boolean haveMatch = false;
+		assert nextWhereClause.getRight().isEmpty();
+		List<IPrimitiveType> values = theFhirPath.evaluate(r, nextWhereClause.getLeft(), IPrimitiveType.class);
+		for (IPrimitiveType<?> nextValue : values) {
+			if (Boolean.TRUE.equals(nextValue.getValue())) {
+				haveMatch = true;
+				break;
+			}
+		}
+		return haveMatch;
+	}
+
+	private static boolean evaluateWhereClauseBinaryEqualsOrIn(IFhirPath theFhirPath, IBaseResource r, HfqlStatement.WhereClause nextWhereClause) {
+		boolean haveMatch = false;
+		List<IBase> values = theFhirPath.evaluate(r, nextWhereClause.getLeft(), IBase.class);
+		for (IBase nextValue : values) {
+			for (String nextRight : nextWhereClause.getRight()) {
+				String expression = "$this = " + nextRight;
+				IPrimitiveType outcome = theFhirPath
+					.evaluateFirst(nextValue, expression, IPrimitiveType.class)
+					.orElseThrow(IllegalStateException::new);
+				Boolean value = (Boolean) outcome.getValue();
+				haveMatch = value;
+				if (haveMatch) {
+					break;
+				}
+			}
+			if (haveMatch) {
+				break;
+			}
+		}
+		return haveMatch;
 	}
 
 	@Nonnull
@@ -640,6 +737,60 @@ public class HfqlExecutor implements IHfqlExecutor {
 	@Nonnull
 	private static InvalidRequestException newInvalidRequestCountWithSelectOnNonGroupedClause(String theClause) {
 		return new InvalidRequestException("Unable to select on non-grouped column in a count expression: " + UrlUtil.sanitizeUrlPart(theClause));
+	}
+
+	private static class RowValueExtractor implements Function<IHfqlExecutionResult.Row, Comparable> {
+		private final int myColumnIndex;
+		private final HfqlDataTypeEnum myDataType;
+
+		public RowValueExtractor(int theColumnIndex, HfqlDataTypeEnum theDataType) {
+			myColumnIndex = theColumnIndex;
+			myDataType = theDataType;
+		}
+
+		@Override
+		public Comparable apply(IHfqlExecutionResult.Row theRow) {
+			Comparable retVal = (Comparable) theRow.getRowValues().get(myColumnIndex);
+			switch (myDataType) {
+				case STRING:
+				case TIME:
+					retVal = defaultIfNull(retVal, "");
+					break;
+				case LONGINT:
+				case INTEGER:
+					if (retVal instanceof Long) {
+						return retVal;
+					} else if (retVal == null) {
+						retVal = Long.MIN_VALUE;
+					} else {
+						retVal = Long.parseLong((String)retVal);
+					}
+					break;
+				case BOOLEAN:
+					if (retVal == null) {
+						retVal = Boolean.FALSE;
+					} else {
+						retVal = Boolean.parseBoolean((String)retVal);
+					}
+					break;
+				case DATE:
+				case TIMESTAMP:
+					if (retVal == null) {
+						retVal = new Date(Long.MIN_VALUE);
+					} else {
+						retVal = new DateTimeType((String) retVal).getValue();
+					}
+					break;
+				case DECIMAL:
+					if (retVal == null) {
+						retVal = BigDecimal.valueOf(Long.MIN_VALUE);
+					} else {
+						retVal = new BigDecimal((String)retVal);
+					}
+					break;
+			}
+			return retVal;
+		}
 	}
 
 	private static class GroupByKey {

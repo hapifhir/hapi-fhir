@@ -67,3 +67,19 @@ SELECT COUNT(*), name.family
 FROM Patient
 GROUP BY name.family
 ```
+
+# Ordering Results
+
+The SQL _ORDER BY_ keywords can be used to suggest a specific order for the search results.
+
+Note that ordering will currently only work on statements that return 10,000 rows or less. This limitation may be removed in a future release.
+
+The following statement searches for Patients with a family name of _Simpson_, counts the frequencies of their first names, and orders by the most frequent names.
+
+```sql
+select name.given, count(*)
+from Patient
+search family = 'Simpson'
+group by name.given
+order by count(*) desc
+```

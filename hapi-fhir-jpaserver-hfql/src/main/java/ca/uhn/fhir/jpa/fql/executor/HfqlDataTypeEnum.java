@@ -24,7 +24,6 @@ import java.sql.Date;
 import java.sql.Types;
 
 public enum HfqlDataTypeEnum {
-	// FIXME: add tests for all of these
 	STRING(Types.VARCHAR, String.class),
 	INTEGER(Types.INTEGER, Integer.class),
 	BOOLEAN(Types.BOOLEAN, Boolean.class),

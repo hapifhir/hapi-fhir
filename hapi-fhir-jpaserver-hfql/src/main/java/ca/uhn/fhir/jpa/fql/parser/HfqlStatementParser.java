@@ -28,9 +28,29 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class HfqlStatementParser {
 
+	public static final String KEYWORD_AND = "AND";
+	public static final String KEYWORD_WHERE = "WHERE";
+	public static final String KEYWORD_SEARCH = "SEARCH";
+	public static final String KEYWORD_SELECT = "SELECT";
+	public static final String KEYWORD_FROM = "FROM";
+	public static final String KEYWORD_LIMIT = "LIMIT";
+	public static final String KEYWORD_GROUP = "GROUP";
+	public static final String KEYWORD_ORDER = "ORDER";
+	public static final String KEYWORD_TRUE = "TRUE";
+	public static final String KEYWORD_FALSE = "FALSE";
+	private static final Set<String> DIRECTIVE_KEYWORDS = Set.of(
+		KEYWORD_FROM,
+		KEYWORD_GROUP,
+		KEYWORD_LIMIT,
+		KEYWORD_ORDER,
+		KEYWORD_SEARCH,
+		KEYWORD_SELECT,
+		KEYWORD_WHERE
+	);
 	private final HfqlLexer myLexer;
 	private final FhirContext myFhirContext;
 	private BaseState myState;
@@ -56,11 +76,11 @@ public class HfqlStatementParser {
 		}
 
 		if (StringUtils.isBlank(myStatement.getFromResourceName())) {
-			throw newExceptionUnexpectedTokenExpectToken(null, "FROM");
+			throw newExceptionUnexpectedTokenExpectToken(null, KEYWORD_FROM);
 		}
 
 		if (myStatement.getSelectClauses().isEmpty()) {
-			throw newExceptionUnexpectedTokenExpectToken(null, "SELECT");
+			throw newExceptionUnexpectedTokenExpectToken(null, KEYWORD_SELECT);
 		}
 
 		return myStatement;
@@ -72,7 +92,7 @@ public class HfqlStatementParser {
 		if (!myLexer.hasNextToken(theOptions)) {
 			throw newExceptionUnexpectedToken(null);
 		}
-		return myLexer.getNextToken();
+		return myLexer.getNextToken(theOptions);
 	}
 
 	@Nonnull
@@ -196,7 +216,7 @@ public class HfqlStatementParser {
 		@Override
 		void consume(HfqlLexerToken theToken) {
 			if (theToken.getToken().equals(":")) {
-				HfqlLexerToken nextToken = getNextTokenRequired(getLexerOptions());
+				HfqlLexerToken nextToken = getNextTokenRequired(HfqlLexerOptions.FHIRPATH_EXPRESSION);
 				String clause = nextToken.asString();
 				String alias = mySelectClause.getClause();
 				mySelectClause.setAlias(alias);
@@ -228,15 +248,37 @@ public class HfqlStatementParser {
 
 		@Override
 		void consume(HfqlLexerToken theToken) {
-			HfqlStatement.WhereClause whereClause;
 			if (myWhereMode == WhereModeEnum.SEARCH) {
-				whereClause = myStatement.addSearchClause();
+				HfqlStatement.WhereClause whereClause = myStatement.addSearchClause();
+				String token = theToken.getToken();
+				whereClause.setLeft(token);
+				myState = new StateInWhereAfterLeft(myWhereMode, whereClause);
 			} else {
-				whereClause = myStatement.addWhereClause();
+				assert myWhereMode == WhereModeEnum.WHERE;
+
+				StringBuilder token = new StringBuilder(theToken.getToken());
+				while (myLexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION)) {
+					HfqlLexerToken nextToken = myLexer.peekNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION);
+					String nextTokenAsKeyword = nextToken.asKeyword();
+					if (KEYWORD_AND.equals(nextTokenAsKeyword) || DIRECTIVE_KEYWORDS.contains(nextTokenAsKeyword)) {
+						break;
+					}
+					if ("=".equals(nextTokenAsKeyword) || "IN".equals(nextTokenAsKeyword)) {
+						HfqlStatement.WhereClause whereClause = myStatement.addWhereClause();
+						whereClause.setLeft(token.toString());
+						myState = new StateInWhereAfterLeft(myWhereMode, whereClause);
+						return;
+					}
+
+					myLexer.consumeNextToken();
+					token.append(' ').append(nextToken.getToken());
+				}
+
+				HfqlStatement.WhereClause whereClause = myStatement.addWhereClause();
+				whereClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
+				whereClause.setLeft(token.toString());
+				myState = new StateAfterWhere(myWhereMode);
 			}
-			String token = theToken.getToken();
-			whereClause.setLeft(token);
-			myState = new StateInWhereAfterLeft(myWhereMode, whereClause);
 		}
 	}
 
@@ -281,7 +323,7 @@ public class HfqlStatementParser {
 		void consume(HfqlLexerToken theToken) {
 			String token = theToken.getToken();
 			String keyword = theToken.asKeyword();
-			if ("TRUE".equals(keyword) || "FALSE".equals(keyword)) {
+			if (KEYWORD_TRUE.equals(keyword) || KEYWORD_FALSE.equals(keyword)) {
 				token = keyword.toLowerCase(Locale.US);
 			} else if (!theToken.isQuotedString()) {
 				throw newExceptionUnexpectedTokenExpectDescription(theToken, "quoted string");
@@ -333,7 +375,7 @@ public class HfqlStatementParser {
 		@Override
 		void consume(HfqlLexerToken theToken) {
 			String keyword = theToken.asKeyword();
-			if (keyword.equals("AND")) {
+			if (keyword.equals(KEYWORD_AND)) {
 				myState = new StateInWhereInitial(myWhereMode);
 			} else {
 				super.consume(theToken);
@@ -358,32 +400,44 @@ public class HfqlStatementParser {
 		void consume(HfqlLexerToken theToken) {
 			String keyword = theToken.asKeyword();
 			switch (keyword) {
-				case "WHERE":
+				/*
+				 * Update DIRECTIVE_KEYWORDS if you add new
+				 * keywords here!
+				 */
+				case KEYWORD_WHERE:
 					validateNotPresent(myStatement.getWhereClauses(), theToken);
 					myState = new StateInWhereInitial(WhereModeEnum.WHERE);
 					break;
-				case "SEARCH":
+				case KEYWORD_SEARCH:
 					validateNotPresent(myStatement.getSearchClauses(), theToken);
 					myState = new StateInWhereInitial(WhereModeEnum.SEARCH);
 					break;
-				case "SELECT":
+				case KEYWORD_SELECT:
 					validateNotPresent(myStatement.getSelectClauses(), theToken);
 					myState = new StateInSelect();
 					break;
-				case "FROM":
+				case KEYWORD_FROM:
 					validateNotPresent(myStatement.getFromResourceName(), theToken);
 					myState = new StateFromStart();
 					break;
-				case "LIMIT":
+				case KEYWORD_LIMIT:
 					validateNotPresent(myStatement.getLimit(), theToken);
 					myState = new LimitState();
 					break;
-				case "GROUP":
+				case KEYWORD_GROUP:
 					validateNotPresent(myStatement.getGroupByClauses(), theToken);
 					myState = new StateGroup();
 					break;
+				case KEYWORD_ORDER:
+					validateNotPresent(myStatement.getOrderByClauses(), theToken);
+					myState = new OrderState();
+					break;
 				default:
-					throw newExceptionUnexpectedTokenExpectToken(theToken, "SELECT");
+					if (myStatement.getSearchClauses().isEmpty()) {
+						throw newExceptionUnexpectedTokenExpectToken(theToken, KEYWORD_SELECT);
+					} else {
+						throw newExceptionUnexpectedToken(theToken);
+					}
 			}
 		}
 
@@ -415,6 +469,53 @@ public class HfqlStatementParser {
 
 	private class StateAfterGroupBy extends BaseRootState {
 		// nothing
+	}
+
+	private class OrderState extends BaseState {
+		@Override
+		void consume(HfqlLexerToken theToken) {
+			if (!"BY".equals(theToken.asKeyword())) {
+				throw newExceptionUnexpectedTokenExpectToken(theToken, "BY");
+			}
+
+			myState = new OrderByState();
+		}
+	}
+
+	private class OrderByState extends BaseState {
+
+		@Nonnull
+		@Override
+		public HfqlLexerOptions getLexerOptions() {
+			return HfqlLexerOptions.FHIRPATH_EXPRESSION;
+		}
+
+		@Override
+		void consume(HfqlLexerToken theToken) {
+			HfqlStatement.OrderByClause clause = myStatement.addOrderByClause(theToken.getToken(), true);
+			myState = new OrderByAfterState(clause);
+		}
+	}
+
+	private class OrderByAfterState extends BaseRootState {
+		private final HfqlStatement.OrderByClause myClause;
+
+		public OrderByAfterState(HfqlStatement.OrderByClause theClause) {
+			myClause = theClause;
+		}
+
+		@Override
+		void consume(HfqlLexerToken theToken) {
+			if ("ASC".equals(theToken.asKeyword())) {
+				myClause.setAscending(true);
+			} else if ("DESC".equals(theToken.asKeyword())) {
+				myClause.setAscending(false);
+			} else if (",".equals(theToken.getToken())) {
+				myState = new OrderByState();
+			} else {
+				super.consume(theToken);
+			}
+		}
 	}
 
 	private abstract static class BaseState {

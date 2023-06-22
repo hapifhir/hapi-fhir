@@ -6,10 +6,15 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import java.util.stream.Collectors;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @SuppressWarnings("SqlDialectInspection")
@@ -93,6 +98,76 @@ public class HfqlStatementParserTest {
 		assertEquals("name.given[0]", statement.getSelectClauses().get(0).getAlias());
 		assertEquals("name.family", statement.getSelectClauses().get(1).getClause());
 		assertEquals("name.family", statement.getSelectClauses().get(1).getAlias());
+	}
+
+	@Test
+	public void testSelectComplexFhirPath_StringConcat() {
+		String input = """
+					SELECT FullName: Patient.name.given + ' ' + Patient.name.family
+					FROM Patient
+			""";
+
+		HfqlStatement statement = parse(input);
+		assertEquals("Patient", statement.getFromResourceName());
+		assertEquals(1, statement.getSelectClauses().size());
+		assertEquals("Patient.name.given + ' ' + Patient.name.family", statement.getSelectClauses().get(0).getClause());
+		assertEquals("FullName", statement.getSelectClauses().get(0).getAlias());
+
+	}
+
+
+	@Test
+	public void testSelectWhere_GreaterThan() {
+		String input = """
+					select id
+					from Observation
+					where
+					   value.ofType(Quantity).value > 100
+			""";
+
+		HfqlStatement statement = parse(input);
+		assertEquals(1, statement.getWhereClauses().size());
+		assertEquals("value.ofType(Quantity).value > 100", statement.getWhereClauses().get(0).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN, statement.getWhereClauses().get(0).getOperator());
+		assertEquals(0, statement.getWhereClauses().get(0).getRight().size());
+	}
+
+	@Test
+	public void testSelectOrderBy() {
+		String input = """
+					select id, name.family
+					from Observation
+					order by name.family, count(*)
+			""";
+
+		HfqlStatement statement = parse(input);
+		assertThat(statement.getSelectClauses().stream().map(t->t.getAlias()).collect(Collectors.toList()), contains(
+			"id", "name.family"
+		));
+		assertEquals(2, statement.getOrderByClauses().size());
+		assertEquals("name.family", statement.getOrderByClauses().get(0).getClause());
+		assertTrue(statement.getOrderByClauses().get(0).isAscending());
+		assertEquals("count(*)", statement.getOrderByClauses().get(1).getClause());
+		assertTrue(statement.getOrderByClauses().get(1).isAscending());
+	}
+
+	@Test
+	public void testSelectOrderBy_Directional() {
+		String input = """
+					select id, name.family
+					from Observation
+					order by name.family DESC, id ASC
+			""";
+
+		HfqlStatement statement = parse(input);
+		assertThat(statement.getSelectClauses().stream().map(t->t.getAlias()).collect(Collectors.toList()), contains(
+			"id", "name.family"
+		));
+		assertEquals(2, statement.getOrderByClauses().size());
+		assertEquals("name.family", statement.getOrderByClauses().get(0).getClause());
+		assertFalse(statement.getOrderByClauses().get(0).isAscending());
+		assertEquals("id", statement.getOrderByClauses().get(1).getClause());
+		assertTrue(statement.getOrderByClauses().get(1).isAscending());
 	}
 
 	private HfqlStatement parse(String theInput) {
@@ -212,6 +287,26 @@ public class HfqlStatementParserTest {
 	}
 
 	@Test
+	public void testNamedSelectClauseWithFhirPath() {
+		String input = """
+			select
+			   Weight: value.ofType(Quantity).value,
+			   Unit: value.ofType(Quantity).unit
+			from Observation
+			""";
+
+		HfqlStatement statement = parse(input);
+		assertEquals("Observation", statement.getFromResourceName());
+		assertEquals(2, statement.getSelectClauses().size());
+		assertEquals("value.ofType(Quantity).value", statement.getSelectClauses().get(0).getClause());
+		assertEquals("Weight", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("value.ofType(Quantity).unit", statement.getSelectClauses().get(1).getClause());
+		assertEquals("Unit", statement.getSelectClauses().get(1).getAlias());
+
+	}
+
+
+	@Test
 	public void testFromWhereSelect_InClauseAndNamedSelects() {
 		// One select with spaces, one without
 		String input = """
@@ -245,6 +340,17 @@ public class HfqlStatementParserTest {
 			blah""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
 		assertEquals("Unexpected token (expected \"SELECT\") at position [line=0, column=0]: blah", ex.getMessage());
+	}
+
+	@Test
+	public void testError_InvalidOrder() {
+		String input = """
+   		select id
+   		from Patient
+   		order foo
+   		""";
+		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
+		assertEquals("Unexpected token (expected \"BY\") at position [line=2, column=6]: foo", ex.getMessage());
 	}
 
 	@Test
@@ -287,7 +393,7 @@ public class HfqlStatementParserTest {
 				  name.given in 'Foo'
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertEquals("Unexpected token (expected \"(\") at position [line=3, column=14]: in", ex.getMessage());
+		assertEquals("Unexpected token (expected \"(\") at position [line=3, column=16]: in", ex.getMessage());
 	}
 
 	@Test
@@ -299,7 +405,7 @@ public class HfqlStatementParserTest {
 				  name.given in ('foo' 'bar')
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertEquals("Unexpected token at position [line=3, column=22]: 'bar'", ex.getMessage());
+		assertEquals("Unexpected token at position [line=3, column=24]: 'bar'", ex.getMessage());
 	}
 
 	@Test

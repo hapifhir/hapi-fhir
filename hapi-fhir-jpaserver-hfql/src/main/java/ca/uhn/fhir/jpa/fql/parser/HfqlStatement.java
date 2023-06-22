@@ -32,18 +32,21 @@ import java.util.List;
 
 public class HfqlStatement implements IModelJson {
 
-	@JsonProperty("selectClauses")
+	@JsonProperty("select")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<SelectClause> mySelectClauses = new ArrayList<>();
-	@JsonProperty("whereClauses")
+	@JsonProperty("where")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<WhereClause> myWhereClauses = new ArrayList<>();
-	@JsonProperty("searchClauses")
+	@JsonProperty("search")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<WhereClause> mySearchClauses = new ArrayList<>();
-	@JsonProperty("groupByClauses")
+	@JsonProperty("groupBy")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<String> myGroupByClauses = new ArrayList<>();
+	@JsonProperty("orderBy")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private List<OrderByClause> myOrderByClauses = new ArrayList<>();
 	@JsonProperty("fromResourceName")
 	private String myFromResourceName;
 	@JsonProperty("limit")
@@ -106,11 +109,18 @@ public class HfqlStatement implements IModelJson {
 		myLimit = theLimit;
 	}
 
-	public void addWhereClause(String theLeft, WhereClauseOperatorEnum theOperator, String theRight) {
+	public WhereClause addWhereClause(String theLeft, WhereClauseOperatorEnum theOperator, String theRight) {
+		WhereClause clause = addWhereClause(theLeft, theOperator);
+		clause.addRight(theRight);
+		return clause;
+	}
+
+	@Nonnull
+	public WhereClause addWhereClause(String theLeft, WhereClauseOperatorEnum theOperator) {
 		WhereClause clause = addWhereClause();
 		clause.setLeft(theLeft);
 		clause.setOperator(theOperator);
-		clause.addRight(theRight);
+		return clause;
 	}
 
 	public void addGroupByClause(String theGroupByClause) {
@@ -129,15 +139,65 @@ public class HfqlStatement implements IModelJson {
 		return getSelectClauses().stream().anyMatch(t -> t.getOperator() == SelectClauseOperator.COUNT);
 	}
 
+	public OrderByClause addOrderByClause(String theClause, boolean theAscending) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theClause, "theClause must not be null or blank");
+		OrderByClause clause = new OrderByClause();
+		clause.setClause(theClause);
+		clause.setAscending(theAscending);
+		getOrderByClauses().add(clause);
+		return clause;
+	}
+
+	public List<OrderByClause> getOrderByClauses() {
+		if (myOrderByClauses == null) {
+			myGroupByClauses = new ArrayList<>();
+		}
+		return myOrderByClauses;
+	}
+
+	public int findSelectClauseIndex(String theClause) {
+		for (int i = 0; i < getSelectClauses().size(); i++) {
+			if (theClause.equals(getSelectClauses().get(i).getClause()) || theClause.equals(getSelectClauses().get(i).getAlias())) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	public enum WhereClauseOperatorEnum {
 		EQUALS,
-		IN
+		UNARY_BOOLEAN, IN
 	}
 
 	public enum SelectClauseOperator {
 
 		SELECT,
 		COUNT
+
+	}
+
+	public class OrderByClause implements IModelJson {
+
+		@JsonProperty("clause")
+		private String myClause;
+		@JsonProperty("ascending")
+		private boolean myAscending;
+
+		public String getClause() {
+			return myClause;
+		}
+
+		public void setClause(String theClause) {
+			myClause = theClause;
+		}
+
+		public boolean isAscending() {
+			return myAscending;
+		}
+
+		public void setAscending(boolean theAscending) {
+			myAscending = theAscending;
+		}
 
 	}
 

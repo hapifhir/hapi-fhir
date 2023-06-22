@@ -46,3 +46,27 @@ A _WHERE_ clause uses a [FHIRPath Expression](https://smilecdr.com/docs/fhir_sta
 
 _WHERE_ clauses have the advantage that they are not limited to existing SearchParameter indexes. However, they have the disadvantage that they need to load every candidate resource in order to apply FHIRPath tests to it. This means that using _WHERE_ will often be **much slower** than using _SEARCH_ clauses. If at all possible, you should use _SEARCH_ clauses first and then add additional _SELECT_ clauses to further refine your criteria.
 
+The following example shows a search for all cardiology note Observations (LOINC code 29463-7) where the string "running" appears anywhere in the text of the note.
+
+```sql
+SELECT id
+FROM Observation
+SEARCH code = 'http://loinc.org|34752-6'
+WHERE
+   value.ofType(string).lower().contains('running')
+```
+
+FHIRPath expressions can contain comparisons too. The following example shows a search for any weight assessment Observations (LOINC code 29463-7) with a value below 10 kg.
+
+```sql
+SELECT
+   id,
+   value.ofType(Quantity).value,
+   value.ofType(Quantity).system,
+   value.ofType(Quantity).code
+FROM Observation
+SEARCH
+   code = 'http://loinc.org|29463-7'
+WHERE
+   value.ofType(Quantity).value < 10
+```

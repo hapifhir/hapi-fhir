@@ -100,7 +100,7 @@ public class HfqlRestProviderTest {
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			String expected = """
 				1,HAPI FHIR THE-VERSION
-				my-search-id,999,"{""selectClauses"":[{""clause"":""name.family"",""alias"":""name.family"",""operator"":""SELECT""}],""fromResourceName"":""Patient""}"
+				my-search-id,999,"{""select"":[{""clause"":""name.family"",""alias"":""name.family"",""operator"":""SELECT""}],""fromResourceName"":""Patient""}"
 				"",name.family,name.given
 				"",STRING,STRING
 				0,Simpson,Homer

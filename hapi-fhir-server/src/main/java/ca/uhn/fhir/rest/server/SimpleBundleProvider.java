@@ -26,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -59,6 +60,15 @@ public class SimpleBundleProvider implements IBundleProvider {
 	 */
 	public SimpleBundleProvider(List<? extends IBaseResource> theList) {
 		this(theList, null);
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @since 6.8.0
+	 */
+	public SimpleBundleProvider(IBaseResource... theList) {
+		this(Arrays.asList(theList), null);
 	}
 
 	public SimpleBundleProvider(List<? extends IBaseResource> theList, String theUuid) {
