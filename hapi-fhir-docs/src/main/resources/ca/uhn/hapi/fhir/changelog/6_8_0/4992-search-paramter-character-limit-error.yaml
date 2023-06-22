@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4992
+title: "Previously, when searching on a resource identifier or similar search field with over 200 characters, a HAPI-1238 error would be returned.
+        This has been fixed."

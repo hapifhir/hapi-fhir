@@ -63,7 +63,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.Base;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -91,7 +90,6 @@ import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
@@ -1475,11 +1473,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		String value = theValue;
 		ResourceIndexedSearchParamToken nextEntity = null;
 		if (isNotBlank(system) || isNotBlank(value)) {
-			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				system = system.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
+			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH_SYSTEM) {
+				system = system.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH_SYSTEM);
 			}
-			if (value != null && value.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				value = value.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
+			if (value != null && value.length() > ResourceIndexedSearchParamToken.MAX_LENGTH_VALUE) {
+				value = value.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH_VALUE);
 			}
 
 			nextEntity = new ResourceIndexedSearchParamToken(myPartitionSettings, theResourceType, searchParamName, system, value);

@@ -277,6 +277,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("CONCEPT_MAP_GRP_ELM_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		{
+			version.onTable("HFJ_SPIDX_TOKEN")
+				.modifyColumn("20230615.1", "SP_VALUE")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, ResourceIndexedSearchParamToken.MAX_LENGTH_VALUE);
+		}
 	}
 
 	protected void init660() {
