@@ -97,6 +97,9 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex);
 
 	// TODO:  LD:  implement this on Mongo in another ticket
+
+	Stream<JobInstance> findAllWithStream();
+
 	default List<JobInstance> fetchInstancesAfterUpdateTime(Date theUpdateTime, Pageable thePageable) {
 		// TODO: come up with a better HAPI code later
 		throw new UnsupportedOperationException(Msg.code(9999));

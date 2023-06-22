@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -30,6 +31,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobInstanceEntity, String>, IHapiFhirJpaRepository {
 
@@ -95,4 +97,7 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId")
 	List<Batch2JobInstanceEntity> findInstancesByJobDefinitionId(@Param("jobDefinitionId") String theJobDefinitionId, Pageable thePageRequest);
+
+	@Query("SELECT e FROM Batch2JobInstanceEntity e")
+	Stream<Batch2JobInstanceEntity> streamAll();
 }
