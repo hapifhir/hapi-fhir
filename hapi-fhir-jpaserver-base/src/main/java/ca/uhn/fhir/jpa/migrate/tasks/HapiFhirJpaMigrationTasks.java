@@ -162,13 +162,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.onTable("BT2_WORK_CHUNK")
 			.addColumn("20230524.1", "WARNING_MSG")
 			.nullable()
-			.type(ColumnTypeEnum.CLOB);
+			.type(ColumnTypeEnum.CLOB)
+			.doNothing(); // the migration below is the better implementation
 
 		version
 			.onTable("BT2_JOB_INSTANCE")
 			.addColumn("20230524.2", "WARNING_MSG")
 			.nullable()
-			.type(ColumnTypeEnum.CLOB);
+			.type(ColumnTypeEnum.CLOB)
+			.doNothing(); // the migration below is the better implementation
 
 		// adding indexes to foreign keys
 		// this makes our table scans more efficient,
@@ -278,10 +280,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("CONCEPT_MAP_GRP_ELM_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
-		// have to drop the column first, orcacle doesn't play well with converting clobs to varchar
+		// add warning message to batch job instance using limited varchar column to store
 		version
 			.onTable("BT2_WORK_CHUNK")
-			.dropColumn("20230622.1", "WARNING_MSG");
+			.dropColumn("20230622.1", "WARNING_MSG")
+			.failureAllowed();
 
 		version
 			.onTable("BT2_WORK_CHUNK")
@@ -291,7 +294,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version
 			.onTable("BT2_JOB_INSTANCE")
-			.dropColumn("20230622.3", "WARNING_MSG");
+			.dropColumn("20230622.3", "WARNING_MSG")
+			.failureAllowed();
 
 		version
 			.onTable("BT2_JOB_INSTANCE")
