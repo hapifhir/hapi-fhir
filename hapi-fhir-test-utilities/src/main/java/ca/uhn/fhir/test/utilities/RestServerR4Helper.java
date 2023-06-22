@@ -1,5 +1,3 @@
-package ca.uhn.fhir.test.utilities;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,12 +17,15 @@ package ca.uhn.fhir.test.utilities;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -62,12 +63,12 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 	protected final MyRestfulServer myRestServer;
 
 	public RestServerR4Helper() {
-		this(false);
+		this(false, false);
 	}
 
-	public RestServerR4Helper(boolean theInitialize) {
+	private RestServerR4Helper(boolean theInitialize, boolean theTransactionLatchEnabled) {
 		super(FhirContext.forR4Cached());
-		myRestServer = new MyRestfulServer(myFhirContext);
+		myRestServer = new MyRestfulServer(myFhirContext, theTransactionLatchEnabled);
 		if (theInitialize) {
 			try {
 				myRestServer.initialize();
@@ -75,6 +76,14 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 				throw new RuntimeException(Msg.code(2110) + "Failed to initialize server", e);
 			}
 		}
+	}
+
+	public static RestServerR4Helper newWithTransactionLatch() {
+		return new RestServerR4Helper(false, true);
+	}
+
+	public static RestServerR4Helper newInitialized() {
+		return new RestServerR4Helper(true, false);
 	}
 
 	@Override
@@ -253,6 +262,14 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		myRestServer.setServerAddressStrategy(theServerAddressStrategy);
 	}
 
+	public void executeWithLatch(Runnable theRunnable) throws InterruptedException {
+		myRestServer.executeWithLatch(theRunnable);
+	}
+
+	public void setHttpMethodForPagingRequest(PagingHttpMethodEnum thePagingHttpMethod) {
+		myRestServer.setHttpMethodForPagingRequest(thePagingHttpMethod);
+	}
+
 	private static class MyRestfulServer extends RestfulServer {
 		private final List<String> myRequestUrls = Collections.synchronizedList(new ArrayList<>());
 		private final List<String> myRequestVerbs = Collections.synchronizedList(new ArrayList<>());
@@ -264,12 +281,34 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
 		private RestServerDstu3Helper.MyPlainProvider myPlainProvider;
 
-		public MyRestfulServer(FhirContext theFhirContext) {
+		private final boolean myInitialTransactionLatchEnabled;
+
+		private PagingHttpMethodEnum myPagingHttpMethod = PagingHttpMethodEnum.GET;
+
+		public MyRestfulServer(FhirContext theFhirContext, boolean theInitialTransactionLatchEnabled) {
 			super(theFhirContext);
+			myInitialTransactionLatchEnabled = theInitialTransactionLatchEnabled;
 		}
 
 		public RestServerDstu3Helper.MyPlainProvider getPlainProvider() {
 			return myPlainProvider;
+		}
+
+		public void setHttpMethodForPagingRequest(PagingHttpMethodEnum thePagingHttpMethod) {
+			myPagingHttpMethod = thePagingHttpMethod;
+		}
+
+		@Override
+		protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			// emulate a GET request invocation in the case of a POST paging request, as POST paging is not supported by FHIR RestServer
+			RequestTypeEnum requestType = myPagingHttpMethod == PagingHttpMethodEnum.POST ? RequestTypeEnum.GET : RequestTypeEnum.POST;
+			super.handleRequest(requestType, request, response);
+		}
+
+		public void executeWithLatch(Runnable theRunnable) throws InterruptedException {
+			myPlainProvider.setExpectedCount(1);
+			theRunnable.run();
+			myPlainProvider.awaitExpected();
 		}
 
 		public void setFailNextPut(boolean theFailNextPut) {

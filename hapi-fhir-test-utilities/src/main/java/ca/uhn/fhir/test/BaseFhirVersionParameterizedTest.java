@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 public abstract class BaseFhirVersionParameterizedTest {
 
 	@RegisterExtension
-	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
+	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper();
 	@RegisterExtension
 	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
 	@RegisterExtension
