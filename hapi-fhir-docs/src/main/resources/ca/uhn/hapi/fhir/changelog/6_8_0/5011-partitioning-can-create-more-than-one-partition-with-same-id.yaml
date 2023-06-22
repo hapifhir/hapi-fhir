@@ -1,5 +1,5 @@
 ---
 type: fix
 issue: 5011
-title: "Previously, if a partition was created with an ID that was alrady in use, it would overwite the partition that 
+title: "Previously, if a partition was created with an ID that was already in use, it would overwrite the partition that 
  was using that ID. Now attempting to overwrite will return a 400"
