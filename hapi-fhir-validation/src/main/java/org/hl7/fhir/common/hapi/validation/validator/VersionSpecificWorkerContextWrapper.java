@@ -51,12 +51,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
+	private static final Lock generateSnapshotLock = new ReentrantLock();
 	private final ValidationSupportContext myValidationSupportContext;
 	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
@@ -93,7 +96,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				StructureDefinition canonicalSd = (StructureDefinition) canonical;
 				if (canonicalSd.getSnapshot().isEmpty()) {
 					ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
-					fetched = myValidationSupportContext.getRootValidationSupport().generateSnapshot(theValidationSupportContext, fetched, "", null, "");
+					generateSnapshotLock.lock();
+					try {
+						fetched = myValidationSupportContext.getRootValidationSupport().generateSnapshot(theValidationSupportContext, fetched, "", null, "");
+					} finally {
+						generateSnapshotLock.unlock();
+					}
 					Validate.isTrue(fetched != null, "StructureDefinition %s has no snapshot, and no snapshot generator is configured", key.getUri());
 					canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
 				}
