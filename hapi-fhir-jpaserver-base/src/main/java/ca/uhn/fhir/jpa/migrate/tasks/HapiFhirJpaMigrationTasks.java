@@ -277,6 +277,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("CONCEPT_MAP_GRP_ELM_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		version
+			.onTable("BT2_WORK_CHUNK")
+			.modifyColumn("20230622.1", "WARNING_MSG")
+			.nullable()
+			.withType(ColumnTypeEnum.STRING, 4000);
+
+		version
+			.onTable("BT2_JOB_INSTANCE")
+			.modifyColumn("20230622.2", "WARNING_MSG")
+			.nullable()
+			.withType(ColumnTypeEnum.STRING, 4000);
 	}
 
 	protected void init660() {
