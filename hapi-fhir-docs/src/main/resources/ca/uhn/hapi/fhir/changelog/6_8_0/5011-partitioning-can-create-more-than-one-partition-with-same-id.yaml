@@ -1,4 +1,5 @@
 ---
 type: fix
 issue: 5011
-title: "Fixed bug that allowed creation of two partitions with the same id"
+title: "Previously, if a partition was created with an ID that was alrady in use, it would overwite the partition that 
+ was using that ID. Now attempting to overwrite will return a 400"
