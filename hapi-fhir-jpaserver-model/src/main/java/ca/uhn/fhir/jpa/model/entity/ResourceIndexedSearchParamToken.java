@@ -374,7 +374,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@PrePersist
 	public void truncateValueTo200Chars() {
-		mySystem = StringUtils.truncate(mySystem, 200);
-		myValue = StringUtils.truncate(myValue, 200);
+		mySystem = StringUtils.truncate(mySystem, MAX_LENGTH);
+		myValue = StringUtils.truncate(myValue, MAX_LENGTH);
 	}
 }
