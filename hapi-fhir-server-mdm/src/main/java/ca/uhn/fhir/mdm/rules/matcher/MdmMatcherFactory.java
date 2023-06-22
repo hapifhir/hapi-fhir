@@ -21,7 +21,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
-import ca.uhn.fhir.jpa.nickname.NicknameSvc;
+import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.EmptyFieldMatcher;
@@ -45,12 +45,12 @@ public class MdmMatcherFactory implements IMatcherFactory {
 	private final FhirContext myFhirContext;
 	private final IMdmSettings myMdmSettings;
 
-	private final NicknameSvc myNicknameSvc;
+	private final INicknameSvc myNicknameSvc;
 
 	public MdmMatcherFactory(
 		FhirContext theFhirContext,
 		IMdmSettings theSettings,
-		NicknameSvc theNicknameSvc
+		INicknameSvc theNicknameSvc
 	) {
 		myFhirContext = theFhirContext;
 		myMdmSettings = theSettings;

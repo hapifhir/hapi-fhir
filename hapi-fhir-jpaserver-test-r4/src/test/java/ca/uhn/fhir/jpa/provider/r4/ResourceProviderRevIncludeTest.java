@@ -3,34 +3,30 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CareTeam;
-import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DetectedIssue;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.context.jdbc.Sql;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
@@ -97,19 +93,85 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-		Patient patient = (Patient) foundResources.get(0);
-		Group group = (Group) foundResources.get(1);
-		CareTeam careTeam = (CareTeam) foundResources.get(2);
-		DetectedIssue detectedIssue = (DetectedIssue) foundResources.get(3);
+		Patient patient = null;
+		boolean patientFound = false;
+		boolean groupFound = false;
+		boolean careTeamFound = false;
+		boolean detectedIssueFound = false;
+		for (IBaseResource foundResource : foundResources) {
+			String type = foundResource.getIdElement().getResourceType();
+			switch (type) {
+				case "Patient":
+					if (foundResource.getIdElement().getIdPart().equals(pid.getIdPart())) {
+						patientFound = true;
+						patient = (Patient) foundResource;
+					}
+					break;
+				case "Group":
+					if (foundResource.getIdElement().getIdPart().equals(gid.getIdPart())) {
+						groupFound = true;
+					}
+					break;
+				case "CareTeam":
+					if (foundResource.getIdElement().getIdPart().equals(ctid.getIdPart())) {
+						careTeamFound = true;
+					}
+					break;
+				case "DetectedIssue":
+					if (dids.contains(foundResource.getIdElement())) {
+						detectedIssueFound = true;
+					}
+					break;
+				default:
+					ourLog.warn(type + " found but not expected");
+			}
+
+			if (patientFound && groupFound && careTeamFound && detectedIssueFound) {
+				break;
+			}
+		}
+
+		assertTrue(patientFound);
+		assertTrue(groupFound);
+		assertTrue(careTeamFound);
+		assertNotNull(patient);
 		assertEquals(pid.getIdPart(), patient.getIdElement().getIdPart());
-		assertEquals(gid.getIdPart(), group.getIdElement().getIdPart());
-		assertEquals(ctid.getIdPart(), careTeam.getIdElement().getIdPart());
 		assertEquals(methodName, patient.getName().get(0).getFamily());
 
 		//Ensure that the revincludes are included in the query list of the sql trace.
 		//TODO GGG/KHS reduce this to something less than 6 by smarter iterating and getting the resource types earlier when needed.
 		assertEquals(6, sqlCapturingInterceptor.getQueryList().size());
 		myInterceptorRegistry.unregisterInterceptor(sqlCapturingInterceptor);
+	}
+
+	@Test
+	public void includeRevInclude() {
+		Practitioner practitioner = new Practitioner();
+		practitioner.addName().setFamily("testIncludeRevInclude");
+		IIdType practitionerId = myClient.create().resource(practitioner).execute().getId().toUnqualifiedVersionless();
+
+		DetectedIssue detectedIssue = new DetectedIssue();
+		detectedIssue.getAuthor().setReferenceElement(practitionerId);
+		IIdType detectedIssueId = myClient.create().resource(detectedIssue).execute().getId().toUnqualifiedVersionless();
+
+		PractitionerRole practitionerRole = new PractitionerRole();
+		practitionerRole.getPractitioner().setReferenceElement(practitionerId);
+		IIdType practitionerRoleId = myClient.create().resource(practitionerRole).execute().getId().toUnqualifiedVersionless();
+
+		// DetectedIssue?_id=123&_include=DetectedIssue:author&_revinclude=PractitionerRole:practitioner
+		Bundle bundle = myClient.search()
+			.forResource(DetectedIssue.class)
+			.where(DetectedIssue.RES_ID.exactly().codes(detectedIssueId.getIdPart()))
+			.include(new Include("DetectedIssue:author"))
+			.revInclude(new Include("PractitionerRole:practitioner").setRecurse(true))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
+		assertEquals(3, foundResources.size());
+		assertEquals(detectedIssueId.getIdPart(), foundResources.get(0).getIdElement().getIdPart());
+		assertEquals(practitionerId.getIdPart(), foundResources.get(1).getIdElement().getIdPart());
+		assertEquals(practitionerRoleId.getIdPart(), foundResources.get(2).getIdElement().getIdPart());
 	}
 
 }

@@ -228,3 +228,7 @@ Chained sorting is more than twice as demanding of database performance.  They i
 In particular, this kind of sorting can be very slow if the search returns a large number of results (e.g. a search for Encounter?sort=patient.name where there is a very large number of Encounter resources and no additional search parameters are limiting the number of included resources).  They are safest when used in smaller collections, and as a secondary sort; as a tie-breaker within another sort.  E.g. `Encounter?practitioner=practitioner-id&date=2023-02&_sort=location,patient.name`.  
 
 In order to improve sorting performance when chained sorts are needed, an [Uplifted Refchain](#uplifted-refchains) can be defined on the SearchParameter. This index will be used for the sorting expression and can improve performance.
+
+# _include and _revinclude order
+
+By default, all _revincludes will be performed first and then all _includes are performed afterwards.  However, if any _revinclude parameters are modified with :iterate (or :recurse for earlier versions of FHIR) then all _include parameters will be evaluated first.

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
+import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NicknameMatcher;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class NicknameMatcherTest {
 	IMdmFieldMatcher matcher;
 
-	NicknameSvc myNicknameSvc = new NicknameSvc();
+	INicknameSvc myNicknameSvc = new NicknameSvc();
 
 	@BeforeEach
 	public void begin() {

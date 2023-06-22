@@ -52,6 +52,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -120,9 +121,23 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		myIdToPartitionCache.invalidateAll();
 	}
 
+	/**
+	 * Generate a random int which is guaranteed to  be unused by an existing partition.
+	 * @return an integer representing a partition ID that is not currently in use by the system.
+	 */
+	public int generateRandomUnusedPartitionId() {
+		int candidate = ThreadLocalRandom.current().nextInt();
+		Optional<PartitionEntity> partition = myPartitionDao.findById(candidate);
+		while (partition.isPresent()) {
+			candidate = ThreadLocalRandom.current().nextInt();
+			partition = myPartitionDao.findById(candidate);
+		}
+		return candidate;
+	}
 	@Override
 	@Transactional
 	public PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails) {
+
 		validateNotInUnnamedPartitionMode();
 		validateHaveValidPartitionIdAndName(thePartition);
 		validatePartitionNameDoesntAlreadyExist(thePartition.getName());
