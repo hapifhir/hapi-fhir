@@ -48,8 +48,6 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
-import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
-import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
@@ -69,10 +67,10 @@ import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
-import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
@@ -91,7 +89,9 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	IMdmSurvivorshipService mdmSurvivorshipService() { return new MdmSurvivorshipSvcImpl(); }
+	IMdmSurvivorshipService mdmSurvivorshipService() {
+		return new MdmSurvivorshipSvcImpl();
+	}
 
 	@Bean
 	MdmQueueConsumerLoader mdmQueueConsumerLoader(IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
@@ -107,6 +107,7 @@ public class MdmConsumerConfig {
 	MdmMessageKeySvc mdmMessageKeySvc() {
 		return new MdmMessageKeySvc();
 	}
+
 	@Bean
 	MdmMatchLinkSvc mdmMatchLinkSvc() {
 		return new MdmMatchLinkSvc();
@@ -203,15 +204,6 @@ public class MdmConsumerConfig {
 	@Bean
 	MdmCandidateSearchCriteriaBuilderSvc mdmCriteriaBuilderSvc() {
 		return new MdmCandidateSearchCriteriaBuilderSvc();
-	}
-
-	@Bean
-	MdmResourceMatcherSvc mdmResourceComparatorSvc(
-		FhirContext theFhirContext,
-		IMatcherFactory theIMatcherFactory,
-		IMdmSettings theMdmSettings
-	) {
-		return new MdmResourceMatcherSvc(theFhirContext, theIMatcherFactory, theMdmSettings);
 	}
 
 	@Bean
