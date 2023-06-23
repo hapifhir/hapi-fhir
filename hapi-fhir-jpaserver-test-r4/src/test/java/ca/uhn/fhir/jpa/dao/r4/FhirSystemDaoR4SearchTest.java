@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -19,11 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 
 	@Test
-	public void testSearchParameterIdentifierWithUnder200Chars() {
+	public void testSearchParameter_WithIdentifierValueUnder200Chars_ShouldSuccess() {
+		// setup
 		final String identifierValue = "identifierValue";
-
 		final Organization organization = new Organization();
-
 		final Identifier identifier = new Identifier();
 		identifier.setSystem("http://www.acme.org.au/units");
 		identifier.setValue(identifierValue);
@@ -50,41 +51,71 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchParameterIdentifierWithOver200Chars() {
-//		final String identifierValue = "Exclusive_Provider_Organization_(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)NICHOLAS_FITTANTE_ACT_FAMILY_ddddddddddddddddddddddddddddddd";
+	public void testSearchParameter_WithIdentifierValueUnder200Chars_ShouldHashBeforeTruncate() {
+		// setup
+		final int tokenMaxLength = ResourceIndexedSearchParamToken.MAX_LENGTH;
 		final String identifierValue = "Exclusive_Provider_Organization_(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)NICHOLAS_FITTANTE_ACT_FAMILY_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890";
+		final Identifier identifier = new Identifier().setSystem("http://www.acme.org.au/units").setValue(identifierValue);
+		final Organization organization = new Organization().addIdentifier(identifier);
 
-		final Organization organization = new Organization();
-
-		final Identifier identifier = new Identifier();
-		identifier.setSystem("http://www.acme.org.au/units");
-		identifier.setValue(identifierValue);
-		organization.addIdentifier(identifier);
-
+		// execute
 		myOrganizationDao.create(organization, mySrd);
 
-		final List<ResourceIndexedSearchParamToken> allSearchTokens = myResourceIndexedSearchParamTokenDao.findAll();
-		assertTrue(allSearchTokens.stream().anyMatch(token -> StringUtil.truncate(identifierValue, 200).equals(token.getValue())));
+		// verify token
+		final ResourceIndexedSearchParamToken resultSearchTokens = myResourceIndexedSearchParamTokenDao.findAll().get(0);
+		final String tokenValue = resultSearchTokens.getValue();
+		final Long tokensHashValue = resultSearchTokens.getHashValue();
 
-		final ResourceIndexedSearchParamToken resourceIndexedSearchParamToken = allSearchTokens.get(0);
+		final String expectedValue = StringUtil.truncate(identifierValue, tokenMaxLength);
+		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
 
-		final Long hashSystemAndValue = resourceIndexedSearchParamToken.getHashSystemAndValue();
-		final Long hashValue = resourceIndexedSearchParamToken.getHashValue();
-
+		assertEquals(expectedValue, tokenValue);
+		assertEquals(expectedHashValue, tokensHashValue);
+		
+		// verify resource
 		final SearchParameterMap searchParameterMap = SearchParameterMap.newSynchronous(Observation.SP_IDENTIFIER, new TokenParam(identifierValue));
-
-//		(t0.HASH_VALUE = 'a6548be4-aa78-4716-9079-203cdded3e4d-0')
-		final IBundleProvider bundle = myOrganizationDao.search(searchParameterMap, mySrd);
-		final List<IBaseResource> allResources = bundle.getAllResources();
-
-		assertEquals(1, allResources.size());
-
+		final List<IBaseResource> allResources = myOrganizationDao.search(searchParameterMap, mySrd).getAllResources();
 		final IBaseResource resource = allResources.get(0);
 		assertTrue(resource instanceof Organization);
 
 		final List<Identifier> identifiersFromResults = ((Organization) resource).getIdentifier();
+		assertEquals(1, allResources.size());
 		assertEquals(1, identifiersFromResults.size());
 		assertEquals(identifierValue, identifiersFromResults.get(0).getValue());
+	}
+
+	@Test
+	public void testSearchParameter_WithIdentifierSystemUnder200Chars_ShouldHashBeforeTruncate() {
+		// setup
+		final int tokenMaxLength = ResourceIndexedSearchParamToken.MAX_LENGTH;
+		final String identifierSystem = "http://www.acme.org.au/units/Exclusive_Provider_Organization_(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)NICHOLAS_FITTANTE_ACT_FAMILY_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890";
+		final Identifier identifier = new Identifier().setSystem(identifierSystem).setValue("1234");
+		final Organization organization = new Organization().addIdentifier(identifier);
+
+		// execute
+		myOrganizationDao.create(organization, mySrd);
+
+		// verify token
+		final ResourceIndexedSearchParamToken resultSearchTokens = myResourceIndexedSearchParamTokenDao.findAll().get(0);
+		final String tokenSystem = resultSearchTokens.getSystem();
+		final Long tokensHashSystem = resultSearchTokens.getHashSystem();
+
+		final String expectedValue = StringUtil.truncate(identifierSystem, tokenMaxLength);
+		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierSystem);
+
+		assertEquals(expectedValue, tokenSystem);
+		assertEquals(expectedHashValue, tokensHashSystem);
+
+		// verify resource
+		final SearchParameterMap searchParameterMap = SearchParameterMap.newSynchronous(Observation.SP_IDENTIFIER, new TokenParam("1234"));
+		final List<IBaseResource> allResources = myOrganizationDao.search(searchParameterMap, mySrd).getAllResources();
+		final IBaseResource resource = allResources.get(0);
+		assertTrue(resource instanceof Organization);
+
+		final List<Identifier> identifiersFromResults = ((Organization) resource).getIdentifier();
+		assertEquals(1, allResources.size());
+		assertEquals(1, identifiersFromResults.size());
+		assertEquals(identifierSystem, identifiersFromResults.get(0).getSystem());
 	}
 	
 	/*//@formatter:off
