@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * hapi-fhir-jpa
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -45,15 +45,13 @@ import java.util.Set;
  * -
  * If one is to be provided, it must be provided before nickname svc is invoked
  */
-public class NicknameSvc {
+public class NicknameSvc implements INicknameSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(NicknameSvc.class);
-
 	private NicknameMap myNicknameMap;
 
 	private Resource myNicknameResource;
 
 	public NicknameSvc() {
-
 	}
 
 	public void setNicknameResource(Resource theNicknameResource) {
@@ -98,6 +96,7 @@ public class NicknameSvc {
 
 	private void ensureMapInitialized() {
 		if (myNicknameResource == null) {
+			ourLog.debug("Loading defaults");
 			myNicknameResource = new ClassPathResource("/nickname/names.csv");
 		}
 

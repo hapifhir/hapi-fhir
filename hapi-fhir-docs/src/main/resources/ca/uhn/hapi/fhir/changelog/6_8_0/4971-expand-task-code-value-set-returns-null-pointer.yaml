@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4971
+title: "Previously, expanding a valueSet including a codeSystem that is unknown to the server would return an internal error(500) to the caller. This problem has been fixed."

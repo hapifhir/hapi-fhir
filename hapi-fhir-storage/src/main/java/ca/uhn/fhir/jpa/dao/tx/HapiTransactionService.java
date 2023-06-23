@@ -95,7 +95,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return new ExecutionBuilder(null);
 	}
 
-
 	/**
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */

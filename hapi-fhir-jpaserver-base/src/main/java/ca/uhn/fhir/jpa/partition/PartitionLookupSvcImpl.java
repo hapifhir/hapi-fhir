@@ -51,7 +51,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -120,13 +122,27 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		myIdToPartitionCache.invalidateAll();
 	}
 
+	/**
+	 * Generate a random int which is guaranteed to  be unused by an existing partition.
+	 * @return an integer representing a partition ID that is not currently in use by the system.
+	 */
+	public int generateRandomUnusedPartitionId() {
+		int candidate = ThreadLocalRandom.current().nextInt();
+		Optional<PartitionEntity> partition = myPartitionDao.findById(candidate);
+		while (partition.isPresent()) {
+			candidate = ThreadLocalRandom.current().nextInt();
+			partition = myPartitionDao.findById(candidate);
+		}
+		return candidate;
+	}
 	@Override
 	@Transactional
 	public PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails) {
+
 		validateNotInUnnamedPartitionMode();
 		validateHaveValidPartitionIdAndName(thePartition);
 		validatePartitionNameDoesntAlreadyExist(thePartition.getName());
-
+		validIdUponCreation(thePartition);
 		ourLog.info("Creating new partition with ID {} and Name {}", thePartition.getId(), thePartition.getName());
 
 		PartitionEntity retVal = myPartitionDao.save(thePartition);
@@ -197,6 +213,13 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		}
 	}
 
+	private void validIdUponCreation(PartitionEntity thePartition){
+		if (myPartitionDao.findById(thePartition.getId()).isPresent()) {
+			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "duplicatePartitionId");
+			throw new InvalidRequestException(Msg.code(2366) + msg);
+		}
+	}
+
 	private void validateHaveValidPartitionIdAndName(PartitionEntity thePartition) {
 		if (thePartition.getId() == null || isBlank(thePartition.getName())) {
 			String msg = myFhirCtx.getLocalizer().getMessage(PartitionLookupSvcImpl.class, "missingPartitionIdOrName");
@@ -212,7 +235,6 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", thePartition.getName());
 			throw new InvalidRequestException(Msg.code(1312) + msg);
 		}
-
 	}
 
 	private void validateNotInUnnamedPartitionMode() {
