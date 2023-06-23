@@ -26,9 +26,24 @@ SELECT id, name[0].family, name[0].given[0]
 FROM Patient
 ```
 
-# Controlling Column Names
+## Non-Primitive Values
 
-If you want to control the column name for a given SELECT expression, prefix it with "[name]:". For example:
+If your FHIRPath expression points to a non-primitive element within a FHIR resource, the element will be encoded using FHIR JSON encoding rules and returned as a STRING column value. 
+
+
+# Column Name Aliases
+
+If you want to control the column name for a given SELECT expression, you can use a standard SQL _AS_ clause. For example:
+
+```sql
+SELECT id AS ID, 
+       name[0].family AS FamilyName, 
+       name[0].given[0] AS GivenName,
+       name[0].given[1] AS MiddleName
+FROM Patient
+```
+
+Alternately, you can also create an alias by prefixing the expression by an alias and a colon. For example: 
 
 ```sql
 SELECT ID: id, 
@@ -77,9 +92,35 @@ Note that ordering will currently only work on statements that return 10,000 row
 The following statement searches for Patients with a family name of _Simpson_, counts the frequencies of their first names, and orders by the most frequent names.
 
 ```sql
-select name.given, count(*)
-from Patient
-search family = 'Simpson'
-group by name.given
-order by count(*) desc
+SELECT name.given, count(*)
+FROM Patient
+WHERE family = 'Simpson'
+GROUP BY name.given
+ORDER BY count(*) DESC
+```
+
+# Select Data Manipulation and Concatenation
+
+FHIRPath contains various helpful keywords that can be used to manipulate the data being returned.
+
+A simple example showing string concatenation is shown below. Note the use of the `[0]` indexes on repeatable fields. Without these this expression will fail with a FHIRPath execution error if multiple names are present, as FHIRPath does not allow string concatenation using a list of strings on either side of the + operator. 
+
+```sql
+SELECT 
+    Patient.name[0].given[0] + ' ' + Patient.name[0].family as FullName
+FROM Patient
+```
+
+
+# Limiting Results
+
+The SQL _LIMIT_ clause can be used to restrict the number of results that can be fetched. For example:
+
+```sql
+SELECT
+    id, name.family, name.given
+FROM
+    Patient
+LIMIT
+    100
 ```

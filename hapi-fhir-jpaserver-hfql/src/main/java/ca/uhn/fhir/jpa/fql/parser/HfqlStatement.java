@@ -37,10 +37,10 @@ public class HfqlStatement implements IModelJson {
 	private List<SelectClause> mySelectClauses = new ArrayList<>();
 	@JsonProperty("where")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	private List<WhereClause> myWhereClauses = new ArrayList<>();
-	@JsonProperty("search")
+	private List<HavingClause> myWhereClauses = new ArrayList<>();
+	@JsonProperty("having")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	private List<WhereClause> mySearchClauses = new ArrayList<>();
+	private List<HavingClause> myHavingClauses = new ArrayList<>();
 	@JsonProperty("groupBy")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<String> myGroupByClauses = new ArrayList<>();
@@ -80,24 +80,24 @@ public class HfqlStatement implements IModelJson {
 		return clause;
 	}
 
-	public WhereClause addWhereClause() {
-		WhereClause clause = new WhereClause();
+	public HavingClause addHavingClause() {
+		HavingClause clause = new HavingClause();
+		myHavingClauses.add(clause);
+		return clause;
+	}
+
+	public List<HavingClause> getHavingClauses() {
+		return myHavingClauses;
+	}
+
+	public HavingClause addWhereClause() {
+		HavingClause clause = new HavingClause();
 		myWhereClauses.add(clause);
 		return clause;
 	}
 
-	public List<WhereClause> getWhereClauses() {
+	public List<HavingClause> getWhereClauses() {
 		return myWhereClauses;
-	}
-
-	public WhereClause addSearchClause() {
-		WhereClause clause = new WhereClause();
-		mySearchClauses.add(clause);
-		return clause;
-	}
-
-	public List<WhereClause> getSearchClauses() {
-		return mySearchClauses;
 	}
 
 	@Nullable
@@ -109,15 +109,15 @@ public class HfqlStatement implements IModelJson {
 		myLimit = theLimit;
 	}
 
-	public WhereClause addWhereClause(String theLeft, WhereClauseOperatorEnum theOperator, String theRight) {
-		WhereClause clause = addWhereClause(theLeft, theOperator);
+	public HavingClause addHavingClause(String theLeft, WhereClauseOperatorEnum theOperator, String theRight) {
+		HavingClause clause = addHavingClause(theLeft, theOperator);
 		clause.addRight(theRight);
 		return clause;
 	}
 
 	@Nonnull
-	public WhereClause addWhereClause(String theLeft, WhereClauseOperatorEnum theOperator) {
-		WhereClause clause = addWhereClause();
+	public HavingClause addHavingClause(String theLeft, WhereClauseOperatorEnum theOperator) {
+		HavingClause clause = addHavingClause();
 		clause.setLeft(theLeft);
 		clause.setOperator(theOperator);
 		return clause;
@@ -252,7 +252,7 @@ public class HfqlStatement implements IModelJson {
 		}
 	}
 
-	public static class WhereClause implements IModelJson {
+	public static class HavingClause implements IModelJson {
 
 		@JsonProperty("left")
 		private String myLeft;

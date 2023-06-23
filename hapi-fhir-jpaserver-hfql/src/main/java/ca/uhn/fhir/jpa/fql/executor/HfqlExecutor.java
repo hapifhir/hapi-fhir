@@ -85,6 +85,10 @@ public class HfqlExecutor implements IHfqlExecutor {
 	public static final int BATCH_SIZE = 1000;
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 	public static final Set<GroupByKey> NULL_GROUP_BY_KEY = Set.of(new GroupByKey(List.of()));
+	/**
+	 * This is the maximum number of results that can be sorted or grouped on
+	 */
+	public static final int ORDER_AND_GROUP_LIMIT = 10000;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -116,8 +120,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 		SearchParameterMap map = new SearchParameterMap();
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 
-		List<HfqlStatement.WhereClause> searchClauses = statement.getSearchClauses();
-		for (HfqlStatement.WhereClause nextSearchClause : searchClauses) {
+		List<HfqlStatement.HavingClause> searchClauses = statement.getWhereClauses();
+		for (HfqlStatement.HavingClause nextSearchClause : searchClauses) {
 			if (nextSearchClause.getLeft().equals(Constants.PARAM_ID)) {
 				map.add(Constants.PARAM_ID, new TokenOrListParam(null, nextSearchClause.getRightAsStrings().toArray(EMPTY_STRING_ARRAY)));
 			} else if (nextSearchClause.getLeft().equals(Constants.PARAM_LASTUPDATED)) {
@@ -156,7 +160,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 		if (statement.hasCountClauses()) {
 			executionResult = executeCountClause(statement, outcome, whereClausePredicate);
 		} else {
-			executionResult = new LocalSearchHfqlExecutionResult(statement, outcome, fhirPath, theLimit, 0, columnDataTypes, whereClausePredicate);
+			executionResult = new LocalSearchHfqlExecutionResult(statement, outcome, fhirPath, theLimit, 0, columnDataTypes, whereClausePredicate, myFhirContext);
 		}
 
 		if (!statement.getOrderByClauses().isEmpty()) {
@@ -171,7 +175,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 		while (theExecutionResult.hasNext()) {
 			IHfqlExecutionResult.Row nextRow = theExecutionResult.getNextRow();
 			rows.add(nextRow);
-			Validate.isTrue(rows.size() <= 10000, "Can not ORDER BY result sets over 10000 results");
+			Validate.isTrue(rows.size() <= ORDER_AND_GROUP_LIMIT, "Can not ORDER BY result sets over 10000 results");
 		}
 
 		List<Integer> orderColumnIndexes = theStatement
@@ -225,7 +229,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 		IBundleProvider resultList = myPagingProvider.retrieveResultList(theRequestDetails, theSearchId);
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 		Predicate<IBaseResource> whereClausePredicate = newWhereClausePredicate(fhirPath, theStatement);
-		return new LocalSearchHfqlExecutionResult(theStatement, resultList, fhirPath, theLimit, theStartingOffset, Collections.emptyList(), whereClausePredicate);
+		return new LocalSearchHfqlExecutionResult(theStatement, resultList, fhirPath, theLimit, theStartingOffset, Collections.emptyList(), whereClausePredicate, myFhirContext);
 	}
 
 	private IHfqlExecutionResult executeCountClause(HfqlStatement theStatement, IBundleProvider theOutcome, Predicate<IBaseResource> theWhereClausePredicate) {
@@ -354,23 +358,23 @@ public class HfqlExecutor implements IHfqlExecutor {
 	}
 
 	private Predicate<IBaseResource> newWhereClausePredicate(IFhirPath theFhirPath, HfqlStatement theStatement) {
-		if (theStatement.getWhereClauses().isEmpty()) {
+		if (theStatement.getHavingClauses().isEmpty()) {
 			return r -> true;
 		}
 
 		return r -> {
-			for (HfqlStatement.WhereClause nextWhereClause : theStatement.getWhereClauses()) {
+			for (HfqlStatement.HavingClause nextHavingClause : theStatement.getHavingClauses()) {
 
 				boolean haveMatch;
-				switch (nextWhereClause.getOperator()) {
+				switch (nextHavingClause.getOperator()) {
 					case UNARY_BOOLEAN: {
-						haveMatch = evaluateWhereClauseUnaryBoolean(theFhirPath, r, nextWhereClause);
+						haveMatch = evaluateWhereClauseUnaryBoolean(theFhirPath, r, nextHavingClause);
 						break;
 					}
 					case EQUALS:
 					case IN:
 					default: {
-						haveMatch = evaluateWhereClauseBinaryEqualsOrIn(theFhirPath, r, nextWhereClause);
+						haveMatch = evaluateWhereClauseBinaryEqualsOrIn(theFhirPath, r, nextHavingClause);
 						break;
 					}
 				}
@@ -385,10 +389,10 @@ public class HfqlExecutor implements IHfqlExecutor {
 		};
 	}
 
-	private static boolean evaluateWhereClauseUnaryBoolean(IFhirPath theFhirPath, IBaseResource r, HfqlStatement.WhereClause nextWhereClause) {
+	private static boolean evaluateWhereClauseUnaryBoolean(IFhirPath theFhirPath, IBaseResource r, HfqlStatement.HavingClause theNextHavingClause) {
 		boolean haveMatch = false;
-		assert nextWhereClause.getRight().isEmpty();
-		List<IPrimitiveType> values = theFhirPath.evaluate(r, nextWhereClause.getLeft(), IPrimitiveType.class);
+		assert theNextHavingClause.getRight().isEmpty();
+		List<IPrimitiveType> values = theFhirPath.evaluate(r, theNextHavingClause.getLeft(), IPrimitiveType.class);
 		for (IPrimitiveType<?> nextValue : values) {
 			if (Boolean.TRUE.equals(nextValue.getValue())) {
 				haveMatch = true;
@@ -398,11 +402,11 @@ public class HfqlExecutor implements IHfqlExecutor {
 		return haveMatch;
 	}
 
-	private static boolean evaluateWhereClauseBinaryEqualsOrIn(IFhirPath theFhirPath, IBaseResource r, HfqlStatement.WhereClause nextWhereClause) {
+	private static boolean evaluateWhereClauseBinaryEqualsOrIn(IFhirPath theFhirPath, IBaseResource r, HfqlStatement.HavingClause theNextHavingClause) {
 		boolean haveMatch = false;
-		List<IBase> values = theFhirPath.evaluate(r, nextWhereClause.getLeft(), IBase.class);
+		List<IBase> values = theFhirPath.evaluate(r, theNextHavingClause.getLeft(), IBase.class);
 		for (IBase nextValue : values) {
-			for (String nextRight : nextWhereClause.getRight()) {
+			for (String nextRight : theNextHavingClause.getRight()) {
 				String expression = "$this = " + nextRight;
 				IPrimitiveType outcome = theFhirPath
 					.evaluateFirst(nextValue, expression, IPrimitiveType.class)
@@ -730,7 +734,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 	}
 
 	@Nonnull
-	private static InvalidRequestException newInvalidRequestExceptionUnknownSearchParameter(HfqlStatement.WhereClause theClause) {
+	private static InvalidRequestException newInvalidRequestExceptionUnknownSearchParameter(HfqlStatement.HavingClause theClause) {
 		return new InvalidRequestException("Unknown/unsupported search parameter: " + UrlUtil.sanitizeUrlPart(theClause.getLeft()));
 	}
 

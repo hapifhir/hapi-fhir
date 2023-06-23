@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,6 +42,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.fql.executor.HfqlExecutor.ORDER_AND_GROUP_LIMIT;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -84,7 +86,7 @@ public class HfqlExecutorTest {
 		statement.setFromResourceName("Patient");
 		statement.addSelectClause("name.given[1]");
 		statement.addSelectClause("name.family");
-		statement.addWhereClause("name.family = 'Simpson'", HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
+		statement.addHavingClause("name.family = 'Simpson'", HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
 
 		String searchId = "the-search-id";
 		when(myPagingProvider.retrieveResultList(any(), eq(searchId))).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
@@ -116,7 +118,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					where name.family = 'Simpson'
+					having name.family = 'Simpson'
 					select name.given[1], name.family
 			""";
 
@@ -146,9 +148,9 @@ public class HfqlExecutorTest {
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 
 		String statement = """
-					from Patient
-					where name.family = 'Simpson'
 					select *
+					from Patient
+					having name.family = 'Simpson'
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
@@ -158,6 +160,34 @@ public class HfqlExecutorTest {
 		assertThat(result.getColumnNames().toString(), result.getColumnNames(), not(hasItem(
 			"address.period.start"
 		)));
+	}
+
+	@Test
+	public void testFromSelectNonPrimitivePath() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(
+			createPatientHomerSimpson(),
+			createPatientNedFlanders()
+		));
+
+		String statement = """
+					select name
+					from Patient
+			""";
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+			"name"
+		));
+		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
+			HfqlDataTypeEnum.STRING
+		));
+
+		List<List<Object>> rowValues = readAllRowValues(result);
+		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
+			Lists.newArrayList("{\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}"),
+			Lists.newArrayList("{\"family\":\"Flanders\",\"given\":[\"Ned\"]}")
+		));
 	}
 
 	@Test
@@ -178,10 +208,57 @@ public class HfqlExecutorTest {
 			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT
 		));
 
+		List<List<Object>> rowValues = readAllRowValues(result);
+		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
+			Lists.newArrayList("Flanders", "Ned", 2L),
+			Lists.newArrayList("Simpson", "Jay", 2L),
+			Lists.newArrayList("Simpson", "Marie", 1L),
+			Lists.newArrayList("Simpson", "Evelyn", 1L),
+			Lists.newArrayList("Simpson", "Homer", 2L),
+			Lists.newArrayList("Simpson", "Lisa", 1L),
+			Lists.newArrayList("Simpson", "Bart", 1L),
+			Lists.newArrayList("Simpson", "El Barto", 1L),
+			Lists.newArrayList("Simpson", "Maggie", 1L)
+		));
+	}
+
+	@Nonnull
+	private static List<List<Object>> readAllRowValues(IHfqlExecutionResult result) {
 		List<List<Object>> rowValues = new ArrayList<>();
 		while (result.hasNext()) {
 			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
 		}
+		return rowValues;
+	}
+
+	@Test
+	@Disabled
+	// FIXME: reenable
+	public void testFromSelectCount_TooMany() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		List<Patient> patients = new ArrayList<>();
+		for (int i = 0; i < ORDER_AND_GROUP_LIMIT + 10; i++) {
+			Patient patient = new Patient();
+			patient.addName().setFamily("PT" + i);
+			patients.add(patient);
+		}
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(patients));
+		String statement = """
+					from Patient
+					select name.family, count(*)
+					group by name.family
+			""";
+
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+			"name.family", "name.given", "count(*)"
+		));
+		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
+			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT
+		));
+
+		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
 			Lists.newArrayList("Flanders", "Ned", 2L),
 			Lists.newArrayList("Simpson", "Jay", 2L),
@@ -214,10 +291,7 @@ public class HfqlExecutorTest {
 			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT
 		));
 
-		List<List<Object>> rowValues = new ArrayList<>();
-		while (result.hasNext()) {
-			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
-		}
+		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, contains(
 			Lists.newArrayList("Flanders", "Ned", 2L),
 			Lists.newArrayList("Simpson", "Homer", 2L),
@@ -253,10 +327,7 @@ public class HfqlExecutorTest {
 			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING
 		));
 
-		List<List<Object>> rowValues = new ArrayList<>();
-		while (result.hasNext()) {
-			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
-		}
+		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, contains(
 			Lists.newArrayList("Simpson", "Lisa"),
 			Lists.newArrayList("Simpson", "Homer"),
@@ -286,10 +357,7 @@ public class HfqlExecutorTest {
 			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.DATE
 		));
 
-		List<List<Object>> rowValues = new ArrayList<>();
-		while (result.hasNext()) {
-			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
-		}
+		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, contains(
 			Lists.newArrayList("Simpson", "Lisa", "1990-01-01"),
 			Lists.newArrayList("Simpson", "Homer", "1950-01-01"),
@@ -319,10 +387,7 @@ public class HfqlExecutorTest {
 			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.BOOLEAN
 		));
 
-		List<List<Object>> rowValues = new ArrayList<>();
-		while (result.hasNext()) {
-			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
-		}
+		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, contains(
 			Lists.newArrayList("Simpson", "Lisa", "false"),
 			Lists.newArrayList("Simpson", "Homer", "true"),
@@ -350,10 +415,7 @@ public class HfqlExecutorTest {
 			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.LONGINT
 		));
 
-		List<List<Object>> rowValues = new ArrayList<>();
-		while (result.hasNext()) {
-			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
-		}
+		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
 			Lists.newArrayList(null, "Homer", 1L, 0L),
 			Lists.newArrayList("Simpson", "Homer", 1L, 1L),
@@ -381,10 +443,7 @@ public class HfqlExecutorTest {
 			HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.LONGINT
 		));
 
-		List<List<Object>> rowValues = new ArrayList<>();
-		while (result.hasNext()) {
-			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
-		}
+		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
 			Lists.newArrayList(4L, 2L)
 		));
@@ -397,7 +456,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					where name.family = 'Simpson'
+					having name.family = 'Simpson'
 					select name.given, identifier.where(system = 'http://system' ).value
 			""";
 
@@ -413,13 +472,13 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testFromWhereComplexFhirPath() {
+	public void testFromHavingComplexFhirPath() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 
 		String statement = """
 					from Patient
-					where identifier.where(system = 'http://system' ).value = 'value0'
+					having identifier.where(system = 'http://system' ).value = 'value0'
 					select name.given, identifier.value
 			""";
 
@@ -436,7 +495,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testFromWhereComplexFhirPath_StringContains() {
+	public void testFromHavingComplexFhirPath_StringContains() {
 		IFhirResourceDao<Observation> observationDao = initDao(Observation.class);
 
 		Observation obs1 = createCardiologyNoteObservation("Observation/1", "Patient is running a lot");
@@ -449,8 +508,8 @@ public class HfqlExecutorTest {
 		String statement = """
 					SELECT id
 					FROM Observation
-					SEARCH code = 'http://loinc.org|34752-6'
-					WHERE
+					WHERE code = 'http://loinc.org|34752-6'
+					HAVING
 					   value.ofType(string).lower().contains('running')
 			""";
 
@@ -481,7 +540,7 @@ public class HfqlExecutorTest {
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(createPatientHomerSimpson()));
 
 		String statement = """
-					SELECT FullName: Patient.name.given + ' ' + Patient.name.family
+					SELECT FullName: Patient.name.first().given.first() + ' ' + Patient.name.first().family
 					FROM Patient
 			""";
 
@@ -501,7 +560,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testFromWhereComplexFhirPath_Numeric() {
+	public void testHaving_ComplexFhirPath_Numeric() {
 		IFhirResourceDao<Observation> observationDao = initDao(Observation.class);
 
 		Observation obs1 = createWeightObservationWithKilos("Observation/1", 10L);
@@ -518,7 +577,7 @@ public class HfqlExecutorTest {
 					   value.ofType(Quantity).system,
 					   value.ofType(Quantity).code
 					from Observation
-					where
+					having
 					   value.ofType(Quantity).value > 100
 			""";
 
@@ -538,13 +597,13 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testFromWhereSelectIn() {
+	public void testFromHavingSelectIn() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 
 		String statement = """
 					from Patient
-					where name.given in ('Foo' | 'Bart')
+					having name.given in ('Foo' | 'Bart')
 					select Given:name.given[1], Family:name.family
 			""";
 
@@ -561,13 +620,13 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testFromWhereSelectEquals() {
+	public void testFromHavingSelectEquals() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 
 		String statement = """
 					from Patient
-					where name.given = 'Homer'
+					having name.given = 'Homer'
 					select Given:name.given[1], Family:name.family
 			""";
 
@@ -619,11 +678,11 @@ public class HfqlExecutorTest {
 		"_blah", "foo"
 	})
 	@ParameterizedTest
-	public void testSearch_Error_UnknownParam(String theParamName) {
+	public void testWhere_Error_UnknownParam(String theParamName) {
 		initDao(Patient.class);
 
 		String statement = "from Patient " +
-			"search " + theParamName + " = 'abc' " +
+			"where " + theParamName + " = 'abc' " +
 			"select name.given";
 
 		try {
@@ -635,7 +694,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testSearch_Id_In_CommaList() {
+	public void testWhere_Id_In_CommaList() {
 		IFhirResourceDao<Observation> patientDao = initDao(Observation.class);
 		Observation resource = new Observation();
 		resource.getMeta().setVersionId("5");
@@ -648,7 +707,7 @@ public class HfqlExecutorTest {
 						id, meta.versionId, value.ofType(Quantity).value
 					from
 						Observation
-					search
+					where
 						_id in ('123', 'Patient/456')
 			""";
 
@@ -712,13 +771,13 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testSearch_LastUpdated_In() {
+	public void testWhere_LastUpdated_In() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 
 		String statement = """
 					from Patient
-					search _lastUpdated in ('lt2021' | 'gt2023')
+					where _lastUpdated in ('lt2021' | 'gt2023')
 					select name.given
 			""";
 
@@ -735,13 +794,13 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testSearch_Boolean() {
+	public void testWhere_Boolean() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 
 		String statement = """
 					from Patient
-					search active = true
+					where active = true
 					select name.given
 			""";
 
@@ -756,13 +815,13 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testSearch_Quantity() {
+	public void testWhere_Quantity() {
 		IFhirResourceDao<Observation> observationDao = initDao(Observation.class);
 		when(observationDao.search(any(), any())).thenReturn(new SimpleBundleProvider());
 
 		String statement = """
 					from Observation
-					search value-quantity = 'lt500|http://unitsofmeasure.org|kg'
+					where value-quantity = 'lt500|http://unitsofmeasure.org|kg'
 					select id
 			""";
 
@@ -779,13 +838,13 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testSearch_String() {
+	public void testWhere_String() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 
 		String statement = """
 					from Patient
-					search name = 'abc'
+					where name = 'abc'
 					select name.given
 			""";
 
@@ -799,14 +858,14 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testSearch_String_Exact() {
+	public void testWhere_String_Exact() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 
 		String statement = """
-					from Patient
-					search name:exact = 'abc'
 					select name.given
+					from Patient
+					where name:exact = 'abc'
 			""";
 
 		myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
@@ -820,13 +879,13 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testSearch_String_AndOr() {
+	public void testWhere_String_AndOr() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 
 		String statement = """
 					from Patient
-					search name in ('A' | 'B') and name in ('C' | 'D')
+					where name in ('A' | 'B') and name in ('C' | 'D')
 					select name.given
 			""";
 
@@ -981,6 +1040,7 @@ public class HfqlExecutorTest {
 		Patient homer = new Patient();
 		homer.addName().setFamily("Simpson").addGiven("Homer").addGiven("Jay");
 		homer.addIdentifier().setSystem("http://system").setValue("value0");
+		homer.setBirthDateElement(new DateType("1950-01-01"));
 		return homer;
 	}
 

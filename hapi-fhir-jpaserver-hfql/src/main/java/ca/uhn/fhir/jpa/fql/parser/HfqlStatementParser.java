@@ -33,8 +33,8 @@ import java.util.Set;
 public class HfqlStatementParser {
 
 	public static final String KEYWORD_AND = "AND";
+	public static final String KEYWORD_HAVING = "HAVING";
 	public static final String KEYWORD_WHERE = "WHERE";
-	public static final String KEYWORD_SEARCH = "SEARCH";
 	public static final String KEYWORD_SELECT = "SELECT";
 	public static final String KEYWORD_FROM = "FROM";
 	public static final String KEYWORD_LIMIT = "LIMIT";
@@ -47,9 +47,9 @@ public class HfqlStatementParser {
 		KEYWORD_GROUP,
 		KEYWORD_LIMIT,
 		KEYWORD_ORDER,
-		KEYWORD_SEARCH,
+		KEYWORD_WHERE,
 		KEYWORD_SELECT,
-		KEYWORD_WHERE
+		KEYWORD_HAVING
 	);
 	private final HfqlLexer myLexer;
 	private final FhirContext myFhirContext;
@@ -147,8 +147,8 @@ public class HfqlStatementParser {
 	}
 
 	private enum WhereModeEnum {
-		WHERE,
-		SEARCH
+		HAVING,
+		WHERE
 	}
 
 	/**
@@ -206,11 +206,9 @@ public class HfqlStatementParser {
 		}
 	}
 
-	private class StateInSelectAfterClause extends BaseRootState {
-		private final HfqlStatement.SelectClause mySelectClause;
-
+	private class StateInSelectAfterClause extends StateSelectAfterClauseFinal {
 		public StateInSelectAfterClause(HfqlStatement.SelectClause theSelectClause) {
-			mySelectClause = theSelectClause;
+			super(theSelectClause);
 		}
 
 		@Override
@@ -221,12 +219,43 @@ public class HfqlStatementParser {
 				String alias = mySelectClause.getClause();
 				mySelectClause.setAlias(alias);
 				mySelectClause.setClause(clause);
-			} else if (theToken.getToken().equals(",")) {
-				myState = new StateInSelect();
+				myState = new StateSelectAfterClauseFinal(mySelectClause);
+			} else if (theToken.asKeyword().equals("AS")) {
+				HfqlLexerToken nextToken = getNextTokenRequired(HfqlLexerOptions.DEFAULT);
+				String alias = nextToken.asString();
+				mySelectClause.setAlias(alias);
+				myState = new StateSelectAfterClauseFinal(mySelectClause);
 			} else {
 				super.consume(theToken);
 			}
 		}
+	}
+
+	private class StateSelectAfterClauseFinal extends BaseRootState {
+		protected final HfqlStatement.SelectClause mySelectClause;
+
+		private StateSelectAfterClauseFinal(HfqlStatement.SelectClause theSelectClause) {
+			mySelectClause = theSelectClause;
+		}
+
+		@Nonnull
+		@Override
+		public HfqlLexerOptions getLexerOptions() {
+			return HfqlLexerOptions.FHIRPATH_EXPRESSION;
+		}
+
+		@Override
+		void consume(HfqlLexerToken theToken) {
+			if (theToken.getToken().equals(",")) {
+				myState = new StateInSelect();
+			} else if (!DIRECTIVE_KEYWORDS.contains(theToken.asKeyword())) {
+				String newClause = mySelectClause.getClause() + " " + theToken.getToken();
+				mySelectClause.setClause(newClause);
+			} else {
+				super.consume(theToken);
+			}
+		}
+
 	}
 
 	private class StateInWhereInitial extends BaseState {
@@ -239,7 +268,7 @@ public class HfqlStatementParser {
 		@Nonnull
 		@Override
 		public HfqlLexerOptions getLexerOptions() {
-			if (myWhereMode == WhereModeEnum.WHERE) {
+			if (myWhereMode == WhereModeEnum.HAVING) {
 				return HfqlLexerOptions.FHIRPATH_EXPRESSION;
 			} else {
 				return HfqlLexerOptions.SEARCH_PARAMETER_NAME;
@@ -248,13 +277,13 @@ public class HfqlStatementParser {
 
 		@Override
 		void consume(HfqlLexerToken theToken) {
-			if (myWhereMode == WhereModeEnum.SEARCH) {
-				HfqlStatement.WhereClause whereClause = myStatement.addSearchClause();
+			if (myWhereMode == WhereModeEnum.WHERE) {
+				HfqlStatement.HavingClause havingClause = myStatement.addWhereClause();
 				String token = theToken.getToken();
-				whereClause.setLeft(token);
-				myState = new StateInWhereAfterLeft(myWhereMode, whereClause);
+				havingClause.setLeft(token);
+				myState = new StateInWhereAfterLeft(myWhereMode, havingClause);
 			} else {
-				assert myWhereMode == WhereModeEnum.WHERE;
+				assert myWhereMode == WhereModeEnum.HAVING;
 
 				StringBuilder token = new StringBuilder(theToken.getToken());
 				while (myLexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION)) {
@@ -264,9 +293,9 @@ public class HfqlStatementParser {
 						break;
 					}
 					if ("=".equals(nextTokenAsKeyword) || "IN".equals(nextTokenAsKeyword)) {
-						HfqlStatement.WhereClause whereClause = myStatement.addWhereClause();
-						whereClause.setLeft(token.toString());
-						myState = new StateInWhereAfterLeft(myWhereMode, whereClause);
+						HfqlStatement.HavingClause havingClause = myStatement.addHavingClause();
+						havingClause.setLeft(token.toString());
+						myState = new StateInWhereAfterLeft(myWhereMode, havingClause);
 						return;
 					}
 
@@ -274,35 +303,35 @@ public class HfqlStatementParser {
 					token.append(' ').append(nextToken.getToken());
 				}
 
-				HfqlStatement.WhereClause whereClause = myStatement.addWhereClause();
-				whereClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
-				whereClause.setLeft(token.toString());
+				HfqlStatement.HavingClause havingClause = myStatement.addHavingClause();
+				havingClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
+				havingClause.setLeft(token.toString());
 				myState = new StateAfterWhere(myWhereMode);
 			}
 		}
 	}
 
 	private class StateInWhereAfterLeft extends BaseState {
-		private final HfqlStatement.WhereClause myWhereClause;
+		private final HfqlStatement.HavingClause myHavingClause;
 		private final WhereModeEnum myWhereMode;
 
-		public StateInWhereAfterLeft(WhereModeEnum theWhereMode, HfqlStatement.WhereClause theWhereClause) {
+		public StateInWhereAfterLeft(WhereModeEnum theWhereMode, HfqlStatement.HavingClause theHavingClause) {
 			myWhereMode = theWhereMode;
-			myWhereClause = theWhereClause;
+			myHavingClause = theHavingClause;
 		}
 
 		@Override
 		void consume(HfqlLexerToken theToken) {
 			if ("=".equals(theToken.getToken())) {
-				myWhereClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.EQUALS);
-				myState = new StateInWhereAfterOperatorEquals(myWhereMode, myWhereClause);
+				myHavingClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.EQUALS);
+				myState = new StateInWhereAfterOperatorEquals(myWhereMode, myHavingClause);
 			} else if ("IN".equals(theToken.asKeyword())) {
 				HfqlLexerToken nextToken = getNextTokenRequired(getLexerOptions());
 				if (!nextToken.getToken().equals("(")) {
 					throw newExceptionUnexpectedTokenExpectToken(theToken, "(");
 				}
-				myWhereClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.IN);
-				myState = new StateInWhereAfterOperatorIn(myWhereMode, myWhereClause);
+				myHavingClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.IN);
+				myState = new StateInWhereAfterOperatorIn(myWhereMode, myHavingClause);
 			} else {
 				throw newExceptionUnexpectedTokenExpectToken(theToken, "=");
 			}
@@ -311,12 +340,12 @@ public class HfqlStatementParser {
 	}
 
 	private class StateInWhereAfterOperatorEquals extends BaseState {
-		private final HfqlStatement.WhereClause myWhereClause;
+		private final HfqlStatement.HavingClause myHavingClause;
 		private final WhereModeEnum myWhereMode;
 
-		public StateInWhereAfterOperatorEquals(WhereModeEnum theWhereMode, HfqlStatement.WhereClause theWhereClause) {
+		public StateInWhereAfterOperatorEquals(WhereModeEnum theWhereMode, HfqlStatement.HavingClause theHavingClause) {
 			myWhereMode = theWhereMode;
-			myWhereClause = theWhereClause;
+			myHavingClause = theHavingClause;
 		}
 
 		@Override
@@ -328,24 +357,24 @@ public class HfqlStatementParser {
 			} else if (!theToken.isQuotedString()) {
 				throw newExceptionUnexpectedTokenExpectDescription(theToken, "quoted string");
 			}
-			myWhereClause.addRight(token);
+			myHavingClause.addRight(token);
 			myState = new StateAfterWhere(myWhereMode);
 		}
 
 	}
 
 	private class StateInWhereAfterOperatorIn extends BaseState {
-		private final HfqlStatement.WhereClause myWhereClause;
+		private final HfqlStatement.HavingClause myHavingClause;
 		private final WhereModeEnum myWhereMode;
 
-		public StateInWhereAfterOperatorIn(WhereModeEnum theWhereMode, HfqlStatement.WhereClause theWhereClause) {
+		public StateInWhereAfterOperatorIn(WhereModeEnum theWhereMode, HfqlStatement.HavingClause theHavingClause) {
 			myWhereMode = theWhereMode;
-			myWhereClause = theWhereClause;
+			myHavingClause = theHavingClause;
 		}
 
 		@Override
 		void consume(HfqlLexerToken theToken) {
-			myWhereClause.addRight(theToken.getToken());
+			myHavingClause.addRight(theToken.getToken());
 
 			if (myLexer.peekNextToken(getLexerOptions()) != null) {
 				if (myLexer.peekNextToken(getLexerOptions()).getToken().equals("|")) {
@@ -404,13 +433,13 @@ public class HfqlStatementParser {
 				 * Update DIRECTIVE_KEYWORDS if you add new
 				 * keywords here!
 				 */
+				case KEYWORD_HAVING:
+					validateNotPresent(myStatement.getHavingClauses(), theToken);
+					myState = new StateInWhereInitial(WhereModeEnum.HAVING);
+					break;
 				case KEYWORD_WHERE:
 					validateNotPresent(myStatement.getWhereClauses(), theToken);
 					myState = new StateInWhereInitial(WhereModeEnum.WHERE);
-					break;
-				case KEYWORD_SEARCH:
-					validateNotPresent(myStatement.getSearchClauses(), theToken);
-					myState = new StateInWhereInitial(WhereModeEnum.SEARCH);
 					break;
 				case KEYWORD_SELECT:
 					validateNotPresent(myStatement.getSelectClauses(), theToken);
@@ -433,7 +462,7 @@ public class HfqlStatementParser {
 					myState = new OrderState();
 					break;
 				default:
-					if (myStatement.getSearchClauses().isEmpty()) {
+					if (myStatement.getWhereClauses().isEmpty()) {
 						throw newExceptionUnexpectedTokenExpectToken(theToken, KEYWORD_SELECT);
 					} else {
 						throw newExceptionUnexpectedToken(theToken);

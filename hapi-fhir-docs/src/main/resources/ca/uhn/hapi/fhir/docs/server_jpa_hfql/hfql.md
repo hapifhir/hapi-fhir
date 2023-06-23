@@ -13,14 +13,14 @@ This module uses a proprietary flavour of SQL that is specific to HAPI FHIR. It 
 A simple example query is shown below:
 
 ```sql
-select
-    family: name.family, 
-    given: name.given, 
-    birthDate: birthDate, 
-    ssn: identifier.where(system='http://hl7.org/fhir/sid/us-ssn').value
-from
+SELECT
+    name.family as family, 
+    name.given as given, 
+    birthDate as birthDate, 
+    identifier.where(system='http://hl7.org/fhir/sid/us-ssn').value as SSN
+FROM
     Patient
-search
+WHERE
     active = true
 ```
 

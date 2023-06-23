@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.fql.executor;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,7 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 	private final List<String> myColumnNames;
 	private final List<HfqlDataTypeEnum> myColumnDataTypes;
 	private final Predicate<IBaseResource> myWhereClausePredicate;
+	private final IParser myParser;
 	private int myTotalRowsFetched = 0;
 	private int myNextSearchResultRow;
 	private int myNextBatchRow = 0;
@@ -49,7 +52,7 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 	private boolean myExhausted = false;
 	private int myNextResourceSearchRow;
 
-	public LocalSearchHfqlExecutionResult(HfqlStatement theStatement, IBundleProvider theSearchResult, IFhirPath theFhirPath, Integer theLimit, int theInitialOffset, List<HfqlDataTypeEnum> theColumnDataTypes, Predicate<IBaseResource> theWhereClausePredicate) {
+	public LocalSearchHfqlExecutionResult(HfqlStatement theStatement, IBundleProvider theSearchResult, IFhirPath theFhirPath, Integer theLimit, int theInitialOffset, List<HfqlDataTypeEnum> theColumnDataTypes, Predicate<IBaseResource> theWhereClausePredicate, FhirContext theFhirContext) {
 		myStatement = theStatement;
 		mySearchResult = theSearchResult;
 		myFhirPath = theFhirPath;
@@ -62,6 +65,7 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 			.stream()
 			.map(HfqlStatement.SelectClause::getAlias)
 			.collect(Collectors.toUnmodifiableList());
+		myParser = theFhirContext.newJsonParser();
 	}
 
 
@@ -118,14 +122,15 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 
 		List<Object> values = new ArrayList<>();
 		for (HfqlStatement.SelectClause nextColumn : myStatement.getSelectClauses()) {
-			List<IPrimitiveType> nextPrimitive = myFhirPath.evaluate(myNextResource, nextColumn.getClause(), IPrimitiveType.class);
+			String clause = nextColumn.getClause();
+			List<IBase> columnValues = myFhirPath.evaluate(myNextResource, clause, IBase.class);
 			String value = null;
-			if (!nextPrimitive.isEmpty()) {
-				IPrimitiveType<?> primitive = nextPrimitive.get(0);
-				if (primitive instanceof IIdType) {
-					value = ((IIdType) primitive).getIdPart();
-				} else if (primitive != null) {
-					value = primitive.getValueAsString();
+			if (!columnValues.isEmpty()) {
+				IBase firstColumnValue = columnValues.get(0);
+				if (firstColumnValue instanceof IIdType) {
+					value = ((IIdType) firstColumnValue).getIdPart();
+				} else if (firstColumnValue != null) {
+					value = myParser.encodeToString(firstColumnValue);
 				}
 			}
 			values.add(value);
