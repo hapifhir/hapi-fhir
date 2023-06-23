@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 
@@ -125,7 +126,7 @@ public class InstanceProgress {
 	public void updateInstance(JobInstance theInstance) {
 		updateInstance(theInstance, false);
 
-		String newWarningMessage = String.join("\n", myWarningMessages);
+		String newWarningMessage = StringUtils.right(String.join("\n", myWarningMessages), 4000);
 		theInstance.setWarningMessages(newWarningMessage);
 	}
 
