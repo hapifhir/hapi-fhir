@@ -56,6 +56,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.thymeleaf.util.StringUtils;
 
@@ -71,6 +73,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
@@ -118,7 +121,6 @@ public class HfqlExecutor implements IHfqlExecutor {
 		massageSelectColumnNames(statement);
 
 		SearchParameterMap map = new SearchParameterMap();
-		IFhirPath fhirPath = myFhirContext.newFhirPath();
 
 		List<HfqlStatement.HavingClause> searchClauses = statement.getWhereClauses();
 		for (HfqlStatement.HavingClause nextSearchClause : searchClauses) {
@@ -151,16 +153,17 @@ public class HfqlExecutor implements IHfqlExecutor {
 			}
 		}
 
+		HfqlExecutionContext executionContext = new HfqlExecutionContext(myFhirContext.newFhirPath());
 		List<HfqlDataTypeEnum> columnDataTypes = determineColumnDataTypes(statement);
 		IBundleProvider outcome = dao.search(map, theRequestDetails);
-		Predicate<IBaseResource> whereClausePredicate = newWhereClausePredicate(fhirPath, statement);
+		Predicate<IBaseResource> whereClausePredicate = newWhereClausePredicate(executionContext, statement);
 
 
 		IHfqlExecutionResult executionResult;
 		if (statement.hasCountClauses()) {
-			executionResult = executeCountClause(statement, outcome, whereClausePredicate);
+			executionResult = executeCountClause(statement, executionContext, outcome, whereClausePredicate);
 		} else {
-			executionResult = new LocalSearchHfqlExecutionResult(statement, outcome, fhirPath, theLimit, 0, columnDataTypes, whereClausePredicate, myFhirContext);
+			executionResult = new LocalSearchHfqlExecutionResult(statement, outcome, executionContext, theLimit, 0, columnDataTypes, whereClausePredicate, myFhirContext);
 		}
 
 		if (!statement.getOrderByClauses().isEmpty()) {
@@ -213,26 +216,25 @@ public class HfqlExecutor implements IHfqlExecutor {
 
 		List<List<Object>> rowData = rows
 			.stream()
-			.map(t->t.getRowValues())
+			.map(IHfqlExecutionResult.Row::getRowValues)
 			.collect(Collectors.toList());
 		return new StaticHfqlExecutionResult(null, theExecutionResult.getColumnNames(), theExecutionResult.getColumnTypes(), rowData);
 	}
 
 	@SuppressWarnings("unchecked")
 	static Comparator<IHfqlExecutionResult.Row> newRowComparator(int columnIndex, HfqlDataTypeEnum dataType) {
-		Comparator<IHfqlExecutionResult.Row> nextComparator = Comparator.comparing(new RowValueExtractor(columnIndex, dataType));
-		return nextComparator;
+		return Comparator.comparing(new RowValueExtractor(columnIndex, dataType));
 	}
 
 	@Override
 	public IHfqlExecutionResult executeContinuation(HfqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails) {
 		IBundleProvider resultList = myPagingProvider.retrieveResultList(theRequestDetails, theSearchId);
-		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		Predicate<IBaseResource> whereClausePredicate = newWhereClausePredicate(fhirPath, theStatement);
-		return new LocalSearchHfqlExecutionResult(theStatement, resultList, fhirPath, theLimit, theStartingOffset, Collections.emptyList(), whereClausePredicate, myFhirContext);
+		HfqlExecutionContext executionContext = new HfqlExecutionContext(myFhirContext.newFhirPath());
+		Predicate<IBaseResource> whereClausePredicate = newWhereClausePredicate(executionContext, theStatement);
+		return new LocalSearchHfqlExecutionResult(theStatement, resultList, executionContext, theLimit, theStartingOffset, Collections.emptyList(), whereClausePredicate, myFhirContext);
 	}
 
-	private IHfqlExecutionResult executeCountClause(HfqlStatement theStatement, IBundleProvider theOutcome, Predicate<IBaseResource> theWhereClausePredicate) {
+	private IHfqlExecutionResult executeCountClause(HfqlStatement theStatement, HfqlExecutionContext theExecutionContext, IBundleProvider theOutcome, Predicate<IBaseResource> theWhereClausePredicate) {
 
 		Set<String> selectClauses = theStatement
 			.getSelectClauses()
@@ -253,19 +255,20 @@ public class HfqlExecutor implements IHfqlExecutor {
 			.collect(Collectors.toSet());
 
 		Map<GroupByKey, Map<String, AtomicLong>> keyCounter = new HashMap<>();
-		IFhirPath fhirPath = myFhirContext.newFhirPath();
 
 		int offset = 0;
 		int batchSize = 1000;
-		while (true) {
+		while (theOutcome.size() == null || theOutcome.sizeOrThrowNpe() < offset) {
 			List<IBaseResource> resources = theOutcome.getResources(offset, offset + batchSize);
 
 			for (IBaseResource nextResource : resources) {
+
 				if (nextResource != null && theWhereClausePredicate.test(nextResource)) {
 
 					List<List<String>> groupByClauseValues = new ArrayList<>();
+
 					for (String nextClause : theStatement.getGroupByClauses()) {
-						List<String> nextClauseValues = fhirPath
+						List<String> nextClauseValues = theExecutionContext
 							.evaluate(nextResource, nextClause, IPrimitiveType.class)
 							.stream()
 							.map(IPrimitiveType::getValueAsString)
@@ -276,11 +279,13 @@ public class HfqlExecutor implements IHfqlExecutor {
 						groupByClauseValues.add(nextClauseValues);
 					}
 					Set<GroupByKey> allKeys = createCrossProduct(groupByClauseValues);
+
 					for (GroupByKey nextKey : allKeys) {
+
 						Map<String, AtomicLong> counts = keyCounter.computeIfAbsent(nextKey, t -> new HashMap<>());
 						for (String nextCountClause : countClauses) {
 							if (!nextCountClause.equals("*")) {
-								if (fhirPath.evaluateFirst(nextResource, nextCountClause, IBase.class).isEmpty()) {
+								if (theExecutionContext.evaluateFirst(nextResource, nextCountClause, IBase.class).isEmpty()) {
 									continue;
 								}
 							}
@@ -291,9 +296,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 				}
 			}
 
-			if (theOutcome.size() != null && theOutcome.sizeOrThrowNpe() <= offset + batchSize) {
-				break;
-			}
+			offset += batchSize;
 		}
 
 		List<String> columnNames = theStatement
@@ -357,7 +360,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 		}
 	}
 
-	private Predicate<IBaseResource> newWhereClausePredicate(IFhirPath theFhirPath, HfqlStatement theStatement) {
+	private Predicate<IBaseResource> newWhereClausePredicate(HfqlExecutionContext theExecutionContext, HfqlStatement theStatement) {
 		if (theStatement.getHavingClauses().isEmpty()) {
 			return r -> true;
 		}
@@ -368,13 +371,13 @@ public class HfqlExecutor implements IHfqlExecutor {
 				boolean haveMatch;
 				switch (nextHavingClause.getOperator()) {
 					case UNARY_BOOLEAN: {
-						haveMatch = evaluateWhereClauseUnaryBoolean(theFhirPath, r, nextHavingClause);
+						haveMatch = evaluateWhereClauseUnaryBoolean(theExecutionContext, r, nextHavingClause);
 						break;
 					}
 					case EQUALS:
 					case IN:
 					default: {
-						haveMatch = evaluateWhereClauseBinaryEqualsOrIn(theFhirPath, r, nextHavingClause);
+						haveMatch = evaluateWhereClauseBinaryEqualsOrIn(theExecutionContext, r, nextHavingClause);
 						break;
 					}
 				}
@@ -389,10 +392,10 @@ public class HfqlExecutor implements IHfqlExecutor {
 		};
 	}
 
-	private static boolean evaluateWhereClauseUnaryBoolean(IFhirPath theFhirPath, IBaseResource r, HfqlStatement.HavingClause theNextHavingClause) {
+	private static boolean evaluateWhereClauseUnaryBoolean(HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.HavingClause theNextHavingClause) {
 		boolean haveMatch = false;
 		assert theNextHavingClause.getRight().isEmpty();
-		List<IPrimitiveType> values = theFhirPath.evaluate(r, theNextHavingClause.getLeft(), IPrimitiveType.class);
+		List<IPrimitiveType> values = theExecutionContext.evaluate(r, theNextHavingClause.getLeft(), IPrimitiveType.class);
 		for (IPrimitiveType<?> nextValue : values) {
 			if (Boolean.TRUE.equals(nextValue.getValue())) {
 				haveMatch = true;
@@ -402,13 +405,13 @@ public class HfqlExecutor implements IHfqlExecutor {
 		return haveMatch;
 	}
 
-	private static boolean evaluateWhereClauseBinaryEqualsOrIn(IFhirPath theFhirPath, IBaseResource r, HfqlStatement.HavingClause theNextHavingClause) {
+	private static boolean evaluateWhereClauseBinaryEqualsOrIn(HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.HavingClause theNextHavingClause) {
 		boolean haveMatch = false;
-		List<IBase> values = theFhirPath.evaluate(r, theNextHavingClause.getLeft(), IBase.class);
+		List<IBase> values = theExecutionContext.evaluate(r, theNextHavingClause.getLeft(), IBase.class);
 		for (IBase nextValue : values) {
 			for (String nextRight : theNextHavingClause.getRight()) {
 				String expression = "$this = " + nextRight;
-				IPrimitiveType outcome = theFhirPath
+				IPrimitiveType outcome = theExecutionContext
 					.evaluateFirst(nextValue, expression, IPrimitiveType.class)
 					.orElseThrow(IllegalStateException::new);
 				Boolean value = (Boolean) outcome.getValue();
@@ -832,4 +835,39 @@ public class HfqlExecutor implements IHfqlExecutor {
 		}
 	}
 
+	public static class HfqlExecutionContext {
+
+		private final Map<String, IFhirPath.IParsedExpression> myFhirPathExpressionMap = new HashMap<>();
+		private final IFhirPath myFhirPath;
+
+		public HfqlExecutionContext(IFhirPath theFhirPath) {
+			myFhirPath = theFhirPath;
+		}
+
+		public <T extends IBase> List<T> evaluate(IBase theInput, String thePath, Class<T> theReturnType) {
+			IFhirPath.IParsedExpression parsedExpression = getParsedExpression(thePath);
+			return myFhirPath.evaluate(theInput, parsedExpression, theReturnType);
+		}
+
+		<T extends IBase> Optional<T> evaluateFirst(IBase theInput, String thePath, Class<T> theReturnType) {
+			IFhirPath.IParsedExpression parsedExpression = getParsedExpression(thePath);
+			return myFhirPath.evaluateFirst(theInput, parsedExpression, theReturnType);
+		}
+
+		private IFhirPath.IParsedExpression getParsedExpression(String thePath) {
+			IFhirPath.IParsedExpression parsedExpression = myFhirPathExpressionMap.get(thePath);
+			if (parsedExpression == null) {
+				try {
+					parsedExpression = myFhirPath.parse(thePath);
+				} catch (Exception e) {
+					// FIXME: add code
+					throw new InvalidRequestException(e);
+				}
+				myFhirPathExpressionMap.put(thePath, parsedExpression);
+			}
+			return parsedExpression;
+		}
+	}
+
+private static final Logger ourLog = LoggerFactory.getLogger(HfqlExecutor.class);
 }

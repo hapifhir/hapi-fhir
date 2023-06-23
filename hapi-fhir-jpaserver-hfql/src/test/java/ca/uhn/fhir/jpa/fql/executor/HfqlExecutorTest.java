@@ -232,8 +232,6 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	@Disabled
-	// FIXME: reenable
 	public void testFromSelectCount_TooMany() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		List<Patient> patients = new ArrayList<>();
@@ -252,10 +250,10 @@ public class HfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
-			"name.family", "name.given", "count(*)"
+			"name.family", "count(*)"
 		));
 		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT
+			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT
 		));
 
 		List<List<Object>> rowValues = readAllRowValues(result);

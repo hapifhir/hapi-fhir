@@ -10,10 +10,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r5.model.Base;
-import org.hl7.fhir.r5.model.IdType;
-import org.hl7.fhir.r5.model.TypeDetails;
-import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 
 import javax.annotation.Nonnull;
@@ -22,7 +19,7 @@ import java.util.Optional;
 
 public class FhirPathR5 implements IFhirPath {
 
-	private FHIRPathEngine myEngine;
+	private final FHIRPathEngine myEngine;
 
 	public FhirPathR5(FhirContext theCtx) {
 		IValidationSupport validationSupport = theCtx.getValidationSupport();
@@ -30,23 +27,35 @@ public class FhirPathR5 implements IFhirPath {
 		myEngine.setDoNotEnforceAsSingletonRule(true);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "unchecked"})
 	@Override
 	public <T extends IBase> List<T> evaluate(IBase theInput, String thePath, Class<T> theReturnType) {
+		ExpressionNode parsed = myEngine.parse(thePath);
+		return (List<T>) evaluate(theInput, parsed, theReturnType);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IBase> List<T> evaluate(IBase theInput, IParsedExpression theParsedExpression, Class<T> theReturnType) {
+		ExpressionNode expressionNode = ((ParsedExpression) theParsedExpression).myParsedExpression;
+		return (List<T>) evaluate(theInput, expressionNode, theReturnType);
+	}
+
+	@Nonnull
+	private <T extends IBase> List<Base> evaluate(IBase theInput, ExpressionNode expressionNode, Class<T> theReturnType) {
 		List<Base> result;
 		try {
-			result = myEngine.evaluate((Base) theInput, thePath);
+			result = myEngine.evaluate((Base) theInput, expressionNode);
 		} catch (FHIRException e) {
 			throw new FhirPathExecutionException(Msg.code(198) + e);
 		}
 
-		for (Base next : result) {
+		for (IBase next : result) {
 			if (!theReturnType.isAssignableFrom(next.getClass())) {
-				throw new FhirPathExecutionException(Msg.code(199) + "FluentPath expression \"" + thePath + "\" returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
+				throw new FhirPathExecutionException(Msg.code(199) + "FhirPath expression returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
 			}
 		}
-
-		return (List<T>) result;
+		return result;
 	}
 
 	@Override
@@ -55,8 +64,13 @@ public class FhirPathR5 implements IFhirPath {
 	}
 
 	@Override
-	public void parse(String theExpression) {
-		myEngine.parse(theExpression);
+	public <T extends IBase> Optional<T> evaluateFirst(IBase theInput, IParsedExpression theParsedExpression, Class<T> theReturnType) {
+		return evaluate(theInput, theParsedExpression, theReturnType).stream().findFirst();
+	}
+
+	@Override
+	public IParsedExpression parse(String theExpression) {
+		return new ParsedExpression(myEngine.parse(theExpression));
 	}
 
 	@Override
@@ -108,5 +122,14 @@ public class FhirPathR5 implements IFhirPath {
 				return null;
 			}
 		});
+	}
+
+	private static class ParsedExpression implements IParsedExpression {
+
+		private final ExpressionNode myParsedExpression;
+
+		public ParsedExpression(ExpressionNode theParsedExpression) {
+			myParsedExpression = theParsedExpression;
+		}
 	}
 }

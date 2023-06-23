@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
 public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 
 	private final IBundleProvider mySearchResult;
-	private final IFhirPath myFhirPath;
+	private final HfqlExecutor.HfqlExecutionContext myExecutionContext;
 	private final Integer myLimit;
 	private final HfqlStatement myStatement;
 	private final List<String> myColumnNames;
@@ -52,10 +51,10 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 	private boolean myExhausted = false;
 	private int myNextResourceSearchRow;
 
-	public LocalSearchHfqlExecutionResult(HfqlStatement theStatement, IBundleProvider theSearchResult, IFhirPath theFhirPath, Integer theLimit, int theInitialOffset, List<HfqlDataTypeEnum> theColumnDataTypes, Predicate<IBaseResource> theWhereClausePredicate, FhirContext theFhirContext) {
+	public LocalSearchHfqlExecutionResult(HfqlStatement theStatement, IBundleProvider theSearchResult, HfqlExecutor.HfqlExecutionContext theExecutionContext, Integer theLimit, int theInitialOffset, List<HfqlDataTypeEnum> theColumnDataTypes, Predicate<IBaseResource> theWhereClausePredicate, FhirContext theFhirContext) {
 		myStatement = theStatement;
 		mySearchResult = theSearchResult;
-		myFhirPath = theFhirPath;
+		myExecutionContext = theExecutionContext;
 		myLimit = theLimit;
 		myNextSearchResultRow = theInitialOffset;
 		myColumnDataTypes = theColumnDataTypes;
@@ -123,7 +122,7 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 		List<Object> values = new ArrayList<>();
 		for (HfqlStatement.SelectClause nextColumn : myStatement.getSelectClauses()) {
 			String clause = nextColumn.getClause();
-			List<IBase> columnValues = myFhirPath.evaluate(myNextResource, clause, IBase.class);
+			List<IBase> columnValues = myExecutionContext.evaluate(myNextResource, clause, IBase.class);
 			String value = null;
 			if (!columnValues.isEmpty()) {
 				IBase firstColumnValue = columnValues.get(0);
