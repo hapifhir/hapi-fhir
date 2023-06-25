@@ -2224,7 +2224,7 @@
 					</executions>
 				</plugin>
 				<plugin>
-					<groupId>com.diffplug.potless</groupId>
+					<groupId>com.diffplug.spotless</groupId>
 					<artifactId>spotless-maven-plugin</artifactId>
 					<version>${spotless_version}</version>
 					<executions>
@@ -2237,17 +2237,17 @@
 						</execution>
 					</executions>
 					<configuration>
-<!--						<formats>-->
-<!--							<format>-->
-<!--								<includes>-->
-<!--									<include>*.md</include>-->
-<!--									<include>.gitignore</include>-->
-<!--									<include>*.java</include>-->
-<!--								</includes>-->
-<!--								<trimTrailingWhitespace/>-->
-<!--								<endWithNewline/>-->
-<!--							</format>-->
-<!--						</formats>-->
+						<formats>
+							<format>
+								<includes>
+									<include>*.md</include>
+									<include>.gitignore</include>
+									<include>*.java</include>
+								</includes>
+								<trimTrailingWhitespace/>
+								<endWithNewline/>
+							</format>
+						</formats>
 						<java>
 							<googleJavaFormat>
 								<version>1.17.0</version>
@@ -2256,7 +2256,7 @@
 							</googleJavaFormat>
 							<indent>
 								<tabs>true</tabs>
-								<spacesPerTab>4</spacesPerTab>
+								<spacesPerTab>3</spacesPerTab>
 							</indent>
 							<removeUnusedImports />
 							<importOrder>
@@ -2564,7 +2564,6 @@
 			<plugin>
 				<groupId>com.diffplug.spotless</groupId>
 				<artifactId>spotless-maven-plugin</artifactId>
-				<version>${spotless_version}</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
