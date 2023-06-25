@@ -894,6 +894,8 @@
 
 	<properties>
 		<fhir_core_version>6.0.15</fhir_core_version>
+		<spotless_version>2.37.0</spotless_version>
+		<gitbuildhook_version>3.4.1</gitbuildhook_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -2210,6 +2212,66 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>com.rudikershaw.gitbuildhook</groupId>
+					<artifactId>git-build-hook-maven-plugin</artifactId>
+					<version>${gitbuildhook_version}</version>
+					<configuration>
+						<installHooks>
+							<pre-commit>hooks/pre-commit.sh</pre-commit>
+						</installHooks>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>install</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>com.diffplug.spotless</groupId>
+					<artifactId>spotless-maven-plugin</artifactId>
+					<version>${spotless_version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>check</goal>
+								<goal>apply</goal>
+							</goals>
+							<phase>compile</phase>
+						</execution>
+					</executions>
+					<configuration>
+						<formats>
+							<format>
+								<includes>
+									<include>*.md</include>
+									<include>.gitignore</include>
+									<include>*.java</include>
+								</includes>
+								<trimTrailingWhitespace/>
+								<endWithNewline/>
+							</format>
+						</formats>
+						<java>
+							<googleJavaFormat>
+								<version>1.17.0</version>
+								<style>AOSP</style>
+								<reflowLongStrings>true</reflowLongStrings>
+							</googleJavaFormat>
+							<indent>
+								<tabs>true</tabs>
+								<spacesPerTab>3</spacesPerTab>
+							</indent>
+							<removeUnusedImports />
+							<importOrder>
+								<wildcardsLast>true</wildcardsLast>
+								<order>,java|javax,\#</order>
+							</importOrder>
+						</java>
+					</configuration>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>3.3.0</version>
@@ -2500,6 +2562,14 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>com.rudikershaw.gitbuildhook</groupId>
+				<artifactId>git-build-hook-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
