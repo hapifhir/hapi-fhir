@@ -2237,18 +2237,17 @@
 						</execution>
 					</executions>
 					<configuration>
-						<formats>
-							<format>
-								<includes>
-									<include>*.md</include>
-									<include>.gitignore</include>
-									<include>*.java</include>
-								</includes>
-								<trimTrailingWhitespace/>
-								<endWithNewline/>
-
-							</format>
-						</formats>
+<!--						<formats>-->
+<!--							<format>-->
+<!--								<includes>-->
+<!--									<include>*.md</include>-->
+<!--									<include>.gitignore</include>-->
+<!--									<include>*.java</include>-->
+<!--								</includes>-->
+<!--								<trimTrailingWhitespace/>-->
+<!--								<endWithNewline/>-->
+<!--							</format>-->
+<!--						</formats>-->
 						<java>
 							<googleJavaFormat>
 								<version>1.17.0</version>
